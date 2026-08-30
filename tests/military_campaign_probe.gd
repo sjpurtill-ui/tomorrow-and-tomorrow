@@ -341,5 +341,23 @@ func _run()->void:
 		assert(MilitaryCampaign._deliver_ammunition(9)==9)
 		assert(int(MilitaryCampaign.home_army.formations[0].ammunition)==9)
 		assert(int(MilitaryCampaign.military_consumables.arrows)==15)
+	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":10000.0,"Preserved food":0.0}
+	GameState.resource_stockpiles["Food"]=10000.0
+	GameState.resource_stockpiles["Transport Carts"]=0.0
+	GameState.population_allocations["Logistics"]=0
+	FoodSystem.initialized=true
+	var provisioned_soldier:Dictionary={}
+	if not (MilitaryCampaign.home_army.soldier_ids as Array).is_empty(): provisioned_soldier=GameState.citizen_by_id(int(MilitaryCampaign.home_army.soldier_ids[0]))
+	var nutrition_before:=float(provisioned_soldier.get("nutrition_condition",1.0))
+	var low_provision_day:Dictionary=FoodSystem.process_day({"traveling":false},1.0,1.0)
+	assert(float(low_provision_day.army_provisions_required)>0.0)
+	assert(float(low_provision_day.army_provisions_delivered)<float(low_provision_day.army_provisions_required))
+	var low_provision_ratio:=float(MilitaryCampaign.home_army.provision_ratio)
+	if not provisioned_soldier.is_empty(): assert(float(provisioned_soldier.nutrition_condition)<nutrition_before)
+	GameState.resource_stockpiles["Transport Carts"]=20.0
+	GameState.population_allocations["Logistics"]=20
+	var high_provision_day:Dictionary=FoodSystem.process_day({"traveling":false},1.0,1.0)
+	assert(float(MilitaryCampaign.home_army.provision_ratio)>low_provision_ratio)
+	assert(float(high_provision_day.army_provisions_delivered)>float(low_provision_day.army_provisions_delivered))
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

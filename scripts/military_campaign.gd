@@ -432,6 +432,39 @@ func prisoner_food_demand()->float:
 	return float(foreign_prisoners)*0.65+float(held_generals.size())
 
 
+func field_provision_delivery_ratio()->float:
+	var troops:=int(home_army.get("troops",0))
+	if troops<=0: return 1.0
+	var workers:=float(GameState.population_allocations.get("Logistics",0))
+	var labor_coverage:=clampf(workers/maxf(1.0,float(troops)*0.09),0.0,1.0)
+	var commander_logistics:=clampf(float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4)),0.0,1.0)
+	var carts:=float(GameState.resource_stockpiles.get("Transport Carts",0.0))
+	var cart_coverage:=clampf(carts/maxf(1.0,float(troops)/24.0),0.0,1.0)
+	return clampf(0.08+labor_coverage*0.42+commander_logistics*0.20+_adoption("supply_groups")*0.20+cart_coverage*0.10,0.0,1.0)
+
+
+func record_daily_provisions(required:float,delivered:float)->void:
+	if home_army.is_empty(): return
+	var need:=maxf(0.0,required)
+	var received:=clampf(delivered,0.0,need)
+	home_army["provisions_required_today"]=need
+	home_army["provisions_delivered_today"]=received
+	home_army["provision_ratio"]=received/maxf(0.01,need) if need>0.0 else 1.0
+	home_army["provision_day"]=int(GameState.elapsed_days)
+	var shortfall:=maxf(0.0,need-received)
+	home_army["provision_shortfall_total"]=float(home_army.get("provision_shortfall_total",0.0))+shortfall
+	home_army["provision_shortfall_days"]=int(home_army.get("provision_shortfall_days",0))+1 if shortfall>0.01 else 0
+	var ratio:=float(home_army.provision_ratio)
+	for citizen_id in home_army.get("soldier_ids",[]):
+		var soldier:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if soldier.is_empty() or not bool(soldier.get("alive",true)): continue
+		var current_nutrition:=clampf(float(soldier.get("nutrition_condition",GameState.food_security)),0.0,1.0)
+		var nutrition_step:=0.040 if ratio<current_nutrition else 0.014
+		soldier["nutrition_condition"]=move_toward(current_nutrition,ratio,nutrition_step)
+		if int(home_army.provision_shortfall_days)>=5 and float(soldier.nutrition_condition)<0.38:
+			soldier["health_condition"]=clampf(float(soldier.get("health_condition",GameState.population_health))-0.004*(1.0-ratio),0.05,1.0)
+
+
 func prisoner_custody_snapshot()->Dictionary:
 	var guards:=float(GameState.population_allocations.get("Defense",0))*0.18
 	var coverage:=clampf(guards/maxf(1.0,float(foreign_prisoners)+float(held_generals.size())*2.0),0.0,1.0)
@@ -645,6 +678,12 @@ func _empty_home_army()->Dictionary:
 	force["reserve_manpower"]=0
 	force["supply_level"]=1.0
 	force["supply_components"]={"nutrition":1.0,"delivery":1.0,"target":1.0}
+	force["provisions_required_today"]=0.0
+	force["provisions_delivered_today"]=0.0
+	force["provision_ratio"]=1.0
+	force["provision_day"]=-1
+	force["provision_shortfall_total"]=0.0
+	force["provision_shortfall_days"]=0
 	force["recent_combat_days"]=0
 	force["service_days"]=0
 	force["service_strain"]=0.0
@@ -1063,18 +1102,20 @@ func _process_service_strain_day()->Dictionary:
 
 
 func _update_supply_day()->void:
-	var nutrition:=clampf(float(GameState.simulation_metrics.get("food_intake_ratio",GameState.food_security)),0.0,1.0)
+	var provision_day:=int(home_army.get("provision_day",-1))
+	var provision_current:=provision_day>=0 and provision_day>=int(GameState.elapsed_days)-1
+	var nutrition:=clampf(float(home_army.get("provision_ratio",1.0)),0.0,1.0) if provision_current else clampf(float(GameState.simulation_metrics.get("food_intake_ratio",GameState.food_security))*field_provision_delivery_ratio(),0.0,1.0)
 	var troops:=maxi(1,_mobilized_count())
 	var logistics_workers:=float(GameState.population_allocations.get("Logistics",0))
 	var commander_logistics:=clampf(float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4)),0.0,1.0)
 	var labor_coverage:=clampf(logistics_workers/maxf(1.0,float(troops)*0.08),0.0,1.0)
 	var practice:=_adoption("supply_groups")
 	var delivery:=clampf(0.30+labor_coverage*0.38+commander_logistics*0.20+practice*0.20,0.0,1.0)
-	var target:=clampf(nutrition*0.62+delivery*0.38,0.0,1.0)
+	var target:=clampf(nutrition*0.74+delivery*0.26,0.0,1.0)
 	var current:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
 	var change:=0.07 if target>current else 0.13
 	home_army["supply_level"]=move_toward(current,target,change)
-	home_army["supply_components"]={"nutrition":nutrition,"delivery":delivery,"target":target,"logistics_workers":logistics_workers}
+	home_army["supply_components"]={"nutrition":nutrition,"delivery":delivery,"target":target,"logistics_workers":logistics_workers,"provisions_required":float(home_army.get("provisions_required_today",0.0)),"provisions_delivered":float(home_army.get("provisions_delivered_today",0.0))}
 	home_army["recent_combat_days"]=maxi(0,int(home_army.get("recent_combat_days",0))-1)
 
 

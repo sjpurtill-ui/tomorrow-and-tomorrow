@@ -53,10 +53,20 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 	for food_type in storage_loss:
 		spoilage[food_type]=float(spoilage.get(food_type,0.0))+float(storage_loss[food_type])
 	var demand:=float(demand_breakdown.total)
-	var consumed:=_consume(demand)
+	var army_required:=float(demand_breakdown.get("army_field",0.0))
+	var provision_delivery_ratio:=1.0
+	if military_campaign!=null and military_campaign.has_method("field_provision_delivery_ratio"):
+		provision_delivery_ratio=clampf(float(military_campaign.field_provision_delivery_ratio()),0.0,1.0)
+	var army_accessible:=army_required*provision_delivery_ratio
+	var accessible_demand:=maxf(0.0,demand-army_required+army_accessible)
+	var consumed:=_consume(accessible_demand)
 	var eaten:=0.0
 	for amount in consumed.values(): eaten+=float(amount)
 	var intake_ratio:=clampf(eaten/maxf(0.01,demand),0.0,1.0)
+	var accessible_intake:=clampf(eaten/maxf(0.01,accessible_demand),0.0,1.0)
+	var army_delivered:=army_accessible*accessible_intake
+	if military_campaign!=null and military_campaign.has_method("record_daily_provisions"):
+		military_campaign.record_daily_provisions(army_required,army_delivered)
 	var diet_quality:=_diet_quality(consumed,eaten)
 	_update_nutrition(intake_ratio,diet_quality)
 	_update_source_health(harvest,workers,traveling)
@@ -70,8 +80,8 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 	var projected_days:=9999.0 if net>=0.0 else total/effective_daily_loss
 	var food_days:=total/maxf(0.01,demand)
 	var sources:=_source_report(harvest,workers,traveling)
-	var forecast_30:=_forecast(30,harvest,demand_breakdown,traveling)
-	var forecast_90:=_forecast(90,harvest,demand_breakdown,traveling)
+	var forecast_30:=_forecast(30,harvest,demand_breakdown,traveling,provision_delivery_ratio)
+	var forecast_90:=_forecast(90,harvest,demand_breakdown,traveling,provision_delivery_ratio)
 	var result:={
 		"food_days":food_days,
 		"food_production":production_total,
@@ -94,6 +104,9 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 		"food_spoilage_by_type":spoilage,
 		"food_preserved":preserved,
 		"food_demand_breakdown":demand_breakdown,
+		"army_provisions_required":army_required,
+		"army_provisions_delivered":army_delivered,
+		"army_provision_delivery_ratio":provision_delivery_ratio,
 		"food_sources":sources,
 		"food_kcal_required":demand*KCAL_PER_RATION,
 		"food_kcal_eaten":eaten*KCAL_PER_RATION
@@ -115,6 +128,7 @@ func _calculate_demand(traveling: bool) -> Dictionary:
 	var travel:=0.0
 	var climate:=0.0
 	var prisoner_custody:=0.0
+	var army_field:=0.0
 	var active_pregnancies:Dictionary={}
 	for record in GameState.active_pregnancies():
 		active_pregnancies[int(record.get("mother_id",-1))]=record
@@ -133,6 +147,7 @@ func _calculate_demand(traveling: bool) -> Dictionary:
 			"Administration":0.04
 		}.get(role,0.02))
 		labor+=work_extra
+		if String(person.get("army_status","civilian"))=="active": army_field+=need+work_extra+need*climate_factor+(need*0.12 if traveling else 0.0)
 		if active_pregnancies.has(int(person.get("id",-1))):
 			var gestation:=day-int((active_pregnancies[int(person.id)] as Dictionary).get("conception_day",day))
 			pregnancy+=0.05 if gestation<91 else (0.12 if gestation<182 else 0.20)
@@ -148,7 +163,7 @@ func _calculate_demand(traveling: bool) -> Dictionary:
 	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoner_custody
 	return {
 		"base":base,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,
-		"travel":travel,"climate":climate,"prisoner_custody":prisoner_custody,"rationing":pre_ration*(1.0-ration_factor),
+		"travel":travel,"climate":climate,"prisoner_custody":prisoner_custody,"army_field":army_field*ration_factor,"rationing":pre_ration*(1.0-ration_factor),
 		"total":pre_ration*ration_factor
 	}
 
@@ -308,12 +323,13 @@ func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array
 		reports.append({"name":entry[0],"food_type":entry[1],"produced":amount,"resource":entry[2],"access":status,"source_health":float(GameState.food_source_health.get(entry[0],0.9)),"travel_limited":traveling})
 	return reports
 
-func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictionary,traveling: bool) -> Dictionary:
+func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictionary,traveling: bool,provision_delivery_ratio:=1.0) -> Dictionary:
 	var projected_stocks:Dictionary=GameState.food_stocks.duplicate(true)
 	var current_day:=GameState.elapsed_days
 	var pre_ration_current:=float(demand_breakdown.get("total",0.0))+float(demand_breakdown.get("rationing",0.0))
 	var non_climate:=maxf(0.0,pre_ration_current-float(demand_breakdown.get("climate",0.0)))
 	var ration_factor:=1.0-_modifier_strength("rationing")*0.30
+	var inaccessible_army_rations:=float(demand_breakdown.get("army_field",0.0))*(1.0-clampf(provision_delivery_ratio,0.0,1.0))
 	var first_shortage:=-1
 	var total_produced:=0.0
 	var total_required:=0.0
@@ -328,7 +344,7 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 			total_produced+=future_yield
 		var season_wave:=sin(fmod(future_day,365.0)/365.0*TAU)
 		var future_climate:=non_climate*maxf(0.0,-season_wave)*0.06
-		var future_required:=(non_climate+future_climate)*ration_factor
+		var future_required:=maxf(0.0,(non_climate+future_climate)*ration_factor-inaccessible_army_rations)
 		total_required+=future_required
 		var storage_multiplier:=0.72 if "Storage Pits" in GameState.settlement_completed else 1.0
 		if traveling: storage_multiplier*=1.28
@@ -341,7 +357,7 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		if eaten<future_required*0.98 and first_shortage<0: first_shortage=offset
 	var ending_total:=0.0
 	for amount in projected_stocks.values(): ending_total+=float(amount)
-	var ending_need:=(non_climate+non_climate*maxf(0.0,-sin(fmod(current_day+float(horizon),365.0)/365.0*TAU))*0.06)*ration_factor
+	var ending_need:=maxf(0.01,(non_climate+non_climate*maxf(0.0,-sin(fmod(current_day+float(horizon),365.0)/365.0*TAU))*0.06)*ration_factor-inaccessible_army_rations)
 	return {
 		"horizon":horizon,"ending_rations":ending_total,"ending_days":ending_total/maxf(0.01,ending_need),
 		"first_shortage_day":first_shortage,"average_production":total_produced/float(horizon),
