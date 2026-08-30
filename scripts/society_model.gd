@@ -296,7 +296,13 @@ func adoption(discovery_id:String)->float:
 func validate_catalog(catalog:Array[Dictionary])->Array[String]:
 	var errors:Array[String]=[]
 	var ids:Dictionary={}
-	for discovery in catalog: ids[String(discovery.get("id",""))]=true
+	var definitions:Dictionary={}
+	for discovery in catalog:
+		var discovery_id:=String(discovery.get("id",""))
+		if discovery_id=="": errors.append("Discovery has an empty ID")
+		elif ids.has(discovery_id): errors.append("Duplicate discovery ID %s" % discovery_id)
+		ids[discovery_id]=true
+		definitions[discovery_id]=discovery
 	for discovery in catalog:
 		var id:=String(discovery.get("id",""))
 		var effects:Dictionary=discovery.get("effects",{})
@@ -305,4 +311,25 @@ func validate_catalog(catalog:Array[Dictionary])->Array[String]:
 			if not EFFECT_LIMITS.has(String(effect_name)): errors.append("%s uses unregistered effect %s" % [id,effect_name])
 		for requirement in discovery.get("requires",[]):
 			if not ids.has(String(requirement)): errors.append("%s requires missing %s" % [id,requirement])
+	var visit_state:Dictionary={}
+	for discovery_id in definitions:
+		_visit_catalog_dependency(String(discovery_id),definitions,visit_state,[],errors)
 	return errors
+
+
+func _visit_catalog_dependency(discovery_id:String,definitions:Dictionary,visit_state:Dictionary,path:Array,errors:Array[String])->void:
+	var state:=int(visit_state.get(discovery_id,0))
+	if state==2: return
+	if state==1:
+		var cycle_start:=path.find(discovery_id)
+		var cycle:Array=path.slice(cycle_start if cycle_start>=0 else 0)
+		cycle.append(discovery_id)
+		var message:="Discovery dependency cycle: %s" % " -> ".join(cycle)
+		if message not in errors: errors.append(message)
+		return
+	if not definitions.has(discovery_id): return
+	visit_state[discovery_id]=1
+	var next_path:=path.duplicate(); next_path.append(discovery_id)
+	for requirement in (definitions[discovery_id] as Dictionary).get("requires",[]):
+		if definitions.has(String(requirement)): _visit_catalog_dependency(String(requirement),definitions,visit_state,next_path,errors)
+	visit_state[discovery_id]=2

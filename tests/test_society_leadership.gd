@@ -37,3 +37,12 @@ func test_subcategory_strength_changes_that_real_subcategory()->void:
 	GameState.leadership_positions={"Steward":advisor}
 	assert_float(model.leadership_subcategory_effect("health","General health")).is_greater(0.0)
 	assert_float(model.leadership_subcategory_effect("health","Water & sanitation")).is_less(0.0)
+
+
+func test_catalog_validation_rejects_dependency_cycles()->void:
+	var cyclic_catalog:Array[Dictionary]=[
+		{"id":"watch","requires":["drill"],"effects":{"warfare_readiness":0.01}},
+		{"id":"drill","requires":["watch"],"effects":{"warfare_readiness":0.01}}
+	]
+	var errors:Array[String]=model.validate_catalog(cyclic_catalog)
+	assert_bool(errors.any(func(message:String)->bool: return message.contains("dependency cycle"))).is_true()
