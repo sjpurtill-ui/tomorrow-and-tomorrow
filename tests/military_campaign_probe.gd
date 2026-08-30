@@ -24,6 +24,11 @@ func _run()->void:
 	var locked_siege_kit:Dictionary=MilitaryCampaign.queue_equipment_production("siege_kit",1)
 	assert(String(locked_siege_kit.get("required_discovery",""))=="siege_engineering")
 	assert(String(MilitaryCampaign.military_capabilities().units.siege_engineer.discovery)=="siege_engineering")
+	var locked_field_gun:Dictionary=MilitaryCampaign.queue_equipment_production("field_gun",1)
+	var locked_rounds:Dictionary=MilitaryCampaign.queue_consumable_production("artillery_rounds",1)
+	assert(String(locked_field_gun.get("required_discovery",""))=="powder_artillery")
+	assert(String(locked_rounds.get("required_discovery",""))=="powder_artillery")
+	assert(MilitaryCampaign._equipment_required_for("field_artillery",25)==5)
 	var spear_gate:Dictionary=MilitaryCampaign.military_capabilities().equipment.spear
 	assert(String(spear_gate.discovery)=="hafted_weapons")
 	assert("hafted_tools" in (spear_gate.prerequisites as Array))
@@ -395,5 +400,21 @@ func _run()->void:
 		MilitaryCampaign._process_equipment_production_day()
 		if int(MilitaryCampaign.military_inventory.siege_kit)>0: break
 	assert(int(MilitaryCampaign.military_inventory.siege_kit)==1)
+	if "powder_artillery" not in GameState.known_discoveries: GameState.known_discoveries.append("powder_artillery")
+	GameState.discovery_adoption["powder_artillery"]=0.20
+	for material in ["Iron Ore","Timber","Fiber Plants","Sulfur","Nitrates"]: GameState.resource_stockpiles[material]=100.0
+	var gun_job:Dictionary=MilitaryCampaign.queue_equipment_production("field_gun",1)
+	var rounds_job:Dictionary=MilitaryCampaign.queue_consumable_production("artillery_rounds",8)
+	assert(not gun_job.has("error") and not rounds_job.has("error"))
+	for day in 300:
+		MilitaryCampaign._process_equipment_production_day()
+		if int(MilitaryCampaign.military_inventory.field_gun)>=1 and int(MilitaryCampaign.military_consumables.artillery_rounds)>=8: break
+	assert(int(MilitaryCampaign.military_inventory.field_gun)==1)
+	assert(int(MilitaryCampaign.military_consumables.artillery_rounds)==8)
+	MilitaryCampaign.equipment_queue=[{"id":999,"job_type":"consumable","item":"artillery_rounds","count":2,"completed":0,"progress_days":0.0,"work_per_item":0.18,"required_days":0.36}]
+	MilitaryCampaign._normalize_equipment_jobs()
+	assert((MilitaryCampaign.equipment_queue[0].reserved_materials as Dictionary).has("Sulfur"))
+	assert((MilitaryCampaign.equipment_queue[0].reserved_materials as Dictionary).has("Nitrates"))
+	MilitaryCampaign.equipment_queue.clear()
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

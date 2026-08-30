@@ -199,3 +199,16 @@ func test_equipped_siege_engineers_reduce_prepared_terrain_advantage() -> void:
 	assert_float(float(ordinary_result.effective_terrain_defense)).is_equal_approx(1.6,0.001)
 	assert_float(float(engineer_result.effective_terrain_defense)).is_less(1.6)
 	assert_float(float(engineer_result.siege_terrain_reduction)).is_greater(0.0)
+
+
+func test_artillery_separates_crew_guns_and_rounds() -> void:
+	var supplied:Dictionary=simulator.create_formation_force("Battery",[{"unit":"field_artillery","weapon":"field_gun","count":25,"equipment":5,"ammunition":40}])
+	var empty:Dictionary=simulator.create_formation_force("Empty Battery",[{"unit":"field_artillery","weapon":"field_gun","count":25,"equipment":5,"ammunition":0}])
+	var target:Dictionary=simulator.create_formation_force("Target",[{"unit":"line_infantry","weapon":"spear","count":80,"equipment":80}])
+	assert_int(int(supplied.formations[0].equipment_required)).is_equal(5)
+	assert_int(int(supplied.formations[0].ammunition_required)).is_equal(40)
+	assert_float(simulator.evaluate_force(supplied,target)[0].attack).is_greater(simulator.evaluate_force(empty,target)[0].attack)
+	var result:Dictionary=simulator.simulate(supplied,target,{"seed":117,"max_rounds":1})
+	var rounds_used:=int(result.rounds[0].attacker_cohort_ammunition_used[0])
+	assert_int(rounds_used).is_greater(0)
+	assert_int(int(result.attacker.formations[0].ammunition)+rounds_used).is_equal(40)

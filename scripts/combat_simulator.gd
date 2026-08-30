@@ -15,7 +15,8 @@ const UNIT_TYPES := {
 	"line_infantry": {"name": "Line Infantry", "attack": 1.00, "defense": 1.00, "organization": 1.00},
 	"skirmisher": {"name": "Skirmisher", "attack": 0.85, "defense": 0.60, "organization": 0.85},
 	"cavalry": {"name": "Cavalry", "attack": 1.35, "defense": 0.72, "organization": 0.90},
-	"siege_engineer": {"name":"Siege Engineers","attack":0.72,"defense":0.68,"organization":0.92}
+	"siege_engineer": {"name":"Siege Engineers","attack":0.72,"defense":0.68,"organization":0.92},
+	"field_artillery":{"name":"Field Artillery","attack":1.55,"defense":0.42,"organization":0.78}
 }
 
 const WEAPONS := {
@@ -24,7 +25,8 @@ const WEAPONS := {
 	"bow": {"name": "Bows", "attack": 1.18, "defense": 0.70, "armor": 0.00, "penetration": 0.35},
 	"sword_shield": {"name": "Sword & Shield", "attack": 1.12, "defense": 1.22, "armor": 0.38, "penetration": 0.42},
 	"lance": {"name": "Lances", "attack": 1.35, "defense": 0.72, "armor": 0.18, "penetration": 0.70},
-	"siege_kit": {"name":"Siege Kit","attack":0.88,"defense":0.72,"armor":0.08,"penetration":0.92}
+	"siege_kit": {"name":"Siege Kit","attack":0.88,"defense":0.72,"armor":0.08,"penetration":0.92},
+	"field_gun":{"name":"Field Gun","attack":2.10,"defense":0.48,"armor":0.12,"penetration":1.45}
 }
 
 # Attack multipliers against the opposing unit mix. Unlisted matchups are 1.0.
@@ -35,7 +37,8 @@ const MATCHUPS := {
 	"line_infantry": {"levy": 1.18, "skirmisher": 1.08, "cavalry": 1.48},
 	"skirmisher": {"levy": 1.28, "line_infantry": 0.82, "cavalry": 0.68},
 	"cavalry": {"levy": 1.20, "line_infantry": 0.62, "skirmisher": 1.45}
-	,"siege_engineer":{"levy":0.82,"line_infantry":0.78,"cavalry":0.62}
+	,"siege_engineer":{"levy":0.82,"line_infantry":0.78,"cavalry":0.62},
+	"field_artillery":{"levy":1.35,"line_infantry":1.22,"cavalry":0.58,"siege_engineer":1.18}
 }
 
 
@@ -66,9 +69,11 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		var weapon_id := String(formation.get("weapon", "improvised"))
 		var count := maxi(0, int(formation.get("count", 0)))
 		var authorized_count := maxi(count,int(formation.get("authorized_count",count)))
-		var equipment_required := maxi(0,int(formation.get("equipment_required",authorized_count)))
+		var default_equipment_required:=ceili(float(authorized_count)/5.0) if weapon_id=="field_gun" else authorized_count
+		var equipment_required := maxi(0,int(formation.get("equipment_required",default_equipment_required)))
 		var equipment := clampi(int(formation.get("equipment",count)),0,equipment_required)
-		var ammunition_required:=maxi(0,int(formation.get("ammunition_required",authorized_count*6 if weapon_id=="bow" else 0)))
+		var default_ammunition_required:=authorized_count*6 if weapon_id=="bow" else (equipment_required*8 if weapon_id=="field_gun" else 0)
+		var ammunition_required:=maxi(0,int(formation.get("ammunition_required",default_ammunition_required)))
 		var ammunition:=clampi(int(formation.get("ammunition",ammunition_required)),0,ammunition_required)
 		var unit: Dictionary = UNIT_TYPES.get(unit_id, UNIT_TYPES.levy)
 		var weapon: Dictionary = WEAPONS.get(weapon_id, WEAPONS.improvised)
@@ -225,13 +230,16 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var unit_id := String(formation.get("unit", "levy"))
 		var weapon_id := String(formation.get("weapon", "improvised"))
 		var count := maxi(0, int(formation.get("count", 0)))
-		var equipment_required:=maxi(1,int(formation.get("equipment_required",formation.get("authorized_count",count))))
+		var default_equipment_required:=ceili(float(formation.get("authorized_count",count))/5.0) if weapon_id=="field_gun" else int(formation.get("authorized_count",count))
+		var equipment_required:=maxi(1,int(formation.get("equipment_required",default_equipment_required)))
 		var equipment:=clampi(int(formation.get("equipment",count)),0,equipment_required)
 		var equipment_ratio:=clampf(float(equipment)/float(equipment_required),0.0,1.0)
-		var ammunition_required:=maxi(0,int(formation.get("ammunition_required",int(formation.get("authorized_count",count))*6 if weapon_id=="bow" else 0)))
+		var default_ammunition_required:=int(formation.get("authorized_count",count))*6 if weapon_id=="bow" else (equipment_required*8 if weapon_id=="field_gun" else 0)
+		var ammunition_required:=maxi(0,int(formation.get("ammunition_required",default_ammunition_required)))
 		var ammunition:=clampi(int(formation.get("ammunition",ammunition_required)),0,ammunition_required)
 		var ammunition_ratio:=clampf(float(ammunition)/maxf(1.0,float(ammunition_required)),0.0,1.0) if ammunition_required>0 else 1.0
-		var ammunition_attack_factor:=0.30+ammunition_ratio*0.70 if ammunition_required>0 else 1.0
+		var ammunition_floor:=0.12 if weapon_id=="field_gun" else 0.30
+		var ammunition_attack_factor:=ammunition_floor+ammunition_ratio*(1.0-ammunition_floor) if ammunition_required>0 else 1.0
 		var unit: Dictionary = UNIT_TYPES.get(unit_id, UNIT_TYPES.levy)
 		var weapon: Dictionary = WEAPONS.get(weapon_id, WEAPONS.improvised)
 		var training:=clampf(float(formation.get("training",0.55 if unit_id=="levy" else 0.70)),0.25,1.25)
@@ -490,7 +498,8 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 	for index in updated.size():
 		var personnel_losses:=original_counts[index]-int(updated[index].get("count",0))
 		var old_equipment:=int(updated[index].get("equipment",original_counts[index]))
-		var equipment_losses:=mini(old_equipment,roundi(float(personnel_losses)*0.72+float(old_equipment)*0.006))
+		var personnel_loss_share:=float(personnel_losses)/maxf(1.0,float(original_counts[index]))
+		var equipment_losses:=mini(old_equipment,roundi(float(old_equipment)*personnel_loss_share*0.72+float(old_equipment)*0.006))
 		updated[index]["equipment"]=old_equipment-equipment_losses
 		cohort_equipment_losses[index]=equipment_losses
 	return {"formations":updated,"losses":cohort_losses,"equipment_losses":cohort_equipment_losses}
@@ -501,10 +510,11 @@ func _consume_ammunition(formations:Array,intensity:float,rng:RandomNumberGenera
 	for index in formations.size():
 		var formation:Dictionary=formations[index]
 		var used:=0
-		if String(formation.get("weapon","improvised"))=="bow":
+		var weapon:=String(formation.get("weapon","improvised"))
+		if weapon in ["bow","field_gun"]:
 			var available:=maxi(0,int(formation.get("ammunition",0)))
-			var archers:=maxi(0,int(formation.get("count",0)))
-			var desired:=maxi(0,roundi(float(archers)*rng.randf_range(0.38,0.72)*clampf(intensity,0.25,1.50)))
+			var firing_elements:=maxi(0,int(formation.get("count",0))) if weapon=="bow" else maxi(0,int(formation.get("equipment",0)))
+			var desired:=maxi(0,roundi(float(firing_elements)*rng.randf_range(0.38,0.72)*clampf(intensity,0.25,1.50))) if weapon=="bow" else maxi(0,roundi(float(firing_elements)*rng.randf_range(0.65,1.25)*clampf(intensity,0.25,1.50)))
 			used=mini(available,desired)
 			formation["ammunition"]=available-used
 			formations[index]=formation
@@ -633,10 +643,11 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 		var recovered:=clampi(roundi(float(equipment)*recovery_rate),0,equipment)
 		var weapon:=String(formation.get("weapon","improvised"))
 		weapons[weapon]=int(weapons.get(weapon,0))+recovered
-		if weapon=="bow":
+		if weapon in ["bow","field_gun"]:
 			var ammunition:=int(formation.get("ammunition",0))
 			var ammunition_recovered:=clampi(roundi(float(ammunition)*recovery_rate),0,ammunition)
-			consumables["arrows"]=int(consumables.get("arrows",0))+ammunition_recovered
+			var ammunition_type:="arrows" if weapon=="bow" else "artillery_rounds"
+			consumables[ammunition_type]=int(consumables.get(ammunition_type,0))+ammunition_recovered
 			formation["ammunition"]=ammunition-ammunition_recovered
 		total_equipment+=equipment
 		formation["equipment"]=equipment-recovered

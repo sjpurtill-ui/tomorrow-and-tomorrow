@@ -6,16 +6,16 @@ signal aftermath_required(aftermath: Dictionary)
 
 const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=2
-const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__","siege_engineer":"siege_engineering"}
-const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__","siege_kit":"siege_engineering"}
+const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__","siege_engineer":"siege_engineering","field_artillery":"powder_artillery"}
+const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__","siege_kit":"siege_engineering","field_gun":"powder_artillery"}
 
 var simulator:RefCounted
 var home_army:Dictionary={}
 var battle_history:Array[Dictionary]=[]
 var pending_aftermath:Dictionary={}
-var military_inventory:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
-var military_consumables:Dictionary={"arrows":0}
-var damaged_equipment:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
+var military_inventory:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0,"field_gun":0}
+var military_consumables:Dictionary={"arrows":0,"artillery_rounds":0}
+var damaged_equipment:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0,"field_gun":0}
 var recruit_pool:Array[int]=[]
 var training_queue:Array[Dictionary]=[]
 var training_injuries:Array[Dictionary]=[]
@@ -53,9 +53,9 @@ func reset_for_new_world()->void:
 	home_army={}
 	battle_history.clear()
 	pending_aftermath.clear()
-	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
-	military_consumables={"arrows":0}
-	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
+	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0,"field_gun":0}
+	military_consumables={"arrows":0,"artillery_rounds":0}
+	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0,"field_gun":0}
 	recruit_pool.clear()
 	training_queue.clear()
 	training_injuries.clear()
@@ -136,16 +136,20 @@ func stand_down(count:int)->Dictionary:
 			removed_here+=1; remaining-=1
 		if removed_here<=0: continue
 		var weapon:=String(formation.get("weapon","improvised"))
-		var gear_returned:=mini(removed_here,int(formation.get("equipment",0)))
-		var arrows_returned:=mini(int(formation.get("ammunition",0)),removed_here*6) if weapon=="bow" else 0
+		var old_equipment:=int(formation.get("equipment",0))
 		formation["count"]=maxi(0,int(formation.get("count",0))-removed_here)
 		formation["authorized_count"]=maxi(int(formation.count),int(formation.get("authorized_count",formation.count))-removed_here)
-		formation["equipment"]=maxi(0,int(formation.get("equipment",0))-gear_returned)
-		formation["equipment_required"]=maxi(int(formation.count),int(formation.get("equipment_required",formation.authorized_count))-removed_here)
-		if weapon=="bow":
-			formation["ammunition"]=maxi(0,int(formation.get("ammunition",0))-arrows_returned)
-			formation["ammunition_required"]=maxi(0,int(formation.get("ammunition_required",0))-removed_here*6)
-			military_consumables["arrows"]=int(military_consumables.get("arrows",0))+arrows_returned
+		var new_equipment_required:=_equipment_required_for(String(formation.get("unit","levy")),int(formation.authorized_count))
+		var gear_returned:=maxi(0,old_equipment-mini(old_equipment,new_equipment_required))
+		formation["equipment"]=old_equipment-gear_returned
+		formation["equipment_required"]=new_equipment_required
+		var ammunition_type:=_ammunition_type_for(weapon)
+		if ammunition_type!="":
+			var new_ammunition_required:=_ammunition_required_for(weapon,new_equipment_required)
+			var ammunition_returned:=maxi(0,int(formation.get("ammunition",0))-new_ammunition_required)
+			formation["ammunition"]=int(formation.get("ammunition",0))-ammunition_returned
+			formation["ammunition_required"]=new_ammunition_required
+			military_consumables[ammunition_type]=int(military_consumables.get(ammunition_type,0))+ammunition_returned
 		formation["soldier_ids"]=member_ids
 		formations[formation_index]=formation
 		military_inventory[weapon]=int(military_inventory.get(weapon,0))+gear_returned
@@ -174,7 +178,7 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	if accepted<=0: return {"error":"No recruits are available for training."}
 	var ids:Array[int]=[]
 	for index in accepted: ids.append(recruit_pool.pop_front())
-	var base_training_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48}.get(unit,21))
+	var base_training_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(unit,21))
 	var training_days:=maxf(3.0,base_training_days*(1.0-_citizen_training(ids)*0.35))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"soldier_ids":ids,"progress_days":0.0,"required_days":training_days,"injury_accumulator":0.0})
@@ -193,7 +197,7 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 	if accepted<=0: return {"error":"The formation has no open authorized positions or no recruits are available."}
 	var ids:Array[int]=[]
 	for index in accepted: ids.append(recruit_pool.pop_front())
-	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48}.get(String(formation.unit),21))
+	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(String(formation.unit),21))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	var required_days:=maxf(3.0,base_days*0.58)
 	training_queue.append({"id":order_id,"mode":"reinforce","target_formation_id":formation_id,"unit":String(formation.unit),"weapon":String(formation.weapon),"count":accepted,"soldier_ids":ids,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
@@ -214,20 +218,21 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 	var old_weapon:=String(formation.get("weapon","improvised"))
 	var returned_gear:=int(formation.get("equipment",0))
 	military_inventory[old_weapon]=int(military_inventory.get(old_weapon,0))+returned_gear
-	var returned_arrows:=int(formation.get("ammunition",0)) if old_weapon=="bow" else 0
-	if returned_arrows>0: military_consumables["arrows"]=int(military_consumables.get("arrows",0))+returned_arrows
+	var ammunition_type:=_ammunition_type_for(old_weapon)
+	var returned_ammunition:=int(formation.get("ammunition",0)) if ammunition_type!="" else 0
+	if returned_ammunition>0: military_consumables[ammunition_type]=int(military_consumables.get(ammunition_type,0))+returned_ammunition
 	(home_army.formations as Array).remove_at(formation_index)
 	for citizen_id in member_ids:
 		(home_army.soldier_ids as Array).erase(citizen_id)
 		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
 		if not citizen.is_empty(): citizen["army_status"]="training"
 	home_army["troops"]=(home_army.soldier_ids as Array).size()
-	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48}.get(unit,21))
+	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(unit,21))
 	var required_days:=maxf(3.0,base_days*(0.72-_citizen_experience(member_ids)*0.24))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":member_ids.size(),"soldier_ids":member_ids,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
 	_refresh_readiness()
-	return {"id":order_id,"accepted":member_ids.size(),"returned_equipment":returned_gear,"returned_ammunition":returned_arrows,"required_days":required_days}
+	return {"id":order_id,"accepted":member_ids.size(),"returned_equipment":returned_gear,"returned_ammunition":returned_ammunition,"required_days":required_days}
 
 
 func cancel_training(order_id:int)->Dictionary:
@@ -265,8 +270,9 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 
 
 func queue_consumable_production(item:String,count:int)->Dictionary:
-	if item!="arrows": return {"error":"Unknown military consumable: %s" % item}
-	var gate:=_knowledge_gate("bow_craft",0.08)
+	var discovery:=String({"arrows":"bow_craft","artillery_rounds":"powder_artillery"}.get(item,""))
+	if discovery=="": return {"error":"Unknown military consumable: %s" % item}
+	var gate:=_knowledge_gate(discovery,0.08)
 	if not bool(gate.unlocked): return {"error":gate.reason,"required_discovery":gate.discovery}
 	var amount:=maxi(0,count)
 	if amount<=0: return {"error":"Production amount must be positive."}
@@ -287,7 +293,7 @@ func queue_transport_cart_production(count:int)->Dictionary:
 	if not bool(gate.unlocked): return {"error":gate.reason,"required_discovery":gate.discovery}
 	var amount:=maxi(0,count)
 	if amount<=0: return {"error":"Production amount must be positive."}
-	var recipe:Dictionary={"materials":{"Timber":8.0,"Fiber Plants":1.5},"days":5.0}
+	var recipe:Dictionary=_transport_recipe()
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount
 		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
@@ -663,11 +669,11 @@ func _apply_imported_state(payload:Dictionary)->void:
 	_normalize_formation_ammunition()
 	battle_history.assign(payload.get("battle_history",[]))
 	pending_aftermath=(payload.get("pending_aftermath",{}) as Dictionary).duplicate(true)
-	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
+	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0,"field_gun":0}
 	for item in (payload.get("military_inventory",{}) as Dictionary): military_inventory[item]=int(payload.military_inventory[item])
-	military_consumables={"arrows":0}
+	military_consumables={"arrows":0,"artillery_rounds":0}
 	for item in (payload.get("military_consumables",{}) as Dictionary): military_consumables[item]=int(payload.military_consumables[item])
-	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
+	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0,"field_gun":0}
 	for item in (payload.get("damaged_equipment",{}) as Dictionary): damaged_equipment[item]=int(payload.damaged_equipment[item])
 	recruit_pool.assign(payload.get("recruit_pool",[]))
 	training_queue.assign(payload.get("training_queue",[]))
@@ -744,7 +750,11 @@ func _normalize_equipment_jobs()->void:
 		fallback_id=maxi(fallback_id+1,int(job.id)+1)
 		if not job.has("job_type"): job["job_type"]="production"
 		if not job.has("reserved_materials"):
-			var recipe:Dictionary=_equipment_recipe(String(job.get("item","improvised")))
+			var job_type:=String(job.get("job_type","production"))
+			var recipe:Dictionary
+			if job_type=="consumable": recipe=_consumable_recipe(String(job.get("item","arrows")))
+			elif job_type=="transport": recipe=_transport_recipe()
+			else: recipe=_equipment_recipe(String(job.get("item","improvised")))
 			var factor:=0.18 if String(job.job_type)=="repair" else 1.0
 			var reserved:Dictionary={}
 			for material in recipe.materials: reserved[material]=float(recipe.materials[material])*int(job.get("count",0))*factor
@@ -756,8 +766,12 @@ func _normalize_formation_ammunition()->void:
 	var formations:Array=home_army.get("formations",[])
 	for index in formations.size():
 		var formation:Dictionary=formations[index]
-		if String(formation.get("weapon","improvised"))=="bow":
-			var required:=maxi(0,int(formation.get("ammunition_required",int(formation.get("authorized_count",formation.get("count",0)))*6)))
+		var weapon:=String(formation.get("weapon","improvised"))
+		if _ammunition_type_for(weapon)!="":
+			var default_equipment_required:=_equipment_required_for(String(formation.get("unit","levy")),int(formation.get("authorized_count",formation.get("count",0))))
+			var equipment_required:=maxi(0,int(formation.get("equipment_required",default_equipment_required)))
+			formation["equipment_required"]=equipment_required
+			var required:=maxi(0,int(formation.get("ammunition_required",_ammunition_required_for(weapon,equipment_required))))
 			formation["ammunition_required"]=required
 			formation["ammunition"]=clampi(int(formation.get("ammunition",required)),0,required)
 		else:
@@ -1189,13 +1203,16 @@ func _deliver_inventory_replacements(delivery_limit:int)->int:
 func _deliver_ammunition(delivery_limit:int)->int:
 	var delivered:=0
 	var remaining_capacity:=maxi(0,delivery_limit)
-	var available:=maxi(0,int(military_consumables.get("arrows",0)))
 	var formations:Array=home_army.get("formations",[])
 	for index in formations.size():
-		if remaining_capacity<=0 or available<=0: break
+		if remaining_capacity<=0: break
 		var formation:Dictionary=formations[index]
-		if String(formation.get("weapon","improvised"))!="bow": continue
-		var required:=maxi(0,int(formation.get("ammunition_required",int(formation.get("authorized_count",formation.get("count",0)))*6)))
+		var weapon:=String(formation.get("weapon","improvised"))
+		var ammunition_type:=_ammunition_type_for(weapon)
+		if ammunition_type=="": continue
+		var available:=maxi(0,int(military_consumables.get(ammunition_type,0)))
+		if available<=0: continue
+		var required:=maxi(0,int(formation.get("ammunition_required",_ammunition_required_for(weapon,int(formation.get("equipment_required",0))))))
 		var missing:=maxi(0,required-int(formation.get("ammunition",0)))
 		var transfer:=mini(mini(available,missing),remaining_capacity)
 		if transfer<=0: continue
@@ -1203,10 +1220,10 @@ func _deliver_ammunition(delivery_limit:int)->int:
 		formation["ammunition_required"]=required
 		formations[index]=formation
 		available-=transfer
+		military_consumables[ammunition_type]=available
 		remaining_capacity-=transfer
 		delivered+=transfer
 	home_army["formations"]=formations
-	military_consumables["arrows"]=available
 	return delivered
 
 
@@ -1260,9 +1277,10 @@ func _process_training_day()->void:
 		var training:Dictionary=training_queue[index]
 		var weapon:=String(training.get("weapon","improvised"))
 		var available_examples:=maxi(0,int(training_equipment_budget.get(weapon,0)))
-		var examples:=mini(maxi(1,int(training.get("count",1))),available_examples)
+		var examples_required:=_equipment_required_for(String(training.get("unit","levy")),int(training.get("count",1)))
+		var examples:=mini(maxi(1,examples_required),available_examples)
 		training_equipment_budget[weapon]=available_examples-examples
-		var equipment_access:=clampf(float(examples)/maxf(1.0,float(training.get("count",1))),0.0,1.0)
+		var equipment_access:=clampf(float(examples)/maxf(1.0,float(examples_required)),0.0,1.0)
 		var access_floor:=0.55 if weapon=="improvised" else 0.25
 		var progress_increment:=training_rate*(access_floor+(1.0-access_floor)*equipment_access)
 		training["progress_days"]=float(training.get("progress_days",0.0))+progress_increment
@@ -1319,25 +1337,45 @@ func _trainee_condition(citizen_ids:Array)->float:
 	return _condition_average(citizens) if not citizens.is_empty() else 0.5
 
 
+func _equipment_required_for(unit:String,personnel:int)->int:
+	return ceili(float(maxi(0,personnel))/5.0) if unit=="field_artillery" else maxi(0,personnel)
+
+
+func _ammunition_required_for(weapon:String,equipment_required:int)->int:
+	if weapon=="bow": return maxi(0,equipment_required)*6
+	if weapon=="field_gun": return maxi(0,equipment_required)*8
+	return 0
+
+
+func _ammunition_type_for(weapon:String)->String:
+	if weapon=="bow": return "arrows"
+	if weapon=="field_gun": return "artillery_rounds"
+	return ""
+
+
 func _complete_training(training:Dictionary)->void:
 	if home_army.is_empty(): home_army=_empty_home_army()
 	var count:=int(training.count)
 	var weapon:=String(training.weapon)
-	var issued:=mini(count,int(military_inventory.get(weapon,0)))
-	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
 	var member_ids:Array=(training.soldier_ids as Array).duplicate()
 	var equipment_access_average:=clampf(float(training.get("equipment_access_sum",0.0))/maxf(0.01,float(training.get("instruction_progress_sum",training.get("required_days",1.0)))),0.0,1.0)
 	var equipment_training_factor:=0.72+equipment_access_average*0.28
 	var formations:Array=home_army.get("formations",[])
 	var mode:=String(training.get("mode","new"))
 	var target_index:=_formation_index(int(training.get("target_formation_id",-1))) if mode=="reinforce" else -1
+	var equipment_needed:=_equipment_required_for(String(training.unit),count)
+	if target_index>=0:
+		var reinforcement_target:Dictionary=formations[target_index]
+		equipment_needed=maxi(0,int(reinforcement_target.get("equipment_required",_equipment_required_for(String(training.unit),int(reinforcement_target.get("authorized_count",reinforcement_target.get("count",0))))))-int(reinforcement_target.get("equipment",0)))
+	var issued:=mini(equipment_needed,int(military_inventory.get(weapon,0)))
+	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
 	if target_index>=0:
 		var target:Dictionary=formations[target_index]
 		var old_count:=int(target.get("count",0))
 		var new_training:=_training_quality(String(training.unit),member_ids)*equipment_training_factor
 		target["count"]=old_count+count
 		target["equipment"]=int(target.get("equipment",0))+issued
-		if weapon=="bow": target["ammunition_required"]=int(target.get("authorized_count",old_count))*6
+		target["ammunition_required"]=_ammunition_required_for(weapon,int(target.get("equipment_required",_equipment_required_for(String(training.unit),int(target.get("authorized_count",old_count))))))
 		target["training"]=(float(target.get("training",0.5))*old_count+new_training*count)/maxf(1.0,float(old_count+count))
 		var target_members:Array=(target.get("soldier_ids",[]) as Array).duplicate(); target_members.append_array(member_ids)
 		target["soldier_ids"]=target_members
@@ -1345,7 +1383,8 @@ func _complete_training(training:Dictionary)->void:
 		formations[target_index]=target
 	else:
 		var formation_id:=next_formation_id; next_formation_id+=1
-		formations.append({"id":formation_id,"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"ammunition":0,"ammunition_required":count*6 if weapon=="bow" else 0,"training":_training_quality(String(training.unit),member_ids)*equipment_training_factor,"experience":_citizen_experience(member_ids),"soldier_ids":member_ids})
+		var equipment_required:=_equipment_required_for(String(training.unit),count)
+		formations.append({"id":formation_id,"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":equipment_required,"ammunition":0,"ammunition_required":_ammunition_required_for(weapon,equipment_required),"training":_training_quality(String(training.unit),member_ids)*equipment_training_factor,"experience":_citizen_experience(member_ids),"soldier_ids":member_ids})
 	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
 	rebuilt["commander"]=_marshal_commander()
 	rebuilt["wounded_pool"]=int(home_army.get("wounded_pool",0))
@@ -1374,14 +1413,20 @@ func _equipment_recipe(item:String)->Dictionary:
 		"bow":{"materials":{"Timber":0.45,"Fiber Plants":0.30},"days":0.80},
 		"sword_shield":{"materials":{"Timber":0.50,"Copper Ore":0.50,"Tin Ore":0.08},"days":1.60},
 		"lance":{"materials":{"Timber":1.10,"Iron Ore":0.20},"days":1.25},
-		"siege_kit":{"materials":{"Timber":3.20,"Fiber Plants":0.80,"Stone":0.45,"Iron Ore":0.12},"days":3.80}
+		"siege_kit":{"materials":{"Timber":3.20,"Fiber Plants":0.80,"Stone":0.45,"Iron Ore":0.12},"days":3.80},
+		"field_gun":{"materials":{"Iron Ore":8.0,"Timber":4.0,"Fiber Plants":0.50},"days":12.0}
 	}.get(item,{"materials":{},"days":1.0})
 
 
 func _consumable_recipe(item:String)->Dictionary:
 	return {
-		"arrows":{"materials":{"Timber":0.08,"Fiber Plants":0.025,"Stone":0.015},"days":0.055}
+		"arrows":{"materials":{"Timber":0.08,"Fiber Plants":0.025,"Stone":0.015},"days":0.055},
+		"artillery_rounds":{"materials":{"Sulfur":0.12,"Nitrates":0.18,"Iron Ore":0.20,"Timber":0.08},"days":0.18}
 	}.get(item,{"materials":{},"days":1.0})
+
+
+func _transport_recipe()->Dictionary:
+	return {"materials":{"Timber":8.0,"Fiber Plants":1.5},"days":5.0}
 
 
 func _knowledge_gate(discovery:String,minimum_adoption:float)->Dictionary:
