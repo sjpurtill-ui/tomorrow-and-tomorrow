@@ -421,7 +421,7 @@ func military_capabilities()->Dictionary:
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
 	var queued_trainees:=_queued_trainees()
-	return {"units":units,"equipment":equipment,"unit_equipment":UNIT_EQUIPMENT.duplicate(true),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"units":units,"equipment":equipment,"unit_equipment":UNIT_EQUIPMENT.duplicate(true),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func validate_military_progression()->Array[String]:
@@ -1959,7 +1959,7 @@ func _process_training_day()->void:
 			if not trainee.is_empty(): trainee["military_training"]=maxf(float(trainee.get("military_training",0.0)),completion)
 		var intensity:=float({"levy":0.75,"line_infantry":1.0,"skirmisher":0.90,"cavalry":1.20}.get(String(training.unit),1.0))
 		var average_condition:=_trainee_condition(training.soldier_ids)
-		training["injury_accumulator"]=float(training.get("injury_accumulator",0.0))+float(training.count)*0.0012*intensity*(1.35-average_condition*0.55)
+		training["injury_accumulator"]=float(training.get("injury_accumulator",0.0))+float(training.count)*0.0012*intensity*(1.35-average_condition*0.55)*_training_injury_risk_multiplier()
 		var injuries:=mini(int(training.count),floori(float(training.injury_accumulator)))
 		training["injury_accumulator"]=float(training.injury_accumulator)-float(injuries)
 		for injury_index in injuries:
@@ -1968,8 +1968,16 @@ func _process_training_day()->void:
 			var injured_id:=int((training.soldier_ids as Array).pop_at(selected))
 			training["count"]=int(training.count)-1
 			var injured:Dictionary=GameState.citizen_by_id(injured_id)
-			if not injured.is_empty(): injured["army_status"]="training_injured"
-			training_injuries.append({"citizen_id":injured_id,"remaining_days":5+posmod(injured_id+int(training.get("id",1)),8),"source_order_id":int(training.get("id",-1))})
+			var wound_cleaning:=_adoption("wound_cleaning")
+			var battlefield_medicine:=_adoption("battlefield_medicine")
+			var severity:=clampf((0.025+intensity*0.018+(1.0-average_condition)*0.045)*(1.0-wound_cleaning*0.25-battlefield_medicine*0.35),0.008,0.10)
+			var recovery_factor:=clampf(1.05-wound_cleaning*0.15-battlefield_medicine*0.38,0.45,1.05)
+			var remaining_days:=maxi(2,ceili(float(5+posmod(injured_id+int(training.get("id",1)),8))*recovery_factor))
+			if not injured.is_empty():
+				injured["army_status"]="training_injured"
+				injured["health_condition"]=clampf(float(injured.get("health_condition",GameState.population_health))-severity,0.05,1.0)
+				injured["service_strain"]=clampf(float(injured.get("service_strain",0.0))+severity*0.80,0.0,1.0)
+			training_injuries.append({"citizen_id":injured_id,"remaining_days":remaining_days,"severity":severity,"source_order_id":int(training.get("id",-1))})
 		if int(training.count)<=0:
 			training_queue.remove_at(index)
 			continue
@@ -1983,16 +1991,23 @@ func _process_training_day()->void:
 func _process_training_injuries_day()->void:
 	for index in range(training_injuries.size()-1,-1,-1):
 		var injury:Dictionary=training_injuries[index]
+		var citizen_id:=int(injury.get("citizen_id",-1))
+		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+		if not citizen.is_empty() and bool(citizen.get("alive",true)):
+			var daily_recovery:=0.0015+_adoption("wound_cleaning")*0.0010+_adoption("battlefield_medicine")*0.0025
+			citizen["health_condition"]=clampf(float(citizen.get("health_condition",GameState.population_health))+daily_recovery,0.05,1.0)
 		injury["remaining_days"]=int(injury.get("remaining_days",1))-1
 		if int(injury.remaining_days)>0:
 			training_injuries[index]=injury
 			continue
-		var citizen_id:=int(injury.get("citizen_id",-1))
-		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
 		if not citizen.is_empty() and bool(citizen.get("alive",true)):
 			citizen["army_status"]="recruit"
 			if citizen_id not in recruit_pool: recruit_pool.append(citizen_id)
 		training_injuries.remove_at(index)
+
+
+func _training_injury_risk_multiplier()->float:
+	return clampf(1.0-_adoption("wound_cleaning")*0.18-_adoption("battlefield_medicine")*0.42,0.35,1.0)
 
 
 func _trainee_condition(citizen_ids:Array)->float:

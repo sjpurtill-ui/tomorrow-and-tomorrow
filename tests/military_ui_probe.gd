@@ -22,6 +22,7 @@ func _ready()->void:
 	if "No depleted" not in MilitaryCommandUI.feedback.text: failures.append("Automatic reinforcement targeting is not connected.")
 	if MilitaryCommandUI.commander_portrait.texture==null or "CMD" not in MilitaryCommandUI.commander_details.text: failures.append("Commander portrait or command statistics are missing.")
 	if MilitaryCommandUI.readiness_meters.size()!=6 or "▼" not in MilitaryCommandUI.readiness_bottleneck.text: failures.append("Readiness components or bottleneck display are missing.")
+	if "Training accident risk" not in MilitaryCommandUI.queues.tooltip_text: failures.append("Training safety and medical advancement are not explained in command.")
 	if MilitaryCommandUI.prisoner_policy.item_count!=7 or MilitaryCommandUI.spoils_policy.item_count!=5 or MilitaryCommandUI.general_policy.item_count!=4: failures.append("Battle aftermath choices are incomplete.")
 	MilitaryCampaign.military_inventory["improvised"]=3
 	MilitaryCampaign.military_consumables["arrows"]=12

@@ -264,10 +264,13 @@ func _run()->void:
 		var injury_order:Dictionary=MilitaryCampaign.start_training("levy","improvised",1)
 		assert(not injury_order.has("error"))
 		MilitaryCampaign.training_queue[-1]["injury_accumulator"]=1.0
+		var trainee_health_before:=float(GameState.citizen_by_id(int(MilitaryCampaign.training_queue[-1].soldier_ids[0])).get("health_condition",1.0))
 		MilitaryCampaign._process_training_day()
 		assert(MilitaryCampaign.training_injuries.size()==1)
 		var injured_id:=int(MilitaryCampaign.training_injuries[0].citizen_id)
 		assert(String(GameState.citizen_by_id(injured_id).army_status)=="training_injured")
+		assert(float(MilitaryCampaign.training_injuries[0].severity)>0.0)
+		assert(float(GameState.citizen_by_id(injured_id).health_condition)<trainee_health_before)
 		for day in 13: MilitaryCampaign._process_training_injuries_day()
 		assert(injured_id in MilitaryCampaign.recruit_pool)
 	var target_id:=int(MilitaryCampaign.home_army.formations[0].id)
@@ -733,5 +736,14 @@ func _run()->void:
 	assert(timed_captive_id not in (MilitaryCampaign.home_army.captured_ids as Array))
 	assert(String(GameState.citizen_by_id(timed_captive_id).army_status)=="recruit")
 	assert(MilitaryCampaign.validate_state().is_empty())
+	GameState.known_discoveries.erase("wound_cleaning")
+	GameState.known_discoveries.erase("battlefield_medicine")
+	GameState.discovery_adoption.erase("wound_cleaning")
+	GameState.discovery_adoption.erase("battlefield_medicine")
+	var untreated_training_risk:=MilitaryCampaign._training_injury_risk_multiplier()
+	GameState.known_discoveries.append_array(["wound_cleaning","battlefield_medicine"])
+	GameState.discovery_adoption["wound_cleaning"]=1.0
+	GameState.discovery_adoption["battlefield_medicine"]=1.0
+	assert(MilitaryCampaign._training_injury_risk_multiplier()<untreated_training_risk*0.50)
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()
