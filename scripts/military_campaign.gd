@@ -1140,12 +1140,29 @@ func _marshal_commander()->Dictionary:
 	var security:=float(GameState.society_capacities.get("security",0.38))
 	var logistics:=float(GameState.society_capacities.get("logistics",0.16))
 	if marshal.is_empty(): return _acting_field_commander(false)
+	var skills:Dictionary=marshal.get("skills",{})
+	var personality_command:=clampf(0.34+float(marshal.get("courage",0.5))*0.34+security*0.24,0.0,1.0)
+	var personality_tactics:=clampf(0.30+float(marshal.get("suspicion",0.5))*0.24+security*0.30,0.0,1.0)
+	var personality_logistics:=clampf(0.25+float(marshal.get("honesty",0.5))*0.18+logistics*0.48,0.0,1.0)
+	var personality_resolve:=clampf(0.30+float(marshal.get("courage",0.5))*0.42+float(marshal.get("pride",0.5))*0.12,0.0,1.0)
+	var command:=personality_command
+	var tactics:=personality_tactics
+	var supply_command:=personality_logistics
+	var resolve:=personality_resolve
+	if skills.has("Command") or skills.has("Strategy"):
+		command=lerpf(personality_command,clampf(float(skills.get("Command",skills.get("Strategy",50)))/100.0,0.0,1.0),0.68)
+	if skills.has("Tactics"):
+		tactics=lerpf(personality_tactics,clampf(float(skills.Tactics)/100.0,0.0,1.0),0.72)
+	if skills.has("Logistics"):
+		supply_command=lerpf(personality_logistics,clampf(float(skills.Logistics)/100.0,0.0,1.0),0.72)
+	if skills.has("Resolve"):
+		resolve=lerpf(personality_resolve,clampf(float(skills.Resolve)/100.0,0.0,1.0),0.68)
 	var commander:Dictionary=simulator.create_commander(
 		String(marshal.get("name","Marshal")),
-		0.34+float(marshal.get("courage",0.5))*0.34+security*0.24,
-		0.30+float(marshal.get("suspicion",0.5))*0.24+security*0.30,
-		0.25+float(marshal.get("honesty",0.5))*0.18+logistics*0.48,
-		0.30+float(marshal.get("courage",0.5))*0.42+float(marshal.get("pride",0.5))*0.12
+		command,
+		tactics,
+		supply_command,
+		resolve
 	)
 	commander["citizen_id"]=int(marshal.get("citizen_id",-1))
 	commander["office"]="Marshal"

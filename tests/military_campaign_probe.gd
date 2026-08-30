@@ -286,6 +286,18 @@ func _run()->void:
 		if int(citizen.id) not in (MilitaryCampaign.home_army.soldier_ids as Array) and int(citizen.id) not in (MilitaryCampaign.home_army.captured_ids as Array): marshal_citizen=citizen; break
 	assert(not marshal_citizen.is_empty())
 	var marshal_record:={"citizen_id":int(marshal_citizen.id),"name":String(marshal_citizen.name),"courage":0.72,"suspicion":0.64,"honesty":0.61,"pride":0.55,"skills":{"Strategy":72,"Tactics":68,"Logistics":58},"relationships":{"sovereign":{"trust":0.5,"respect":0.5,"fear":0.1,"resentment":0.0,"obligation":0.5}}}
+	var low_skill_marshal:=marshal_record.duplicate(true)
+	low_skill_marshal["skills"]={"Strategy":0,"Tactics":0,"Logistics":0,"Resolve":0}
+	GameState.leadership_positions["Marshal"]=low_skill_marshal
+	var unskilled_commander:Dictionary=MilitaryCampaign._marshal_commander()
+	var high_skill_marshal:=marshal_record.duplicate(true)
+	high_skill_marshal["skills"]={"Strategy":100,"Tactics":100,"Logistics":100,"Resolve":100}
+	GameState.leadership_positions["Marshal"]=high_skill_marshal
+	var master_commander:Dictionary=MilitaryCampaign._marshal_commander()
+	assert(float(master_commander.command)>float(unskilled_commander.command)+0.50)
+	assert(float(master_commander.tactics)>float(unskilled_commander.tactics)+0.50)
+	assert(float(master_commander.logistics)>float(unskilled_commander.logistics)+0.50)
+	assert(float(master_commander.resolve)>float(unskilled_commander.resolve)+0.50)
 	GameState.leadership_positions["Marshal"]=marshal_record
 	MilitaryCampaign.home_army["commander"]=MilitaryCampaign._marshal_commander()
 	GameState.known_discoveries.append("shield_wall")
