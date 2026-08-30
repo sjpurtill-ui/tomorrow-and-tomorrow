@@ -22,6 +22,50 @@ func _run()->void:
 	assert(float(threat_inquiry.get("defense",0.0))>0.0)
 	assert(float(threat_inquiry.get("danger",0.0))>0.0)
 	assert(float(threat_inquiry.get("training",0.0))>0.0)
+	var inquiry_day_before:=GameState.elapsed_days
+	var inquiry_allocations_before:Dictionary=GameState.research_allocations.duplicate(true)
+	var inquiry_subcategory_allocations_before:Dictionary=GameState.research_subcategory_allocations.duplicate(true)
+	var inquiry_active_before:Dictionary=GameState.active_investigations.duplicate(true)
+	var inquiry_progress_before:Dictionary=GameState.discovery_progress.duplicate(true)
+	var inquiry_observations_before:Array[String]=GameState.active_observations.duplicate()
+	var inquiry_capacities_before:Dictionary=GameState.society_capacities.duplicate(true)
+	var inquiry_subcategories_before:Dictionary=GameState.society_subcategories.duplicate(true)
+	var inquiry_effects_before:Dictionary=GameState.knowledge_effects.duplicate(true)
+	var inquiry_intelligence_before:=GameState.combined_intelligence
+	var watch_definition:Dictionary=DiscoverySystem.discovery_definition("watch_rotation")
+	var watch_dynamic:=String(watch_definition.dynamic)
+	var watch_subcategory:=String(watch_definition.subcategory)
+	var watch_channel:="%s::%s" % [watch_dynamic,watch_subcategory]
+	GameState.elapsed_days=6.0
+	GameState.research_allocations={watch_dynamic:1}
+	GameState.research_subcategory_allocations={watch_dynamic:{watch_subcategory:1}}
+	GameState.active_investigations={watch_channel:"watch_rotation"}
+	GameState.discovery_progress={"watch_rotation":0.0}
+	MilitaryCampaign.active_threat.clear()
+	DiscoverySystem.rng.seed=44017
+	DiscoverySystem.reset_society_clock()
+	DiscoverySystem.process_day({})
+	var peaceful_watch_progress:=float(GameState.discovery_progress.get("watch_rotation",0.0))
+	GameState.active_investigations={watch_channel:"watch_rotation"}
+	GameState.discovery_progress={"watch_rotation":0.0}
+	MilitaryCampaign.active_threat={"id":"inquiry_pressure","estimated_strength":24}
+	DiscoverySystem.rng.seed=44017
+	DiscoverySystem.reset_society_clock()
+	DiscoverySystem.process_day({})
+	var threatened_watch_progress:=float(GameState.discovery_progress.get("watch_rotation",0.0))
+	assert(threatened_watch_progress>peaceful_watch_progress)
+	GameState.elapsed_days=inquiry_day_before
+	GameState.research_allocations=inquiry_allocations_before
+	GameState.research_subcategory_allocations=inquiry_subcategory_allocations_before
+	GameState.active_investigations=inquiry_active_before
+	GameState.discovery_progress=inquiry_progress_before
+	GameState.active_observations=inquiry_observations_before
+	GameState.society_capacities=inquiry_capacities_before
+	GameState.society_subcategories=inquiry_subcategories_before
+	GameState.knowledge_effects=inquiry_effects_before
+	GameState.combined_intelligence=inquiry_intelligence_before
+	DiscoverySystem.reset_for_new_world()
+	DiscoverySystem.initialize()
 	MilitaryCampaign.active_threat.clear()
 	var locked_spear:Dictionary=MilitaryCampaign.queue_equipment_production("spear",1)
 	assert(String(locked_spear.get("required_discovery",""))=="hafted_weapons")
