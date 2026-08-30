@@ -110,7 +110,14 @@ func _run()->void:
 	assert(float(army.formations[0].training)<1.0)
 	assert(float(army.formations[0].personnel_condition)>0.0)
 	assert(float(army.formations[0].readiness)>0.0)
-	assert(float(MilitaryCampaign.formation_combat_summaries(army)[0].attack_strength)>0.0)
+	var army_cohort_summaries:Array[Dictionary]=MilitaryCampaign.formation_combat_summaries(army)
+	assert(float(army_cohort_summaries[0].attack_strength)>0.0)
+	var cohort_attack_total:=0.0; var cohort_defense_total:=0.0
+	for cohort_summary in army_cohort_summaries:
+		cohort_attack_total+=float(cohort_summary.attack_strength); cohort_defense_total+=float(cohort_summary.defense_strength)
+	var army_combat_total:Dictionary=MilitaryCampaign.combat_summary(army)
+	assert(is_equal_approx(float(army_combat_total.attack_strength),cohort_attack_total))
+	assert(is_equal_approx(float(army_combat_total.defense_strength),cohort_defense_total))
 	assert(float(army.readiness)>0.0 and float(army.readiness)<=1.0)
 	assert((army.readiness_components as Dictionary).has("condition"))
 	var condition_probe:Dictionary=GameState.citizen_by_id(int(army.soldier_ids[0]))
