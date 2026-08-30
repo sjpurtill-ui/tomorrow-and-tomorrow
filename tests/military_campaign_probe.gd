@@ -113,6 +113,13 @@ func _run()->void:
 	assert(float(MilitaryCampaign.formation_combat_summaries(army)[0].attack_strength)>0.0)
 	assert(float(army.readiness)>0.0 and float(army.readiness)<=1.0)
 	assert((army.readiness_components as Dictionary).has("condition"))
+	var condition_probe:Dictionary=GameState.citizen_by_id(int(army.soldier_ids[0]))
+	condition_probe["service_strain"]=0.0
+	var rested_condition:=MilitaryCampaign._condition_average([condition_probe])
+	condition_probe["service_strain"]=1.0
+	var strained_condition:=MilitaryCampaign._condition_average([condition_probe])
+	assert(strained_condition<rested_condition*0.75)
+	condition_probe["service_strain"]=0.0
 	var baseline_inquiry:Dictionary=MilitaryCampaign.military_inquiry_context()
 	var original_supply:=float(MilitaryCampaign.home_army.get("supply_level",1.0))
 	MilitaryCampaign.home_army["supply_level"]=0.20

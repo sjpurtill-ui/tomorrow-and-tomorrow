@@ -1302,7 +1302,12 @@ func _remove_active_citizen(citizen_id:int)->bool:
 
 func _condition_average(soldiers:Array[Dictionary])->float:
 	if soldiers.is_empty(): return 0.0
-	return float(GameState.citizen_condition_profile(soldiers).average_capacity)
+	var total:=0.0
+	for soldier in soldiers:
+		var physical:=GameState.citizen_physical_capacity(soldier)
+		var service_strain:=clampf(float(soldier.get("service_strain",0.0)),0.0,1.0)
+		total+=physical*(1.0-service_strain*0.30)
+	return total/float(soldiers.size())
 
 
 func _campaign_morale()->float:
