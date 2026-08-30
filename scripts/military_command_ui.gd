@@ -42,6 +42,7 @@ var refresh_accumulator:=0.0
 
 func _ready()->void:
 	_build_interface()
+	get_viewport().size_changed.connect(_fit_modal_to_viewport)
 	MilitaryCampaign.army_changed.connect(func(_army:Dictionary): _refresh())
 	set_process(true)
 
@@ -95,9 +96,8 @@ func _build_interface()->void:
 
 	modal=PanelContainer.new()
 	modal.name="MilitaryCommandModal"
-	modal.set_anchors_preset(Control.PRESET_CENTER)
-	modal.position=-PANEL_SIZE*0.5
 	modal.size=PANEL_SIZE
+	_fit_modal_to_viewport()
 	modal.visible=false
 	modal.add_theme_stylebox_override("panel",_panel_style(Color("#182029"),GOLD,2,12))
 	layer.add_child(modal)
@@ -170,6 +170,14 @@ func _build_interface()->void:
 	feedback=Label.new(); feedback.text="F6 closes this panel. Time continues while it is open."; feedback.custom_minimum_size.x=800; feedback.add_theme_color_override("font_color",MUTED); feedback.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; outer.add_child(feedback)
 	_populate_choices()
 	_refresh()
+
+
+func _fit_modal_to_viewport()->void:
+	if modal==null:
+		return
+	var viewport_size:=get_viewport().get_visible_rect().size
+	modal.size=PANEL_SIZE
+	modal.position=(viewport_size-PANEL_SIZE)*0.5
 
 
 func _section(parent:HBoxContainer,title_text:String,color:Color)->VBoxContainer:
@@ -343,8 +351,7 @@ func _refresh()->void:
 		if not last_round.is_empty(): round_report="  •  LOSSES %d / %d  •  %s" % [int(last_round.get("attacker_losses",0)),int(last_round.get("defender_losses",0)),String(last_round.get("intensity","contact")).to_upper()]
 		engagement_label.text="ROUND %02d   %s %d  —  %d %s   Last: %s%s" % [int(engagement.get("round",0))+1,String(attacker.get("name","Army")),int(attacker.get("troops",0)),int(defender.get("troops",0)),String(defender.get("name","Enemy")),String(engagement.get("last_order","ready")).capitalize(),round_report]
 		engagement_label.tooltip_text=String(last_round.get("event","Choose whether to hold, press the attack, or withdraw."))
-	modal.size=PANEL_SIZE
-	modal.position=-PANEL_SIZE*0.5
+	_fit_modal_to_viewport()
 
 
 func _commander_portrait(index:int)->AtlasTexture:

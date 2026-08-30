@@ -259,6 +259,7 @@ func _capture_preview_if_requested() -> void:
 	var capture_knowledge_panel := false
 	var capture_world_menu := false
 	var capture_society_panel := false
+	var capture_military_panel := false
 	var capture_travel := false
 	var capture_settled := false
 	var capture_growth_years := 0
@@ -287,6 +288,8 @@ func _capture_preview_if_requested() -> void:
 			capture_world_menu = true
 		elif argument == "--capture-society":
 			capture_society_panel = true
+		elif argument == "--capture-military":
+			capture_military_panel = true
 		elif argument == "--capture-travel":
 			capture_travel = true
 		elif argument == "--capture-settled":
@@ -430,6 +433,12 @@ func _capture_preview_if_requested() -> void:
 			mandate_panel.queue_free()
 			mandate_panel=null
 		_open_society_panel()
+	if capture_military_panel:
+		if mandate_panel:
+			mandate_panel.queue_free()
+			mandate_panel=null
+		if not MilitaryCommandUI.modal.visible:
+			MilitaryCommandUI._toggle()
 	if capture_zoom > 0.0:
 		camera_target = settler_marker.position
 		camera.size = capture_zoom

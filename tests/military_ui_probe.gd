@@ -9,6 +9,7 @@ func _ready()->void:
 	var failures:Array[String]=[]
 	if panel==null: failures.append("Military modal was not created.")
 	elif panel.size.x>get_viewport().get_visible_rect().size.x-80.0 or panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Military modal exceeds the safe viewport: %s." % panel.size)
+	elif panel.position.x<40.0 or panel.position.y<30.0 or panel.position.x+panel.size.x>get_viewport().get_visible_rect().size.x-40.0 or panel.position.y+panel.size.y>get_viewport().get_visible_rect().size.y-30.0: failures.append("Military modal is not centered inside the safe viewport: %s size %s." % [panel.position,panel.size])
 	elif (panel.get_child(0) as Control).get_combined_minimum_size().y>panel.size.y-16.0: failures.append("Military modal content exceeds its fixed vertical interior.")
 	if not _descendants_of_type(panel,"ScrollContainer").is_empty(): failures.append("Military modal must not require scrolling.")
 	if MilitaryCommandUI.unit_choice.item_count<6: failures.append("Unit catalog is incomplete.")
