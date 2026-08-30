@@ -25,6 +25,7 @@ var last_world_seed:=-2147483648
 var last_processed_day:=-1
 var next_training_order_id:=1
 var next_formation_id:=1
+var next_equipment_job_id:=1
 
 
 func _ready()->void:
@@ -58,6 +59,7 @@ func reset_for_new_world()->void:
 	held_generals.clear()
 	next_training_order_id=1
 	next_formation_id=1
+	next_equipment_job_id=1
 
 
 func muster_home_army(requested_strength:=-1)->Dictionary:
@@ -240,8 +242,11 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 			return {"error":"Insufficient %s: need %.1f." % [material,required]}
 	for material in recipe.materials:
 		GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
-	equipment_queue.append({"item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount})
-	return {"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
+	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
+	var reserved:Dictionary={}
+	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
+	equipment_queue.append({"id":job_id,"job_type":"production","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount,"reserved_materials":reserved})
+	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
 
 
 func queue_equipment_repair(item:String,count:int)->Dictionary:
@@ -255,8 +260,35 @@ func queue_equipment_repair(item:String,count:int)->Dictionary:
 	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount*0.18
 	damaged_equipment[item]=int(damaged_equipment.get(item,0))-amount
 	var work_per_item:=float(recipe.days)*0.38
-	equipment_queue.append({"job_type":"repair","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":work_per_item,"required_days":work_per_item*amount})
-	return {"queued":amount,"item":item,"repair_work_days":work_per_item*amount}
+	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
+	var reserved:Dictionary={}
+	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount*0.18
+	equipment_queue.append({"id":job_id,"job_type":"repair","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":work_per_item,"required_days":work_per_item*amount,"reserved_materials":reserved,"reserved_damaged":amount})
+	return {"id":job_id,"queued":amount,"item":item,"repair_work_days":work_per_item*amount}
+
+
+func cancel_equipment_job(job_id:int)->Dictionary:
+	for index in equipment_queue.size():
+		var job:Dictionary=equipment_queue[index]
+		if int(job.get("id",-1))!=job_id: continue
+		var count:=int(job.get("count",0))
+		var completed:=clampi(int(job.get("completed",0)),0,count)
+		var remaining:=maxi(0,count-completed)
+		var work_per_item:=maxf(0.01,float(job.get("work_per_item",1.0)))
+		var fractional:=clampf(float(job.get("progress_days",0.0))/work_per_item-float(completed),0.0,1.0) if remaining>0 else 0.0
+		var refundable_units:=maxf(0.0,float(remaining)-fractional*0.35)
+		var refunded:Dictionary={}
+		for material in (job.get("reserved_materials",{}) as Dictionary):
+			var per_item:=float(job.reserved_materials[material])/maxf(1.0,float(count))
+			var amount:=per_item*refundable_units
+			GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))+amount
+			refunded[material]=amount
+		if String(job.get("job_type","production"))=="repair" and remaining>0:
+			var item:=String(job.get("item","improvised"))
+			damaged_equipment[item]=int(damaged_equipment.get(item,0))+remaining
+		equipment_queue.remove_at(index)
+		return {"cancelled":true,"job_id":job_id,"completed":completed,"unfinished":remaining,"materials_refunded":refunded,"damaged_items_returned":remaining if String(job.get("job_type","production"))=="repair" else 0}
+	return {"error":"Equipment job %d was not found." % job_id}
 
 
 func recruitment_capacity()->int:
@@ -386,7 +418,8 @@ func export_state()->Dictionary:
 		"foreign_prisoners":foreign_prisoners,
 		"held_generals":held_generals.duplicate(true),
 		"next_training_order_id":next_training_order_id,
-		"next_formation_id":next_formation_id
+		"next_formation_id":next_formation_id,
+		"next_equipment_job_id":next_equipment_job_id
 	}
 
 
@@ -469,6 +502,12 @@ func validate_state()->Array[String]:
 		if int(military_inventory[item])<0: errors.append("Military inventory for %s is negative." % item)
 	for item in damaged_equipment:
 		if int(damaged_equipment[item])<0: errors.append("Damaged-equipment inventory for %s is negative." % item)
+	var equipment_job_ids:Dictionary={}
+	for job in equipment_queue:
+		var job_id:=int(job.get("id",-1))
+		if job_id<=0 or equipment_job_ids.has(job_id): errors.append("Equipment job IDs must be positive and unique.")
+		equipment_job_ids[job_id]=true
+		if int(job.get("completed",0))<0 or int(job.get("completed",0))>int(job.get("count",0)): errors.append("Equipment job completion is outside its order size.")
 	return errors
 
 
@@ -485,10 +524,13 @@ func _apply_imported_state(payload:Dictionary)->void:
 	training_queue.assign(payload.get("training_queue",[]))
 	training_injuries.assign(payload.get("training_injuries",[]))
 	equipment_queue.assign(payload.get("equipment_queue",[]))
+	_normalize_equipment_jobs()
 	foreign_prisoners=maxi(0,int(payload.get("foreign_prisoners",0)))
 	held_generals.assign(payload.get("held_generals",[]))
 	next_training_order_id=int(payload.get("next_training_order_id",_next_available_training_order_id()))
 	next_formation_id=int(payload.get("next_formation_id",_next_available_formation_id()))
+	next_equipment_job_id=int(payload.get("next_equipment_job_id",_next_available_equipment_job_id()))
+	next_equipment_job_id=maxi(next_equipment_job_id,_next_available_equipment_job_id())
 
 
 func _empty_home_army()->Dictionary:
@@ -528,6 +570,28 @@ func _next_available_formation_id()->int:
 	var highest:=0
 	for formation in home_army.get("formations",[]): highest=maxi(highest,int(formation.get("id",0)))
 	return highest+1
+
+
+func _next_available_equipment_job_id()->int:
+	var highest:=0
+	for job in equipment_queue: highest=maxi(highest,int(job.get("id",0)))
+	return highest+1
+
+
+func _normalize_equipment_jobs()->void:
+	var fallback_id:=1
+	for index in equipment_queue.size():
+		var job:Dictionary=equipment_queue[index]
+		if int(job.get("id",0))<=0: job["id"]=fallback_id
+		fallback_id=maxi(fallback_id+1,int(job.id)+1)
+		if not job.has("job_type"): job["job_type"]="production"
+		if not job.has("reserved_materials"):
+			var recipe:Dictionary=_equipment_recipe(String(job.get("item","improvised")))
+			var factor:=0.18 if String(job.job_type)=="repair" else 1.0
+			var reserved:Dictionary={}
+			for material in recipe.materials: reserved[material]=float(recipe.materials[material])*int(job.get("count",0))*factor
+			job["reserved_materials"]=reserved
+		equipment_queue[index]=job
 
 
 func _formation_index(formation_id:int)->int:
