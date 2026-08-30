@@ -21,6 +21,9 @@ func _run()->void:
 	var locked_cart:Dictionary=MilitaryCampaign.queue_transport_cart_production(1)
 	assert(String(locked_cart.get("required_discovery",""))=="joinery")
 	assert(String(MilitaryCampaign.military_capabilities().transport_carts.discovery)=="joinery")
+	var locked_siege_kit:Dictionary=MilitaryCampaign.queue_equipment_production("siege_kit",1)
+	assert(String(locked_siege_kit.get("required_discovery",""))=="siege_engineering")
+	assert(String(MilitaryCampaign.military_capabilities().units.siege_engineer.discovery)=="siege_engineering")
 	var spear_gate:Dictionary=MilitaryCampaign.military_capabilities().equipment.spear
 	assert(String(spear_gate.discovery)=="hafted_weapons")
 	assert("hafted_tools" in (spear_gate.prerequisites as Array))
@@ -380,5 +383,17 @@ func _run()->void:
 		MilitaryCampaign._process_equipment_production_day()
 		if float(GameState.resource_stockpiles.get("Transport Carts",0.0))>carts_before: break
 	assert(is_equal_approx(float(GameState.resource_stockpiles.get("Transport Carts",0.0)),carts_before+1.0))
+	if "siege_engineering" not in GameState.known_discoveries: GameState.known_discoveries.append("siege_engineering")
+	GameState.discovery_adoption["siege_engineering"]=0.20
+	GameState.resource_stockpiles["Timber"]=100.0
+	GameState.resource_stockpiles["Fiber Plants"]=100.0
+	GameState.resource_stockpiles["Stone"]=100.0
+	GameState.resource_stockpiles["Iron Ore"]=100.0
+	var siege_job:Dictionary=MilitaryCampaign.queue_equipment_production("siege_kit",1)
+	assert(not siege_job.has("error"))
+	for day in 100:
+		MilitaryCampaign._process_equipment_production_day()
+		if int(MilitaryCampaign.military_inventory.siege_kit)>0: break
+	assert(int(MilitaryCampaign.military_inventory.siege_kit)==1)
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

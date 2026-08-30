@@ -6,16 +6,16 @@ signal aftermath_required(aftermath: Dictionary)
 
 const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=2
-const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__"}
-const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__"}
+const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__","siege_engineer":"siege_engineering"}
+const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__","siege_kit":"siege_engineering"}
 
 var simulator:RefCounted
 var home_army:Dictionary={}
 var battle_history:Array[Dictionary]=[]
 var pending_aftermath:Dictionary={}
-var military_inventory:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+var military_inventory:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
 var military_consumables:Dictionary={"arrows":0}
-var damaged_equipment:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+var damaged_equipment:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
 var recruit_pool:Array[int]=[]
 var training_queue:Array[Dictionary]=[]
 var training_injuries:Array[Dictionary]=[]
@@ -53,9 +53,9 @@ func reset_for_new_world()->void:
 	home_army={}
 	battle_history.clear()
 	pending_aftermath.clear()
-	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
 	military_consumables={"arrows":0}
-	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
 	recruit_pool.clear()
 	training_queue.clear()
 	training_injuries.clear()
@@ -174,7 +174,7 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	if accepted<=0: return {"error":"No recruits are available for training."}
 	var ids:Array[int]=[]
 	for index in accepted: ids.append(recruit_pool.pop_front())
-	var base_training_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45}.get(unit,21))
+	var base_training_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48}.get(unit,21))
 	var training_days:=maxf(3.0,base_training_days*(1.0-_citizen_training(ids)*0.35))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"soldier_ids":ids,"progress_days":0.0,"required_days":training_days,"injury_accumulator":0.0})
@@ -193,7 +193,7 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 	if accepted<=0: return {"error":"The formation has no open authorized positions or no recruits are available."}
 	var ids:Array[int]=[]
 	for index in accepted: ids.append(recruit_pool.pop_front())
-	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45}.get(String(formation.unit),21))
+	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48}.get(String(formation.unit),21))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	var required_days:=maxf(3.0,base_days*0.58)
 	training_queue.append({"id":order_id,"mode":"reinforce","target_formation_id":formation_id,"unit":String(formation.unit),"weapon":String(formation.weapon),"count":accepted,"soldier_ids":ids,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
@@ -222,7 +222,7 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
 		if not citizen.is_empty(): citizen["army_status"]="training"
 	home_army["troops"]=(home_army.soldier_ids as Array).size()
-	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45}.get(unit,21))
+	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48}.get(unit,21))
 	var required_days:=maxf(3.0,base_days*(0.72-_citizen_experience(member_ids)*0.24))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":member_ids.size(),"soldier_ids":member_ids,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
@@ -663,11 +663,11 @@ func _apply_imported_state(payload:Dictionary)->void:
 	_normalize_formation_ammunition()
 	battle_history.assign(payload.get("battle_history",[]))
 	pending_aftermath=(payload.get("pending_aftermath",{}) as Dictionary).duplicate(true)
-	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
 	for item in (payload.get("military_inventory",{}) as Dictionary): military_inventory[item]=int(payload.military_inventory[item])
 	military_consumables={"arrows":0}
 	for item in (payload.get("military_consumables",{}) as Dictionary): military_consumables[item]=int(payload.military_consumables[item])
-	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0,"siege_kit":0}
 	for item in (payload.get("damaged_equipment",{}) as Dictionary): damaged_equipment[item]=int(payload.damaged_equipment[item])
 	recruit_pool.assign(payload.get("recruit_pool",[]))
 	training_queue.assign(payload.get("training_queue",[]))
@@ -1373,7 +1373,8 @@ func _equipment_recipe(item:String)->Dictionary:
 		"spear":{"materials":{"Timber":0.65,"Stone":0.10},"days":0.55},
 		"bow":{"materials":{"Timber":0.45,"Fiber Plants":0.30},"days":0.80},
 		"sword_shield":{"materials":{"Timber":0.50,"Copper Ore":0.50,"Tin Ore":0.08},"days":1.60},
-		"lance":{"materials":{"Timber":1.10,"Iron Ore":0.20},"days":1.25}
+		"lance":{"materials":{"Timber":1.10,"Iron Ore":0.20},"days":1.25},
+		"siege_kit":{"materials":{"Timber":3.20,"Fiber Plants":0.80,"Stone":0.45,"Iron Ore":0.12},"days":3.80}
 	}.get(item,{"materials":{},"days":1.0})
 
 

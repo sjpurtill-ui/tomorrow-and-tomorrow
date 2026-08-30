@@ -14,7 +14,8 @@ const UNIT_TYPES := {
 	"levy": {"name": "Levy", "attack": 0.65, "defense": 0.55, "organization": 0.65},
 	"line_infantry": {"name": "Line Infantry", "attack": 1.00, "defense": 1.00, "organization": 1.00},
 	"skirmisher": {"name": "Skirmisher", "attack": 0.85, "defense": 0.60, "organization": 0.85},
-	"cavalry": {"name": "Cavalry", "attack": 1.35, "defense": 0.72, "organization": 0.90}
+	"cavalry": {"name": "Cavalry", "attack": 1.35, "defense": 0.72, "organization": 0.90},
+	"siege_engineer": {"name":"Siege Engineers","attack":0.72,"defense":0.68,"organization":0.92}
 }
 
 const WEAPONS := {
@@ -22,7 +23,8 @@ const WEAPONS := {
 	"spear": {"name": "Spears", "attack": 1.00, "defense": 1.18, "armor": 0.05, "penetration": 0.55},
 	"bow": {"name": "Bows", "attack": 1.18, "defense": 0.70, "armor": 0.00, "penetration": 0.35},
 	"sword_shield": {"name": "Sword & Shield", "attack": 1.12, "defense": 1.22, "armor": 0.38, "penetration": 0.42},
-	"lance": {"name": "Lances", "attack": 1.35, "defense": 0.72, "armor": 0.18, "penetration": 0.70}
+	"lance": {"name": "Lances", "attack": 1.35, "defense": 0.72, "armor": 0.18, "penetration": 0.70},
+	"siege_kit": {"name":"Siege Kit","attack":0.88,"defense":0.72,"armor":0.08,"penetration":0.92}
 }
 
 # Attack multipliers against the opposing unit mix. Unlisted matchups are 1.0.
@@ -33,6 +35,7 @@ const MATCHUPS := {
 	"line_infantry": {"levy": 1.18, "skirmisher": 1.08, "cavalry": 1.48},
 	"skirmisher": {"levy": 1.28, "line_infantry": 0.82, "cavalry": 0.68},
 	"cavalry": {"levy": 1.20, "line_infantry": 0.62, "skirmisher": 1.45}
+	,"siege_engineer":{"levy":0.82,"line_infantry":0.78,"cavalry":0.62}
 }
 
 
@@ -109,6 +112,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 	var seed := int(options.get("seed", 1))
 	var round_limit := clampi(int(options.get("max_rounds", MAX_ROUNDS)), 1, MAX_ROUNDS)
 	var terrain_defense := clampf(float(options.get("terrain_defense", 1.0)), 0.5, 2.0)
+	var siege_reduction:=_siege_terrain_reduction(attacking_force)
+	var effective_terrain_defense:=lerpf(terrain_defense,1.0,siege_reduction) if terrain_defense>1.0 else terrain_defense
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
 
@@ -127,7 +132,7 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			break
 
 		var attacker_cohorts := evaluate_force(attacking_force, defending_force, 1.0)
-		var defender_cohorts := evaluate_force(defending_force, attacking_force, terrain_defense)
+		var defender_cohorts := evaluate_force(defending_force, attacking_force, effective_terrain_defense)
 		var attacker_commander:Dictionary=attacking_force.get("commander",{})
 		var defender_commander:Dictionary=defending_force.get("commander",{})
 		var attacker_power := _cohort_power(attacker_cohorts,attacker_morale,float(attacking_force.readiness),float(attacker_commander.get("command",0.5)))
@@ -135,14 +140,14 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		var total_power := maxf(MIN_EFFECTIVE_STRENGTH, attacker_power + defender_power)
 		var attacker_share := attacker_power / total_power
 		var defender_share := defender_power / total_power
-		var engagement:=_engagement_context(rng,attacker_share,defender_share,attacker_morale,defender_morale,terrain_defense)
+		var engagement:=_engagement_context(rng,attacker_share,defender_share,attacker_morale,defender_morale,effective_terrain_defense)
 		var attacker_variance := _casualty_variance(rng)
 		var defender_variance := _casualty_variance(rng)
 
 		# Casualties are based on the opposing force's share of power. They are
 		# calculated before either side is reduced, so each round is simultaneous.
 		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_troops) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * float(engagement.attacker_exposure))))
-		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * float(engagement.defender_exposure) / terrain_defense)))
+		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * float(engagement.defender_exposure) / effective_terrain_defense)))
 		# A force in contact usually suffers at least one loss; true lulls may be bloodless.
 		if attacker_losses==0 and float(engagement.intensity)>=0.65: attacker_losses=1
 		if defender_losses==0 and float(engagement.intensity)>=0.65: defender_losses=1
@@ -198,6 +203,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		"attacker": _force_result(attacking_force, attacker_initial, attacker_troops, attacker_morale),
 		"defender": _force_result(defending_force, defender_initial, defender_troops, defender_morale),
 		"terrain_defense": terrain_defense,
+		"effective_terrain_defense":effective_terrain_defense,
+		"siege_terrain_reduction":siege_reduction,
 		"termination":termination
 	}
 
@@ -335,6 +342,18 @@ func _formation_manpower(formations: Array) -> int:
 	var total:=0
 	for formation in formations: total+=int(formation.get("count",0))
 	return total
+
+
+func _siege_terrain_reduction(force:Dictionary)->float:
+	var troops:=maxi(1,int(force.get("troops",0)))
+	var effective_engineers:=0.0
+	for formation in force.get("formations",[]):
+		if String(formation.get("unit",""))!="siege_engineer" or String(formation.get("weapon",""))!="siege_kit": continue
+		var count:=maxi(0,int(formation.get("count",0)))
+		var required:=maxi(1,int(formation.get("equipment_required",formation.get("authorized_count",count))))
+		var equipment_ratio:=clampf(float(formation.get("equipment",0))/float(required),0.0,1.0)
+		effective_engineers+=float(count)*equipment_ratio
+	return clampf(effective_engineers/float(troops)*1.6,0.0,0.45)
 
 
 func _weighted_matchup(unit_id: String, enemy_formations: Array) -> float:
