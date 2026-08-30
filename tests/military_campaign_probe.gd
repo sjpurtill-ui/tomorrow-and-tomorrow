@@ -298,6 +298,18 @@ func _run()->void:
 	assert(float(master_commander.tactics)>float(unskilled_commander.tactics)+0.50)
 	assert(float(master_commander.logistics)>float(unskilled_commander.logistics)+0.50)
 	assert(float(master_commander.resolve)>float(unskilled_commander.resolve)+0.50)
+	var preview_opponent:Dictionary=MilitaryCampaign.simulator.create_formation_force("Preview opponent",[{"unit":"levy","weapon":"improvised","count":20,"equipment":20}],0.75,0.75)
+	var prepared_force:Dictionary=MilitaryCampaign.simulator.create_formation_force("Prepared",[{"unit":"line_infantry","weapon":"spear","count":20,"equipment":20,"personnel_condition":1.0}],1.0,1.0)
+	prepared_force["commander"]=master_commander
+	var shaken_force:Dictionary=MilitaryCampaign.simulator.create_formation_force("Shaken",[{"unit":"line_infantry","weapon":"spear","count":20,"equipment":20,"personnel_condition":1.0}],0.40,0.30)
+	shaken_force["commander"]=unskilled_commander
+	var prepared_preview:Dictionary=MilitaryCampaign.combat_summary(prepared_force,preview_opponent)
+	var shaken_preview:Dictionary=MilitaryCampaign.combat_summary(shaken_force,preview_opponent)
+	assert(float(prepared_preview.effective_strength)>float(shaken_preview.effective_strength)*3.0)
+	var exhausted_force:Dictionary=prepared_force.duplicate(true)
+	exhausted_force.formations[0]["personnel_condition"]=0.20
+	var exhausted_preview:Dictionary=MilitaryCampaign.combat_summary(exhausted_force,preview_opponent)
+	assert(float(exhausted_preview.readiness_components.condition)<float(prepared_preview.readiness_components.condition))
 	GameState.leadership_positions["Marshal"]=marshal_record
 	MilitaryCampaign.home_army["commander"]=MilitaryCampaign._marshal_commander()
 	GameState.known_discoveries.append("shield_wall")
