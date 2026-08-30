@@ -128,7 +128,7 @@ func _build_interface()->void:
 	_action_button(threat_row,"Pay tribute",func(): _report(MilitaryCampaign.respond_to_threat("tribute")))
 	_action_button(threat_row,"Withdraw",func(): _report(MilitaryCampaign.respond_to_threat("withdraw")))
 	engagement_row=HBoxContainer.new(); engagement_row.add_theme_constant_override("separation",8); outer.add_child(engagement_row)
-	engagement_label=Label.new(); engagement_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL; engagement_label.add_theme_color_override("font_color",GOLD); engagement_row.add_child(engagement_label)
+	engagement_label=Label.new(); engagement_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL; engagement_label.add_theme_color_override("font_color",GOLD); engagement_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; engagement_row.add_child(engagement_label)
 	_action_button(engagement_row,"Next round",func(): _report(MilitaryCampaign.advance_engagement("hold")))
 	_action_button(engagement_row,"⚔ Push harder",func(): _report(MilitaryCampaign.advance_engagement("push")))
 	_action_button(engagement_row,"◀ Retreat",func(): _report(MilitaryCampaign.advance_engagement("retreat")))
@@ -280,7 +280,12 @@ func _refresh()->void:
 	engagement_row.visible=not engagement.is_empty()
 	if not engagement.is_empty():
 		var attacker:Dictionary=engagement.get("attacker",{}); var defender:Dictionary=engagement.get("defender",{})
-		engagement_label.text="ROUND %02d   %s %d  —  %d %s   Last: %s" % [int(engagement.get("round",0))+1,String(attacker.get("name","Army")),int(attacker.get("troops",0)),int(defender.get("troops",0)),String(defender.get("name","Enemy")),String(engagement.get("last_order","ready")).capitalize()]
+		var round_records:Array=engagement.get("rounds",[])
+		var last_round:Dictionary=round_records[-1] if not round_records.is_empty() else {}
+		var round_report:=""
+		if not last_round.is_empty(): round_report="  •  LOSSES %d / %d  •  %s" % [int(last_round.get("attacker_losses",0)),int(last_round.get("defender_losses",0)),String(last_round.get("intensity","contact")).to_upper()]
+		engagement_label.text="ROUND %02d   %s %d  —  %d %s   Last: %s%s" % [int(engagement.get("round",0))+1,String(attacker.get("name","Army")),int(attacker.get("troops",0)),int(defender.get("troops",0)),String(defender.get("name","Enemy")),String(engagement.get("last_order","ready")).capitalize(),round_report]
+		engagement_label.tooltip_text=String(last_round.get("event","Choose whether to hold, press the attack, or withdraw."))
 	modal.size=PANEL_SIZE
 	modal.position=-PANEL_SIZE*0.5
 

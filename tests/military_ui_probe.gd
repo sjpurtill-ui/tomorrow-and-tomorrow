@@ -61,11 +61,12 @@ func _ready()->void:
 	if "RELATIVE STRENGTH" not in MilitaryCommandUI.summary.text: failures.append("An approaching threat has no relative-strength preview.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Threat controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.active_threat.clear()
-	MilitaryCampaign.active_engagement={"round":2,"last_order":"push","attacker":MilitaryCampaign.home_army.duplicate(true),"defender":MilitaryCampaign.simulator.create_formation_force("Raiders",[{"id":91,"unit":"levy","weapon":"improvised","count":44,"equipment":40}],0.72,0.68)}
+	MilitaryCampaign.active_engagement={"round":2,"last_order":"push","rounds":[{"attacker_losses":3,"defender_losses":5,"intensity":"Close engagement","event":"The shield line buckles, then reforms."}],"attacker":MilitaryCampaign.home_army.duplicate(true),"defender":MilitaryCampaign.simulator.create_formation_force("Raiders",[{"id":91,"unit":"levy","weapon":"improvised","count":44,"equipment":40}],0.72,0.68)}
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if not MilitaryCommandUI.engagement_row.visible: failures.append("A live campaign engagement does not expose round orders.")
 	if MilitaryCommandUI.aftermath_row.visible: failures.append("Held-captive controls compete with live battle orders for modal space.")
+	if "LOSSES 3 / 5" not in MilitaryCommandUI.engagement_label.text or "buckles" not in MilitaryCommandUI.engagement_label.tooltip_text: failures.append("Live battle progress omits last-round losses, intensity, or battlefield event.")
 	if "RELATIVE STRENGTH" not in MilitaryCommandUI.summary.text or "Relative effective strength" not in MilitaryCommandUI.condition.tooltip_text: failures.append("A live battle does not switch the top bar to relative strength.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Live battle controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.active_engagement.clear()
