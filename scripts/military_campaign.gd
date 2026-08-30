@@ -1141,7 +1141,10 @@ func _acting_field_commander(assign_office:bool)->Dictionary:
 	for citizen in GameState.living_citizens():
 		var citizen_id:=int(citizen.get("id",-1))
 		if excluded.has(citizen_id) or GameState.citizen_age_years(citizen)<18: continue
-		if String(citizen.get("army_status","civilian")) in ["captured","killed"]: continue
+		# The commander is resolved separately from formation casualties and captivity.
+		# Keep field command outside every enlisted pool so one citizen cannot receive
+		# two contradictory battlefield fates in the same engagement.
+		if String(citizen.get("army_status","civilian")) not in ["civilian",""]: continue
 		var aptitude:=float(posmod(int(citizen.get("aptitude_seed",citizen_id*7919)),1000))/1000.0
 		var score:=GameState.citizen_physical_capacity(citizen)*0.42+aptitude*0.48+(0.10 if String(citizen.get("role",""))=="Defense" else 0.0)
 		if score>best_score: best_score=score; best=citizen

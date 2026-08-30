@@ -303,6 +303,12 @@ func _run()->void:
 	assert(GameState.leadership_positions.has("Marshal"))
 	assert(int(GameState.leadership_positions.Marshal.citizen_id)!=int(marshal_citizen.id))
 	assert(bool(MilitaryCampaign.home_army.commander.get("acting",false)))
+	var successor_id:=int(MilitaryCampaign.home_army.commander.get("citizen_id",-1))
+	assert(successor_id>=0)
+	assert(successor_id not in (MilitaryCampaign.home_army.soldier_ids as Array))
+	assert(successor_id not in MilitaryCampaign.recruit_pool)
+	for succession_training in MilitaryCampaign.training_queue:
+		assert(successor_id not in (succession_training.soldier_ids as Array))
 	var before_stand_down:=int(MilitaryCampaign.home_army.troops)
 	var experience_before_stand_down:Dictionary={}
 	for citizen_id in MilitaryCampaign.home_army.soldier_ids: experience_before_stand_down[int(citizen_id)]=float(GameState.citizen_by_id(int(citizen_id)).get("military_experience",0.0))
@@ -542,6 +548,7 @@ func _run()->void:
 	var captured_commander_id:=int(field_commander.get("citizen_id",-1))
 	assert(captured_commander_id>=0)
 	var commander_was_active:=captured_commander_id in (MilitaryCampaign.home_army.soldier_ids as Array)
+	assert(not commander_was_active)
 	var captives_before_commander:=(MilitaryCampaign.home_army.captured_ids as Array).size()
 	MilitaryCampaign._apply_home_commander_fate({"defeated":MilitaryCampaign.home_army.name,"commander_fate":"captured"})
 	assert(captured_commander_id in (MilitaryCampaign.home_army.captured_ids as Array))
