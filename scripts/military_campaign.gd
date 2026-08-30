@@ -1342,11 +1342,39 @@ func _remove_active_citizen(citizen_id:int)->bool:
 func _condition_average(soldiers:Array[Dictionary])->float:
 	if soldiers.is_empty(): return 0.0
 	var total:=0.0
-	for soldier in soldiers:
-		var physical:=GameState.citizen_physical_capacity(soldier)
-		var service_strain:=clampf(float(soldier.get("service_strain",0.0)),0.0,1.0)
-		total+=physical*(1.0-service_strain*0.30)
+	for soldier in soldiers: total+=_military_citizen_capacity(soldier)
 	return total/float(soldiers.size())
+
+
+func _military_citizen_capacity(soldier:Dictionary)->float:
+	var physical:=GameState.citizen_physical_capacity(soldier)
+	var service_strain:=clampf(float(soldier.get("service_strain",0.0)),0.0,1.0)
+	return physical*(1.0-service_strain*0.30)
+
+
+func force_condition_profile(force:Dictionary={})->Dictionary:
+	var subject:=force if not force.is_empty() else home_army
+	var bands:Array[Dictionary]=[
+		{"id":"ready","label":"Ready","count":0,"color":"#5f9f73"},
+		{"id":"capable","label":"Capable","count":0,"color":"#a4a85c"},
+		{"id":"strained","label":"Strained","count":0,"color":"#c68b4f"},
+		{"id":"unfit","label":"Unfit","count":0,"color":"#a8514d"}
+	]
+	var capacities:Array[Dictionary]=[]
+	for citizen_id in subject.get("soldier_ids",[]):
+		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if not citizen.is_empty() and bool(citizen.get("alive",true)): capacities.append({"capacity":_military_citizen_capacity(citizen),"count":1})
+	if capacities.is_empty():
+		for formation in subject.get("formations",[]): capacities.append({"capacity":clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0),"count":maxi(0,int(formation.get("count",0)))})
+	var total:=0
+	for entry in capacities:
+		var count:=int(entry.count)
+		var capacity:=float(entry.capacity)
+		total+=count
+		var band_index:=0 if capacity>=0.72 else (1 if capacity>=0.50 else (2 if capacity>=0.30 else 3))
+		bands[band_index]["count"]=int(bands[band_index].count)+count
+	for band in bands: band["share"]=float(band.count)/maxf(1.0,float(total))
+	return {"total":total,"bands":bands}
 
 
 func _campaign_morale()->float:

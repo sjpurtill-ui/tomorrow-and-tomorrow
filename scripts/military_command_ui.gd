@@ -12,6 +12,7 @@ var layer:CanvasLayer
 var modal:PanelContainer
 var summary:Label
 var condition:ProgressBar
+var condition_bands:Dictionary={}
 var readiness_meters:Dictionary={}
 var readiness_bottleneck:Label
 var formations:Label
@@ -88,6 +89,10 @@ func _build_interface()->void:
 	var close:=Button.new(); close.text="✕"; close.pressed.connect(func(): modal.hide()); title_row.add_child(close)
 	summary=Label.new(); summary.add_theme_font_size_override("font_size",17); outer.add_child(summary)
 	condition=ProgressBar.new(); condition.custom_minimum_size.y=22; condition.show_percentage=true; outer.add_child(condition)
+	var condition_strip:=HBoxContainer.new(); condition_strip.custom_minimum_size.y=12; condition_strip.add_theme_constant_override("separation",2); outer.add_child(condition_strip)
+	var condition_caption:=Label.new(); condition_caption.text="PERSONNEL"; condition_caption.custom_minimum_size.x=68; condition_caption.add_theme_font_size_override("font_size",9); condition_caption.add_theme_color_override("font_color",MUTED); condition_strip.add_child(condition_caption)
+	for entry in [["ready",Color("#5f9f73")],["capable",Color("#a4a85c")],["strained",Color("#c68b4f")],["unfit",Color("#a8514d")]]:
+		var band:=ColorRect.new(); band.color=entry[1]; band.custom_minimum_size.x=3; band.size_flags_horizontal=Control.SIZE_EXPAND_FILL; condition_strip.add_child(band); condition_bands[String(entry[0])]=band
 	var readiness_strip:=HBoxContainer.new(); readiness_strip.add_theme_constant_override("separation",6); outer.add_child(readiness_strip)
 	for entry in [["manpower","MEN",RED],["equipment","EQ",GOLD],["ammunition","AMMO",Color("#b98ccb")],["condition","COND",Color("#83b77b")],["organization","ORG",BLUE],["supply","SUP",Color("#74b9ae")]]:
 		_add_readiness_meter(readiness_strip,String(entry[0]),String(entry[1]),entry[2])
@@ -242,6 +247,15 @@ func _refresh()->void:
 		condition.value=relative_share*100.0
 		condition.tooltip_text="Relative effective strength after cohort matchups, terrain, equipment, condition, readiness, and leadership."
 	var readiness_components:Dictionary=combat.get("readiness_components",{})
+	var personnel_profile:Dictionary=MilitaryCampaign.force_condition_profile(display_force)
+	for band_data in personnel_profile.get("bands",[]):
+		var band_id:=String(band_data.get("id",""))
+		if not condition_bands.has(band_id): continue
+		var band:ColorRect=condition_bands[band_id]
+		var band_count:=int(band_data.get("count",0))
+		band.visible=band_count>0
+		band.size_flags_stretch_ratio=maxf(0.001,float(band_data.get("share",0.0)))
+		band.tooltip_text="%s: %d soldiers (%d%%)" % [String(band_data.get("label",band_id.capitalize())),band_count,roundi(float(band_data.get("share",0.0))*100.0)]
 	var weakest_key:=""; var weakest_value:=2.0
 	for key in readiness_meters:
 		var value:=clampf(float(readiness_components.get(key,1.0)),0.0,1.0); (readiness_meters[key] as ProgressBar).value=value*100.0; (readiness_meters[key] as ProgressBar).tooltip_text="%s: %d%%" % [String(key).capitalize(),roundi(value*100.0)]
@@ -257,7 +271,7 @@ func _refresh()->void:
 	for formation_index in mini(3,formation_cards.size()):
 		var formation:Dictionary=formation_cards[formation_index].formation
 		var formation_stats:Dictionary=formation_cards[formation_index].stats
-		formation_lines.append("%s  %d/%d men  •  %s %d/%d\n  ⚔ %.1f   🛡 %.1f   RDY %d%%   COND %d%%" % [String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),float(formation_stats.get("attack_strength",0.0)),float(formation_stats.get("defense_strength",0.0)),roundi(float(formation_stats.get("readiness",ready))*100.0),roundi(float(formation_stats.get("condition",1.0))*100.0)])
+		formation_lines.append("%s  %s  %d/%d men  •  %s %d/%d\n  ⚔ %.1f   🛡 %.1f   RDY %d%%   COND %d%%" % [_unit_icon(String(formation.get("unit",""))),String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),float(formation_stats.get("attack_strength",0.0)),float(formation_stats.get("defense_strength",0.0)),roundi(float(formation_stats.get("readiness",ready))*100.0),roundi(float(formation_stats.get("condition",1.0))*100.0)])
 	if formation_cards.size()>3: formation_lines.append("+ %d more cohorts in the field" % (formation_cards.size()-3))
 	var custody_line:="\n\nCAPTIVES  %d soldiers  •  %d generals" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size()]
 	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n".join(formation_lines))+custody_line
@@ -292,6 +306,10 @@ func _refresh()->void:
 
 func _commander_portrait(index:int)->AtlasTexture:
 	var texture:=AtlasTexture.new(); texture.atlas=COMMANDER_PORTRAITS; texture.region=Rect2((index%3)*512,(index/3)*512,512,512); return texture
+
+
+func _unit_icon(unit:String)->String:
+	return String({"levy":"🪓","line_infantry":"🛡","skirmisher":"🏹","cavalry":"🐎","siege_engineer":"🛠","field_artillery":"💥"}.get(unit,"⚑"))
 
 
 func _queue_summary(army:Dictionary)->String:

@@ -9,6 +9,7 @@ func _ready()->void:
 	var failures:Array[String]=[]
 	if panel==null: failures.append("Military modal was not created.")
 	elif panel.size.x>get_viewport().get_visible_rect().size.x-80.0 or panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Military modal exceeds the safe viewport: %s." % panel.size)
+	elif (panel.get_child(0) as Control).get_combined_minimum_size().y>panel.size.y-16.0: failures.append("Military modal content exceeds its fixed vertical interior.")
 	if not _descendants_of_type(panel,"ScrollContainer").is_empty(): failures.append("Military modal must not require scrolling.")
 	if MilitaryCommandUI.unit_choice.item_count<6: failures.append("Unit catalog is incomplete.")
 	if MilitaryCommandUI.weapon_choice.item_count!=2: failures.append("Levy training should expose exactly its two compatible weapon families.")
@@ -37,6 +38,9 @@ func _ready()->void:
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if "⚔" not in MilitaryCommandUI.formations.text or "COND" not in MilitaryCommandUI.formations.text: failures.append("Formation cards omit cohort attack, defense, readiness, or condition.")
+	if "🏹" not in MilitaryCommandUI.formations.text: failures.append("Formation cards omit unit-type iconography.")
+	if not MilitaryCommandUI.condition_bands.ready.visible or not MilitaryCommandUI.condition_bands.capable.visible: failures.append("Army personnel condition is not visible as a segmented heatmap.")
+	if (panel.get_child(0) as Control).get_combined_minimum_size().y>panel.size.y-16.0: failures.append("Populated military content clips inside the fixed modal.")
 	if "3 ready" not in MilitaryCommandUI.inventory.text or "Arrows  12" not in MilitaryCommandUI.inventory.text: failures.append("Ready equipment or ammunition is absent from the arsenal snapshot.")
 	if "1 generals" not in MilitaryCommandUI.formations.text: failures.append("Held generals are absent from the custody snapshot.")
 	if not MilitaryCommandUI.aftermath_row.visible or MilitaryCommandUI.aftermath_label.text!="HELD CAPTIVES": failures.append("Held captives do not expose a delayed disposition decision.")

@@ -119,6 +119,8 @@ func _run()->void:
 	condition_probe["service_strain"]=1.0
 	var strained_condition:=MilitaryCampaign._condition_average([condition_probe])
 	assert(strained_condition<rested_condition*0.75)
+	var condition_profile:Dictionary=MilitaryCampaign.force_condition_profile(army)
+	assert(int(condition_profile.total)==int(army.troops))
 	condition_probe["service_strain"]=0.0
 	var baseline_inquiry:Dictionary=MilitaryCampaign.military_inquiry_context()
 	var original_supply:=float(MilitaryCampaign.home_army.get("supply_level",1.0))
