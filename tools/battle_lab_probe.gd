@@ -11,6 +11,14 @@ func _run_probe() -> void:
 	await process_frame
 	print("BATTLE_LAB_LAYOUT minimum=%s viewport=%s" % [lab.get_combined_minimum_size(),root.size])
 	print("BATTLE_LAB_READINESS attacker=%s defender=%s" % [lab.attacker_readiness.text,lab.defender_readiness.text])
+	var supplied_strength:=float(lab.strength_bar.value)
+	lab.attacker_cards[2].ammunition.value=0
+	lab._preview_battle()
+	var depleted_strength:=float(lab.strength_bar.value)
+	assert(depleted_strength<supplied_strength)
+	lab.attacker_cards[2].ammunition.value=int(lab.attacker_archers.value)*6
+	lab._preview_battle()
+	print("BATTLE_LAB_AMMUNITION supplied=%.1f depleted=%.1f" % [supplied_strength,depleted_strength])
 	lab._advance_preparation(1)
 	lab._start_battle()
 	lab.battle_timer.stop()

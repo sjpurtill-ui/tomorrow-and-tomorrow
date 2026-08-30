@@ -183,7 +183,7 @@ func _build_interface() -> void:
 	preparation_row.add_theme_constant_override("separation",4)
 	battlefield_panel.add_child(preparation_row)
 	preparation_label=Label.new()
-	preparation_label.text="DAY 0 • +6 EQ / +4 MEN"
+	preparation_label.text="DAY 0 • +6 EQ / +4 MEN / +12 ARW"
 	preparation_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	preparation_label.add_theme_font_size_override("font_size",11)
 	preparation_label.add_theme_color_override("font_color",Color("#d3b46f"))
@@ -434,7 +434,9 @@ func _add_unit_input(parent: VBoxContainer, icon_path: String, unit_name: String
 	row.add_child(counts)
 	var input:=_add_card_count(counts,"MEN",initial)
 	var equipment:=_add_card_count(counts,"EQ",initial)
-	return {"input":input,"equipment":equipment,"stats":stats,"unit":unit_id,"weapon":weapon_id}
+	var ammunition:SpinBox=null
+	if weapon_id=="bow": ammunition=_add_card_count(counts,"ARW",initial*6)
+	return {"input":input,"equipment":equipment,"ammunition":ammunition,"stats":stats,"unit":unit_id,"weapon":weapon_id}
 
 
 func _add_card_count(parent: HBoxContainer,label_text: String,initial: int) -> SpinBox:
@@ -594,12 +596,12 @@ func _make_input_forces() -> Array[Dictionary]:
 	var attacker_composition: Array[Dictionary] = [
 		{"unit":"levy","weapon":"improvised","count":int(attacker_troops.value),"equipment":int(attacker_cards[0].equipment.value)},
 		{"unit":"line_infantry","weapon":"spear","count":int(attacker_spears.value),"equipment":int(attacker_cards[1].equipment.value)},
-		{"unit":"skirmisher","weapon":"bow","count":int(attacker_archers.value),"equipment":int(attacker_cards[2].equipment.value)}
+		{"unit":"skirmisher","weapon":"bow","count":int(attacker_archers.value),"equipment":int(attacker_cards[2].equipment.value),"ammunition":int(attacker_cards[2].ammunition.value),"ammunition_required":int(attacker_archers.value)*6}
 	]
 	var defender_composition: Array[Dictionary] = [
 		{"unit":"levy","weapon":"improvised","count":int(defender_troops.value),"equipment":int(defender_cards[0].equipment.value)},
 		{"unit":"line_infantry","weapon":"spear","count":int(defender_spears.value),"equipment":int(defender_cards[1].equipment.value)},
-		{"unit":"skirmisher","weapon":"bow","count":int(defender_archers.value),"equipment":int(defender_cards[2].equipment.value)}
+		{"unit":"skirmisher","weapon":"bow","count":int(defender_archers.value),"equipment":int(defender_cards[2].equipment.value),"ammunition":int(defender_cards[2].ammunition.value),"ammunition_required":int(defender_archers.value)*6}
 	]
 	var attacker: Dictionary = simulator.create_formation_force("River Host", attacker_composition, attacker_morale.value, 1.0)
 	var defender: Dictionary = simulator.create_formation_force("Hill Guard", defender_composition, defender_morale.value, 1.0)
@@ -629,7 +631,7 @@ func _preview_battle() -> void:
 	defender_remaining_bar.value = 100
 	results.clear()
 	results.append_text("[color=#82909e]Press Start Battle to watch the engagement unfold.[/color]")
-	preparation_label.text="DAY 0 • +6 EQ / +4 MEN"
+	preparation_label.text="DAY 0 • +6 EQ / +4 MEN / +12 ARW"
 
 
 func _toggle_battle() -> void:
@@ -978,6 +980,8 @@ func _advance_preparation(days: int) -> void:
 		var defender_result:Dictionary=simulator.advance_preparation_day(live_defender,{"equipment_replacements":6,"manpower_replacements":4,"organization_recovery":0.065})
 		live_attacker=attacker_result.force
 		live_defender=defender_result.force
+		_refill_lab_ammunition(live_attacker,12)
+		_refill_lab_ammunition(live_defender,12)
 		attacker_delivered+=int(attacker_result.equipment_delivered)
 		defender_delivered+=int(defender_result.equipment_delivered)
 		attacker_rejoined+=int(attacker_result.manpower_rejoined)
@@ -992,8 +996,22 @@ func _advance_preparation(days: int) -> void:
 	_update_cohort_cards()
 	_update_strength()
 	_refresh_force_summaries()
-	preparation_label.text="DAY %d • +6 EQ / +4 MEN" % preparation_day
-	outcome_label.text="Prepared %d day%s • Rejoined: %d / %d • Equipment: %d / %d" % [days,"s" if days!=1 else "",attacker_rejoined,defender_rejoined,attacker_delivered,defender_delivered]
+	preparation_label.text="DAY %d • +6 EQ / +4 MEN / +12 ARW" % preparation_day
+	outcome_label.text="Prepared %d day%s • Rejoined %d/%d • Equipment %d/%d • Arrows resupplied" % [days,"s" if days!=1 else "",attacker_rejoined,defender_rejoined,attacker_delivered,defender_delivered]
+
+
+func _refill_lab_ammunition(force:Dictionary,capacity:int)->int:
+	var remaining:=maxi(0,capacity)
+	var delivered:=0
+	for formation in force.get("formations",[]):
+		if remaining<=0: break
+		if String(formation.get("weapon",""))!="bow": continue
+		var required:=maxi(0,int(formation.get("ammunition_required",int(formation.get("authorized_count",formation.get("count",0)))*6)))
+		var transfer:=mini(remaining,maxi(0,required-int(formation.get("ammunition",0))))
+		formation["ammunition"]=int(formation.get("ammunition",0))+transfer
+		remaining-=transfer
+		delivered+=transfer
+	return delivered
 
 
 func _recover_roster_day(roster: Array[Dictionary]) -> void:
@@ -1005,8 +1023,10 @@ func _recover_roster_day(roster: Array[Dictionary]) -> void:
 
 
 func _update_strength() -> void:
-	var attacker_power := float(live_attacker.get("troops", 0)) * float(live_attacker.get("attack", 1.0)) * float(live_attacker.get("readiness", 1.0)) * float(live_attacker.get("morale", 1.0))
-	var defender_power := float(live_defender.get("troops", 0)) * float(live_defender.get("attack", 1.0)) * float(live_defender.get("readiness", 1.0)) * float(live_defender.get("morale", 1.0)) * terrain_defense.value
+	var attacker_totals:=_aggregate_cohort_stats(simulator.evaluate_force(live_attacker,live_defender,1.0))
+	var defender_totals:=_aggregate_cohort_stats(simulator.evaluate_force(live_defender,live_attacker,terrain_defense.value))
+	var attacker_power := (float(attacker_totals.attack)+float(attacker_totals.defense))*0.5*float(live_attacker.get("readiness",1.0))*float(live_attacker.get("morale",1.0))*float(live_attacker.get("attack_modifier",1.0))
+	var defender_power := (float(defender_totals.attack)+float(defender_totals.defense))*0.5*float(live_defender.get("readiness",1.0))*float(live_defender.get("morale",1.0))*float(live_defender.get("attack_modifier",1.0))
 	var attacker_share := attacker_power / maxf(0.01, attacker_power + defender_power) * 100.0
 	strength_bar.value = attacker_share
 	strength_label.text = "RIVER HOST  %.0f%%          RELATIVE STRENGTH          %.0f%%  HILL GUARD" % [attacker_share, 100.0 - attacker_share]
@@ -1023,8 +1043,8 @@ func _update_cohort_cards() -> void:
 	live_defender.readiness=defender_readiness_state.aggregate
 	attacker_readiness.text="%.0f%%" % (float(attacker_readiness_state.aggregate)*100.0)
 	defender_readiness.text="%.0f%%" % (float(defender_readiness_state.aggregate)*100.0)
-	attacker_readiness.tooltip_text="Manpower %.0f%% • Equipment %.0f%% • Condition %.0f%% • Organization %.0f%%" % [attacker_readiness_state.manpower*100.0,attacker_readiness_state.equipment*100.0,attacker_readiness_state.condition*100.0,attacker_readiness_state.organization*100.0]
-	defender_readiness.tooltip_text="Manpower %.0f%% • Equipment %.0f%% • Condition %.0f%% • Organization %.0f%%" % [defender_readiness_state.manpower*100.0,defender_readiness_state.equipment*100.0,defender_readiness_state.condition*100.0,defender_readiness_state.organization*100.0]
+	attacker_readiness.tooltip_text="Manpower %.0f%% • Equipment %.0f%% • Ammunition %.0f%% • Condition %.0f%% • Organization %.0f%%" % [attacker_readiness_state.manpower*100.0,attacker_readiness_state.equipment*100.0,attacker_readiness_state.ammunition*100.0,attacker_readiness_state.condition*100.0,attacker_readiness_state.organization*100.0]
+	defender_readiness.tooltip_text="Manpower %.0f%% • Equipment %.0f%% • Ammunition %.0f%% • Condition %.0f%% • Organization %.0f%%" % [defender_readiness_state.manpower*100.0,defender_readiness_state.equipment*100.0,defender_readiness_state.ammunition*100.0,defender_readiness_state.condition*100.0,defender_readiness_state.organization*100.0]
 	attacker_readiness.tooltip_text+="\nReserve %d • Wounded %d • Scattered %d • Dead %d" % [live_attacker.get("reserve_manpower",0),live_attacker.get("wounded_pool",0),live_attacker.get("scattered_pool",0),live_attacker.get("dead",0)]
 	defender_readiness.tooltip_text+="\nReserve %d • Wounded %d • Scattered %d • Dead %d" % [live_defender.get("reserve_manpower",0),live_defender.get("wounded_pool",0),live_defender.get("scattered_pool",0),live_defender.get("dead",0)]
 	attacker_readiness.tooltip_text+="\nPOWs held %d • Own soldiers captured %d" % [live_attacker.get("held_prisoners",0),live_attacker.get("prisoner_pool",0)]
@@ -1297,12 +1317,14 @@ func _update_card_side(cards: Array[Dictionary], evaluation: Array[Dictionary], 
 		var count := int(formations[index].get("count", cohort.count)) if index < formations.size() else int(cohort.count)
 		cards[index].input.value = count
 		cards[index].equipment.value=int(formations[index].get("equipment",cohort.get("equipment",count))) if index<formations.size() else int(cohort.get("equipment",count))
+		if cards[index].ammunition!=null: cards[index].ammunition.value=int(formations[index].get("ammunition",cohort.get("ammunition",0))) if index<formations.size() else int(cohort.get("ammunition",0))
 		var matchup_note := ""
 		if float(cohort.matchup) >= 1.12:
 			matchup_note = "  ▲ COUNTER"
 		elif float(cohort.matchup) <= 0.88:
 			matchup_note = "  ▼ EXPOSED"
-		cards[index].stats.text = "ATK %.2f   DEF %.2f   EQ %.0f%%%s" % [cohort.attack,cohort.defense,float(cohort.get("equipment_ratio",1.0))*100.0,matchup_note]
+		var ammunition_note:="  ARW %.0f%%" % (float(cohort.get("ammunition_ratio",1.0))*100.0) if int(cohort.get("ammunition_required",0))>0 else ""
+		cards[index].stats.text = "ATK %.2f   DEF %.2f   EQ %.0f%%%s%s" % [cohort.attack,cohort.defense,float(cohort.get("equipment_ratio",1.0))*100.0,ammunition_note,matchup_note]
 
 
 func _update_live_display(status: String) -> void:
