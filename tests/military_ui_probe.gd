@@ -25,11 +25,15 @@ func _ready()->void:
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Probe Host",[
 		{"id":1,"unit":"levy","weapon":"improvised","count":30,"authorized_count":40,"equipment":26,"equipment_required":40,"personnel_condition":0.72,"readiness":0.61},
 		{"id":2,"unit":"line_infantry","weapon":"spear","count":24,"authorized_count":30,"equipment":22,"equipment_required":30,"personnel_condition":0.84,"readiness":0.73},
-		{"id":3,"unit":"skirmisher","weapon":"bow","count":16,"authorized_count":20,"equipment":15,"equipment_required":20,"ammunition":72,"ammunition_required":120,"personnel_condition":0.66,"readiness":0.57}
+		{"id":3,"unit":"skirmisher","weapon":"bow","count":16,"authorized_count":20,"equipment":15,"equipment_required":20,"ammunition":72,"ammunition_required":120,"personnel_condition":0.66,"readiness":0.57},
+		{"id":4,"unit":"levy","weapon":"improvised","count":9,"authorized_count":12,"equipment":8,"equipment_required":12,"personnel_condition":0.70,"readiness":0.58},
+		{"id":5,"unit":"line_infantry","weapon":"spear","count":8,"authorized_count":10,"equipment":7,"equipment_required":10,"personnel_condition":0.77,"readiness":0.62},
+		{"id":6,"unit":"skirmisher","weapon":"bow","count":6,"authorized_count":8,"equipment":5,"equipment_required":8,"ammunition":20,"ammunition_required":48,"personnel_condition":0.64,"readiness":0.51}
 	],0.76,0.65)
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if "⚔" not in MilitaryCommandUI.formations.text or "COND" not in MilitaryCommandUI.formations.text: failures.append("Formation cards omit cohort attack, defense, readiness, or condition.")
+	if "+ 3 more cohorts" not in MilitaryCommandUI.formations.text: failures.append("Large armies are not summarized within the fixed modal.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Populated formation cards make the modal clip: %s." % panel.size)
 	MilitaryCampaign.pending_aftermath={"type":"rout","prisoners":4}
 	MilitaryCommandUI._refresh()

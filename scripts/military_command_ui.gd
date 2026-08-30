@@ -240,10 +240,14 @@ func _refresh()->void:
 	var formation_lines:Array[String]=[]
 	var formation_combat:=MilitaryCampaign.formation_combat_summaries(display_force,display_opponent,1.0)
 	var displayed_formations:Array=display_force.get("formations",[])
-	for formation_index in displayed_formations.size():
-		var formation:Dictionary=displayed_formations[formation_index]
-		var formation_stats:Dictionary=formation_combat[formation_index] if formation_index<formation_combat.size() else {}
+	var formation_cards:Array[Dictionary]=[]
+	for formation_index in displayed_formations.size(): formation_cards.append({"formation":displayed_formations[formation_index],"stats":formation_combat[formation_index] if formation_index<formation_combat.size() else {}})
+	formation_cards.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int((a.formation as Dictionary).get("count",0))>int((b.formation as Dictionary).get("count",0)))
+	for formation_index in mini(3,formation_cards.size()):
+		var formation:Dictionary=formation_cards[formation_index].formation
+		var formation_stats:Dictionary=formation_cards[formation_index].stats
 		formation_lines.append("%s  %d/%d men  •  %s %d/%d\n  ⚔ %.1f   🛡 %.1f   RDY %d%%   COND %d%%" % [String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),float(formation_stats.get("attack_strength",0.0)),float(formation_stats.get("defense_strength",0.0)),roundi(float(formation_stats.get("readiness",ready))*100.0),roundi(float(formation_stats.get("condition",1.0))*100.0)])
+	if formation_cards.size()>3: formation_lines.append("+ %d more cohorts in the field" % (formation_cards.size()-3))
 	var custody_line:="\n\nCAPTIVES  %d soldiers  •  %d generals" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size()]
 	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n".join(formation_lines))+custody_line
 	var commander:Dictionary=combat.get("commander",{})
