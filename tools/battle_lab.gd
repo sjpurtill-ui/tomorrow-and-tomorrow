@@ -800,7 +800,8 @@ func _show_prisoner_decision(termination: Dictionary) -> void:
 	prisoner_action_select.visible=soldiers>0
 	general_action_select.visible=general_captured
 	spoils_action_select.visible=has_spoils
-	prisoner_decision_label.text="CAPTIVES: %d soldiers%s\nSPOILS: ⚔ %d gear  ◆ %d supply  ▣ %d carts  ¤ %d wealth" % [soldiers," + captured general" if general_captured else "",weapons_total,int(spoils.get("supplies",0)),int(spoils.get("carts",0)),int(spoils.get("wealth",0))]
+	var arrows:=int((spoils.get("consumables",{}) as Dictionary).get("arrows",0))
+	prisoner_decision_label.text="CAPTIVES: %d soldiers%s\nSPOILS: ⚔ %d gear  ➶ %d arrows  ◆ %d supply  ▣ %d carts  ¤ %d wealth" % [soldiers," + captured general" if general_captured else "",weapons_total,arrows,int(spoils.get("supplies",0)),int(spoils.get("carts",0)),int(spoils.get("wealth",0))]
 
 
 func _resolve_prisoners(decision: String,general_decision: String="hold general",spoils_decision: String="army stores") -> void:
@@ -1094,8 +1095,20 @@ func _apply_termination_captures(termination: Dictionary) -> void:
 				largest=count
 				target=index
 		if target<0: break
+		var weapon:=String(formations[target].get("weapon","improvised"))
+		var surrendered_weapon:=1 if int(formations[target].get("equipment",0))>0 else 0
+		var surrendered_arrows:=mini(6,int(formations[target].get("ammunition",0))) if weapon=="bow" else 0
 		formations[target]["count"]=int(formations[target].count)-1
-		formations[target]["equipment"]=maxi(0,int(formations[target].get("equipment",0))-1)
+		formations[target]["equipment"]=maxi(0,int(formations[target].get("equipment",0))-surrendered_weapon)
+		formations[target]["ammunition"]=maxi(0,int(formations[target].get("ammunition",0))-surrendered_arrows)
+		var spoils:Dictionary=termination.get("spoils",{})
+		var weapons:Dictionary=spoils.get("weapons",{})
+		var consumables:Dictionary=spoils.get("consumables",{})
+		if surrendered_weapon>0: weapons[weapon]=int(weapons.get(weapon,0))+surrendered_weapon
+		if surrendered_arrows>0: consumables["arrows"]=int(consumables.get("arrows",0))+surrendered_arrows
+		spoils["weapons"]=weapons
+		spoils["consumables"]=consumables
+		termination["spoils"]=spoils
 		remaining-=1
 	force["formations"]=formations
 	force["prisoner_pool"]=int(force.get("prisoner_pool",0))+prisoners-remaining
@@ -1113,27 +1126,19 @@ func _apply_termination_captures(termination: Dictionary) -> void:
 
 
 func _apply_termination_spoils(termination: Dictionary) -> void:
-	var spoils:Dictionary=termination.get("spoils",{})
-	if spoils.is_empty(): return
-	var defeated_name:=String(termination.get("defeated",""))
-	var defeated:Dictionary=live_attacker if defeated_name==String(live_attacker.get("name","")) else live_defender
-	var formations:Array=defeated.get("formations",[])
-	for weapon in (spoils.get("weapons",{}) as Dictionary):
-		var remaining:=int((spoils.weapons as Dictionary)[weapon])
-		for index in formations.size():
-			if remaining<=0: break
-			if String(formations[index].get("weapon",""))!=String(weapon): continue
-			var taken:=mini(remaining,int(formations[index].get("equipment",0)))
-			formations[index]["equipment"]=int(formations[index].get("equipment",0))-taken
-			remaining-=taken
-	defeated["formations"]=formations
+	# CombatSimulator has already deducted recoverable spoils from the defeated
+	# force. Applying the manifest again here would charge every captured item twice.
+	return
 
 
 func _resolve_spoils(decision: String,spoils: Dictionary,captor: Dictionary,defeated: Dictionary) -> String:
 	if spoils.is_empty(): return "No recoverable battlefield spoils."
 	var weapons:Dictionary=spoils.get("weapons",{})
+	var consumables:Dictionary=spoils.get("consumables",{})
 	var gear_total:=0
+	var ammunition_total:=0
 	for amount in weapons.values(): gear_total+=int(amount)
+	for amount in consumables.values(): ammunition_total+=int(amount)
 	var supplies:=int(spoils.get("supplies",0))
 	var carts:=int(spoils.get("carts",0))
 	var wealth:=int(spoils.get("wealth",0))
@@ -1152,14 +1157,20 @@ func _resolve_spoils(decision: String,spoils: Dictionary,captor: Dictionary,defe
 			stockpile[weapon]=int(stockpile.get(weapon,0))+available
 		captor["formations"]=formations
 		captor["equipment_stockpile"]=stockpile
+		var ammunition_stockpile:Dictionary=captor.get("ammunition_stockpile",{}).duplicate(true)
+		for item in consumables: ammunition_stockpile[item]=int(ammunition_stockpile.get(item,0))+int(consumables[item])
+		captor["ammunition_stockpile"]=ammunition_stockpile
 		captor["supplies"]=int(captor.get("supplies",0))+supplies
 		captor["transport_carts"]=int(captor.get("transport_carts",0))+carts
 		captor["war_wealth"]=int(captor.get("war_wealth",0))+wealth
-		return "Spoils enter army stores: %d gear, %d supply, %d carts, and %d wealth." % [gear_total,supplies,carts,wealth]
+		return "Spoils enter army stores: %d gear, %d arrows, %d supply, %d carts, and %d wealth." % [gear_total,ammunition_total,supplies,carts,wealth]
 	if decision=="return property":
 		var stockpile:Dictionary=defeated.get("equipment_stockpile",{}).duplicate(true)
 		for weapon in weapons: stockpile[weapon]=int(stockpile.get(weapon,0))+int(weapons[weapon])
 		defeated["equipment_stockpile"]=stockpile
+		var returned_ammunition:Dictionary=defeated.get("ammunition_stockpile",{}).duplicate(true)
+		for item in consumables: returned_ammunition[item]=int(returned_ammunition.get(item,0))+int(consumables[item])
+		defeated["ammunition_stockpile"]=returned_ammunition
 		defeated["supplies"]=int(defeated.get("supplies",0))+supplies
 		defeated["transport_carts"]=int(defeated.get("transport_carts",0))+carts
 		defeated["war_wealth"]=int(defeated.get("war_wealth",0))+wealth
@@ -1171,11 +1182,11 @@ func _resolve_spoils(decision: String,spoils: Dictionary,captor: Dictionary,defe
 		captor["war_wealth"]=int(captor.get("war_wealth",0))+roundi(float(wealth)*0.25)
 		return "Spoils are divided among the ranks; captor morale +10, only 25%% of coin reaches stores."
 	if decision=="state treasury":
-		captor["war_wealth"]=int(captor.get("war_wealth",0))+wealth+gear_total*2+supplies+carts*5
+		captor["war_wealth"]=int(captor.get("war_wealth",0))+wealth+gear_total*2+ammunition_total*0.15+supplies+carts*5
 		captor["morale"]=clampf(float(captor.get("morale",0.0))-0.04,0.0,1.5)
 		return "Spoils are liquidated into the treasury; troop morale −4."
 	# Unrestricted plunder maximizes immediate proceeds but damages discipline and future resistance.
-	captor["war_wealth"]=int(captor.get("war_wealth",0))+roundi(float(wealth+gear_total*2+supplies+carts*5)*1.35)
+	captor["war_wealth"]=int(captor.get("war_wealth",0))+roundi(float(wealth+gear_total*2+ammunition_total*0.15+supplies+carts*5)*1.35)
 	captor["morale"]=clampf(float(captor.get("morale",0.0))+0.06,0.0,1.5)
 	captor["discipline_penalty"]=clampf(float(captor.get("discipline_penalty",0.0))+0.12,0.0,1.0)
 	captor["war_reputation"]=clampf(float(captor.get("war_reputation",0.0))-0.25,-1.0,1.0)

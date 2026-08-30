@@ -605,6 +605,7 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 	var logistics:=clampf(float((winner.get("commander",{}) as Dictionary).get("logistics",0.5)),0.0,1.0)
 	var recovery_rate:=clampf(base_rate*(0.65+logistics*0.70)*rng.randf_range(0.85,1.15),0.0,0.60)
 	var weapons:Dictionary={}
+	var consumables:Dictionary={}
 	var total_equipment:=0
 	var formations:Array=loser.get("formations",[])
 	for index in formations.size():
@@ -613,6 +614,11 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 		var recovered:=clampi(roundi(float(equipment)*recovery_rate),0,equipment)
 		var weapon:=String(formation.get("weapon","improvised"))
 		weapons[weapon]=int(weapons.get(weapon,0))+recovered
+		if weapon=="bow":
+			var ammunition:=int(formation.get("ammunition",0))
+			var ammunition_recovered:=clampi(roundi(float(ammunition)*recovery_rate),0,ammunition)
+			consumables["arrows"]=int(consumables.get("arrows",0))+ammunition_recovered
+			formation["ammunition"]=ammunition-ammunition_recovered
 		total_equipment+=equipment
 		formation["equipment"]=equipment-recovered
 		formations[index]=formation
@@ -620,7 +626,7 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 	var supplies:=maxi(0,roundi(float(total_equipment)*recovery_rate*rng.randf_range(0.28,0.52)))
 	var carts:=maxi(0,roundi(float(total_equipment)*recovery_rate/28.0))
 	var wealth:=maxi(0,roundi(float(total_equipment)*recovery_rate*rng.randf_range(0.8,1.8)))
-	return {"weapons":weapons,"supplies":supplies,"carts":carts,"wealth":wealth,"recovery_rate":recovery_rate}
+	return {"weapons":weapons,"consumables":consumables,"supplies":supplies,"carts":carts,"wealth":wealth,"recovery_rate":recovery_rate}
 
 
 func _winner_name(outcome: String, attacker: Dictionary, defender: Dictionary) -> String:

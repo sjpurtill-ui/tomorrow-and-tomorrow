@@ -103,6 +103,12 @@ func test_spoils_are_deducted_from_the_defeated_force() -> void:
 	var captured:=int(spoils.weapons.get("spear",0))
 	assert_int(captured).is_greater(0)
 	assert_int(int(loser.formations[0].equipment)+captured).is_equal(before)
+	var archers:Dictionary=simulator.create_formation_force("Archers",[{"unit":"skirmisher","weapon":"bow","count":40,"equipment":40,"ammunition":180,"ammunition_required":240}])
+	rng.seed=91
+	var arrow_spoils:Dictionary=simulator._battle_spoils(archers,winner,"surrender",rng)
+	var captured_arrows:=int(arrow_spoils.consumables.get("arrows",0))
+	assert_int(captured_arrows).is_greater(0)
+	assert_int(int(archers.formations[0].ammunition)+captured_arrows).is_equal(180)
 
 
 func test_equipment_and_manpower_are_separate_inputs() -> void:

@@ -1485,10 +1485,15 @@ func _return_home_captives(count:int)->Array[int]:
 
 func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dictionary)->void:
 	var weapons:Dictionary=spoils.get("weapons",{})
+	var consumables:Dictionary=spoils.get("consumables",{})
 	var gear_total:=0
+	var consumable_total:=0
 	for weapon in weapons:
 		var amount:=int(weapons[weapon]); gear_total+=amount
 		if policy.to_lower()=="army stores": military_inventory[weapon]=int(military_inventory.get(weapon,0))+amount
+	for item in consumables:
+		var amount:=int(consumables[item]); consumable_total+=amount
+		if policy.to_lower()=="army stores": military_consumables[item]=int(military_consumables.get(item,0))+amount
 	var supplies:=int(spoils.get("supplies",0)); var carts:=int(spoils.get("carts",0)); var wealth:=int(spoils.get("wealth",0))
 	match policy.to_lower():
 		"army stores":
@@ -1496,12 +1501,12 @@ func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dicti
 			GameState.resource_stockpiles["Transport Carts"]=float(GameState.resource_stockpiles.get("Transport Carts",0.0))+carts
 			GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+wealth
 		"reward troops": home_army["morale"]=clampf(float(home_army.get("morale",0.0))+0.10,0.0,1.5)
-		"state treasury": GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+wealth+gear_total*2+supplies+carts*5
+		"state treasury": GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+wealth+gear_total*2+consumable_total*0.15+supplies+carts*5
 		"return property": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.06,0.0,1.0)
 		"unrestricted plunder":
-			GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+(wealth+gear_total*2+supplies+carts*5)*1.35
+			GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+(wealth+gear_total*2+consumable_total*0.15+supplies+carts*5)*1.35
 			GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.04,0.0,1.0)
-	outcome["spoils"]={"gear":gear_total,"supplies":supplies,"carts":carts,"wealth":wealth}
+	outcome["spoils"]={"gear":gear_total,"ammunition":consumable_total,"supplies":supplies,"carts":carts,"wealth":wealth}
 
 
 func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:Dictionary)->void:
