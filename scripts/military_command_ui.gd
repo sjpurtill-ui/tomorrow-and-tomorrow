@@ -99,7 +99,7 @@ func _build_interface()->void:
 	produce_count=_counter(production_row,1,100,10)
 	_action_button(production_row,"Queue production",_queue_production)
 
-	feedback=Label.new(); feedback.text="F6 closes this panel. Time continues while it is open."; feedback.add_theme_color_override("font_color",MUTED); feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; outer.add_child(feedback)
+	feedback=Label.new(); feedback.text="F6 closes this panel. Time continues while it is open."; feedback.custom_minimum_size.x=800; feedback.add_theme_color_override("font_color",MUTED); feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; outer.add_child(feedback)
 	_populate_choices()
 	_refresh()
 
@@ -112,7 +112,7 @@ func _section(parent:HBoxContainer,title_text:String,color:Color)->VBoxContainer
 
 
 func _body_label(parent:VBoxContainer)->Label:
-	var label:=Label.new(); label.size_flags_vertical=Control.SIZE_EXPAND_FILL; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.add_theme_color_override("font_color",INK); parent.add_child(label); return label
+	var label:=Label.new(); label.custom_minimum_size.x=200; label.size_flags_vertical=Control.SIZE_EXPAND_FILL; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.add_theme_color_override("font_color",INK); parent.add_child(label); return label
 
 
 func _counter(parent:HBoxContainer,minimum:int,maximum:int,value:int)->SpinBox:
