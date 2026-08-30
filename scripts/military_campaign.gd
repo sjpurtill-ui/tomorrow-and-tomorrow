@@ -679,16 +679,48 @@ func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
 func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionary:
 	var engagement:=active_engagement.duplicate(true)
 	var attacker:Dictionary=engagement.attacker; var defender:Dictionary=engagement.defender
-	var attacker_result:Dictionary=simulator._force_result(attacker,int(engagement.attacker_initial),int(attacker.troops),float(attacker.morale))
-	var defender_result:Dictionary=simulator._force_result(defender,int(engagement.defender_initial),int(defender.troops),float(defender.morale))
 	var outcome:=String(last_result.get("outcome","continued")); var termination:Dictionary=(last_result.get("termination",{}) as Dictionary).duplicate(true)
 	if retreated:
 		outcome="attacker_retreat"
-		termination={"type":"withdrawal","summary":"%s withdrew from the field before collapse." % String(attacker.name),"defeated":String(attacker.name),"captor":String(defender.name),"prisoners":0,"spoils":{},"captured_general":false,"commander_fate":"escaped"}
+		termination=_retreat_termination(attacker,defender,int(engagement.seed),int(engagement.round))
 	elif outcome=="continued": termination={"type":"continued","summary":"Both forces remain capable of further action."}
+	var attacker_result:Dictionary=simulator._force_result(attacker,int(engagement.attacker_initial),int(attacker.troops),float(attacker.morale))
+	var defender_result:Dictionary=simulator._force_result(defender,int(engagement.defender_initial),int(defender.troops),float(defender.morale))
 	var final_result:Dictionary={"seed":int(engagement.seed),"outcome":outcome,"winner":String(defender.name) if retreated else String(last_result.get("winner","")),"round_count":int(engagement.round),"rounds":engagement.rounds.duplicate(true),"attacker":attacker_result,"defender":defender_result,"terrain_defense":float(engagement.terrain_defense),"effective_terrain_defense":float(last_result.get("effective_terrain_defense",engagement.terrain_defense)),"termination":termination,"orders":{"retreated":retreated}}
 	active_engagement.clear(); threats_resolved+=1
 	return _commit_campaign_battle(final_result)
+
+
+func _retreat_termination(attacker:Dictionary,defender:Dictionary,battle_seed:int,round_number:int)->Dictionary:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=battle_seed^(round_number+1)*65537^0x45d9f3b
+	var commander:Dictionary=attacker.get("commander",{})
+	var withdrawal_skill:=clampf(float(commander.get("command",0.5))*0.30+float(commander.get("tactics",0.5))*0.30+float(commander.get("logistics",0.5))*0.20+float(commander.get("resolve",0.5))*0.20,0.0,1.0)
+	var enemy_commander:Dictionary=defender.get("commander",{})
+	var enemy_leadership:=clampf(float(enemy_commander.get("command",0.5))*0.45+float(enemy_commander.get("tactics",0.5))*0.55,0.0,1.0)
+	var enemy_cavalry:=0
+	for formation in defender.get("formations",[]):
+		if String(formation.get("unit",""))=="cavalry": enemy_cavalry+=maxi(0,int(formation.get("count",0)))
+	var cavalry_share:=float(enemy_cavalry)/maxf(1.0,float(defender.get("troops",0)))
+	var morale:=clampf(float(attacker.get("morale",0.5)),0.0,1.0)
+	var pursuit_pressure:=clampf(0.18+enemy_leadership*0.22+cavalry_share*0.40-withdrawal_skill*0.35-morale*0.20,0.0,0.55)
+	var remaining:=maxi(0,int(attacker.get("troops",0)))
+	var prisoners:=clampi(roundi(float(remaining)*pursuit_pressure*rng.randf_range(0.02,0.08)),0,remaining)
+	var commander_fate:="escaped"
+	var captured_general:=false
+	var fate_roll:=rng.randf()
+	if fate_roll<pursuit_pressure*0.16:
+		commander_fate="captured"
+		captured_general=true
+	elif fate_roll<pursuit_pressure*0.195:
+		commander_fate="killed"
+	elif fate_roll<pursuit_pressure*0.295:
+		commander_fate="wounded, but escaped"
+	var spoils:Dictionary=simulator._battle_spoils(attacker,defender,"withdrawal",rng) if pursuit_pressure>0.02 else {}
+	var summary:="%s breaks contact under pursuit" % String(attacker.get("name","The withdrawing army"))
+	if prisoners>0: summary+=", leaving %d stragglers captive" % prisoners
+	summary+=". %s is %s." % [String(commander.get("name","The commander")),commander_fate]
+	return {"type":"withdrawal","summary":summary,"defeated":String(attacker.get("name","Attacker")),"captor":String(defender.get("name","Defender")),"prisoners":prisoners,"spoils":spoils,"captured_general":captured_general,"commander":String(commander.get("name","The commander")),"commander_fate":commander_fate,"pursuit_pressure":pursuit_pressure}
 
 
 func respond_to_threat(response:String)->Dictionary:
