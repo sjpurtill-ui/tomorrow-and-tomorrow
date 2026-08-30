@@ -103,7 +103,7 @@ func _build_interface()->void:
 	_action_button(recruit_row,"Raise recruits",_raise_recruits)
 	var stand_row:=HBoxContainer.new(); army_box.add_child(stand_row)
 	_action_button(stand_row,"Reinforce weakest",_reinforce_weakest)
-	_action_button(stand_row,"Stand down 5",func(): _report(MilitaryCampaign.stand_down(5)))
+	_action_button(stand_row,"Demobilize 5",func(): _report(MilitaryCampaign.demobilize(5)))
 
 	var training_box:=_section(columns,"TRAINING",GOLD)
 	queues=_body_label(training_box)

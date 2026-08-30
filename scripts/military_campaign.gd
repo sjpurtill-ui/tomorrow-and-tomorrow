@@ -183,6 +183,36 @@ func stand_down(count:int)->Dictionary:
 	return {"requested":requested,"released":released_ids.size(),"citizen_ids":released_ids,"returned_equipment":returned_equipment}
 
 
+func demobilize(count:int)->Dictionary:
+	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before demobilizing personnel."}
+	var requested:=maxi(0,count)
+	if requested<=0: return {"error":"Demobilization count must be positive."}
+	var released_recruits:Array[int]=[]
+	while released_recruits.size()<requested and not recruit_pool.is_empty():
+		var citizen_id:int=int(recruit_pool.pop_back())
+		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+		if citizen.is_empty() or not bool(citizen.get("alive",true)): continue
+		citizen["army_status"]="civilian"
+		citizen["role"]=String(citizen.get("pre_army_role",citizen.get("role","Unassigned")))
+		citizen.erase("pre_army_role")
+		released_recruits.append(citizen_id)
+	var active_result:Dictionary={"released":0,"citizen_ids":[],"returned_equipment":{}}
+	var remaining:=requested-released_recruits.size()
+	if remaining>0 and int(home_army.get("troops",0))>0: active_result=stand_down(remaining)
+	var released_ids:Array=released_recruits.duplicate()
+	released_ids.append_array(active_result.get("citizen_ids",[]))
+	if not released_recruits.is_empty(): GameState.synchronize_population_allocations()
+	army_changed.emit(home_army.duplicate(true))
+	return {
+		"requested":requested,
+		"released":released_ids.size(),
+		"released_recruits":released_recruits.size(),
+		"released_field_soldiers":int(active_result.get("released",0)),
+		"citizen_ids":released_ids,
+		"returned_equipment":active_result.get("returned_equipment",{})
+	}
+
+
 func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	var gate:=_training_gate(unit,weapon)
 	if gate.has("error"): return gate
