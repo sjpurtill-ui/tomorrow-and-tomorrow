@@ -75,7 +75,7 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		organization_total += count * float(unit.organization)*training_factor
 		armor_total += count * float(weapon.armor)
 		penetration_total += count * float(weapon.penetration)
-		normalized.append({"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"training":training,"soldier_ids":(formation.get("soldier_ids",[]) as Array).duplicate()})
+		normalized.append({"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"training":training,"soldier_ids":(formation.get("soldier_ids",[]) as Array).duplicate(),"wear_accumulator":float(formation.get("wear_accumulator",0.0))})
 	var divisor := maxf(1.0, float(troops))
 	return {
 		"name": name,
@@ -269,8 +269,9 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	var scattered_available:=int(prepared.get("scattered_pool",0))
 	var wounded_available:=int(prepared.get("wounded_pool",0))
 	var reserves_available:=int(prepared.get("reserve_manpower",0))
+	var recovery_multiplier:=clampf(float(context.get("recovery_multiplier",1.0)),0.10,1.60)
 	var scattered_return:=mini(scattered_available,maxi(0,roundi(float(scattered_available)*(0.22+logistics*0.28))))
-	var wounded_return:=mini(wounded_available,maxi(0,roundi(float(wounded_available)*(0.035+logistics*0.055))))
+	var wounded_return:=mini(wounded_available,maxi(0,roundi(float(wounded_available)*(0.035+logistics*0.055)*recovery_multiplier)))
 	var reserve_arrivals:=mini(reserves_available,maxi(0,roundi(float(context.get("manpower_replacements",4))*(0.45+logistics*0.85))))
 	var manpower_queue:=scattered_return+wounded_return+reserve_arrivals
 	var integrated:=0

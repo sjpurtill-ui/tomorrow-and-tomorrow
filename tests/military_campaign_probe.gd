@@ -37,6 +37,16 @@ func _run()->void:
 	assert(float(army.formations[0].training)<1.0)
 	assert(float(army.readiness)>0.0 and float(army.readiness)<=1.0)
 	assert((army.readiness_components as Dictionary).has("condition"))
+	MilitaryCampaign.home_army.formations[0]["wear_accumulator"]=0.99
+	MilitaryCampaign.home_army["recent_combat_days"]=7
+	var damaged_before:=int(MilitaryCampaign.damaged_equipment.improvised)
+	MilitaryCampaign._process_equipment_wear_day()
+	assert(int(MilitaryCampaign.damaged_equipment.improvised)==damaged_before+1)
+	var repair:Dictionary=MilitaryCampaign.queue_equipment_repair("improvised",1)
+	assert(not repair.has("error"))
+	for day in 3: MilitaryCampaign._process_equipment_production_day()
+	assert(int(MilitaryCampaign.military_inventory.improvised)==1)
+	assert(MilitaryCampaign._deliver_inventory_replacements(1)==1)
 	assert(int(army.recruits)==0)
 	assert(int(army.reserve_manpower)==0)
 	assert(MilitaryCampaign._mobilized_count()==raised_count)
@@ -117,5 +127,19 @@ func _run()->void:
 	var released_citizen:Dictionary=GameState.citizen_by_id(int(stood_down.citizen_ids[0]))
 	assert(String(released_citizen.army_status)=="civilian")
 	assert(MilitaryCampaign.validate_state().is_empty())
+	GameState.simulation_metrics["food_intake_ratio"]=0.0
+	GameState.population_allocations["Logistics"]=0
+	MilitaryCampaign.home_army["supply_level"]=1.0
+	MilitaryCampaign._refresh_readiness()
+	var supplied_readiness:=float(MilitaryCampaign.home_army.readiness)
+	for day in 8: MilitaryCampaign._process_military_day()
+	var depleted_supply:=float(MilitaryCampaign.home_army.supply_level)
+	var depleted_readiness:=float(MilitaryCampaign.home_army.readiness)
+	assert(depleted_supply<0.40)
+	assert(depleted_readiness<supplied_readiness)
+	GameState.simulation_metrics["food_intake_ratio"]=1.0
+	GameState.population_allocations["Logistics"]=10
+	for day in 12: MilitaryCampaign._process_military_day()
+	assert(float(MilitaryCampaign.home_army.supply_level)>depleted_supply)
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

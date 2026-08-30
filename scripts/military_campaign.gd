@@ -14,6 +14,7 @@ var home_army:Dictionary={}
 var battle_history:Array[Dictionary]=[]
 var pending_aftermath:Dictionary={}
 var military_inventory:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+var damaged_equipment:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
 var recruit_pool:Array[int]=[]
 var training_queue:Array[Dictionary]=[]
 var equipment_queue:Array[Dictionary]=[]
@@ -45,6 +46,7 @@ func reset_for_new_world()->void:
 	battle_history.clear()
 	pending_aftermath.clear()
 	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
 	recruit_pool.clear()
 	training_queue.clear()
 	equipment_queue.clear()
@@ -173,6 +175,21 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	return {"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
 
 
+func queue_equipment_repair(item:String,count:int)->Dictionary:
+	if not simulator.WEAPONS.has(item): return {"error":"Unknown equipment type: %s" % item}
+	var amount:=mini(maxi(0,count),int(damaged_equipment.get(item,0)))
+	if amount<=0: return {"error":"No damaged %s is available to repair." % item.replace("_"," ")}
+	var recipe:Dictionary=_equipment_recipe(item)
+	for material in recipe.materials:
+		var required:=float(recipe.materials[material])*amount*0.18
+		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s for repairs: need %.1f." % [material,required]}
+	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount*0.18
+	damaged_equipment[item]=int(damaged_equipment.get(item,0))-amount
+	var work_per_item:=float(recipe.days)*0.38
+	equipment_queue.append({"job_type":"repair","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":work_per_item,"required_days":work_per_item*amount})
+	return {"queued":amount,"item":item,"repair_work_days":work_per_item*amount}
+
+
 func recruitment_capacity()->int:
 	var population:=GameState.living_citizen_count()
 	var share:=0.04
@@ -209,6 +226,8 @@ func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dict
 	battle_options["terrain_defense"]=float(battle_options.get("terrain_defense",_terrain_defense()))
 	var result:Dictionary=simulator.simulate(home_army,enemy_force,battle_options)
 	_apply_home_result(result.attacker,result.rounds,int(result.seed))
+	home_army["recent_combat_days"]=7
+	home_army["supply_level"]=clampf(float(home_army.get("supply_level",1.0))-0.06,0.0,1.0)
 	_apply_home_commander_fate(result.termination)
 	var record:=result.duplicate(true)
 	record["day"]=int(GameState.elapsed_days)
@@ -250,6 +269,7 @@ func campaign_army_snapshot()->Dictionary:
 	snapshot["foreign_prisoners"]=foreign_prisoners
 	snapshot["held_generals"]=held_generals.duplicate(true)
 	snapshot["military_inventory"]=military_inventory.duplicate(true)
+	snapshot["damaged_equipment"]=damaged_equipment.duplicate(true)
 	snapshot["recruits"]=recruit_pool.size()
 	snapshot["training_queue"]=training_queue.duplicate(true)
 	snapshot["equipment_queue"]=equipment_queue.duplicate(true)
@@ -265,6 +285,7 @@ func export_state()->Dictionary:
 		"battle_history":battle_history.duplicate(true),
 		"pending_aftermath":pending_aftermath.duplicate(true),
 		"military_inventory":military_inventory.duplicate(true),
+		"damaged_equipment":damaged_equipment.duplicate(true),
 		"recruit_pool":recruit_pool.duplicate(),
 		"training_queue":training_queue.duplicate(true),
 		"equipment_queue":equipment_queue.duplicate(true),
@@ -315,6 +336,8 @@ func validate_state()->Array[String]:
 			if GameState.citizen_by_id(int(citizen_id)).is_empty(): errors.append("Training order references missing citizen %d." % int(citizen_id))
 	for item in military_inventory:
 		if int(military_inventory[item])<0: errors.append("Military inventory for %s is negative." % item)
+	for item in damaged_equipment:
+		if int(damaged_equipment[item])<0: errors.append("Damaged-equipment inventory for %s is negative." % item)
 	return errors
 
 
@@ -325,6 +348,8 @@ func _apply_imported_state(payload:Dictionary)->void:
 	pending_aftermath=(payload.get("pending_aftermath",{}) as Dictionary).duplicate(true)
 	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
 	for item in (payload.get("military_inventory",{}) as Dictionary): military_inventory[item]=int(payload.military_inventory[item])
+	damaged_equipment={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	for item in (payload.get("damaged_equipment",{}) as Dictionary): damaged_equipment[item]=int(payload.damaged_equipment[item])
 	recruit_pool.assign(payload.get("recruit_pool",[]))
 	training_queue.assign(payload.get("training_queue",[]))
 	equipment_queue.assign(payload.get("equipment_queue",[]))
@@ -340,6 +365,9 @@ func _empty_home_army()->Dictionary:
 	force["scattered_ids"]=[]
 	force["captured_ids"]=[]
 	force["reserve_manpower"]=0
+	force["supply_level"]=1.0
+	force["supply_components"]={"nutrition":1.0,"delivery":1.0,"target":1.0}
+	force["recent_combat_days"]=0
 	force["campaign_day"]=int(GameState.elapsed_days)
 	return force
 
@@ -533,8 +561,12 @@ func _process_military_day()->void:
 	_process_training_day()
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
 	var logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.5))
-	var delivered:=_deliver_inventory_replacements()
-	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":0.025+logistics*0.055})
+	_update_supply_day()
+	_process_equipment_wear_day()
+	var supply:=float(home_army.get("supply_level",1.0))
+	var delivered:=_deliver_inventory_replacements(_daily_delivery_capacity())
+	var recovery_multiplier:=0.35+supply*0.55+_adoption("battlefield_medicine")*0.55
+	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier})
 	home_army=prepared.force
 	_rejoin_recovered_citizens("scattered_ids",int(prepared.scattered_returned))
 	_rejoin_recovered_citizens("wounded_ids",int(prepared.wounded_returned))
@@ -544,21 +576,68 @@ func _process_military_day()->void:
 	army_changed.emit(home_army.duplicate(true))
 
 
-func _deliver_inventory_replacements()->int:
-	var delivered:=0
+func _update_supply_day()->void:
+	var nutrition:=clampf(float(GameState.simulation_metrics.get("food_intake_ratio",GameState.food_security)),0.0,1.0)
+	var troops:=maxi(1,_mobilized_count())
+	var logistics_workers:=float(GameState.population_allocations.get("Logistics",0))
+	var commander_logistics:=clampf(float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4)),0.0,1.0)
+	var labor_coverage:=clampf(logistics_workers/maxf(1.0,float(troops)*0.08),0.0,1.0)
+	var practice:=_adoption("supply_groups")
+	var delivery:=clampf(0.30+labor_coverage*0.38+commander_logistics*0.20+practice*0.20,0.0,1.0)
+	var target:=clampf(nutrition*0.62+delivery*0.38,0.0,1.0)
+	var current:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
+	var change:=0.07 if target>current else 0.13
+	home_army["supply_level"]=move_toward(current,target,change)
+	home_army["supply_components"]={"nutrition":nutrition,"delivery":delivery,"target":target,"logistics_workers":logistics_workers}
+	home_army["recent_combat_days"]=maxi(0,int(home_army.get("recent_combat_days",0))-1)
+
+
+func _daily_delivery_capacity()->int:
+	var workers:=int(GameState.population_allocations.get("Logistics",0))
+	if workers<=0: return 0
+	var commander_logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4))
+	return maxi(1,floori(float(workers)*(0.35+commander_logistics*0.45+_adoption("supply_groups")*0.40)))
+
+
+func _process_equipment_wear_day()->void:
+	var supply:=float(home_army.get("supply_level",1.0))
+	var recent_combat:=int(home_army.get("recent_combat_days",0))>0
+	var standardization:=_adoption("workshop_standards")
 	var formations:Array=home_army.get("formations",[])
 	for index in formations.size():
+		var formation:Dictionary=formations[index]
+		var equipment:=int(formation.get("equipment",0))
+		if equipment<=0: continue
+		var daily_rate:=maxf(0.0002,0.0007+(0.0075 if recent_combat else 0.0)+(1.0-supply)*0.004-standardization*0.0004)
+		var accumulator:=float(formation.get("wear_accumulator",0.0))+float(equipment)*daily_rate
+		var damaged:=mini(equipment,floori(accumulator))
+		formation["wear_accumulator"]=accumulator-float(damaged)
+		if damaged>0:
+			var item:=String(formation.get("weapon","improvised"))
+			formation["equipment"]=equipment-damaged
+			damaged_equipment[item]=int(damaged_equipment.get(item,0))+damaged
+		formations[index]=formation
+	home_army["formations"]=formations
+
+
+func _deliver_inventory_replacements(delivery_limit:int)->int:
+	var delivered:=0
+	var remaining_capacity:=maxi(0,delivery_limit)
+	var formations:Array=home_army.get("formations",[])
+	for index in formations.size():
+		if remaining_capacity<=0: break
 		var formation:Dictionary=formations[index]
 		var item:=String(formation.get("weapon","improvised"))
 		var available:=int(military_inventory.get(item,0))
 		var required:=int(formation.get("equipment_required",formation.get("authorized_count",formation.get("count",0))))
 		var missing:=maxi(0,required-int(formation.get("equipment",0)))
-		var transfer:=mini(available,missing)
+		var transfer:=mini(mini(available,missing),remaining_capacity)
 		if transfer<=0: continue
 		formation["equipment"]=int(formation.get("equipment",0))+transfer
 		formations[index]=formation
 		military_inventory[item]=available-transfer
 		delivered+=transfer
+		remaining_capacity-=transfer
 	home_army["formations"]=formations
 	return delivered
 
@@ -688,8 +767,10 @@ func _refresh_readiness()->void:
 		if not citizen.is_empty() and bool(citizen.get("alive",true)): soldiers.append(citizen)
 	var condition:=_condition_average(soldiers)
 	var readiness:Dictionary=simulator.force_readiness(home_army,condition)
-	home_army["readiness"]=float(readiness.aggregate)
+	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
+	home_army["readiness"]=float(readiness.aggregate)*(0.48+supply*0.52)
 	home_army["readiness_components"]=readiness
+	home_army.readiness_components["supply"]=supply
 
 
 func _production_rate()->float:
