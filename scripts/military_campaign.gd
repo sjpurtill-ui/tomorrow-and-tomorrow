@@ -1051,11 +1051,14 @@ func _apply_home_commander_fate(termination:Dictionary)->void:
 			var commander_name:=GameState.register_specific_death(citizen_id,"Killed while commanding in battle")
 			if commander_name!="": _record_military_deaths([commander_name],"Killed while commanding in battle")
 		else:
+			citizen["pre_capture_role"]=String(citizen.get("role","Unassigned"))
+			citizen["military_capture_kind"]="commander"
+			citizen["capture_was_active_soldier"]=was_active
 			citizen["army_status"]="captured"
-			if was_active:
-				var captured_ids:Array=home_army.get("captured_ids",[]).duplicate()
-				captured_ids.append(citizen_id)
-				home_army["captured_ids"]=captured_ids
+			var captured_ids:Array=home_army.get("captured_ids",[]).duplicate()
+			if citizen_id not in captured_ids: captured_ids.append(citizen_id)
+			home_army["captured_ids"]=captured_ids
+			GameState.synchronize_population_allocations()
 	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
 	if int(marshal.get("citizen_id",-2))==citizen_id: GameState.leadership_positions.erase("Marshal")
 	var successor:=_acting_field_commander(true)
@@ -1887,10 +1890,20 @@ func _return_home_captives(count:int)->Array[int]:
 		var citizen_id:=int(captured.pop_front())
 		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
 		if citizen.is_empty() or not bool(citizen.get("alive",true)): continue
-		citizen["army_status"]="recruit"
-		if citizen_id not in recruit_pool: recruit_pool.append(citizen_id)
+		var captured_commander:=String(citizen.get("military_capture_kind",""))=="commander"
+		var return_to_recruits:=not captured_commander or bool(citizen.get("capture_was_active_soldier",false))
+		if return_to_recruits:
+			citizen["army_status"]="recruit"
+			if citizen_id not in recruit_pool: recruit_pool.append(citizen_id)
+		else:
+			citizen["army_status"]="civilian"
+			citizen["role"]=String(citizen.get("pre_capture_role",citizen.get("role","Unassigned")))
+		citizen.erase("military_capture_kind")
+		citizen.erase("capture_was_active_soldier")
+		citizen.erase("pre_capture_role")
 		returned.append(citizen_id)
 	home_army["captured_ids"]=captured
+	if not returned.is_empty(): GameState.synchronize_population_allocations()
 	return returned
 
 
