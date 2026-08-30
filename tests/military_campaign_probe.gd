@@ -18,6 +18,9 @@ func _run()->void:
 	assert(MilitaryCampaign.validate_military_progression().is_empty())
 	var locked_spear:Dictionary=MilitaryCampaign.queue_equipment_production("spear",1)
 	assert(String(locked_spear.get("required_discovery",""))=="hafted_weapons")
+	var locked_cart:Dictionary=MilitaryCampaign.queue_transport_cart_production(1)
+	assert(String(locked_cart.get("required_discovery",""))=="joinery")
+	assert(String(MilitaryCampaign.military_capabilities().transport_carts.discovery)=="joinery")
 	var spear_gate:Dictionary=MilitaryCampaign.military_capabilities().equipment.spear
 	assert(String(spear_gate.discovery)=="hafted_weapons")
 	assert("hafted_tools" in (spear_gate.prerequisites as Array))
@@ -359,5 +362,16 @@ func _run()->void:
 	var high_provision_day:Dictionary=FoodSystem.process_day({"traveling":false},1.0,1.0)
 	assert(float(MilitaryCampaign.home_army.provision_ratio)>low_provision_ratio)
 	assert(float(high_provision_day.army_provisions_delivered)>float(low_provision_day.army_provisions_delivered))
+	if "joinery" not in GameState.known_discoveries: GameState.known_discoveries.append("joinery")
+	GameState.discovery_adoption["joinery"]=0.20
+	GameState.resource_stockpiles["Timber"]=100.0
+	GameState.resource_stockpiles["Fiber Plants"]=100.0
+	var carts_before:=float(GameState.resource_stockpiles.get("Transport Carts",0.0))
+	var cart_job:Dictionary=MilitaryCampaign.queue_transport_cart_production(1)
+	assert(not cart_job.has("error"))
+	for day in 100:
+		MilitaryCampaign._process_equipment_production_day()
+		if float(GameState.resource_stockpiles.get("Transport Carts",0.0))>carts_before: break
+	assert(is_equal_approx(float(GameState.resource_stockpiles.get("Transport Carts",0.0)),carts_before+1.0))
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

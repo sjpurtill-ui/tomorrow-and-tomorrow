@@ -282,6 +282,23 @@ func queue_consumable_production(item:String,count:int)->Dictionary:
 	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
 
 
+func queue_transport_cart_production(count:int)->Dictionary:
+	var gate:=_knowledge_gate("joinery",0.10)
+	if not bool(gate.unlocked): return {"error":gate.reason,"required_discovery":gate.discovery}
+	var amount:=maxi(0,count)
+	if amount<=0: return {"error":"Production amount must be positive."}
+	var recipe:Dictionary={"materials":{"Timber":8.0,"Fiber Plants":1.5},"days":5.0}
+	for material in recipe.materials:
+		var required:=float(recipe.materials[material])*amount
+		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
+	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
+	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
+	var reserved:Dictionary={}
+	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
+	equipment_queue.append({"id":job_id,"job_type":"transport","item":"transport_cart","count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount,"reserved_materials":reserved})
+	return {"id":job_id,"queued":amount,"item":"transport_cart","work_days":float(recipe.days)*amount}
+
+
 func queue_equipment_repair(item:String,count:int)->Dictionary:
 	if not simulator.WEAPONS.has(item): return {"error":"Unknown equipment type: %s" % item}
 	var amount:=mini(maxi(0,count),int(damaged_equipment.get(item,0)))
@@ -343,7 +360,7 @@ func military_capabilities()->Dictionary:
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
 	var queued_trainees:=_queued_trainees()
-	return {"units":units,"equipment":equipment,"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"units":units,"equipment":equipment,"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func validate_military_progression()->Array[String]:
@@ -1227,6 +1244,7 @@ func _process_equipment_production_day()->void:
 	var produced:=maxi(0,completed-previously_completed)
 	if produced>0:
 		if String(job.get("job_type","production"))=="consumable": military_consumables[String(job.item)]=int(military_consumables.get(String(job.item),0))+produced
+		elif String(job.get("job_type","production"))=="transport": GameState.resource_stockpiles["Transport Carts"]=float(GameState.resource_stockpiles.get("Transport Carts",0.0))+produced
 		else: military_inventory[String(job.item)]=int(military_inventory.get(String(job.item),0))+produced
 	job["completed"]=completed
 	if completed>=int(job.count):
