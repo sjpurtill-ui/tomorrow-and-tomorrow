@@ -3,7 +3,7 @@ extends Node
 const VALID_STATUSES:= ["active","under_construction","stressed","damaged","vacant","ruin","reclaimed"]
 const VALID_REPAIR_STATES:= ["maintained","emergency_stabilization","awaiting_assessment","awaiting_materials","repairing","rebuilding","salvaging","unrepairable"]
 const VALID_REOCCUPATION_STATES:= ["occupied","evacuating","displaced","unsafe_return","temporary_use","returning","partially_reoccupied","reoccupied","contested_claim","permanently_abandoned"]
-const VALID_LAND_USES:= ["residential_compound","mixed_household","communal","civic","sacred","market","workshop","dirty_industry","storage","hospitality","defense","water","waste","transport","field","pasture","vacant","ruin"]
+const VALID_LAND_USES:= ["residential_compound","mixed_household","temporary_encampment","communal","civic","sacred","market","workshop","dirty_industry","storage","hospitality","defense","water","waste","transport","field","pasture","vacant","ruin"]
 const FOUNDING_NONRESIDENTIAL:= ["communal","storage","workshop","water","waste"]
 
 func reset_for_new_world()->void:
@@ -74,11 +74,12 @@ func _create_founding_plots()->void:
 			material_family="earth"
 			material_mix={"Clay":0.35,"Stone":0.12,"Fiber Plants":0.08}
 		var created_day:=GameState.settlement_founded_day
+		var plot_form:="portable_shelter_cluster" if index<residential_count else _founding_function_form(land_use)
 		var plot:Dictionary={
 			"id":plot_id,"seed":plot_seed,"nucleus_id":1,"parent_plot_id":-1,"lineage_ids":[],
 			"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
 			"land_use":land_use,"secondary_use":"craft" if land_use=="mixed_household" else "",
-			"form":"portable_shelter_cluster" if index<residential_count else _founding_function_form(land_use),
+			"form":plot_form,"roof_plan":_roof_plan_for(plot_seed,material_family,plot_form),
 			"material_family":material_family,"material_mix":material_mix,"construction_recipe":"founding_salvage_and_local_materials",
 			"supply_provenance":{},"replacement_debt":{},"roof_coverage":rng.randf_range(0.20,0.34) if index<residential_count else rng.randf_range(0.08,0.24),"storeys":1,
 			"resident_capacity":resident_capacity,"resident_count":resident_count,"worker_capacity":2 if land_use in ["mixed_household","workshop","storage"] else 0,
@@ -168,13 +169,19 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	if month_day<=GameState.last_morphology_day: return []
 	GameState.last_morphology_day=month_day
 	var events:Array[Dictionary]=[]
+	var active_construction:Array[Dictionary]=[]
+	for plot in GameState.settlement_plots:
+		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
+	var builders:=float(GameState.population_allocations.get("Construction",0))
+	var labor_efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
+	var builders_per_site:=builders/float(maxi(1,active_construction.size()))
 	for plot in GameState.settlement_plots:
 		plot["last_update_day"]=month_day
 		if String(plot.get("status",""))=="under_construction":
-			var builders:=float(GameState.population_allocations.get("Construction",0))
-			var labor_efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
 			var previous_progress:=float(plot.get("construction_progress",0.0))
-			plot["construction_progress"]=clampf(previous_progress+builders*labor_efficiency*0.10,0.0,1.0)
+			# Parallel projects divide the real monthly builder pool. A large population
+			# can build concurrently, but no site receives the whole workforce for free.
+			plot["construction_progress"]=clampf(previous_progress+builders_per_site*labor_efficiency*0.10,0.0,1.0)
 			if not is_equal_approx(previous_progress,float(plot.construction_progress)):
 				GameState.morphology_revision+=1
 			if float(plot.construction_progress)>=1.0:
@@ -186,13 +193,213 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 				events.append({"type":"morphology","title":_completion_title(String(plot.get("land_use","residential_compound"))),"plot_id":int(plot.id)})
 	_synchronize_early_works(month_day,events)
 	_update_plot_workforce(month_day,events)
+	_update_plot_prosperity(month_day)
 	_update_field_seasons(month_day)
 	_process_occupancy_and_maintenance(month_day,events)
+	_update_overflow_encampments(month_day,events)
+	_attempt_secondary_nucleus(month_day,events,context)
+	_attempt_overflow_encampment(month_day,events,context)
 	_attempt_functional_growth(month_day,events,context)
-	if not _has_active_construction(): _attempt_household_growth(month_day,events,context)
+	var construction_slots:=_monthly_construction_slots()
+	var available_household_starts:=maxi(0,construction_slots-_active_construction_count())
+	for action_index in available_household_starts:
+		if not _attempt_household_growth(month_day,events,context,action_index): break
 	_attempt_field_growth(month_day,events,context)
 	rebuild_summary()
 	return events
+
+func _active_construction_count()->int:
+	var count:=0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("status",""))=="under_construction": count+=1
+	return count
+
+func _monthly_construction_slots()->int:
+	var builders:=float(GameState.population_allocations.get("Construction",0))
+	if builders<4.0: return 0
+	var efficiency:=clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.12,1.45)
+	# One early household project occupies roughly six effective builder-months.
+	# Administrative/logistical maturity raises the safe coordination ceiling but
+	# does not conjure labor or materials.
+	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.12)),0.0,1.0)
+	var coordination_cap:=3+floori(logistics*9.0)
+	return clampi(maxi(1,floori(builders*efficiency/6.0)),1,coordination_cap)
+
+func _update_plot_prosperity(day:int)->void:
+	var economy:=GameState.economy_metrics
+	var market_access:=float(economy.get("market_access",0.0))
+	var reliability:=float(economy.get("exchange_reliability",0.45))
+	var shortage:=float(economy.get("shortage_pressure",0.0))
+	var inequality:=float(economy.get("inequality",0.25))
+	for plot in GameState.settlement_plots:
+		if String(plot.get("status","")) in ["ruin","reclaimed"]: continue
+		var use:=String(plot.get("land_use",""))
+		var exchange_exposure:=0.22
+		if use in ["market","workshop","storage","hospitality","transport"]: exchange_exposure=0.48
+		elif use in ["mixed_household","civic","communal"]: exchange_exposure=0.34
+		elif use in ["field","pasture","water"]: exchange_exposure=0.16
+		var service:=clampf(float(plot.get("service_access",0.2)),0.0,1.0)
+		var condition:=clampf(float(plot.get("condition",0.6)),0.0,1.0)
+		var target:=clampf(0.12+market_access*exchange_exposure+reliability*0.16+service*0.14+condition*0.10-shortage*0.34-maxf(0.0,inequality-0.30)*0.18,0.03,0.94)
+		var prior:=float(plot.get("prosperity",0.30))
+		plot["prosperity"]=lerpf(prior,target,0.12)
+		if absf(float(plot.prosperity)-prior)>0.001: GameState.morphology_revision+=1
+		plot["last_economy_update_day"]=day
+
+func _attempt_secondary_nucleus(day:int,events:Array[Dictionary],context:Dictionary={})->void:
+	var occupied_households:Array[Dictionary]=[]
+	var effective_household_units:=0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
+		if String(plot.get("status","")) not in ["active","stressed","damaged"]: continue
+		occupied_households.append(plot)
+		effective_household_units+=maxi(1,int(plot.get("infill_units",0))+1)
+	var desired_nuclei:=clampi(1+floori(float(maxi(0,effective_household_units-24))/28.0),1,8)
+	if _active_nuclei()>=desired_nuclei: return
+	var route_by_id:Dictionary={}
+	for route in GameState.settlement_routes:
+		if bool(route.get("active",true)): route_by_id[int(route.get("id",-1))]=route
+	var best_plot:Dictionary={}
+	var best_score:=-INF
+	for plot in occupied_households:
+		var candidate:=Vector2(plot.get("centroid",Vector2.ZERO))
+		var nearest_nucleus:=INF
+		for nucleus in GameState.settlement_nuclei:
+			if bool(nucleus.get("active",true)):
+				nearest_nucleus=minf(nearest_nucleus,candidate.distance_to(Vector2(nucleus.get("position",Vector2.ZERO))))
+		if nearest_nucleus<0.085: continue
+		var route:Dictionary=route_by_id.get(int(plot.get("frontage_route_id",-1)),{})
+		var hierarchy_bonus:float=float({"path":0.0,"lane":0.42,"main_approach":0.86,"farm_lane":0.24}.get(String(route.get("hierarchy","path")),0.0))
+		var score:=nearest_nucleus*5.4+float(route.get("traffic",0.0))*0.92+float(hierarchy_bonus)+float(plot.get("service_access",0.0))*0.34
+		var origin:Vector3=context.get("settlement_origin",GameState.settlement_founded_at)
+		var height_callable:Callable=context.get("terrain_height_at",Callable())
+		if height_callable.is_valid():
+			var sample:=0.015
+			var world_x:=origin.x+candidate.x
+			var world_z:=origin.z+candidate.y
+			var slope:=maxf(absf(float(height_callable.call(world_x+sample,world_z))-float(height_callable.call(world_x-sample,world_z))),absf(float(height_callable.call(world_x,world_z+sample))-float(height_callable.call(world_x,world_z-sample))))/(sample*2.0)
+			if slope>0.28: continue
+			score-=slope*2.6
+		if score>best_score:
+			best_score=score
+			best_plot=plot
+	if best_plot.is_empty(): return
+	var nucleus_id:=GameState.next_settlement_nucleus_id
+	GameState.next_settlement_nucleus_id+=1
+	var nucleus_kind:="market_crossing" if nucleus_id%3==0 else "neighborhood_hearth"
+	var nucleus_position:=Vector2(best_plot.get("centroid",Vector2.ZERO))
+	GameState.settlement_nuclei.append({"id":nucleus_id,"kind":nucleus_kind,"position":nucleus_position,"pull":0.78 if nucleus_kind=="market_crossing" else 0.66,"active":true,"created_day":day,"absorbed_day":-1,"founding_plot_id":int(best_plot.get("id",-1))})
+	best_plot["nucleus_id"]=nucleus_id
+	GameState.settlement_plot_history.append({"day":day,"plot_id":int(best_plot.get("id",-1)),"event":"secondary_nucleus_formed","new_state":nucleus_kind,"cause":"outer households and inherited route traffic formed a durable local focus"})
+	GameState.morphology_revision+=1
+	events.append({"type":"morphology","title":"A New Local Centre Emerged","plot_id":int(best_plot.get("id",-1)),"nucleus_id":nucleus_id})
+
+func _permanent_resident_capacity()->int:
+	var capacity:=0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
+		if String(plot.get("status","")) not in ["active","stressed","damaged"]: continue
+		capacity+=int(plot.get("resident_capacity",0))
+	return capacity
+
+func _update_overflow_encampments(day:int,events:Array[Dictionary])->void:
+	var camps:Array[Dictionary]=[]
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))=="temporary_encampment": camps.append(plot)
+	camps.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.get("created_day",0))<int(b.get("created_day",0)))
+	var remaining:=maxi(0,GameState.population_total-_permanent_resident_capacity())
+	for camp in camps:
+		var prior_population:=int(camp.get("resident_count",0))
+		var target:=int(camp.get("camp_target_population",90))
+		var assigned:=mini(remaining,target)
+		remaining-=assigned
+		camp["resident_count"]=assigned
+		camp["last_update_day"]=day
+		var previous_status:=String(camp.get("status","active"))
+		if assigned<=0:
+			camp["vacant_months"]=int(camp.get("vacant_months",0))+1
+			if int(camp.vacant_months)>=3: camp["status"]="vacant"
+		else:
+			camp["vacant_months"]=0
+			camp["status"]="active"
+		if prior_population!=assigned or String(camp.get("status","active"))!=previous_status:
+			GameState.morphology_revision+=1
+			if previous_status!="vacant" and String(camp.status)=="vacant":
+				GameState.settlement_plot_history.append({"day":day,"plot_id":int(camp.id),"event":"overflow_camp_emptied","new_state":"vacant","cause":"permanent household capacity absorbed the displaced population"})
+				events.append({"type":"morphology","title":"A Temporary Camp Emptied","plot_id":int(camp.id)})
+
+func _attempt_overflow_encampment(day:int,events:Array[Dictionary],context:Dictionary={})->void:
+	var permanent_capacity:=_permanent_resident_capacity()
+	var represented_in_camps:=0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))=="temporary_encampment" and String(plot.get("status",""))=="active": represented_in_camps+=int(plot.get("resident_count",0))
+	var unrepresented:=GameState.population_total-permanent_capacity-represented_in_camps
+	if unrepresented<28: return
+	var camp_labor:=int(GameState.population_allocations.get("Construction",0))+int(GameState.population_allocations.get("Logistics",0))
+	if camp_labor<4: return
+	var plot:=_create_overflow_encampment(day,unrepresented,context)
+	if plot.is_empty(): return
+	_create_growth_route(plot,day,"camp_path")
+	GameState.settlement_plots.append(plot)
+	GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"overflow_camp_formed","new_state":"active","cause":"population exceeded durable household capacity; families occupied temporary ground using carried and salvaged cover"})
+	GameState.morphology_revision+=1
+	events.append({"type":"morphology","title":"Families Occupied Temporary Ground","plot_id":int(plot.id)})
+
+func _create_overflow_encampment(day:int,unrepresented:int,context:Dictionary={})->Dictionary:
+	var plot_id:=GameState.next_settlement_plot_id
+	var plot_seed:=hash("%d:overflow_encampment:%d" % [GameState.world_seed,plot_id])
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=plot_seed
+	var target_population:=mini(unrepresented,rng.randi_range(72,132))
+	# Temporary family ground is still real ground. Derive its footprint from a
+	# crowded but plausible open-camp density instead of squeezing a hundred people
+	# into a decorative twenty-metre speck. This keeps the scale bar honest and
+	# makes emergency expansion legible from the aerial camera.
+	var camp_density_per_hectare:=rng.randf_range(210.0,340.0)
+	var radius:=clampf(sqrt((float(target_population)/camp_density_per_hectare)/100.0/PI),0.027,0.045)
+	var anchors:Array[Dictionary]=[]
+	for existing in GameState.settlement_plots:
+		if String(existing.get("status","")) in ["ruin","reclaimed","vacant"]: continue
+		if String(existing.get("land_use","")) in ["water","waste","field"]: continue
+		anchors.append(existing)
+	if anchors.is_empty(): return {}
+	anchors.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return Vector2(a.get("centroid",Vector2.ZERO)).length()>Vector2(b.get("centroid",Vector2.ZERO)).length())
+	var outer_count:=maxi(1,ceili(float(anchors.size())*0.42))
+	var best_center:=Vector2.ZERO
+	var best_score:=-INF
+	for attempt in 80:
+		var anchor:Dictionary=anchors[rng.randi_range(0,outer_count-1)]
+		var anchor_center:=Vector2(anchor.get("centroid",Vector2.ZERO))
+		var anchor_radius:=sqrt(_polygon_area_km2(anchor.get("polygon",PackedVector2Array()))/PI)
+		var nucleus_position:=Vector2.ZERO
+		var nearest_nucleus_distance:=INF
+		for nucleus in GameState.settlement_nuclei:
+			if not bool(nucleus.get("active",true)): continue
+			var candidate_position:=Vector2(nucleus.get("position",Vector2.ZERO))
+			var distance:=anchor_center.distance_to(candidate_position)
+			if distance<nearest_nucleus_distance:
+				nearest_nucleus_distance=distance
+				nucleus_position=candidate_position
+		var outward:=(anchor_center-nucleus_position).normalized()
+		if outward.length_squared()<0.01: outward=Vector2.from_angle(rng.randf()*TAU)
+		var direction:=outward.rotated(rng.randf_range(-0.72,0.72))
+		var center:=anchor_center+direction*(anchor_radius+radius+rng.randf_range(0.006,0.018))
+		var score:=_growth_site_score(center,radius,"residential_compound",context)
+		score+=center.distance_to(nucleus_position)*2.1
+		if center.distance_to(nucleus_position)>0.72: score-=8.0
+		if score>best_score:
+			best_score=score
+			best_center=center
+	if best_score<=-9000.0: return {}
+	GameState.next_settlement_plot_id+=1
+	var polygon:=_irregular_polygon(best_center,radius,plot_seed)
+	return {
+		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(best_center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
+		"land_use":"temporary_encampment","secondary_use":"displaced_households","form":"emergency_open_encampment","roof_plan":"mixed_light_shelters","material_family":"organic","material_mix":{"Fiber Plants":0.10,"Timber":0.03},"construction_recipe":"carried_cover_and_salvaged_ground","supply_provenance":{"Personal Baggage":"retained","Salvage":"local"},"replacement_debt":{"Fiber Plants":0.90},"roof_coverage":rng.randf_range(0.045,0.085),"storeys":1,
+		"resident_capacity":0,"resident_count":target_population,"camp_target_population":target_population,"shelter_capacity":roundi(float(target_population)*rng.randf_range(0.16,0.34)),"worker_capacity":0,"worker_count":0,"storage_capacity":0.2,"condition":rng.randf_range(0.28,0.46),"maintenance_debt":0.72,"service_access":0.12,"hazard_exposure":rng.randf_range(0.22,0.42),"prosperity":0.08,
+		"status":"active","construction_progress":1.0,"growth_cause":"population exceeded permanent shelter capacity","pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.18},"habitability":0.18,"repair_state":"awaiting_materials","reoccupation_state":"displaced","vacant_months":0,
+		"displaced_households":ceili(float(target_population)/5.0),"returning_households":0,"claim_pressure":0.38,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
+	}
 
 func _completion_title(land_use:String)->String:
 	return {
@@ -313,6 +520,13 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 	var radius:=rng.randf_range(0.014,0.026)
 	var center:=Vector2.ZERO
 	var found:=false
+	var best_center:=Vector2.ZERO
+	var best_site_score:=-INF
+	var origin:Vector3=context.get("settlement_origin",GameState.settlement_founded_at)
+	var height_callable:Callable=context.get("terrain_height_at",Callable())
+	var river_callable:Callable=context.get("river_distance_at",Callable())
+	var drainage_tangent_callable:Callable=context.get("drainage_tangent_at",Callable())
+	var moisture_callable:Callable=context.get("moisture_at",Callable())
 	var existing_fields:Array[Dictionary]=[]
 	for existing in GameState.settlement_plots:
 		if String(existing.get("land_use",""))=="field" and String(existing.get("status","")) not in ["ruin","reclaimed"]: existing_fields.append(existing)
@@ -334,19 +548,44 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 			if center.distance_to(Vector2(existing.get("centroid",Vector2.ZERO)))<(radius+existing_radius)*clearance_factor:
 				clear=false
 				break
-		if clear:
+		if not clear: continue
+		var world_x:=origin.x+center.x
+		var world_z:=origin.z+center.y
+		var site_score:=rng.randf_range(-0.035,0.035)
+		if height_callable.is_valid():
+			var slope_sample:=0.036
+			var slope_gradient:=Vector2(
+				float(height_callable.call(world_x+slope_sample,world_z))-float(height_callable.call(world_x-slope_sample,world_z)),
+				float(height_callable.call(world_x,world_z+slope_sample))-float(height_callable.call(world_x,world_z-slope_sample))
+			)/(slope_sample*2.0)
+			var slope:=slope_gradient.length()
+			if slope>0.30: continue
+			site_score-=slope*3.8
+		if river_callable.is_valid():
+			var candidate_water_distance:=float(river_callable.call(world_x,world_z))
+			if candidate_water_distance<0.014: continue
+			if candidate_water_distance<INF:
+				# Early hand cultivation favors moist but non-inundated ground. The
+				# optimum remains broad because swales can be intermittent or unreliable.
+				site_score+=exp(-absf(candidate_water_distance-0.095)/0.14)*0.82
+		if moisture_callable.is_valid():
+			var candidate_moisture:=float(moisture_callable.call(world_x,world_z))
+			site_score+=clampf(candidate_moisture+0.18,-0.18,0.42)*0.68
+		if not existing_fields.is_empty(): site_score+=0.24
+		# Retain the surveyed soil bearing without forcing a geometric ray of fields.
+		site_score+=maxf(0.0,center.normalized().dot(direction))*0.18
+		if site_score>best_site_score:
+			best_site_score=site_score
+			best_center=center
 			found=true
-			break
 	if not found: return {}
+	center=best_center
 	GameState.next_settlement_plot_id+=1
-	var origin:Vector3=context.get("settlement_origin",GameState.settlement_founded_at)
 	var world_x:=origin.x+center.x
 	var world_z:=origin.z+center.y
 	var river_distance:=INF
-	var river_callable:Callable=context.get("river_distance_at",Callable())
 	if river_callable.is_valid(): river_distance=float(river_callable.call(world_x,world_z))
 	var moisture:=0.0
-	var moisture_callable:Callable=context.get("moisture_at",Callable())
 	if moisture_callable.is_valid(): moisture=float(moisture_callable.call(world_x,world_z))
 	var field_pattern:="dryland_patchwork"
 	if river_distance<0.42: field_pattern="irrigated_beds"
@@ -358,7 +597,14 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 	var crop_family:String=crop_families[absi(plot_seed)%crop_families.size()]
 	if field_pattern=="irrigated_beds" and absi(plot_seed)%3==0: crop_family="garden_beds"
 	var field_rotation:=direction.angle()+rng.randf_range(-0.68,0.68)+sin(float(field_index)*1.73)*0.22
-	var height_callable:Callable=context.get("terrain_height_at",Callable())
+	if drainage_tangent_callable.is_valid() and river_distance<0.24:
+		var drainage_tangent:Vector2=drainage_tangent_callable.call(world_x,world_z)
+		if drainage_tangent.length_squared()>0.1:
+			# Long field edges and access strips tend to follow a nearby channel while
+			# retaining household-scale irregularity. The influence fades before the
+			# broad 'irrigated' classification does, preventing ruler-straight valleys.
+			var drainage_alignment:=clampf(1.0-river_distance/0.24,0.0,1.0)*0.68
+			field_rotation=lerp_angle(field_rotation,drainage_tangent.angle(),drainage_alignment)
 	if height_callable.is_valid():
 		var sample_radius:=0.045
 		var gradient:=Vector2(
@@ -453,7 +699,8 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 	rng.seed=GameState.world_seed^day^0x27d4eb2d
 	for plot in GameState.settlement_plots:
 		var status:=String(plot.get("status","active"))
-		if status=="under_construction": continue
+		if status in ["under_construction","ruin","reclaimed"]: continue
+		var temporary_ground:=String(plot.get("land_use",""))=="temporary_encampment"
 		var previous_condition:=float(plot.get("condition",1.0))
 		var exposure:=float(plot.get("hazard_exposure",0.1))
 		var decay:=0.00065+exposure*0.00055+hardship*0.0012
@@ -464,6 +711,33 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		if status=="vacant":
 			plot["reclamation"]=clampf(float(plot.get("reclamation",0.0))+0.012+float(plot.get("vacant_months",0))*0.00012,0.0,1.0)
 		elif status=="active": plot["reclamation"]=maxf(0.0,float(plot.get("reclamation",0.0))-0.03)
+		if temporary_ground:
+			# Tents and salvaged cover do not become masonry-style ruins. Once empty,
+			# their paths and bare patches are gradually reclaimed; occupied cover can
+			# fail and become stressed, but remains temporary fabric in the record.
+			if status=="vacant" and float(plot.get("reclamation",0.0))>=0.72:
+				plot["status"]="reclaimed"
+				plot["condition"]=0.0
+				plot["repair_state"]="ground_reclaimed"
+				GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"temporary_ground_reclaimed","new_state":"reclaimed","cause":"the overflow camp emptied and vegetation returned across its temporary footprint"})
+				GameState.morphology_revision+=1
+				events.append({"type":"morphology","title":"Temporary Ground Was Reclaimed","plot_id":int(plot.id)})
+			elif status in ["active","stressed"] and rng.randf()<exposure*0.0015:
+				plot["condition"]=maxf(0.06,float(plot.condition)-rng.randf_range(0.06,0.22))
+				plot["status"]="stressed"
+				plot["repair_state"]="cover_failed"
+				GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"temporary_cover_failed","new_state":"stressed","cause":"weather or fire damaged temporary family cover"})
+				GameState.morphology_revision+=1
+				events.append({"type":"morphology","title":"Temporary Cover Failed","plot_id":int(plot.id)})
+			elif status=="active" and float(plot.condition)<0.34:
+				plot["status"]="stressed"
+				GameState.morphology_revision+=1
+			elif status=="stressed" and float(plot.condition)>=0.46:
+				plot["status"]="active"
+				GameState.morphology_revision+=1
+			if absf(float(plot.condition)-previous_condition)>0.018:
+				GameState.morphology_revision+=1
+			continue
 		if status in ["active","stressed"] and rng.randf()<exposure*0.0015:
 			var severity:=rng.randf_range(0.06,0.22)
 			plot["condition"]=maxf(0.0,float(plot.condition)-severity)
@@ -532,6 +806,22 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 			visited[current_id]=true
 			route_total_users[current_id]=int(route_total_users.get(current_id,0))+carried_users
 			current_id=int(route_parent.get(current_id,-1))
+	# A route can be busy without being a settlement-scale trunk. Rank mature
+	# non-field routes by inherited users so "main approach" remains a scarce,
+	# legible hierarchy rather than eventually spreading to every old path.
+	var main_candidates:Array[Dictionary]=[]
+	for route_id in route_by_id:
+		var candidate:Dictionary=route_by_id[route_id]
+		if String(candidate.get("kind","desire_path")) in ["field_track","camp_path"]: continue
+		var inherited_users:=int(route_total_users.get(route_id,0))
+		if inherited_users<120 or float(candidate.get("condition",0.0))<0.70: continue
+		if day-int(candidate.get("created_day",day))<720: continue
+		main_candidates.append({"id":int(route_id),"score":float(inherited_users)+float(candidate.get("traffic",0.0))*48.0+float(candidate.get("condition",0.0))*18.0})
+	main_candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.score)>float(b.score))
+	var main_approach_limit:=clampi(1+floori(float(GameState.population_total)/1800.0),1,8)
+	var main_approach_ids:Dictionary={}
+	for candidate_index in mini(main_approach_limit,main_candidates.size()):
+		main_approach_ids[int(main_candidates[candidate_index].id)]=true
 	for route_id in route_by_id:
 		var route:Dictionary=route_by_id[route_id]
 		var frontage_users:=int(route_total_users.get(route_id,0))
@@ -543,14 +833,14 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		route["traffic"]=lerpf(float(route.get("traffic",0.0)),observed_traffic,0.16)
 		var traffic:=float(route.traffic)
 		var route_kind:=String(route.get("kind","desire_path"))
-		var hierarchy:="field_track" if route_kind=="field_track" else "path"
+		var hierarchy:="field_track" if route_kind=="field_track" else ("camp_path" if route_kind=="camp_path" else "path")
 		if route_kind=="field_track":
 			if traffic>=0.34 and float(route.condition)>=0.42: hierarchy="farm_lane"
-		else:
+		elif route_kind!="camp_path":
 			if traffic>=0.30 and float(route.condition)>=0.48: hierarchy="lane"
-			if traffic>=0.90 and frontage_users>=120 and float(route.condition)>=0.72 and day-int(route.get("created_day",day))>=720: hierarchy="main_approach"
+			if main_approach_ids.has(int(route_id)) and traffic>=0.72: hierarchy="main_approach"
 		route["hierarchy"]=hierarchy
-		var target_width:=0.72 if route_kind=="field_track" else 0.62
+		var target_width:=0.72 if route_kind=="field_track" else (0.34 if route_kind=="camp_path" else 0.62)
 		if hierarchy=="farm_lane": target_width=1.35+traffic*0.55
 		elif hierarchy=="lane": target_width=1.25+traffic*1.15
 		elif hierarchy=="main_approach": target_width=2.25+traffic*1.55
@@ -665,13 +955,15 @@ func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:D
 			nearest_route=minf(nearest_route,Geometry2D.get_closest_point_to_segment(candidate,points[point_index],points[point_index+1]).distance_to(candidate))
 	var route_access:=exp(-nearest_route/0.018) if nearest_route<INF else 0.0
 	var nucleus_pull:=0.0
+	var nearest_nucleus_distance:=INF
 	for nucleus in GameState.settlement_nuclei:
 		if not bool(nucleus.get("active",true)): continue
 		var distance:=candidate.distance_to(Vector2(nucleus.get("position",Vector2.ZERO)))
+		nearest_nucleus_distance=minf(nearest_nucleus_distance,distance)
 		nucleus_pull=maxf(nucleus_pull,float(nucleus.get("pull",1.0))*exp(-distance/0.14))
 	var core_distance:=candidate.length()
-	var compactness:=exp(-core_distance/0.22)
-	var edge_preference:=exp(-absf(core_distance-0.095)/0.065)
+	var compactness:=exp(-nearest_nucleus_distance/0.22) if nearest_nucleus_distance<INF else exp(-core_distance/0.22)
+	var edge_preference:=exp(-absf(nearest_nucleus_distance-0.095)/0.065) if nearest_nucleus_distance<INF else exp(-absf(core_distance-0.095)/0.065)
 	var score:=route_access*2.8+nucleus_pull*0.72
 	if land_use=="storage": score+=compactness*1.25
 	elif land_use in ["workshop","dirty_industry"]: score+=edge_preference*1.12-route_access*0.10
@@ -693,6 +985,17 @@ func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:D
 		if river_distance<0.025: return -10000.0
 		score+=exp(-absf(river_distance-0.16)/0.20)*0.24
 	return score
+
+func _nearest_nucleus_id(position:Vector2)->int:
+	var nearest_id:=1
+	var nearest_distance:=INF
+	for nucleus in GameState.settlement_nuclei:
+		if not bool(nucleus.get("active",true)): continue
+		var distance:=position.distance_to(Vector2(nucleus.get("position",Vector2.ZERO)))
+		if distance<nearest_distance:
+			nearest_distance=distance
+			nearest_id=int(nucleus.get("id",1))
+	return nearest_id
 
 func _create_functional_growth_plot(day:int,land_use:String,recipe:Dictionary,context:Dictionary={})->Dictionary:
 	var plot_id:=GameState.next_settlement_plot_id
@@ -727,8 +1030,8 @@ func _create_functional_growth_plot(day:int,land_use:String,recipe:Dictionary,co
 	var workers:=int(GameState.population_allocations.get("Crafting" if land_use=="workshop" else "Logistics",0))
 	var worker_capacity:=rng.randi_range(5,8)
 	return {
-		"id":plot_id,"seed":plot_seed,"nucleus_id":1,"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
-		"land_use":land_use,"secondary_use":"craft" if land_use=="workshop" else "provisions","form":recipe.form,"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"specialized_%s_expansion" % land_use,"supply_provenance":recipe.cost.duplicate(true),"replacement_debt":{},"roof_coverage":0.42 if land_use=="workshop" else 0.54,"storeys":1,
+		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
+		"land_use":land_use,"secondary_use":"craft" if land_use=="workshop" else "provisions","form":recipe.form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form)),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"specialized_%s_expansion" % land_use,"supply_provenance":recipe.cost.duplicate(true),"replacement_debt":{},"roof_coverage":0.42 if land_use=="workshop" else 0.54,"storeys":1,
 		"resident_capacity":0,"resident_count":0,"worker_capacity":worker_capacity,"worker_count":mini(workers,worker_capacity),"storage_capacity":rng.randf_range(10.0,18.0) if land_use=="storage" else 1.4,"condition":0.58,"maintenance_debt":0.0,"service_access":0.38,"hazard_exposure":rng.randf_range(0.10,0.24),"prosperity":0.34,
 		"status":"under_construction","construction_progress":0.0,"growth_cause":"assigned %s labor, construction labor, and delivered materials" % ("craft" if land_use=="workshop" else "logistics"),"pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied",
 		"displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
@@ -751,16 +1054,19 @@ func _available_household_recipe()->Dictionary:
 		return {"family":"stone","form":"dry_stone_household","cost":{"Stone":4.2,"Timber":0.8},"mix":{"Stone":0.72,"Timber":0.12,"Fiber Plants":0.06}}
 	return {}
 
-func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
-	for plot in GameState.settlement_plots:
-		if String(plot.get("status",""))=="under_construction": return
+func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictionary={},action_index:=0)->bool:
 	var capacity:=_resident_capacity_for_growth()
-	if GameState.population_total<=roundi(float(capacity)*0.88): return
-	if int(GameState.population_allocations.get("Construction",0))<4: return
+	if GameState.population_total<=roundi(float(capacity)*0.88): return false
+	if int(GameState.population_allocations.get("Construction",0))<4: return false
 	var recipe:=_available_household_recipe()
-	if recipe.is_empty(): return
+	if recipe.is_empty(): return false
+	# Some pressure becomes roofed infill inside a viable inherited compound;
+	# other months still create edge plots. This keeps dense cores and irregular
+	# expansion in tension instead of choosing one morphology forever.
+	var monthly_phase:=(floori(float(day)/30.0)+action_index)%4
+	if monthly_phase!=3 and _attempt_household_infill(day,recipe,events,action_index): return true
 	var plot:=_create_household_growth_plot(day,recipe,context)
-	if plot.is_empty(): return
+	if plot.is_empty(): return false
 	for resource_name in recipe.cost:
 		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(recipe.cost[resource_name]))
 	_create_growth_route(plot,day)
@@ -768,6 +1074,51 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":"household crowding, available labor, and delivered materials"})
 	GameState.morphology_revision+=1
 	events.append({"type":"morphology","title":"New Household Ground Claimed","plot_id":int(plot.id)})
+	return true
+
+func _attempt_household_infill(day:int,recipe:Dictionary,events:Array[Dictionary],action_index:=0)->bool:
+	var route_by_id:Dictionary={}
+	for route in GameState.settlement_routes:
+		if bool(route.get("active",true)): route_by_id[int(route.get("id",-1))]=route
+	var best_plot:Dictionary={}
+	var best_score:=-INF
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
+		if String(plot.get("status","")) not in ["active","stressed"]: continue
+		var coverage:=float(plot.get("roof_coverage",0.0))
+		var infill_units:=int(plot.get("infill_units",0))
+		if coverage>=0.62 or infill_units>=3: continue
+		if float(plot.get("area_ha",0.0))<0.012: continue
+		var route:Dictionary=route_by_id.get(int(plot.get("frontage_route_id",-1)),{})
+		var score:=float(plot.get("service_access",0.0))*1.15+float(route.get("traffic",0.0))*0.78+float(plot.get("area_ha",0.0))*4.0-float(plot.get("hazard_exposure",0.0))*0.62-float(infill_units)*0.28
+		if score>best_score:
+			best_score=score
+			best_plot=plot
+	if best_plot.is_empty(): return false
+	var cost_scale:=0.58+float(int(best_plot.get("infill_units",0)))*0.12
+	for resource_name in recipe.cost:
+		var required:=float(recipe.cost[resource_name])*cost_scale
+		if float(GameState.resource_stockpiles.get(resource_name,0.0))<required: return false
+	for resource_name in recipe.cost:
+		var required:=float(recipe.cost[resource_name])*cost_scale
+		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-required)
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d:infill:%d:%d:%d" % [GameState.world_seed,int(best_plot.id),day,action_index])
+	var capacity_gain:=rng.randi_range(3,6)
+	best_plot["infill_units"]=int(best_plot.get("infill_units",0))+1
+	best_plot["resident_capacity"]=int(best_plot.get("resident_capacity",0))+capacity_gain
+	best_plot["roof_coverage"]=minf(0.64,float(best_plot.get("roof_coverage",0.0))+rng.randf_range(0.065,0.105))
+	best_plot["secondary_use"]="shared_yard" if String(best_plot.get("secondary_use",""))=="" else String(best_plot.secondary_use)
+	best_plot["condition"]=maxf(0.32,float(best_plot.get("condition",0.7))-0.018)
+	best_plot["hazard_exposure"]=clampf(float(best_plot.get("hazard_exposure",0.1))+0.012,0.0,1.0)
+	best_plot["last_update_day"]=day
+	var provenance:Dictionary=best_plot.get("supply_provenance",{}).duplicate(true)
+	for resource_name in recipe.cost: provenance[resource_name]=float(provenance.get(resource_name,0.0))+float(recipe.cost[resource_name])*cost_scale
+	best_plot["supply_provenance"]=provenance
+	GameState.settlement_plot_history.append({"day":day,"plot_id":int(best_plot.id),"event":"compound_infilled","new_state":"active","cause":"household pressure, route access, construction labor, and delivered materials roofed part of an inherited yard","capacity_gain":capacity_gain})
+	GameState.morphology_revision+=1
+	events.append({"type":"morphology","title":"An Inherited Compound Was Infilled","plot_id":int(best_plot.id),"capacity_gain":capacity_gain})
+	return true
 
 func _create_growth_route(plot:Dictionary,day:int,route_kind:String="desire_path")->void:
 	var plot_center:=Vector2(plot.get("centroid",Vector2.ZERO))
@@ -786,7 +1137,7 @@ func _create_growth_route(plot:Dictionary,day:int,route_kind:String="desire_path
 	var bend_strength:=minf(0.004,nearest_distance*0.16)
 	var bend_a:=plot_center.lerp(nearest,0.36)+side*sin(float(int(plot.id)*29+GameState.world_seed))*bend_strength
 	var bend_b:=plot_center.lerp(nearest,0.72)-side*sin(float(int(plot.id)*17+GameState.world_seed)*0.67)*bend_strength*0.62
-	GameState.settlement_routes.append({"id":route_id,"kind":route_kind,"points":PackedVector2Array([plot_center,bend_a,bend_b,nearest]),"condition":0.16 if route_kind=="field_track" else 0.22,"width_m":0.72 if route_kind=="field_track" else 0.58,"created_day":day,"active":true})
+	GameState.settlement_routes.append({"id":route_id,"kind":route_kind,"points":PackedVector2Array([plot_center,bend_a,bend_b,nearest]),"condition":0.10 if route_kind=="camp_path" else (0.16 if route_kind=="field_track" else 0.22),"width_m":0.34 if route_kind=="camp_path" else (0.72 if route_kind=="field_track" else 0.58),"created_day":day,"active":true})
 	plot["frontage_route_id"]=route_id
 
 func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary={})->Dictionary:
@@ -803,11 +1154,17 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 		if String(existing.get("land_use","")) in ["residential_compound","mixed_household","communal","workshop"] and String(existing.get("status","")) not in ["ruin","reclaimed"]:
 			anchors.append(existing)
 	if anchors.is_empty(): return {}
-	anchors.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return Vector2(a.get("centroid",Vector2.ZERO)).length()<Vector2(b.get("centroid",Vector2.ZERO)).length())
+	var active_nuclei:Array[Dictionary]=[]
+	for nucleus in GameState.settlement_nuclei:
+		if bool(nucleus.get("active",true)): active_nuclei.append(nucleus)
+	var target_nucleus:Dictionary=active_nuclei[absi(plot_seed)%active_nuclei.size()] if not active_nuclei.is_empty() else {"id":1,"position":Vector2.ZERO}
+	var target_nucleus_position:=Vector2(target_nucleus.get("position",Vector2.ZERO))
+	anchors.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		return Vector2(a.get("centroid",Vector2.ZERO)).distance_to(target_nucleus_position)<Vector2(b.get("centroid",Vector2.ZERO)).distance_to(target_nucleus_position))
 	var cluster_growth:=anchors.size()>=34 and plot_id%10 in [0,1,2]
 	var cluster_phase:=floori(float(plot_id)/10.0)
 	var cluster_angle:=fmod(float(hash("%d:outer_cluster:%d" % [GameState.world_seed,cluster_phase]))*0.000001,TAU)
-	var cluster_target:=Vector2.from_angle(cluster_angle)*((0.145+float(cluster_phase%4)*0.016) if cluster_growth else 0.0)
+	var cluster_target:=target_nucleus_position+Vector2.from_angle(cluster_angle)*((0.090+float(cluster_phase%4)*0.014) if cluster_growth else 0.0)
 	for attempt in 72:
 		var anchor_index:=mini(anchors.size()-1,floori(pow(rng.randf(),2.15)*float(anchors.size())))
 		if cluster_growth:
@@ -817,7 +1174,8 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 		var anchor_center:=Vector2(anchor.get("centroid",Vector2.ZERO))
 		var anchor_polygon:PackedVector2Array=anchor.get("polygon",PackedVector2Array())
 		var anchor_radius:=sqrt(_polygon_area_km2(anchor_polygon)/PI)
-		var outward:=anchor_center.normalized() if anchor_center.length()>0.004 else Vector2.from_angle(rng.randf()*TAU)
+		var nucleus_outward:=anchor_center-target_nucleus_position
+		var outward:=nucleus_outward.normalized() if nucleus_outward.length()>0.004 else Vector2.from_angle(rng.randf()*TAU)
 		var angle:=rng.randf()*TAU
 		if rng.randf()<0.28:
 			angle=outward.angle()+rng.randf_range(-0.92,0.92)
@@ -825,7 +1183,7 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 		var score:=_growth_site_score(center,radius,"residential_compound",context)
 		# Most households infill, but a stable seeded minority follows the outer
 		# frontage so a settlement develops irregular arms rather than a disk.
-		if (plot_id+GameState.world_seed)%5==0: score+=exp(-absf(center.length()-0.14)/0.08)*0.82
+		if (plot_id+GameState.world_seed)%5==0: score+=exp(-absf(center.distance_to(target_nucleus_position)-0.11)/0.075)*0.82
 		if cluster_growth: score+=exp(-center.distance_to(cluster_target)/0.075)*1.48
 		if score>best_score:
 			best_score=score
@@ -835,12 +1193,21 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 	GameState.next_settlement_plot_id+=1
 	var polygon:=_irregular_polygon(center,radius,plot_seed)
 	return {
-		"id":plot_id,"seed":plot_seed,"nucleus_id":1,"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
-		"land_use":"residential_compound","secondary_use":"","form":recipe.form,"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"household_expansion","supply_provenance":recipe.cost.duplicate(true),"replacement_debt":{},"roof_coverage":0.30,"storeys":1,
+		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
+		"land_use":"residential_compound","secondary_use":"","form":recipe.form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form)),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"household_expansion","supply_provenance":recipe.cost.duplicate(true),"replacement_debt":{},"roof_coverage":0.30,"storeys":1,
 		"resident_capacity":rng.randi_range(7,10),"resident_count":0,"worker_capacity":1,"worker_count":0,"storage_capacity":0.8,"condition":0.58,"maintenance_debt":0.0,"service_access":0.34,"hazard_exposure":rng.randf_range(0.08,0.20),"prosperity":0.31,
 		"status":"under_construction","construction_progress":0.0,"growth_cause":"household crowding, available labor, and delivered materials","pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied",
 		"displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
 	}
+
+func _roof_plan_for(plot_seed:int,material_family:String,form:String)->String:
+	if form in ["portable_shelter_cluster","light_shelter_cluster"]:
+		return ["round_light_shelter","tapered_light_shelter","ridge_light_shelter"][absi(plot_seed)%3]
+	if material_family=="earth":
+		return ["irregular_flat","courtyard_flat","mixed_earthen_span"][absi(plot_seed)%3]
+	if material_family=="stone":
+		return ["rubble_slab","timber_span_on_rubble","rubble_slab"][absi(plot_seed)%3]
+	return ["round_thatch","tapered_thatch","timber_ridge","long_thatch"][absi(plot_seed)%4]
 
 func rebuild_summary()->Dictionary:
 	var active_plots:=0
@@ -849,6 +1216,8 @@ func rebuild_summary()->Dictionary:
 	var condition_total:=0.0
 	var vacant:=0
 	var ruins:=0
+	var temporary_camp_population:=0
+	var temporary_shelter_capacity:=0
 	var uses:Dictionary={}
 	var occupied_capacity:=0
 	for plot in GameState.settlement_plots:
@@ -861,13 +1230,16 @@ func rebuild_summary()->Dictionary:
 			occupied_area+=area
 		if status=="vacant": vacant+=1
 		if status=="ruin": ruins+=1
+		if String(plot.get("land_use",""))=="temporary_encampment" and status=="active":
+			temporary_camp_population+=int(plot.get("resident_count",0))
+			temporary_shelter_capacity+=int(plot.get("shelter_capacity",0))
 		if status in ["active","stressed"]: occupied_capacity+=int(plot.get("resident_capacity",0))
 		if status not in ["vacant","ruin","reclaimed"]: uses[String(plot.get("land_use","vacant"))]=true
 	var count:=GameState.settlement_plots.size()
 	var population:=GameState.population_total
 	var permanence:=clampf(0.16+float(active_plots)/maxf(1.0,float(count))*0.15+float(GameState.settlement_completed.size())*0.035,0.0,1.0)
 	var specialization:=clampf(float(GameState.population_allocations.get("Crafting",0)+GameState.population_allocations.get("Extraction",0)+GameState.population_allocations.get("Knowledge",0)+GameState.population_allocations.get("Administration",0)+GameState.population_allocations.get("Logistics",0))/maxf(1.0,float(GameState.able_population())),0.0,1.0)
-	var exchange:=clampf(float(GameState.simulation_metrics.get("logistics",0.16))*0.35+DiscoverySystem.effect("trade_capacity")*0.40,0.0,1.0)
+	var exchange:=clampf(float(GameState.economy_metrics.get("market_access",float(GameState.simulation_metrics.get("logistics",0.16))*0.35+DiscoverySystem.effect("trade_capacity")*0.40)),0.0,1.0)
 	var institutions:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.62))*0.35+float(GameState.population_allocations.get("Administration",0))/maxf(1.0,float(population)*0.06)*0.25,0.0,1.0)
 	var connectivity:=clampf(float(GameState.simulation_metrics.get("logistics",0.16))*0.55+DiscoverySystem.effect("route_speed")*0.30,0.0,1.0)
 	var infrastructure:=clampf(float(GameState.settlement_completed.size())/10.0+DiscoverySystem.effect("construction_rate")*0.20,0.0,1.0)
@@ -878,8 +1250,9 @@ func rebuild_summary()->Dictionary:
 		"built_area_ha":built_area,"occupied_area_ha":occupied_area,"vacancy_ratio":float(vacant)/maxf(1.0,float(count)),"ruin_ratio":float(ruins)/maxf(1.0,float(count)),
 		"mean_condition":condition_total/maxf(1.0,float(count)),"density_people_ha":float(population)/maxf(0.01,occupied_area),"permanence":permanence,
 		"specialization":specialization,"exchange":exchange,"institutions":institutions,"connectivity":connectivity,"infrastructure":infrastructure,
-		"diversity":clampf(float(uses.size())/12.0,0.0,1.0),"food_import_share":food_import_share,"active_nuclei":_active_nuclei(),"district_count":1,
-		"usable_resident_capacity":occupied_capacity,"limiting_factors":[]
+		"price_stability":clampf(1.0-absf(float(GameState.economy_metrics.get("inflation",0.0)))*8.0,0.0,1.0),"inequality":float(GameState.economy_metrics.get("inequality",0.0)),
+		"diversity":clampf(float(uses.size())/12.0,0.0,1.0),"food_import_share":food_import_share,"active_nuclei":_active_nuclei(),"district_count":maxi(1,_active_nuclei()),
+		"usable_resident_capacity":occupied_capacity,"population_without_permanent_housing":maxi(0,population-occupied_capacity),"temporary_camp_population":temporary_camp_population,"temporary_shelter_capacity":temporary_shelter_capacity,"unsheltered_population":maxi(0,population-occupied_capacity-temporary_shelter_capacity),"limiting_factors":[]
 	}
 	var classification_result:=_classify(summary)
 	summary["classification"]=classification_result.classification

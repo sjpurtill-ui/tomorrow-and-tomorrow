@@ -18,6 +18,12 @@ func _reset_fixture(seed:int)->void:
 	GameState.elapsed_days=19.0
 	model.ensure_founded()
 
+func _count_use(land_use:String)->int:
+	var count:=0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))==land_use: count+=1
+	return count
+
 func test_founding_creates_complete_functional_plot_set()->void:
 	assert_int(GameState.settlement_plots.size()).is_between(18,30)
 	var uses:Dictionary={}
@@ -107,17 +113,18 @@ func test_population_alone_cannot_create_a_town()->void:
 	assert_bool((summary.limiting_factors as Array).is_empty()).is_false()
 
 func test_household_growth_requires_pressure_labor_and_delivered_materials()->void:
-	var original_count:=GameState.settlement_plots.size()
+	var original_residential:=_count_use("residential_compound")
 	GameState.ensure_living_population(240)
 	GameState.population_allocations["Construction"]=8
 	GameState.resource_stockpiles={}
 	GameState.elapsed_days=60.0
 	model.process_month()
-	assert_int(GameState.settlement_plots.size()).is_equal(original_count)
+	assert_int(_count_use("residential_compound")).is_equal(original_residential)
+	assert_int(_count_use("temporary_encampment")).is_greater(0)
 	GameState.resource_stockpiles={"Timber":8.0,"Fiber Plants":6.0}
 	GameState.elapsed_days=90.0
 	model.process_month()
-	assert_int(GameState.settlement_plots.size()).is_equal(original_count+1)
+	assert_int(_count_use("residential_compound")).is_equal(original_residential+1)
 	var growth_plot:Dictionary=GameState.settlement_plots.back()
 	assert_str(String(growth_plot.status)).is_equal("under_construction")
 	assert_str(String(growth_plot.growth_cause)).contains("materials")
@@ -186,6 +193,10 @@ func test_two_centuries_of_supplied_growth_stays_bounded_and_valid()->void:
 	for plot in GameState.settlement_plots:
 		for point in plot.polygon: maximum_extent=maxf(maximum_extent,point.length())
 	assert_float(maximum_extent*2.0).is_less(1.8)
+	var main_approaches:=0
+	for route in GameState.settlement_routes:
+		if String(route.get("hierarchy",""))=="main_approach": main_approaches+=1
+	assert_int(main_approaches).is_less_equal(clampi(1+floori(float(GameState.population_total)/1800.0),1,8))
 	assert_int(GameState.settlement_plot_history.size()).is_greater(GameState.settlement_plots.size())
 
 func test_cultivation_requires_discovery_food_labor_and_surveyed_fertile_ground()->void:
@@ -291,3 +302,68 @@ func test_role_reallocation_visibly_idles_and_reopens_working_ground()->void:
 	model.process_month()
 	assert_int(int(field.worker_count)).is_greater(0)
 	assert_str(String(field.status)).is_equal("active")
+
+func test_overflow_population_claims_temporary_ground_without_free_housing()->void:
+	GameState.ensure_living_population(420)
+	GameState.population_allocations["Construction"]=4
+	GameState.population_allocations["Logistics"]=4
+	GameState.resource_stockpiles={}
+	GameState.elapsed_days=60.0
+	model.process_month()
+	var camp:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))=="temporary_encampment":
+			camp=plot
+			break
+	assert_bool(camp.is_empty()).is_false()
+	assert_int(int(camp.get("resident_capacity",-1))).is_equal(0)
+	assert_int(int(camp.get("resident_count",0))).is_greater(0)
+	assert_float(float(camp.get("roof_coverage",1.0))).is_less(0.10)
+	assert_str(String(camp.get("repair_state",""))).is_equal("awaiting_materials")
+	var camp_density:=float(camp.get("resident_count",0))/maxf(0.001,float(camp.get("area_ha",0.0)))
+	assert_float(camp_density).is_between(100.0,520.0)
+	var summary:Dictionary=model.rebuild_summary()
+	assert_int(int(summary.get("population_without_permanent_housing",0))).is_greater(0)
+	assert_int(int(summary.get("temporary_camp_population",0))).is_greater(0)
+	assert_array(model.validate_state()).is_empty()
+	# Once durable capacity exceeds the population, inherited camp ground empties
+	# rather than being silently promoted into free permanent housing.
+	GameState.population_total=1
+	var events:Array[Dictionary]=[]
+	for day in [90,120,150]: model.call("_update_overflow_encampments",day,events)
+	assert_int(int(camp.get("resident_count",-1))).is_equal(0)
+	assert_str(String(camp.get("status",""))).is_equal("vacant")
+	# Temporary cover leaves an archaeological trace in history, but the physical
+	# ground is reclaimed instead of hardening into a permanent building ruin.
+	for month in range(6,72):
+		var day:=month*30
+		model.call("_update_overflow_encampments",day,events)
+		model.call("_process_occupancy_and_maintenance",day,events)
+	assert_str(String(camp.get("status",""))).is_equal("reclaimed")
+	assert_str(String(camp.get("repair_state",""))).is_equal("ground_reclaimed")
+
+func test_resource_backed_infill_adds_capacity_without_rewriting_plot_geometry()->void:
+	GameState.ensure_living_population(280)
+	GameState.population_allocations["Construction"]=12
+	GameState.population_allocations["Logistics"]=6
+	GameState.resource_stockpiles={"Timber":30.0,"Fiber Plants":24.0}
+	var inherited_geometry:Dictionary={}
+	var inherited_capacity:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
+		inherited_geometry[int(plot.id)]=(plot.polygon as PackedVector2Array).duplicate()
+		inherited_capacity[int(plot.id)]=int(plot.get("resident_capacity",0))
+	GameState.elapsed_days=120.0
+	model.process_month()
+	var infilled:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if int(plot.get("infill_units",0))>0:
+			infilled=plot
+			break
+	assert_bool(infilled.is_empty()).is_false()
+	var plot_id:=int(infilled.id)
+	assert_array(infilled.polygon).is_equal(inherited_geometry[plot_id])
+	assert_int(int(infilled.resident_capacity)).is_greater(int(inherited_capacity[plot_id]))
+	assert_float(float(infilled.roof_coverage)).is_greater(0.30)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(30.0)
+	assert_array(model.validate_state()).is_empty()

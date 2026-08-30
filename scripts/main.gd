@@ -31,8 +31,6 @@ var camera_origin := Vector2.ZERO
 var game_day := 1
 var game_speed := 1
 var day_progress := 0.0
-var treasury: Array[float] = []
-var income: Array[float] = []
 var world_seed := 0
 var continent_noise := FastNoiseLite.new()
 var detail_noise := FastNoiseLite.new()
@@ -64,7 +62,6 @@ func _ready() -> void:
 	_generate_province_data()
 	_build_terrain_texture()
 	_create_starting_armies()
-	_recalculate_economy()
 	queue_redraw()
 
 func _configure_world_noise() -> void:
@@ -225,15 +222,6 @@ func _create_starting_armies() -> void:
 	if starting_province >= 0:
 		armies.append({"owner": 0, "province": starting_province, "population": 120, "type": "Settler"})
 
-func _recalculate_economy() -> void:
-	treasury.resize(COUNTRY_COUNT)
-	income.resize(COUNTRY_COUNT)
-	for country in COUNTRY_COUNT:
-		income[country] = 0.0
-	for province in PROVINCE_COUNT:
-		if province_owner[province] >= 0 and not province_is_water[province]:
-			income[province_owner[province]] += province_population[province] / 100000.0 + province_resource_amount[province] * 0.15
-
 func _nearest_seed(point: Vector2) -> int:
 	var nearest := 0
 	var best := INF
@@ -314,8 +302,6 @@ func _process(delta: float) -> void:
 		var elapsed_days := int(day_progress)
 		day_progress -= elapsed_days
 		game_day += elapsed_days
-		for country in COUNTRY_COUNT:
-			treasury[country] += income[country] * elapsed_days / 30.0
 		queue_redraw()
 
 func _unhandled_key_input(event: InputEvent) -> void:

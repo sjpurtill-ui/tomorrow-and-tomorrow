@@ -256,7 +256,8 @@ func _material_profile(resource_name:String)->Dictionary:
 		"Bitumen":{"family":"chemical","bulk":0.85,"store":"sealed","loss":0.0020,"base_yield":0.16},
 		"Salt":{"family":"mineral","bulk":0.80,"store":"dry","loss":0.0018,"base_yield":0.24},
 		"Sulfur":{"family":"chemical","bulk":0.75,"store":"sealed","loss":0.0012,"base_yield":0.12},
-		"Nitrates":{"family":"chemical","bulk":0.70,"store":"dry","loss":0.0025,"base_yield":0.10}
+		"Nitrates":{"family":"chemical","bulk":0.70,"store":"dry","loss":0.0025,"base_yield":0.10},
+		"Coin":{"family":"metal","bulk":0.05,"store":"secure","loss":0.00005,"base_yield":0.0}
 	}
 	if profiles.has(resource_name): return profiles[resource_name]
 	if "Ore" in resource_name or resource_name in ["Graphite","Lead Ore"]: return {"family":"metal","bulk":1.55,"store":"secure","loss":0.0002,"base_yield":0.14}

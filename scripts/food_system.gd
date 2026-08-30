@@ -159,7 +159,7 @@ func _calculate_demand(traveling: bool) -> Dictionary:
 	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("prisoner_food_demand"):
 		prisoner_custody=maxf(0.0,float(military_campaign.prisoner_food_demand()))
-	var ration_factor:=1.0-_modifier_strength("rationing")*0.30
+	var ration_factor:=1.0+_policy_effect("food_demand")
 	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoner_custody
 	return {
 		"base":base,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,
@@ -202,7 +202,7 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	practice+=DiscoverySystem.effect("foraging_yield")
 	practice+=DiscoverySystem.effect("food_output")
 	practice+=_modifier_strength("abundant_game")-_modifier_strength("lean_harvest")
-	practice+=_modifier_strength("foraging_drive")*0.42-_modifier_strength("conservation_order")*0.18
+	practice+=_policy_effect("food_yield")
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=GameState.world_seed^int(GameState.elapsed_days+1.0)*7919
 	var variation:=rng.randf_range(0.93,1.07)
@@ -328,7 +328,7 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	var current_day:=GameState.elapsed_days
 	var pre_ration_current:=float(demand_breakdown.get("total",0.0))+float(demand_breakdown.get("rationing",0.0))
 	var non_climate:=maxf(0.0,pre_ration_current-float(demand_breakdown.get("climate",0.0)))
-	var ration_factor:=1.0-_modifier_strength("rationing")*0.30
+	var ration_factor:=1.0+_policy_effect("food_demand")
 	var inaccessible_army_rations:=float(demand_breakdown.get("army_field",0.0))*(1.0-clampf(provision_delivery_ratio,0.0,1.0))
 	var first_shortage:=-1
 	var total_produced:=0.0
@@ -389,6 +389,20 @@ func _stock_total() -> float:
 	for amount in GameState.food_stocks.values(): total+=float(amount)
 	return total
 
+func remove_for_external_trade(requested:float)->float:
+	initialize()
+	var removed:=0.0
+	for amount in _consume(maxf(0.0,requested)).values(): removed+=float(amount)
+	_sync_total()
+	return removed
+
+func receive_external_food(requested:float)->float:
+	initialize()
+	var received:=maxf(0.0,requested)
+	GameState.food_stocks["Dry staples"]=float(GameState.food_stocks.get("Dry staples",0.0))+received
+	_sync_total()
+	return received
+
 func _sync_total() -> void:
 	GameState.resource_stockpiles["Food"]=_stock_total()
 
@@ -396,4 +410,10 @@ func _modifier_strength(effect_id: String) -> float:
 	var engine:=get_node_or_null("/root/ConsequenceEngine")
 	if engine and engine.has_method("modifier_strength"):
 		return float(engine.call("modifier_strength",effect_id))
+	return 0.0
+
+func _policy_effect(channel:String)->float:
+	var engine:=get_node_or_null("/root/ConsequenceEngine")
+	if engine and engine.has_method("policy_effect"):
+		return float(engine.call("policy_effect",channel))
 	return 0.0

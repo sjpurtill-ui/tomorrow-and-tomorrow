@@ -33,10 +33,98 @@ func apply_campaign_goal(goal: Dictionary) -> void:
 		GameState.active_modifiers.append(pressure)
 	_add_event("Mandate Received",String(goal.get("title","A civilization must be made.")),"mandate","major")
 
-func apply_policy(effect_id: String,magnitude: float,duration_days: float,source: String) -> void:
+func apply_policy(effect_id: String,magnitude: float,duration_days: float,source: String,metadata:Dictionary={})->bool:
 	initialize()
-	GameState.active_modifiers.append({"id":effect_id,"magnitude":clampf(magnitude,-0.35,0.35),"until_day":GameState.elapsed_days+clampf(duration_days,1.0,3650.0),"description":source})
+	var incoming_sequence:=int(metadata.get("source_order_sequence",0))
+	var incoming_order_id:=String(metadata.get("source_order_id",""))
+	for existing_variant in GameState.active_modifiers:
+		var existing:Dictionary=existing_variant
+		if String(existing.get("id",""))!=effect_id or String(existing.get("kind",""))!="policy" or GameState.elapsed_days>float(existing.get("until_day",-INF)): continue
+		if incoming_order_id!="" and String(existing.get("source_order_id",""))==incoming_order_id: return false
+		var existing_sequence:=int(existing.get("source_order_sequence",0))
+		if incoming_sequence>0 and existing_sequence>incoming_sequence:
+			_add_event("Order Overtaken","A newer %s order was already in force when this interpretation arrived; the older submission changed no variables." % effect_id.replace("_"," "),"institutions","notice")
+			return false
+	# A standing policy supersedes its previous version instead of becoming an
+	# exploitable stack of repeated identical pronouncements.
+	var superseded:=false
+	var prior_magnitude:=0.0
+	for modifier in GameState.active_modifiers:
+		if String(modifier.get("id",""))==effect_id and String(modifier.get("kind",""))=="policy" and GameState.elapsed_days<=float(modifier.get("until_day",-INF)):
+			superseded=true
+			prior_magnitude=float(modifier.get("magnitude",0.0))
+			_refresh_policy_observation_record(modifier)
+			modifier["until_day"]=GameState.elapsed_days-0.001
+			modifier["ended_day"]=GameState.elapsed_days
+			modifier["ended_reason"]="superseded"
+			modifier["superseded_by_order_id"]=String(metadata.get("source_order_id",""))
+	if superseded: _record_policy_churn(clampf(0.025+absf(prior_magnitude-clampf(magnitude,-0.35,0.35))*0.12,0.025,0.07),"A standing %s order was replaced before its term ended." % effect_id.replace("_"," "))
+	var effects:Dictionary=(metadata.get("effects",{}) as Dictionary).duplicate(true)
+	if effects.is_empty() and GovernmentPolicyCatalog.has_policy(effect_id): effects=GovernmentPolicyCatalog.definition(effect_id).get("effects",{})
+	var record:={"id":effect_id,"kind":"policy","effects":effects,"magnitude":clampf(magnitude,-0.35,0.35),"started_day":GameState.elapsed_days,"until_day":GameState.elapsed_days+clampf(duration_days,1.0,3650.0),"description":source}
+	var observation_baseline:=_capture_policy_observation(effects)
+	var observation_baseline_days:Dictionary={}
+	for metric in observation_baseline: observation_baseline_days[metric]=GameState.elapsed_days
+	record["observation_baseline"]=observation_baseline
+	record["observation_baseline_days"]=observation_baseline_days
+	record["observation_latest"]=observation_baseline.duplicate(true)
+	record["observation_updated_day"]=GameState.elapsed_days
+	for key in metadata:
+		if String(key)=="effects": continue
+		record[key]=metadata[key]
+	GameState.active_modifiers.append(record)
+	_prune_policy_history()
 	_add_event("Order Issued",source,"policy","notice")
+	return true
+
+func repeal_policy(effect_id:String,source:String,metadata:Dictionary={})->bool:
+	initialize()
+	var repealed:=false
+	var longest_remaining:=0.0
+	for modifier in GameState.active_modifiers:
+		if String(modifier.get("id",""))!=effect_id or String(modifier.get("kind",""))!="policy": continue
+		if GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		longest_remaining=maxf(longest_remaining,float(modifier.get("until_day",GameState.elapsed_days))-GameState.elapsed_days)
+		_refresh_policy_observation_record(modifier)
+		modifier["until_day"]=GameState.elapsed_days-0.001
+		modifier["repealed_day"]=GameState.elapsed_days
+		modifier["ended_day"]=GameState.elapsed_days
+		modifier["ended_reason"]="repealed"
+		for key in metadata: modifier["repeal_"+String(key)]=metadata[key]
+		repealed=true
+	if repealed and longest_remaining>7.0: _record_policy_churn(clampf(0.025+longest_remaining/3650.0*0.025,0.025,0.06),"A standing %s order was rescinded before its term ended." % effect_id.replace("_"," "))
+	_add_event("Order Rescinded",source if repealed else "No active %s order remained to rescind." % effect_id.replace("_"," "),"policy","notice")
+	_prune_policy_history()
+	return repealed
+
+func _record_policy_churn(magnitude:float,description:String)->void:
+	GameState.active_modifiers.append({"id":"policy_churn","kind":"governance","magnitude":clampf(magnitude,0.0,0.10),"started_day":GameState.elapsed_days,"until_day":GameState.elapsed_days+120.0,"description":description})
+	_add_event("Policy Reversal",description,"institutions","warning")
+
+func refresh_policy_lifecycle()->void:
+	for modifier_variant in GameState.active_modifiers:
+		var modifier:Dictionary=modifier_variant
+		if String(modifier.get("kind","")) not in ["policy","governance"] or modifier.has("ended_reason"): continue
+		if GameState.elapsed_days>float(modifier.get("until_day",INF)):
+			if String(modifier.get("kind",""))=="policy": _refresh_policy_observation_record(modifier)
+			modifier["ended_reason"]="expired"
+			modifier["ended_day"]=float(modifier.get("until_day",GameState.elapsed_days))
+
+func _prune_policy_history(limit:=400)->void:
+	refresh_policy_lifecycle()
+	if GameState.active_modifiers.size()<=limit: return
+	var retained_orders:Dictionary={}
+	for order_variant in GameState.sovereign_orders: retained_orders[String((order_variant as Dictionary).get("id",""))]=true
+	while GameState.active_modifiers.size()>limit:
+		var remove_index:=-1
+		for index in GameState.active_modifiers.size():
+			var modifier:Dictionary=GameState.active_modifiers[index]
+			if String(modifier.get("kind","")) not in ["policy","governance"] or not modifier.has("ended_reason"): continue
+			if String(modifier.get("kind",""))=="policy" and retained_orders.has(String(modifier.get("source_order_id",""))): continue
+			remove_index=index
+			break
+		if remove_index<0: break
+		GameState.active_modifiers.remove_at(remove_index)
 
 func modifier_strength(effect_id: String) -> float:
 	var result := 0.0
@@ -48,8 +136,118 @@ func modifier_strength(effect_id: String) -> float:
 		result += clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)
 	return clampf(result,-0.50,0.50)
 
+func policy_effect(channel:String)->float:
+	var result:=0.0
+	for modifier_variant in GameState.active_modifiers:
+		var modifier:Dictionary=modifier_variant
+		if String(modifier.get("kind",""))!="policy" or GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		var effects:Dictionary=modifier.get("effects",{})
+		if effects.is_empty() and GovernmentPolicyCatalog.has_policy(String(modifier.get("id",""))): effects=GovernmentPolicyCatalog.definition(String(modifier.id)).get("effects",{})
+		if not effects.has(channel): continue
+		result+=clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)*float(effects[channel])
+	return clampf(result,-1.0,1.0)
+
+func policy_observation(policy:Dictionary)->Dictionary:
+	if policy.is_empty(): return {"summary":"No linked metric baseline is available yet.","metrics":[],"days_elapsed":0.0}
+	if String(policy.get("kind","policy"))=="policy" and not policy.has("ended_reason") and GameState.elapsed_days<=float(policy.get("until_day",INF)):
+		_refresh_policy_observation_record(policy)
+	var baseline:Dictionary=policy.get("observation_baseline",{})
+	var latest:Dictionary=policy.get("observation_latest",{})
+	var baseline_days:Dictionary=policy.get("observation_baseline_days",{})
+	var effects:Dictionary=policy.get("effects",{})
+	var lines:Array[String]=[]
+	var metrics:Array[Dictionary]=[]
+	var seen_metrics:Dictionary={}
+	for channel_variant in effects:
+		var channel:=String(channel_variant)
+		var spec:=GovernmentPolicyCatalog.observation_spec(channel)
+		var metric:=String(spec.get("metric",""))
+		if metric.is_empty() or seen_metrics.has(metric) or not baseline.has(metric) or not latest.has(metric): continue
+		seen_metrics[metric]=true
+		var baseline_value:=float(baseline[metric])
+		var current_value:=float(latest[metric])
+		var expected_direction:=signf(float(effects[channel])*float(policy.get("magnitude",0.0)))
+		var delta:=current_value-baseline_value
+		var line:=GovernmentPolicyCatalog.formatted_observation(channel,baseline_value,current_value)
+		if not line.is_empty(): lines.append(line)
+		metrics.append({"channel":channel,"metric":metric,"label":String(spec.get("label",metric)),"baseline":baseline_value,"current":current_value,"delta":delta,"expected_direction":expected_direction,"moving_with_expected_direction":absf(delta)<0.000001 or signf(delta)==expected_direction,"baseline_day":float(baseline_days.get(metric,policy.get("started_day",GameState.elapsed_days)))})
+	var end_day:=minf(GameState.elapsed_days,float(policy.get("ended_day",policy.get("until_day",GameState.elapsed_days)))) if policy.has("ended_reason") else GameState.elapsed_days
+	var days_elapsed:=maxf(0.0,end_day-float(policy.get("started_day",end_day)))
+	return {"summary":" • ".join(lines) if not lines.is_empty() else "Linked metric baseline will form after the next simulation day.","metrics":metrics,"days_elapsed":days_elapsed,"updated_day":float(policy.get("observation_updated_day",policy.get("started_day",end_day))),"disclaimer":"Observed movement also reflects staffing, resources, environment, conflict, discoveries, and other policies."}
+
+func _capture_policy_observation(effects:Dictionary)->Dictionary:
+	var snapshot:Dictionary={}
+	for channel_variant in effects:
+		var spec:=GovernmentPolicyCatalog.observation_spec(String(channel_variant))
+		var metric:=String(spec.get("metric",""))
+		if metric.is_empty() or not GameState.simulation_metrics.has(metric): continue
+		var value=GameState.simulation_metrics[metric]
+		if value is float or value is int: snapshot[metric]=float(value)
+	return snapshot
+
+func _refresh_policy_observation_record(policy:Dictionary)->void:
+	var effects:Dictionary=policy.get("effects",{})
+	if effects.is_empty() and GovernmentPolicyCatalog.has_policy(String(policy.get("id",""))): effects=GovernmentPolicyCatalog.definition(String(policy.id)).get("effects",{})
+	var current:=_capture_policy_observation(effects)
+	var baseline:Dictionary=policy.get("observation_baseline",{})
+	var baseline_days:Dictionary=policy.get("observation_baseline_days",{})
+	for metric in current:
+		if not baseline.has(metric):
+			baseline[metric]=current[metric]
+			baseline_days[metric]=GameState.elapsed_days
+	policy["observation_baseline"]=baseline
+	policy["observation_baseline_days"]=baseline_days
+	policy["observation_latest"]=current
+	policy["observation_updated_day"]=GameState.elapsed_days
+
+func _refresh_all_policy_observations()->void:
+	for modifier_variant in GameState.active_modifiers:
+		var modifier:Dictionary=modifier_variant
+		if String(modifier.get("kind",""))!="policy" or modifier.has("ended_reason") or GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		_refresh_policy_observation_record(modifier)
+
+func active_policies()->Array[Dictionary]:
+	refresh_policy_lifecycle()
+	var result:Array[Dictionary]=[]
+	for modifier_variant in GameState.active_modifiers:
+		var modifier:Dictionary=modifier_variant
+		if String(modifier.get("kind",""))!="policy": continue
+		if GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		var policy:=modifier.duplicate(true)
+		if (policy.get("effects",{}) as Dictionary).is_empty() and GovernmentPolicyCatalog.has_policy(String(policy.get("id",""))): policy["effects"]=GovernmentPolicyCatalog.definition(String(policy.id)).get("effects",{})
+		policy["remaining_days"]=maxf(0.0,float(policy.get("until_day",GameState.elapsed_days))-GameState.elapsed_days)
+		result.append(policy)
+	result.sort_custom(func(a:Dictionary,b:Dictionary): return float(a.get("until_day",INF))<float(b.get("until_day",INF)))
+	return result
+
+func governance_metrics()->Dictionary:
+	refresh_policy_lifecycle()
+	var active:=active_policies()
+	var administrative_load:=0.0
+	var offices:Dictionary={}
+	for policy in active:
+		var execution:=maxf(0.35,float(policy.get("execution_factor",0.62)))
+		administrative_load+=absf(float(policy.get("magnitude",0.0)))*(0.10+maxf(0.0,1.0-execution)*0.08)
+		offices[String(policy.get("office","Council"))]=int(offices.get(String(policy.get("office","Council")),0))+1
+	var churn:=maxf(0.0,modifier_strength("policy_churn"))
+	administrative_load=clampf(administrative_load+churn*0.25,0.0,0.30)
+	return {"active_policy_count":active.size(),"administrative_load":administrative_load,"policy_churn":churn,"council_support":_council_support(),"office_policy_counts":offices}
+
+func _council_support()->float:
+	if GameState.advisor_roster.is_empty(): return 0.5
+	var total:=0.0
+	var count:=0
+	for advisor_variant in GameState.advisor_roster:
+		var advisor:Dictionary=advisor_variant
+		var relationship:Dictionary=advisor.get("relationships",{}).get("sovereign",{})
+		if relationship.is_empty(): continue
+		total+=float(relationship.get("trust",0.5))*0.45+float(relationship.get("respect",0.5))*0.35+(1.0-float(relationship.get("resentment",0.0)))*0.20
+		count+=1
+	return clampf(total/maxi(1,count),0.0,1.0)
+
 func process_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
+	refresh_policy_lifecycle()
 	GameState.synchronize_population_allocations()
 	var previous: Dictionary = GameState.simulation_metrics.duplicate(true)
 	var traveling:=bool(context.get("traveling",GameState.convoy_traveling))
@@ -69,6 +267,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var stewards := float(GameState.population_allocations.get("Administration",0))
 	var guards := float(GameState.population_allocations.get("Defense",0))
 	var dynamics:=GameState.society_capacities
+	var governance:=governance_metrics()
+	var administrative_load:=float(governance.administrative_load)
+	var policy_churn:=float(governance.policy_churn)
+	var council_support:=float(governance.council_support)
 
 	var prior_health := float(previous.get("health",GameState.population_health))
 	var prior_cohesion := float(previous.get("cohesion",0.58))
@@ -79,7 +281,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var housing_ratio := mobile_shelter_ratio if traveling else permanent_housing_ratio
 	var labor_efficiency := clampf(0.34+prior_health*0.34+prior_cohesion*0.18+housing_ratio*0.12,0.25,1.08)
 	labor_efficiency*=lerpf(0.82,1.08,clampf(float(dynamics.get("labor",0.5)),0.0,1.0))
-	labor_efficiency*=1.0-modifier_strength("care_rotation")*0.12
+	labor_efficiency*=(1.0+policy_effect("labor_multiplier"))*(1.0-administrative_load)
+	labor_efficiency=clampf(labor_efficiency,0.20,1.12)
 
 	var ecology := float(previous.get("ecology",0.88))
 	var food_result:Dictionary=_food_system().process_day({"traveling":traveling},labor_efficiency,ecology)
@@ -110,12 +313,13 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if traveling:
 		travel_health_penalty=0.08+maxf(0.0,0.62-housing_ratio)*0.30+minf(0.24,GameState.consecutive_food_shortage_days*0.009)
 	var process_health_cost:=(DiscoverySystem.effect("health_risk")+DiscoverySystem.effect("pollution")*0.22+DiscoverySystem.effect("water_pollution")*0.18)*industrial_activity
-	var health_target := clampf(0.18+GameState.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+modifier_strength("care_rotation")*0.26-travel_health_penalty-malnutrition*0.28-process_health_cost,0.05,0.97)
+	var health_target := clampf(0.18+GameState.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-travel_health_penalty-malnutrition*0.28-process_health_cost,0.05,0.97)
 	GameState.population_health = lerpf(GameState.population_health,health_target,0.022)
 
 	var admin_coverage := clampf(stewards/maxf(1.0,population*0.035),0.0,1.25)
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
-	var cohesion_target := clampf(0.24+GameState.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+DiscoverySystem.effect("state_capacity")*0.08+DiscoverySystem.effect("cohesion")*0.10+(1.0-work_strain)*0.08-modifier_strength("divided_camp")-modifier_strength("rationing")*0.16+modifier_strength("public_assembly")*0.22,0.08,0.96)
+	var economic_social_pressure:=float(GameState.economy_metrics.get("social_pressure",0.0))
+	var cohesion_target := clampf(0.24+GameState.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+DiscoverySystem.effect("state_capacity")*0.08+DiscoverySystem.effect("cohesion")*0.10+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16+economic_social_pressure*0.55,0.08,0.96)
 	var cohesion := lerpf(prior_cohesion,cohesion_target,0.014)
 
 	var inquiry_points := 0
@@ -123,7 +327,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var focus_quality := 1.0 if inquiry_points <= maxi(1,int(observers)) else clampf(observers/maxf(1.0,float(inquiry_points)),0.15,1.0)
 	var knowledge := float(previous.get("knowledge",0.18))
 	var knowledge_gain := observers*labor_efficiency*focus_quality/maxf(3000.0,population*92.0)*(1.0+DiscoverySystem.effect("knowledge_rate"))*lerpf(0.55,1.45,GameState.combined_intelligence)
-	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth"))
+	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth")+policy_effect("knowledge_gain"))
 	knowledge += float(GameState.known_discoveries.size())/240000.0
 	knowledge = clampf(knowledge,0.0,1.0)
 
@@ -143,21 +347,21 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	workshop_function=clampf(workshop_function/3.0,0.0,1.0)
 	storage_function=clampf(storage_function/3.0,0.0,1.0)
 	var craft_coverage := clampf(makers/maxf(1.0,population*0.05),0.0,1.25)
-	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+DiscoverySystem.effect("tool_quality")*0.30+DiscoverySystem.effect("craft_output")*0.22+modifier_strength("skilled_craftspeople")+modifier_strength("emergency_building")*0.20,0.02,0.96)
+	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+DiscoverySystem.effect("tool_quality")*0.30+DiscoverySystem.effect("craft_output")*0.22+modifier_strength("skilled_craftspeople")+policy_effect("material_target"),0.02,0.96)
 	if "Open Work Area" in GameState.settlement_completed: material_target += 0.08
 	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,0.012)
-	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+DiscoverySystem.effect("haul_capacity")*0.18+DiscoverySystem.effect("route_speed")*0.12,0.03,0.95)
+	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+DiscoverySystem.effect("haul_capacity")*0.18+DiscoverySystem.effect("route_speed")*0.12+policy_effect("logistics_target"),0.03,0.95)
 	var logistics := lerpf(float(previous.get("logistics",0.16)),logistics_target,0.016)
-	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+DiscoverySystem.effect("warfare_readiness")*0.14-modifier_strength("migratory_pressure")+modifier_strength("expanded_watch")*0.24,0.04,0.96)
+	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+DiscoverySystem.effect("warfare_readiness")*0.14-modifier_strength("migratory_pressure")+policy_effect("security_target"),0.04,0.96)
 	var security := lerpf(float(previous.get("security",0.38)),security_target,0.016)
 
 	var extraction_pressure := extractors/able_population
 	var foraging_pressure := maxf(0.0,food_workers/able_population-0.48)
-	var ecology_delta := 0.00018+modifier_strength("sacred_land")*0.00032+modifier_strength("conservation_order")*0.00055
-	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105+modifier_strength("foraging_drive")*0.00048
+	var ecology_delta := 0.00018+modifier_strength("sacred_land")*0.00032+policy_effect("ecology_delta")
+	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105
 	ecology_delta-=(DiscoverySystem.effect("pollution")+DiscoverySystem.effect("water_pollution"))*industrial_activity*0.0009
 	ecology = clampf(ecology+ecology_delta,0.04,1.0)
-	var legitimacy_target := clampf(0.12+GameState.food_security*0.26+GameState.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+DiscoverySystem.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+modifier_strength("public_assembly")*0.18,0.06,0.96)
+	var legitimacy_target := clampf(0.12+GameState.food_security*0.26+GameState.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+DiscoverySystem.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")-administrative_load*0.12-policy_churn*0.18+economic_social_pressure,0.06,0.96)
 	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,0.012)
 
 	# Mortality is accumulated as population-level risk, while reproduction is
@@ -199,7 +403,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var reproduction:=GameState.process_reproduction_day({
 		"health":GameState.population_health,"food_security":GameState.food_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
-		"birth_crisis":birth_crisis,"conception_support":DiscoverySystem.effect("conception_support"),
+		"birth_crisis":birth_crisis,"conception_support":DiscoverySystem.effect("conception_support")+policy_effect("conception_support"),
 		"maternal_safety":DiscoverySystem.effect("maternal_safety"),"neonatal_survival":DiscoverySystem.effect("neonatal_survival")
 	})
 	var births_today:=int((reproduction.get("births",[]) as Array).size())
@@ -242,6 +446,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	GameState.simulation_metrics = {
 		"health":GameState.population_health,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
 		"material_capacity":material_capacity,"logistics":logistics,"security":security,"ecology":ecology,"legitimacy":legitimacy,
+		"governance_administrative_load":administrative_load,"governance_policy_churn":policy_churn,"governance_council_support":council_support,"governance_active_policies":int(governance.active_policy_count),
 		"resource_access":float(accessible_count),"settlement":settlement_score,"population":GameState.population_exact,
 		"annual_birth_rate":annual_birth_rate,"annual_death_rate":annual_death_rate,"traveling":traveling,
 		"mortality_components":mortality_components.duplicate(true),
@@ -259,6 +464,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		GameState.simulation_metrics[food_metric]=food_result[food_metric]
 	for material_metric in GameState.material_metrics:
 		GameState.simulation_metrics["material_"+String(material_metric)]=GameState.material_metrics[material_metric]
+	_refresh_all_policy_observations()
 	GameState.simulation_trends.clear()
 	for key in GameState.simulation_metrics:
 		if previous.has(key) and GameState.simulation_metrics[key] is float:

@@ -17,14 +17,17 @@ config/features=PackedStringArray("4.7")
 [autoload]
 
 GameState="*res://scripts/game_state.gd"
+GovernmentPolicyCatalog="*res://scripts/government_policy_catalog.gd"
 DiscoverySystem="*res://scripts/discovery_system.gd"
 ResourceSystem="*res://scripts/resource_system.gd"
+EconomySystem="*res://scripts/economy_system.gd"
 SettlementModel="*res://scripts/settlement_model.gd"
 WorldFacts="*res://scripts/world_fact_database.gd"
 AdvisorSystem="*res://scripts/advisor_system.gd"
 FoodSystem="*res://scripts/food_system.gd"
 ConsequenceEngine="*res://scripts/consequence_engine.gd"
 GenerativeDirector="*res://scripts/generative_director.gd"
+PronouncementInterpreter="*res://scripts/pronouncement_interpreter.gd"
 MilitaryCampaign="*res://scripts/military_campaign.gd"
 MilitaryCommandUI="*res://scripts/military_command_ui.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"

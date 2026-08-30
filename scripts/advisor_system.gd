@@ -4,10 +4,12 @@ const ADVICE_ACTS := ["report", "recommend", "warn", "object", "request", "corre
 
 var initialized := false
 var rng := RandomNumberGenerator.new()
+var order_sequence:=0
 
 func reset_for_new_world()->void:
 	initialized=false
 	rng=RandomNumberGenerator.new()
+	order_sequence=0
 
 func initialize() -> void:
 	if initialized:
@@ -224,23 +226,200 @@ func _validate(text: String, act: Dictionary) -> bool:
 
 func issue_order(order_type: String, target: String, parameters: Dictionary, addressed_office := "") -> Dictionary:
 	initialize()
-	var order := {"id":"order_%d_%d" % [int(GameState.elapsed_days),rng.randi()], "type":order_type, "target":target, "parameters":parameters.duplicate(true), "office":addressed_office, "issued_day":int(GameState.elapsed_days), "status":"issued"}
+	order_sequence+=1
+	var order := {"id":"order_%d_%d" % [int(GameState.elapsed_days),rng.randi()], "sequence":order_sequence,"type":order_type, "target":target, "parameters":parameters.duplicate(true), "office":addressed_office, "issued_day":int(GameState.elapsed_days), "status":"issued"}
 	GameState.sovereign_orders.push_front(order)
+	if GameState.sovereign_orders.size()>100: GameState.sovereign_orders.resize(100)
 	if addressed_office != "" and GameState.leadership_positions.has(addressed_office):
 		var advisor: Dictionary = GameState.leadership_positions[addressed_office]
 		_record_memory(advisor.name, "The Sovereign ordered %s concerning %s." % [order_type,target], 0.78, "order")
 	return order
 
+func begin_pronouncement(text:String)->Dictionary:
+	var order:=issue_order("pronouncement","civilization",{"text":text.strip_edges().substr(0,500),"interpretation":{}},"")
+	order["status"]="interpreting"
+	order["submitted_day"]=int(GameState.elapsed_days)
+	return order
+
+func execute_pronouncement(text:String,interpretation:Dictionary,existing_order:Dictionary={})->Dictionary:
+	initialize()
+	var result:=interpretation.duplicate(true)
+	var executed:Array[Dictionary]=[]
+	var order:=existing_order if not existing_order.is_empty() else begin_pronouncement(text)
+	if String(order.get("status",""))!="interpreting" and not (order.get("parameters",{}).get("interpretation",{}) as Dictionary).is_empty(): return order
+	for policy_variant in result.get("policies",[]):
+		var policy:Dictionary=policy_variant.duplicate(true)
+		var effect_id:=String(policy.get("id",""))
+		var action:=String(policy.get("action","enact"))
+		var office:=String(policy.get("office","Council"))
+		var metadata:={"source_order_id":String(order.id),"source_order_sequence":int(order.get("sequence",0)),"office":office,"interpretation_source":String(result.get("source","interpreter")),"effects":(policy.get("effects",{}) as Dictionary).duplicate(true)}
+		if not String(policy.get("basis","")).is_empty(): metadata["interpretation_basis"]=String(policy.basis)
+		if policy.has("confidence"): metadata["interpretation_confidence"]=clampf(float(policy.confidence),0.0,1.0)
+		for parameter_key in ["action_source","parameter_basis","magnitude_source","duration_source"]:
+			if policy.has(parameter_key): metadata[parameter_key]=String(policy[parameter_key])
+		if action=="repeal":
+			policy["repealed_active_policy"]=ConsequenceEngine.repeal_policy(effect_id,String(policy.get("ripple","Order rescinded.")),metadata)
+			policy["execution_factor"]=1.0
+		else:
+			var execution:=execution_modifier(office,policy.get("skills",[]))
+			var requested:=float(policy.get("magnitude",0.0))
+			var effective:=clampf(requested*execution,0.02,0.25)
+			policy["requested_magnitude"]=requested
+			policy["magnitude"]=effective
+			policy["execution_factor"]=execution
+			policy["executor"]=_executor_name(office)
+			metadata["executor"]=String(policy.executor)
+			metadata["execution_factor"]=execution
+			metadata["requested_magnitude"]=requested
+			var applied:=ConsequenceEngine.apply_policy(effect_id,effective,float(policy.get("days",30.0)),String(policy.get("ripple","Order enacted.")),metadata)
+			policy["applied"]=applied
+			policy["skipped_as_stale"]=not applied
+			if applied and GameState.leadership_positions.has(office):
+				_record_memory(String(GameState.leadership_positions[office].get("name","")),"I was charged with executing the Sovereign's %s pronouncement." % effect_id.replace("_"," "),0.76,"duty")
+		executed.append(policy)
+	result["policies"]=executed
+	var political_reactions:=_apply_pronouncement_reactions(executed)
+	result["political_reactions"]=political_reactions
+	order["political_reactions"]=political_reactions.duplicate(true)
+	order["parameters"]={"text":text,"interpretation":result}
+	order["status"]="interpreted"
+	var policy_ids:Array[String]=[]
+	for executed_policy in executed: policy_ids.append(String(executed_policy.get("id","")))
+	order["policy_ids"]=policy_ids
+	refresh_pronouncement_statuses()
+	return order
+
+func _apply_pronouncement_reactions(policies:Array[Dictionary])->Array[Dictionary]:
+	var changed:Array[Dictionary]=[]
+	for policy in policies:
+		var action:=String(policy.get("action","enact"))
+		if (action=="enact" and bool(policy.get("applied",false))) or (action=="repeal" and bool(policy.get("repealed_active_policy",false))): changed.append(policy)
+	if changed.is_empty(): return []
+	var reactions:Array[Dictionary]=[]
+	for advisor_variant in GameState.advisor_roster:
+		var advisor:Dictionary=advisor_variant
+		var advisor_name:=String(advisor.get("name",""))
+		if advisor_name.is_empty(): continue
+		var goals:Array=advisor.get("goals",[])
+		var alignment:=0.0
+		var aligned_goals:Array[String]=[]
+		var opposed_goals:Array[String]=[]
+		var duty_offices:Array[String]=[]
+		var changed_ids:Array[String]=[]
+		for policy in changed:
+			var policy_id:=String(policy.get("id",""))
+			changed_ids.append(policy_id)
+			var direction:=-1.0 if String(policy.get("action","enact"))=="repeal" else 1.0
+			var affinity:=GovernmentPolicyCatalog.council_goal_affinity(policy_id)
+			for goal_variant in goals:
+				var goal:=String(goal_variant)
+				var contribution:=0.0
+				if (affinity.get("supports",[]) as Array).has(goal): contribution+=direction
+				if (affinity.get("strains",[]) as Array).has(goal): contribution-=direction
+				alignment+=contribution
+				if contribution>0.0 and not aligned_goals.has(goal): aligned_goals.append(goal)
+				elif contribution<0.0 and not opposed_goals.has(goal): opposed_goals.append(goal)
+			var office:=String(policy.get("office","Council"))
+			if GameState.leadership_positions.has(office) and String((GameState.leadership_positions[office] as Dictionary).get("name",""))==advisor_name and not duty_offices.has(office): duty_offices.append(office)
+		if is_zero_approx(alignment) and duty_offices.is_empty(): continue
+		alignment=clampf(alignment,-3.0,3.0)
+		var has_duty:=not duty_offices.is_empty()
+		var trust_delta:=clampf(alignment*0.006+(0.003 if has_duty else 0.0),-0.024,0.024)
+		var respect_delta:=clampf(alignment*0.003+(0.004 if has_duty else 0.0),-0.012,0.016)
+		var resentment_delta:=clampf(-alignment*0.005+(-0.002 if alignment>0.0 else 0.0),-0.012,0.018)
+		var relationships:Dictionary=advisor.get("relationships",{})
+		var sovereign:Dictionary=relationships.get("sovereign",{"trust":0.5,"respect":0.5,"fear":0.0,"resentment":0.0,"obligation":0.4})
+		sovereign["trust"]=clampf(float(sovereign.get("trust",0.5))+trust_delta,0.0,1.0)
+		sovereign["respect"]=clampf(float(sovereign.get("respect",0.5))+respect_delta,0.0,1.0)
+		sovereign["resentment"]=clampf(float(sovereign.get("resentment",0.0))+resentment_delta,0.0,1.0)
+		relationships["sovereign"]=sovereign
+		advisor["relationships"]=relationships
+		var stance:="supports" if alignment>=0.5 else "objects" if alignment<=-0.5 else "accepts"
+		var reason_parts:Array[String]=[]
+		if not aligned_goals.is_empty(): reason_parts.append("advances "+_readable_goals(aligned_goals))
+		if not opposed_goals.is_empty(): reason_parts.append("strains "+_readable_goals(opposed_goals))
+		if has_duty: reason_parts.append("assigns %s responsibility" % ", ".join(duty_offices))
+		var summary:="%s %s the order%s." % [advisor_name,stance," because "+" and ".join(reason_parts) if not reason_parts.is_empty() else ""]
+		var reaction:={"advisor":advisor_name,"stance":stance,"alignment":alignment,"policy_ids":changed_ids.duplicate(),"aligned_goals":aligned_goals,"opposed_goals":opposed_goals,"duty_offices":duty_offices,"trust_delta":trust_delta,"respect_delta":respect_delta,"resentment_delta":resentment_delta,"trust_after":float(sovereign.trust),"respect_after":float(sovereign.respect),"resentment_after":float(sovereign.resentment),"summary":summary}
+		reactions.append(reaction)
+		if not advisor.has("memories"): advisor["memories"]=[]
+		_record_memory(advisor_name,summary,clampf(0.48+absf(alignment)*0.10,0.48,0.78),"approval" if alignment>0.0 else "objection" if alignment<0.0 else "duty")
+	return reactions
+
+func _readable_goals(goals:Array[String])->String:
+	var labels:Array[String]=[]
+	for goal in goals: labels.append(String(goal).replace("_"," "))
+	return ", ".join(labels)
+
+func refresh_pronouncement_statuses()->void:
+	ConsequenceEngine.refresh_policy_lifecycle()
+	for order_variant in GameState.sovereign_orders:
+		var order:Dictionary=order_variant
+		if String(order.get("type",""))!="pronouncement": continue
+		if String(order.get("status","")) in ["interpreting","cancelled"]: continue
+		var policies:Array=order.get("parameters",{}).get("interpretation",{}).get("policies",[])
+		if policies.is_empty():
+			order["status"]="recorded_unresolved"
+			continue
+		var enacted:=0
+		var active:=0
+		var stale:=0
+		var reasons:Array[String]=[]
+		for policy_variant in policies:
+			var policy:Dictionary=policy_variant
+			if String(policy.get("action","enact"))!="enact": continue
+			enacted+=1
+			if bool(policy.get("skipped_as_stale",false)):
+				stale+=1
+				reasons.append("stale")
+				continue
+			var matching:Dictionary={}
+			for modifier_variant in GameState.active_modifiers:
+				var modifier:Dictionary=modifier_variant
+				if String(modifier.get("source_order_id",""))==String(order.get("id","")) and String(modifier.get("id",""))==String(policy.get("id","")):
+					matching=modifier
+					break
+			if matching.is_empty():
+				reasons.append("unknown")
+			else:
+				policy["observation"]=ConsequenceEngine.policy_observation(matching)
+				if GameState.elapsed_days<=float(matching.get("until_day",-INF)):
+					active+=1
+				else:
+					reasons.append(String(matching.get("ended_reason","expired")))
+		if enacted==0:
+			var changed:=false
+			for repeal_variant in policies:
+				if bool((repeal_variant as Dictionary).get("repealed_active_policy",false)): changed=true
+			order["status"]="executed" if changed else "no_effect"
+		elif active==enacted:
+			order["status"]="active"
+		elif active>0:
+			order["status"]="partially_active"
+		elif stale==enacted:
+			order["status"]="stale"
+		elif not reasons.is_empty() and reasons.all(func(reason:String): return reason==reasons[0]) and reasons[0] in ["expired","repealed","superseded","stale"]:
+			order["status"]=reasons[0]
+		else:
+			order["status"]="closed"
+
+func _executor_name(office:String)->String:
+	if not GameState.leadership_positions.has(office): return "Vacant %s office" % office
+	return String(GameState.leadership_positions[office].get("name",office))
+
 func execution_modifier(office: String, relevant_skills: Array) -> float:
+	var governance:Dictionary=ConsequenceEngine.governance_metrics()
+	var institutional_capacity:=clampf(float(GameState.society_capacities.get("institutions",0.5)),0.0,1.0)
+	var burden:=float(governance.get("administrative_load",0.0))
 	if not GameState.leadership_positions.has(office):
-		return 0.62
+		return clampf(0.38+institutional_capacity*0.36-burden*0.45,0.32,0.72)
 	var advisor: Dictionary = GameState.leadership_positions[office]
 	var total := 0.0
 	for skill in relevant_skills:
 		total += float(advisor.skills.get(skill, 35))
 	var competence := total / maxi(1,relevant_skills.size()) / 100.0
-	var relationship: Dictionary = advisor.relationships.sovereign
-	return clampf(0.45 + competence * 0.42 + relationship.trust * 0.08 + relationship.respect * 0.05,0.35,1.12)
+	var relationship: Dictionary = advisor.get("relationships",{}).get("sovereign",{})
+	return clampf(0.38+competence*0.36+float(relationship.get("trust",0.5))*0.08+float(relationship.get("respect",0.5))*0.05+institutional_capacity*0.13-burden*0.45,0.35,1.12)
 
 func respond_to_council_item(item_id: String, response: String) -> void:
 	for item in GameState.council_inbox:

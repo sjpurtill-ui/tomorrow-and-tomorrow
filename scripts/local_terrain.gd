@@ -99,8 +99,11 @@ var allocation_value_labels: Dictionary = {}
 var population_value_labels: Dictionary = {}
 var research_total_label: Label
 var council_panel: Control
+var pending_pronouncement_inputs: Dictionary={}
+var pronouncement_status_label: Label
 var mandate_panel: Control
 var date_label: Label
+var world_header_label:Label
 var time_speed_buttons: Dictionary = {}
 var travel_status_label: Label
 var route_mesh: MeshInstance3D
@@ -128,6 +131,7 @@ var settlement_footprint: MeshInstance3D
 var settlement_blip: MeshInstance3D
 var settlement_map_label:Label3D
 var settlement_fabric_shader:Shader
+var vegetation_surface_shader:Shader
 var settlement_land_use_root: Node3D
 var footprint_population := -1
 var rendered_morphology_revision := -1
@@ -358,9 +362,11 @@ func _capture_preview_if_requested() -> void:
 	if capture_growth_years > 0 and "Hearth Circle" in GameState.settlement_completed:
 		for work_name in ["Lean-to Shelters","Storage Pits","Open Work Area","Gathering Yard"]:
 			if work_name not in GameState.settlement_completed: GameState.settlement_completed.append(work_name)
-		GameState.population_allocations["Construction"] = 10
-		GameState.population_allocations["Crafting"] = 12
-		GameState.population_allocations["Logistics"] = 10
+		# Explicit capture allocations describe the audited society and must not be
+		# replaced by tiny fixture defaults. Defaults only fill omitted roles.
+		if not capture_allocations.has("Construction"): GameState.population_allocations["Construction"] = 10
+		if not capture_allocations.has("Crafting"): GameState.population_allocations["Crafting"] = 12
+		if not capture_allocations.has("Logistics"): GameState.population_allocations["Logistics"] = 10
 		GameState.simulation_metrics["labor_efficiency"] = 0.78
 		GameState.resource_stockpiles["Timber"] = 80.0
 		GameState.resource_stockpiles["Fiber Plants"] = 80.0
@@ -441,7 +447,7 @@ func _capture_preview_if_requested() -> void:
 	for route in GameState.settlement_routes:
 		var hierarchy:=String(route.get("hierarchy",route.get("kind","unclassified")))
 		route_hierarchy_counts[hierarchy]=int(route_hierarchy_counts.get(hierarchy,0))+1
-	var morphology_debug:Dictionary={"plots":GameState.settlement_plots.size(),"routes":GameState.settlement_routes.size(),"route_hierarchy":route_hierarchy_counts,"revision":GameState.morphology_revision,"founded_at":GameState.settlement_founded_at,"camera_target":camera_target,"lod":rendered_settlement_lod,"meshes":[]}
+	var morphology_debug:Dictionary={"plots":GameState.settlement_plots.size(),"routes":GameState.settlement_routes.size(),"route_hierarchy":route_hierarchy_counts,"nuclei":GameState.settlement_nuclei,"revision":GameState.morphology_revision,"founded_at":GameState.settlement_founded_at,"camera_target":camera_target,"lod":rendered_settlement_lod,"meshes":[]}
 	if settlement_land_use_root:
 		for child in settlement_land_use_root.get_children():
 			if child is MeshInstance3D and (child as MeshInstance3D).mesh:
@@ -492,6 +498,8 @@ func _process(delta: float) -> void:
 		if not discoveries.is_empty() or not resource_events.is_empty():
 			footprint_population = -1
 		var simulation_events := _process_population_day(daily_context)
+		var economy_events := EconomySystem.process_day(daily_context)
+		simulation_events.append_array(economy_events)
 		_refresh_event_report()
 		for consequence in simulation_events:
 			if String(consequence.get("severity","")) in ["danger","critical","warning"]:
@@ -567,6 +575,7 @@ func _settlement_spatial_context(base:Dictionary={}) -> Dictionary:
 	var context:=base.duplicate(false)
 	context["terrain_height_at"]=Callable(self,"_height_at")
 	context["river_distance_at"]=Callable(self,"_river_distance_at")
+	context["drainage_tangent_at"]=Callable(self,"_drainage_tangent_at")
 	context["moisture_at"]=Callable(self,"_land_moisture_at")
 	context["settlement_origin"]=GameState.settlement_founded_at
 	return context
@@ -727,6 +736,12 @@ func _world_height_at(x: float,z: float) -> float:
 	var range_band:=exp(-pow((cradle_x-55.0)/25.0,2.0))*exp(-pow(cradle_z/510.0,4.0))
 	var range_teeth:=pow(clampf((1.0-absf(detail_noise.get_noise_2d(x*0.72+330.0,z*0.72-710.0))-0.20)/0.80,0.0,1.0),1.55)
 	height+=range_band*(0.65+range_teeth*6.8)
+	var local_drainage_distance:=_local_drainage_distance_at(x,z)
+	if local_drainage_distance<0.11:
+		var swale:=pow(1.0-local_drainage_distance/0.11,1.72)
+		# Four to nine metres of relief is enough to create a real drainage floor at
+		# settlement scale without turning every intermittent reach into a canyon.
+		height-=swale*(0.0045+0.0045*swale)
 	var river_x := _world_river_x(z)
 	if river_x!=INF:
 		var distance:=absf(x-river_x)
@@ -741,6 +756,49 @@ func _world_river_x(z: float) -> float:
 	if absf(z)>760.0:
 		return INF
 	return -18.0+sin(z/128.0+float(GameState.world_seed%97)*0.031)*32.0+sin(z/57.0-0.8)*14.0+sin(z/21.0+1.7)*4.5
+
+func _local_drainage_distance_at(x:float,z:float)->float:
+	# Intermittent swales fill the enormous gap between the continental river and
+	# metre-scale soil noise. Parallel indices are only a construction device: two
+	# incommensurate meanders and a broad activation field make visible reaches
+	# discontinuous, irregular and seed-specific across the planet.
+	var phase:=float(posmod(GameState.world_seed,10007))/10007.0
+	var spacing:=2.40
+	var offset:=(phase-0.5)*spacing
+	var channel_index:=roundi((x-offset)/spacing)
+	var channel_x:=float(channel_index)*spacing+offset
+	channel_x+=sin(z*1.34+float(channel_index)*2.17+phase*TAU)*0.22
+	channel_x+=sin(z*3.71-float(channel_index)*0.83+phase*17.0)*0.055
+	var activation_raw:=0.50+sin(z*1.11+float(channel_index)*1.73+phase*31.0)*0.31+sin(z*0.37-float(channel_index)*2.41+phase*67.0)*0.19
+	var activation:=smoothstep(0.29,0.72,activation_raw)
+	if activation<0.28: return INF
+	# Weak reaches report a larger effective distance, naturally fading their
+	# influence on siting and cultivation without binary on/off seams.
+	return absf(x-channel_x)+lerpf(0.075,0.0,activation)
+
+func _drainage_tangent_at(x:float,z:float)->Vector2:
+	# Return the along-water direction in world X/Z space. Fields, tracks and
+	# riparian growth can then respond to the same authored watershed instead of
+	# each inventing an unrelated visual bearing.
+	var main_x:=_world_river_x(z)
+	var main_distance:=INF if main_x==INF else absf(x-main_x)
+	var phase:=float(posmod(GameState.world_seed,10007))/10007.0
+	var spacing:=2.40
+	var offset:=(phase-0.5)*spacing
+	var channel_index:=roundi((x-offset)/spacing)
+	var channel_x:=float(channel_index)*spacing+offset
+	channel_x+=sin(z*1.34+float(channel_index)*2.17+phase*TAU)*0.22
+	channel_x+=sin(z*3.71-float(channel_index)*0.83+phase*17.0)*0.055
+	var local_distance:=_local_drainage_distance_at(x,z)
+	if local_distance<main_distance:
+		var local_dx_dz:=cos(z*1.34+float(channel_index)*2.17+phase*TAU)*0.22*1.34
+		local_dx_dz+=cos(z*3.71-float(channel_index)*0.83+phase*17.0)*0.055*3.71
+		return Vector2(local_dx_dz,1.0).normalized()
+	if main_x!=INF:
+		var main_dx_dz:=cos(z/128.0+float(GameState.world_seed%97)*0.031)*32.0/128.0
+		main_dx_dz+=cos(z/57.0-0.8)*14.0/57.0+cos(z/21.0+1.7)*4.5/21.0
+		return Vector2(main_dx_dz,1.0).normalized()
+	return Vector2.UP
 
 func _prepare_river_course() -> void:
 	river_course.clear()
@@ -924,6 +982,7 @@ render_mode diffuse_burley, specular_disabled;
 uniform sampler2D ground_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D forest_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D regional_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
+uniform float drainage_phase = 0.0;
 
 varying vec3 world_position;
 varying vec3 world_normal;
@@ -1001,6 +1060,22 @@ void fragment() {
 	forest_mask *= 0.80 + broad * 0.28;
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.12, regional_detail));
+	// Seeded intermittent swales bridge the visual scale between a continental
+	// river and local soil mottling. Their broad riparian shoulder remains green;
+	// the narrow floor exposes damp earth. Geometry uses the same centreline.
+	float drainage_spacing=2.40;
+	float drainage_offset=(drainage_phase-0.5)*drainage_spacing;
+	float drainage_index=floor((world_position.x-drainage_offset)/drainage_spacing+0.5);
+	float drainage_x=drainage_index*drainage_spacing+drainage_offset;
+	drainage_x+=sin(world_position.z*1.34+drainage_index*2.17+drainage_phase*6.2831853)*0.22;
+	drainage_x+=sin(world_position.z*3.71-drainage_index*0.83+drainage_phase*17.0)*0.055;
+	float drainage_raw=0.50+sin(world_position.z*1.11+drainage_index*1.73+drainage_phase*31.0)*0.31+sin(world_position.z*0.37-drainage_index*2.41+drainage_phase*67.0)*0.19;
+	float drainage_active=smoothstep(0.29,0.72,drainage_raw);
+	float drainage_distance=abs(world_position.x-drainage_x)+mix(0.075,0.0,drainage_active);
+	float riparian=(1.0-smoothstep(0.025,0.115,drainage_distance))*drainage_active;
+	float swale_floor=(1.0-smoothstep(0.006,0.026,drainage_distance))*drainage_active;
+	earth=mix(earth,vec3(0.17,0.275,0.155),riparian*(0.24+regional_detail*0.16));
+	earth=mix(earth,vec3(0.225,0.245,0.165),swale_floor*(0.26+close_detail*0.18));
 	float open_meadow = smoothstep(0.58,0.78,soil_patch) * (1.0-forest_mask) * (1.0-close_detail*0.45);
 	float dryland_mass = smoothstep(0.64,0.82,value_noise(world_position.xz*0.029+vec2(61.0,-47.0))) * (1.0-forest_mask);
 	earth = mix(earth, vec3(0.34,0.37,0.205), open_meadow*0.30);
@@ -1032,8 +1107,11 @@ void fragment() {
 	vec3 horizontal_sun = normalize(vec3(-0.46, 0.0, -0.42));
 	float directional_slope = dot(normalize(world_normal), horizontal_sun);
 	float hillshade = clamp(1.0 + directional_slope * 5.8 - slope * 0.16, 0.70, 1.22);
-	float regional_relief = 1.0 - close_detail * 0.62;
-	earth *= mix(1.0, hillshade, regional_relief * 0.72);
+	// Close aerial views still need landform. Suppressing most hillshade at the
+	// exact settlement scale turned real 10–50 m relief into flat colour patches.
+	// Texture supplies surface detail; directional normal shading supplies shape.
+	float regional_relief = 1.0 - close_detail * 0.38;
+	earth *= mix(1.0, hillshade, regional_relief * 0.82);
 	float ridge_glint = smoothstep(0.12, 0.62, slope) * smoothstep(0.25, 0.82, hill_light) * regional_relief;
 	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.20);
 	// Close aerial imagery needs a different exposure than the shaded regional
@@ -1052,6 +1130,7 @@ void fragment() {
 	material.set_shader_parameter("ground_albedo",ground_texture)
 	material.set_shader_parameter("forest_albedo",forest_texture)
 	material.set_shader_parameter("regional_albedo",regional_texture)
+	material.set_shader_parameter("drainage_phase",float(posmod(GameState.world_seed,10007))/10007.0)
 	return material
 
 func _add_terrain_vertex(surface: SurfaceTool, grid_x: int, grid_z: int) -> void:
@@ -1531,6 +1610,12 @@ func _update_scale_lod() -> void:
 		detail_terrain_patch.visible = detail_visible
 	if close_vegetation_root:
 		close_vegetation_root.visible = detail_visible
+		var canopy_lod_fade:=clampf((0.76-camera.size)/0.56,0.18,1.0)
+		for vegetation_child in close_vegetation_root.get_children():
+			if not String(vegetation_child.name).begins_with("TreeCanopies_"): continue
+			var canopy_instance:=vegetation_child as MultiMeshInstance3D
+			if canopy_instance and canopy_instance.material_override is ShaderMaterial:
+				(canopy_instance.material_override as ShaderMaterial).set_shader_parameter("lod_fade",canopy_lod_fade)
 	if province_terrain_mesh:
 		# The streamed regional mesh is the same planet at higher sampling density.
 		# Rendering both layers together causes kilometre-scale diagonal z seams.
@@ -1703,6 +1788,7 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 	var canopy_colors: Array[Color] = []
 	var scrub_transforms: Array[Transform3D] = []
 	var scrub_colors: Array[Color] = []
+	var understory_patches:Array[Dictionary]=[]
 	for attempt in 3400:
 		var local_point := Vector2(rng.randf_range(-0.235, 0.235), rng.randf_range(-0.235, 0.235))
 		var world_x := center.x + local_point.x
@@ -1710,11 +1796,24 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 		if _height_at(world_x, world_z) <= SEA_LEVEL or _near_persistent_settlement_surface(local_point):
 			continue
 		var moisture := moisture_noise.get_noise_2d(world_x, world_z)
-		var cluster := detail_noise.get_noise_2d(world_x * 940.0 + 71.0, world_z * 940.0 - 39.0)
-		var woodland_field := cluster + moisture * 0.42
-		var woodland_chance := 0.004
-		if woodland_field > 0.10:
-			woodland_chance = clampf((woodland_field - 0.10) * 0.92, 0.015, 0.48)
+		# Woodland is nested land cover, not independent tree noise. The previous
+		# x940 sample produced a new decision every ~40 m and peppered every camera
+		# view with equally sized dots. Kilometre masses establish forest/open country;
+		# neighbourhood fields cut margins and clearings; fine noise roughens the edge.
+		var woodland_mass:=detail_noise.get_noise_2d(world_x*16.0+71.0,world_z*16.0-39.0)
+		var woodland_neighbourhood:=detail_noise.get_noise_2d(world_x*92.0-143.0,world_z*92.0+211.0)
+		var woodland_edge:=detail_noise.get_noise_2d(world_x*430.0+317.0,world_z*430.0-173.0)
+		var woodland_field:=woodland_mass*0.62+woodland_neighbourhood*0.31+woodland_edge*0.13+moisture*0.38
+		var drainage_distance:=_local_drainage_distance_at(world_x,world_z)
+		if drainage_distance<0.16:
+			# Gallery woodland and brush expose the watershed from altitude. It is
+			# strongest beside the damp floor but remains probabilistic, so occupied
+			# floodplains still contain openings and cultivation clearings.
+			var riparian_weight:=pow(1.0-drainage_distance/0.16,1.35)
+			woodland_field+=riparian_weight*(0.28+maxf(0.0,moisture)*0.18)
+		var woodland_chance := 0.002
+		if woodland_field > 0.015:
+			woodland_chance = clampf((woodland_field - 0.015) * 1.08, 0.012, 0.54)
 		var is_canopy := rng.randf() < woodland_chance
 		var scrub_chance := clampf(0.07 + maxf(0.0, woodland_field) * 0.26, 0.05, 0.24)
 		if not is_canopy and rng.randf() > scrub_chance:
@@ -1723,12 +1822,14 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 		if is_canopy:
 			var scale := rng.randf_range(0.74, 1.34)
 			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(scale * rng.randf_range(0.72, 1.10), scale * rng.randf_range(0.72, 1.22), scale))
-			canopy_transforms.append(Transform3D(basis, Vector3(world_x, height + 0.0024 * scale, world_z)))
-			canopy_colors.append(Color("#2d422f").lerp(Color("#66704a"), rng.randf_range(0.04, 0.48)))
+			canopy_transforms.append(Transform3D(basis, Vector3(world_x, height + 0.00125 * scale, world_z)))
+			canopy_colors.append(Color("#3b5137").lerp(Color("#78815a"), rng.randf_range(0.05, 0.58)))
 			# Woodland reads from altitude as connected crowns and edge belts, not a
 			# scatter of identical dots. Seed a few overlapping neighbours in strong
 			# moisture/noise pockets while preserving cleared plots and routes.
-			if woodland_field>0.18:
+			if woodland_field>0.13:
+				if rng.randf()<clampf(0.22+woodland_field*0.48,0.20,0.58):
+					understory_patches.append({"center":local_point,"radius":rng.randf_range(0.020,0.046)*(0.86+maxf(0.0,woodland_mass)*0.62),"seed":rng.randi()})
 				for cluster_member in rng.randi_range(2,6):
 					var neighbour_local:=local_point+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.0035,0.011)
 					if _near_persistent_settlement_surface(neighbour_local): continue
@@ -1738,15 +1839,56 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 					var neighbour_scale:=scale*rng.randf_range(0.58,0.96)
 					var neighbour_basis:=Basis().rotated(Vector3.UP,rng.randf()*TAU).scaled(Vector3(neighbour_scale*rng.randf_range(0.78,1.16),neighbour_scale*rng.randf_range(0.72,1.08),neighbour_scale))
 					var neighbour_height:=_close_surface_height_at(neighbour_x,neighbour_z)
-					canopy_transforms.append(Transform3D(neighbour_basis,Vector3(neighbour_x,neighbour_height+0.0024*neighbour_scale,neighbour_z)))
-					canopy_colors.append(Color("#273d2b").lerp(Color("#626e47"),rng.randf_range(0.06,0.44)))
+					canopy_transforms.append(Transform3D(neighbour_basis,Vector3(neighbour_x,neighbour_height+0.00125*neighbour_scale,neighbour_z)))
+					canopy_colors.append(Color("#354b33").lerp(Color("#727d55"),rng.randf_range(0.06,0.54)))
 		else:
 			var scale := rng.randf_range(0.42, 1.25)
 			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(scale * rng.randf_range(0.70, 1.45), scale * rng.randf_range(0.42, 0.82), scale))
 			scrub_transforms.append(Transform3D(basis, Vector3(world_x, height + 0.0007 * scale, world_z)))
 			scrub_colors.append(Color("#4c5937").lerp(Color("#83764d"), rng.randf_range(0.0, 0.48)))
-	_create_close_vegetation_multimesh("TreeCanopies", canopy_transforms, canopy_colors, 0.0035, 0.0046)
-	_create_close_vegetation_multimesh("ShrubAndGrassPatches", scrub_transforms, scrub_colors, 0.0011, 0.0018)
+	_create_close_vegetation_multimesh("TreeCanopies", canopy_transforms, canopy_colors, 0.0037, 0.00235)
+	_create_close_vegetation_multimesh("ShrubAndGrassPatches", scrub_transforms, scrub_colors, 0.0011, 0.00125)
+	_create_woodland_understory(center,understory_patches)
+
+func _create_woodland_understory(center:Vector3,patches:Array[Dictionary])->void:
+	if patches.is_empty() or close_vegetation_root==null: return
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for patch in patches:
+		var local_center:Vector2=patch.center
+		var radius:=float(patch.radius)
+		var patch_seed:=int(patch.seed)
+		# Dense crowns share a dark, irregular forest floor at aerial scale. The
+		# feathered edge keeps the mass organic; overlap, not a hard polygon, creates
+		# the continuous canopy value seen in satellite imagery.
+		var center_color:=Color(0.115,0.205,0.105,0.24)
+		var edge_color:=Color(0.20,0.285,0.145,0.026)
+		var segments:=14
+		for index in segments:
+			var angle_a:=TAU*float(index)/float(segments)
+			var angle_b:=TAU*float(index+1)/float(segments)
+			var radius_a:=radius*(0.74+0.19*sin(angle_a*3.0+float(patch_seed%997)*0.017)+0.09*sin(angle_a*7.0))
+			var radius_b:=radius*(0.74+0.19*sin(angle_b*3.0+float(patch_seed%997)*0.017)+0.09*sin(angle_b*7.0))
+			for entry in [[local_center,center_color],[local_center+Vector2.from_angle(angle_a)*radius_a,edge_color],[local_center+Vector2.from_angle(angle_b)*radius_b,edge_color]]:
+				var point_2d:Vector2=entry[0]
+				var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
+				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+0.00105
+				surface.set_color(entry[1])
+				surface.add_vertex(world_point)
+	var mesh:=surface.commit()
+	if mesh==null: return
+	var instance:=MeshInstance3D.new()
+	instance.name="WoodlandUnderstory"
+	instance.mesh=mesh
+	var material:=StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo=true
+	material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.roughness=1.0
+	material.cull_mode=BaseMaterial3D.CULL_DISABLED
+	material.no_depth_test=true
+	material.render_priority=1
+	instance.material_override=material
+	close_vegetation_root.add_child(instance)
 
 func _create_close_vegetation_multimesh(node_name: String, transforms: Array[Transform3D], colors: Array[Color], radius: float, height: float) -> void:
 	if transforms.is_empty() or close_vegetation_root == null:
@@ -1761,6 +1903,20 @@ func _create_close_vegetation_multimesh(node_name: String, transforms: Array[Tra
 		patch_mesh.radial_segments=7
 		patch_mesh.rings=4
 		mesh=patch_mesh
+	if node_name=="TreeCanopies":
+		for variant in 8:
+			var variant_transforms:Array[Transform3D]=[]
+			var variant_colors:Array[Color]=[]
+			for index in transforms.size():
+				if index%8!=variant: continue
+				variant_transforms.append(transforms[index])
+				variant_colors.append(colors[index])
+			_spawn_vegetation_multimesh("%s_%d" % [node_name,variant],mesh,variant_transforms,variant_colors,0,variant)
+		return
+	_spawn_vegetation_multimesh(node_name,mesh,transforms,colors,1,-1)
+
+func _spawn_vegetation_multimesh(node_name:String,mesh:Mesh,transforms:Array[Transform3D],colors:Array[Color],kind:int,atlas_variant:int)->void:
+	if transforms.is_empty(): return
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.use_colors = true
@@ -1772,12 +1928,65 @@ func _create_close_vegetation_multimesh(node_name: String, transforms: Array[Tra
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
 	instance.multimesh = multi
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	material.roughness = 1.0
-	material.cull_mode=BaseMaterial3D.CULL_DISABLED
-	instance.material_override = material
+	instance.material_override=_vegetation_surface_material(kind,atlas_variant)
 	close_vegetation_root.add_child(instance)
+
+func _vegetation_surface_material(kind:int,atlas_variant:=-1)->ShaderMaterial:
+	if vegetation_surface_shader==null:
+		vegetation_surface_shader=Shader.new()
+		vegetation_surface_shader.code="""
+shader_type spatial;
+render_mode blend_mix, depth_prepass_alpha, cull_disabled, diffuse_burley, specular_disabled;
+uniform int vegetation_kind = 0;
+uniform int atlas_variant = -1;
+uniform float lod_fade = 1.0;
+uniform sampler2D canopy_atlas : source_color, filter_linear_mipmap, repeat_disable;
+varying vec3 world_position;
+float vh(vec2 p) {
+	p=fract(p*vec2(123.34,456.21));
+	p+=dot(p,p+45.32);
+	return fract(p.x*p.y);
+}
+float vn(vec2 p) {
+	vec2 i=floor(p); vec2 f=fract(p); f=f*f*(3.0-2.0*f);
+	return mix(mix(vh(i),vh(i+vec2(1,0)),f.x),mix(vh(i+vec2(0,1)),vh(i+vec2(1,1)),f.x),f.y);
+}
+void vertex() { world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+void fragment() {
+	float crown=vn(world_position.xz*410.0+vec2(17.0,-31.0));
+	float leaf=vn(world_position.xz*1350.0+vec2(-73.0,29.0));
+	float gap=smoothstep(0.68,0.92,vn(world_position.xz*780.0+vec2(91.0,7.0)));
+	vec3 base=COLOR.rgb*(0.70+crown*0.38+(leaf-0.5)*0.15);
+	if (vegetation_kind==0) {
+		if (atlas_variant>=0) {
+			vec2 cell=vec2(float(atlas_variant%4),float(atlas_variant/4));
+			vec2 atlas_uv=(cell+vec2(0.018)+UV*0.964)/4.0;
+			vec4 canopy=texture(canopy_atlas,atlas_uv);
+			float canopy_luma=max(dot(canopy.rgb,vec3(0.299,0.587,0.114)),0.12);
+			float tint_luma=max(dot(COLOR.rgb,vec3(0.299,0.587,0.114)),0.12);
+			vec3 restrained_canopy=mix(vec3(canopy_luma),canopy.rgb,0.58)*vec3(0.68,0.75,0.62);
+			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.16);
+			base*=0.82+crown*0.16;
+			ALPHA=canopy.a*lod_fade;
+			ALPHA_SCISSOR_THRESHOLD=0.08;
+		}
+		base=mix(base,base*vec3(0.64,0.78,0.61),gap*0.42);
+		base=mix(base,base*vec3(1.08,1.12,0.78),smoothstep(0.76,0.94,leaf)*0.18);
+	} else {
+		base=mix(base,base*vec3(1.12,1.02,0.69),gap*0.36);
+	}
+	ALBEDO=base;
+	ROUGHNESS=1.0;
+	AO=0.84+crown*0.14;
+}
+"""
+	var material:=ShaderMaterial.new()
+	material.shader=vegetation_surface_shader
+	material.set_shader_parameter("vegetation_kind",kind)
+	material.set_shader_parameter("atlas_variant",atlas_variant)
+	var canopy_texture:=load("res://assets/textures/vegetation_canopy_atlas.png")
+	if canopy_texture: material.set_shader_parameter("canopy_atlas",canopy_texture)
+	return material
 
 func _create_irregular_canopy_mesh(radius:float,height:float)->ArrayMesh:
 	# One batched crown is a shallow, uneven dome rather than a vertical sphere.
@@ -1799,6 +2008,7 @@ func _create_irregular_canopy_mesh(radius:float,height:float)->ArrayMesh:
 		var outer_a:=Vector3(cos(angle_a)*outer_radius_a,height*(0.30+0.09*sin(angle_a*4.0)),sin(angle_a)*outer_radius_a)
 		var outer_b:=Vector3(cos(angle_b)*outer_radius_b,height*(0.30+0.09*sin(angle_b*4.0)),sin(angle_b)*outer_radius_b)
 		for vertex in [Vector3(0.0,center_height,0.0),inner_a,inner_b,inner_a,outer_a,outer_b,inner_a,outer_b,inner_b]:
+			surface.set_uv(Vector2(vertex.x/(radius*2.0)+0.5,vertex.z/(radius*2.0)+0.5))
 			surface.add_vertex(vertex)
 	surface.generate_normals()
 	return surface.commit()
@@ -1809,6 +2019,7 @@ func _able_population() -> int:
 func _process_population_day(context := {}) -> Array[Dictionary]:
 	GameState.synchronize_population_allocations()
 	var events := ConsequenceEngine.process_day(context)
+	AdvisorSystem.refresh_pronouncement_statuses()
 	if "Lean-to Shelters" in GameState.settlement_completed and GameState.population_total > int(GameState.housing_capacity * 0.80):
 		var builders := float(GameState.population_allocations.get("Construction", 0))
 		GameState.housing_progress += builders / 8.0*float(GameState.simulation_metrics.get("labor_efficiency",0.72))
@@ -1889,6 +2100,8 @@ func _settlement_plot_color(plot: Dictionary) -> Color:
 	var color := Color("#786f51")
 	if land_use in ["residential_compound", "mixed_household"]:
 		color = Color("#817457")
+	elif land_use=="temporary_encampment":
+		color=Color("#746a4d")
 	elif land_use in ["communal", "civic", "sacred", "market"]:
 		color = Color("#93835f")
 	elif land_use in ["workshop", "dirty_industry", "storage"]:
@@ -1952,8 +2165,8 @@ func _settlement_plot_color(plot: Dictionary) -> Color:
 		# Let the satellite ground remain the dominant image. Plot fill is only the
 		# accumulated landscape stain (clearing, trampling, cultivation), while roofs,
 		# boundaries and lanes carry the readable settlement structure above it.
-		var temporary_ground:=String(plot.get("form","")) in ["portable_shelter_cluster","light_shelter_cluster"]
-		color.a=0.12 if temporary_ground else (0.28 if land_use in ["residential_compound","mixed_household"] else (0.018 if land_use=="field" else 0.42))
+		var temporary_ground:=String(plot.get("form","")) in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment"]
+		color.a=(0.16 if land_use=="temporary_encampment" else 0.12) if temporary_ground else (0.28 if land_use in ["residential_compound","mixed_household"] else (0.018 if land_use=="field" else 0.42))
 	else:
 		color.a=0.58
 	return color
@@ -2001,11 +2214,15 @@ func _append_plot_polygon(surface: SurfaceTool, polygon: PackedVector2Array, cen
 func _ground_atlas_cell(plot:Dictionary)->Vector2i:
 	var use:=String(plot.get("land_use",""))
 	var family:=String(plot.get("material_family","organic"))
+	var variant:=absi(int(plot.get("seed",1)))%7
 	if String(plot.get("status","active")) in ["damaged","ruin"]: return Vector2i(2,3) if family=="earth" else Vector2i(3,3)
-	if use in ["workshop","dirty_industry","waste"]: return Vector2i(0,0)
-	if use=="storage": return Vector2i(1,0)
-	if family=="stone": return Vector2i(3,3)
-	return Vector2i(3,2)
+	if use in ["workshop","dirty_industry","waste"]: return Vector2i(0,0) if variant%3 else Vector2i(3,2)
+	if use=="storage": return Vector2i(1,0) if variant%2 else Vector2i(3,2)
+	if use in ["communal","civic","sacred","market"]: return Vector2i(1,0) if variant%3 else Vector2i(3,2)
+	# A compound's open ground is not its wall material. Stone-built households
+	# still stand in worn earth, weeds, ash and kitchen-garden spill. Selecting
+	# among real ground surfaces keeps the plot from becoming one stone/mud rug.
+	return [Vector2i(3,2),Vector2i(1,0),Vector2i(2,2),Vector2i(0,0)][variant%4]
 
 func _append_textured_plot_polygon(surface:SurfaceTool,plot:Dictionary,center:Vector3,color:Color,lift:=0.0021,atlas_cell_override:=Vector2i(-1,-1),margin_ratio:=0.20)->void:
 	var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
@@ -2022,6 +2239,8 @@ func _append_textured_plot_polygon(surface:SurfaceTool,plot:Dictionary,center:Ve
 	var center_color:=color
 	var margin_color:=color
 	margin_color.a*=margin_ratio
+	var texture_angle:=float(plot.get("field_rotation",float(absi(int(plot.get("seed",1)))%6283)/1000.0))
+	var texture_phase:=float(absi(int(plot.get("seed",1)))%997)/997.0
 	for index in polygon.size():
 		for vertex_index in 3:
 			var source_point:Vector2=centroid if vertex_index==0 else polygon[index if vertex_index==1 else (index+1)%polygon.size()]
@@ -2031,6 +2250,7 @@ func _append_textured_plot_polygon(surface:SurfaceTool,plot:Dictionary,center:Ve
 			var local_uv:=Vector2((point_2d.x-minimum.x)/span.x,(point_2d.y-minimum.y)/span.y)
 			surface.set_color(center_color if vertex_index==0 else margin_color)
 			surface.set_uv(_atlas_uv(atlas_cell,local_uv))
+			surface.set_uv2(Vector2(fposmod(texture_angle,TAU)/TAU,texture_phase))
 			surface.add_vertex(world_point)
 
 func _commit_settlement_surface(surface: SurfaceTool, node_name: String, parent: Node3D, transparent := false) -> void:
@@ -2041,7 +2261,10 @@ func _commit_settlement_surface(surface: SurfaceTool, node_name: String, parent:
 	var instance := MeshInstance3D.new()
 	instance.name = node_name
 	instance.mesh = mesh
-	var physical_fabric:=transparent and node_name in ["PersistentPlotGround","PersistentFieldGround","PersistentCultivationRows","PersistentYardVariation","PersistentRoofFabric","PersistentDesirePaths"]
+	# Roofs use their material atlas at every LOD. The old `transparent` gate sent
+	# close roofs through a plain vertex-colour material, which is exactly why they
+	# appeared as identical coloured boxes while distant roofs happened to texture.
+	var physical_fabric:=node_name=="PersistentRoofFabric" or (transparent and node_name in ["PersistentPlotGround","PersistentFieldGround","PersistentCultivationRows","PersistentYardVariation","PersistentDesirePaths"])
 	var material:Material
 	if physical_fabric:
 		var fabric_kind:=1 if node_name in ["PersistentFieldGround","PersistentCultivationRows"] else (3 if node_name=="PersistentRoofFabric" else (2 if node_name in ["PersistentYardVariation","PersistentDesirePaths"] else 0))
@@ -2075,6 +2298,7 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_burley, specular
 uniform float grain_strength = 0.5;
 uniform int fabric_kind = 0;
 uniform sampler2D material_atlas : source_color, filter_linear_mipmap, repeat_disable;
+uniform sampler2D roof_material_atlas : source_color, filter_linear, repeat_disable;
 varying vec3 world_position;
 float hash21(vec2 p) {
 	p=fract(p*vec2(123.34,345.45));
@@ -2087,6 +2311,22 @@ float value_noise(vec2 p) {
 	f=f*f*(3.0-2.0*f);
 	return mix(mix(hash21(i),hash21(i+vec2(1.0,0.0)),f.x),mix(hash21(i+vec2(0.0,1.0)),hash21(i+vec2(1.0,1.0)),f.x),f.y);
 }
+vec2 mirrored_repeat(vec2 p) {
+	// Triangle-wave repetition avoids a hard jump where a generated texture tile
+	// meets itself. The atlas cell remains clamped; only its internal material
+	// grain repeats at a physical scale.
+	vec2 f=fract(p*0.5)*2.0;
+	return 1.0-abs(f-1.0);
+}
+vec3 sample_material_cell(vec2 source_uv,vec2 metre_position,float frequency,float orientation,float phase) {
+	vec2 cell=floor(clamp(source_uv,vec2(0.0),vec2(0.9999))*4.0);
+	float angle=orientation*6.2831853;
+	mat2 turn=mat2(vec2(cos(angle),sin(angle)),vec2(-sin(angle),cos(angle)));
+	vec2 local_uv=mirrored_repeat(turn*metre_position*frequency+vec2(phase*19.7,phase*31.3));
+	local_uv=mix(vec2(0.025),vec2(0.975),local_uv);
+	vec2 atlas_uv=(cell+local_uv)/4.0;
+	return (fabric_kind==3 ? texture(roof_material_atlas,atlas_uv) : texture(material_atlas,atlas_uv)).rgb;
+}
 void vertex() {
 	world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
 }
@@ -2096,12 +2336,41 @@ void fragment() {
 	float dry=smoothstep(0.64,0.88,value_noise(world_position.xz*73.0+vec2(91.0,17.0)));
 	vec3 fabric=COLOR.rgb*(0.82+broad*0.23+(fine-0.5)*0.18*grain_strength);
 	if ((fabric_kind==0 || fabric_kind==1 || fabric_kind==2 || fabric_kind==3) && UV.x>=0.0 && UV.y>=0.0) {
-		vec3 photographic=texture(material_atlas,UV).rgb;
+		// World units are kilometres. Material detail repeats in metres rather
+		// than stretching once from one parcel corner to the other. Fields retain
+		// their simulated row geometry above this base grain; roofs retain their
+		// individual course/repair overlays.
+		// Roof cells cover roughly a 3.8 m span. The former 1.6 m repetition forced
+		// mipmapping to average reed bindings and board joints into a flat colour.
+		float physical_frequency=fabric_kind==3 ? 260.0 : (fabric_kind==1 ? 165.0 : (fabric_kind==2 ? 230.0 : 120.0));
+		float material_phase=fract(UV2.y+hash21(floor(UV*4.0)+vec2(17.0,43.0)));
+		float material_orientation=fabric_kind==3 ? 0.0 : fract(UV2.x+0.25);
+		// Roof meshes carry a true ridge-aligned 0..1 UV footprint. Ground fabrics
+		// remain world-scaled so adjoining parcels do not visibly restart a tile.
+		vec2 sampling_position=fabric_kind==3 ? fract(UV*4.0)/physical_frequency : world_position.xz;
+		vec3 photographic=fabric_kind==3 ? texture(roof_material_atlas,UV).rgb : sample_material_cell(UV,sampling_position,physical_frequency,material_orientation,material_phase);
+		vec3 secondary=fabric_kind==3 ? photographic : sample_material_cell(UV,sampling_position,physical_frequency*0.47,fract(material_orientation+0.071),fract(material_phase+0.37));
+		photographic=mix(photographic,secondary,fabric_kind==3 ? 0.0 : (0.16+0.12*broad));
+		if (fabric_kind==3) photographic=clamp((photographic-vec3(0.5))*1.20+vec3(0.5),vec3(0.0),vec3(1.0));
 		float source_luma=max(dot(photographic,vec3(0.299,0.587,0.114)),0.12);
 		float tint_luma=max(dot(COLOR.rgb,vec3(0.299,0.587,0.114)),0.12);
 		vec3 tint=COLOR.rgb/tint_luma;
-		photographic*=mix(vec3(1.0),tint,0.27);
-		fabric=mix(fabric,photographic,0.82);
+		if (fabric_kind==3) {
+			// Keep photographic weave/boards/joints as surface information, but let
+			// simulated material, age and condition establish the roof's exposure.
+			// Direct albedo replacement made pale reed roofs glow like pasted mats.
+			vec3 normalized_detail=clamp(photographic/source_luma,vec3(0.48),vec3(1.58));
+			float source_value=clamp(source_luma/0.62,0.94,1.06);
+			vec2 detail_cell=floor(clamp(UV,vec2(0.0),vec2(0.9999))*4.0);
+			// Reed bindings are broad source-photo features. At aerial scale their
+			// full contrast looked like evenly spaced rivets; the procedural fibre
+			// pass below retains fine material direction without that rug-like repeat.
+			float photographic_detail=detail_cell.x<0.5 ? 0.31 : 0.46;
+			fabric=COLOR.rgb*mix(vec3(1.0),normalized_detail,photographic_detail)*source_value*0.94;
+		} else {
+			photographic*=mix(vec3(1.0),tint,0.08);
+			fabric=mix(fabric,photographic,0.94);
+		}
 	}
 	if (fabric_kind==1) {
 		// Vegetation is clumpy at metre scale and interrupted by exposed earth;
@@ -2113,9 +2382,28 @@ void fragment() {
 	} else if (fabric_kind==3) {
 		// Coarse fibre, bark and patched earthen roofing separate roofs from
 		// coloured map rectangles even when a house is only a few pixels wide.
-		float fibre=abs(fract((world_position.x+world_position.z*0.37)*1850.0)-0.5)*2.0;
+		vec2 roof_cell=floor(clamp(UV,vec2(0.0),vec2(0.9999))*4.0);
+		float roof_angle=fract(UV2.x+0.25)*6.2831853;
+		vec2 roof_axis=vec2(cos(roof_angle),sin(roof_angle));
+		vec2 roof_cross=vec2(-roof_axis.y,roof_axis.x);
+		float along=dot(world_position.xz,roof_axis);
+		float across=dot(world_position.xz,roof_cross);
+		float fibre=abs(fract(along*1450.0+UV2.y*7.0)-0.5)*2.0;
 		float roof_stain=value_noise(world_position.xz*520.0+vec2(181.0,-63.0));
-		fabric*=0.78+fibre*0.17+roof_stain*0.18;
+		if (roof_cell.x<0.5) {
+			float binding=smoothstep(0.38,0.49,abs(fract(across*390.0+UV2.y*11.0)-0.5));
+			fabric*=0.73+fibre*0.20+binding*0.16+roof_stain*0.12;
+		} else if (roof_cell.x<1.5) {
+			float board=pow(abs(fract(across*920.0+UV2.y*13.0)-0.5)*2.0,5.0);
+			fabric*=0.76+board*0.25+roof_stain*0.14;
+		} else if (roof_cell.x<2.5) {
+			float plaster=value_noise(vec2(along*310.0,across*470.0)+UV2.y*19.0);
+			fabric*=0.78+plaster*0.30+roof_stain*0.10;
+		} else {
+			float joint_a=pow(abs(fract(along*610.0+UV2.y*5.0)-0.5)*2.0,7.0);
+			float joint_b=pow(abs(fract(across*740.0+UV2.y*9.0)-0.5)*2.0,7.0);
+			fabric*=0.70+max(joint_a,joint_b)*0.23+roof_stain*0.18;
+		}
 		fabric=mix(fabric,fabric*vec3(0.72,0.67,0.56),smoothstep(0.72,0.90,roof_stain)*0.32);
 	} else {
 		float earth_mottle=value_noise(world_position.xz*135.0+vec2(-9.0,44.0));
@@ -2123,7 +2411,18 @@ void fragment() {
 	}
 	fabric=mix(fabric,fabric*vec3(1.10,1.035,0.86),dry*0.14*grain_strength);
 	ALBEDO=fabric;
-	ALPHA=COLOR.a;
+	float material_alpha=COLOR.a;
+	if (fabric_kind==1) {
+		// Cultivation changes the existing terrain unevenly. Broken crop cover and
+		// worked soil prevent even a rectangular authoritative parcel from reading
+		// as a translucent map card.
+		float cover=value_noise(world_position.xz*92.0+vec2(61.0,-37.0));
+		material_alpha*=0.62+cover*0.38;
+	} else if (fabric_kind==0 || fabric_kind==2) {
+		float wear=value_noise(world_position.xz*138.0+vec2(-27.0,83.0));
+		material_alpha*=0.70+wear*0.30;
+	}
+	ALPHA=material_alpha;
 	ROUGHNESS=0.98;
 }
 """
@@ -2131,8 +2430,10 @@ void fragment() {
 	material.shader=settlement_fabric_shader
 	material.set_shader_parameter("grain_strength",grain_strength)
 	material.set_shader_parameter("fabric_kind",fabric_kind)
-	var atlas_texture:=load("res://assets/textures/settlement_material_atlas.png")
+	var atlas_texture:=load("res://assets/textures/settlement_material_atlas_v2.png")
 	if atlas_texture: material.set_shader_parameter("material_atlas",atlas_texture)
+	var roof_atlas_texture:=load("res://assets/textures/settlement_roof_material_atlas_v1.png")
+	if roof_atlas_texture: material.set_shader_parameter("roof_material_atlas",roof_atlas_texture)
 	return material
 
 func _append_shelter_roof(surface: SurfaceTool, plot: Dictionary, center: Vector3, shelter_index: int, shelter_count: int) -> void:
@@ -2201,7 +2502,7 @@ func _append_shelter_roof(surface: SurfaceTool, plot: Dictionary, center: Vector
 			surface.set_color(wall_color)
 			surface.add_vertex(world_point)
 
-func _append_ground_disc(surface:SurfaceTool,world_center:Vector3,radius:float,color:Color,lift:float)->void:
+func _append_ground_disc(surface:SurfaceTool,world_center:Vector3,radius:float,color:Color,lift:float,atlas_cell:=Vector2i(-1,-1))->void:
 	var segments:=18
 	for index in segments:
 		var angle_a:=TAU*float(index)/float(segments)
@@ -2210,6 +2511,36 @@ func _append_ground_disc(surface:SurfaceTool,world_center:Vector3,radius:float,c
 			var point:=Vector3(world_center.x+offset.x,0.0,world_center.z+offset.y)
 			point.y=_close_surface_height_at(point.x,point.z)+lift
 			surface.set_color(color)
+			surface.set_uv(_atlas_uv(atlas_cell,Vector2(0.5,0.5)))
+			surface.add_vertex(point)
+
+func _append_textured_ground_patch(surface:SurfaceTool,world_center:Vector3,radius:float,color:Color,lift:float,atlas_cell:Vector2i,patch_seed:int)->void:
+	# Human traffic does not produce circular decals. Build an asymmetric patch
+	# from deterministic radial samples and feather its material into the terrain.
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=patch_seed
+	var segments:=rng.randi_range(9,14)
+	var angle_offset:=rng.randf()*TAU
+	var stretch_axis:=Vector2.from_angle(rng.randf()*TAU)
+	var edge_points:Array[Vector2]=[]
+	for index in segments:
+		var angle:=angle_offset+TAU*float(index)/float(segments)+rng.randf_range(-0.11,0.11)
+		var radial:=radius*rng.randf_range(0.58,1.18)
+		var direction:=Vector2.from_angle(angle)
+		var stretch:=lerpf(0.72,1.26,absf(direction.dot(stretch_axis)))
+		edge_points.append(direction*radial*stretch)
+	var center_color:=color
+	var edge_color:=color
+	edge_color.a*=0.04
+	var texture_coordinates:=Vector2(fposmod(stretch_axis.angle(),TAU)/TAU,float(absi(patch_seed)%997)/997.0)
+	for index in segments:
+		for vertex_index in 3:
+			var offset:=Vector2.ZERO if vertex_index==0 else edge_points[index if vertex_index==1 else (index+1)%segments]
+			var point:=Vector3(world_center.x+offset.x,0.0,world_center.z+offset.y)
+			point.y=_close_surface_height_at(point.x,point.z)+lift
+			surface.set_color(center_color if vertex_index==0 else edge_color)
+			surface.set_uv(_atlas_uv(atlas_cell,Vector2(0.5,0.5)))
+			surface.set_uv2(texture_coordinates)
 			surface.add_vertex(point)
 
 func _atlas_uv(cell:Vector2i,local_uv:Vector2)->Vector2:
@@ -2232,24 +2563,185 @@ func _field_atlas_cell(plot:Dictionary)->Vector2i:
 	if crop=="garden_beds": return Vector2i(1,2)
 	return Vector2i(0 if absi(int(plot.get("seed",1)))%2==0 else 2,1)
 
-func _roof_atlas_cell(plot:Dictionary,temporary_camp:bool)->Vector2i:
-	if temporary_camp: return Vector2i(0,3)
+func _roof_atlas_cell(plot:Dictionary,temporary_camp:bool,roof_variant:=0)->Vector2i:
+	var seed_value:=absi(int(plot.get("seed",1))+roof_variant*37)
+	var condition:=clampf(float(plot.get("condition",0.72)),0.0,1.0)
+	var age_years:=maxf(0.0,(float(GameState.elapsed_days)-float(plot.get("created_day",GameState.elapsed_days)))/365.0)
+	var wear_row:=0
+	if condition<0.34 or age_years>22.0: wear_row=3
+	elif condition<0.58 or age_years>11.0: wear_row=2
+	elif age_years>3.0: wear_row=1
+	# Adjacent household masses are repaired at different times; deterministic
+	# variation prevents an entire district aging as one cloned roof sheet.
+	if roof_variant>0 and seed_value%5==0: wear_row=mini(3,wear_row+1)
+	if temporary_camp: return Vector2i(0,mini(2,wear_row))
 	var family:=String(plot.get("material_family","organic"))
-	if family=="earth": return Vector2i(2,3)
-	if family=="stone": return Vector2i(3,3)
+	var roof_plan:=String(plot.get("roof_plan",""))
 	var mix:Dictionary=plot.get("material_mix",{})
-	return Vector2i(0,3) if float(mix.get("Fiber Plants",0.0))>=float(mix.get("Timber",0.0)) else Vector2i(1,3)
+	var fibre:=float(mix.get("Fiber Plants",0.0))
+	var timber:=float(mix.get("Timber",0.0))
+	var clay:=float(mix.get("Clay",0.0))
+	var stone:=float(mix.get("Stone",0.0))
+	# Wall/foundation family does not automatically determine the roof. Early
+	# earth and rubble structures overwhelmingly retain fibre or timber spans.
+	# Secondary roof masses may show a real delivered substitute or repair, which
+	# makes material history legible without cosmetic random colours.
+	# The recorded roof plan is the first-order visual fact. Previously a compound
+	# with enough fibre forced every mass back to the same thatch cell, even when
+	# its generated plan called for timber, clay or rubble. That made the atlas look
+	# like one recoloured rug instead of a material history.
+	if roof_plan in ["timber_ridge","timber_span_on_rubble"] and timber>0.08: return Vector2i(1,wear_row)
+	if roof_plan in ["irregular_flat","courtyard_flat","mixed_earthen_span"] and clay>0.12: return Vector2i(2,wear_row)
+	if roof_plan=="rubble_slab" and stone>0.18: return Vector2i(3,wear_row)
+	if roof_variant%5==4 and timber>0.12: return Vector2i(1,wear_row)
+	if roof_variant%6==5 and fibre>0.10: return Vector2i(0,wear_row)
+	if fibre>=0.15 and fibre>=timber*0.72: return Vector2i(0,wear_row)
+	if timber>=0.16: return Vector2i(1,wear_row)
+	if family=="stone" and stone>=0.46: return Vector2i(3,wear_row)
+	if family=="earth" and clay>=0.40: return Vector2i(2,wear_row)
+	return Vector2i(0,wear_row) if seed_value%2==0 else Vector2i(1,wear_row)
 
-func _append_flat_quad(surface:SurfaceTool,center:Vector3,local_center:Vector2,right:Vector2,forward:Vector2,color:Color,lift:float,atlas_cell:=Vector2i(-1,-1))->void:
+func _roof_repair_atlas_cell(plot:Dictionary,base_cell:Vector2i,roof_variant:int)->Vector2i:
+	var mix:Dictionary=plot.get("material_mix",{})
+	var candidates:Array[Vector2i]=[]
+	if float(mix.get("Fiber Plants",0.0))>0.035: candidates.append(Vector2i(0,3))
+	if float(mix.get("Timber",0.0))>0.035: candidates.append(Vector2i(1,3))
+	if float(mix.get("Clay",0.0))>0.055: candidates.append(Vector2i(2,3))
+	if float(mix.get("Stone",0.0))>0.070: candidates.append(Vector2i(3,3))
+	if candidates.size()<=1: return base_cell
+	var start:=absi(int(plot.get("seed",1))+roof_variant*17)%candidates.size()
+	for offset in candidates.size():
+		var candidate:Vector2i=candidates[(start+offset)%candidates.size()]
+		if candidate!=base_cell: return candidate
+	return base_cell
+
+func _roof_material_tone(cell:Vector2i,seed_value:int)->Color:
+	var palettes:Dictionary={
+		0:[Color("#b5a06d"),Color("#8f7c51"),Color("#c2ae79"),Color("#665e49")],
+		1:[Color("#6f5e48"),Color("#4f4d45"),Color("#7a6850"),Color("#55534d")],
+		2:[Color("#9a684d"),Color("#7c513f"),Color("#b68762"),Color("#715245")],
+		3:[Color("#777872"),Color("#6d6256"),Color("#92908a"),Color("#555c57")]
+	}
+	var palette:Array=palettes.get(cell.x,palettes[0])
+	var tone:Color=palette[absi(seed_value)%palette.size()]
+	if cell.y==1: tone=tone.darkened(0.025)
+	elif cell.y==2: tone=tone.darkened(0.055).lerp(Color("#66705c"),0.07)
+	elif cell.y==3: tone=tone.darkened(0.07)
+	return tone
+
+func _append_flat_quad(surface:SurfaceTool,center:Vector3,local_center:Vector2,right:Vector2,forward:Vector2,color:Color,lift:float,atlas_cell:=Vector2i(-1,-1),texture_seed:=0)->void:
 	var corners:=[local_center-right-forward,local_center+right-forward,local_center+right+forward,local_center-right+forward]
 	var corner_uvs:=[Vector2(0.0,0.0),Vector2(1.0,0.0),Vector2(1.0,1.0),Vector2(0.0,1.0)]
+	var texture_coordinates:=Vector2(fposmod(forward.angle(),TAU)/TAU,float(absi(texture_seed)%997)/997.0)
 	for corner_index in [0,1,2,0,2,3]:
 		var point_2d:Vector2=corners[corner_index]
 		var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
 		world_point.y=_close_surface_height_at(world_point.x,world_point.z)+lift
 		surface.set_color(color)
 		surface.set_uv(_atlas_uv(atlas_cell,corner_uvs[corner_index]))
+		surface.set_uv2(texture_coordinates)
 		surface.add_vertex(world_point)
+
+func _roof_local_uv(point:Vector2,local_center:Vector2,right:Vector2,forward:Vector2)->Vector2:
+	var offset:=point-local_center
+	var horizontal:=0.5+0.5*offset.dot(right)/maxf(right.length_squared(),0.00000001)
+	var vertical:=0.5+0.5*offset.dot(forward)/maxf(forward.length_squared(),0.00000001)
+	return Vector2(clampf(horizontal,0.0,1.0),clampf(vertical,0.0,1.0))
+
+func _append_irregular_roof_patch(surface:SurfaceTool,center:Vector3,local_center:Vector2,right:Vector2,forward:Vector2,color:Color,lift:float,atlas_cell:Vector2i,texture_seed:int)->void:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=texture_seed
+	var points:Array[Vector2]=[]
+	var segments:=rng.randi_range(6,8)
+	var angle_offset:=rng.randf()*TAU
+	for index in segments:
+		var angle:=angle_offset+TAU*float(index)/float(segments)+rng.randf_range(-0.13,0.13)
+		var direction:=Vector2(cos(angle),sin(angle))
+		points.append(local_center+right*direction.x*rng.randf_range(0.62,1.10)+forward*direction.y*rng.randf_range(0.58,1.08))
+	var texture_coordinates:=Vector2(fposmod(forward.angle(),TAU)/TAU,float(absi(texture_seed)%997)/997.0)
+	for index in segments:
+		for point_2d in [local_center,points[index],points[(index+1)%segments]]:
+			var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
+			world_point.y=_close_surface_height_at(world_point.x,world_point.z)+lift
+			surface.set_color(color)
+			surface.set_uv(_atlas_uv(atlas_cell,_roof_local_uv(point_2d,local_center,right,forward)))
+			surface.set_uv2(texture_coordinates)
+			surface.add_vertex(world_point)
+
+func _append_roof_footprint(surface:SurfaceTool,center:Vector3,local_center:Vector2,right:Vector2,forward:Vector2,color:Color,lift:float,atlas_cell:Vector2i,variant:int,roof_plan:String,texture_seed:=0)->void:
+	var points:Array[Vector2]=[]
+	var texture_coordinates:=Vector2(fposmod(forward.angle(),TAU)/TAU,float(absi(texture_seed+variant*43)%997)/997.0)
+	if roof_plan in ["round_thatch","round_light_shelter"]:
+		var radial_segments:=10
+		var round_radius:=sqrt(maxf(0.0000001,right.length()*forward.length()))*0.91
+		var round_right:=right.normalized()*round_radius
+		var round_forward:=forward.normalized()*round_radius
+		for radial_index in radial_segments:
+			var angle:=TAU*float(radial_index)/float(radial_segments)
+			points.append(local_center+round_right*cos(angle)+round_forward*sin(angle))
+	elif atlas_cell.x==0 or roof_plan in ["tapered_thatch","tapered_light_shelter","long_thatch"]:
+		# Fibre roofs taper at the ridge ends and read as bundled thatch rather than
+		# mass-produced rectangular tiles.
+		var hand:=0.06 if variant%2==0 else -0.05
+		points=[local_center-right*(0.68+hand)-forward,local_center+right*(0.74-hand)-forward*0.96,local_center+right+forward*0.52,local_center+right*0.57+forward,local_center-right*(0.62-hand)+forward*0.94,local_center-right+forward*(0.61+hand)]
+	elif atlas_cell.x==1 or roof_plan in ["timber_ridge","ridge_light_shelter"]:
+		# Hand-split boards and bark shingles produce stepped eaves, not four exact
+		# corners. The asymmetry is deliberately sub-metre at world scale.
+		var step:=0.08 if variant%2==0 else -0.07
+		points=[local_center-right*(0.90+step)-forward,local_center+right*(0.83-step)-forward,local_center+right+forward*0.38,local_center+right*(0.91-step)+forward,local_center-right*(0.79+step)+forward,local_center-right-forward*0.22]
+	elif atlas_cell.x==2 or roof_plan in ["irregular_flat","courtyard_flat","mixed_earthen_span"]:
+		# Hand-smoothed mud roofs keep visibly imperfect corners.
+		var skew:=right*(0.10 if variant%2==0 else -0.08)
+		points=[local_center-right-forward+skew,local_center+right*0.92-forward,local_center+right+forward*0.87,local_center-right*0.86+forward]
+	elif atlas_cell.x==3 or roof_plan in ["rubble_slab","timber_span_on_rubble"]:
+		# Rubble/slab coverings form an uneven heavy footprint.
+		points=[local_center-right*0.82-forward,local_center+right*0.72-forward*0.94,local_center+right+forward*0.26,local_center+right*0.78+forward,local_center-right*0.64+forward*0.91,local_center-right-forward*0.08]
+	else:
+		points=[local_center-right-forward,local_center+right-forward,local_center+right+forward,local_center-right+forward]
+	if points.size()<3: return
+	if roof_plan in ["round_thatch","round_light_shelter"] and atlas_cell.x>=0:
+		# A centre-to-eave value gradient is the aerial cue for a shallow conical
+		# thatch roof. It remains only centimetres above the terrain drape and does
+		# not become an oversized 3D prop.
+		var crown_color:=color.lightened(0.10)
+		for point_index in points.size():
+			var next_index:=(point_index+1)%points.size()
+			var rim_direction:=(points[point_index]-local_center).normalized()
+			var directional_shade:=0.075+0.065*(0.5+0.5*rim_direction.dot(Vector2(0.62,0.78)))
+			var rim_color:=color.darkened(directional_shade)
+			for roof_vertex in [[local_center,lift+0.00014,crown_color],[points[point_index],lift,rim_color],[points[next_index],lift,color.darkened(directional_shade*0.82)]]:
+				var point_2d:Vector2=roof_vertex[0]
+				var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
+				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+float(roof_vertex[1])
+				surface.set_color(roof_vertex[2])
+				surface.set_uv(_atlas_uv(atlas_cell,_roof_local_uv(point_2d,local_center,right,forward)))
+				surface.set_uv2(texture_coordinates)
+				surface.add_vertex(world_point)
+		return
+	if atlas_cell.x in [0,1] and roof_plan not in ["irregular_flat","courtyard_flat","mixed_earthen_span","rubble_slab"]:
+		# A shallow visual ridge is enough to read as a roof from above. Geometry
+		# remains terrain-scale; value and a few centimetres of crown replace the
+		# previous flat, box-like card.
+		var crown_color:=color.lightened(0.12)
+		for point_index in points.size():
+			var next_index:=(point_index+1)%points.size()
+			for roof_vertex in [[local_center,lift+0.00010,crown_color],[points[point_index],lift,color.darkened(0.13)],[points[next_index],lift,color.darkened(0.09)]]:
+				var point_2d:Vector2=roof_vertex[0]
+				var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
+				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+float(roof_vertex[1])
+				surface.set_color(roof_vertex[2])
+				surface.set_uv(_atlas_uv(atlas_cell,_roof_local_uv(point_2d,local_center,right,forward)))
+				surface.set_uv2(texture_coordinates)
+				surface.add_vertex(world_point)
+		return
+	for point_index in range(1,points.size()-1):
+		for point_2d in [points[0],points[point_index],points[point_index+1]]:
+			var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
+			world_point.y=_close_surface_height_at(world_point.x,world_point.z)+lift
+			surface.set_color(color)
+			surface.set_uv(_atlas_uv(atlas_cell,_roof_local_uv(point_2d,local_center,right,forward)))
+			surface.set_uv2(texture_coordinates)
+			surface.add_vertex(world_point)
 
 func _append_satellite_roof_fabric(surface:SurfaceTool,plot:Dictionary,center:Vector3)->int:
 	var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
@@ -2258,7 +2750,9 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,plot:Dictionary,center:Ve
 	var coverage:=clampf(float(plot.get("roof_coverage",0.18)),0.04,0.72)
 	var residents:=maxi(0,int(plot.get("resident_count",0)))
 	var use:=String(plot.get("land_use",""))
-	var temporary_camp:=String(plot.get("form","")) in ["portable_shelter_cluster","light_shelter_cluster"]
+	var emergency_camp:=String(plot.get("form",""))=="emergency_open_encampment"
+	var temporary_camp:=String(plot.get("form","")) in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment"]
+	var roof_plan:=String(plot.get("roof_plan",["round_thatch","tapered_thatch","timber_ridge","long_thatch"][absi(int(plot.get("seed",1)))%4]))
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=int(plot.get("seed",1))^0x6d2b79f5
 	var base_angle:=rng.randf_range(0.0,TAU)
@@ -2273,21 +2767,30 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,plot:Dictionary,center:Ve
 		route_maturity=clampf(float(route.get("traffic",0.0))*0.62+float(route.get("condition",0.0))*0.38,0.0,1.0)
 		break
 	var occupied_pressure:=clampf(float(residents)/34.0,0.0,1.0)
-	var density_bonus:=roundi(route_maturity*occupied_pressure*2.2)
+	var density_bonus:=roundi(route_maturity*occupied_pressure*2.2)+int(plot.get("infill_units",0))
 	var household_variation:=rng.randi_range(-1,2)
-	var mass_count:=clampi(ceili(coverage*3.2)+ceili(float(residents)/22.0)+density_bonus+household_variation,1,6)
-	if temporary_camp: mass_count=1
+	var mass_count:=clampi(ceili(coverage*3.2)+ceili(float(residents)/22.0)+density_bonus+household_variation,1,8)
+	if emergency_camp: mass_count=clampi(ceili(float(residents)/11.0),4,14)
+	elif temporary_camp: mass_count=1
 	if use in ["communal","civic","sacred","market","workshop","storage"]: mass_count=clampi(1+roundi(coverage*3.0)+roundi(route_maturity),1,4)
 	var appended:=0
 	for mass_index in mass_count:
+		var mass_roof_plan:=roof_plan
+		if emergency_camp:
+			mass_roof_plan=["round_light_shelter","tapered_light_shelter","ridge_light_shelter"][(absi(int(plot.get("seed",1)))+mass_index*5)%3]
+		elif roof_plan in ["round_thatch","round_light_shelter"] and mass_index>0:
+			mass_roof_plan="tapered_light_shelter" if temporary_camp else ("tapered_thatch" if mass_index%2==1 else "timber_ridge")
 		var turn_across_courtyard:=mass_count>=3 and mass_index%3==2
-		var mass_angle:=base_angle+(PI*0.5 if turn_across_courtyard else rng.randf_range(-0.11,0.11))
+		var mass_angle:=rng.randf()*TAU if emergency_camp else base_angle+(PI*0.5 if turn_across_courtyard else rng.randf_range(-0.11,0.11))
 		var side_axis:=Vector2.from_angle(mass_angle)
 		var depth_axis:=Vector2(-side_axis.y,side_axis.x)
 		var rank:=float(mass_index)-float(mass_count-1)*0.5
 		var row_offset:=rank*rng.randf_range(0.0032,0.0051)
 		var courtyard_depth:=(0.0032 if mass_index%2==0 else -0.0022) if mass_count>=4 else rng.randf_range(-0.0022,0.0022)
 		var local_center:=plot_center+Vector2.from_angle(base_angle)*row_offset+Vector2.from_angle(base_angle+PI*0.5)*courtyard_depth
+		if emergency_camp:
+			var plot_radius:=sqrt(maxf(0.0000001,float(plot.get("area_ha",0.02))/100.0)/PI)
+			local_center=plot_center+Vector2.from_angle(rng.randf()*TAU)*sqrt(rng.randf())*plot_radius*rng.randf_range(0.30,0.78)
 		if not Geometry2D.is_point_in_polygon(local_center,polygon): local_center=plot_center.lerp(local_center,0.42)
 		var density_scale:=lerpf(1.0,0.82,clampf(float(mass_count-3)/3.0,0.0,1.0))
 		var half_width:=rng.randf_range(0.0012,0.0025)*density_scale
@@ -2295,41 +2798,53 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,plot:Dictionary,center:Ve
 		if temporary_camp:
 			half_width=rng.randf_range(0.00055,0.0010)
 			half_depth=rng.randf_range(0.00075,0.00135)
+		if emergency_camp:
+			half_width=rng.randf_range(0.00042,0.00086)
+			half_depth=rng.randf_range(0.00056,0.00108)
 		if use in ["communal","civic","market","workshop","storage"]:
 			half_width*=rng.randf_range(1.25,1.65)
 			half_depth*=rng.randf_range(1.10,1.42)
 		# A sub-metre offset shadow gives the aerial fabric terrain-readable relief
 		# without promoting every roof into a chunky authored 3D building.
 		var shadow_center:=local_center+Vector2(0.00042,0.00055)
-		var shadow_alpha:=0.18 if temporary_camp else 0.34
-		_append_flat_quad(surface,center,shadow_center,side_axis*half_width*1.04,depth_axis*half_depth*1.04,Color(0.08,0.075,0.055,shadow_alpha),0.00325)
+		var shadow_alpha:=0.055 if temporary_camp else 0.09
+		_append_roof_footprint(surface,center,shadow_center,side_axis*half_width*1.025,depth_axis*half_depth*1.025,Color(0.08,0.075,0.055,shadow_alpha),0.00325,Vector2i(-1,-1),mass_index,mass_roof_plan,int(plot.get("seed",1)))
 		var weather_palette:=[Color("#8c714b"),Color("#706047"),Color("#9a8058"),Color("#68665a"),Color("#79563f")]
 		var family:=String(plot.get("material_family","organic"))
 		if family=="earth": weather_palette=[Color("#a16a48"),Color("#76503b"),Color("#b07c57"),Color("#68483b"),Color("#8c5c43")]
 		elif family=="stone": weather_palette=[Color("#858178"),Color("#646862"),Color("#989187"),Color("#595e5a"),Color("#777269")]
 		if temporary_camp: weather_palette=[Color("#cbbd8d"),Color("#918162"),Color("#ded09d"),Color("#726c5b"),Color("#ac925f")]
+		if emergency_camp: weather_palette=[Color("#87785b"),Color("#6c654f"),Color("#9a8762"),Color("#5c6252"),Color("#806449")]
+		var roof_atlas_cell:=_roof_atlas_cell(plot,temporary_camp,mass_index)
 		var weather_tone:Color=weather_palette[(absi(int(plot.get("seed",1)))+mass_index*3)%weather_palette.size()]
-		var tone:=_settlement_roof_color(plot).lerp(weather_tone,rng.randf_range(0.38,0.68))
+		var material_tone:=_roof_material_tone(roof_atlas_cell,int(plot.get("seed",1))+mass_index*29)
+		var tone:=material_tone.lerp(weather_tone,rng.randf_range(0.12,0.30))
+		var roof_age_years:=maxf(0.0,(float(GameState.elapsed_days)-float(plot.get("created_day",GameState.elapsed_days)))/365.0)
+		var roof_condition:=clampf(float(plot.get("condition",0.72)),0.0,1.0)
+		var exposure:=clampf(roof_age_years/18.0+(1.0-roof_condition)*0.7,0.0,1.0)
+		tone=tone.lerp(Color("#625f4d"),exposure*0.10)
 		tone=tone.lightened(rng.randf_range(-0.05,0.055))
 		# At this LOD these are density flecks, not individually modelled houses.
-		tone.a=rng.randf_range(0.76,0.90) if temporary_camp else rng.randf_range(0.70,0.84)
-		var roof_atlas_cell:=_roof_atlas_cell(plot,temporary_camp)
-		_append_flat_quad(surface,center,local_center,side_axis*half_width,depth_axis*half_depth,tone,0.0036,roof_atlas_cell)
+		tone.a=rng.randf_range(0.58,0.76) if emergency_camp else (rng.randf_range(0.80,0.93) if temporary_camp else rng.randf_range(0.91,0.99))
+		_append_roof_footprint(surface,center,local_center,side_axis*half_width,depth_axis*half_depth,tone,0.0036,roof_atlas_cell,mass_index,mass_roof_plan,int(plot.get("seed",1)))
 		# Roof-scale fibre courses, boards and repairs survive as texture at the
 		# playable aerial zoom. They share the physical footprint; no giant prop is
 		# introduced just to make a building readable.
-		var course_count:=rng.randi_range(3,6)
+		# The photographic atlas now carries real bindings, boards and joints. The old
+		# stack of translucent quads only reintroduced the coloured-box look.
+		var course_count:=0
 		for course_index in course_count:
 			var course_t:=(float(course_index)+0.5)/float(course_count)-0.5
 			var course_center:=local_center+side_axis*(course_t*half_width*1.72)
 			var course_color:=tone.lightened(rng.randf_range(-0.12,0.14))
 			course_color.a=0.26 if family=="organic" else 0.18
-			_append_flat_quad(surface,center,course_center,side_axis*(half_width/float(course_count)*0.24),depth_axis*half_depth*0.91,course_color,0.00363,roof_atlas_cell)
+			_append_flat_quad(surface,center,course_center,side_axis*(half_width/float(course_count)*0.24),depth_axis*half_depth*0.91,course_color,0.00363,roof_atlas_cell,int(plot.get("seed",1))+mass_index*53+course_index)
 		if not temporary_camp and rng.randf()<0.68:
 			var patch_center:=local_center+side_axis*rng.randf_range(-half_width*0.42,half_width*0.42)+depth_axis*rng.randf_range(-half_depth*0.38,half_depth*0.38)
-			var patch_color:=tone.lerp(Color("#4d4637"),rng.randf_range(0.18,0.42))
-			patch_color.a=0.34
-			_append_flat_quad(surface,center,patch_center,side_axis*half_width*rng.randf_range(0.16,0.34),depth_axis*half_depth*rng.randf_range(0.14,0.31),patch_color,0.00366,roof_atlas_cell)
+			var repair_cell:=_roof_repair_atlas_cell(plot,roof_atlas_cell,mass_index)
+			var patch_color:=_roof_material_tone(repair_cell,int(plot.get("seed",1))+mass_index*47+11).lerp(Color("#4d4637"),rng.randf_range(0.05,0.20))
+			patch_color.a=0.44 if repair_cell!=roof_atlas_cell else 0.28
+			_append_irregular_roof_patch(surface,center,patch_center,side_axis*half_width*rng.randf_range(0.16,0.34),depth_axis*half_depth*rng.randf_range(0.14,0.31),patch_color,0.00366,repair_cell,int(plot.get("seed",1))+mass_index*71+19)
 		appended+=1
 	return appended
 
@@ -2370,15 +2885,17 @@ func _append_yard_variation(surface:SurfaceTool,plot:Dictionary,center:Vector3)-
 	var plot_center:=Vector2(plot.get("centroid",Vector2.ZERO))
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=int(plot.get("seed",1))^0x31f2a7
-	var patch_count:=rng.randi_range(3,7)
+	var patch_count:=rng.randi_range(4,8)
 	var appended:=0
 	for patch_index in patch_count:
-		var local_center:=plot_center+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.0015,0.0065)
+		var local_center:=plot_center+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.0010,0.0074)
 		if not Geometry2D.is_point_in_polygon(local_center,polygon): continue
 		var world_center:=Vector3(center.x+local_center.x,0.0,center.z+local_center.y)
-		var color:=Color("#7d6a4b").lerp(Color("#40563b"),rng.randf_range(0.12,0.78))
-		color.a=rng.randf_range(0.10,0.23)
-		_append_ground_disc(surface,world_center,rng.randf_range(0.0010,0.0031),color,0.0027)
+		var ground_cells:=[Vector2i(3,2),Vector2i(1,0),Vector2i(2,2),Vector2i(0,0)]
+		var atlas_cell:Vector2i=ground_cells[(absi(int(plot.get("seed",1)))+patch_index*3)%ground_cells.size()]
+		var color:=Color.WHITE.lerp(Color("#7d765f"),rng.randf_range(0.04,0.18))
+		color.a=rng.randf_range(0.18,0.36)
+		_append_textured_ground_patch(surface,world_center,rng.randf_range(0.0013,0.0040),color,0.0027,atlas_cell,int(plot.get("seed",1))^((patch_index+5)*0x45d9f3b))
 		appended+=1
 	return appended
 
@@ -2449,7 +2966,10 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 			row_color.a=1.0
 			row_color=row_color.lerp(Color("#b19a6c") if row_phase>0.56 else Color("#32472d"),0.18+absf(row_phase-0.5)*0.24)
 			row_color=row_color.lightened(segment_rng.randf_range(-0.10,0.11))
-			row_color.a=(0.15+crop_cover*0.34)*(0.82 if field_pattern=="dryland_patchwork" else 1.0)
+			# The internal tenure strips carry cultivation; the full plot underneath is
+			# only a faint soil disturbance. Keeping the strips materially readable is
+			# what separates grain, pulses, roots and garden beds at map scale.
+			row_color.a=(0.26+crop_cover*0.46)*(0.84 if field_pattern=="dryland_patchwork" else 1.0)
 			# A worked bed is not a filled rectangle. Build it from separated crop or
 			# furrow courses so soil remains visible between them, then vary individual
 			# courses by household practice and crop condition.
@@ -2463,6 +2983,14 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 				var micro_finish:=segment_finish+forward*micro_center_offset-right*segment_rng.randf_range(0.0,0.00038)
 				if micro_finish.distance_to(micro_start)<0.00035: continue
 				var micro_color:=row_color.lightened(segment_rng.randf_range(-0.09,0.10))
+				var micro_atlas_cell:=field_atlas_cell
+				var tenure_variant:=absi(int(plot.get("seed",1))+row_index*19+segment_index*31+micro_index*7)%13
+				if field_pattern=="smallholder_mosaic" and tenure_variant in [0,5]:
+					micro_atlas_cell=Vector2i(1,2) # mixed garden practice within staple fields
+				elif tenure_variant==8:
+					micro_atlas_cell=Vector2i(2,2) # fallow/weed interruption
+				elif String(plot.get("cultivation_phase","prepared")) in ["prepared","harvested"] and tenure_variant%4==0:
+					micro_atlas_cell=Vector2i(2,0) if tenure_variant%2==0 else Vector2i(3,0)
 				if String(plot.get("cultivation_phase","prepared")) in ["prepared","harvested","fallow"]:
 					micro_color=micro_color.lerp(Color("#4d3929"),segment_rng.randf_range(0.18,0.42))
 					micro_color.a*=0.72
@@ -2473,7 +3001,8 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 					var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
 					world_point.y=_close_surface_height_at(world_point.x,world_point.z)+0.0028
 					surface.set_color(micro_color)
-					surface.set_uv(_atlas_uv(field_atlas_cell,corner_uvs[corner_index]))
+					surface.set_uv(_atlas_uv(micro_atlas_cell,corner_uvs[corner_index]))
+					surface.set_uv2(Vector2(fposmod(right.angle(),TAU)/TAU,float(absi(int(plot.get("seed",1))+row_index*41+segment_index*17+micro_index)%997)/997.0))
 					surface.add_vertex(world_point)
 	# Aggregate simulation fields contain many household beds and inherited strips.
 	# Cross-dividers make that internal tenure legible without creating more plots.
@@ -2541,14 +3070,18 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		var ground_inset:=1.0 if land_use in ["field","water","waste"] else 0.76
 		if land_use=="field" and status not in ["ruin","reclaimed"]:
 			var field_ground_color:=plot_color
-			field_ground_color.a=0.60 if status=="active" else 0.34
-			_append_textured_plot_polygon(field_ground_surface,plot,center,field_ground_color,0.0021)
+			# From close range the worked rows carry most of the detail; from the
+			# regional camera the parcel itself must survive as a coherent change in
+			# land cover. A nearly transparent perimeter made real fields collapse into
+			# isolated scratches instead of the satellite-like patchwork they occupy.
+			field_ground_color.a=(0.34 if lod>=1 else 0.24) if status=="active" else 0.17
+			_append_textured_plot_polygon(field_ground_surface,plot,center,field_ground_color,0.0021,Vector2i(-1,-1),0.38 if lod>=1 else 0.22)
 		elif land_use not in ["water","waste","vacant","pasture"] and status!="reclaimed":
 			_append_textured_plot_polygon(ground_surface,plot,center,plot_color,0.0018,_ground_atlas_cell(plot),0.46)
 		else:
 			_append_plot_polygon(ground_surface, polygon, center, plot_color, ground_inset, 0.0018)
 		var form:=String(plot.get("form",""))
-		var temporary_camp:=form in ["portable_shelter_cluster","light_shelter_cluster"]
+		var temporary_camp:=form in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment"]
 		var feature_center:=Vector2(plot.get("centroid",Vector2.ZERO))
 		var feature_world:=Vector3(center.x+feature_center.x,0.0,center.z+feature_center.y)
 		if lod<=1 and not temporary_camp:
@@ -2573,7 +3106,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			if status == "under_construction" and float(plot.get("construction_progress", 0.0)) < 0.26:
 				continue
 			roof_count+=_append_satellite_roof_fabric(roof_surface,plot,center)
-		if lod == 0 and status in ["damaged", "ruin"]:
+		if lod == 0 and status in ["damaged", "ruin"] and land_use!="temporary_encampment":
 			_append_plot_polygon(scar_surface, polygon, center, Color(0.19, 0.17, 0.15, 0.72), 0.34, 0.0044)
 			scar_count += 1
 	_commit_settlement_surface(ground_surface, "PersistentPlotGround", parent, true)
@@ -2603,17 +3136,17 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 		if points.size() < 2:
 			continue
 		var route_kind:=String(route.get("kind","desire_path"))
-		var hierarchy:=String(route.get("hierarchy","field_track" if route_kind=="field_track" else "path"))
+		var hierarchy:=String(route.get("hierarchy","field_track" if route_kind=="field_track" else ("camp_path" if route_kind=="camp_path" else "path")))
 		# Agricultural access is a faint inherited track; inhabited lanes remain
 		# readable but no longer turn every outlying field into a map-diagram spoke.
-		var minimum_half_width:=0.00034 if route_kind=="field_track" else 0.00058
+		var minimum_half_width:=0.00034 if route_kind=="field_track" else (0.00014 if route_kind=="camp_path" else 0.00058)
 		if hierarchy=="farm_lane": minimum_half_width=0.00058
 		elif hierarchy=="lane": minimum_half_width=0.00082
 		elif hierarchy=="main_approach": minimum_half_width=0.00128
 		var width := maxf(minimum_half_width, float(route.get("width_m", 1.2)) / 2000.0)
 		var condition := clampf(float(route.get("condition", 0.5)), 0.0, 1.0)
-		var route_color := (Color("#41402e") if route_kind=="field_track" else Color("#6f6248")).lerp(Color("#897654"), condition * 0.24)
-		route_color.a = 0.12 if route_kind=="field_track" else 0.18
+		var route_color := (Color("#41402e") if route_kind=="field_track" else (Color("#5e5948") if route_kind=="camp_path" else Color("#6f6248"))).lerp(Color("#897654"), condition * 0.24)
+		route_color.a = 0.12 if route_kind=="field_track" else (0.07 if route_kind=="camp_path" else 0.18)
 		if hierarchy=="farm_lane": route_color.a=0.22
 		elif hierarchy=="lane": route_color.a=0.34
 		elif hierarchy=="main_approach": route_color=Color("#756347"); route_color.a=0.54
@@ -2675,11 +3208,12 @@ func _create_land_patch(center: Vector3, radius: float, color: Color, segments: 
 	parent.add_child(patch)
 
 func _river_distance_at(x: float, z: float) -> float:
+	var nearest:=_local_drainage_distance_at(x,z) if SEAMLESS_WORLD else INF
 	var v := z / world_depth + 0.5
 	var river_u := _river_u_at_v(v)
 	if river_u < 0.0:
-		return INF
-	return absf(x - (river_u - 0.5) * world_width)
+		return nearest
+	return minf(nearest,absf(x - (river_u - 0.5) * world_width))
 
 func _terrain_slope_at(x: float, z: float, sample_radius := 0.45) -> float:
 	var east_west := absf(_height_at(x + sample_radius, z) - _height_at(x - sample_radius, z))
@@ -3663,13 +4197,13 @@ func _build_interface() -> void:
 	top_rule.size = Vector2(viewport_width, 1)
 	top_rule.color = Color("#70664f")
 	layer.add_child(top_rule)
-	var label := Label.new()
-	label.position = Vector2(18, 9)
-	label.size = Vector2(238, 40)
-	label.text = "%s\n%s" % [GameState.province_name.to_upper(),"FOUNDING EXPEDITION" if not GameState.settlement_site_committed else _settlement_display_name()]
-	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", Color("#ded6c4"))
-	layer.add_child(label)
+	world_header_label=Label.new()
+	world_header_label.position = Vector2(18, 9)
+	world_header_label.size = Vector2(238, 40)
+	world_header_label.text = "%s\n%s" % [GameState.province_name.to_upper(),"FOUNDING EXPEDITION" if not GameState.settlement_site_committed else _settlement_display_name()]
+	world_header_label.add_theme_font_size_override("font_size", 14)
+	world_header_label.add_theme_color_override("font_color", Color("#ded6c4"))
+	layer.add_child(world_header_label)
 	population_summary_label = Button.new()
 	population_summary_label.position = Vector2(18, 53)
 	population_summary_label.size = Vector2(180, 32)
@@ -4753,6 +5287,20 @@ func _open_materials_panel() -> void:
 	var live_stored:=ResourceSystem.stored_bulk()
 	_make_provision_stat(header,"STORAGE","%.0f / %.0f bulk" % [live_stored,live_capacity],Color("#a58b67"))
 	root.add_child(HSeparator.new())
+	var economy_row:=HBoxContainer.new()
+	economy_row.add_theme_constant_override("separation",9)
+	root.add_child(economy_row)
+	var economy_metrics:=GameState.economy_metrics
+	_make_provision_stat(economy_row,"EXCHANGE",String(economy_metrics.get("stage_name","Resource obligations")),Color("#c1a56b"))
+	_make_provision_stat(economy_row,"MARKET ACCESS","%d%%" % roundi(float(economy_metrics.get("market_access",0.0))*100.0),Color("#7f9b91"))
+	_make_provision_stat(economy_row,"PRICE INDEX","%.2f  %+.1f%%" % [float(economy_metrics.get("price_index",1.0)),float(economy_metrics.get("inflation",0.0))*100.0],Color("#aa8c68"))
+	_make_provision_stat(economy_row,"TRADE","%.1f today" % float(economy_metrics.get("trade_volume",0.0)),Color("#75939c"))
+	if GameState.economy_stage==EconomySystem.STAGE_CURRENCY:
+		_make_provision_stat(economy_row,"TREASURY","%.1f / %.1f supply" % [GameState.public_treasury,GameState.currency_supply],Color("#c5b36f"))
+		_make_provision_stat(economy_row,"CREDIT","%.1f  •  %d%% GINI" % [GameState.credit_outstanding,roundi(float(economy_metrics.get("inequality",0.0))*100.0)],Color("#9c7f91"))
+	else:
+		_make_provision_stat(economy_row,"SETTLEMENT",EconomySystem.settlement_medium(),Color("#968a72"))
+	root.add_child(HSeparator.new())
 	var scroll:=ScrollContainer.new()
 	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
@@ -4845,6 +5393,166 @@ func _open_materials_panel() -> void:
 	doctrine.add_theme_font_size_override("font_size",11)
 	doctrine.add_theme_color_override("font_color",Color("#adb1a8"))
 	flow_column.add_child(doctrine)
+	flow_column.add_child(HSeparator.new())
+	_add_provision_section_title(flow_column,"EXCHANGE & VALUE","Prices compare claims on known goods; they never substitute for physical stock.")
+	var exchange_metrics:=GameState.economy_metrics
+	var exchange_summary:=Label.new()
+	exchange_summary.text="%s\n%s\nMarket access %d%%  •  Monetized %d%%  •  Shortage pressure %d%%" % [String(exchange_metrics.get("stage_name","Resource obligations")).to_upper(),EconomySystem.settlement_medium(),roundi(float(exchange_metrics.get("market_access",0.0))*100.0),roundi(float(exchange_metrics.get("monetization",0.0))*100.0),roundi(float(exchange_metrics.get("shortage_pressure",0.0))*100.0)]
+	exchange_summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	exchange_summary.add_theme_font_size_override("font_size",10)
+	exchange_summary.add_theme_color_override("font_color",Color("#c9b889"))
+	flow_column.add_child(exchange_summary)
+	var real_economy:Dictionary=exchange_metrics.get("real_economy",{})
+	if not real_economy.is_empty():
+		var real_label:=Label.new()
+		real_label.text="ESSENTIAL COVERAGE %d%%  •  FOOD %d%%  •  MATERIALS %d%%  •  COLLECTIVE LABOR %d%%\nEXCHANGEABLE SURPLUS %.1f value  •  REAL OUTPUT %.2f / person  •  LABOR RETURN %.2f× basket%s" % [roundi(float(real_economy.get("essential_coverage",0.0))*100.0),roundi(float(real_economy.get("food_coverage",0.0))*100.0),roundi(float(real_economy.get("material_coverage",0.0))*100.0),roundi(float(real_economy.get("collective_labor_share",0.0))*100.0),float(real_economy.get("exchangeable_surplus_value",0.0)),float(real_economy.get("output_per_capita",0.0)),float(real_economy.get("labor_return_index",0.0)),"  •  PRIVATE LIQUIDITY %.1f days" % float(real_economy.get("private_liquidity_days",0.0)) if GameState.economy_stage==EconomySystem.STAGE_CURRENCY else ""]
+		real_label.tooltip_text="Physical adequacy and labor burden remain decisive in every exchange stage. These are observational accounts; the economy does not consume food or materials a second time."
+		real_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		real_label.add_theme_font_size_override("font_size",9)
+		real_label.add_theme_color_override("font_color",Color("#9eab8c"))
+		flow_column.add_child(real_label)
+	var public_obligations:Dictionary=exchange_metrics.get("public_obligations",{})
+	if not public_obligations.is_empty():
+		var obligation_label:=Label.new()
+		obligation_label.text="PUBLIC DUES  %s  •  ASSESSED REACH %d%%  •  IN-KIND SHARE %d%%\nLABOR %.1f / %.1f rendered  •  %d%% covered  •  %.1f days carried\nMATERIAL %.1f / %.1f value rendered  •  %d%% covered  •  %.1f value carried" % [String(public_obligations.get("regime","customary obligations")).to_upper(),roundi(float(public_obligations.get("assessment_reach",0.0))*100.0),roundi(float(public_obligations.get("in_kind_share",1.0))*100.0),float(public_obligations.get("labor_fulfilled",0.0)),float(public_obligations.get("labor_outstanding",0.0)),roundi(float(public_obligations.get("labor_coverage",0.0))*100.0),float(public_obligations.get("labor_arrears",0.0)),float(public_obligations.get("material_fulfilled",0.0)),float(public_obligations.get("material_outstanding",0.0)),roundi(float(public_obligations.get("material_coverage",0.0))*100.0),float(public_obligations.get("material_arrears",0.0))]
+		obligation_label.tooltip_text="Collective labor and material deliveries can satisfy public obligations. These accounts classify work and goods already handled by their owning systems; they never consume a second unit. Scheduled levies preserve unpaid claims, while currency commutes most dues into the exchange levy."
+		obligation_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		obligation_label.add_theme_font_size_override("font_size",9)
+		obligation_label.add_theme_color_override("font_color",Color("#aa9675"))
+		flow_column.add_child(obligation_label)
+	var reserve_summary:=Label.new()
+	reserve_summary.text="AVAILABLE METAL %.1f  •  WEIGHED EXCHANGE %.1f  •  TODAY'S METAL TURNOVER %.1f  •  COMMITTED RESERVE %.1f  •  RESERVE RATIO %d%%" % [float(exchange_metrics.get("metal_available",EconomySystem._available_metal_value())),GameState.weighed_metal_circulation,float(exchange_metrics.get("metal_trade_turnover",0.0)),float(exchange_metrics.get("metal_reserve",EconomySystem._monetary_reserve_value())),roundi(float(exchange_metrics.get("reserve_ratio",0.0))*100.0)]
+	reserve_summary.tooltip_text="Available metal remains in ordinary stores. Weighed exchange metal is physical standardized metal held in circulation. Committed reserve is sequestered backing. One unit cannot occupy more than one account."
+	reserve_summary.add_theme_font_size_override("font_size",9)
+	reserve_summary.add_theme_color_override("font_color",Color("#a9976f"))
+	flow_column.add_child(reserve_summary)
+	var reserve_composition:Dictionary=exchange_metrics.get("reserve_composition",GameState.monetary_reserve_metals)
+	if not reserve_composition.is_empty():
+		var reserve_parts:Array[String]=[]
+		for reserve_material in reserve_composition:
+			reserve_parts.append("%s %.1f" % [String(reserve_material),float(reserve_composition[reserve_material])])
+		reserve_parts.sort()
+		var composition_label:=Label.new()
+		composition_label.text="Backing: "+"  •  ".join(reserve_parts)
+		composition_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		composition_label.add_theme_font_size_override("font_size",9)
+		composition_label.add_theme_color_override("font_color",Color("#8e8778"))
+		flow_column.add_child(composition_label)
+	var exchange_metal_composition:Dictionary=exchange_metrics.get("weighed_metal_composition",GameState.weighed_metal_composition)
+	if not exchange_metal_composition.is_empty():
+		var exchange_metal_parts:Array[String]=[]
+		for exchange_material in exchange_metal_composition:
+			exchange_metal_parts.append("%s %.1f" % [String(exchange_material),float(exchange_metal_composition[exchange_material])])
+		exchange_metal_parts.sort()
+		var exchange_metal_label:=Label.new()
+		exchange_metal_label.text="Weighed circulation: %s  •  cumulative wear %.2f" % ["  •  ".join(exchange_metal_parts),GameState.weighed_metal_losses]
+		exchange_metal_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		exchange_metal_label.add_theme_font_size_override("font_size",9)
+		exchange_metal_label.add_theme_color_override("font_color",Color("#a58f70"))
+		flow_column.add_child(exchange_metal_label)
+	if GameState.economy_stage!=EconomySystem.STAGE_SUBSISTENCE:
+		var metal_policy_row:=HBoxContainer.new()
+		metal_policy_row.add_theme_constant_override("separation",4)
+		flow_column.add_child(metal_policy_row)
+		for metal_policy_variant in [["METAL TO TRADE",maxf(1.0,GameState.population_exact*0.04)],["WITHDRAW TRADE METAL",maxf(1.0,GameState.population_exact*0.04)]]:
+			var metal_policy:Array=metal_policy_variant
+			var metal_policy_button:=Button.new()
+			metal_policy_button.text=String(metal_policy[0])
+			metal_policy_button.tooltip_text=_economy_policy_preview_text(String(metal_policy[0]),float(metal_policy[1]))
+			metal_policy_button.pressed.connect(_apply_economy_policy.bind(String(metal_policy[0]),float(metal_policy[1])))
+			metal_policy_row.add_child(metal_policy_button)
+	var accounting_audit:Dictionary=exchange_metrics.get("accounting_audit",{})
+	if not accounting_audit.is_empty():
+		var audit_label:=Label.new()
+		audit_label.text="ACCOUNTS VERIFIED" if bool(accounting_audit.get("ok",false)) else "ACCOUNT WARNING  "+"; ".join(accounting_audit.get("violations",[]))
+		audit_label.add_theme_font_size_override("font_size",9)
+		audit_label.add_theme_color_override("font_color",Color("#71977d") if bool(accounting_audit.get("ok",false)) else Color("#bd6558"))
+		flow_column.add_child(audit_label)
+	if GameState.economy_stage!=EconomySystem.STAGE_SUBSISTENCE:
+		var external_trade:Dictionary=exchange_metrics.get("external_trade",{})
+		var trade_label:=Label.new()
+		trade_label.text="REGIONAL TRADE  %s  •  CLAIMS %.1f / %.1f limit  •  TODAY +%.1f exports / −%.1f imports\nCUMULATIVE %.1f export claims / %.1f import spending / %.1f losses  •  FOOD IMPORT DEPENDENCE %d%%" % [GameState.external_trade_policy.replace("_"," ").to_upper(),GameState.external_trade_credit,float(external_trade.get("claim_limit",0.0)),float(external_trade.get("exports",0.0)),float(external_trade.get("imports",0.0)),GameState.external_trade_exports,GameState.external_trade_imports,GameState.external_trade_losses,roundi(float(GameState.simulation_metrics.get("food_import_share",0.0))*100.0)]
+		trade_label.tooltip_text="Regional imports must be funded by prior or same-day exports. Trade friction reduces export proceeds; domestic currency is not assumed to be foreign money."
+		trade_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		trade_label.add_theme_font_size_override("font_size",9)
+		trade_label.add_theme_color_override("font_color",Color("#829da1"))
+		flow_column.add_child(trade_label)
+		var trade_policy_button:=Button.new()
+		trade_policy_button.text="TRADE: "+GameState.external_trade_policy.replace("_"," ").to_upper()
+		trade_policy_button.tooltip_text=_economy_policy_preview_text("TRADE",0.0)
+		trade_policy_button.pressed.connect(_apply_economy_policy.bind("TRADE",0.0))
+		flow_column.add_child(trade_policy_button)
+	var exchange_mix:Dictionary=exchange_metrics.get("exchange_mix",{})
+	if not exchange_mix.is_empty():
+		var mix_parts:Array[String]=[]
+		for channel in ["public_allocation","reciprocity","barter","weighed_metal","recorded_credit","currency"]:
+			var share:=float(exchange_mix.get(channel,0.0))
+			if share<0.005: continue
+			mix_parts.append("%s %d%%" % [String(channel).replace("_"," ").capitalize(),roundi(share*100.0)])
+		var mix_label:=Label.new()
+		mix_label.text="  •  ".join(mix_parts)
+		mix_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		mix_label.add_theme_font_size_override("font_size",9)
+		mix_label.add_theme_color_override("font_color",Color("#8fa19c"))
+		flow_column.add_child(mix_label)
+	for quote_variant in EconomySystem.known_market_snapshot():
+		var market_quote:Dictionary=quote_variant
+		var price_change:=(float(market_quote.unit_value)/maxf(0.001,float(market_quote.base_value))-1.0)*100.0
+		var price_line:=Label.new()
+		price_line.text="%s  •  %.2f / unit  •  %+.0f%% vs reference  •  %+.1f%% / 30d  •  %.1f stored" % [String(market_quote.resource).to_upper(),float(market_quote.unit_value),price_change,float(market_quote.get("trend_30d",0.0))*100.0,float(market_quote.stock)]
+		price_line.add_theme_font_size_override("font_size",10)
+		price_line.add_theme_color_override("font_color",Color("#b9b4a7"))
+		flow_column.add_child(price_line)
+	var benchmark:=EconomySystem.benchmark_status()
+	_add_provision_section_title(flow_column,"NEXT BENCHMARK",String(benchmark.next_stage))
+	for requirement_variant in benchmark.requirements:
+		var requirement:Dictionary=requirement_variant
+		var met:=float(requirement.value)>=float(requirement.target)
+		var requirement_line:=Label.new()
+		requirement_line.text="%s  %s  %.2f / %.2f" % ["✓" if met else "○",String(requirement.name),float(requirement.value),float(requirement.target)]
+		requirement_line.add_theme_font_size_override("font_size",10)
+		requirement_line.add_theme_color_override("font_color",Color("#7fa27c") if met else Color("#a39a89"))
+		flow_column.add_child(requirement_line)
+	if GameState.economy_stage==EconomySystem.STAGE_CURRENCY:
+		var military_upkeep:=float(exchange_metrics.get("military_upkeep_due",0.0))
+		var currency_liquidity:Dictionary=exchange_metrics.get("currency_liquidity",{})
+		var liquidity_label:=Label.new()
+		liquidity_label.text="CURRENCY CONFIDENCE %d%%  •  ACTIVE HOUSEHOLD %.1f / %.1f issued (%d%%)\nTREASURY %.1f  •  HOARDS %.1f (%d%%)  •  MUTUAL AID %.1f  •  TODAY +%.2f hoarded / −%.2f released" % [roundi(float(currency_liquidity.get("confidence",0.0))*100.0),float(exchange_metrics.get("transactional_money",GameState.private_currency)),GameState.currency_supply,roundi(float(currency_liquidity.get("transactional_share",0.0))*100.0),GameState.public_treasury,GameState.currency_hoards,roundi(float(currency_liquidity.get("hoard_share",0.0))*100.0),GameState.mutual_aid_reserve,float(currency_liquidity.get("hoarded_today",0.0)),float(currency_liquidity.get("released_today",0.0))]
+		liquidity_label.tooltip_text="Only active household currency currently funds purchases, taxes, and private lending. Treasury balances enter circulation when spent; hoards return when confidence improves; mutual-aid reserves return through relief. All four accounts remain part of conserved supply."
+		liquidity_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		liquidity_label.add_theme_font_size_override("font_size",9)
+		liquidity_label.add_theme_color_override("font_color",Color("#a68d72"))
+		flow_column.add_child(liquidity_label)
+		var credit_label:=Label.new()
+		credit_label.text="PRIVATE CREDIT %.2f / %.2f capacity  •  DEFAULT RATE %.2f%%  •  WEALTH GINI %d%%" % [GameState.credit_outstanding,float(exchange_metrics.get("credit_limit",0.0)),float(exchange_metrics.get("default_rate",0.0))*100.0,roundi(float(exchange_metrics.get("inequality",0.0))*100.0)]
+		credit_label.add_theme_font_size_override("font_size",9)
+		credit_label.add_theme_color_override("font_color",Color("#9c879b"))
+		flow_column.add_child(credit_label)
+		var mutual_aid:Dictionary=exchange_metrics.get("mutual_aid",{})
+		if bool(mutual_aid.get("active",false)):
+			var aid_label:=Label.new()
+			aid_label.text="MUTUAL AID %.2f / %.2f capacity  •  +%.2f contributions  •  −%.2f relief" % [GameState.mutual_aid_reserve,float(mutual_aid.get("capacity",0.0)),float(mutual_aid.get("contribution",0.0)),float(mutual_aid.get("payout",0.0))]
+			aid_label.add_theme_font_size_override("font_size",9)
+			aid_label.add_theme_color_override("font_color",Color("#839f8b"))
+			flow_column.add_child(aid_label)
+		var fiscal_outlook:Dictionary=exchange_metrics.get("fiscal_outlook",{})
+		var fiscal_label:=Label.new()
+		fiscal_label.text="LEVY %.0f%%  •  EFFECTIVE %.1f%%  •  COMPLIANCE %d%%  •  REVENUE %.2f  •  COLLECTION GAP %.2f\nCIVIL DUE %.2f  •  MILITARY DUE %.2f  •  ARREARS %.2f  •  BALANCE %+.2f\nPUBLIC DEBT %.2f / %.2f capacity  •  BORROWED %.2f  •  DEBT SERVICE %.2f\nFISCAL %s  •  PRIORITY %s  •  30-DAY COVER %d%%  •  CIV/MIL %d%%/%d%%\nFREE HEADROOM %.2f  •  14-DAY BUFFER %.2f  •  RUNWAY %.0f days" % [GameState.tax_rate*100.0,float(exchange_metrics.get("effective_tax_rate",0.0))*100.0,roundi(float(exchange_metrics.get("tax_compliance",0.0))*100.0),float(exchange_metrics.get("tax_revenue",0.0)),float(exchange_metrics.get("tax_noncompliance_gap",0.0))+float(exchange_metrics.get("tax_liquidity_gap",0.0)),float(exchange_metrics.get("civil_upkeep_due",0.0)),military_upkeep,float(exchange_metrics.get("public_arrears",0.0)),float(exchange_metrics.get("fiscal_balance",0.0)),GameState.public_debt,float(exchange_metrics.get("debt_capacity",0.0)),float(exchange_metrics.get("public_borrowing",0.0)),float(exchange_metrics.get("debt_service",0.0)),String(fiscal_outlook.get("status","unmeasured")).to_upper(),String(fiscal_outlook.get("spending_priority",GameState.public_spending_priority)).replace("_"," ").to_upper(),roundi(float(fiscal_outlook.get("coverage_ratio",0.0))*100.0),roundi(float(fiscal_outlook.get("civil_coverage",1.0))*100.0),roundi(float(fiscal_outlook.get("military_coverage",1.0))*100.0),float(fiscal_outlook.get("discretionary_headroom",0.0)),float(fiscal_outlook.get("protected_buffer",0.0)),float(fiscal_outlook.get("runway_days",0.0))]
+		fiscal_label.tooltip_text="Statutory levy is filtered through administrative reach, legitimacy, institutions, records, inequality, arrears, high-rate resistance, and available household currency. The fiscal outlook then projects visible receipts and obligations. The protected buffer is fourteen days of gross obligations; it is guidance, not money removed from the treasury.\n%s" % String(fiscal_outlook.get("warning","No forecast is available yet."))
+		fiscal_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		fiscal_label.add_theme_font_size_override("font_size",9)
+		fiscal_label.add_theme_color_override("font_color",Color("#b6a978"))
+		flow_column.add_child(fiscal_label)
+		var policy_row:=HBoxContainer.new()
+		policy_row.add_theme_constant_override("separation",4)
+		flow_column.add_child(policy_row)
+		for policy_variant in [["LEVY −",-0.01],["LEVY +",0.01],["SPENDING",0.0],["BACK METAL",maxf(1.0,GameState.population_exact*0.05)],["RELEASE METAL",maxf(1.0,GameState.population_exact*0.05)],["ISSUE",maxf(1.0,GameState.population_exact*0.10)],["RETIRE",-maxf(1.0,GameState.population_exact*0.05)]]:
+			var policy:Array=policy_variant
+			var policy_button:=Button.new()
+			policy_button.text=String(policy[0])
+			policy_button.tooltip_text=_economy_policy_preview_text(String(policy[0]),float(policy[1]))
+			policy_button.pressed.connect(_apply_economy_policy.bind(String(policy[0]),float(policy[1])))
+			policy_row.add_child(policy_button)
 	var stores_column:=VBoxContainer.new()
 	stores_column.custom_minimum_size=Vector2(340,0)
 	stores_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -4916,6 +5624,55 @@ func _cycle_material_priority(resource_name:String)->void:
 	elif current>1.2: GameState.resource_priorities[resource_name]=0.5
 	else: GameState.resource_priorities[resource_name]=1.0
 	_open_materials_panel.call_deferred()
+
+func _apply_economy_policy(action:String,amount:float)->void:
+	if action.begins_with("LEVY"):
+		EconomySystem.set_tax_rate(GameState.tax_rate+amount)
+	elif action=="ISSUE":
+		EconomySystem.issue_currency(amount,"Sovereign issue")
+	elif action=="RETIRE":
+		EconomySystem.retire_currency(absf(amount),"Sovereign retirement")
+	elif action=="BACK METAL":
+		EconomySystem.commit_metal_to_reserve(amount,"Sovereign reserve commitment")
+	elif action=="RELEASE METAL":
+		EconomySystem.release_surplus_reserve(amount,"Sovereign surplus reserve release")
+	elif action=="METAL TO TRADE":
+		EconomySystem.place_weighed_metal_in_circulation(amount,"Sovereign weighed-metal placement")
+	elif action=="WITHDRAW TRADE METAL":
+		EconomySystem.withdraw_weighed_metal(amount,"Sovereign weighed-metal withdrawal")
+	elif action=="SPENDING":
+		EconomySystem.cycle_public_spending_priority()
+	elif action=="TRADE":
+		EconomySystem.cycle_external_trade_policy()
+	_open_materials_panel.call_deferred()
+
+func _economy_policy_preview_text(action:String,amount:float)->String:
+	var preview:Dictionary=EconomySystem.preview_policy(action,amount)
+	var after:Dictionary=preview.get("after",{})
+	var fiscal_outlook:Dictionary=after.get("fiscal_outlook",{})
+	return "%s\nAccepted now: %.1f. After action — stores %.1f metal value; weighed exchange %.1f; reserve %.1f (%.1f issue ceiling); supply %.1f; active household %.1f (%d%%); treasury %.1f; levy %.0f%%; trade %s.\nFiscal %s, %s priority: %.1f free above the 14-day buffer; %d%% total coverage; civil %d%% / military %d%%; %d%% tax compliance and %.1f%% effective levy.\n%s" % [
+		String(preview.get("reason","No forecast available.")),
+		float(preview.get("accepted",0.0)),
+		float(after.get("available_metal",0.0)),
+		float(after.get("circulating_metal",0.0)),
+		float(after.get("reserve",0.0)),
+		float(after.get("issue_ceiling",0.0)),
+		float(after.get("money_supply",0.0)),
+		float(after.get("transactional_money",0.0)),
+		roundi(float(after.get("transactional_share",0.0))*100.0),
+		float(after.get("treasury",0.0)),
+		float(after.get("tax_rate",0.0))*100.0,
+		String(after.get("trade_policy",GameState.external_trade_policy)).replace("_"," "),
+		String(fiscal_outlook.get("status","unmeasured")),
+		String(fiscal_outlook.get("spending_priority",GameState.public_spending_priority)).replace("_"," "),
+		float(fiscal_outlook.get("discretionary_headroom",0.0)),
+		roundi(float(fiscal_outlook.get("coverage_ratio",0.0))*100.0),
+		roundi(float(fiscal_outlook.get("civil_coverage",1.0))*100.0),
+		roundi(float(fiscal_outlook.get("military_coverage",1.0))*100.0),
+		roundi(float(fiscal_outlook.get("tax_compliance",0.0))*100.0),
+		float(fiscal_outlook.get("effective_tax_rate",0.0))*100.0,
+		String(preview.get("warning",""))
+	]
 
 func _effect_ripple_text(effects:Dictionary)->String:
 	var names={"tool_quality":"tool quality","construction_rate":"construction","food_output":"food output","foraging_yield":"foraging","hunting_yield":"hunting","cultivation_yield":"cultivation","food_spoilage":"spoilage","food_storage":"food stores","nutrition_quality":"diet quality","soil_productivity":"soil fertility","health_protection":"health","water_safety":"water safety","disease_exposure":"disease exposure","maternal_safety":"maternal safety","neonatal_survival":"newborn survival","conception_support":"birth conditions","injury_risk":"injury risk","labor_efficiency":"labor efficiency","labor_demand":"labor burden","task_coordination":"coordination","haul_capacity":"carrying","route_speed":"travel","trade_capacity":"trade","state_capacity":"governance","legitimacy":"legitimacy","cohesion":"cohesion","warfare_readiness":"military power","security_efficiency":"security","knowledge_rate":"discovery","knowledge_preservation":"memory","observation_rate":"observation","adoption_rate":"spread of practice","ecology_recovery":"land recovery","ecological_pressure":"land pressure","pollution":"pollution","disaster_risk":"accident risk","mine_safety":"mine safety","craft_output":"workshops","housing_output":"housing","repair_capacity":"repair","standardization":"standards","fuel_efficiency":"fuel efficiency","metal_yield":"metal output","timber_yield":"timber output","stone_yield":"stone output"}
@@ -5532,6 +6289,7 @@ func _refresh_research_allocations() -> void:
 			meter.value=mini(total,observers)
 
 func _open_council_panel() -> void:
+	AdvisorSystem.refresh_pronouncement_statuses()
 	if council_panel:
 		council_panel.queue_free()
 	council_panel = Control.new()
@@ -5561,6 +6319,21 @@ func _open_council_panel() -> void:
 	subtitle.text = "Advisors interpret the world and seek your orders. Their reports may be incomplete, mistaken, or self-serving."
 	subtitle.add_theme_color_override("font_color",Color("#aaa99f"))
 	root.add_child(subtitle)
+	var interpreter_config:=PronouncementInterpreter.configuration_status()
+	var interpreter_config_label:=Label.new()
+	interpreter_config_label.name="InterpreterConfigLabel"
+	if bool(interpreter_config.get("configured",false)):
+		interpreter_config_label.text="INTERPRETER • %s • %s • %s • %s" % [String(interpreter_config.get("mode","API")).to_upper(),String(interpreter_config.get("model","configured model")),String(interpreter_config.get("endpoint_host","configured endpoint")),String(interpreter_config.get("transport_security","validated transport")).to_upper()]
+		interpreter_config_label.add_theme_color_override("font_color",Color("#82a69a"))
+	else:
+		var configuration_problems:Array[String]=[]
+		for missing_item in interpreter_config.get("missing",[]): configuration_problems.append("missing "+String(missing_item))
+		for issue in interpreter_config.get("issues",[]): configuration_problems.append(String(issue))
+		interpreter_config_label.text="INTERPRETER • DETERMINISTIC OFFLINE • %s" % "; ".join(configuration_problems)
+		interpreter_config_label.add_theme_color_override("font_color",Color("#a89a7e"))
+	interpreter_config_label.tooltip_text="Only configuration presence, model name, and endpoint host are shown. API credentials are read at runtime and are never displayed or stored in an order."
+	interpreter_config_label.add_theme_font_size_override("font_size",10)
+	root.add_child(interpreter_config_label)
 	root.add_child(HSeparator.new())
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -5570,6 +6343,103 @@ func _open_council_panel() -> void:
 	reports.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	reports.add_theme_constant_override("separation",12)
 	scroll.add_child(reports)
+	var active_heading:=Label.new()
+	active_heading.text="ACTIVE STANDING POLICIES"
+	active_heading.add_theme_font_size_override("font_size",13)
+	active_heading.add_theme_color_override("font_color",Color("#c8ad72"))
+	reports.add_child(active_heading)
+	var governance_metrics:Dictionary=ConsequenceEngine.governance_metrics()
+	var governance_line:=Label.new()
+	governance_line.text="GOVERNANCE LOAD %d%% • POLICY CHURN %d%% • COUNCIL SUPPORT %d%% • %d ACTIVE" % [roundi(float(governance_metrics.administrative_load)*100.0),roundi(float(governance_metrics.policy_churn)*100.0),roundi(float(governance_metrics.council_support)*100.0),int(governance_metrics.active_policy_count)]
+	governance_line.tooltip_text="Each standing policy occupies administrative capacity. Replacing or rescinding policy early creates churn. Named advisors react from their established goals; their trust, respect, and resentment shape council support and future office execution."
+	governance_line.add_theme_font_size_override("font_size",11)
+	governance_line.add_theme_color_override("font_color",Color("#9da49c") if float(governance_metrics.policy_churn)<=0.0 else Color("#d19b75"))
+	reports.add_child(governance_line)
+	var active_policies:Array[Dictionary]=ConsequenceEngine.active_policies()
+	if active_policies.is_empty():
+		var no_policy:=Label.new()
+		no_policy.text="No interpreted policy is currently in force."
+		no_policy.add_theme_font_size_override("font_size",13)
+		no_policy.add_theme_color_override("font_color",Color("#858c87"))
+		reports.add_child(no_policy)
+	else:
+		for active_policy in active_policies:
+			var policy_card:=PanelContainer.new()
+			policy_card.add_theme_stylebox_override("panel",_knowledge_style(Color("#10191a"),Color("#31403d"),1,3,10))
+			reports.add_child(policy_card)
+			var policy_label:=Label.new()
+			var remaining:=ceili(float(active_policy.get("remaining_days",0.0)))
+			var executor:=String(active_policy.get("executor","Council execution"))
+			var execution:=roundi(float(active_policy.get("execution_factor",1.0))*100.0)
+			var effect_text:=GovernmentPolicyCatalog.formatted_effects(active_policy.get("effects",{}),float(active_policy.get("magnitude",0.0)))
+			var observation:=ConsequenceEngine.policy_observation(active_policy)
+			var grounding_text:=""
+			if not String(active_policy.get("interpretation_basis","")).is_empty(): grounding_text="\nGROUNDED READING • %d%% • “%s”" % [roundi(float(active_policy.get("interpretation_confidence",1.0))*100.0),String(active_policy.interpretation_basis)]
+			var action_text:="\nACTION SOURCE • "+String(active_policy.get("action_source","deterministic enact reading"))
+			var terms_text:="\nTERMS • "+String(active_policy.get("parameter_basis","catalog defaults"))
+			policy_label.text="%s • %s • %d DAY%s REMAIN\nStrength %d%% • execution %d%% • %s%s%s%s\nVARIABLES • %s\nOBSERVED SINCE ORDER (%d day%s) • %s\n↳ %s" % [String(active_policy.get("id","policy")).replace("_"," ").to_upper(),String(active_policy.get("office","Council")),remaining,"" if remaining==1 else "S",roundi(float(active_policy.get("magnitude",0.0))*100.0),execution,executor,grounding_text,action_text,terms_text,effect_text,roundi(float(observation.get("days_elapsed",0.0))),"" if roundi(float(observation.get("days_elapsed",0.0)))==1 else "s",String(observation.get("summary","Baseline pending.")),String(active_policy.get("description",""))]
+			policy_label.tooltip_text=String(observation.get("disclaimer","Observed movement is not an isolated causal estimate."))
+			policy_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			policy_label.add_theme_font_size_override("font_size",12)
+			policy_label.add_theme_color_override("font_color",Color("#c7c4b9"))
+			policy_card.add_child(policy_label)
+	reports.add_child(HSeparator.new())
+	var pronouncement_count:=0
+	for order_variant in GameState.sovereign_orders:
+		var order:Dictionary=order_variant
+		if String(order.get("type",""))!="pronouncement": continue
+		if pronouncement_count==0:
+			var record_heading:=Label.new()
+			record_heading.text="RECENT PRONOUNCEMENTS"
+			record_heading.add_theme_font_size_override("font_size",13)
+			record_heading.add_theme_color_override("font_color",Color("#c8ad72"))
+			reports.add_child(record_heading)
+		var parameters:Dictionary=order.get("parameters",{})
+		var interpretation:Dictionary=parameters.get("interpretation",{})
+		var policy_lines:Array[String]=[]
+		for policy_variant in interpretation.get("policies",[]):
+			var policy:Dictionary=policy_variant
+			var action:=String(policy.get("action","enact")).to_upper()
+			var execution_text:=" • execution %d%%" % roundi(float(policy.get("execution_factor",1.0))*100.0) if action=="ENACT" else ""
+			var variable_text:=GovernmentPolicyCatalog.formatted_effects(policy.get("effects",{}),float(policy.get("magnitude",0.0))) if action=="ENACT" else "standing effects end"
+			var observation:Dictionary=policy.get("observation",{})
+			var observation_text:="\nOBSERVED • %s" % String(observation.get("summary","")) if action=="ENACT" and not observation.is_empty() else ""
+			var grounding_text:="\nGROUNDED READING • %d%% • “%s”" % [roundi(float(policy.get("confidence",1.0))*100.0),String(policy.get("basis",""))] if not String(policy.get("basis","")).is_empty() else ""
+			var action_text:="\nACTION SOURCE • "+String(policy.get("action_source","deterministic player-clause reading"))
+			var terms_text:="\nTERMS • "+String(policy.get("parameter_basis","catalog defaults"))
+			policy_lines.append("%s • %s • %s • %d days%s%s%s%s\nVARIABLES • %s%s\n↳ %s" % [action,String(policy.get("id","policy")).replace("_"," ").to_upper(),String(policy.get("office","Council")),roundi(float(policy.get("days",0.0))),execution_text,grounding_text,action_text,terms_text,variable_text,observation_text,String(policy.get("ripple",""))])
+		var reactions:Array=order.get("political_reactions",interpretation.get("political_reactions",[]))
+		for reaction_index in mini(3,reactions.size()):
+			var reaction:Dictionary=reactions[reaction_index]
+			policy_lines.append("COUNCIL • %s  •  trust %+.1f  respect %+.1f  resentment %+.1f" % [String(reaction.get("summary","Council response recorded.")),float(reaction.get("trust_delta",0.0))*100.0,float(reaction.get("respect_delta",0.0))*100.0,float(reaction.get("resentment_delta",0.0))*100.0])
+		if reactions.size()>3: policy_lines.append("COUNCIL • +%d further recorded response%s" % [reactions.size()-3,"" if reactions.size()==4 else "s"])
+		var unresolved:=String(interpretation.get("unresolved",""))
+		if not unresolved.is_empty():
+			var unresolved_origin:="PROVIDER INTERPRETATION — NO DIRECT EFFECT" if String(interpretation.get("source",""))=="generative API" else "BOUNDED LOCAL INTERPRETATION"
+			policy_lines.append("UNRESOLVED • %s • %s" % [unresolved_origin,unresolved])
+		if policy_lines.is_empty() and String(order.get("status",""))=="interpreting":
+			var request_progress:=PronouncementInterpreter.request_progress(String(order.get("request_id","")))
+			if bool(request_progress.get("retry_scheduled",false)):
+				policy_lines.append("PROVIDER RETRY SCHEDULED • attempt %d of %d failed safely" % [int(request_progress.get("attempts",1)),int(request_progress.get("max_attempts",2))])
+			else:
+				policy_lines.append("AWAITING BOUNDED INTERPRETATION…")
+		var record:=Label.new()
+		var source_text:=String(interpretation.get("source","recorded")).to_upper()
+		if String(interpretation.get("source_detail","")).strip_edges()!="": source_text+=" • "+String(interpretation.source_detail).to_upper()
+		record.text="DAY %d • %s • %s\n“%s”\n%s" % [int(order.get("issued_day",0))+1,String(order.get("status","recorded")).replace("_"," ").to_upper(),source_text,String(parameters.get("text","")),"\n".join(policy_lines)]
+		record.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		record.add_theme_font_size_override("font_size",13)
+		record.add_theme_color_override("font_color",Color("#c7c4b9"))
+		reports.add_child(record)
+		if String(order.get("status",""))=="interpreting":
+			var cancel_pending:=Button.new()
+			cancel_pending.text="CANCEL PENDING INTERPRETATION"
+			cancel_pending.tooltip_text="Withdraw this pronouncement before interpretation applies any standing policy."
+			cancel_pending.pressed.connect(_cancel_pending_pronouncement.bind(String(order.get("id","")),String(order.get("request_id",""))))
+			reports.add_child(cancel_pending)
+		pronouncement_count+=1
+		if pronouncement_count>=4: break
+	if pronouncement_count>0: reports.add_child(HSeparator.new())
 	if GameState.council_inbox.is_empty():
 		var empty := Label.new()
 		empty.text = "No advisor currently seeks an audience. Appoint officials through Leadership to form your council."
@@ -5610,6 +6480,16 @@ func _open_council_panel() -> void:
 					ripple.add_theme_font_size_override("font_size",12)
 					ripple.add_theme_color_override("font_color",Color("#a8a596"))
 					row.add_child(ripple)
+	pronouncement_status_label=Label.new()
+	pronouncement_status_label.text="Pronouncements become bounded policy only after council interpretation."
+	pronouncement_status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	pronouncement_status_label.add_theme_font_size_override("font_size",11)
+	pronouncement_status_label.add_theme_color_override("font_color",Color("#9fa59d"))
+	root.add_child(pronouncement_status_label)
+	for pending_request_id in pending_pronouncement_inputs:
+		var pending_progress:=PronouncementInterpreter.request_progress(String(pending_request_id))
+		if not pending_progress.is_empty(): _on_pronouncement_progress(String(pending_request_id),pending_progress)
+		break
 	var order_row := HBoxContainer.new()
 	root.add_child(order_row)
 	var order_input := LineEdit.new()
@@ -5619,6 +6499,7 @@ func _open_council_panel() -> void:
 	var send := Button.new()
 	send.text = "ISSUE ORDER"
 	send.pressed.connect(_issue_freeform_order.bind(order_input))
+	order_input.text_submitted.connect(func(_submitted:String): _issue_freeform_order(order_input))
 	order_row.add_child(send)
 	var close := Button.new()
 	close.text = "CLOSE"
@@ -5630,31 +6511,82 @@ func _answer_council(item_id: String, response: String) -> void:
 	_open_council_panel()
 
 func _issue_freeform_order(input: LineEdit) -> void:
+	if not input.editable: return
 	var text := input.text.strip_edges()
 	if text.is_empty():
 		return
-	AdvisorSystem.issue_order("directive","civilization",{"text":text},"")
-	var normalized:=text.to_lower()
-	var effect:=""
-	var ripple:="The council records the order, but no office can yet translate it into a standing simulation policy."
-	if "ration" in normalized:
-		effect="rationing"; ripple="Rationing extends food stores but strains cohesion."
-	elif "forag" in normalized or "gather food" in normalized or "hunt" in normalized:
-		effect="foraging_drive"; ripple="Emergency gathering raises food yield while increasing pressure on the land."
-	elif "conserv" in normalized or "protect the land" in normalized:
-		effect="conservation_order"; ripple="Gathering is restricted so the landscape can recover."
-	elif "heal" in normalized or "care" in normalized or "sick" in normalized:
-		effect="care_rotation"; ripple="Care rotations improve health while reducing labor efficiency."
-	elif "watch" in normalized or "guard" in normalized or "defen" in normalized:
-		effect="expanded_watch"; ripple="The expanded watch raises security while claiming scarce labor."
-	elif "assembly" in normalized or "explain" in normalized or "council" in normalized:
-		effect="public_assembly"; ripple="Public deliberation strengthens legitimacy and cohesion."
-	elif "build" in normalized or "shelter" in normalized:
-		effect="emergency_building"; ripple="Urgent construction improves material momentum but distorts other work."
-	if effect!="": ConsequenceEngine.apply_policy(effect,0.16,120.0,ripple)
-	input.text=""
-	if travel_status_label: travel_status_label.text="ORDER RECORDED  •  %s" % ripple
-	input.text = ""
+	input.editable=false
+	var active_context:Array[Dictionary]=[]
+	for policy in ConsequenceEngine.active_policies(): active_context.append({"id":String(policy.get("id","")),"remaining_days":ceili(float(policy.get("remaining_days",0.0)))})
+	var context:={"day":int(GameState.elapsed_days),"population":GameState.population_total,"food_days":float(GameState.simulation_metrics.get("food_days",0.0)),"health":GameState.population_health,"known_offices":GameState.leadership_positions.keys(),"active_policies":active_context}
+	if not PronouncementInterpreter.interpretation_completed.is_connected(_on_pronouncement_interpreted): PronouncementInterpreter.interpretation_completed.connect(_on_pronouncement_interpreted)
+	if not PronouncementInterpreter.interpretation_progress.is_connected(_on_pronouncement_progress): PronouncementInterpreter.interpretation_progress.connect(_on_pronouncement_progress)
+	var pending_order:=AdvisorSystem.begin_pronouncement(text)
+	var request_id:=PronouncementInterpreter.interpret(text,context)
+	pending_order["request_id"]=request_id
+	pending_pronouncement_inputs[request_id]={"input":input,"text":text,"submitted_day":int(GameState.elapsed_days),"order":pending_order}
+	if travel_status_label: travel_status_label.text="COUNCIL INTERPRETING PRONOUNCEMENT…"
+	if pronouncement_status_label: pronouncement_status_label.text="INTERPRETING • The council is translating language into bounded policy…"
+	var initial_progress:=PronouncementInterpreter.request_progress(request_id)
+	if not initial_progress.is_empty(): _on_pronouncement_progress(request_id,initial_progress)
+
+func _on_pronouncement_progress(request_id:String,status:Dictionary)->void:
+	if not pending_pronouncement_inputs.has(request_id): return
+	if not pronouncement_status_label or not is_instance_valid(pronouncement_status_label): return
+	var stage:=String(status.get("stage","interpreting"))
+	match stage:
+		"requesting":
+			pronouncement_status_label.text="API REQUEST • attempt %d of %d • %s" % [int(status.get("attempt",1)),int(status.get("max_attempts",2)),"strict structured contract" if bool(status.get("structured_output",false)) else "validated JSON contract"]
+		"retrying":
+			pronouncement_status_label.text="API RETRY SCHEDULED • attempt %d failed safely • next attempt %d of %d%s" % [int(status.get("attempt",1)),int(status.get("next_attempt",2)),int(status.get("max_attempts",2))," • structured-output compatibility mode" if bool(status.get("structured_output_downgraded",false)) else ""]
+		"offline": pronouncement_status_label.text="DETERMINISTIC OFFLINE • API is not fully configured; bounded local interpretation is running."
+		"fallback": pronouncement_status_label.text="SAFE FALLBACK • API attempts failed; applying only the bounded deterministic reading."
+		"accepted": pronouncement_status_label.text="API RESPONSE ACCEPTED • validating and applying grounded policy…"
+		"cancelled": pronouncement_status_label.text="CANCELLED • No standing policy was applied."
+		_: pronouncement_status_label.text="INTERPRETING • The council is translating language into bounded policy…"
+	pronouncement_status_label.add_theme_color_override("font_color",Color("#c8ad72") if stage in ["accepted","requesting"] else Color("#bca47d") if stage in ["retrying","fallback"] else Color("#9fa59d"))
+
+func _on_pronouncement_interpreted(request_id:String,result:Dictionary)->void:
+	var pending:Dictionary=pending_pronouncement_inputs.get(request_id,{})
+	var input:LineEdit=pending.get("input")
+	pending_pronouncement_inputs.erase(request_id)
+	var text:=String(pending.get("text","Sovereign pronouncement"))
+	if input and is_instance_valid(input): input.text=""; input.editable=true
+	var order:=AdvisorSystem.execute_pronouncement(text,result,pending.get("order",{}))
+	order["submitted_day"]=int(pending.get("submitted_day",order.get("issued_day",GameState.elapsed_days)))
+	var interpretation:Dictionary=order.get("parameters",{}).get("interpretation",{})
+	var policies:Array=interpretation.get("policies",[])
+	var ripples:Array[String]=[]
+	for policy_variant in policies:
+		var policy:Dictionary=policy_variant
+		var execution_suffix:=" (execution %d%%)" % roundi(float(policy.get("execution_factor",1.0))*100.0) if String(policy.get("action","enact"))=="enact" else ""
+		ripples.append(String(policy.ripple)+execution_suffix)
+	var message:="  ".join(ripples)
+	if message.is_empty(): message=String(result.get("unresolved","The pronouncement was recorded without an executable simulation effect."))
+	if travel_status_label: travel_status_label.text="PRONOUNCEMENT INTERPRETED  •  %s" % message
+	if pronouncement_status_label:
+		pronouncement_status_label.text="INTERPRETED VIA %s • %s" % [String(interpretation.get("source","interpreter")).to_upper(),message]
+		pronouncement_status_label.add_theme_color_override("font_color",Color("#c8ad72"))
+
+func _cancel_pending_pronouncement(order_id:String,request_id:String)->void:
+	if not PronouncementInterpreter.cancel(request_id):
+		_open_council_panel.call_deferred()
+		return
+	var pending:Dictionary=pending_pronouncement_inputs.get(request_id,{})
+	pending_pronouncement_inputs.erase(request_id)
+	var input:LineEdit=pending.get("input")
+	if input and is_instance_valid(input): input.editable=true
+	for order_variant in GameState.sovereign_orders:
+		var order:Dictionary=order_variant
+		if String(order.get("id",""))!=order_id: continue
+		order["status"]="cancelled"
+		order["cancelled_day"]=int(GameState.elapsed_days)
+		order["parameters"]={"text":String(order.get("parameters",{}).get("text","Sovereign pronouncement")),"interpretation":{"source":"cancelled","source_detail":"Cancelled by Sovereign","summary":"The pronouncement was withdrawn before interpretation.","policies":[],"unresolved":"No standing policy was applied."}}
+		break
+	if pronouncement_status_label:
+		pronouncement_status_label.text="CANCELLED • No standing policy was applied."
+		pronouncement_status_label.add_theme_color_override("font_color",Color("#b78c72"))
+	_open_council_panel.call_deferred()
 
 func _build_leader_selection(layer: CanvasLayer) -> void:
 	_generate_leader_candidates("Steward")
@@ -6383,6 +7315,8 @@ func _update_time_interface() -> void:
 	var day_of_year := absolute_day % 365 + 1
 	var hour_of_day:=absolute_hour%24
 	date_label.text = "YEAR %d  •  DAY %d  •  %02d:00" % [year, day_of_year,hour_of_day]
+	if world_header_label:
+		world_header_label.text="%s\n%s" % [GameState.province_name.to_upper(),_settlement_display_name() if GameState.settlement_site_committed else "FOUNDING EXPEDITION"]
 	_refresh_knowledge_record()
 	for speed_key in time_speed_buttons:
 		var speed_button:Button=time_speed_buttons[speed_key]
@@ -6397,7 +7331,9 @@ func _update_time_interface() -> void:
 		if materials_button:
 			var material_metrics:=GameState.material_metrics
 			var known_count:=ResourceSystem.visible_deposits().size()
-			materials_button.text="MATERIALS  %d KNOWN  •  %.1f STORED" % [known_count,float(material_metrics.get("stored_bulk",0.0))]
+			var exchange_stage:=String(GameState.economy_metrics.get("stage_name","Resource obligations")).to_upper()
+			var treasury_suffix:="  •  %.1f TREASURY" % GameState.public_treasury if GameState.economy_stage==EconomySystem.STAGE_CURRENCY else ""
+			materials_button.text="MATERIALS  %d KNOWN  •  %.1f STORED\n%s%s" % [known_count,float(material_metrics.get("stored_bulk",0.0)),exchange_stage,treasury_suffix]
 	if convoy_map_label:
 		var settlement_classification:String = String(_settlement_model().classification()).to_upper() if "Hearth Circle" in GameState.settlement_completed else ""
 		convoy_map_label.text="%s  •  %s  •  %s" % [_settlement_display_name(),settlement_classification,_compact_population(GameState.population_total)] if settlement_classification!="" else "%s  •  %s" % [_settlement_display_name(),_compact_population(GameState.population_total)]
@@ -6836,12 +7772,15 @@ func _restart_world(selected_seed:int)->void:
 	GameState.reset_for_new_world(selected_seed)
 	DiscoverySystem.reset_for_new_world()
 	ResourceSystem.reset_for_new_world()
+	EconomySystem.reset_for_new_world()
 	_settlement_model().reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
 	_food_system().reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	WorldFacts.reset_for_new_world()
 	GenerativeDirector.reset_for_new_world()
+	PronouncementInterpreter.reset_for_new_world()
+	pending_pronouncement_inputs.clear()
 	get_tree().reload_current_scene()
 
 func _restart_random_world()->void:
