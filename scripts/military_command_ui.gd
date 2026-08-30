@@ -102,6 +102,7 @@ func _build_interface()->void:
 	recruit_count=_counter(recruit_row,1,100,10)
 	_action_button(recruit_row,"Raise recruits",_raise_recruits)
 	var stand_row:=HBoxContainer.new(); army_box.add_child(stand_row)
+	_action_button(stand_row,"Reinforce weakest",_reinforce_weakest)
 	_action_button(stand_row,"Stand down 5",func(): _report(MilitaryCampaign.stand_down(5)))
 
 	var training_box:=_section(columns,"TRAINING",GOLD)
@@ -281,6 +282,17 @@ func _inventory_summary(army:Dictionary)->String:
 
 
 func _raise_recruits()->void: _report(MilitaryCampaign.raise_recruits(int(recruit_count.value)))
+
+
+func _reinforce_weakest()->void:
+	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot(); var target:Dictionary={}; var largest_gap:=0
+	for formation in (army.get("formations",[]) as Array):
+		var gap:=maxi(0,int(formation.get("authorized_count",formation.get("count",0)))-int(formation.get("count",0)))
+		if gap>largest_gap: largest_gap=gap; target=formation
+	if target.is_empty():
+		_report({"error":"No depleted formation currently needs reinforcement."})
+		return
+	_report(MilitaryCampaign.reinforce_formation(int(target.id),mini(largest_gap,int(recruit_count.value))))
 
 
 func _start_training()->void:
