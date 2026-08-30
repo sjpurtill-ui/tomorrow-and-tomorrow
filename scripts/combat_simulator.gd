@@ -281,8 +281,14 @@ func force_readiness(force: Dictionary,personnel_condition := 1.0) -> Dictionary
 	for formation in formations: training_total+=int(formation.get("count",0))*clampf(float(formation.get("training",0.55)),0.0,1.0)
 	var training_organization:=training_total/maxf(1.0,float(soldiers))
 	var organization:=clampf(float(force.get("morale",1.0))*0.55+training_organization*0.45,0.0,1.0)
-	var aggregate:=manpower_fill*0.28+equipment_fill*0.27+condition*0.23+organization*0.14+ammunition_fill*0.08
-	return {"aggregate":aggregate,"manpower":manpower_fill,"equipment":equipment_fill,"ammunition":ammunition_fill,"condition":condition,"organization":organization}
+	var base_readiness:=manpower_fill*0.28+equipment_fill*0.27+condition*0.23+organization*0.14+ammunition_fill*0.08
+	# Personnel, issued equipment, and required ammunition are operational gates.
+	# An additive score alone let an empty battery appear almost fully ready.
+	var gate_product:=manpower_fill*equipment_fill*(ammunition_fill if ammunition_required>0 else 1.0)
+	var gate_dimensions:=3.0 if ammunition_required>0 else 2.0
+	var operational_fill:=pow(maxf(0.0,gate_product),1.0/gate_dimensions)
+	var aggregate:=base_readiness*(0.20+operational_fill*0.80)
+	return {"aggregate":aggregate,"base_readiness":base_readiness,"operational_fill":operational_fill,"manpower":manpower_fill,"equipment":equipment_fill,"ammunition":ammunition_fill,"condition":condition,"organization":organization}
 
 
 func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dictionary:
