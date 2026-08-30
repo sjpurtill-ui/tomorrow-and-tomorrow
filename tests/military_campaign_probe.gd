@@ -238,6 +238,11 @@ func _run()->void:
 	var rejected:Dictionary=MilitaryCampaign.import_state(invalid)
 	assert(rejected.has("error"))
 	assert(MilitaryCampaign.validate_state().is_empty())
+	var invalid_without_army:=saved.duplicate(true)
+	invalid_without_army["home_army"]={}
+	invalid_without_army.military_inventory["improvised"]=-1
+	assert(MilitaryCampaign.import_state(invalid_without_army).has("error"))
+	assert(MilitaryCampaign.validate_state().is_empty())
 	var marshal_citizen:Dictionary={}
 	for citizen in GameState.living_citizens():
 		if int(citizen.id) not in (MilitaryCampaign.home_army.soldier_ids as Array) and int(citizen.id) not in (MilitaryCampaign.home_army.captured_ids as Array): marshal_citizen=citizen; break
@@ -341,9 +346,15 @@ func _run()->void:
 		assert(int(released_held.disposed)==1)
 		assert(MilitaryCampaign.foreign_prisoners==held_before-1)
 	MilitaryCampaign.held_generals.append({"name":"Test captive","captured_day":0})
+	var coin_before_general_ransom:=float(GameState.resource_stockpiles.get("Coin",0.0))
 	var general_disposition:Dictionary=MilitaryCampaign.resolve_held_general(0,"ransom")
 	assert(int(general_disposition.ransom_income)==50)
+	assert(float(general_disposition.war_wealth_receipt.accepted)==50.0)
+	assert(float(GameState.resource_stockpiles.get("Coin",0.0))==coin_before_general_ransom+50.0)
 	assert(MilitaryCampaign.held_generals.is_empty())
+	var distributed_spoils:Dictionary={}
+	MilitaryCampaign._apply_campaign_spoils_policy("reward troops",{"weapons":{"improvised":2},"consumables":{"arrows":10},"supplies":3,"carts":1,"wealth":4},distributed_spoils)
+	assert(is_equal_approx(float(distributed_spoils.war_wealth_receipt.accepted),17.5))
 	var stranded_recoveree:=released_citizen
 	stranded_recoveree["army_status"]="scattered"
 	stranded_recoveree["role"]="Defense"

@@ -697,7 +697,7 @@ func resolve_held_general(index:int,policy:String)->Dictionary:
 	var general:Dictionary=held_generals.pop_at(index)
 	var outcome:Dictionary={"general":general.duplicate(true),"general_policy":normalized}
 	if normalized=="ransom":
-		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+50.0
+		outcome["war_wealth_receipt"]=_receive_war_wealth(50.0,"state treasury","Ransom for held commander")
 		outcome["ransom_income"]=50
 	elif normalized=="release":
 		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
@@ -789,7 +789,6 @@ func _migrate_v1_state(payload:Dictionary)->Dictionary:
 
 func validate_state()->Array[String]:
 	var errors:Array[String]=[]
-	if home_army.is_empty(): return errors
 	var active_ids:Array=home_army.get("soldier_ids",[])
 	var formations:Array=home_army.get("formations",[])
 	var formation_total:=0
@@ -1777,7 +1776,7 @@ func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)
 		_adjust_war_reputation(float(count)*0.006,0.0,-float(count)*0.004)
 		if normalized=="parole": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.015,0.0,1.0)
 	elif normalized=="ransom":
-		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+count*2.0
+		outcome["war_wealth_receipt"]=_receive_war_wealth(count*2.0,"state treasury","Ransom for prisoners of war")
 		outcome["ransom_income"]=count*2
 		_adjust_war_reputation(0.0,float(count)*0.001,float(count)*0.003)
 	elif normalized=="execute":
@@ -1820,16 +1819,19 @@ func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dicti
 		var amount:=int(consumables[item]); consumable_total+=amount
 		if policy.to_lower()=="army stores": military_consumables[item]=int(military_consumables.get(item,0))+amount
 	var supplies:=int(spoils.get("supplies",0)); var carts:=int(spoils.get("carts",0)); var wealth:=int(spoils.get("wealth",0))
+	var converted_value:=float(wealth)+float(gear_total)*2.0+float(consumable_total)*0.15+float(supplies)+float(carts)*5.0
 	match policy.to_lower():
 		"army stores":
 			GameState.resource_stockpiles["Food"]=float(GameState.resource_stockpiles.get("Food",0.0))+supplies
 			GameState.resource_stockpiles["Transport Carts"]=float(GameState.resource_stockpiles.get("Transport Carts",0.0))+carts
-			GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+wealth
-		"reward troops": home_army["morale"]=clampf(float(home_army.get("morale",0.0))+0.10,0.0,1.5)
-		"state treasury": GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+wealth+gear_total*2+consumable_total*0.15+supplies+carts*5
+			outcome["war_wealth_receipt"]=_receive_war_wealth(float(wealth),"state treasury","Captured campaign wealth stored by the army")
+		"reward troops":
+			home_army["morale"]=clampf(float(home_army.get("morale",0.0))+0.10,0.0,1.5)
+			outcome["war_wealth_receipt"]=_receive_war_wealth(converted_value,"troops","Campaign spoils distributed to the troops")
+		"state treasury": outcome["war_wealth_receipt"]=_receive_war_wealth(converted_value,"state treasury","Campaign spoils transferred to the state treasury")
 		"return property": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.06,0.0,1.0)
 		"unrestricted plunder":
-			GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+(wealth+gear_total*2+consumable_total*0.15+supplies+carts*5)*1.35
+			outcome["war_wealth_receipt"]=_receive_war_wealth(converted_value*1.35,"troops","Unrestricted campaign plunder")
 			GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.04,0.0,1.0)
 	if policy.to_lower()=="return property": _adjust_war_reputation(0.04,0.0,-0.025)
 	elif policy.to_lower()=="unrestricted plunder": _adjust_war_reputation(0.0,0.035,0.065)
@@ -1840,7 +1842,7 @@ func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:D
 	var general:={"name":String(aftermath.get("commander","Unknown commander")),"captured_day":int(GameState.elapsed_days)}
 	if policy.to_lower()=="hold": held_generals.append(general)
 	elif policy.to_lower()=="ransom":
-		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+50.0
+		outcome["general_war_wealth_receipt"]=_receive_war_wealth(50.0,"state treasury","Ransom for captured enemy commander")
 		outcome["general_ransom_income"]=50
 	elif policy.to_lower()=="release":
 		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
@@ -1850,6 +1852,15 @@ func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:D
 		_adjust_war_reputation(0.0,0.06,0.09)
 		outcome["general_executed"]=true
 	outcome["general_policy"]=policy
+
+
+func _receive_war_wealth(amount:float,destination:String,reason:String)->Dictionary:
+	var accepted:=maxf(0.0,amount)
+	var economy:=get_node_or_null("/root/EconomySystem")
+	if economy!=null and economy.has_method("receive_war_wealth"):
+		return economy.call("receive_war_wealth",accepted,destination,reason)
+	GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+accepted
+	return {"accepted":accepted,"destination":"collective stores","medium":"physical coin and bullion","material_deposited":accepted,"currency_deposited":0.0,"fallback":true}
 
 
 func _adjust_war_reputation(mercy_delta:float,fear_delta:float,grievance_delta:float)->void:
