@@ -124,7 +124,8 @@ func raise_recruits(count:int)->Dictionary:
 	if home_army.is_empty(): home_army=_empty_home_army()
 	if raised>0: GameState.synchronize_population_allocations()
 	army_changed.emit(home_army.duplicate(true))
-	return {"requested":count,"raised":raised,"recruit_pool":recruit_pool.size(),"capacity":capacity}
+	var message:="%d citizen%s entered the recruit pool; %d recruits wait and %d/%d mobilization places are committed." % [raised,"" if raised==1 else "s",recruit_pool.size(),_mobilized_count(),capacity] if raised>0 else "No recruits were raised; mobilization capacity is full or no eligible civilians remain."
+	return {"requested":count,"raised":raised,"recruit_pool":recruit_pool.size(),"capacity":capacity,"message":message}
 
 
 func stand_down(count:int)->Dictionary:
@@ -212,7 +213,8 @@ func demobilize(count:int)->Dictionary:
 		"released_recruits":released_recruits.size(),
 		"released_field_soldiers":int(active_result.get("released",0)),
 		"citizen_ids":released_ids,
-		"returned_equipment":active_result.get("returned_equipment",{})
+		"returned_equipment":active_result.get("returned_equipment",{}),
+		"message":"%d citizen%s demobilized: %d recruits and %d field soldiers returned to civilian life." % [released_ids.size(),"" if released_ids.size()==1 else "s",released_recruits.size(),int(active_result.get("released",0))]
 	}
 
 
@@ -231,7 +233,7 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	var training_days:=maxf(3.0,base_training_days*(1.0-_citizen_training(ids)*0.35))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"soldier_ids":ids,"progress_days":0.0,"required_days":training_days,"injury_accumulator":0.0})
-	return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days}
+	return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"message":"Training begun for %d %s with %s; baseline %.0f days, with %d/%d training places now committed." % [accepted,unit.replace("_"," "),weapon.replace("_"," "),training_days,_queued_trainees(),training_capacity()]}
 
 
 func reinforce_formation(formation_id:int,count:int)->Dictionary:
@@ -254,7 +256,7 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	var required_days:=maxf(3.0,base_days*0.58)
 	training_queue.append({"id":order_id,"mode":"reinforce","target_formation_id":formation_id,"unit":String(formation.unit),"weapon":String(formation.weapon),"count":accepted,"soldier_ids":ids,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
-	return {"id":order_id,"accepted":accepted,"target_formation_id":formation_id,"required_days":required_days}
+	return {"id":order_id,"accepted":accepted,"target_formation_id":formation_id,"required_days":required_days,"message":"%d replacements entered training for %s; baseline %.0f days before they rejoin formation %d." % [accepted,String(formation.unit).replace("_"," "),required_days,formation_id]}
 
 
 func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
@@ -285,7 +287,7 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":member_ids.size(),"soldier_ids":member_ids,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
 	_refresh_readiness()
-	return {"id":order_id,"accepted":member_ids.size(),"returned_equipment":returned_gear,"returned_ammunition":returned_ammunition,"required_days":required_days}
+	return {"id":order_id,"accepted":member_ids.size(),"returned_equipment":returned_gear,"returned_ammunition":returned_ammunition,"required_days":required_days,"message":"%d veterans left the field to retrain as %s with %s; baseline %.0f days." % [member_ids.size(),unit.replace("_"," "),weapon.replace("_"," "),required_days]}
 
 
 func cancel_training(order_id:int)->Dictionary:
@@ -298,7 +300,7 @@ func cancel_training(order_id:int)->Dictionary:
 			var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
 			if not citizen.is_empty(): citizen["army_status"]="recruit"
 		training_queue.remove_at(index)
-		return {"cancelled":true,"order_id":order_id,"returned":returned.size(),"progress_retained":float(order.get("progress_days",0.0))}
+		return {"cancelled":true,"order_id":order_id,"returned":returned.size(),"progress_retained":float(order.get("progress_days",0.0)),"message":"Training order %d cancelled; %d citizens returned to the recruit pool with prior instruction retained." % [order_id,returned.size()]}
 	return {"error":"Training order %d was not found." % order_id}
 
 
@@ -319,7 +321,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	var reserved:Dictionary={}
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
 	equipment_queue.append({"id":job_id,"job_type":"production","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount,"reserved_materials":reserved})
-	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
+	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
 func queue_consumable_production(item:String,count:int)->Dictionary:
@@ -338,7 +340,7 @@ func queue_consumable_production(item:String,count:int)->Dictionary:
 	var reserved:Dictionary={}
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
 	equipment_queue.append({"id":job_id,"job_type":"consumable","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount,"reserved_materials":reserved})
-	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
+	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
 func queue_transport_cart_production(count:int)->Dictionary:
@@ -355,7 +357,7 @@ func queue_transport_cart_production(count:int)->Dictionary:
 	var reserved:Dictionary={}
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
 	equipment_queue.append({"id":job_id,"job_type":"transport","item":"transport_cart","count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount,"reserved_materials":reserved})
-	return {"id":job_id,"queued":amount,"item":"transport_cart","work_days":float(recipe.days)*amount}
+	return {"id":job_id,"queued":amount,"item":"transport_cart","work_days":float(recipe.days)*amount,"message":"Queued %d transport cart%s; %.1f workshop-days reserved with %d jobs waiting." % [amount,"" if amount==1 else "s",float(recipe.days)*amount,equipment_queue.size()]}
 
 
 func queue_equipment_repair(item:String,count:int)->Dictionary:
@@ -373,7 +375,7 @@ func queue_equipment_repair(item:String,count:int)->Dictionary:
 	var reserved:Dictionary={}
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount*0.18
 	equipment_queue.append({"id":job_id,"job_type":"repair","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":work_per_item,"required_days":work_per_item*amount,"reserved_materials":reserved,"reserved_damaged":amount})
-	return {"id":job_id,"queued":amount,"item":item,"repair_work_days":work_per_item*amount}
+	return {"id":job_id,"queued":amount,"item":item,"repair_work_days":work_per_item*amount,"message":"Queued repair of %d %s; %.1f workshop-days reserved." % [amount,item.replace("_"," "),work_per_item*amount]}
 
 
 func cancel_equipment_job(job_id:int)->Dictionary:
@@ -396,7 +398,7 @@ func cancel_equipment_job(job_id:int)->Dictionary:
 			var item:=String(job.get("item","improvised"))
 			damaged_equipment[item]=int(damaged_equipment.get(item,0))+remaining
 		equipment_queue.remove_at(index)
-		return {"cancelled":true,"job_id":job_id,"completed":completed,"unfinished":remaining,"materials_refunded":refunded,"damaged_items_returned":remaining if String(job.get("job_type","production"))=="repair" else 0}
+		return {"cancelled":true,"job_id":job_id,"completed":completed,"unfinished":remaining,"materials_refunded":refunded,"damaged_items_returned":remaining if String(job.get("job_type","production"))=="repair" else 0,"message":"Workshop job %d cancelled; %d completed and %d unfinished units reconciled." % [job_id,completed,remaining]}
 	return {"error":"Equipment job %d was not found." % job_id}
 
 

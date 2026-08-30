@@ -62,6 +62,7 @@ func _run()->void:
 	assert(String(MilitaryCampaign.military_capabilities().units.cavalry.get("physical_requirement",""))=="domesticated_mounts")
 	var raised:Dictionary=MilitaryCampaign.raise_recruits(12)
 	var raised_count:=int(raised.raised)
+	assert("recruit pool" in String(raised.message))
 	assert(raised_count>0)
 	assert(raised_count<=int(raised.capacity))
 	var mobilized_before_repeat_muster:=MilitaryCampaign._mobilized_count()
@@ -75,8 +76,10 @@ func _run()->void:
 	assert(int(MilitaryCampaign.military_capabilities().training_capacity)>0)
 	var production:Dictionary=MilitaryCampaign.queue_equipment_production("improvised",raised_count)
 	assert(not production.has("error"))
+	assert("workshop-days" in String(production.message))
 	var training:Dictionary=MilitaryCampaign.start_training("levy","improvised",raised_count)
 	assert(int(training.accepted)==raised_count)
+	assert("Training begun" in String(training.message))
 	for trainee_id in MilitaryCampaign.training_queue[-1].soldier_ids:
 		assert(String(GameState.citizen_by_id(int(trainee_id)).army_status)=="training")
 	for day in 4:
