@@ -16,6 +16,13 @@ func _run()->void:
 	DiscoverySystem.initialize()
 	assert(DiscoverySystem.validate_catalog().is_empty())
 	assert(MilitaryCampaign.validate_military_progression().is_empty())
+	assert(MilitaryCampaign.military_inquiry_context().is_empty())
+	MilitaryCampaign.active_threat={"id":"inquiry_bootstrap","estimated_strength":24}
+	var threat_inquiry:Dictionary=MilitaryCampaign.military_inquiry_context()
+	assert(float(threat_inquiry.get("defense",0.0))>0.0)
+	assert(float(threat_inquiry.get("danger",0.0))>0.0)
+	assert(float(threat_inquiry.get("training",0.0))>0.0)
+	MilitaryCampaign.active_threat.clear()
 	var locked_spear:Dictionary=MilitaryCampaign.queue_equipment_production("spear",1)
 	assert(String(locked_spear.get("required_discovery",""))=="hafted_weapons")
 	var locked_cart:Dictionary=MilitaryCampaign.queue_transport_cart_production(1)
@@ -91,6 +98,20 @@ func _run()->void:
 	assert(float(MilitaryCampaign.formation_combat_summaries(army)[0].attack_strength)>0.0)
 	assert(float(army.readiness)>0.0 and float(army.readiness)<=1.0)
 	assert((army.readiness_components as Dictionary).has("condition"))
+	var baseline_inquiry:Dictionary=MilitaryCampaign.military_inquiry_context()
+	var original_supply:=float(MilitaryCampaign.home_army.get("supply_level",1.0))
+	MilitaryCampaign.home_army["supply_level"]=0.20
+	var undersupplied_inquiry:Dictionary=MilitaryCampaign.military_inquiry_context()
+	assert(float(undersupplied_inquiry.get("logistics",0.0))>float(baseline_inquiry.get("logistics",0.0)))
+	MilitaryCampaign.home_army["supply_level"]=original_supply
+	var original_equipment:=int(MilitaryCampaign.home_army.formations[0].equipment)
+	MilitaryCampaign.home_army.formations[0]["equipment"]=maxi(0,original_equipment-1)
+	MilitaryCampaign.damaged_equipment["improvised"]=int(MilitaryCampaign.damaged_equipment.improvised)+1
+	var equipment_need_inquiry:Dictionary=MilitaryCampaign.military_inquiry_context()
+	assert(float(equipment_need_inquiry.get("crafting",0.0))>float(baseline_inquiry.get("crafting",0.0)))
+	assert(float(equipment_need_inquiry.get("materials",0.0))>float(baseline_inquiry.get("materials",0.0)))
+	MilitaryCampaign.home_army.formations[0]["equipment"]=original_equipment
+	MilitaryCampaign.damaged_equipment["improvised"]=int(MilitaryCampaign.damaged_equipment.improvised)-1
 	MilitaryCampaign.home_army.formations[0]["wear_accumulator"]=0.99
 	MilitaryCampaign.home_army["recent_combat_days"]=7
 	var damaged_before:=int(MilitaryCampaign.damaged_equipment.improvised)

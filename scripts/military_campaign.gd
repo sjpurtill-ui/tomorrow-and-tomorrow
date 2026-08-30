@@ -396,9 +396,50 @@ func validate_military_progression()->Array[String]:
 
 
 func military_inquiry_context()->Dictionary:
-	var active_military:=recruit_pool.size()+_queued_trainees()+int(home_army.get("troops",0))
-	if active_military<=0 and equipment_queue.is_empty(): return {}
-	return {"defense":0.15+float(recruit_pool.size()+_queued_trainees())*0.03,"training":minf(2.0,float(_queued_trainees())*0.08),"warfare":minf(2.0,float(home_army.get("troops",0))*0.035),"crafting":float(equipment_queue.size())*0.35,"materials":float(equipment_queue.size())*0.30,"logistics":float(GameState.population_allocations.get("Logistics",0))*0.06,"injury":0.45 if int(home_army.get("wounded_pool",0))>0 else 0.0}
+	var fielded:=int(home_army.get("troops",0))
+	var queued_trainees:=_queued_trainees()
+	var active_military:=_mobilized_count()
+	var has_threat:=not active_threat.is_empty()
+	var engaged:=not active_engagement.is_empty()
+	var threat_strength:=maxi(0,int(active_threat.get("estimated_strength",0)))
+	if engaged:
+		var enemy_force:Dictionary=active_engagement.get("defender",active_engagement.get("enemy_force",{}))
+		threat_strength=maxi(threat_strength,int(enemy_force.get("troops",0)))
+	var recent_combat_days:=maxi(0,int(home_army.get("recent_combat_days",0)))
+	var wounded:=maxi(0,int(home_army.get("wounded_pool",0)))+training_injuries.size()
+	var equipment_shortfall:=0
+	var ammunition_shortfall:=0
+	for formation_variant in home_army.get("formations",[]):
+		var formation:Dictionary=formation_variant
+		equipment_shortfall+=maxi(0,int(formation.get("equipment_required",_equipment_required_for(String(formation.get("unit","levy")),int(formation.get("authorized_count",formation.get("count",0))))))-int(formation.get("equipment",0)))
+		ammunition_shortfall+=maxi(0,int(formation.get("ammunition_required",0))-int(formation.get("ammunition",0)))
+	var damaged_total:=0
+	for damaged_count in damaged_equipment.values(): damaged_total+=maxi(0,int(damaged_count))
+	var production_backlog:=_equipment_backlog_work()
+	var supply_shortfall:=0.0
+	var readiness_shortfall:=0.0
+	if fielded>0:
+		supply_shortfall=1.0-clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
+		readiness_shortfall=1.0-clampf(float(home_army.get("readiness",0.0)),0.0,1.0)
+	var military_pressure:=active_military>0 or has_threat or engaged or recent_combat_days>0 or not pending_aftermath.is_empty() or production_backlog>0.0 or equipment_shortfall>0 or ammunition_shortfall>0 or damaged_total>0
+	if not military_pressure: return {}
+	var threat_pressure:=clampf((0.40 if has_threat else 0.0)+float(threat_strength)*0.025+(0.55 if engaged else 0.0),0.0,2.0)
+	var service_pressure:=minf(1.5,float(active_military)*0.025)
+	var equipment_pressure:=minf(2.0,float(equipment_shortfall)*0.045+float(ammunition_shortfall)*0.008+float(damaged_total)*0.065+production_backlog*0.012)
+	var combat_pressure:=minf(1.0,float(recent_combat_days)*0.08+(0.35 if not pending_aftermath.is_empty() else 0.0))
+	var injury_pressure:=minf(2.0,float(wounded)*0.10+float(recent_combat_days)*0.045)
+	var threat_gap:=maxi(0,threat_strength-fielded)
+	var logistics_practice:=minf(0.50,float(GameState.population_allocations.get("Logistics",0))*0.04)
+	return {
+		"defense":minf(3.0,0.12+service_pressure*0.45+threat_pressure*0.80+readiness_shortfall*0.55+combat_pressure*0.35),
+		"danger":minf(3.0,threat_pressure+combat_pressure*0.75),
+		"training":minf(2.5,float(queued_trainees)*0.08+float(threat_gap)*0.025+threat_pressure*0.25+readiness_shortfall*0.60),
+		"warfare":minf(2.5,float(fielded)*0.035+threat_pressure*0.20+combat_pressure*0.70),
+		"crafting":minf(2.5,float(equipment_queue.size())*0.20+equipment_pressure*0.85),
+		"materials":minf(2.5,float(equipment_queue.size())*0.18+equipment_pressure*0.75),
+		"logistics":minf(2.5,logistics_practice+float(fielded)*0.008+threat_pressure*0.15+supply_shortfall*1.25+(0.35 if engaged else 0.0)),
+		"injury":injury_pressure
+	}
 
 
 func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dictionary:
