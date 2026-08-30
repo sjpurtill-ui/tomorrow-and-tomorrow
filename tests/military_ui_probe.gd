@@ -64,6 +64,7 @@ func _ready()->void:
 	if not MilitaryCommandUI.threat_row.visible: failures.append("An approaching threat is not exposed in military command.")
 	if "RELATIVE STRENGTH" not in MilitaryCommandUI.summary.text: failures.append("An approaching threat has no relative-strength preview.")
 	if "effective" not in MilitaryCommandUI.condition.tooltip_text or "readiness" not in MilitaryCommandUI.condition.tooltip_text: failures.append("Relative-strength bar omits its combat-power breakdown.")
+	if "Defender ground" not in MilitaryCommandUI.condition.tooltip_text or "fieldworks" not in MilitaryCommandUI.condition.tooltip_text: failures.append("Relative-strength bar omits terrain and fortification effects.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Threat controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.active_threat.clear()
 	MilitaryCampaign.active_engagement={"round":2,"last_order":"push","rounds":[{"attacker_losses":3,"defender_losses":5,"intensity":"Close engagement","event":"The shield line buckles, then reforms."}],"attacker":MilitaryCampaign.home_army.duplicate(true),"defender":MilitaryCampaign.simulator.create_formation_force("Raiders",[{"id":91,"unit":"levy","weapon":"improvised","count":44,"equipment":40}],0.72,0.68)}

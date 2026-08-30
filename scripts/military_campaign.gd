@@ -7,6 +7,7 @@ signal threat_changed(threat: Dictionary)
 
 const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=2
+const FIELD_FORTIFICATION_MAX_BONUS:=0.22
 const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__","siege_engineer":"siege_engineering","field_artillery":"powder_artillery"}
 const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__","siege_kit":"siege_engineering","field_gun":"powder_artillery"}
 const UNIT_EQUIPMENT:Dictionary={"levy":["improvised","spear"],"line_infantry":["spear","sword_shield"],"skirmisher":["bow"],"cavalry":["lance","sword_shield"],"siege_engineer":["siege_kit"],"field_artillery":["field_gun"]}
@@ -1393,8 +1394,22 @@ func _campaign_morale()->float:
 	return clampf(float(GameState.simulation_metrics.get("cohesion",0.58))*0.55+float(GameState.simulation_metrics.get("security",0.38))*0.45,0.15,1.0)
 
 
+func defensive_position()->Dictionary:
+	var terrain:=String(GameState.province_terrain)
+	var terrain_base:=float({"Mountains":1.35,"Hills":1.20,"Forest":1.15,"Marsh":1.12,"Plains":1.0}.get(terrain,1.0))
+	var fieldworks_adoption:=_adoption("field_fortifications")
+	var fieldworks_bonus:=fieldworks_adoption*FIELD_FORTIFICATION_MAX_BONUS
+	return {
+		"terrain":terrain,
+		"terrain_base":terrain_base,
+		"fieldworks_adoption":fieldworks_adoption,
+		"fieldworks_bonus":fieldworks_bonus,
+		"modifier":clampf(terrain_base+fieldworks_bonus,0.75,1.75)
+	}
+
+
 func _terrain_defense()->float:
-	return float({"Mountains":1.35,"Hills":1.20,"Forest":1.15,"Marsh":1.12,"Plains":1.0}.get(GameState.province_terrain,1.0))
+	return float(defensive_position().modifier)
 
 
 func _home_army_name()->String:

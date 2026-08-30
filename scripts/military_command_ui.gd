@@ -244,14 +244,16 @@ func _refresh()->void:
 		condition.add_theme_stylebox_override("fill",_bar_style(Color("#5f9f73"))); condition.add_theme_stylebox_override("background",_bar_style(Color("#101820")))
 		condition.tooltip_text="Aggregate readiness %d%%: personnel condition, training, equipment, ammunition, supply, morale, and leadership." % roundi(ready*100.0)
 	else:
-		var opponent_combat:Dictionary=MilitaryCampaign.combat_summary(display_opponent,display_force,MilitaryCampaign._terrain_defense())
+		var position:Dictionary=MilitaryCampaign.defensive_position()
+		var terrain_defense:=float(engagement.get("terrain_defense",position.modifier)) if not engagement.is_empty() else float(position.modifier)
+		var opponent_combat:Dictionary=MilitaryCampaign.combat_summary(display_opponent,display_force,terrain_defense)
 		var own_strength:=maxf(0.0,float(combat.get("effective_strength",0.0)))
 		var enemy_strength:=maxf(0.0,float(opponent_combat.get("effective_strength",0.0)))
 		var relative_share:=own_strength/maxf(0.001,own_strength+enemy_strength)
 		summary.text="DAY %d   ⚔ %.1f  🛡 %.1f     %s %d%%  —  RELATIVE STRENGTH  —  %d%% %s" % [int(GameState.elapsed_days),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),String(display_force.get("name","Our host")).to_upper(),roundi(relative_share*100.0),roundi((1.0-relative_share)*100.0),String(display_opponent.get("name","Enemy")).to_upper()]
 		condition.value=relative_share*100.0
 		condition.add_theme_stylebox_override("fill",_bar_style(RED)); condition.add_theme_stylebox_override("background",_bar_style(BLUE))
-		condition.tooltip_text="%s %.1f effective (readiness %d%%, morale %d%%) vs %s %.1f (readiness %d%%, morale %d%%), after matchups, terrain, equipment, condition, and leadership." % [String(display_force.get("name","Our host")),own_strength,roundi(float(combat.get("readiness",0.0))*100.0),roundi(float(combat.get("morale",0.0))*100.0),String(display_opponent.get("name","Enemy")),enemy_strength,roundi(float(opponent_combat.get("readiness",0.0))*100.0),roundi(float(opponent_combat.get("morale",0.0))*100.0)]
+		condition.tooltip_text="%s %.1f effective (readiness %d%%, morale %d%%) vs %s %.1f (readiness %d%%, morale %d%%). Defender ground ×%.2f: %s ×%.2f, fieldworks +%.2f at %d%% adoption. Matchups, equipment, condition, and leadership are included." % [String(display_force.get("name","Our host")),own_strength,roundi(float(combat.get("readiness",0.0))*100.0),roundi(float(combat.get("morale",0.0))*100.0),String(display_opponent.get("name","Enemy")),enemy_strength,roundi(float(opponent_combat.get("readiness",0.0))*100.0),roundi(float(opponent_combat.get("morale",0.0))*100.0),terrain_defense,String(position.terrain),float(position.terrain_base),float(position.fieldworks_bonus),roundi(float(position.fieldworks_adoption)*100.0)]
 	var readiness_components:Dictionary=combat.get("readiness_components",{})
 	var personnel_profile:Dictionary=MilitaryCampaign.force_condition_profile(display_force)
 	for band_data in personnel_profile.get("bands",[]):

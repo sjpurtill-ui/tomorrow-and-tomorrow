@@ -665,5 +665,16 @@ func _run()->void:
 	assert(not GameState.citizen_by_id(captured_commander_id).has("military_capture_kind"))
 	assert(String(GameState.citizen_by_id(captured_commander_id).army_status)==("recruit" if commander_was_active else "civilian"))
 	assert(MilitaryCampaign.validate_state().is_empty())
+	GameState.province_terrain="Plains"
+	GameState.known_discoveries.erase("field_fortifications")
+	GameState.discovery_adoption.erase("field_fortifications")
+	var unfortified_position:Dictionary=MilitaryCampaign.defensive_position()
+	assert(is_equal_approx(float(unfortified_position.modifier),1.0))
+	GameState.known_discoveries.append("field_fortifications")
+	GameState.discovery_adoption["field_fortifications"]=0.50
+	var fortified_position:Dictionary=MilitaryCampaign.defensive_position()
+	assert(is_equal_approx(float(fortified_position.fieldworks_bonus),MilitaryCampaign.FIELD_FORTIFICATION_MAX_BONUS*0.50))
+	assert(is_equal_approx(float(fortified_position.modifier),1.0+MilitaryCampaign.FIELD_FORTIFICATION_MAX_BONUS*0.50))
+	assert(MilitaryCampaign._terrain_defense()>float(unfortified_position.modifier))
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()
