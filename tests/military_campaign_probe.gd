@@ -57,6 +57,10 @@ func _run()->void:
 	var raised_count:=int(raised.raised)
 	assert(raised_count>0)
 	assert(raised_count<=int(raised.capacity))
+	assert(int(GameState.population_allocations.Defense)>=raised_count)
+	var allocated_after_muster:=0
+	for allocation in GameState.population_allocations.values(): allocated_after_muster+=int(allocation)
+	assert(allocated_after_muster==GameState.able_population())
 	assert(MilitaryCampaign._effective_training_rate(MilitaryCampaign.training_capacity()*3)<MilitaryCampaign._training_rate())
 	assert(int(MilitaryCampaign.military_capabilities().training_capacity)>0)
 	var production:Dictionary=MilitaryCampaign.queue_equipment_production("improvised",raised_count)

@@ -119,6 +119,7 @@ func raise_recruits(count:int)->Dictionary:
 		recruit_pool.append(int(citizen.id))
 		raised+=1
 	if home_army.is_empty(): home_army=_empty_home_army()
+	if raised>0: GameState.synchronize_population_allocations()
 	army_changed.emit(home_army.duplicate(true))
 	return {"requested":count,"raised":raised,"recruit_pool":recruit_pool.size(),"capacity":capacity}
 
@@ -175,6 +176,7 @@ func stand_down(count:int)->Dictionary:
 	home_army["formations"]=formations
 	home_army["soldier_ids"]=active_ids
 	home_army["troops"]=active_ids.size()
+	if not released_ids.is_empty(): GameState.synchronize_population_allocations()
 	_refresh_formation_experience()
 	_refresh_readiness()
 	army_changed.emit(home_army.duplicate(true))
@@ -1407,6 +1409,7 @@ func _process_service_strain_day()->Dictionary:
 		home_army["desertions_total"]=int(home_army.get("desertions_total",0))+deserted_ids.size()
 		GameState.simulation_metrics["cohesion"]=clampf(cohesion-0.002*float(deserted_ids.size()),0.0,1.0)
 		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Soldiers desert","description":"%d exhausted soldiers abandon the host." % deserted_ids.size(),"domain":"security","severity":"warning"})
+		GameState.synchronize_population_allocations()
 	home_army["service_days"]=int(home_army.get("service_days",0))+1
 	home_army["service_strain"]=average_strain
 	home_army["discipline"]=discipline
