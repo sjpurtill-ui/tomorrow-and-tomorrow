@@ -140,7 +140,7 @@ func _build_interface()->void:
 	general_policy=_policy_choice(aftermath_row,["hold","release","ransom","execute"],"Enemy general")
 	_action_button(aftermath_row,"Resolve decision",_resolve_aftermath_or_captives)
 
-	feedback=Label.new(); feedback.text="F6 closes this panel. Time continues while it is open."; feedback.custom_minimum_size.x=800; feedback.add_theme_color_override("font_color",MUTED); feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; outer.add_child(feedback)
+	feedback=Label.new(); feedback.text="F6 closes this panel. Time continues while it is open."; feedback.custom_minimum_size.x=800; feedback.add_theme_color_override("font_color",MUTED); feedback.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; outer.add_child(feedback)
 	_populate_choices()
 	_refresh()
 
@@ -355,5 +355,6 @@ func _resolve_aftermath_or_captives()->void:
 
 func _report(result:Dictionary)->void:
 	feedback.text=String(result.get("error",result.get("message","Orders accepted; campaign state updated.")))
+	feedback.tooltip_text=feedback.text
 	feedback.add_theme_color_override("font_color",RED if result.has("error") else Color("#8fc58d"))
 	_refresh()

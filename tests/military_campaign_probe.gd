@@ -204,6 +204,8 @@ func _run()->void:
 	if not MilitaryCampaign.pending_aftermath.is_empty():
 		var aftermath:Dictionary=MilitaryCampaign.resolve_aftermath("hold","army stores","hold")
 		assert(not aftermath.has("error"))
+		assert(String(aftermath.get("message","")).length()>0)
+		assert("Prisoner policy:" not in String(aftermath.message))
 	for day in 120:
 		if int(MilitaryCampaign.home_army.get("wounded_pool",0))+int(MilitaryCampaign.home_army.get("scattered_pool",0))<=0: break
 		MilitaryCampaign._process_military_day()

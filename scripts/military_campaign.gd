@@ -520,6 +520,7 @@ func resolve_aftermath(prisoner_policy:String,spoils_policy:String,general_polic
 		_mark_home_prisoners(prisoners)
 	outcome["day"]=int(GameState.elapsed_days)
 	outcome["aftermath"]=pending_aftermath.duplicate(true)
+	outcome["message"]=_aftermath_description(outcome)
 	pending_aftermath.clear()
 	GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Battle aftermath resolved","description":_aftermath_description(outcome),"domain":"security","severity":"notice"})
 	army_changed.emit(home_army.duplicate(true))
@@ -2169,4 +2170,32 @@ func _record_council_battle(result:Dictionary)->void:
 
 
 func _aftermath_description(outcome:Dictionary)->String:
-	return "Prisoner policy: %s. Spoils policy: %s. General policy: %s." % [outcome.prisoner_policy,outcome.spoils_policy,outcome.general_policy]
+	var aftermath:Dictionary=outcome.get("aftermath",{})
+	var summary:=String(aftermath.get("summary",""))
+	var home_won:=String(aftermath.get("captor",""))==String(home_army.get("name",""))
+	if not home_won:
+		var lost_prisoners:=int(aftermath.get("prisoners",0))
+		if lost_prisoners>0: return "%s%d of our people were taken captive." % [summary+" " if summary!="" else "",lost_prisoners]
+		return summary if summary!="" else "The army returned without captured spoils."
+	var parts:Array[String]=[]
+	var prisoners:=int(aftermath.get("prisoners",0))
+	if prisoners>0:
+		match String(outcome.get("prisoner_policy","hold")).to_lower():
+			"hold": parts.append("%d prisoners held" % prisoners)
+			"release": parts.append("%d prisoners released" % prisoners)
+			"parole": parts.append("%d prisoners paroled" % prisoners)
+			"exchange": parts.append("%d captives exchanged" % int(outcome.get("exchanged_prisoners",0)))
+			"ransom": parts.append("%d prisoners ransomed" % prisoners)
+			"execute": parts.append("%d prisoners executed" % prisoners)
+			"enslave": parts.append("%d prisoners enslaved" % prisoners)
+	if bool(aftermath.get("captured_general",false)):
+		var general_policy:=String(outcome.get("general_policy","hold")).to_lower()
+		var general_result:=String({"hold":"held","release":"released","ransom":"ransomed","execute":"executed"}.get(general_policy,general_policy))
+		parts.append("%s %s" % [String(aftermath.get("commander","Enemy commander")),general_result])
+	var spoils:Dictionary=outcome.get("spoils",{})
+	var spoil_parts:Array[String]=[]
+	for entry in [["gear","gear"],["ammunition","ammunition"],["supplies","supplies"],["carts","carts"],["wealth","wealth"]]:
+		var amount:=int(spoils.get(String(entry[0]),0))
+		if amount>0: spoil_parts.append("%d %s" % [amount,String(entry[1])])
+	if not spoil_parts.is_empty(): parts.append("Spoils: %s" % ", ".join(spoil_parts))
+	return ". ".join(parts)+"." if not parts.is_empty() else (summary if summary!="" else "Battle aftermath resolved.")

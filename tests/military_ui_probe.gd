@@ -49,6 +49,10 @@ func _ready()->void:
 	if not MilitaryCommandUI.aftermath_row.visible: failures.append("Pending battle aftermath is not exposed.")
 	if MilitaryCommandUI.aftermath_label.text!="BATTLE DECISION" or not MilitaryCommandUI.spoils_policy.visible: failures.append("Immediate battle aftermath does not restore the spoils decision.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Aftermath controls make the modal clip: %s." % panel.size)
+	MilitaryCommandUI._report({"message":"A deliberately long battle report must remain available without growing the fixed command modal beyond its safe viewport, even when it contains prisoner, commander, equipment, supply, and treasury outcomes."})
+	await get_tree().process_frame
+	if MilitaryCommandUI.feedback.tooltip_text!=MilitaryCommandUI.feedback.text: failures.append("Trimmed battle feedback does not preserve its full report in a tooltip.")
+	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Long battle feedback makes the modal clip: %s." % panel.size)
 	MilitaryCampaign.pending_aftermath.clear()
 	MilitaryCampaign.active_threat={"title":"Probe raiders","estimated_strength":12,"deadline_day":9,"enemy_force":MilitaryCampaign.simulator.create_formation_force("Probe Raiders",[{"id":90,"unit":"levy","weapon":"improvised","count":12,"equipment":10}],0.68,0.60)}
 	MilitaryCommandUI._refresh()
