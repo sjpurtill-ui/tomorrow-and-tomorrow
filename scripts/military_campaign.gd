@@ -734,9 +734,13 @@ func _home_army_name()->String:
 
 func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 	var totals:={"killed":0,"wounded":0,"scattered":0}
+	var equipment_loss_by_formation:Array[int]=[]
 	for round_data in rounds:
 		var breakdown:Dictionary=round_data.get("attacker_casualties",{})
 		for key in totals: totals[key]=int(totals[key])+int(breakdown.get(key,0))
+		var round_equipment:Array=round_data.get("attacker_cohort_equipment_losses",[])
+		while equipment_loss_by_formation.size()<round_equipment.size(): equipment_loss_by_formation.append(0)
+		for index in round_equipment.size(): equipment_loss_by_formation[index]+=int(round_equipment[index])
 	var old_formations:Array=home_army.get("formations",[])
 	var result_formations:Array=side.get("formations",[]).duplicate(true)
 	var unassigned:Array=home_army.get("soldier_ids",[]).duplicate()
@@ -785,6 +789,15 @@ func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 		_award_combat_experience(survivor,experience_gain)
 	for formation_index in result_formations.size(): result_formations[formation_index]["experience"]=_citizen_experience(result_formations[formation_index].get("soldier_ids",[]))
 	var persisted:=home_army.duplicate(true)
+	var salvage_accumulators:Dictionary=persisted.get("battlefield_salvage_accumulators",{}).duplicate()
+	for formation_index in equipment_loss_by_formation.size():
+		if int(equipment_loss_by_formation[formation_index])<=0 or formation_index>=old_formations.size(): continue
+		var weapon:=String(old_formations[formation_index].get("weapon","improvised"))
+		var salvage_progress:=float(salvage_accumulators.get(weapon,0.0))+float(equipment_loss_by_formation[formation_index])*0.35
+		var salvaged:=floori(salvage_progress)
+		salvage_accumulators[weapon]=salvage_progress-float(salvaged)
+		if salvaged>0: damaged_equipment[weapon]=int(damaged_equipment.get(weapon,0))+salvaged
+	persisted["battlefield_salvage_accumulators"]=salvage_accumulators
 	persisted["formations"]=result_formations
 	persisted["troops"]=int(side.get("remaining_troops",0))
 	persisted["morale"]=float(side.get("morale",persisted.get("morale",1.0)))
@@ -1287,7 +1300,6 @@ func _mark_home_prisoners(count:int)->void:
 			member_ids.remove_at(member_position)
 			formations[formation_index]["soldier_ids"]=member_ids
 			formations[formation_index]["count"]=int(formations[formation_index].get("count",0))-1
-			formations[formation_index]["equipment"]=maxi(0,int(formations[formation_index].get("equipment",0))-1)
 			break
 	home_army["formations"]=formations
 	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-marked)

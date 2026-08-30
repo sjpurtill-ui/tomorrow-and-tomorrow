@@ -109,8 +109,13 @@ func _run()->void:
 	var veteran_force:Dictionary=MilitaryCampaign.simulator.create_formation_force("Veteran",[{"unit":"line_infantry","weapon":"spear","count":10,"equipment":10,"training":0.70,"experience":0.80}],1.0,1.0)
 	assert(float(MilitaryCampaign.simulator.evaluate_force(veteran_force,dummy)[0].attack)>float(MilitaryCampaign.simulator.evaluate_force(green_force,dummy)[0].attack))
 	var enemy:Dictionary=MilitaryCampaign.simulator.create_formation_force("Raiders",[{"unit":"levy","weapon":"improvised","count":8,"equipment":8}],0.7,0.8)
+	var damaged_before_battle:=int(MilitaryCampaign.damaged_equipment.improvised)
 	var battle:Dictionary=MilitaryCampaign.resolve_campaign_battle(enemy,{"seed":77,"max_rounds":2})
 	assert(not battle.has("error"))
+	var battlefield_equipment_losses:=0
+	for round_data in battle.rounds:
+		for amount in round_data.attacker_cohort_equipment_losses: battlefield_equipment_losses+=int(amount)
+	assert(int(MilitaryCampaign.damaged_equipment.improvised)-damaged_before_battle==floori(float(battlefield_equipment_losses)*0.35))
 	var post_battle:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	assert(int(post_battle.troops)==(post_battle.soldier_ids as Array).size())
 	if not (post_battle.soldier_ids as Array).is_empty():
@@ -136,11 +141,16 @@ func _run()->void:
 	assert(int(recovered.wounded_pool)==(recovered.wounded_ids as Array).size())
 	assert(int(recovered.scattered_pool)==(recovered.scattered_ids as Array).size())
 	var before_capture:=int(recovered.troops)
+	var equipment_before_capture:=0
+	for formation in recovered.formations: equipment_before_capture+=int(formation.equipment)
 	MilitaryCampaign._mark_home_prisoners(1)
 	var captured:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	assert(int(captured.troops)==before_capture-1)
 	assert(int(captured.troops)==(captured.soldier_ids as Array).size())
 	assert((captured.captured_ids as Array).size()==1)
+	var equipment_after_capture:=0
+	for formation in captured.formations: equipment_after_capture+=int(formation.equipment)
+	assert(equipment_after_capture==equipment_before_capture)
 	assert(MilitaryCampaign._mobilized_count()==raised_count)
 	var open_capacity:=maxi(0,MilitaryCampaign.recruitment_capacity()-MilitaryCampaign._mobilized_count())
 	var capped_replacement:Dictionary=MilitaryCampaign.raise_recruits(raised_count)

@@ -91,6 +91,18 @@ func test_cohort_casualties_sum_to_force_casualties() -> void:
 	for cohort in result.attacker.formations:
 		cohort_survivors += int(cohort.count)
 	assert_int(cohort_survivors).is_equal(result.attacker.remaining_troops)
+	assert_int((result.rounds[0].attacker_cohort_equipment_losses as Array).size()).is_equal((result.attacker.formations as Array).size())
+
+
+func test_spoils_are_deducted_from_the_defeated_force() -> void:
+	var loser:Dictionary=simulator.create_formation_force("Loser",[{"unit":"line_infantry","weapon":"spear","count":40,"equipment":40}])
+	var winner:Dictionary=simulator.create_formation_force("Winner",[{"unit":"levy","weapon":"improvised","count":40,"equipment":40}])
+	var rng:=RandomNumberGenerator.new(); rng.seed=91
+	var before:=int(loser.formations[0].equipment)
+	var spoils:Dictionary=simulator._battle_spoils(loser,winner,"surrender",rng)
+	var captured:=int(spoils.weapons.get("spear",0))
+	assert_int(captured).is_greater(0)
+	assert_int(int(loser.formations[0].equipment)+captured).is_equal(before)
 
 
 func test_equipment_and_manpower_are_separate_inputs() -> void:

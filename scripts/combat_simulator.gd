@@ -175,6 +175,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			"event":engagement.event,
 			"attacker_cohort_losses":attacker_cohort_result.losses,
 			"defender_cohort_losses":defender_cohort_result.losses,
+			"attacker_cohort_equipment_losses":attacker_cohort_result.equipment_losses,
+			"defender_cohort_equipment_losses":defender_cohort_result.equipment_losses,
 			"attacker_casualties":attacker_casualties,
 			"defender_casualties":defender_casualties
 		})
@@ -418,10 +420,12 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 	var updated: Array[Dictionary] = []
 	var original_counts:Array[int]=[]
 	var cohort_losses:Array[int]=[]
+	var cohort_equipment_losses:Array[int]=[]
 	for formation in formations:
 		updated.append(formation.duplicate(true))
 		original_counts.append(int(formation.get("count",0)))
 		cohort_losses.append(0)
+		cohort_equipment_losses.append(0)
 	var contact_factors:Array[float]=[]
 	for index in updated.size():
 		var contact:=rng.randf_range(0.55,1.45)
@@ -454,7 +458,8 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 		var old_equipment:=int(updated[index].get("equipment",original_counts[index]))
 		var equipment_losses:=mini(old_equipment,roundi(float(personnel_losses)*0.72+float(old_equipment)*0.006))
 		updated[index]["equipment"]=old_equipment-equipment_losses
-	return {"formations":updated,"losses":cohort_losses}
+		cohort_equipment_losses[index]=equipment_losses
+	return {"formations":updated,"losses":cohort_losses,"equipment_losses":cohort_equipment_losses}
 
 
 func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
@@ -570,12 +575,17 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 	var recovery_rate:=clampf(base_rate*(0.65+logistics*0.70)*rng.randf_range(0.85,1.15),0.0,0.60)
 	var weapons:Dictionary={}
 	var total_equipment:=0
-	for formation in loser.get("formations",[]):
+	var formations:Array=loser.get("formations",[])
+	for index in formations.size():
+		var formation:Dictionary=formations[index]
 		var equipment:=int(formation.get("equipment",0))
 		var recovered:=clampi(roundi(float(equipment)*recovery_rate),0,equipment)
 		var weapon:=String(formation.get("weapon","improvised"))
 		weapons[weapon]=int(weapons.get(weapon,0))+recovered
 		total_equipment+=equipment
+		formation["equipment"]=equipment-recovered
+		formations[index]=formation
+	loser["formations"]=formations
 	var supplies:=maxi(0,roundi(float(total_equipment)*recovery_rate*rng.randf_range(0.28,0.52)))
 	var carts:=maxi(0,roundi(float(total_equipment)*recovery_rate/28.0))
 	var wealth:=maxi(0,roundi(float(total_equipment)*recovery_rate*rng.randf_range(0.8,1.8)))
