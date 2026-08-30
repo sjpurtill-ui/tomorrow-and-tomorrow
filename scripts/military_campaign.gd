@@ -316,7 +316,7 @@ func military_capabilities()->Dictionary:
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
 	var queued_trainees:=_queued_trainees()
-	return {"units":units,"equipment":equipment,"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"units":units,"equipment":equipment,"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func validate_military_progression()->Array[String]:
@@ -1330,9 +1330,31 @@ func _refresh_readiness()->void:
 
 
 func _production_rate()->float:
+	return _base_production_rate()*workshop_utilization()
+
+
+func _base_production_rate()->float:
 	var crafting:=float(GameState.population_allocations.get("Crafting",0))*0.16
 	if crafting<=0.0: return 0.0
 	return crafting*(0.55+float(GameState.society_capacities.get("production",0.12))*0.45+_adoption("workshop_standards")*0.45)
+
+
+func _equipment_backlog_work()->float:
+	var backlog:=0.0
+	for job in equipment_queue: backlog+=maxf(0.0,float(job.get("required_days",0.0))-float(job.get("progress_days",0.0)))
+	return backlog
+
+
+func workshop_utilization()->float:
+	if equipment_queue.is_empty(): return 0.0
+	var base_rate:=_base_production_rate()
+	if base_rate<=0.0: return 0.0
+	var backlog_days:=_equipment_backlog_work()/base_rate
+	return clampf(0.20+backlog_days/30.0,0.20,0.75)
+
+
+func civilian_crafting_fraction()->float:
+	return 1.0-workshop_utilization()
 
 
 func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)->void:

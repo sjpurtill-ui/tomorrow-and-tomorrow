@@ -61,6 +61,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var extractors := float(GameState.population_allocations.get("Extraction",0))
 	var builders := float(GameState.population_allocations.get("Construction",0))
 	var makers := float(GameState.population_allocations.get("Crafting",0))
+	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
+		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var carriers := float(GameState.population_allocations.get("Logistics",0))
 	var observers := float(GameState.population_allocations.get("Knowledge",0))
 	var stewards := float(GameState.population_allocations.get("Administration",0))

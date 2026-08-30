@@ -26,12 +26,16 @@ func _run()->void:
 	GameState.population_allocations["Crafting"]=1
 	var cancelled_job:Dictionary=MilitaryCampaign.queue_equipment_production("improvised",4)
 	assert(not cancelled_job.has("error"))
+	assert(MilitaryCampaign.workshop_utilization()>0.0)
+	assert(MilitaryCampaign.civilian_crafting_fraction()<1.0)
+	assert(float(MilitaryCampaign.military_capabilities().equipment_backlog_work)>0.0)
 	var timber_after_reservation:=float(GameState.resource_stockpiles.Timber)
 	MilitaryCampaign._process_equipment_production_day()
 	var cancelled_equipment:Dictionary=MilitaryCampaign.cancel_equipment_job(int(cancelled_job.id))
 	assert(bool(cancelled_equipment.cancelled))
 	assert(float(GameState.resource_stockpiles.Timber)>timber_after_reservation)
 	assert(float(GameState.resource_stockpiles.Timber)<timber_before_cancel)
+	assert(is_equal_approx(MilitaryCampaign.civilian_crafting_fraction(),1.0))
 	GameState.population_allocations["Crafting"]=6
 	var locked_line:Dictionary=MilitaryCampaign.start_training("line_infantry","improvised",1)
 	assert(String(locked_line.get("required_discovery",""))=="shield_wall")
@@ -48,7 +52,9 @@ func _run()->void:
 	assert(not production.has("error"))
 	var training:Dictionary=MilitaryCampaign.start_training("levy","improvised",raised_count)
 	assert(int(training.accepted)==raised_count)
-	MilitaryCampaign._process_military_day()
+	for day in 4:
+		MilitaryCampaign._process_military_day()
+		if int(MilitaryCampaign.military_inventory.improvised)>0: break
 	assert(int(MilitaryCampaign.military_inventory.improvised)>0)
 	assert(int(MilitaryCampaign.military_inventory.improvised)<raised_count)
 	var partial_training:=float(GameState.citizen_by_id(int(MilitaryCampaign.training_queue[0].soldier_ids[0])).get("military_training",0.0))

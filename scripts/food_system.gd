@@ -40,6 +40,9 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 	var workers:=float(GameState.population_allocations.get("Food",0))
 	var logistics:=float(GameState.population_allocations.get("Logistics",0))
 	var makers:=float(GameState.population_allocations.get("Crafting",0))
+	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
+		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var demand_breakdown:=_calculate_demand(traveling)
 	var harvest:=_produce(workers,labor_efficiency,ecology,traveling)
 	for food_type in harvest:
