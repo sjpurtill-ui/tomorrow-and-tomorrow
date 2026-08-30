@@ -1001,7 +1001,14 @@ func validate_state()->Array[String]:
 	var formation_roster:Dictionary={}
 	for formation in formations:
 		var count:=int(formation.get("count",0)); formation_total+=count
-		if count<0 or int(formation.get("equipment",0))<0: errors.append("Formation has a negative personnel or equipment count.")
+		var authorized:=int(formation.get("authorized_count",count))
+		var equipment:=int(formation.get("equipment",0))
+		var expected_equipment_required:=_equipment_required_for(String(formation.get("unit","levy")),authorized)
+		var equipment_required:=int(formation.get("equipment_required",expected_equipment_required))
+		if count<0 or equipment<0: errors.append("Formation has a negative personnel or equipment count.")
+		if authorized<count or authorized<0: errors.append("Formation personnel exceeds its authorized strength.")
+		if equipment_required!=expected_equipment_required: errors.append("Formation equipment requirement does not match its authorized strength.")
+		if equipment>equipment_required: errors.append("Formation has more issued equipment than its authorized capacity.")
 		var ammunition:=int(formation.get("ammunition",0)); var ammunition_required:=int(formation.get("ammunition_required",0))
 		if ammunition<0 or ammunition_required<0 or ammunition>ammunition_required: errors.append("Formation ammunition is outside its authorized capacity.")
 		var formation_members:Array=formation.get("soldier_ids",[])
@@ -1021,22 +1028,37 @@ func validate_state()->Array[String]:
 	if (home_army.get("wounded_ids",[]) as Array).size()!=int(home_army.get("wounded_pool",0)): errors.append("Wounded citizen IDs do not equal wounded pool.")
 	if (home_army.get("scattered_ids",[]) as Array).size()!=int(home_army.get("scattered_pool",0)): errors.append("Scattered citizen IDs do not equal scattered pool.")
 	var seen:Dictionary={}
-	for pool in [active_ids,home_army.get("wounded_ids",[]),home_army.get("scattered_ids",[]),home_army.get("captured_ids",[]),recruit_pool]:
+	var pool_specs:Array[Dictionary]=[
+		{"ids":active_ids,"status":"active"},
+		{"ids":home_army.get("wounded_ids",[]),"status":"wounded"},
+		{"ids":home_army.get("scattered_ids",[]),"status":"scattered"},
+		{"ids":home_army.get("captured_ids",[]),"status":"captured"},
+		{"ids":recruit_pool,"status":"recruit"}
+	]
+	for pool_spec in pool_specs:
+		var pool:Array=pool_spec.ids
 		for citizen_id in pool:
 			if seen.has(int(citizen_id)): errors.append("Citizen %d appears in more than one military pool." % int(citizen_id))
 			seen[int(citizen_id)]=true
 			var pooled_citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
 			if pooled_citizen.is_empty(): errors.append("Military pool references missing citizen %d." % int(citizen_id))
 			elif not bool(pooled_citizen.get("alive",true)): errors.append("Military pool references deceased citizen %d." % int(citizen_id))
+			elif String(pooled_citizen.get("army_status","civilian"))!=String(pool_spec.status): errors.append("Citizen %d status does not match the %s military pool." % [int(citizen_id),String(pool_spec.status)])
+	var training_order_ids:Dictionary={}
 	for training in training_queue:
+		var training_id:=int(training.get("id",-1))
+		if training_id<=0 or training_order_ids.has(training_id): errors.append("Training order IDs must be positive and unique.")
+		training_order_ids[training_id]=true
 		var trainee_ids:Array=training.get("soldier_ids",[])
 		if trainee_ids.size()!=int(training.get("count",0)): errors.append("Training order headcount does not equal its citizen IDs.")
+		if String(training.get("mode","new"))=="reinforce" and not formation_ids.has(int(training.get("target_formation_id",-1))): errors.append("Reinforcement order targets a missing formation.")
 		for citizen_id in trainee_ids:
 			if seen.has(int(citizen_id)): errors.append("Citizen %d appears in more than one military pool." % int(citizen_id))
 			seen[int(citizen_id)]=true
 			var trainee:Dictionary=GameState.citizen_by_id(int(citizen_id))
 			if trainee.is_empty(): errors.append("Training order references missing citizen %d." % int(citizen_id))
 			elif not bool(trainee.get("alive",true)): errors.append("Training order references deceased citizen %d." % int(citizen_id))
+			elif String(trainee.get("army_status","civilian"))!="training": errors.append("Citizen %d status does not match the training queue." % int(citizen_id))
 	for injury in training_injuries:
 		var citizen_id:=int(injury.get("citizen_id",-1))
 		if seen.has(citizen_id): errors.append("Citizen %d appears in more than one military pool." % citizen_id)
@@ -1044,6 +1066,14 @@ func validate_state()->Array[String]:
 		var injured_citizen:Dictionary=GameState.citizen_by_id(citizen_id)
 		if injured_citizen.is_empty(): errors.append("Training injury references missing citizen %d." % citizen_id)
 		elif not bool(injured_citizen.get("alive",true)): errors.append("Training injury references deceased citizen %d." % citizen_id)
+		elif String(injured_citizen.get("army_status","civilian"))!="training_injured": errors.append("Citizen %d status does not match the training-injury pool." % citizen_id)
+	var commander:Dictionary=home_army.get("commander",{})
+	var commander_id:=int(commander.get("citizen_id",-1))
+	if commander_id>=0:
+		if seen.has(commander_id): errors.append("The field commander is also assigned to an enlisted military pool.")
+		var commander_citizen:Dictionary=GameState.citizen_by_id(commander_id)
+		if commander_citizen.is_empty(): errors.append("The field commander references a missing citizen.")
+		elif not bool(commander_citizen.get("alive",true)): errors.append("The field commander references a deceased citizen.")
 	for item in military_inventory:
 		if int(military_inventory[item])<0: errors.append("Military inventory for %s is negative." % item)
 	for item in military_consumables:

@@ -488,13 +488,16 @@ func _run()->void:
 	MilitaryCampaign.home_army["scattered_pool"]=(MilitaryCampaign.home_army.scattered_ids as Array).size()
 	for formation in MilitaryCampaign.home_army.formations:
 		formation["authorized_count"]=int(formation.count)
-		formation["equipment_required"]=int(formation.count)
+		formation["equipment_required"]=MilitaryCampaign._equipment_required_for(String(formation.unit),int(formation.count))
+		formation["equipment"]=mini(int(formation.equipment),int(formation.equipment_required))
 	MilitaryCampaign.home_army["scattered_recovery_accumulator"]=1.0
 	MilitaryCampaign._process_military_day()
 	assert(int(stranded_recoveree.id) in MilitaryCampaign.recruit_pool)
 	assert(int(stranded_recoveree.id) not in (MilitaryCampaign.home_army.scattered_ids as Array))
 	assert(String(stranded_recoveree.army_status)=="recruit")
-	assert(MilitaryCampaign.validate_state().is_empty())
+	var post_recovery_errors:=MilitaryCampaign.validate_state()
+	if not post_recovery_errors.is_empty(): push_error("Post-recovery military state invalid: %s" % str(post_recovery_errors))
+	assert(post_recovery_errors.is_empty())
 	if "bow_craft" not in GameState.known_discoveries: GameState.known_discoveries.append("bow_craft")
 	GameState.discovery_adoption["bow_craft"]=0.20
 	assert(String(MilitaryCampaign._training_gate("levy","bow").get("error","")).contains("cannot be trained"))
@@ -685,5 +688,30 @@ func _run()->void:
 	assert(is_equal_approx(float(fortified_position.fieldworks_bonus),MilitaryCampaign.FIELD_FORTIFICATION_MAX_BONUS*0.50))
 	assert(is_equal_approx(float(fortified_position.modifier),1.0+MilitaryCampaign.FIELD_FORTIFICATION_MAX_BONUS*0.50))
 	assert(MilitaryCampaign._terrain_defense()>float(unfortified_position.modifier))
+	var integrity_formation:Dictionary=MilitaryCampaign.home_army.formations[0]
+	var original_authorized:=int(integrity_formation.authorized_count)
+	integrity_formation["authorized_count"]=int(integrity_formation.count)-1
+	assert(str(MilitaryCampaign.validate_state()).contains("authorized strength"))
+	integrity_formation["authorized_count"]=original_authorized
+	var original_equipment_integrity:=int(integrity_formation.equipment)
+	integrity_formation["equipment"]=int(integrity_formation.equipment_required)+1
+	assert(str(MilitaryCampaign.validate_state()).contains("issued equipment"))
+	integrity_formation["equipment"]=original_equipment_integrity
+	var integrity_citizen_id:=int(MilitaryCampaign.home_army.soldier_ids[0])
+	var integrity_citizen:Dictionary=GameState.citizen_by_id(integrity_citizen_id)
+	integrity_citizen["army_status"]="recruit"
+	assert(str(MilitaryCampaign.validate_state()).contains("status does not match"))
+	integrity_citizen["army_status"]="active"
+	var original_integrity_commander:Dictionary=MilitaryCampaign.home_army.commander.duplicate(true)
+	MilitaryCampaign.home_army["commander"]=original_integrity_commander.duplicate(true)
+	MilitaryCampaign.home_army.commander["citizen_id"]=integrity_citizen_id
+	assert(str(MilitaryCampaign.validate_state()).contains("also assigned"))
+	MilitaryCampaign.home_army["commander"]=original_integrity_commander
+	assert(MilitaryCampaign.validate_state().is_empty())
+	var invalid_military_save:Dictionary=MilitaryCampaign.export_state()
+	invalid_military_save.home_army.formations[0]["authorized_count"]=int(invalid_military_save.home_army.formations[0].count)-1
+	var invalid_import:Dictionary=MilitaryCampaign.import_state(invalid_military_save)
+	assert(String(invalid_import.get("error",""))=="Invalid military save state.")
+	assert(MilitaryCampaign.validate_state().is_empty())
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()
