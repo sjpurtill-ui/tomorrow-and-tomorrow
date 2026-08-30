@@ -233,6 +233,9 @@ func _run()->void:
 	var captured:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	assert(int(captured.troops)==before_capture-1)
 	assert(int(captured.troops)==(captured.soldier_ids as Array).size())
+	var captured_authorized:=0
+	for captured_formation in captured.formations: captured_authorized+=int(captured_formation.authorized_count)
+	assert(is_equal_approx(float(captured.readiness_components.manpower),float(captured.troops)/maxf(1.0,float(captured_authorized))))
 	assert((captured.captured_ids as Array).size()==captured_before+1)
 	var equipment_after_capture:=0
 	for formation in captured.formations: equipment_after_capture+=int(formation.equipment)

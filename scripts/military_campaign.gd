@@ -2229,6 +2229,7 @@ func _mark_home_prisoners(count:int)->void:
 	home_army["soldier_ids"]=soldier_ids
 	home_army["captured_ids"]=captured_ids
 	_refresh_formation_experience()
+	_refresh_readiness()
 
 
 func _record_council_battle(result:Dictionary)->void:
