@@ -81,5 +81,17 @@ func _run()->void:
 	var rejected:Dictionary=MilitaryCampaign.import_state(invalid)
 	assert(rejected.has("error"))
 	assert(MilitaryCampaign.validate_state().is_empty())
+	var marshal_citizen:Dictionary={}
+	for citizen in GameState.living_citizens():
+		if int(citizen.id) not in (MilitaryCampaign.home_army.soldier_ids as Array) and int(citizen.id) not in (MilitaryCampaign.home_army.captured_ids as Array): marshal_citizen=citizen; break
+	assert(not marshal_citizen.is_empty())
+	var marshal_record:={"citizen_id":int(marshal_citizen.id),"name":String(marshal_citizen.name),"courage":0.72,"suspicion":0.64,"honesty":0.61,"pride":0.55,"skills":{"Strategy":72,"Tactics":68,"Logistics":58},"relationships":{"sovereign":{"trust":0.5,"respect":0.5,"fear":0.1,"resentment":0.0,"obligation":0.5}}}
+	GameState.leadership_positions["Marshal"]=marshal_record
+	MilitaryCampaign.home_army["commander"]=MilitaryCampaign._marshal_commander()
+	MilitaryCampaign._apply_home_commander_fate({"defeated":MilitaryCampaign.home_army.name,"commander_fate":"killed"})
+	assert(not bool(GameState.citizen_by_id(int(marshal_citizen.id)).alive))
+	assert(GameState.leadership_positions.has("Marshal"))
+	assert(int(GameState.leadership_positions.Marshal.citizen_id)!=int(marshal_citizen.id))
+	assert(bool(MilitaryCampaign.home_army.commander.get("acting",false)))
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

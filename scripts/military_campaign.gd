@@ -64,9 +64,13 @@ func muster_home_army(requested_strength:=-1)->Dictionary:
 func raise_recruits(count:int)->Dictionary:
 	GameState.initialize_citizen_registry()
 	var candidates:Array[Dictionary]=[]
+	var office_holders:Dictionary={}
+	for office in GameState.leadership_positions:
+		office_holders[int((GameState.leadership_positions[office] as Dictionary).get("citizen_id",-1))]=true
 	for citizen in GameState.living_citizens():
 		if String(citizen.get("army_status","civilian")) not in ["civilian",""]: continue
 		if GameState.citizen_age_years(citizen)<16: continue
+		if office_holders.has(int(citizen.get("id",-1))): continue
 		candidates.append(citizen)
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var a_defense:=1 if String(a.get("role",""))=="Defense" else 0
@@ -152,6 +156,7 @@ func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dict
 	battle_options["terrain_defense"]=float(battle_options.get("terrain_defense",_terrain_defense()))
 	var result:Dictionary=simulator.simulate(home_army,enemy_force,battle_options)
 	_apply_home_result(result.attacker,result.rounds)
+	_apply_home_commander_fate(result.termination)
 	var record:=result.duplicate(true)
 	record["day"]=int(GameState.elapsed_days)
 	battle_history.push_front(record)
@@ -309,14 +314,82 @@ func _marshal_commander()->Dictionary:
 	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
 	var security:=float(GameState.society_capacities.get("security",0.38))
 	var logistics:=float(GameState.society_capacities.get("logistics",0.16))
-	if marshal.is_empty(): return simulator.create_commander("Acting field captain",0.35+security*0.25,0.32+security*0.22,0.25+logistics*0.35,0.38)
-	return simulator.create_commander(
+	if marshal.is_empty(): return _acting_field_commander(false)
+	var commander:Dictionary=simulator.create_commander(
 		String(marshal.get("name","Marshal")),
 		0.34+float(marshal.get("courage",0.5))*0.34+security*0.24,
 		0.30+float(marshal.get("suspicion",0.5))*0.24+security*0.30,
 		0.25+float(marshal.get("honesty",0.5))*0.18+logistics*0.48,
 		0.30+float(marshal.get("courage",0.5))*0.42+float(marshal.get("pride",0.5))*0.12
 	)
+	commander["citizen_id"]=int(marshal.get("citizen_id",-1))
+	commander["office"]="Marshal"
+	return commander
+
+
+func _apply_home_commander_fate(termination:Dictionary)->void:
+	if String(termination.get("defeated",""))!=String(home_army.get("name","")): return
+	var fate:=String(termination.get("commander_fate","escaped"))
+	if fate not in ["killed","captured"]: return
+	var former:Dictionary=home_army.get("commander",{})
+	var citizen_id:=int(former.get("citizen_id",-1))
+	var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+	var was_active:=_remove_active_citizen(citizen_id)
+	if not citizen.is_empty():
+		if fate=="killed":
+			citizen["alive"]=false
+			citizen["death_day"]=int(GameState.elapsed_days)
+			citizen["death_cause"]="Killed while commanding in battle"
+		else:
+			citizen["army_status"]="captured"
+			if was_active:
+				var captured_ids:Array=home_army.get("captured_ids",[]).duplicate()
+				captured_ids.append(citizen_id)
+				home_army["captured_ids"]=captured_ids
+	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
+	if int(marshal.get("citizen_id",-2))==citizen_id: GameState.leadership_positions.erase("Marshal")
+	var successor:=_acting_field_commander(true)
+	home_army["commander"]=successor
+	GameState.council_inbox.push_front({"id":"succession_%d_%d" % [int(GameState.elapsed_days),citizen_id],"advisor":String(successor.get("name","Field command")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":"%s is %s. %s assumes field command with reduced experience." % [String(former.get("name","The commander")),fate,String(successor.get("name","An acting captain"))],"urgency":0.98,"day":int(GameState.elapsed_days),"status":"unread"})
+
+
+func _acting_field_commander(assign_office:bool)->Dictionary:
+	var excluded:Dictionary={}
+	for office in GameState.leadership_positions:
+		excluded[int((GameState.leadership_positions[office] as Dictionary).get("citizen_id",-1))]=true
+	var best:Dictionary={}; var best_score:=-1.0
+	for citizen in GameState.living_citizens():
+		var citizen_id:=int(citizen.get("id",-1))
+		if excluded.has(citizen_id) or GameState.citizen_age_years(citizen)<18: continue
+		if String(citizen.get("army_status","civilian")) in ["captured","killed"]: continue
+		var aptitude:=float(posmod(int(citizen.get("aptitude_seed",citizen_id*7919)),1000))/1000.0
+		var score:=GameState.citizen_physical_capacity(citizen)*0.42+aptitude*0.48+(0.10 if String(citizen.get("role",""))=="Defense" else 0.0)
+		if score>best_score: best_score=score; best=citizen
+	if best.is_empty(): return simulator.create_commander("Acting field captain",0.38,0.36,0.30,0.42)
+	var competence:=clampf(0.28+best_score*0.38,0.30,0.68)
+	var advisor:={"citizen_id":int(best.id),"name":String(best.get("name","Acting field captain")),"background":"Field-promoted officer","traits":["Resolute","Pragmatic"],"skills":{"Strategy":roundi(competence*100.0),"Tactics":roundi(competence*92.0),"Logistics":roundi(competence*78.0)},"relationships":{"sovereign":{"trust":0.46,"respect":0.52,"fear":0.18,"resentment":0.0,"obligation":0.62}},"honesty":0.52,"courage":clampf(competence+0.10,0.0,1.0),"pride":0.42,"suspicion":0.48,"support":roundi(competence*75.0),"acting":true}
+	if assign_office: GameState.leadership_positions["Marshal"]=advisor
+	var commander:Dictionary=simulator.create_commander(String(advisor.name),competence,competence*0.92,competence*0.78,clampf(competence+0.08,0.0,1.0))
+	commander["citizen_id"]=int(best.id); commander["office"]="Marshal"; commander["acting"]=true
+	return commander
+
+
+func _remove_active_citizen(citizen_id:int)->bool:
+	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
+	var position:=soldier_ids.find(citizen_id)
+	if position<0: return false
+	soldier_ids.remove_at(position)
+	var formations:Array=home_army.get("formations",[])
+	for index in range(formations.size()-1,-1,-1):
+		var formation:Dictionary=formations[index]
+		if int(formation.get("count",0))<=0: continue
+		formation["count"]=int(formation.get("count",0))-1
+		formations[index]=formation
+		break
+	home_army["soldier_ids"]=soldier_ids
+	home_army["formations"]=formations
+	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-1)
+	return true
 
 
 func _condition_average(soldiers:Array[Dictionary])->float:
