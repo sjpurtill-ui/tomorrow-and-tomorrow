@@ -315,7 +315,8 @@ func military_capabilities()->Dictionary:
 	for unit in UNIT_KNOWLEDGE: units[unit]=_knowledge_gate(String(UNIT_KNOWLEDGE[unit]),0.10)
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
-	return {"units":units,"equipment":equipment,"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_training_rate(),"production_rate":_production_rate(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	var queued_trainees:=_queued_trainees()
+	return {"units":units,"equipment":equipment,"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func validate_military_progression()->Array[String]:
@@ -1114,7 +1115,7 @@ func _process_equipment_production_day()->void:
 
 func _process_training_day()->void:
 	if training_queue.is_empty(): return
-	var training_rate:=_training_rate()
+	var training_rate:=_effective_training_rate(_queued_trainees())
 	for index in range(training_queue.size()-1,-1,-1):
 		var training:Dictionary=training_queue[index]
 		training["progress_days"]=float(training.get("progress_days",0.0))+training_rate
@@ -1248,6 +1249,21 @@ func _adoption(discovery:String)->float:
 func _training_rate()->float:
 	var security:=float(GameState.society_capacities.get("security",0.38))
 	return (0.42+security*0.55)*(1.0+_adoption("formation_drill")*0.35+_adoption("professional_corps")*0.55)
+
+
+func training_capacity()->int:
+	var defense_workers:=float(GameState.population_allocations.get("Defense",0))
+	var commander:Dictionary=home_army.get("commander",_marshal_commander())
+	var command:=clampf(float(commander.get("command",0.5)),0.0,1.0)
+	var base:=3.0+defense_workers*0.30+command*3.0
+	base*=1.0+_adoption("formation_drill")*0.45+_adoption("professional_corps")*0.70+_adoption("military_staffs")*0.20
+	return maxi(1,floori(base))
+
+
+func _effective_training_rate(trainees:int)->float:
+	if trainees<=0: return _training_rate()
+	var load_factor:=minf(1.0,float(training_capacity())/float(trainees))
+	return _training_rate()*load_factor
 
 
 func _training_quality(unit:String,trainee_ids:Array=[])->float:

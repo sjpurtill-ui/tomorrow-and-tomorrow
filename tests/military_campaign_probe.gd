@@ -42,6 +42,8 @@ func _run()->void:
 	var raised_count:=int(raised.raised)
 	assert(raised_count>0)
 	assert(raised_count<=int(raised.capacity))
+	assert(MilitaryCampaign._effective_training_rate(MilitaryCampaign.training_capacity()*3)<MilitaryCampaign._training_rate())
+	assert(int(MilitaryCampaign.military_capabilities().training_capacity)>0)
 	var production:Dictionary=MilitaryCampaign.queue_equipment_production("improvised",raised_count)
 	assert(not production.has("error"))
 	var training:Dictionary=MilitaryCampaign.start_training("levy","improvised",raised_count)
