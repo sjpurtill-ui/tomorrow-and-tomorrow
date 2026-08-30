@@ -465,6 +465,16 @@ func campaign_army_snapshot()->Dictionary:
 	return snapshot
 
 
+func combat_summary(force:Dictionary={},opponent:Dictionary={},terrain_modifier:float=1.0)->Dictionary:
+	var subject:=force if not force.is_empty() else ((active_engagement.get("attacker",{}) as Dictionary) if not active_engagement.is_empty() else home_army)
+	var opposing:=opponent if not opponent.is_empty() else ((active_engagement.get("defender",{}) as Dictionary) if not active_engagement.is_empty() else {"formations":[]})
+	var cohorts:Array[Dictionary]=simulator.evaluate_force(subject,opposing,terrain_modifier)
+	var attack_strength:=0.0; var defense_strength:=0.0; var effective_strength:=0.0
+	for cohort in cohorts:
+		var count:=float(cohort.get("count",0)); attack_strength+=count*float(cohort.get("attack",0.0)); defense_strength+=count*float(cohort.get("defense",0.0)); effective_strength+=count*sqrt(maxf(0.0,float(cohort.get("attack",0.0))*float(cohort.get("defense",0.0))))
+	return {"troops":int(subject.get("troops",0)),"attack_strength":attack_strength,"defense_strength":defense_strength,"effective_strength":effective_strength,"average_attack":attack_strength/maxf(1.0,float(subject.get("troops",0))),"average_defense":defense_strength/maxf(1.0,float(subject.get("troops",0))),"commander":(subject.get("commander",{}) as Dictionary).duplicate(true)}
+
+
 func threat_snapshot()->Dictionary:
 	return active_threat.duplicate(true)
 

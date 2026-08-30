@@ -13,6 +13,7 @@ func _ready()->void:
 	if MilitaryCommandUI.unit_choice.item_count<6: failures.append("Unit catalog is incomplete.")
 	if MilitaryCommandUI.weapon_choice.item_count!=2: failures.append("Levy training should expose exactly its two compatible weapon families.")
 	if MilitaryCommandUI.equipment_choice.item_count<10: failures.append("Production catalog is incomplete.")
+	if MilitaryCommandUI.commander_portrait.texture==null or "CMD" not in MilitaryCommandUI.commander_details.text: failures.append("Commander portrait or command statistics are missing.")
 	if MilitaryCommandUI.prisoner_policy.item_count!=7 or MilitaryCommandUI.spoils_policy.item_count!=5 or MilitaryCommandUI.general_policy.item_count!=4: failures.append("Battle aftermath choices are incomplete.")
 	MilitaryCampaign.pending_aftermath={"type":"rout","prisoners":4}
 	MilitaryCommandUI._refresh()

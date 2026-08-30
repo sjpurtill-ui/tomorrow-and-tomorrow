@@ -1,6 +1,7 @@
 extends Node
 
 const PANEL_SIZE:=Vector2(1160,640)
+const COMMANDER_PORTRAITS:=preload("res://assets/ui/commander_portraits.png")
 const INK:=Color("#e8dfc6")
 const MUTED:=Color("#9ca9b8")
 const GOLD:=Color("#d5ad58")
@@ -12,6 +13,8 @@ var modal:PanelContainer
 var summary:Label
 var condition:ProgressBar
 var formations:Label
+var commander_portrait:TextureRect
+var commander_details:Label
 var queues:Label
 var inventory:Label
 var feedback:Label
@@ -85,6 +88,9 @@ func _build_interface()->void:
 
 	var columns:=HBoxContainer.new(); columns.size_flags_vertical=Control.SIZE_EXPAND_FILL; columns.add_theme_constant_override("separation",10); outer.add_child(columns)
 	var army_box:=_section(columns,"ARMY",RED)
+	var commander_row:=HBoxContainer.new(); commander_row.add_theme_constant_override("separation",8); army_box.add_child(commander_row)
+	commander_portrait=TextureRect.new(); commander_portrait.custom_minimum_size=Vector2(54,54); commander_portrait.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; commander_portrait.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; commander_row.add_child(commander_portrait)
+	commander_details=Label.new(); commander_details.size_flags_horizontal=Control.SIZE_EXPAND_FILL; commander_details.vertical_alignment=VERTICAL_ALIGNMENT_CENTER; commander_row.add_child(commander_details)
 	formations=_body_label(army_box)
 	var recruit_row:=HBoxContainer.new(); army_box.add_child(recruit_row)
 	recruit_count=_counter(recruit_row,1,100,10)
@@ -201,26 +207,37 @@ func _add_choice(choice:OptionButton,id:String,gate:Dictionary)->void:
 func _refresh()->void:
 	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	var capabilities:Dictionary=MilitaryCampaign.military_capabilities()
+	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
+	var display_force:Dictionary=(engagement.get("attacker",{}) as Dictionary) if not engagement.is_empty() else army
+	var display_opponent:Dictionary=(engagement.get("defender",{}) as Dictionary) if not engagement.is_empty() else {}
+	var combat:Dictionary=MilitaryCampaign.combat_summary(display_force,display_opponent,1.0)
 	var troops:=int(army.get("troops",0)); var ready:=float(army.get("readiness",0.0)); var capacity:=int(capabilities.get("recruitment_capacity",0))
-	summary.text="DAY %d     %d FIELD SOLDIERS     %d RECRUITS     %d / %d MOBILIZED" % [int(GameState.elapsed_days),troops,int(army.get("recruits",0)),MilitaryCampaign._mobilized_count(),capacity]
+	summary.text="DAY %d     %d FIELD SOLDIERS     ⚔ %.1f ATTACK     🛡 %.1f DEFENSE     %d / %d MOBILIZED" % [int(GameState.elapsed_days),int(combat.get("troops",troops)),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),MilitaryCampaign._mobilized_count(),capacity]
 	condition.value=ready*100.0
 	condition.tooltip_text="Aggregate readiness: personnel condition, training, equipment, ammunition, supply, morale, and leadership."
 	var formation_lines:Array[String]=[]
-	for formation in (army.get("formations",[]) as Array):
+	for formation in (display_force.get("formations",[]) as Array):
 		formation_lines.append("%s  %d/%d men\n  %s %d/%d  •  readiness %d%%" % [String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),roundi(float(formation.get("readiness",ready))*100.0)])
 	var custody_line:="\n\nCAPTIVES  %d soldiers  •  %d generals" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size()]
 	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n\n".join(formation_lines))+custody_line
+	var commander:Dictionary=combat.get("commander",{})
+	var portrait_index:=posmod(hash(String(commander.get("name","commander"))),6)
+	commander_portrait.texture=_commander_portrait(portrait_index)
+	commander_details.text="%s%s\nCMD %d   TAC %d   LOG %d   RES %d" % [String(commander.get("name","No field commander")),"  •  ACTING" if bool(commander.get("acting",false)) else "",roundi(float(commander.get("command",0.0))*100.0),roundi(float(commander.get("tactics",0.0))*100.0),roundi(float(commander.get("logistics",0.0))*100.0),roundi(float(commander.get("resolve",0.0))*100.0)]
 	queues.text="Training rate %.1f/day  •  capacity %d\nWorkshop %.0f%% utilized\n\n%s" % [float(capabilities.get("training_rate",0.0)),int(capabilities.get("training_capacity",0)),float(capabilities.get("workshop_utilization",0.0))*100.0,_queue_summary(army)]
 	inventory.text=_inventory_summary(army)+"\n\nLogistics practice %d%%\nField supply access %d%%" % [roundi(float(capabilities.get("logistics_practice",0.0))*100.0),roundi(MilitaryCampaign.field_provision_delivery_ratio()*100.0)]
 	aftermath_row.visible=not MilitaryCampaign.pending_aftermath.is_empty()
 	var threat:Dictionary=MilitaryCampaign.threat_snapshot()
 	threat_row.visible=not threat.is_empty()
 	if not threat.is_empty(): threat_label.text="⚠  %s — about %d fighters — decision due day %d" % [String(threat.get("title","Threat approaching")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0))]
-	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
 	engagement_row.visible=not engagement.is_empty()
 	if not engagement.is_empty():
 		var attacker:Dictionary=engagement.get("attacker",{}); var defender:Dictionary=engagement.get("defender",{})
 		engagement_label.text="ROUND %02d   %s %d  —  %d %s   Last: %s" % [int(engagement.get("round",0))+1,String(attacker.get("name","Army")),int(attacker.get("troops",0)),int(defender.get("troops",0)),String(defender.get("name","Enemy")),String(engagement.get("last_order","ready")).capitalize()]
+
+
+func _commander_portrait(index:int)->AtlasTexture:
+	var texture:=AtlasTexture.new(); texture.atlas=COMMANDER_PORTRAITS; texture.region=Rect2((index%3)*512,(index/3)*512,512,512); return texture
 
 
 func _queue_summary(army:Dictionary)->String:
