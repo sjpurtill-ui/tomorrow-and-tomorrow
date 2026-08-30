@@ -1304,6 +1304,7 @@ func _apply_home_commander_fate(termination:Dictionary)->void:
 			citizen["pre_capture_role"]=String(citizen.get("role","Unassigned"))
 			citizen["military_capture_kind"]="commander"
 			citizen["capture_was_active_soldier"]=was_active
+			citizen["military_captured_day"]=int(GameState.elapsed_days)
 			citizen["army_status"]="captured"
 			var captured_ids:Array=home_army.get("captured_ids",[]).duplicate()
 			if citizen_id not in captured_ids: captured_ids.append(citizen_id)
@@ -1617,6 +1618,7 @@ func _process_military_day()->void:
 	if active_engagement.is_empty(): _reconcile_dead_military_citizens()
 	_process_service_rest_day()
 	_process_prisoner_custody_day()
+	_process_home_captives_day()
 	_process_equipment_production_day()
 	_process_training_injuries_day()
 	_process_training_day()
@@ -1660,6 +1662,55 @@ func _process_prisoner_custody_day()->Dictionary:
 	escaped_prisoners_total+=escaped
 	if escaped>0: GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Prisoners escape","description":"%d prisoners escape inadequate custody." % escaped,"domain":"security","severity":"warning"})
 	return {"escaped":escaped,"remaining":foreign_prisoners,"guard_coverage":custody.guard_coverage}
+
+
+func home_captive_snapshot()->Dictionary:
+	var captured:Array=home_army.get("captured_ids",[])
+	var oldest_days:=0
+	var chance_total:=0.0
+	var living_count:=0
+	for citizen_id in captured:
+		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if citizen.is_empty() or not bool(citizen.get("alive",true)): continue
+		var days:=maxi(1,last_processed_day-int(citizen.get("military_captured_day",last_processed_day-1)))
+		oldest_days=maxi(oldest_days,days)
+		chance_total+=_home_captive_return_chance(citizen,days)
+		living_count+=1
+	return {"count":captured.size(),"oldest_days":oldest_days,"average_daily_return_chance":chance_total/maxf(1.0,float(living_count)) if living_count>0 else 0.0}
+
+
+func _home_captive_return_chance(citizen:Dictionary,days_captive:int)->float:
+	var physical:=GameState.citizen_physical_capacity(citizen)
+	var experience:=clampf(float(citizen.get("military_experience",0.0)),0.0,1.0)
+	var mercy:=clampf(float(war_reputation.get("mercy",0.0)),0.0,1.0)
+	var grievance:=clampf(float(war_reputation.get("grievance",0.0)),0.0,1.0)
+	return clampf(0.00035+minf(365.0,float(maxi(0,days_captive)))*0.000008+physical*0.00060+experience*0.00045+mercy*0.00120-grievance*0.00135,0.00010,0.008)
+
+
+func _process_home_captives_day(return_chance_override:float=-1.0)->Dictionary:
+	var captured:Array=(home_army.get("captured_ids",[]) as Array).duplicate()
+	if captured.is_empty(): return {"returned":0,"citizen_ids":[]}
+	var returned:Array[int]=[]
+	for citizen_id_variant in captured.duplicate():
+		var citizen_id:=int(citizen_id_variant)
+		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+		if citizen.is_empty() or not bool(citizen.get("alive",true)): continue
+		var days:=maxi(1,last_processed_day-int(citizen.get("military_captured_day",last_processed_day-1)))
+		var chance:=return_chance_override if return_chance_override>=0.0 else _home_captive_return_chance(citizen,days)
+		var rng:=RandomNumberGenerator.new()
+		rng.seed=int(GameState.world_seed)^citizen_id*104729^last_processed_day*7919
+		if rng.randf()>clampf(chance,0.0,1.0): continue
+		captured.erase(citizen_id)
+		if _restore_home_captive(citizen_id): returned.append(citizen_id)
+	home_army["captured_ids"]=captured
+	if not returned.is_empty():
+		GameState.synchronize_population_allocations()
+		var names:Array[String]=[]
+		for citizen_id in returned: names.append(String(GameState.citizen_by_id(citizen_id).get("name","A captive")))
+		var message:="%s returned from enemy captivity." % ", ".join(names)
+		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Captives return","description":message,"domain":"security","severity":"notice"})
+		GameState.council_inbox.push_front({"id":"captive_return_%d_%d" % [int(GameState.elapsed_days),returned[0]],"advisor":String((home_army.get("commander",{}) as Dictionary).get("name","Field command")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":message,"urgency":0.58,"day":int(GameState.elapsed_days),"status":"unread"})
+	return {"returned":returned.size(),"citizen_ids":returned}
 
 
 func _process_service_rest_day()->void:
@@ -2225,23 +2276,28 @@ func _return_home_captives(count:int)->Array[int]:
 	var returned:Array[int]=[]
 	for index in mini(maxi(0,count),captured.size()):
 		var citizen_id:=int(captured.pop_front())
-		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
-		if citizen.is_empty() or not bool(citizen.get("alive",true)): continue
-		var captured_commander:=String(citizen.get("military_capture_kind",""))=="commander"
-		var return_to_recruits:=not captured_commander or bool(citizen.get("capture_was_active_soldier",false))
-		if return_to_recruits:
-			citizen["army_status"]="recruit"
-			if citizen_id not in recruit_pool: recruit_pool.append(citizen_id)
-		else:
-			citizen["army_status"]="civilian"
-			citizen["role"]=String(citizen.get("pre_capture_role",citizen.get("role","Unassigned")))
-		citizen.erase("military_capture_kind")
-		citizen.erase("capture_was_active_soldier")
-		citizen.erase("pre_capture_role")
-		returned.append(citizen_id)
+		if _restore_home_captive(citizen_id): returned.append(citizen_id)
 	home_army["captured_ids"]=captured
 	if not returned.is_empty(): GameState.synchronize_population_allocations()
 	return returned
+
+
+func _restore_home_captive(citizen_id:int)->bool:
+	var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+	if citizen.is_empty() or not bool(citizen.get("alive",true)): return false
+	var captured_commander:=String(citizen.get("military_capture_kind",""))=="commander"
+	var return_to_recruits:=not captured_commander or bool(citizen.get("capture_was_active_soldier",false))
+	if return_to_recruits:
+		citizen["army_status"]="recruit"
+		if citizen_id not in recruit_pool: recruit_pool.append(citizen_id)
+	else:
+		citizen["army_status"]="civilian"
+		citizen["role"]=String(citizen.get("pre_capture_role",citizen.get("role","Unassigned")))
+	citizen.erase("military_capture_kind")
+	citizen.erase("capture_was_active_soldier")
+	citizen.erase("pre_capture_role")
+	citizen.erase("military_captured_day")
+	return true
 
 
 func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dictionary)->void:
@@ -2316,6 +2372,7 @@ func _mark_home_prisoners(count:int)->void:
 		var citizen:Dictionary=GameState.citizen_by_id(int(soldier_id))
 		if citizen.is_empty(): continue
 		citizen["army_status"]="captured"
+		citizen["military_captured_day"]=int(GameState.elapsed_days)
 		captured_ids.append(soldier_id)
 		for formation_index in formations.size():
 			var member_ids:Array=(formations[formation_index].get("soldier_ids",[]) as Array).duplicate()

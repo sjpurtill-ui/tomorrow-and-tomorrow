@@ -42,7 +42,7 @@ func _ready()->void:
 	if not MilitaryCommandUI.condition_bands.ready.visible or not MilitaryCommandUI.condition_bands.capable.visible: failures.append("Army personnel condition is not visible as a segmented heatmap.")
 	if (panel.get_child(0) as Control).get_combined_minimum_size().y>panel.size.y-16.0: failures.append("Populated military content clips inside the fixed modal.")
 	if "3 ready" not in MilitaryCommandUI.inventory.text or "Arrows  12" not in MilitaryCommandUI.inventory.text: failures.append("Ready equipment or ammunition is absent from the arsenal snapshot.")
-	if "1 generals" not in MilitaryCommandUI.formations.text: failures.append("Held generals are absent from the custody snapshot.")
+	if "GEN 1" not in MilitaryCommandUI.formations.text or "OUR MISSING" not in MilitaryCommandUI.formations.text: failures.append("Held generals or missing home soldiers are absent from the custody snapshot.")
 	if not MilitaryCommandUI.aftermath_row.visible or MilitaryCommandUI.aftermath_label.text!="HELD CAPTIVES": failures.append("Held captives do not expose a delayed disposition decision.")
 	if MilitaryCommandUI.spoils_policy.visible: failures.append("Spoils policy remains visible after immediate battle aftermath has ended.")
 	if "+ 3 more cohorts" not in MilitaryCommandUI.formations.text: failures.append("Large armies are not summarized within the fixed modal.")
@@ -80,6 +80,7 @@ func _ready()->void:
 	if not panel.visible: failures.append("Military modal did not open.")
 	MilitaryCommandUI._toggle()
 	if panel.visible: failures.append("Military modal did not close.")
+	if panel.size!=MilitaryCommandUI.PANEL_SIZE: failures.append("Military modal escaped its exact fixed size: %s." % panel.size)
 	if not failures.is_empty():
 		for failure in failures: push_error(failure)
 		get_tree().quit(1)

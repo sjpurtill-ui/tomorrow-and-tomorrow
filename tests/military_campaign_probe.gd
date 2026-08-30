@@ -716,5 +716,22 @@ func _run()->void:
 	var invalid_import:Dictionary=MilitaryCampaign.import_state(invalid_military_save)
 	assert(String(invalid_import.get("error",""))=="Invalid military save state.")
 	assert(MilitaryCampaign.validate_state().is_empty())
+	var captive_reputation:Dictionary=MilitaryCampaign.war_reputation.duplicate(true)
+	var captive_candidate:Dictionary=GameState.citizen_by_id(int(MilitaryCampaign.home_army.soldier_ids[-1]))
+	MilitaryCampaign.war_reputation={"mercy":1.0,"fear":0.0,"grievance":0.0}
+	var merciful_return_chance:=MilitaryCampaign._home_captive_return_chance(captive_candidate,90)
+	MilitaryCampaign.war_reputation={"mercy":0.0,"fear":0.0,"grievance":1.0}
+	assert(merciful_return_chance>MilitaryCampaign._home_captive_return_chance(captive_candidate,90))
+	MilitaryCampaign.war_reputation=captive_reputation
+	MilitaryCampaign._mark_home_prisoners(1)
+	var timed_captive_id:=int(MilitaryCampaign.home_army.captured_ids[-1])
+	assert(int(GameState.citizen_by_id(timed_captive_id).military_captured_day)==int(GameState.elapsed_days))
+	MilitaryCampaign.last_processed_day+=1
+	var natural_return:Dictionary=MilitaryCampaign._process_home_captives_day(1.0)
+	assert(timed_captive_id in (natural_return.citizen_ids as Array))
+	assert(timed_captive_id in MilitaryCampaign.recruit_pool)
+	assert(timed_captive_id not in (MilitaryCampaign.home_army.captured_ids as Array))
+	assert(String(GameState.citizen_by_id(timed_captive_id).army_status)=="recruit")
+	assert(MilitaryCampaign.validate_state().is_empty())
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

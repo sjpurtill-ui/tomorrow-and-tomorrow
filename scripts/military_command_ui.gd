@@ -281,8 +281,10 @@ func _refresh()->void:
 		var formation_stats:Dictionary=formation_cards[formation_index].stats
 		formation_lines.append("%s  %s  %d/%d men  •  %s %d/%d\n  ⚔ %.1f   🛡 %.1f   RDY %d%%   COND %d%%" % [_unit_icon(String(formation.get("unit",""))),String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),float(formation_stats.get("attack_strength",0.0)),float(formation_stats.get("defense_strength",0.0)),roundi(float(formation_stats.get("readiness",ready))*100.0),roundi(float(formation_stats.get("condition",1.0))*100.0)])
 	if formation_cards.size()>3: formation_lines.append("+ %d more cohorts in the field" % (formation_cards.size()-3))
-	var custody_line:="\n\nCAPTIVES  %d soldiers  •  %d generals" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size()]
+	var missing:Dictionary=MilitaryCampaign.home_captive_snapshot()
+	var custody_line:="\n\nPOW %d  •  GEN %d  •  OUR MISSING %d" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size(),int(missing.get("count",0))]
 	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n".join(formation_lines))+custody_line
+	formations.tooltip_text="Missing soldiers may return through exchange or a daily captivity check. Current average return chance: %.2f%%/day; oldest captivity: %d days." % [float(missing.get("average_daily_return_chance",0.0))*100.0,int(missing.get("oldest_days",0))]
 	var commander:Dictionary=combat.get("commander",{})
 	var portrait_index:=posmod(hash(String(commander.get("name","commander"))),6)
 	commander_portrait.texture=_commander_portrait(portrait_index)
