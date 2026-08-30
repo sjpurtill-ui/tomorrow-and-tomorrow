@@ -135,12 +135,20 @@ func _run()->void:
 	assert(float(MilitaryCampaign.simulator.evaluate_force(veteran_force,dummy)[0].attack)>float(MilitaryCampaign.simulator.evaluate_force(green_force,dummy)[0].attack))
 	var enemy:Dictionary=MilitaryCampaign.simulator.create_formation_force("Raiders",[{"unit":"levy","weapon":"improvised","count":8,"equipment":8}],0.7,0.8)
 	var damaged_before_battle:=int(MilitaryCampaign.damaged_equipment.improvised)
+	var lifetime_deaths_before_battle:=GameState.lifetime_deaths
 	var battle:Dictionary=MilitaryCampaign.resolve_campaign_battle(enemy,{"seed":77,"max_rounds":2})
 	assert(not battle.has("error"))
 	var battlefield_equipment_losses:=0
+	var battlefield_deaths:=0
 	for round_data in battle.rounds:
 		for amount in round_data.attacker_cohort_equipment_losses: battlefield_equipment_losses+=int(amount)
+		battlefield_deaths+=int((round_data.attacker_casualties as Dictionary).get("killed",0))
 	assert(int(MilitaryCampaign.damaged_equipment.improvised)-damaged_before_battle==floori(float(battlefield_equipment_losses)*0.35))
+	assert(GameState.lifetime_deaths-lifetime_deaths_before_battle==battlefield_deaths)
+	if battlefield_deaths>0:
+		assert(not GameState.demographic_ledger.is_empty())
+		assert(String(GameState.demographic_ledger[0].cause)=="Killed in battle")
+		assert(int(GameState.demographic_ledger[0].count)==battlefield_deaths)
 	var post_battle:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	assert(int(post_battle.troops)==(post_battle.soldier_ids as Array).size())
 	if not (post_battle.soldier_ids as Array).is_empty():
@@ -253,8 +261,12 @@ func _run()->void:
 	assert(not MilitaryCampaign.home_army.formations.is_empty())
 	assert(String(MilitaryCampaign.home_army.formations[-1].unit)=="line_infantry")
 	assert(is_equal_approx(float(MilitaryCampaign.home_army.formations[-1].experience),experience_before_retraining))
+	var lifetime_deaths_before_commander:=GameState.lifetime_deaths
 	MilitaryCampaign._apply_home_commander_fate({"defeated":MilitaryCampaign.home_army.name,"commander_fate":"killed"})
 	assert(not bool(GameState.citizen_by_id(int(marshal_citizen.id)).alive))
+	assert(GameState.lifetime_deaths==lifetime_deaths_before_commander+1)
+	assert(String(GameState.demographic_ledger[0].cause)=="Killed while commanding in battle")
+	assert(String(marshal_citizen.name) in (GameState.demographic_ledger[0].people as Array))
 	assert(GameState.leadership_positions.has("Marshal"))
 	assert(int(GameState.leadership_positions.Marshal.citizen_id)!=int(marshal_citizen.id))
 	assert(bool(MilitaryCampaign.home_army.commander.get("acting",false)))

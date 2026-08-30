@@ -1031,9 +1031,8 @@ func _apply_home_commander_fate(termination:Dictionary)->void:
 	var was_active:=_remove_active_citizen(citizen_id)
 	if not citizen.is_empty():
 		if fate=="killed":
-			citizen["alive"]=false
-			citizen["death_day"]=int(GameState.elapsed_days)
-			citizen["death_cause"]="Killed while commanding in battle"
+			var commander_name:=GameState.register_specific_death(citizen_id,"Killed while commanding in battle")
+			if commander_name!="": _record_military_deaths([commander_name],"Killed while commanding in battle")
 		else:
 			citizen["army_status"]="captured"
 			if was_active:
@@ -1045,6 +1044,17 @@ func _apply_home_commander_fate(termination:Dictionary)->void:
 	var successor:=_acting_field_commander(true)
 	home_army["commander"]=successor
 	GameState.council_inbox.push_front({"id":"succession_%d_%d" % [int(GameState.elapsed_days),citizen_id],"advisor":String(successor.get("name","Field command")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":"%s is %s. %s assumes field command with reduced experience." % [String(former.get("name","The commander")),fate,String(successor.get("name","An acting captain"))],"urgency":0.98,"day":int(GameState.elapsed_days),"status":"unread"})
+
+
+func _record_military_deaths(names:Array[String],cause:String)->void:
+	if names.is_empty(): return
+	GameState.lifetime_deaths+=names.size()
+	var location:=GameState.settlement_name if GameState.settlement_name!="" else "the campaign"
+	var record:Dictionary={"id":"military_deaths_%d_%d" % [int(GameState.elapsed_days),GameState.demographic_ledger.size()],"day":int(GameState.elapsed_days),"start_day":int(GameState.elapsed_days),"end_day":int(GameState.elapsed_days),"title":"%d military death%s near %s" % [names.size(),"" if names.size()==1 else "s",location],"description":"Named citizens killed during military service: %s." % ", ".join(names),"domain":"population","severity":"demographic","kind":"death","count":names.size(),"cause":cause,"location":location,"population_after":GameState.population_total,"people":names.duplicate()}
+	GameState.demographic_ledger.push_front(record)
+	if GameState.demographic_ledger.size()>120: GameState.demographic_ledger.resize(120)
+	GameState.simulation_events.push_front(record)
+	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 
 
 func _acting_field_commander(assign_office:bool)->Dictionary:
@@ -1140,6 +1150,7 @@ func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 	casualty_ids.append_array(unassigned)
 	var wounded_ids:Array=home_army.get("wounded_ids",[]).duplicate()
 	var scattered_ids:Array=home_army.get("scattered_ids",[]).duplicate()
+	var killed_names:Array[String]=[]
 	var status_queue:Array[String]=[]
 	for index in int(totals.killed): status_queue.append("killed")
 	for index in int(totals.wounded): status_queue.append("wounded")
@@ -1149,11 +1160,11 @@ func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 		if citizen.is_empty(): continue
 		citizen["army_status"]=status_queue[index]
 		if status_queue[index]=="killed":
-			citizen["alive"]=false
-			citizen["death_day"]=int(GameState.elapsed_days)
-			citizen["death_cause"]="Killed in battle"
+			var killed_name:=GameState.register_specific_death(int(citizen.id),"Killed in battle")
+			if killed_name!="": killed_names.append(killed_name)
 		elif status_queue[index]=="wounded": wounded_ids.append(int(citizen.id))
 		elif status_queue[index]=="scattered": scattered_ids.append(int(citizen.id))
+	_record_military_deaths(killed_names,"Killed in battle")
 	var experience_gain:=clampf(float(rounds.size())*0.014,0.008,0.12)
 	for index in mini(status_queue.size(),casualty_ids.size()):
 		if status_queue[index]=="killed": continue
