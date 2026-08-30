@@ -117,6 +117,9 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 	var seed := int(options.get("seed", 1))
 	var round_limit := clampi(int(options.get("max_rounds", MAX_ROUNDS)), 1, MAX_ROUNDS)
 	var terrain_defense := clampf(float(options.get("terrain_defense", 1.0)), 0.5, 2.0)
+	var casualty_intensity:=clampf(float(options.get("casualty_intensity",1.0)),0.20,2.0)
+	var attacker_exposure_modifier:=clampf(float(options.get("attacker_exposure_modifier",1.0)),0.50,2.0)
+	var defender_exposure_modifier:=clampf(float(options.get("defender_exposure_modifier",1.0)),0.50,2.0)
 	var siege_reduction:=_siege_terrain_reduction(attacking_force)
 	var effective_terrain_defense:=lerpf(terrain_defense,1.0,siege_reduction) if terrain_defense>1.0 else terrain_defense
 	var rng := RandomNumberGenerator.new()
@@ -151,8 +154,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 
 		# Casualties are based on the opposing force's share of power. They are
 		# calculated before either side is reduced, so each round is simultaneous.
-		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_troops) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * float(engagement.attacker_exposure))))
-		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * float(engagement.defender_exposure) / effective_terrain_defense)))
+		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_troops) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier)))
+		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier / effective_terrain_defense)))
 		# A force in contact usually suffers at least one loss; true lulls may be bloodless.
 		if attacker_losses==0 and float(engagement.intensity)>=0.65: attacker_losses=1
 		if defender_losses==0 and float(engagement.intensity)>=0.65: defender_losses=1
@@ -160,8 +163,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		defender_troops -= defender_losses
 		var attacker_cohort_result:=_apply_cohort_losses(attacking_force.get("formations", []), attacker_cohorts, attacker_losses,rng,engagement.get("attacker_target",-1))
 		var defender_cohort_result:=_apply_cohort_losses(defending_force.get("formations", []), defender_cohorts, defender_losses,rng,engagement.get("defender_target",-1))
-		var attacker_ammunition_used:=_consume_ammunition(attacker_cohort_result.formations,float(engagement.intensity),rng)
-		var defender_ammunition_used:=_consume_ammunition(defender_cohort_result.formations,float(engagement.intensity),rng)
+		var attacker_ammunition_used:=_consume_ammunition(attacker_cohort_result.formations,float(engagement.intensity)*casualty_intensity,rng)
+		var defender_ammunition_used:=_consume_ammunition(defender_cohort_result.formations,float(engagement.intensity)*casualty_intensity,rng)
 		var attacker_casualties:=_casualty_breakdown(attacker_losses,rng,float(engagement.intensity))
 		var defender_casualties:=_casualty_breakdown(defender_losses,rng,float(engagement.intensity))
 		attacking_force["formations"] = attacker_cohort_result.formations
@@ -186,6 +189,7 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			"attacker_morale": attacker_morale,
 			"defender_morale": defender_morale,
 			"intensity":engagement.label,
+			"order_intensity":casualty_intensity,
 			"event":engagement.event,
 			"attacker_cohort_losses":attacker_cohort_result.losses,
 			"defender_cohort_losses":defender_cohort_result.losses,
@@ -226,6 +230,8 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 	var commander:Dictionary=force.get("commander",{})
 	var tactics:=clampf(float(commander.get("tactics",0.5)),0.0,1.0)
 	var result: Array[Dictionary] = []
+	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))
+	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))
 	for formation in formations:
 		var unit_id := String(formation.get("unit", "levy"))
 		var weapon_id := String(formation.get("weapon", "improvised"))
@@ -251,8 +257,8 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) - _enemy_penetration(enemy_formations)) * 0.35
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
-			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor,
-			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor,
+			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*formation_attack_modifier,
+			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*formation_defense_modifier,
 			"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience
 		})
 	return result
@@ -539,6 +545,8 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 		# Command-level modifiers sit above equipment-derived statistics.
 		formation_force.attack *= float(force.get("attack_modifier", 1.0))
 		formation_force.defense *= float(force.get("defense_modifier", 1.0))
+		formation_force["attack_modifier"]=float(force.get("attack_modifier",1.0))
+		formation_force["defense_modifier"]=float(force.get("defense_modifier",1.0))
 		formation_force["commander"]=force.get("commander",{}).duplicate(true)
 		formation_force["reserve_manpower"]=int(force.get("reserve_manpower",formation_force.get("reserve_manpower",0)))
 		formation_force["wounded_pool"]=int(force.get("wounded_pool",0))

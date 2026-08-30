@@ -164,6 +164,19 @@ func test_tactical_leadership_exploits_favorable_matchups() -> void:
 	assert_float(expert_stats[0].attack).is_greater(ordinary_stats[0].attack)
 
 
+func test_push_order_increases_pressure_and_risk() -> void:
+	var attacker:Dictionary=simulator.create_formation_force("Attackers",[{"unit":"line_infantry","weapon":"spear","count":200,"equipment":200}])
+	var defender:Dictionary=simulator.create_formation_force("Defenders",[{"unit":"line_infantry","weapon":"spear","count":200,"equipment":200}])
+	var hold:Dictionary=simulator.simulate(attacker,defender,{"seed":812,"max_rounds":1})
+	var pushing:=attacker.duplicate(true)
+	pushing["attack_modifier"]=1.25
+	assert_float(simulator.evaluate_force(pushing,defender)[0].attack).is_greater(simulator.evaluate_force(attacker,defender)[0].attack)
+	var push:Dictionary=simulator.simulate(pushing,defender,{"seed":812,"max_rounds":1,"casualty_intensity":1.30,"attacker_exposure_modifier":1.12})
+	assert_int(push.rounds[0].defender_losses).is_greater(hold.rounds[0].defender_losses)
+	assert_int(int(push.rounds[0].attacker_losses)+int(push.rounds[0].defender_losses)).is_greater(int(hold.rounds[0].attacker_losses)+int(hold.rounds[0].defender_losses))
+	assert_float(float(push.rounds[0].order_intensity)).is_equal_approx(1.30,0.001)
+
+
 func test_resolute_commander_reduces_morale_shock() -> void:
 	var attacker: Dictionary = simulator.create_formation_force("Attackers",[{"unit":"levy","weapon":"improvised","count":100}])
 	var brittle: Dictionary = simulator.create_formation_force("Brittle",[{"unit":"levy","weapon":"improvised","count":100}])

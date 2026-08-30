@@ -529,11 +529,13 @@ func advance_engagement(order:String="hold")->Dictionary:
 	if command=="retreat": return _finish_active_engagement(true,{})
 	var attacker:Dictionary=(active_engagement.attacker as Dictionary).duplicate(true)
 	var defender:Dictionary=(active_engagement.defender as Dictionary).duplicate(true)
+	var round_options:Dictionary={"seed":int(active_engagement.seed)+(int(active_engagement.round)+1)*7919,"terrain_defense":float(active_engagement.terrain_defense),"max_rounds":1}
 	if command=="push":
-		attacker["attack_modifier"]=float(attacker.get("attack_modifier",1.0))*1.35
-		defender["attack_modifier"]=float(defender.get("attack_modifier",1.0))*1.25
+		attacker["attack_modifier"]=float(attacker.get("attack_modifier",1.0))*1.25
+		round_options["casualty_intensity"]=1.30
+		round_options["attacker_exposure_modifier"]=1.12
 	var next_round:=int(active_engagement.round)+1
-	var result:Dictionary=simulator.simulate(attacker,defender,{"seed":int(active_engagement.seed)+next_round*7919,"terrain_defense":float(active_engagement.terrain_defense),"max_rounds":1})
+	var result:Dictionary=simulator.simulate(attacker,defender,round_options)
 	if (result.get("rounds",[]) as Array).is_empty(): return _finish_active_engagement(false,result)
 	var record:Dictionary=(result.rounds[0] as Dictionary).duplicate(true); record["round"]=next_round; record["order"]=command
 	(active_engagement.rounds as Array).append(record)
