@@ -26,6 +26,12 @@ func _ready()->void:
 	if not MilitaryCommandUI.threat_row.visible: failures.append("An approaching threat is not exposed in military command.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Threat controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.active_threat.clear()
+	MilitaryCampaign.active_engagement={"round":2,"last_order":"push","attacker":{"name":"River Host","troops":18},"defender":{"name":"Raiders","troops":11}}
+	MilitaryCommandUI._refresh()
+	await get_tree().process_frame
+	if not MilitaryCommandUI.engagement_row.visible: failures.append("A live campaign engagement does not expose round orders.")
+	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Live battle controls make the modal clip: %s." % panel.size)
+	MilitaryCampaign.active_engagement.clear()
 	if not panel.visible: failures.append("Military modal did not open.")
 	MilitaryCommandUI._toggle()
 	if panel.visible: failures.append("Military modal did not close.")

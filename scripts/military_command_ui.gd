@@ -24,6 +24,8 @@ var equipment_choice:OptionButton
 var aftermath_row:HBoxContainer
 var threat_row:HBoxContainer
 var threat_label:Label
+var engagement_row:HBoxContainer
+var engagement_label:Label
 var prisoner_policy:OptionButton
 var spoils_policy:OptionButton
 var general_policy:OptionButton
@@ -110,6 +112,11 @@ func _build_interface()->void:
 	_action_button(threat_row,"Defend",func(): _report(MilitaryCampaign.respond_to_threat("defend")))
 	_action_button(threat_row,"Pay tribute",func(): _report(MilitaryCampaign.respond_to_threat("tribute")))
 	_action_button(threat_row,"Withdraw",func(): _report(MilitaryCampaign.respond_to_threat("withdraw")))
+	engagement_row=HBoxContainer.new(); engagement_row.add_theme_constant_override("separation",8); outer.add_child(engagement_row)
+	engagement_label=Label.new(); engagement_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL; engagement_label.add_theme_color_override("font_color",GOLD); engagement_row.add_child(engagement_label)
+	_action_button(engagement_row,"Next round",func(): _report(MilitaryCampaign.advance_engagement("hold")))
+	_action_button(engagement_row,"⚔ Push harder",func(): _report(MilitaryCampaign.advance_engagement("push")))
+	_action_button(engagement_row,"◀ Retreat",func(): _report(MilitaryCampaign.advance_engagement("retreat")))
 
 	aftermath_row=HBoxContainer.new(); aftermath_row.add_theme_constant_override("separation",8); outer.add_child(aftermath_row)
 	var aftermath_label:=Label.new(); aftermath_label.text="BATTLE DECISION"; aftermath_label.add_theme_color_override("font_color",GOLD); aftermath_row.add_child(aftermath_label)
@@ -209,6 +216,11 @@ func _refresh()->void:
 	var threat:Dictionary=MilitaryCampaign.threat_snapshot()
 	threat_row.visible=not threat.is_empty()
 	if not threat.is_empty(): threat_label.text="⚠  %s — about %d fighters — decision due day %d" % [String(threat.get("title","Threat approaching")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0))]
+	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
+	engagement_row.visible=not engagement.is_empty()
+	if not engagement.is_empty():
+		var attacker:Dictionary=engagement.get("attacker",{}); var defender:Dictionary=engagement.get("defender",{})
+		engagement_label.text="ROUND %02d   %s %d  —  %d %s   Last: %s" % [int(engagement.get("round",0))+1,String(attacker.get("name","Army")),int(attacker.get("troops",0)),int(defender.get("troops",0)),String(defender.get("name","Enemy")),String(engagement.get("last_order","ready")).capitalize()]
 
 
 func _queue_summary(army:Dictionary)->String:
@@ -251,6 +263,6 @@ func _resolve_aftermath()->void:
 
 
 func _report(result:Dictionary)->void:
-	feedback.text=String(result.get("error",JSON.stringify(result)))
+	feedback.text=String(result.get("error",result.get("message","Orders accepted; campaign state updated.")))
 	feedback.add_theme_color_override("font_color",RED if result.has("error") else Color("#8fc58d"))
 	_refresh()

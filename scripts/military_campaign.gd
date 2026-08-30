@@ -34,6 +34,7 @@ var prisoner_escape_accumulator:=0.0
 var escaped_prisoners_total:=0
 var active_threat:Dictionary={}
 var threats_resolved:=0
+var active_engagement:Dictionary={}
 
 
 func _ready()->void:
@@ -74,6 +75,7 @@ func reset_for_new_world()->void:
 	escaped_prisoners_total=0
 	active_threat.clear()
 	threats_resolved=0
+	active_engagement.clear()
 
 
 func muster_home_army(requested_strength:=-1)->Dictionary:
@@ -396,6 +398,7 @@ func military_inquiry_context()->Dictionary:
 
 
 func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dictionary:
+	if not active_engagement.is_empty(): return {"error":"Finish the active campaign engagement first."}
 	if home_army.is_empty(): muster_home_army()
 	if int(home_army.get("troops",0))<=0: return {"error":"No deployable home army."}
 	_refresh_readiness()
@@ -403,6 +406,10 @@ func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dict
 	battle_options["seed"]=int(battle_options.get("seed",GameState.world_seed^int(GameState.elapsed_days+1.0)*7919))
 	battle_options["terrain_defense"]=float(battle_options.get("terrain_defense",_terrain_defense()))
 	var result:Dictionary=simulator.simulate(home_army,enemy_force,battle_options)
+	return _commit_campaign_battle(result)
+
+
+func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	_apply_home_result(result.attacker,result.rounds,int(result.seed))
 	home_army["recent_combat_days"]=7
 	home_army["supply_level"]=clampf(float(home_army.get("supply_level",1.0))-0.06,0.0,1.0)
@@ -448,9 +455,6 @@ func campaign_army_snapshot()->Dictionary:
 	if home_army.is_empty(): home_army=_empty_home_army()
 	var snapshot:=home_army.duplicate(true)
 	snapshot["foreign_prisoners"]=foreign_prisoners
-	snapshot["held_generals"]=held_generals.duplicate(true)
-	snapshot["military_inventory"]=military_inventory.duplicate(true)
-	snapshot["military_consumables"]=military_consumables.duplicate(true)
 	snapshot["damaged_equipment"]=damaged_equipment.duplicate(true)
 	snapshot["recruits"]=recruit_pool.size()
 	snapshot["training_queue"]=training_queue.duplicate(true)
@@ -465,17 +469,75 @@ func threat_snapshot()->Dictionary:
 	return active_threat.duplicate(true)
 
 
+func engagement_snapshot()->Dictionary:
+	return active_engagement.duplicate(true)
+
+
+func begin_threat_engagement()->Dictionary:
+	if not active_engagement.is_empty(): return engagement_snapshot()
+	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
+	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
+	if int(home_army.get("troops",0))<=0: return {"error":"No trained field formation can defend the settlement."}
+	_refresh_readiness()
+	var threat:=active_threat.duplicate(true)
+	active_engagement={"threat":threat,"attacker":home_army.duplicate(true),"defender":threat.enemy_force.duplicate(true),"attacker_initial":int(home_army.troops),"defender_initial":int(threat.enemy_force.troops),"round":0,"rounds":[],"seed":int(threat.seed),"terrain_defense":_terrain_defense(),"status":"active","last_order":"hold"}
+	active_threat.clear(); threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
+	return engagement_snapshot()
+
+
+func advance_engagement(order:String="hold")->Dictionary:
+	if active_engagement.is_empty(): return {"error":"No campaign battle is active."}
+	var command:=order.to_lower()
+	if command not in ["hold","push","retreat"]: return {"error":"Unknown battle order: %s" % order}
+	if command=="retreat": return _finish_active_engagement(true,{})
+	var attacker:Dictionary=(active_engagement.attacker as Dictionary).duplicate(true)
+	var defender:Dictionary=(active_engagement.defender as Dictionary).duplicate(true)
+	if command=="push":
+		attacker["attack_modifier"]=float(attacker.get("attack_modifier",1.0))*1.35
+		defender["attack_modifier"]=float(defender.get("attack_modifier",1.0))*1.25
+	var next_round:=int(active_engagement.round)+1
+	var result:Dictionary=simulator.simulate(attacker,defender,{"seed":int(active_engagement.seed)+next_round*7919,"terrain_defense":float(active_engagement.terrain_defense),"max_rounds":1})
+	if (result.get("rounds",[]) as Array).is_empty(): return _finish_active_engagement(false,result)
+	var record:Dictionary=(result.rounds[0] as Dictionary).duplicate(true); record["round"]=next_round; record["order"]=command
+	(active_engagement.rounds as Array).append(record)
+	active_engagement["round"]=next_round; active_engagement["attacker"]=_force_from_round_result(active_engagement.attacker,result.attacker); active_engagement["defender"]=_force_from_round_result(active_engagement.defender,result.defender); active_engagement["last_order"]=command; active_engagement["last_result"]=result.duplicate(true)
+	if String(result.get("outcome","continued"))!="continued" or next_round>=CombatSimulator.MAX_ROUNDS:
+		return _finish_active_engagement(false,result)
+	army_changed.emit(home_army.duplicate(true))
+	return {"active":true,"engagement":engagement_snapshot(),"round":record}
+
+
+func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
+	var updated:=previous.duplicate(true)
+	for key in ["remaining_troops","morale","formations","reserve_manpower","wounded_pool","scattered_pool","dead"]:
+		if not side.has(key): continue
+		if key=="remaining_troops": updated["troops"]=int(side[key])
+		else: updated[key]=side[key].duplicate(true) if side[key] is Array or side[key] is Dictionary else side[key]
+	return updated
+
+
+func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionary:
+	var engagement:=active_engagement.duplicate(true)
+	var attacker:Dictionary=engagement.attacker; var defender:Dictionary=engagement.defender
+	var attacker_result:Dictionary=simulator._force_result(attacker,int(engagement.attacker_initial),int(attacker.troops),float(attacker.morale))
+	var defender_result:Dictionary=simulator._force_result(defender,int(engagement.defender_initial),int(defender.troops),float(defender.morale))
+	var outcome:=String(last_result.get("outcome","continued")); var termination:Dictionary=(last_result.get("termination",{}) as Dictionary).duplicate(true)
+	if retreated:
+		outcome="attacker_retreat"
+		termination={"type":"withdrawal","summary":"%s withdrew from the field before collapse." % String(attacker.name),"defeated":String(attacker.name),"captor":String(defender.name),"prisoners":0,"spoils":{},"captured_general":false,"commander_fate":"escaped"}
+	elif outcome=="continued": termination={"type":"continued","summary":"Both forces remain capable of further action."}
+	var final_result:Dictionary={"seed":int(engagement.seed),"outcome":outcome,"winner":String(defender.name) if retreated else String(last_result.get("winner","")),"round_count":int(engagement.round),"rounds":engagement.rounds.duplicate(true),"attacker":attacker_result,"defender":defender_result,"terrain_defense":float(engagement.terrain_defense),"effective_terrain_defense":float(last_result.get("effective_terrain_defense",engagement.terrain_defense)),"termination":termination,"orders":{"retreated":retreated}}
+	active_engagement.clear(); threats_resolved+=1
+	return _commit_campaign_battle(final_result)
+
+
 func respond_to_threat(response:String)->Dictionary:
 	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
 	var choice:=response.to_lower()
 	var threat:=active_threat.duplicate(true)
 	if choice=="defend":
-		if int(home_army.get("troops",0))<=0: return {"error":"No trained field formation can defend the settlement."}
-		active_threat.clear(); threat_changed.emit({})
-		var result:=resolve_campaign_battle(threat.enemy_force,{"seed":int(threat.seed),"terrain_defense":_terrain_defense()})
-		result["threat"]=threat; threats_resolved+=1
-		return result
+		return begin_threat_engagement()
 	if choice=="tribute":
 		var demanded:=float(threat.get("tribute_food",0.0)); var available:=float(GameState.resource_stockpiles.get("Food",0.0))
 		if available<demanded: return {"error":"The demanded tribute requires %.1f Food; only %.1f is stored." % [demanded,available]}
@@ -499,9 +561,13 @@ func _resolve_threat_without_battle(title:String,description:String)->void:
 
 
 func _process_threat_day()->void:
+	if not active_engagement.is_empty():
+		advance_engagement("hold")
+		return
 	if not active_threat.is_empty():
 		if int(GameState.elapsed_days)>int(active_threat.get("deadline_day",GameState.elapsed_days)) and pending_aftermath.is_empty():
 			respond_to_threat("defend" if int(home_army.get("troops",0))>0 else "withdraw")
+			while not active_engagement.is_empty(): advance_engagement("hold")
 		return
 	if not GameState.settlement_site_committed or int(GameState.elapsed_days)<90 or not pending_aftermath.is_empty(): return
 	var population:=maxi(1,GameState.living_citizen_count()); var security:=clampf(float(GameState.simulation_metrics.get("security",0.38)),0.0,1.0)
@@ -641,7 +707,8 @@ func export_state()->Dictionary:
 		"prisoner_escape_accumulator":prisoner_escape_accumulator,
 		"escaped_prisoners_total":escaped_prisoners_total,
 		"active_threat":active_threat.duplicate(true),
-		"threats_resolved":threats_resolved
+		"threats_resolved":threats_resolved,
+		"active_engagement":active_engagement.duplicate(true)
 	}
 
 
@@ -729,6 +796,10 @@ func validate_state()->Array[String]:
 	for item in damaged_equipment:
 		if int(damaged_equipment[item])<0: errors.append("Damaged-equipment inventory for %s is negative." % item)
 	if foreign_prisoners<0 or prisoner_custody_days<0 or escaped_prisoners_total<0: errors.append("Prisoner custody counters cannot be negative.")
+	if not active_threat.is_empty() and not active_engagement.is_empty(): errors.append("A pending threat and active engagement cannot coexist.")
+	if not active_engagement.is_empty():
+		if int(active_engagement.get("round",-1))<0 or int(active_engagement.get("round",0))>CombatSimulator.MAX_ROUNDS: errors.append("Active engagement round is outside battle limits.")
+		if (active_engagement.get("attacker",{}) as Dictionary).is_empty() or (active_engagement.get("defender",{}) as Dictionary).is_empty(): errors.append("Active engagement is missing a force.")
 	var equipment_job_ids:Dictionary={}
 	for job in equipment_queue:
 		var job_id:=int(job.get("id",-1))
@@ -766,6 +837,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	escaped_prisoners_total=maxi(0,int(payload.get("escaped_prisoners_total",0)))
 	active_threat=(payload.get("active_threat",{}) as Dictionary).duplicate(true)
 	threats_resolved=maxi(0,int(payload.get("threats_resolved",0)))
+	active_engagement=(payload.get("active_engagement",{}) as Dictionary).duplicate(true)
 
 
 func _empty_home_army()->Dictionary:
@@ -1087,6 +1159,7 @@ func _process_military_day()->void:
 	_process_training_injuries_day()
 	_process_training_day()
 	_process_threat_day()
+	if not active_engagement.is_empty(): return
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
 	var logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.5))
 	_update_supply_day()
