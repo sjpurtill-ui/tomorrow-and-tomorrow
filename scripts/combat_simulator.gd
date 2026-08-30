@@ -75,7 +75,7 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		organization_total += count * float(unit.organization)*training_factor
 		armor_total += count * float(weapon.armor)
 		penetration_total += count * float(weapon.penetration)
-		normalized.append({"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"training":training})
+		normalized.append({"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"training":training,"soldier_ids":(formation.get("soldier_ids",[]) as Array).duplicate()})
 	var divisor := maxf(1.0, float(troops))
 	return {
 		"name": name,

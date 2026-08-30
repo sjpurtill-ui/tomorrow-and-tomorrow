@@ -159,7 +159,7 @@ func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dict
 	battle_options["seed"]=int(battle_options.get("seed",GameState.world_seed^int(GameState.elapsed_days+1.0)*7919))
 	battle_options["terrain_defense"]=float(battle_options.get("terrain_defense",_terrain_defense()))
 	var result:Dictionary=simulator.simulate(home_army,enemy_force,battle_options)
-	_apply_home_result(result.attacker,result.rounds)
+	_apply_home_result(result.attacker,result.rounds,int(result.seed))
 	_apply_home_commander_fate(result.termination)
 	var record:=result.duplicate(true)
 	record["day"]=int(GameState.elapsed_days)
@@ -246,6 +246,7 @@ func validate_state()->Array[String]:
 	for formation in formations:
 		var count:=int(formation.get("count",0)); formation_total+=count
 		if count<0 or int(formation.get("equipment",0))<0: errors.append("Formation has a negative personnel or equipment count.")
+		if (formation.get("soldier_ids",[]) as Array).size()!=count: errors.append("Formation headcount does not equal its citizen IDs.")
 	if formation_total!=int(home_army.get("troops",0)): errors.append("Formation manpower does not equal army troop total.")
 	if active_ids.size()!=int(home_army.get("troops",0)): errors.append("Active citizen IDs do not equal army troop total.")
 	if (home_army.get("wounded_ids",[]) as Array).size()!=int(home_army.get("wounded_pool",0)): errors.append("Wounded citizen IDs do not equal wounded pool.")
@@ -385,10 +386,14 @@ func _remove_active_citizen(citizen_id:int)->bool:
 	if position<0: return false
 	soldier_ids.remove_at(position)
 	var formations:Array=home_army.get("formations",[])
-	for index in range(formations.size()-1,-1,-1):
+	for index in formations.size():
 		var formation:Dictionary=formations[index]
-		if int(formation.get("count",0))<=0: continue
+		var member_ids:Array=(formation.get("soldier_ids",[]) as Array).duplicate()
+		var member_position:=member_ids.find(citizen_id)
+		if member_position<0: continue
+		member_ids.remove_at(member_position)
 		formation["count"]=int(formation.get("count",0))-1
+		formation["soldier_ids"]=member_ids
 		formations[index]=formation
 		break
 	home_army["soldier_ids"]=soldier_ids
@@ -414,20 +419,40 @@ func _home_army_name()->String:
 	return "%s Host" % (GameState.settlement_name if GameState.settlement_name!="" else "Founding")
 
 
-func _apply_home_result(side:Dictionary,rounds:Array)->void:
+func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 	var totals:={"killed":0,"wounded":0,"scattered":0}
 	for round_data in rounds:
 		var breakdown:Dictionary=round_data.get("attacker_casualties",{})
 		for key in totals: totals[key]=int(totals[key])+int(breakdown.get(key,0))
-	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
+	var old_formations:Array=home_army.get("formations",[])
+	var result_formations:Array=side.get("formations",[]).duplicate(true)
+	var unassigned:Array=home_army.get("soldier_ids",[]).duplicate()
+	var soldier_ids:Array=[]
+	var casualty_ids:Array=[]
+	var rng:=RandomNumberGenerator.new(); rng.seed=battle_seed^0x5bd1e995
+	for formation_index in result_formations.size():
+		var old_formation:Dictionary=old_formations[formation_index] if formation_index<old_formations.size() else {}
+		var members:Array=(old_formation.get("soldier_ids",[]) as Array).duplicate()
+		if members.is_empty():
+			for index in mini(int(old_formation.get("count",0)),unassigned.size()): members.append(unassigned.pop_front())
+		else:
+			for citizen_id in members: unassigned.erase(citizen_id)
+		for index in range(members.size()-1,0,-1):
+			var swap_index:=rng.randi_range(0,index); var held=members[index]; members[index]=members[swap_index]; members[swap_index]=held
+		var survivor_count:=mini(int(result_formations[formation_index].get("count",0)),members.size())
+		var survivors:=members.slice(0,survivor_count)
+		casualty_ids.append_array(members.slice(survivor_count))
+		result_formations[formation_index]["soldier_ids"]=survivors
+		soldier_ids.append_array(survivors)
+	casualty_ids.append_array(unassigned)
 	var wounded_ids:Array=home_army.get("wounded_ids",[]).duplicate()
 	var scattered_ids:Array=home_army.get("scattered_ids",[]).duplicate()
 	var status_queue:Array[String]=[]
 	for index in int(totals.killed): status_queue.append("killed")
 	for index in int(totals.wounded): status_queue.append("wounded")
 	for index in int(totals.scattered): status_queue.append("scattered")
-	for index in mini(status_queue.size(),soldier_ids.size()):
-		var citizen:Dictionary=GameState.citizen_by_id(int(soldier_ids.pop_back()))
+	for index in mini(status_queue.size(),casualty_ids.size()):
+		var citizen:Dictionary=GameState.citizen_by_id(int(casualty_ids[index]))
 		if citizen.is_empty(): continue
 		citizen["army_status"]=status_queue[index]
 		if status_queue[index]=="killed":
@@ -437,7 +462,7 @@ func _apply_home_result(side:Dictionary,rounds:Array)->void:
 		elif status_queue[index]=="wounded": wounded_ids.append(int(citizen.id))
 		elif status_queue[index]=="scattered": scattered_ids.append(int(citizen.id))
 	var persisted:=home_army.duplicate(true)
-	persisted["formations"]=side.get("formations",[]).duplicate(true)
+	persisted["formations"]=result_formations
 	persisted["troops"]=int(side.get("remaining_troops",0))
 	persisted["morale"]=float(side.get("morale",persisted.get("morale",1.0)))
 	persisted["attack"]=float(side.get("attack",persisted.get("attack",1.0)))
@@ -492,14 +517,22 @@ func _deliver_inventory_replacements()->int:
 func _rejoin_recovered_citizens(pool_name:String,count:int)->void:
 	var pool:Array=home_army.get(pool_name,[]).duplicate()
 	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
+	var formations:Array=home_army.get("formations",[])
 	for index in mini(count,pool.size()):
 		var citizen_id:=int(pool.pop_front())
 		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
 		if citizen.is_empty() or not bool(citizen.get("alive",true)): continue
 		citizen["army_status"]="active"
 		soldier_ids.append(citizen_id)
+		for formation_index in formations.size():
+			var member_ids:Array=(formations[formation_index].get("soldier_ids",[]) as Array).duplicate()
+			if member_ids.size()>=int(formations[formation_index].get("count",0)): continue
+			member_ids.append(citizen_id)
+			formations[formation_index]["soldier_ids"]=member_ids
+			break
 	home_army[pool_name]=pool
 	home_army["soldier_ids"]=soldier_ids
+	home_army["formations"]=formations
 
 
 func _process_equipment_production_day()->void:
@@ -532,7 +565,7 @@ func _complete_training(training:Dictionary)->void:
 	var weapon:=String(training.weapon)
 	var issued:=mini(count,int(military_inventory.get(weapon,0)))
 	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
-	var formation:={"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"training":_training_quality(String(training.unit))}
+	var formation:={"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"training":_training_quality(String(training.unit)),"soldier_ids":(training.soldier_ids as Array).duplicate()}
 	var formations:Array=home_army.get("formations",[])
 	formations.append(formation)
 	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
@@ -658,22 +691,22 @@ func _mark_home_prisoners(count:int)->void:
 	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
 	var captured_ids:Array=home_army.get("captured_ids",[]).duplicate()
 	var marked:=mini(maxi(0,count),soldier_ids.size())
+	var formations:Array=home_army.get("formations",[])
 	for index in marked:
 		var soldier_id:=int(soldier_ids.pop_back())
 		var citizen:Dictionary=GameState.citizen_by_id(int(soldier_id))
 		if citizen.is_empty(): continue
 		citizen["army_status"]="captured"
 		captured_ids.append(soldier_id)
-	var remaining_to_remove:=marked
-	var formations:Array=home_army.get("formations",[])
-	for index in range(formations.size()-1,-1,-1):
-		if remaining_to_remove<=0: break
-		var formation:Dictionary=formations[index]
-		var removed:=mini(remaining_to_remove,int(formation.get("count",0)))
-		formation["count"]=int(formation.get("count",0))-removed
-		formation["equipment"]=maxi(0,int(formation.get("equipment",0))-removed)
-		formations[index]=formation
-		remaining_to_remove-=removed
+		for formation_index in formations.size():
+			var member_ids:Array=(formations[formation_index].get("soldier_ids",[]) as Array).duplicate()
+			var member_position:=member_ids.find(soldier_id)
+			if member_position<0: continue
+			member_ids.remove_at(member_position)
+			formations[formation_index]["soldier_ids"]=member_ids
+			formations[formation_index]["count"]=int(formations[formation_index].get("count",0))-1
+			formations[formation_index]["equipment"]=maxi(0,int(formations[formation_index].get("equipment",0))-1)
+			break
 	home_army["formations"]=formations
 	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-marked)
 	home_army["soldier_ids"]=soldier_ids
