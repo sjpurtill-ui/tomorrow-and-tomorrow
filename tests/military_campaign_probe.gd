@@ -323,5 +323,23 @@ func _run()->void:
 	assert(int(stranded_recoveree.id) not in (MilitaryCampaign.home_army.scattered_ids as Array))
 	assert(String(stranded_recoveree.army_status)=="recruit")
 	assert(MilitaryCampaign.validate_state().is_empty())
+	if "bow_craft" not in GameState.known_discoveries: GameState.known_discoveries.append("bow_craft")
+	GameState.discovery_adoption["bow_craft"]=0.20
+	GameState.resource_stockpiles["Timber"]=100.0
+	GameState.resource_stockpiles["Fiber Plants"]=100.0
+	GameState.resource_stockpiles["Stone"]=100.0
+	var arrow_job:Dictionary=MilitaryCampaign.queue_consumable_production("arrows",24)
+	assert(not arrow_job.has("error"))
+	for day in 100:
+		MilitaryCampaign._process_equipment_production_day()
+		if int(MilitaryCampaign.military_consumables.arrows)>=24: break
+	assert(int(MilitaryCampaign.military_consumables.arrows)==24)
+	if not (MilitaryCampaign.home_army.formations as Array).is_empty():
+		MilitaryCampaign.home_army.formations[0]["weapon"]="bow"
+		MilitaryCampaign.home_army.formations[0]["ammunition"]=0
+		MilitaryCampaign.home_army.formations[0]["ammunition_required"]=24
+		assert(MilitaryCampaign._deliver_ammunition(9)==9)
+		assert(int(MilitaryCampaign.home_army.formations[0].ammunition)==9)
+		assert(int(MilitaryCampaign.military_consumables.arrows)==15)
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

@@ -167,3 +167,15 @@ func test_resolute_commander_reduces_morale_shock() -> void:
 	var brittle_result: Dictionary = simulator.simulate(attacker,brittle,{"seed":91,"max_rounds":1})
 	var resolute_result: Dictionary = simulator.simulate(attacker,resolute,{"seed":91,"max_rounds":1})
 	assert_float(resolute_result.defender.morale).is_greater(brittle_result.defender.morale)
+
+
+func test_archers_need_and_expend_ammunition() -> void:
+	var supplied:Dictionary=simulator.create_formation_force("Supplied",[{"unit":"skirmisher","weapon":"bow","count":40,"ammunition":240,"ammunition_required":240}])
+	var empty:Dictionary=simulator.create_formation_force("Empty",[{"unit":"skirmisher","weapon":"bow","count":40,"ammunition":0,"ammunition_required":240}])
+	var target:Dictionary=simulator.create_formation_force("Target",[{"unit":"levy","weapon":"improvised","count":40}])
+	assert_float(simulator.evaluate_force(supplied,target)[0].attack).is_greater(simulator.evaluate_force(empty,target)[0].attack)
+	assert_float(simulator.force_readiness(supplied).aggregate).is_greater(simulator.force_readiness(empty).aggregate)
+	var result:Dictionary=simulator.simulate(supplied,target,{"seed":73,"max_rounds":1})
+	var used:=int(result.rounds[0].attacker_cohort_ammunition_used[0])
+	assert_int(used).is_greater(0)
+	assert_int(int(result.attacker.formations[0].ammunition)+used).is_equal(240)
