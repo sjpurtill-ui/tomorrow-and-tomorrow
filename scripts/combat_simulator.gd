@@ -67,13 +67,15 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		var equipment := clampi(int(formation.get("equipment",count)),0,equipment_required)
 		var unit: Dictionary = UNIT_TYPES.get(unit_id, UNIT_TYPES.levy)
 		var weapon: Dictionary = WEAPONS.get(weapon_id, WEAPONS.improvised)
+		var training:=clampf(float(formation.get("training",0.55 if unit_id=="levy" else 0.70)),0.25,1.25)
+		var training_factor:=0.72+training*0.28
 		troops += count
-		attack_total += count * float(unit.attack) * float(weapon.attack)
-		defense_total += count * float(unit.defense) * float(weapon.defense)
-		organization_total += count * float(unit.organization)
+		attack_total += count * float(unit.attack) * float(weapon.attack)*training_factor
+		defense_total += count * float(unit.defense) * float(weapon.defense)*training_factor
+		organization_total += count * float(unit.organization)*training_factor
 		armor_total += count * float(weapon.armor)
 		penetration_total += count * float(weapon.penetration)
-		normalized.append({"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required})
+		normalized.append({"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"training":training})
 	var divisor := maxf(1.0, float(troops))
 	return {
 		"name": name,
@@ -206,14 +208,16 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var equipment_ratio:=clampf(float(equipment)/float(equipment_required),0.0,1.0)
 		var unit: Dictionary = UNIT_TYPES.get(unit_id, UNIT_TYPES.levy)
 		var weapon: Dictionary = WEAPONS.get(weapon_id, WEAPONS.improvised)
+		var training:=clampf(float(formation.get("training",0.55 if unit_id=="levy" else 0.70)),0.25,1.25)
+		var training_factor:=0.72+training*0.28
 		var matchup := _weighted_matchup(unit_id, enemy_formations)
 		matchup=1.0+(matchup-1.0)*(0.65+tactics*0.70)
 		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) - _enemy_penetration(enemy_formations)) * 0.35
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
-			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78),
-			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65),
-			"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio
+			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*training_factor,
+			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor,
+			"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"training":training
 		})
 	return result
 
@@ -232,7 +236,10 @@ func force_readiness(force: Dictionary,personnel_condition := 1.0) -> Dictionary
 	var manpower_fill:=clampf(float(soldiers)/maxf(1.0,float(authorized)),0.0,1.0)
 	var equipment_fill:=clampf(float(equipment)/maxf(1.0,float(equipment_required)),0.0,1.0)
 	var condition:=clampf(personnel_condition,0.0,1.0)
-	var organization:=clampf(float(force.get("morale",1.0)),0.0,1.0)
+	var training_total:=0.0
+	for formation in formations: training_total+=int(formation.get("count",0))*clampf(float(formation.get("training",0.55)),0.0,1.0)
+	var training_organization:=training_total/maxf(1.0,float(soldiers))
+	var organization:=clampf(float(force.get("morale",1.0))*0.55+training_organization*0.45,0.0,1.0)
 	var aggregate:=manpower_fill*0.30+equipment_fill*0.30+condition*0.25+organization*0.15
 	return {"aggregate":aggregate,"manpower":manpower_fill,"equipment":equipment_fill,"condition":condition,"organization":organization}
 

@@ -146,6 +146,7 @@ func military_inquiry_context()->Dictionary:
 func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dictionary:
 	if home_army.is_empty(): muster_home_army()
 	if int(home_army.get("troops",0))<=0: return {"error":"No deployable home army."}
+	_refresh_readiness()
 	var battle_options:=options.duplicate(true)
 	battle_options["seed"]=int(battle_options.get("seed",GameState.world_seed^int(GameState.elapsed_days+1.0)*7919))
 	battle_options["terrain_defense"]=float(battle_options.get("terrain_defense",_terrain_defense()))
@@ -386,6 +387,7 @@ func _process_military_day()->void:
 	_rejoin_recovered_citizens("scattered_ids",int(prepared.scattered_returned))
 	_rejoin_recovered_citizens("wounded_ids",int(prepared.wounded_returned))
 	home_army["equipment_delivered_today"]=delivered
+	_refresh_readiness()
 	home_army["campaign_day"]=int(GameState.elapsed_days)
 	army_changed.emit(home_army.duplicate(true))
 
@@ -452,7 +454,7 @@ func _complete_training(training:Dictionary)->void:
 	var weapon:=String(training.weapon)
 	var issued:=mini(count,int(military_inventory.get(weapon,0)))
 	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
-	var formation:={"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"training":1.0}
+	var formation:={"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"training":_training_quality(String(training.unit))}
 	var formations:Array=home_army.get("formations",[])
 	formations.append(formation)
 	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
@@ -471,6 +473,7 @@ func _complete_training(training:Dictionary)->void:
 	rebuilt["soldier_ids"]=soldier_ids
 	rebuilt["campaign_day"]=int(GameState.elapsed_days)
 	home_army=rebuilt
+	_refresh_readiness()
 
 
 func _equipment_recipe(item:String)->Dictionary:
@@ -502,6 +505,24 @@ func _adoption(discovery:String)->float:
 func _training_rate()->float:
 	var security:=float(GameState.society_capacities.get("security",0.38))
 	return (0.42+security*0.55)*(1.0+_adoption("formation_drill")*0.35+_adoption("professional_corps")*0.55)
+
+
+func _training_quality(unit:String)->float:
+	var base:=float({"levy":0.48,"line_infantry":0.58,"skirmisher":0.55,"cavalry":0.56}.get(unit,0.50))
+	var commander:Dictionary=home_army.get("commander",_marshal_commander())
+	return clampf(base+float(commander.get("command",0.5))*0.12+_adoption("formation_drill")*0.14+_adoption("professional_corps")*0.20+_adoption("military_staffs")*0.06,0.30,1.15)
+
+
+func _refresh_readiness()->void:
+	if home_army.is_empty(): return
+	var soldiers:Array[Dictionary]=[]
+	for citizen_id in home_army.get("soldier_ids",[]):
+		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if not citizen.is_empty() and bool(citizen.get("alive",true)): soldiers.append(citizen)
+	var condition:=_condition_average(soldiers)
+	var readiness:Dictionary=simulator.force_readiness(home_army,condition)
+	home_army["readiness"]=float(readiness.aggregate)
+	home_army["readiness_components"]=readiness
 
 
 func _production_rate()->float:
