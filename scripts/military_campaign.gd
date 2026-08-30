@@ -277,7 +277,17 @@ func military_capabilities()->Dictionary:
 	for unit in UNIT_KNOWLEDGE: units[unit]=_knowledge_gate(String(UNIT_KNOWLEDGE[unit]),0.10)
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
-	return {"units":units,"equipment":equipment,"recruitment_capacity":recruitment_capacity(),"training_rate":_training_rate(),"production_rate":_production_rate(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"units":units,"equipment":equipment,"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_training_rate(),"production_rate":_production_rate(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+
+
+func validate_military_progression()->Array[String]:
+	var errors:Array[String]=[]
+	for gate_map in [UNIT_KNOWLEDGE,EQUIPMENT_KNOWLEDGE]:
+		for gate_name in gate_map:
+			var discovery:=String(gate_map[gate_name])
+			if discovery in ["","__mount_population__"]: continue
+			if DiscoverySystem.discovery_definition(discovery).is_empty(): errors.append("%s references missing discovery %s." % [String(gate_name),discovery])
+	return errors
 
 
 func military_inquiry_context()->Dictionary:
@@ -538,13 +548,15 @@ func _training_gate(unit:String,weapon:String)->Dictionary:
 
 
 func _formations_for_strength(total:int)->Array[Dictionary]:
-	var line_share:=0.42 if "formation_drill" in GameState.known_discoveries else 0.20
-	var skirmish_share:=0.24 if "bow_making" in GameState.known_discoveries else 0.12
+	var line_unlocked:=bool(_knowledge_gate("shield_wall",0.10).unlocked) and bool(_knowledge_gate("hafted_weapons",0.08).unlocked)
+	var skirmish_unlocked:=bool(_knowledge_gate("bow_craft",0.10).unlocked)
+	var line_share:=0.42 if line_unlocked else 0.0
+	var skirmish_share:=0.24 if skirmish_unlocked else 0.0
 	var line:=roundi(float(total)*line_share)
 	var skirmish:=roundi(float(total)*skirmish_share)
 	var levy:=maxi(0,total-line-skirmish)
-	var line_weapon:="spear" if "formation_drill" in GameState.known_discoveries else "improvised"
-	var bow_weapon:="bow" if "bow_making" in GameState.known_discoveries else "improvised"
+	var line_weapon:="spear" if line_unlocked else "improvised"
+	var bow_weapon:="bow" if skirmish_unlocked else "improvised"
 	return [
 		{"unit":"levy","weapon":"improvised","count":levy,"authorized_count":levy,"equipment":levy,"equipment_required":levy},
 		{"unit":"line_infantry","weapon":line_weapon,"count":line,"authorized_count":line,"equipment":line,"equipment_required":line},
@@ -1052,16 +1064,21 @@ func _equipment_recipe(item:String)->Dictionary:
 
 
 func _knowledge_gate(discovery:String,minimum_adoption:float)->Dictionary:
-	if discovery=="": return {"unlocked":true,"discovery":"","adoption":1.0,"reason":"Available through basic household practice."}
-	if discovery=="__mount_population__": return {"unlocked":false,"discovery":"","physical_requirement":"domesticated_mounts","adoption":0.0,"reason":"Requires a domesticated mount population and husbandry system; doctrine alone cannot create cavalry."}
+	if discovery=="": return {"unlocked":true,"discovery":"","adoption":1.0,"minimum_adoption":0.0,"prerequisites":[],"reason":"Available through basic household practice."}
+	if discovery=="__mount_population__": return {"unlocked":false,"discovery":"","physical_requirement":"domesticated_mounts","missing_system":true,"adoption":0.0,"minimum_adoption":1.0,"prerequisites":[],"reason":"Requires a domesticated mount population and husbandry system; doctrine alone cannot create cavalry."}
+	var definition:Dictionary=DiscoverySystem.discovery_definition(discovery)
+	var prerequisites:Array=(definition.get("requires",[]) as Array).duplicate()
+	var gate_base:={"discovery":discovery,"minimum_adoption":minimum_adoption,"prerequisites":prerequisites,"available_day":int(definition.get("day",0))}
 	if discovery not in GameState.known_discoveries:
-		var definition:Dictionary=DiscoverySystem.discovery_definition(discovery)
 		var label:=String(definition.get("name",discovery.replace("_"," ").capitalize()))
-		return {"unlocked":false,"discovery":discovery,"adoption":0.0,"reason":"Requires inquiry: %s." % label}
+		gate_base.merge({"unlocked":false,"adoption":0.0,"reason":"Requires inquiry: %s." % label})
+		return gate_base
 	var adoption:=_adoption(discovery)
 	if adoption<minimum_adoption:
-		return {"unlocked":false,"discovery":discovery,"adoption":adoption,"reason":"%s is known but only %.0f%% adopted; %.0f%% is required." % [discovery.replace("_"," ").capitalize(),adoption*100.0,minimum_adoption*100.0]}
-	return {"unlocked":true,"discovery":discovery,"adoption":adoption,"reason":"Available at %.0f%% adoption." % (adoption*100.0)}
+		gate_base.merge({"unlocked":false,"adoption":adoption,"reason":"%s is known but only %.0f%% adopted; %.0f%% is required." % [discovery.replace("_"," ").capitalize(),adoption*100.0,minimum_adoption*100.0]})
+		return gate_base
+	gate_base.merge({"unlocked":true,"adoption":adoption,"reason":"Available at %.0f%% adoption." % (adoption*100.0)})
+	return gate_base
 
 
 func _adoption(discovery:String)->float:

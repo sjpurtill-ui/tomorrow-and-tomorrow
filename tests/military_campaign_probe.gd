@@ -12,8 +12,16 @@ func _run()->void:
 	GameState.population_allocations["Logistics"]=4
 	GameState.resource_stockpiles={"Timber":100.0,"Stone":100.0,"Fiber Plants":100.0,"Iron Ore":100.0,"Food":1000.0}
 	MilitaryCampaign.reset_for_new_world()
+	DiscoverySystem.reset_for_new_world()
+	DiscoverySystem.initialize()
+	assert(DiscoverySystem.validate_catalog().is_empty())
+	assert(MilitaryCampaign.validate_military_progression().is_empty())
 	var locked_spear:Dictionary=MilitaryCampaign.queue_equipment_production("spear",1)
 	assert(String(locked_spear.get("required_discovery",""))=="hafted_weapons")
+	var spear_gate:Dictionary=MilitaryCampaign.military_capabilities().equipment.spear
+	assert(String(spear_gate.discovery)=="hafted_weapons")
+	assert("hafted_tools" in (spear_gate.prerequisites as Array))
+	assert(float(spear_gate.minimum_adoption)>0.0)
 	var locked_line:Dictionary=MilitaryCampaign.start_training("line_infantry","improvised",1)
 	assert(String(locked_line.get("required_discovery",""))=="shield_wall")
 	var impossible_cavalry:Dictionary=MilitaryCampaign.start_training("cavalry","lance",1)
