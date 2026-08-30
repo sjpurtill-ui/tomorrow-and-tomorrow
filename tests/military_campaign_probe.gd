@@ -104,7 +104,9 @@ func _run()->void:
 	if not MilitaryCampaign.pending_aftermath.is_empty():
 		var aftermath:Dictionary=MilitaryCampaign.resolve_aftermath("hold","army stores","hold")
 		assert(not aftermath.has("error"))
-	for day in 20: MilitaryCampaign._process_military_day()
+	for day in 120:
+		if int(MilitaryCampaign.home_army.get("wounded_pool",0))+int(MilitaryCampaign.home_army.get("scattered_pool",0))<=0: break
+		MilitaryCampaign._process_military_day()
 	var recovered:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	assert(int(recovered.troops)==(recovered.soldier_ids as Array).size())
 	assert(int(recovered.wounded_pool)==(recovered.wounded_ids as Array).size())
@@ -205,5 +207,29 @@ func _run()->void:
 	GameState.population_allocations["Logistics"]=10
 	for day in 12: MilitaryCampaign._process_military_day()
 	assert(float(MilitaryCampaign.home_army.supply_level)>depleted_supply)
+	if not (MilitaryCampaign.home_army.soldier_ids as Array).is_empty():
+		var service_id:=int(MilitaryCampaign.home_army.soldier_ids[0])
+		var service_days_before:=int(GameState.citizen_by_id(service_id).get("military_service_days",0))
+		MilitaryCampaign.home_army["desertion_accumulator"]=1.0
+		for citizen_id in MilitaryCampaign.home_army.soldier_ids: GameState.citizen_by_id(int(citizen_id))["service_strain"]=1.0
+		var service_result:Dictionary=MilitaryCampaign._process_service_strain_day()
+		assert(int(service_result.deserted)==1)
+		assert(String(GameState.citizen_by_id(int(service_result.citizen_ids[0])).army_status)=="deserter")
+		if service_id in MilitaryCampaign.home_army.soldier_ids: assert(int(GameState.citizen_by_id(service_id).military_service_days)==service_days_before+1)
+		MilitaryCampaign._refresh_readiness()
+		assert((MilitaryCampaign.home_army.readiness_components as Dictionary).has("discipline"))
+		assert(MilitaryCampaign.validate_state().is_empty())
+	var locked_count:=0
+	for citizen in GameState.living_citizens():
+		if GameState._citizen_locked_to_military(citizen): locked_count+=1
+	GameState.population_allocation_percentages["Defense"]=0.0
+	GameState.synchronize_population_allocations()
+	assert(int(GameState.population_allocations.Defense)>=locked_count)
+	for citizen_id in MilitaryCampaign.home_army.soldier_ids: assert(String(GameState.citizen_by_id(int(citizen_id)).role)=="Defense")
+	var allocated_total:=0
+	for allocation in GameState.population_allocations.values(): allocated_total+=int(allocation)
+	assert(allocated_total==GameState.able_population())
+	var cost:Dictionary=MilitaryCampaign.campaign_army_snapshot().mobilization_cost
+	assert(int(cost.citizens_withheld)==locked_count)
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

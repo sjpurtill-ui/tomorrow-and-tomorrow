@@ -936,8 +936,31 @@ func synchronize_population_allocations() -> void:
 		population_allocations[best_role]=int(population_allocations.get(best_role,0))+1
 		remainders[best_role]=-1.0
 		assigned+=1
+	var locked_military:=0
+	if citizen_registry_initialized:
+		for person in citizen_registry:
+			if not bool(person.get("alive",true)): continue
+			var age:=citizen_age_years(person)
+			if age<14 or age>=60: continue
+			if _citizen_locked_to_military(person): locked_military+=1
+	var defense_shortfall:=maxi(0,locked_military-int(population_allocations.get("Defense",0)))
+	population_allocations["Defense"]=int(population_allocations.get("Defense",0))+defense_shortfall
+	while defense_shortfall>0:
+		var donor_role:=""
+		var donor_count:=0
+		for role in POPULATION_ROLES:
+			if role=="Defense": continue
+			if int(population_allocations.get(role,0))>donor_count:
+				donor_count=int(population_allocations.get(role,0))
+				donor_role=String(role)
+		if donor_role=="" or donor_count<=0: break
+		population_allocations[donor_role]=donor_count-1
+		defense_shortfall-=1
 	if citizen_registry_initialized:
 		_assign_citizen_roles()
+
+func _citizen_locked_to_military(person:Dictionary)->bool:
+	return String(person.get("army_status","civilian")) not in ["civilian","","deserter","killed"]
 
 func _set_citizen_role(person: Dictionary,new_role: String) -> void:
 	var old_role:=String(person.get("role","Unassigned"))
@@ -964,6 +987,10 @@ func _assign_citizen_roles() -> void:
 			continue
 		if age>=60:
 			_set_citizen_role(person,"Elder")
+			continue
+		if _citizen_locked_to_military(person):
+			_set_citizen_role(person,"Defense")
+			remaining["Defense"]=maxi(0,int(remaining.get("Defense",0))-1)
 			continue
 		var present_role:=String(person.get("role","Unassigned"))
 		if present_role in POPULATION_ROLES and int(remaining.get(present_role,0))>0:

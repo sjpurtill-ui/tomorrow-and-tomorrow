@@ -84,7 +84,10 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		"troops": troops,
 		"attack": attack_total / divisor,
 		"defense": defense_total / divisor,
-		"morale": clampf(float(morale) * organization_total / divisor, 0.0, 1.5),
+		# Morale is the force's current psychological state. Cohort training and
+		# organization are represented separately in readiness and combat power;
+		# multiplying them here made preparation apply the same penalty twice.
+		"morale": clampf(float(morale), 0.0, 1.5),
 		"readiness": clampf(float(readiness), 0.0, 1.5),
 		"armor": armor_total / divisor,
 		"penetration": penetration_total / divisor,
@@ -274,8 +277,12 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	var wounded_available:=int(prepared.get("wounded_pool",0))
 	var reserves_available:=int(prepared.get("reserve_manpower",0))
 	var recovery_multiplier:=clampf(float(context.get("recovery_multiplier",1.0)),0.10,1.60)
-	var scattered_return:=mini(scattered_available,maxi(0,roundi(float(scattered_available)*(0.22+logistics*0.28))))
-	var wounded_return:=mini(wounded_available,maxi(0,roundi(float(wounded_available)*(0.035+logistics*0.055)*recovery_multiplier)))
+	var scattered_progress:=float(prepared.get("scattered_recovery_accumulator",0.0))+float(scattered_available)*(0.22+logistics*0.28)
+	var wounded_progress:=float(prepared.get("wounded_recovery_accumulator",0.0))+float(wounded_available)*(0.035+logistics*0.055)*recovery_multiplier
+	var scattered_return:=mini(scattered_available,maxi(0,floori(scattered_progress)))
+	var wounded_return:=mini(wounded_available,maxi(0,floori(wounded_progress)))
+	prepared["scattered_recovery_accumulator"]=scattered_progress-float(scattered_return) if scattered_available>scattered_return else 0.0
+	prepared["wounded_recovery_accumulator"]=wounded_progress-float(wounded_return) if wounded_available>wounded_return else 0.0
 	var reserve_arrivals:=mini(reserves_available,maxi(0,roundi(float(context.get("manpower_replacements",4))*(0.45+logistics*0.85))))
 	var manpower_queue:=scattered_return+wounded_return+reserve_arrivals
 	var integrated:=0

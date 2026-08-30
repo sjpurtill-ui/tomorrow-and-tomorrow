@@ -67,7 +67,7 @@ func test_formation_weapons_derive_different_combat_stats() -> void:
 	assert_float(trained.attack).is_greater(levy.attack)
 	assert_float(trained.defense).is_greater(levy.defense)
 	assert_float(trained.armor).is_greater(levy.armor)
-	assert_float(trained.morale).is_greater(levy.morale)
+	assert_float(simulator.force_readiness(trained).organization).is_greater(simulator.force_readiness(levy).organization)
 
 
 func test_spears_counter_cavalry_but_archers_do_not() -> void:
@@ -122,6 +122,16 @@ func test_preparation_day_restores_organization_and_delivers_limited_equipment()
 	assert_int(result.equipment_delivered).is_equal(12)
 	assert_float(prepared.morale).is_equal_approx(0.55,0.001)
 	assert_int(force.formations[0].equipment).is_equal(40)
+
+
+func test_fractional_recovery_eventually_returns_single_casualties() -> void:
+	var force:Dictionary=simulator.create_formation_force("Recovering",[{"unit":"levy","weapon":"improvised","count":8,"authorized_count":10,"equipment":10,"equipment_required":10}],0.7)
+	force["scattered_pool"]=1
+	force["wounded_pool"]=1
+	for day in 20:
+		force=simulator.advance_preparation_day(force,{"recovery_multiplier":1.0,"manpower_replacements":0}).force
+	assert_int(force.scattered_pool).is_equal(0)
+	assert_int(force.wounded_pool).is_equal(0)
 
 
 func test_tactical_leadership_exploits_favorable_matchups() -> void:

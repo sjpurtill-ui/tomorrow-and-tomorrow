@@ -77,7 +77,8 @@ func raise_recruits(count:int)->Dictionary:
 		office_holders[int((GameState.leadership_positions[office] as Dictionary).get("citizen_id",-1))]=true
 	for citizen in GameState.living_citizens():
 		if String(citizen.get("army_status","civilian")) not in ["civilian",""]: continue
-		if GameState.citizen_age_years(citizen)<16: continue
+		var age:=GameState.citizen_age_years(citizen)
+		if age<16 or age>=60: continue
 		if office_holders.has(int(citizen.get("id",-1))): continue
 		candidates.append(citizen)
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
@@ -186,7 +187,6 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 
 func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before retraining a formation."}
-	if int(home_army.get("wounded_pool",0))+int(home_army.get("scattered_pool",0))>0: return {"error":"Recover wounded and scattered personnel before restructuring formations."}
 	var formation_index:=_formation_index(formation_id)
 	if formation_index<0: return {"error":"Formation %d was not found." % formation_id}
 	var gate:=_training_gate(unit,weapon)
@@ -343,7 +343,20 @@ func campaign_army_snapshot()->Dictionary:
 	snapshot["training_queue"]=training_queue.duplicate(true)
 	snapshot["training_injuries"]=training_injuries.duplicate(true)
 	snapshot["equipment_queue"]=equipment_queue.duplicate(true)
+	snapshot["mobilization_cost"]=_mobilization_cost()
 	return snapshot
+
+
+func _mobilization_cost()->Dictionary:
+	var by_role:Dictionary={}
+	var total:=0
+	for citizen in GameState.living_citizens():
+		var status:=String(citizen.get("army_status","civilian"))
+		if status in ["civilian","","deserter"]: continue
+		var former_role:=String(citizen.get("pre_army_role","Unassigned"))
+		by_role[former_role]=int(by_role.get(former_role,0))+1
+		total+=1
+	return {"citizens_withheld":total,"former_roles":by_role,"defense_allocation":int(GameState.population_allocations.get("Defense",0))}
 
 
 func export_state()->Dictionary:
@@ -479,6 +492,12 @@ func _empty_home_army()->Dictionary:
 	force["supply_level"]=1.0
 	force["supply_components"]={"nutrition":1.0,"delivery":1.0,"target":1.0}
 	force["recent_combat_days"]=0
+	force["service_days"]=0
+	force["service_strain"]=0.0
+	force["discipline"]=0.5
+	force["desertion_pressure"]=0.0
+	force["desertion_accumulator"]=0.0
+	force["desertions_total"]=0
 	force["campaign_day"]=int(GameState.elapsed_days)
 	return force
 
@@ -714,6 +733,7 @@ func _process_military_day()->void:
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
 	var logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.5))
 	_update_supply_day()
+	_process_service_strain_day()
 	_process_equipment_wear_day()
 	var supply:=float(home_army.get("supply_level",1.0))
 	var delivered:=_deliver_inventory_replacements(_daily_delivery_capacity())
@@ -726,6 +746,66 @@ func _process_military_day()->void:
 	_refresh_readiness()
 	home_army["campaign_day"]=int(GameState.elapsed_days)
 	army_changed.emit(home_army.duplicate(true))
+
+
+func _process_service_strain_day()->Dictionary:
+	var active_ids:Array=(home_army.get("soldier_ids",[]) as Array).duplicate()
+	if active_ids.is_empty():
+		home_army["service_strain"]=0.0
+		home_army["desertion_pressure"]=0.0
+		return {"deserted":0,"citizen_ids":[]}
+	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
+	var morale:=clampf(float(home_army.get("morale",1.0)),0.0,1.0)
+	var recent_combat:=1.0 if int(home_army.get("recent_combat_days",0))>0 else 0.0
+	var commander:Dictionary=home_army.get("commander",{})
+	var leadership:=clampf(float(commander.get("command",0.5))*0.55+float(commander.get("resolve",0.5))*0.45,0.0,1.0)
+	var training:=0.0
+	for formation in home_army.get("formations",[]): training+=float(formation.get("training",0.0))*float(formation.get("count",0))
+	training=clampf(training/maxf(1.0,float(active_ids.size())),0.0,1.0)
+	var discipline:=clampf(0.18+leadership*0.42+training*0.30+_adoption("professional_corps")*0.18,0.0,1.0)
+	var daily_strain:=0.0015+(1.0-supply)*0.008+recent_combat*0.004+(1.0-morale)*0.003
+	var total_strain:=0.0
+	var candidates:Array[Dictionary]=[]
+	var commander_id:=int(commander.get("citizen_id",-1))
+	for citizen_id in active_ids:
+		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if citizen.is_empty(): continue
+		citizen["military_service_days"]=int(citizen.get("military_service_days",0))+1
+		var personal_resilience:=clampf(GameState.citizen_physical_capacity(citizen)*0.55+float(citizen.get("military_experience",0.0))*0.25+discipline*0.20,0.0,1.0)
+		var strain:=clampf(float(citizen.get("service_strain",0.0))+daily_strain*(1.20-personal_resilience*0.40),0.0,1.0)
+		citizen["service_strain"]=strain
+		total_strain+=strain
+		if int(citizen_id)!=commander_id: candidates.append({"citizen_id":int(citizen_id),"strain":strain})
+	var average_strain:=total_strain/maxf(1.0,float(active_ids.size()))
+	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
+	var pressure:=(maxf(0.0,average_strain-0.42)*0.020+maxf(0.0,0.42-supply)*0.024+maxf(0.0,0.32-morale)*0.018)*(1.15-discipline*0.65)*(1.10-cohesion*0.35)
+	var accumulator:=float(home_army.get("desertion_accumulator",0.0))+float(candidates.size())*pressure
+	var desertion_count:=mini(candidates.size(),floori(accumulator))
+	accumulator-=float(desertion_count)
+	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if not is_equal_approx(float(a.strain),float(b.strain)): return float(a.strain)>float(b.strain)
+		return posmod(hash("%d:%d" % [int(GameState.elapsed_days),int(a.citizen_id)]),100000)<posmod(hash("%d:%d" % [int(GameState.elapsed_days),int(b.citizen_id)]),100000))
+	var deserted_ids:Array[int]=[]
+	for index in desertion_count:
+		var citizen_id:=int(candidates[index].citizen_id)
+		if not _remove_active_citizen(citizen_id): continue
+		var deserter:Dictionary=GameState.citizen_by_id(citizen_id)
+		if not deserter.is_empty():
+			deserter["army_status"]="deserter"
+			deserter["desertion_day"]=int(GameState.elapsed_days)
+			deserter["role"]=String(deserter.get("pre_army_role","Unassigned"))
+		deserted_ids.append(citizen_id)
+	if not deserted_ids.is_empty():
+		home_army["morale"]=clampf(float(home_army.get("morale",1.0))-0.015*float(deserted_ids.size()),0.0,1.5)
+		home_army["desertions_total"]=int(home_army.get("desertions_total",0))+deserted_ids.size()
+		GameState.simulation_metrics["cohesion"]=clampf(cohesion-0.002*float(deserted_ids.size()),0.0,1.0)
+		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Soldiers desert","description":"%d exhausted soldiers abandon the host." % deserted_ids.size(),"domain":"security","severity":"warning"})
+	home_army["service_days"]=int(home_army.get("service_days",0))+1
+	home_army["service_strain"]=average_strain
+	home_army["discipline"]=discipline
+	home_army["desertion_pressure"]=pressure
+	home_army["desertion_accumulator"]=accumulator
+	return {"deserted":deserted_ids.size(),"citizen_ids":deserted_ids,"pressure":pressure,"discipline":discipline,"strain":average_strain}
 
 
 func _update_supply_day()->void:
@@ -1021,9 +1101,12 @@ func _refresh_readiness()->void:
 	var condition:=_condition_average(soldiers)
 	var readiness:Dictionary=simulator.force_readiness(home_army,condition)
 	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
-	home_army["readiness"]=float(readiness.aggregate)*(0.48+supply*0.52)
+	var discipline:=clampf(float(home_army.get("discipline",0.5)),0.0,1.0)
+	home_army["readiness"]=float(readiness.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)
 	home_army["readiness_components"]=readiness
 	home_army.readiness_components["supply"]=supply
+	home_army.readiness_components["discipline"]=discipline
+	home_army.readiness_components["service_strain"]=clampf(float(home_army.get("service_strain",0.0)),0.0,1.0)
 
 
 func _production_rate()->float:
