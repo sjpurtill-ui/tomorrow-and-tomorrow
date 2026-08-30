@@ -5,6 +5,7 @@ signal battle_resolved(result: Dictionary)
 signal aftermath_required(aftermath: Dictionary)
 
 const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
+const SAVE_VERSION:=1
 const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"mounted_warfare"}
 const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"mounted_warfare"}
 
@@ -194,6 +195,81 @@ func campaign_army_snapshot()->Dictionary:
 	snapshot["training_queue"]=training_queue.duplicate(true)
 	snapshot["equipment_queue"]=equipment_queue.duplicate(true)
 	return snapshot
+
+
+func export_state()->Dictionary:
+	return {
+		"version":SAVE_VERSION,
+		"world_seed":GameState.world_seed,
+		"last_processed_day":last_processed_day,
+		"home_army":home_army.duplicate(true),
+		"battle_history":battle_history.duplicate(true),
+		"pending_aftermath":pending_aftermath.duplicate(true),
+		"military_inventory":military_inventory.duplicate(true),
+		"recruit_pool":recruit_pool.duplicate(),
+		"training_queue":training_queue.duplicate(true),
+		"equipment_queue":equipment_queue.duplicate(true),
+		"foreign_prisoners":foreign_prisoners,
+		"held_generals":held_generals.duplicate(true)
+	}
+
+
+func import_state(payload:Dictionary)->Dictionary:
+	if int(payload.get("version",-1))!=SAVE_VERSION: return {"error":"Unsupported military save version."}
+	if int(payload.get("world_seed",GameState.world_seed))!=GameState.world_seed: return {"error":"Military save belongs to a different world."}
+	var previous:=export_state()
+	_apply_imported_state(payload)
+	var errors:=validate_state()
+	if not errors.is_empty():
+		_apply_imported_state(previous)
+		return {"error":"Invalid military save state.","details":errors}
+	last_world_seed=GameState.world_seed
+	return {"ok":true,"version":SAVE_VERSION}
+
+
+func validate_state()->Array[String]:
+	var errors:Array[String]=[]
+	if home_army.is_empty(): return errors
+	var active_ids:Array=home_army.get("soldier_ids",[])
+	var formations:Array=home_army.get("formations",[])
+	var formation_total:=0
+	for formation in formations:
+		var count:=int(formation.get("count",0)); formation_total+=count
+		if count<0 or int(formation.get("equipment",0))<0: errors.append("Formation has a negative personnel or equipment count.")
+	if formation_total!=int(home_army.get("troops",0)): errors.append("Formation manpower does not equal army troop total.")
+	if active_ids.size()!=int(home_army.get("troops",0)): errors.append("Active citizen IDs do not equal army troop total.")
+	if (home_army.get("wounded_ids",[]) as Array).size()!=int(home_army.get("wounded_pool",0)): errors.append("Wounded citizen IDs do not equal wounded pool.")
+	if (home_army.get("scattered_ids",[]) as Array).size()!=int(home_army.get("scattered_pool",0)): errors.append("Scattered citizen IDs do not equal scattered pool.")
+	var seen:Dictionary={}
+	for pool in [active_ids,home_army.get("wounded_ids",[]),home_army.get("scattered_ids",[]),home_army.get("captured_ids",[]),recruit_pool]:
+		for citizen_id in pool:
+			if seen.has(int(citizen_id)): errors.append("Citizen %d appears in more than one military pool." % int(citizen_id))
+			seen[int(citizen_id)]=true
+			if GameState.citizen_by_id(int(citizen_id)).is_empty(): errors.append("Military pool references missing citizen %d." % int(citizen_id))
+	for training in training_queue:
+		var trainee_ids:Array=training.get("soldier_ids",[])
+		if trainee_ids.size()!=int(training.get("count",0)): errors.append("Training order headcount does not equal its citizen IDs.")
+		for citizen_id in trainee_ids:
+			if seen.has(int(citizen_id)): errors.append("Citizen %d appears in more than one military pool." % int(citizen_id))
+			seen[int(citizen_id)]=true
+			if GameState.citizen_by_id(int(citizen_id)).is_empty(): errors.append("Training order references missing citizen %d." % int(citizen_id))
+	for item in military_inventory:
+		if int(military_inventory[item])<0: errors.append("Military inventory for %s is negative." % item)
+	return errors
+
+
+func _apply_imported_state(payload:Dictionary)->void:
+	last_processed_day=int(payload.get("last_processed_day",int(GameState.elapsed_days)))
+	home_army=(payload.get("home_army",{}) as Dictionary).duplicate(true)
+	battle_history.assign(payload.get("battle_history",[]))
+	pending_aftermath=(payload.get("pending_aftermath",{}) as Dictionary).duplicate(true)
+	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	for item in (payload.get("military_inventory",{}) as Dictionary): military_inventory[item]=int(payload.military_inventory[item])
+	recruit_pool.assign(payload.get("recruit_pool",[]))
+	training_queue.assign(payload.get("training_queue",[]))
+	equipment_queue.assign(payload.get("equipment_queue",[]))
+	foreign_prisoners=maxi(0,int(payload.get("foreign_prisoners",0)))
+	held_generals.assign(payload.get("held_generals",[]))
 
 
 func _empty_home_army()->Dictionary:
@@ -402,7 +478,7 @@ func _equipment_recipe(item:String)->Dictionary:
 		"improvised":{"materials":{"Timber":0.35},"days":0.25},
 		"spear":{"materials":{"Timber":0.65,"Stone":0.10},"days":0.55},
 		"bow":{"materials":{"Timber":0.45,"Fiber Plants":0.30},"days":0.80},
-		"sword_shield":{"materials":{"Timber":0.50,"Iron Ore":0.55},"days":1.60},
+		"sword_shield":{"materials":{"Timber":0.50,"Copper Ore":0.50,"Tin Ore":0.08},"days":1.60},
 		"lance":{"materials":{"Timber":1.10,"Iron Ore":0.20},"days":1.25}
 	}.get(item,{"materials":{},"days":1.0})
 
