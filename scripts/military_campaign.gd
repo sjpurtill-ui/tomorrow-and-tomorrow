@@ -793,18 +793,26 @@ func validate_state()->Array[String]:
 	var formations:Array=home_army.get("formations",[])
 	var formation_total:=0
 	var formation_ids:Dictionary={}
+	var formation_roster:Dictionary={}
 	for formation in formations:
 		var count:=int(formation.get("count",0)); formation_total+=count
 		if count<0 or int(formation.get("equipment",0))<0: errors.append("Formation has a negative personnel or equipment count.")
 		var ammunition:=int(formation.get("ammunition",0)); var ammunition_required:=int(formation.get("ammunition_required",0))
 		if ammunition<0 or ammunition_required<0 or ammunition>ammunition_required: errors.append("Formation ammunition is outside its authorized capacity.")
-		if (formation.get("soldier_ids",[]) as Array).size()!=count: errors.append("Formation headcount does not equal its citizen IDs.")
+		var formation_members:Array=formation.get("soldier_ids",[])
+		if formation_members.size()!=count: errors.append("Formation headcount does not equal its citizen IDs.")
+		for citizen_id in formation_members:
+			if formation_roster.has(int(citizen_id)): errors.append("Citizen %d appears in more than one formation." % int(citizen_id))
+			formation_roster[int(citizen_id)]=true
 		if absf(float(formation.get("experience",0.0))-_citizen_experience(formation.get("soldier_ids",[])))>0.001: errors.append("Formation experience does not match its citizen roster.")
 		var formation_id:=int(formation.get("id",-1))
 		if formation_id<=0 or formation_ids.has(formation_id): errors.append("Formation IDs must be positive and unique.")
 		formation_ids[formation_id]=true
 	if formation_total!=int(home_army.get("troops",0)): errors.append("Formation manpower does not equal army troop total.")
 	if active_ids.size()!=int(home_army.get("troops",0)): errors.append("Active citizen IDs do not equal army troop total.")
+	if formation_roster.size()!=active_ids.size(): errors.append("Formation roster does not equal the active army roster.")
+	for citizen_id in active_ids:
+		if not formation_roster.has(int(citizen_id)): errors.append("Active citizen %d is not assigned to a formation." % int(citizen_id))
 	if (home_army.get("wounded_ids",[]) as Array).size()!=int(home_army.get("wounded_pool",0)): errors.append("Wounded citizen IDs do not equal wounded pool.")
 	if (home_army.get("scattered_ids",[]) as Array).size()!=int(home_army.get("scattered_pool",0)): errors.append("Scattered citizen IDs do not equal scattered pool.")
 	var seen:Dictionary={}
@@ -812,19 +820,25 @@ func validate_state()->Array[String]:
 		for citizen_id in pool:
 			if seen.has(int(citizen_id)): errors.append("Citizen %d appears in more than one military pool." % int(citizen_id))
 			seen[int(citizen_id)]=true
-			if GameState.citizen_by_id(int(citizen_id)).is_empty(): errors.append("Military pool references missing citizen %d." % int(citizen_id))
+			var pooled_citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+			if pooled_citizen.is_empty(): errors.append("Military pool references missing citizen %d." % int(citizen_id))
+			elif not bool(pooled_citizen.get("alive",true)): errors.append("Military pool references deceased citizen %d." % int(citizen_id))
 	for training in training_queue:
 		var trainee_ids:Array=training.get("soldier_ids",[])
 		if trainee_ids.size()!=int(training.get("count",0)): errors.append("Training order headcount does not equal its citizen IDs.")
 		for citizen_id in trainee_ids:
 			if seen.has(int(citizen_id)): errors.append("Citizen %d appears in more than one military pool." % int(citizen_id))
 			seen[int(citizen_id)]=true
-			if GameState.citizen_by_id(int(citizen_id)).is_empty(): errors.append("Training order references missing citizen %d." % int(citizen_id))
+			var trainee:Dictionary=GameState.citizen_by_id(int(citizen_id))
+			if trainee.is_empty(): errors.append("Training order references missing citizen %d." % int(citizen_id))
+			elif not bool(trainee.get("alive",true)): errors.append("Training order references deceased citizen %d." % int(citizen_id))
 	for injury in training_injuries:
 		var citizen_id:=int(injury.get("citizen_id",-1))
 		if seen.has(citizen_id): errors.append("Citizen %d appears in more than one military pool." % citizen_id)
 		seen[citizen_id]=true
-		if GameState.citizen_by_id(citizen_id).is_empty(): errors.append("Training injury references missing citizen %d." % citizen_id)
+		var injured_citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+		if injured_citizen.is_empty(): errors.append("Training injury references missing citizen %d." % citizen_id)
+		elif not bool(injured_citizen.get("alive",true)): errors.append("Training injury references deceased citizen %d." % citizen_id)
 	for item in military_inventory:
 		if int(military_inventory[item])<0: errors.append("Military inventory for %s is negative." % item)
 	for item in military_consumables:
@@ -1199,9 +1213,77 @@ func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 	home_army["wounded_ids"]=wounded_ids
 	home_army["scattered_ids"]=scattered_ids
 	home_army["campaign_day"]=int(GameState.elapsed_days)
+	_reconcile_dead_military_citizens()
+
+
+func _reconcile_dead_military_citizens()->Dictionary:
+	var removed:Array[int]=[]
+	var living_recruits:Array[int]=[]
+	for citizen_id in recruit_pool:
+		var recruit:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if not recruit.is_empty() and bool(recruit.get("alive",true)): living_recruits.append(int(citizen_id))
+		else: removed.append(int(citizen_id))
+	recruit_pool=living_recruits
+	for index in range(training_queue.size()-1,-1,-1):
+		var training:Dictionary=training_queue[index]
+		var living_trainees:Array[int]=[]
+		for citizen_id in training.get("soldier_ids",[]):
+			var trainee:Dictionary=GameState.citizen_by_id(int(citizen_id))
+			if not trainee.is_empty() and bool(trainee.get("alive",true)): living_trainees.append(int(citizen_id))
+			else: removed.append(int(citizen_id))
+		training["soldier_ids"]=living_trainees
+		training["count"]=living_trainees.size()
+		if living_trainees.is_empty(): training_queue.remove_at(index)
+		else: training_queue[index]=training
+	for index in range(training_injuries.size()-1,-1,-1):
+		var injured_id:=int(training_injuries[index].get("citizen_id",-1))
+		var injured:Dictionary=GameState.citizen_by_id(injured_id)
+		if injured.is_empty() or not bool(injured.get("alive",true)):
+			removed.append(injured_id)
+			training_injuries.remove_at(index)
+	if not home_army.is_empty():
+		var formations:Array=home_army.get("formations",[])
+		var living_active:Array[int]=[]
+		for formation_index in formations.size():
+			var formation:Dictionary=formations[formation_index]
+			var living_members:Array[int]=[]
+			for citizen_id in formation.get("soldier_ids",[]):
+				var soldier:Dictionary=GameState.citizen_by_id(int(citizen_id))
+				if not soldier.is_empty() and bool(soldier.get("alive",true)):
+					living_members.append(int(citizen_id)); living_active.append(int(citizen_id))
+				else: removed.append(int(citizen_id))
+			formation["soldier_ids"]=living_members
+			formation["count"]=living_members.size()
+			formation["experience"]=_citizen_experience(living_members)
+			formations[formation_index]=formation
+		home_army["formations"]=formations
+		home_army["soldier_ids"]=living_active
+		home_army["troops"]=living_active.size()
+		for pool_name in ["wounded_ids","scattered_ids","captured_ids"]:
+			var living_pool:Array[int]=[]
+			for citizen_id in home_army.get(pool_name,[]):
+				var pooled:Dictionary=GameState.citizen_by_id(int(citizen_id))
+				if not pooled.is_empty() and bool(pooled.get("alive",true)): living_pool.append(int(citizen_id))
+				else: removed.append(int(citizen_id))
+			home_army[pool_name]=living_pool
+			if pool_name=="wounded_ids": home_army["wounded_pool"]=living_pool.size()
+			elif pool_name=="scattered_ids": home_army["scattered_pool"]=living_pool.size()
+		var commander:Dictionary=home_army.get("commander",{})
+		var commander_id:=int(commander.get("citizen_id",-1))
+		if commander_id>=0:
+			var commander_citizen:Dictionary=GameState.citizen_by_id(commander_id)
+			if commander_citizen.is_empty() or not bool(commander_citizen.get("alive",true)):
+				var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
+				if int(marshal.get("citizen_id",-2))==commander_id: GameState.leadership_positions.erase("Marshal")
+				var successor:=_acting_field_commander(true)
+				home_army["commander"]=successor
+				GameState.council_inbox.push_front({"id":"natural_succession_%d_%d" % [int(GameState.elapsed_days),commander_id],"advisor":String(successor.get("name","Field command")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":"%s has died away from battle. %s assumes field command." % [String(commander.get("name","The commander")),String(successor.get("name","An acting captain"))],"urgency":0.88,"day":int(GameState.elapsed_days),"status":"unread"})
+		_refresh_readiness()
+	return {"removed":removed.size(),"citizen_ids":removed}
 
 
 func _process_military_day()->void:
+	if active_engagement.is_empty(): _reconcile_dead_military_citizens()
 	_process_service_rest_day()
 	_process_prisoner_custody_day()
 	_process_equipment_production_day()

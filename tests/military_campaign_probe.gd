@@ -495,5 +495,20 @@ func _run()->void:
 	MilitaryCampaign.war_reputation={"mercy":0.0,"fear":0.0,"grievance":0.0}
 	assert(bool(MilitaryCampaign.import_state(reputation_save).get("ok",false)))
 	assert(is_equal_approx(float(MilitaryCampaign.war_reputation_snapshot().fear),saved_fear))
+	assert(not (MilitaryCampaign.home_army.soldier_ids as Array).is_empty())
+	var natural_death_id:=int(MilitaryCampaign.home_army.soldier_ids[0])
+	var troops_before_natural_death:=int(MilitaryCampaign.home_army.troops)
+	var issued_before_natural_death:=0
+	for formation in MilitaryCampaign.home_army.formations: issued_before_natural_death+=int(formation.equipment)
+	assert(GameState.register_specific_death(natural_death_id,"Illness")!="")
+	assert(not MilitaryCampaign.validate_state().is_empty())
+	var roster_repair:Dictionary=MilitaryCampaign._reconcile_dead_military_citizens()
+	assert(int(roster_repair.removed)>=1)
+	assert(natural_death_id not in (MilitaryCampaign.home_army.soldier_ids as Array))
+	assert(int(MilitaryCampaign.home_army.troops)==troops_before_natural_death-1)
+	var issued_after_natural_death:=0
+	for formation in MilitaryCampaign.home_army.formations: issued_after_natural_death+=int(formation.equipment)
+	assert(issued_after_natural_death==issued_before_natural_death)
+	assert(MilitaryCampaign.validate_state().is_empty())
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()
