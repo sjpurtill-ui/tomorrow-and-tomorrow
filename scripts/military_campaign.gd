@@ -81,11 +81,12 @@ func reset_for_new_world()->void:
 
 
 func muster_home_army(requested_strength:=-1)->Dictionary:
-	# Compatibility entry point: raise the requested citizens, but do not conjure
-	# trained or equipped formations. Call start_training() to field them.
+	# Compatibility entry point: reach the requested total mobilized strength,
+	# but do not conjure trained or equipped formations. Call start_training()
+	# to field recruits. Repeated muster calls must not mobilize the same target twice.
 	if home_army.is_empty(): home_army=_empty_home_army()
 	var desired:=int(GameState.population_allocations.get("Defense",0)) if requested_strength<0 else maxi(0,int(requested_strength))
-	raise_recruits(maxi(0,desired-recruit_pool.size()-_queued_trainees()))
+	raise_recruits(maxi(0,desired-_mobilized_count()))
 	return campaign_army_snapshot()
 
 
