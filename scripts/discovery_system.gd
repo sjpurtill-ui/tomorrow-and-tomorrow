@@ -64,7 +64,13 @@ func initialize() -> void:
 
 func process_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
-	society_model.process_day(catalog,context)
+	var effective_context:=context.duplicate(true)
+	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	if military_campaign!=null and military_campaign.has_method("military_inquiry_context"):
+		var military_context:Dictionary=military_campaign.military_inquiry_context()
+		for signal_name in military_context:
+			effective_context[signal_name]=float(effective_context.get(signal_name,0.0))+float(military_context[signal_name])
+	society_model.process_day(catalog,effective_context)
 	var results: Array[Dictionary] = []
 	var current_day := int(floor(GameState.elapsed_days))
 	_refresh_active_investigations()
@@ -77,7 +83,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var attention := 0.35 + allocation * 0.32
 		var activity := 0.65
 		for activity_signal in discovery.signals:
-			activity += float(context.get(activity_signal, 0.0)) * 0.22
+			activity += float(effective_context.get(activity_signal, 0.0)) * 0.22
 		var leader_factor := _leader_factor(String(discovery.dynamic))
 		# Catalog chances describe relative discoverability. The global time scale keeps
 		# knowledge unfolding across generations instead of exhausting an era in months.
