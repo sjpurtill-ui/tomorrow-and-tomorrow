@@ -11,7 +11,7 @@ func _ready()->void:
 	elif panel.size.x>get_viewport().get_visible_rect().size.x-80.0 or panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Military modal exceeds the safe viewport: %s." % panel.size)
 	if not _descendants_of_type(panel,"ScrollContainer").is_empty(): failures.append("Military modal must not require scrolling.")
 	if MilitaryCommandUI.unit_choice.item_count<6: failures.append("Unit catalog is incomplete.")
-	if MilitaryCommandUI.weapon_choice.item_count<7: failures.append("Weapon catalog is incomplete.")
+	if MilitaryCommandUI.weapon_choice.item_count!=2: failures.append("Levy training should expose exactly its two compatible weapon families.")
 	if MilitaryCommandUI.equipment_choice.item_count<10: failures.append("Production catalog is incomplete.")
 	if not panel.visible: failures.append("Military modal did not open.")
 	MilitaryCommandUI._toggle()

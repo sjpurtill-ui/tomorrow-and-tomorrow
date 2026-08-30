@@ -8,6 +8,7 @@ const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=2
 const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__","siege_engineer":"siege_engineering","field_artillery":"powder_artillery"}
 const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__","siege_kit":"siege_engineering","field_gun":"powder_artillery"}
+const UNIT_EQUIPMENT:Dictionary={"levy":["improvised","spear"],"line_infantry":["spear","sword_shield"],"skirmisher":["bow"],"cavalry":["lance","sword_shield"],"siege_engineer":["siege_kit"],"field_artillery":["field_gun"]}
 
 var simulator:RefCounted
 var home_army:Dictionary={}
@@ -366,7 +367,7 @@ func military_capabilities()->Dictionary:
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
 	var queued_trainees:=_queued_trainees()
-	return {"units":units,"equipment":equipment,"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"units":units,"equipment":equipment,"unit_equipment":UNIT_EQUIPMENT.duplicate(true),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func validate_military_progression()->Array[String]:
@@ -376,6 +377,10 @@ func validate_military_progression()->Array[String]:
 			var discovery:=String(gate_map[gate_name])
 			if discovery in ["","__mount_population__"]: continue
 			if DiscoverySystem.discovery_definition(discovery).is_empty(): errors.append("%s references missing discovery %s." % [String(gate_name),discovery])
+	for unit in UNIT_EQUIPMENT:
+		if not UNIT_KNOWLEDGE.has(unit): errors.append("Equipment doctrine references unknown unit %s." % String(unit))
+		for item in UNIT_EQUIPMENT[unit]:
+			if not EQUIPMENT_KNOWLEDGE.has(item): errors.append("%s references unknown equipment %s." % [String(unit),String(item)])
 	return errors
 
 
@@ -795,6 +800,7 @@ func _training_gate(unit:String,weapon:String)->Dictionary:
 	if not bool(unit_gate.unlocked): return {"error":unit_gate.reason,"required_discovery":unit_gate.discovery}
 	var weapon_gate:=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE.get(weapon,"")),0.10)
 	if not bool(weapon_gate.unlocked): return {"error":weapon_gate.reason,"required_discovery":weapon_gate.discovery}
+	if weapon not in (UNIT_EQUIPMENT.get(unit,[]) as Array): return {"error":"%s cannot be trained with %s." % [unit.replace("_"," ").capitalize(),weapon.replace("_"," ").capitalize()],"compatible_equipment":UNIT_EQUIPMENT.get(unit,[])}
 	return {}
 
 

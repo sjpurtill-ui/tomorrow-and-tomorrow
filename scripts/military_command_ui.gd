@@ -86,7 +86,7 @@ func _build_interface()->void:
 
 	var training_box:=_section(columns,"TRAINING",GOLD)
 	queues=_body_label(training_box)
-	unit_choice=OptionButton.new(); training_box.add_child(unit_choice)
+	unit_choice=OptionButton.new(); training_box.add_child(unit_choice); unit_choice.item_selected.connect(func(_index:int): _populate_training_weapons())
 	weapon_choice=OptionButton.new(); training_box.add_child(weapon_choice)
 	var train_row:=HBoxContainer.new(); training_box.add_child(train_row)
 	train_count=_counter(train_row,1,100,10)
@@ -141,11 +141,21 @@ func _populate_choices()->void:
 	var capabilities:Dictionary=MilitaryCampaign.military_capabilities()
 	for unit in (capabilities.get("units",{}) as Dictionary):
 		_add_choice(unit_choice,String(unit),capabilities.units[unit])
+	_populate_training_weapons()
 	for item in (capabilities.get("equipment",{}) as Dictionary):
-		_add_choice(weapon_choice,String(item),capabilities.equipment[item])
 		_add_choice(equipment_choice,String(item),capabilities.equipment[item])
 	var consumables:Dictionary={"arrows":{"unlocked":MilitaryCampaign._adoption("bow_craft")>=0.08,"reason":"Requires Bow Craft adoption."},"artillery_rounds":{"unlocked":MilitaryCampaign._adoption("powder_artillery")>=0.08,"reason":"Requires Powder Artillery adoption."},"transport_cart":capabilities.transport_carts}
 	for item in consumables: _add_choice(equipment_choice,String(item),consumables[item])
+
+
+func _populate_training_weapons()->void:
+	if weapon_choice==null: return
+	weapon_choice.clear()
+	if unit_choice.selected<0: return
+	var unit:=String(unit_choice.get_item_metadata(unit_choice.selected))
+	var capabilities:Dictionary=MilitaryCampaign.military_capabilities()
+	for item in (capabilities.get("unit_equipment",{}) as Dictionary).get(unit,[]):
+		_add_choice(weapon_choice,String(item),(capabilities.get("equipment",{}) as Dictionary).get(item,{"unlocked":false,"reason":"Equipment definition missing."}))
 
 
 func _add_choice(choice:OptionButton,id:String,gate:Dictionary)->void:

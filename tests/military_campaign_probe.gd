@@ -116,6 +116,8 @@ func _run()->void:
 	var capabilities:Dictionary=MilitaryCampaign.military_capabilities()
 	assert(bool(capabilities.equipment.spear.unlocked))
 	assert(not bool(capabilities.units.line_infantry.unlocked))
+	assert("bow" not in (capabilities.unit_equipment.levy as Array))
+	assert("field_gun" in (capabilities.unit_equipment.field_artillery as Array))
 	var bronze_recipe:Dictionary=MilitaryCampaign._equipment_recipe("sword_shield")
 	assert(bronze_recipe.materials.has("Copper Ore"))
 	assert(bronze_recipe.materials.has("Tin Ore"))
@@ -343,6 +345,7 @@ func _run()->void:
 	assert(MilitaryCampaign.validate_state().is_empty())
 	if "bow_craft" not in GameState.known_discoveries: GameState.known_discoveries.append("bow_craft")
 	GameState.discovery_adoption["bow_craft"]=0.20
+	assert(String(MilitaryCampaign._training_gate("levy","bow").get("error","")).contains("cannot be trained"))
 	GameState.resource_stockpiles["Timber"]=100.0
 	GameState.resource_stockpiles["Fiber Plants"]=100.0
 	GameState.resource_stockpiles["Stone"]=100.0
