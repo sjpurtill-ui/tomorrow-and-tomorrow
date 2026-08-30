@@ -9,6 +9,8 @@ const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=2
 const FIELD_FORTIFICATION_MAX_BONUS:=0.22
 const FORTIFIED_STORES_MAX_PROTECTION:=0.60
+const EQUIPMENT_DELIVERY_LOAD:Dictionary={"improvised":0.80,"spear":1.00,"bow":0.80,"sword_shield":1.80,"lance":1.60,"siege_kit":6.00,"field_gun":10.00}
+const AMMUNITION_DELIVERY_LOAD:Dictionary={"arrows":0.08,"artillery_rounds":0.65}
 const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__","siege_engineer":"siege_engineering","field_artillery":"powder_artillery"}
 const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__","siege_kit":"siege_engineering","field_gun":"powder_artillery"}
 const UNIT_EQUIPMENT:Dictionary={"levy":["improvised","spear"],"line_infantry":["spear","sword_shield"],"skirmisher":["bow"],"cavalry":["lance","sword_shield"],"siege_engineer":["siege_kit"],"field_artillery":["field_gun"]}
@@ -421,7 +423,7 @@ func military_capabilities()->Dictionary:
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
 	var queued_trainees:=_queued_trainees()
-	return {"units":units,"equipment":equipment,"unit_equipment":UNIT_EQUIPMENT.duplicate(true),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"units":units,"equipment":equipment,"unit_equipment":UNIT_EQUIPMENT.duplicate(true),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"delivery_load_capacity":_daily_delivery_capacity(),"equipment_delivery_load":EQUIPMENT_DELIVERY_LOAD.duplicate(true),"ammunition_delivery_load":AMMUNITION_DELIVERY_LOAD.duplicate(true),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func validate_military_progression()->Array[String]:
@@ -1204,6 +1206,9 @@ func _empty_home_army()->Dictionary:
 	force["provision_day"]=-1
 	force["provision_shortfall_total"]=0.0
 	force["provision_shortfall_days"]=0
+	force["delivery_load_bank"]=0.0
+	force["delivery_load_capacity_today"]=0.0
+	force["delivery_load_used_today"]=0.0
 	force["recent_combat_days"]=0
 	force["service_days"]=0
 	force["service_strain"]=0.0
@@ -1689,9 +1694,20 @@ func _process_military_day()->void:
 	_process_service_strain_day()
 	_process_equipment_wear_day()
 	var supply:=float(home_army.get("supply_level",1.0))
-	var delivery_capacity:=_daily_delivery_capacity()
-	var delivered:=_deliver_inventory_replacements(delivery_capacity)
-	var ammunition_delivered:=_deliver_ammunition(maxi(0,delivery_capacity-delivered))
+	var daily_delivery_capacity:=_daily_delivery_capacity()
+	var delivery_bank_cap:=maxf(10.0,daily_delivery_capacity*3.0)
+	var available_delivery_load:=minf(delivery_bank_cap,maxf(0.0,float(home_army.get("delivery_load_bank",0.0)))+daily_delivery_capacity)
+	var delivered:=_deliver_inventory_replacements(available_delivery_load)
+	var equipment_load_used:=float(home_army.get("equipment_delivery_load_used",0.0))
+	var remaining_delivery_load:=maxf(0.0,available_delivery_load-equipment_load_used)
+	# Do not let light ammunition consume a convoy being assembled for a heavier
+	# replacement. Once the pending item fits, any residual capacity can carry ammo.
+	var pending_equipment_load:=_next_equipment_delivery_load()
+	var ammunition_delivered:=_deliver_ammunition(remaining_delivery_load if pending_equipment_load<=0.0 else 0.0)
+	var ammunition_load_used:=float(home_army.get("ammunition_delivery_load_used",0.0))
+	home_army["delivery_load_bank"]=maxf(0.0,remaining_delivery_load-ammunition_load_used)
+	home_army["delivery_load_capacity_today"]=daily_delivery_capacity
+	home_army["delivery_load_used_today"]=equipment_load_used+ammunition_load_used
 	var recovery_multiplier:=0.35+supply*0.55+_adoption("battlefield_medicine")*0.55
 	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier})
 	home_army=prepared.force
@@ -1875,11 +1891,21 @@ func _update_supply_day()->void:
 	home_army["recent_combat_days"]=maxi(0,int(home_army.get("recent_combat_days",0))-1)
 
 
-func _daily_delivery_capacity()->int:
+func _daily_delivery_capacity()->float:
 	var workers:=int(GameState.population_allocations.get("Logistics",0))
-	if workers<=0: return 0
+	if workers<=0: return 0.0
 	var commander_logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4))
-	return maxi(1,floori(float(workers)*(0.35+commander_logistics*0.45+_adoption("supply_groups")*0.40)))
+	var practice:=_adoption("supply_groups")
+	var carts:=minf(float(workers),maxf(0.0,float(GameState.resource_stockpiles.get("Transport Carts",0.0))))
+	return maxf(0.50,float(workers)*(0.35+commander_logistics*0.45+practice*0.40)+carts*(0.75+practice*0.45))
+
+
+func _equipment_delivery_load(item:String)->float:
+	return maxf(0.05,float(EQUIPMENT_DELIVERY_LOAD.get(item,1.0)))
+
+
+func _ammunition_delivery_load(item:String)->float:
+	return maxf(0.01,float(AMMUNITION_DELIVERY_LOAD.get(item,0.25)))
 
 
 func _process_equipment_wear_day()->void:
@@ -1903,34 +1929,46 @@ func _process_equipment_wear_day()->void:
 	home_army["formations"]=formations
 
 
-func _deliver_inventory_replacements(delivery_limit:int)->int:
+func _deliver_inventory_replacements(delivery_limit:float)->int:
 	var delivered:=0
-	var remaining_capacity:=maxi(0,delivery_limit)
+	var remaining_capacity:=maxf(0.0,delivery_limit)
 	var formations:Array=home_army.get("formations",[])
 	for index in formations.size():
-		if remaining_capacity<=0: break
+		if remaining_capacity<=0.0001: break
 		var formation:Dictionary=formations[index]
 		var item:=String(formation.get("weapon","improvised"))
 		var available:=int(military_inventory.get(item,0))
 		var required:=int(formation.get("equipment_required",formation.get("authorized_count",formation.get("count",0))))
 		var missing:=maxi(0,required-int(formation.get("equipment",0)))
-		var transfer:=mini(mini(available,missing),remaining_capacity)
+		var item_load:=_equipment_delivery_load(item)
+		var transfer:=mini(mini(available,missing),floori((remaining_capacity+0.000001)/item_load))
 		if transfer<=0: continue
 		formation["equipment"]=int(formation.get("equipment",0))+transfer
 		formations[index]=formation
 		military_inventory[item]=available-transfer
 		delivered+=transfer
-		remaining_capacity-=transfer
+		remaining_capacity-=float(transfer)*item_load
 	home_army["formations"]=formations
+	home_army["equipment_delivery_load_used"]=maxf(0.0,delivery_limit-remaining_capacity)
 	return delivered
 
 
-func _deliver_ammunition(delivery_limit:int)->int:
+func _next_equipment_delivery_load()->float:
+	var next_load:=INF
+	for formation in home_army.get("formations",[]):
+		var item:=String(formation.get("weapon","improvised"))
+		if int(military_inventory.get(item,0))<=0: continue
+		var required:=int(formation.get("equipment_required",formation.get("authorized_count",formation.get("count",0))))
+		if int(formation.get("equipment",0))<required: next_load=minf(next_load,_equipment_delivery_load(item))
+	return 0.0 if is_inf(next_load) else next_load
+
+
+func _deliver_ammunition(delivery_limit:float)->int:
 	var delivered:=0
-	var remaining_capacity:=maxi(0,delivery_limit)
+	var remaining_capacity:=maxf(0.0,delivery_limit)
 	var formations:Array=home_army.get("formations",[])
 	for index in formations.size():
-		if remaining_capacity<=0: break
+		if remaining_capacity<=0.0001: break
 		var formation:Dictionary=formations[index]
 		var weapon:=String(formation.get("weapon","improvised"))
 		var ammunition_type:=_ammunition_type_for(weapon)
@@ -1939,16 +1977,18 @@ func _deliver_ammunition(delivery_limit:int)->int:
 		if available<=0: continue
 		var required:=maxi(0,int(formation.get("ammunition_required",_ammunition_required_for(weapon,int(formation.get("equipment_required",0))))))
 		var missing:=maxi(0,required-int(formation.get("ammunition",0)))
-		var transfer:=mini(mini(available,missing),remaining_capacity)
+		var ammunition_load:=_ammunition_delivery_load(ammunition_type)
+		var transfer:=mini(mini(available,missing),floori((remaining_capacity+0.000001)/ammunition_load))
 		if transfer<=0: continue
 		formation["ammunition"]=int(formation.get("ammunition",0))+transfer
 		formation["ammunition_required"]=required
 		formations[index]=formation
 		available-=transfer
 		military_consumables[ammunition_type]=available
-		remaining_capacity-=transfer
+		remaining_capacity-=float(transfer)*ammunition_load
 		delivered+=transfer
 	home_army["formations"]=formations
+	home_army["ammunition_delivery_load_used"]=maxf(0.0,delivery_limit-remaining_capacity)
 	return delivered
 
 
