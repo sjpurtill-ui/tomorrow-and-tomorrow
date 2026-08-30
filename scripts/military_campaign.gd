@@ -497,12 +497,19 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	_apply_home_result(result.attacker,result.rounds,int(result.seed))
 	home_army["recent_combat_days"]=7
 	home_army["supply_level"]=clampf(float(home_army.get("supply_level",1.0))-0.06,0.0,1.0)
-	_apply_home_commander_fate(result.termination)
+	var termination:Dictionary=result.get("termination",{})
+	_apply_home_commander_fate(termination)
+	var home_won:=String(termination.get("captor",""))==String(home_army.get("name",""))
+	var home_lost:=String(termination.get("defeated",""))==String(home_army.get("name","")) and not home_won
+	if home_lost and int(termination.get("prisoners",0))>0:
+		_mark_home_prisoners(int(termination.prisoners))
+	var termination_summary:=String(termination.get("summary",""))
+	if termination_summary!="": result["message"]=termination_summary
 	var record:=result.duplicate(true)
 	record["day"]=int(GameState.elapsed_days)
 	battle_history.push_front(record)
 	if battle_history.size()>40: battle_history.resize(40)
-	pending_aftermath=result.get("termination",{}).duplicate(true)
+	pending_aftermath=termination.duplicate(true) if home_won else {}
 	if String(pending_aftermath.get("type","continued"))=="continued": pending_aftermath.clear()
 	_record_council_battle(result)
 	battle_resolved.emit(result.duplicate(true))
