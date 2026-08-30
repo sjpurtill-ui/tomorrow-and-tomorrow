@@ -6,8 +6,8 @@ signal aftermath_required(aftermath: Dictionary)
 
 const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=1
-const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"mounted_warfare"}
-const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"mounted_warfare"}
+const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__"}
+const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__"}
 
 var simulator:RefCounted
 var home_army:Dictionary={}
@@ -654,6 +654,7 @@ func _equipment_recipe(item:String)->Dictionary:
 
 func _knowledge_gate(discovery:String,minimum_adoption:float)->Dictionary:
 	if discovery=="": return {"unlocked":true,"discovery":"","adoption":1.0,"reason":"Available through basic household practice."}
+	if discovery=="__mount_population__": return {"unlocked":false,"discovery":"","physical_requirement":"domesticated_mounts","adoption":0.0,"reason":"Requires a domesticated mount population and husbandry system; doctrine alone cannot create cavalry."}
 	if discovery not in GameState.known_discoveries:
 		var definition:Dictionary=DiscoverySystem.discovery_definition(discovery)
 		var label:=String(definition.get("name",discovery.replace("_"," ").capitalize()))
