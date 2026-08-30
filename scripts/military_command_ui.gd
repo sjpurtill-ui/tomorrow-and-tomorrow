@@ -21,6 +21,10 @@ var unit_choice:OptionButton
 var weapon_choice:OptionButton
 var produce_count:SpinBox
 var equipment_choice:OptionButton
+var aftermath_row:HBoxContainer
+var prisoner_policy:OptionButton
+var spoils_policy:OptionButton
+var general_policy:OptionButton
 var refresh_accumulator:=0.0
 
 
@@ -99,6 +103,13 @@ func _build_interface()->void:
 	produce_count=_counter(production_row,1,100,10)
 	_action_button(production_row,"Queue production",_queue_production)
 
+	aftermath_row=HBoxContainer.new(); aftermath_row.add_theme_constant_override("separation",8); outer.add_child(aftermath_row)
+	var aftermath_label:=Label.new(); aftermath_label.text="BATTLE DECISION"; aftermath_label.add_theme_color_override("font_color",GOLD); aftermath_row.add_child(aftermath_label)
+	prisoner_policy=_policy_choice(aftermath_row,["hold","release","exchange","parole","ransom","execute","enslave"],"Prisoners")
+	spoils_policy=_policy_choice(aftermath_row,["army stores","reward troops","state treasury","return property","unrestricted plunder"],"Spoils")
+	general_policy=_policy_choice(aftermath_row,["hold","release","ransom","execute"],"Enemy general")
+	_action_button(aftermath_row,"Resolve aftermath",_resolve_aftermath)
+
 	feedback=Label.new(); feedback.text="F6 closes this panel. Time continues while it is open."; feedback.custom_minimum_size.x=800; feedback.add_theme_color_override("font_color",MUTED); feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; outer.add_child(feedback)
 	_populate_choices()
 	_refresh()
@@ -117,6 +128,14 @@ func _body_label(parent:VBoxContainer)->Label:
 
 func _counter(parent:HBoxContainer,minimum:int,maximum:int,value:int)->SpinBox:
 	var spin:=SpinBox.new(); spin.min_value=minimum; spin.max_value=maximum; spin.value=value; spin.custom_minimum_size.x=82; parent.add_child(spin); return spin
+
+
+func _policy_choice(parent:HBoxContainer,items:Array[String],tooltip:String)->OptionButton:
+	var choice:=OptionButton.new(); choice.tooltip_text=tooltip; choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	for item in items:
+		choice.add_item(item.capitalize()); choice.set_item_metadata(choice.item_count-1,item)
+	parent.add_child(choice)
+	return choice
 
 
 func _action_button(parent:HBoxContainer,text_value:String,action:Callable)->void:
@@ -174,9 +193,11 @@ func _refresh()->void:
 	var formation_lines:Array[String]=[]
 	for formation in (army.get("formations",[]) as Array):
 		formation_lines.append("%s  %d/%d men\n  %s %d/%d  •  readiness %d%%" % [String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),roundi(float(formation.get("readiness",ready))*100.0)])
-	formations.text="No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n\n".join(formation_lines)
+	var custody_line:="\n\nCAPTIVES  %d soldiers  •  %d generals" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size()]
+	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n\n".join(formation_lines))+custody_line
 	queues.text="Training rate %.1f/day  •  capacity %d\nWorkshop %.0f%% utilized\n\n%s" % [float(capabilities.get("training_rate",0.0)),int(capabilities.get("training_capacity",0)),float(capabilities.get("workshop_utilization",0.0))*100.0,_queue_summary(army)]
 	inventory.text=_inventory_summary(army)+"\n\nLogistics practice %d%%\nField supply access %d%%" % [roundi(float(capabilities.get("logistics_practice",0.0))*100.0),roundi(MilitaryCampaign.field_provision_delivery_ratio()*100.0)]
+	aftermath_row.visible=not MilitaryCampaign.pending_aftermath.is_empty()
 
 
 func _queue_summary(army:Dictionary)->String:
@@ -212,6 +233,10 @@ func _queue_production()->void:
 	elif item in ["arrows","artillery_rounds"]: result=MilitaryCampaign.queue_consumable_production(item,count)
 	else: result=MilitaryCampaign.queue_equipment_production(item,count)
 	_report(result)
+
+
+func _resolve_aftermath()->void:
+	_report(MilitaryCampaign.resolve_aftermath(String(prisoner_policy.get_item_metadata(prisoner_policy.selected)),String(spoils_policy.get_item_metadata(spoils_policy.selected)),String(general_policy.get_item_metadata(general_policy.selected))))
 
 
 func _report(result:Dictionary)->void:
