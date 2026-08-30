@@ -78,7 +78,7 @@ func raise_recruits(count:int)->Dictionary:
 		if a_defense!=b_defense: return a_defense>b_defense
 		return GameState.citizen_physical_capacity(a)>GameState.citizen_physical_capacity(b))
 	var capacity:=recruitment_capacity()
-	var available_capacity:=maxi(0,capacity-recruit_pool.size()-_queued_trainees()-int(home_army.get("troops",0)))
+	var available_capacity:=maxi(0,capacity-_mobilized_count())
 	var raised:=0
 	for index in mini(mini(maxi(0,count),candidates.size()),available_capacity):
 		var citizen:Dictionary=candidates[index]
@@ -131,6 +131,10 @@ func recruitment_capacity()->int:
 	if _adoption("public_levies")>=0.15: share=0.18
 	if _adoption("professional_corps")>=0.20: share=0.30
 	return maxi(1,roundi(float(population)*share))
+
+
+func _mobilized_count()->int:
+	return recruit_pool.size()+_queued_trainees()+int(home_army.get("troops",0))+int(home_army.get("wounded_pool",0))+int(home_army.get("scattered_pool",0))+(home_army.get("captured_ids",[]) as Array).size()
 
 
 func military_capabilities()->Dictionary:
@@ -285,6 +289,7 @@ func _empty_home_army()->Dictionary:
 	force["wounded_ids"]=[]
 	force["scattered_ids"]=[]
 	force["captured_ids"]=[]
+	force["reserve_manpower"]=0
 	force["campaign_day"]=int(GameState.elapsed_days)
 	return force
 
@@ -534,7 +539,7 @@ func _complete_training(training:Dictionary)->void:
 	rebuilt["commander"]=_marshal_commander()
 	rebuilt["wounded_pool"]=int(home_army.get("wounded_pool",0))
 	rebuilt["scattered_pool"]=int(home_army.get("scattered_pool",0))
-	rebuilt["reserve_manpower"]=int(home_army.get("reserve_manpower",0))
+	rebuilt["reserve_manpower"]=0
 	rebuilt["wounded_ids"]=home_army.get("wounded_ids",[]).duplicate()
 	rebuilt["scattered_ids"]=home_army.get("scattered_ids",[]).duplicate()
 	rebuilt["captured_ids"]=home_army.get("captured_ids",[]).duplicate()
