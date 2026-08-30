@@ -62,6 +62,7 @@ func _ready()->void:
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if not MilitaryCommandUI.threat_row.visible: failures.append("An approaching threat is not exposed in military command.")
+	if "STORES" not in MilitaryCommandUI.threat_label.text or "Fortified Stores" not in MilitaryCommandUI.threat_label.tooltip_text: failures.append("Threat response omits reserve exposure and fortified-store protection.")
 	if "RELATIVE STRENGTH" not in MilitaryCommandUI.summary.text: failures.append("An approaching threat has no relative-strength preview.")
 	if "effective" not in MilitaryCommandUI.condition.tooltip_text or "readiness" not in MilitaryCommandUI.condition.tooltip_text: failures.append("Relative-strength bar omits its combat-power breakdown.")
 	if "Defender ground" not in MilitaryCommandUI.condition.tooltip_text or "fieldworks" not in MilitaryCommandUI.condition.tooltip_text: failures.append("Relative-strength bar omits terrain and fortification effects.")

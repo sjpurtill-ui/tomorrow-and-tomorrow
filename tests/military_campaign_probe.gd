@@ -581,6 +581,15 @@ func _run()->void:
 	var withdrawal:Dictionary=MilitaryCampaign.respond_to_threat("withdraw")
 	assert(bool(withdrawal.get("resolved",false)))
 	assert(is_equal_approx(float(GameState.resource_stockpiles.Timber),timber_before_withdraw*0.90))
+	assert(is_equal_approx(float(withdrawal.effective_plunder_fraction),0.10))
+	GameState.known_discoveries.append("fortified_stores")
+	GameState.discovery_adoption["fortified_stores"]=1.0
+	MilitaryCampaign.active_threat={"id":"fortified_withdraw_test","plunder_fraction":0.10}
+	var fortified_timber_before:=float(GameState.resource_stockpiles.Timber)
+	var fortified_withdrawal:Dictionary=MilitaryCampaign.respond_to_threat("withdraw")
+	assert(is_equal_approx(float(fortified_withdrawal.effective_plunder_fraction),0.04))
+	assert(float(fortified_withdrawal.resources_protected.Timber)>0.0)
+	assert(is_equal_approx(float(GameState.resource_stockpiles.Timber),fortified_timber_before*0.96))
 	MilitaryCampaign.active_threat={"id":"save_test","deadline_day":9999,"estimated_strength":7}
 	var threat_save:Dictionary=MilitaryCampaign.export_state()
 	MilitaryCampaign.active_threat.clear()

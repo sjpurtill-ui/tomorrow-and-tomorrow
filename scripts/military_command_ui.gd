@@ -298,7 +298,11 @@ func _refresh()->void:
 	aftermath_label.text="BATTLE DECISION" if has_pending_aftermath else "HELD CAPTIVES"
 	spoils_policy.visible=has_pending_aftermath
 	threat_row.visible=not threat.is_empty()
-	if not threat.is_empty(): threat_label.text="⚠  %s — about %d fighters — decision due day %d" % [String(threat.get("title","Threat approaching")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0))]
+	if not threat.is_empty():
+		var protection:Dictionary=MilitaryCampaign.store_protection()
+		var protection_percent:=roundi(float(protection.seizure_reduction)*100.0)
+		threat_label.text="⚠  %s — about %d fighters — due day %d  •  STORES %s" % [String(threat.get("title","Threat approaching")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0)),("%d%% SHIELDED" % protection_percent) if protection_percent>0 else "EXPOSED"]
+		threat_label.tooltip_text="Fortified Stores adoption %d%%; reduces seizure of threatened reserves by %d%%." % [roundi(float(protection.adoption)*100.0),protection_percent]
 	engagement_row.visible=not engagement.is_empty()
 	if not engagement.is_empty():
 		var attacker:Dictionary=engagement.get("attacker",{}); var defender:Dictionary=engagement.get("defender",{})

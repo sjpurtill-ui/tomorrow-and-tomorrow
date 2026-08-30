@@ -8,6 +8,7 @@ signal threat_changed(threat: Dictionary)
 const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=2
 const FIELD_FORTIFICATION_MAX_BONUS:=0.22
+const FORTIFIED_STORES_MAX_PROTECTION:=0.60
 const UNIT_KNOWLEDGE:Dictionary={"levy":"","line_infantry":"shield_wall","skirmisher":"bow_craft","cavalry":"__mount_population__","siege_engineer":"siege_engineering","field_artillery":"powder_artillery"}
 const EQUIPMENT_KNOWLEDGE:Dictionary={"improvised":"","spear":"hafted_weapons","bow":"bow_craft","sword_shield":"bronze_weaponry","lance":"__mount_population__","siege_kit":"siege_engineering","field_gun":"powder_artillery"}
 const UNIT_EQUIPMENT:Dictionary={"levy":["improvised","spear"],"line_infantry":["spear","sword_shield"],"skirmisher":["bow"],"cavalry":["lance","sword_shield"],"siege_engineer":["siege_kit"],"field_artillery":["field_gun"]}
@@ -754,11 +755,18 @@ func respond_to_threat(response:String)->Dictionary:
 		return {"resolved":true,"response":choice,"food_paid":demanded}
 	if choice=="withdraw":
 		var losses:Dictionary={}
+		var protected:Dictionary={}
+		var protection:Dictionary=store_protection()
+		var base_plunder_fraction:=clampf(float(threat.get("plunder_fraction",0.12)),0.0,1.0)
+		var effective_plunder_fraction:=base_plunder_fraction*float(protection.exposed_share)
 		for resource_name in ["Food","Timber","Stone","Fiber Plants"]:
-			var amount:=float(GameState.resource_stockpiles.get(resource_name,0.0))*float(threat.get("plunder_fraction",0.12))
+			var available:=float(GameState.resource_stockpiles.get(resource_name,0.0))
+			var amount:=available*effective_plunder_fraction
+			protected[resource_name]=available*base_plunder_fraction-amount
 			GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-amount); losses[resource_name]=amount
-		_resolve_threat_without_battle("Settlement yields ground","The population avoided battle, but the hostile force stripped exposed stores.")
-		return {"resolved":true,"response":choice,"resources_lost":losses}
+		var message:="The population yielded ground. Raiders took %.0f%% of reserves; fortified stores protected %.0f%% of the threatened share." % [effective_plunder_fraction*100.0,float(protection.seizure_reduction)*100.0]
+		_resolve_threat_without_battle("Settlement yields ground",message)
+		return {"resolved":true,"response":choice,"resources_lost":losses,"resources_protected":protected,"base_plunder_fraction":base_plunder_fraction,"effective_plunder_fraction":effective_plunder_fraction,"store_protection":protection,"message":message}
 	return {"error":"Unknown threat response: %s" % response}
 
 
@@ -1406,6 +1414,12 @@ func defensive_position()->Dictionary:
 		"fieldworks_bonus":fieldworks_bonus,
 		"modifier":clampf(terrain_base+fieldworks_bonus,0.75,1.75)
 	}
+
+
+func store_protection()->Dictionary:
+	var adoption:=_adoption("fortified_stores")
+	var seizure_reduction:=adoption*FORTIFIED_STORES_MAX_PROTECTION
+	return {"adoption":adoption,"seizure_reduction":seizure_reduction,"exposed_share":1.0-seizure_reduction}
 
 
 func _terrain_defense()->float:
