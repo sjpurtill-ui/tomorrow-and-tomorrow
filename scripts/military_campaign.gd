@@ -800,6 +800,31 @@ func resolve_held_general(index:int,policy:String)->Dictionary:
 	return outcome
 
 
+func resolve_held_captives(prisoner_policy:String,general_policy:String)->Dictionary:
+	var normalized_prisoners:=prisoner_policy.to_lower()
+	var normalized_generals:=general_policy.to_lower()
+	if normalized_prisoners not in ["hold","release","exchange","parole","ransom","execute","enslave"]: return {"error":"Unknown held-prisoner policy: %s" % prisoner_policy}
+	if normalized_generals not in ["hold","release","ransom","execute"]: return {"error":"Unknown held-general policy: %s" % general_policy}
+	var prisoners_before:=foreign_prisoners
+	var generals_before:=held_generals.size()
+	if prisoners_before<=0 and generals_before<=0: return {"error":"No foreign captives are being held."}
+	if normalized_prisoners=="exchange" and prisoners_before>0 and (home_army.get("captured_ids",[]) as Array).is_empty(): return {"error":"No home captives are available for a prisoner exchange."}
+	var prisoner_result:Dictionary={}
+	if normalized_prisoners!="hold" and prisoners_before>0:
+		prisoner_result=resolve_held_prisoners(normalized_prisoners,prisoners_before)
+		if prisoner_result.has("error"): return prisoner_result
+	var general_results:Array[Dictionary]=[]
+	if normalized_generals!="hold":
+		while not held_generals.is_empty(): general_results.append(resolve_held_general(0,normalized_generals))
+	var prisoners_resolved:=prisoners_before-foreign_prisoners
+	var generals_resolved:=generals_before-held_generals.size()
+	var message:="Captives remain in custody."
+	if prisoners_resolved>0 or generals_resolved>0:
+		message="Resolved %d prisoner%s and %d commander%s." % [prisoners_resolved,"" if prisoners_resolved==1 else "s",generals_resolved,"" if generals_resolved==1 else "s"]
+		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Captive policy enacted","description":message,"domain":"security","severity":"notice"})
+	return {"message":message,"prisoner_policy":normalized_prisoners,"general_policy":normalized_generals,"prisoners_resolved":prisoners_resolved,"generals_resolved":generals_resolved,"prisoner_result":prisoner_result,"general_results":general_results,"foreign_prisoners":foreign_prisoners,"held_generals":held_generals.size()}
+
+
 func _mobilization_cost()->Dictionary:
 	var by_role:Dictionary={}
 	var total:=0

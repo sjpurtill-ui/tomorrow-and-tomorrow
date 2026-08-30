@@ -396,6 +396,14 @@ func _run()->void:
 	assert(float(general_disposition.war_wealth_receipt.accepted)==50.0)
 	assert(float(GameState.resource_stockpiles.get("Coin",0.0))==coin_before_general_ransom+50.0)
 	assert(MilitaryCampaign.held_generals.is_empty())
+	MilitaryCampaign.foreign_prisoners+=2
+	MilitaryCampaign.held_generals.append_array([{"name":"Held captain A"},{"name":"Held captain B"}])
+	var held_decision:Dictionary=MilitaryCampaign.resolve_held_captives("hold","hold")
+	assert(int(held_decision.prisoners_resolved)==0 and int(held_decision.generals_resolved)==0)
+	var released_captives:Dictionary=MilitaryCampaign.resolve_held_captives("release","release")
+	assert(int(released_captives.prisoners_resolved)==2)
+	assert(int(released_captives.generals_resolved)==2)
+	assert(MilitaryCampaign.foreign_prisoners==0 and MilitaryCampaign.held_generals.is_empty())
 	var distributed_spoils:Dictionary={}
 	MilitaryCampaign._apply_campaign_spoils_policy("reward troops",{"weapons":{"improvised":2},"consumables":{"arrows":10},"supplies":3,"carts":1,"wealth":4},distributed_spoils)
 	assert(is_equal_approx(float(distributed_spoils.war_wealth_receipt.accepted),17.5))

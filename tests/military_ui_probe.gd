@@ -24,6 +24,7 @@ func _ready()->void:
 	if MilitaryCommandUI.prisoner_policy.item_count!=7 or MilitaryCommandUI.spoils_policy.item_count!=5 or MilitaryCommandUI.general_policy.item_count!=4: failures.append("Battle aftermath choices are incomplete.")
 	MilitaryCampaign.military_inventory["improvised"]=3
 	MilitaryCampaign.military_consumables["arrows"]=12
+	MilitaryCampaign.foreign_prisoners=2
 	MilitaryCampaign.held_generals=[{"name":"Captured captain"}]
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Probe Host",[
 		{"id":1,"unit":"levy","weapon":"improvised","count":30,"authorized_count":40,"equipment":26,"equipment_required":40,"personnel_condition":0.72,"readiness":0.61},
@@ -38,12 +39,15 @@ func _ready()->void:
 	if "⚔" not in MilitaryCommandUI.formations.text or "COND" not in MilitaryCommandUI.formations.text: failures.append("Formation cards omit cohort attack, defense, readiness, or condition.")
 	if "3 ready" not in MilitaryCommandUI.inventory.text or "Arrows  12" not in MilitaryCommandUI.inventory.text: failures.append("Ready equipment or ammunition is absent from the arsenal snapshot.")
 	if "1 generals" not in MilitaryCommandUI.formations.text: failures.append("Held generals are absent from the custody snapshot.")
+	if not MilitaryCommandUI.aftermath_row.visible or MilitaryCommandUI.aftermath_label.text!="HELD CAPTIVES": failures.append("Held captives do not expose a delayed disposition decision.")
+	if MilitaryCommandUI.spoils_policy.visible: failures.append("Spoils policy remains visible after immediate battle aftermath has ended.")
 	if "+ 3 more cohorts" not in MilitaryCommandUI.formations.text: failures.append("Large armies are not summarized within the fixed modal.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Populated formation cards make the modal clip: %s." % panel.size)
 	MilitaryCampaign.pending_aftermath={"type":"rout","prisoners":4}
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if not MilitaryCommandUI.aftermath_row.visible: failures.append("Pending battle aftermath is not exposed.")
+	if MilitaryCommandUI.aftermath_label.text!="BATTLE DECISION" or not MilitaryCommandUI.spoils_policy.visible: failures.append("Immediate battle aftermath does not restore the spoils decision.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Aftermath controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.pending_aftermath.clear()
 	MilitaryCampaign.active_threat={"title":"Probe raiders","estimated_strength":12,"deadline_day":9,"enemy_force":MilitaryCampaign.simulator.create_formation_force("Probe Raiders",[{"id":90,"unit":"levy","weapon":"improvised","count":12,"equipment":10}],0.68,0.60)}
@@ -57,6 +61,7 @@ func _ready()->void:
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if not MilitaryCommandUI.engagement_row.visible: failures.append("A live campaign engagement does not expose round orders.")
+	if MilitaryCommandUI.aftermath_row.visible: failures.append("Held-captive controls compete with live battle orders for modal space.")
 	if "RELATIVE STRENGTH" not in MilitaryCommandUI.summary.text or "Relative effective strength" not in MilitaryCommandUI.condition.tooltip_text: failures.append("A live battle does not switch the top bar to relative strength.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Live battle controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.active_engagement.clear()

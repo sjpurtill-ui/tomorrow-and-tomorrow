@@ -27,6 +27,7 @@ var weapon_choice:OptionButton
 var produce_count:SpinBox
 var equipment_choice:OptionButton
 var aftermath_row:HBoxContainer
+var aftermath_label:Label
 var threat_row:HBoxContainer
 var threat_label:Label
 var engagement_row:HBoxContainer
@@ -133,11 +134,11 @@ func _build_interface()->void:
 	_action_button(engagement_row,"◀ Retreat",func(): _report(MilitaryCampaign.advance_engagement("retreat")))
 
 	aftermath_row=HBoxContainer.new(); aftermath_row.add_theme_constant_override("separation",8); outer.add_child(aftermath_row)
-	var aftermath_label:=Label.new(); aftermath_label.text="BATTLE DECISION"; aftermath_label.add_theme_color_override("font_color",GOLD); aftermath_row.add_child(aftermath_label)
+	aftermath_label=Label.new(); aftermath_label.text="BATTLE DECISION"; aftermath_label.add_theme_color_override("font_color",GOLD); aftermath_row.add_child(aftermath_label)
 	prisoner_policy=_policy_choice(aftermath_row,["hold","release","exchange","parole","ransom","execute","enslave"],"Prisoners")
 	spoils_policy=_policy_choice(aftermath_row,["army stores","reward troops","state treasury","return property","unrestricted plunder"],"Spoils")
 	general_policy=_policy_choice(aftermath_row,["hold","release","ransom","execute"],"Enemy general")
-	_action_button(aftermath_row,"Resolve aftermath",_resolve_aftermath)
+	_action_button(aftermath_row,"Resolve decision",_resolve_aftermath_or_captives)
 
 	feedback=Label.new(); feedback.text="F6 closes this panel. Time continues while it is open."; feedback.custom_minimum_size.x=800; feedback.add_theme_color_override("font_color",MUTED); feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; outer.add_child(feedback)
 	_populate_choices()
@@ -268,7 +269,12 @@ func _refresh()->void:
 	var burden:Dictionary=army.get("economic_burden",{})
 	var reputation:Dictionary=MilitaryCampaign.war_reputation_snapshot()
 	inventory.text=_inventory_summary(army)+"\n\nLogistics %d%%  •  Field supply %d%%\nLabor withheld %d  •  Workshop diversion %d%%\nUpkeep %.2f/day  •  Reputation M%d F%d G%d" % [roundi(float(capabilities.get("logistics_practice",0.0))*100.0),roundi(MilitaryCampaign.field_provision_delivery_ratio()*100.0),int(burden.get("mobilized_citizens",0)),roundi(float(burden.get("workshop_diversion",0.0))*100.0),float(burden.get("currency_upkeep_units",0.0)),roundi(float(reputation.get("mercy",0.0))*100.0),roundi(float(reputation.get("fear",0.0))*100.0),roundi(float(reputation.get("grievance",0.0))*100.0)]
-	aftermath_row.visible=not MilitaryCampaign.pending_aftermath.is_empty()
+	var has_pending_aftermath:=not MilitaryCampaign.pending_aftermath.is_empty()
+	var has_held_captives:=int(army.get("foreign_prisoners",0))>0 or not (army.get("held_generals",[]) as Array).is_empty()
+	var can_manage_held_captives:=has_held_captives and threat.is_empty() and engagement.is_empty()
+	aftermath_row.visible=has_pending_aftermath or can_manage_held_captives
+	aftermath_label.text="BATTLE DECISION" if has_pending_aftermath else "HELD CAPTIVES"
+	spoils_policy.visible=has_pending_aftermath
 	threat_row.visible=not threat.is_empty()
 	if not threat.is_empty(): threat_label.text="⚠  %s — about %d fighters — decision due day %d" % [String(threat.get("title","Threat approaching")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0))]
 	engagement_row.visible=not engagement.is_empty()
@@ -338,8 +344,13 @@ func _queue_repair()->void:
 	_report(MilitaryCampaign.queue_equipment_repair(item,int(produce_count.value)))
 
 
-func _resolve_aftermath()->void:
-	_report(MilitaryCampaign.resolve_aftermath(String(prisoner_policy.get_item_metadata(prisoner_policy.selected)),String(spoils_policy.get_item_metadata(spoils_policy.selected)),String(general_policy.get_item_metadata(general_policy.selected))))
+func _resolve_aftermath_or_captives()->void:
+	var selected_prisoner_policy:=String(prisoner_policy.get_item_metadata(prisoner_policy.selected))
+	var selected_general_policy:=String(general_policy.get_item_metadata(general_policy.selected))
+	if not MilitaryCampaign.pending_aftermath.is_empty():
+		_report(MilitaryCampaign.resolve_aftermath(selected_prisoner_policy,String(spoils_policy.get_item_metadata(spoils_policy.selected)),selected_general_policy))
+	else:
+		_report(MilitaryCampaign.resolve_held_captives(selected_prisoner_policy,selected_general_policy))
 
 
 func _report(result:Dictionary)->void:
