@@ -260,6 +260,12 @@ func _capture_preview_if_requested() -> void:
 	var capture_world_menu := false
 	var capture_society_panel := false
 	var capture_military_panel := false
+	var capture_provisions_panel := false
+	var capture_materials_panel := false
+	var capture_council_panel := false
+	var capture_government_panel := false
+	var capture_candidates_panel := false
+	var capture_audit_root:Control
 	var capture_travel := false
 	var capture_settled := false
 	var capture_growth_years := 0
@@ -290,6 +296,16 @@ func _capture_preview_if_requested() -> void:
 			capture_society_panel = true
 		elif argument == "--capture-military":
 			capture_military_panel = true
+		elif argument == "--capture-provisions":
+			capture_provisions_panel = true
+		elif argument == "--capture-materials":
+			capture_materials_panel = true
+		elif argument == "--capture-council":
+			capture_council_panel = true
+		elif argument == "--capture-government":
+			capture_government_panel = true
+		elif argument == "--capture-candidates":
+			capture_candidates_panel = true
 		elif argument == "--capture-travel":
 			capture_travel = true
 		elif argument == "--capture-settled":
@@ -403,8 +419,10 @@ func _capture_preview_if_requested() -> void:
 		settler_panel.visible = true
 		lens_panel.visible = false
 		_refresh_population_allocations()
+		capture_audit_root=settler_panel
 	if capture_mandate_panel:
 		_open_mandate_panel()
+		capture_audit_root=mandate_panel
 	elif capture_days>0 and mandate_panel:
 		mandate_panel.queue_free()
 		mandate_panel=null
@@ -413,32 +431,69 @@ func _capture_preview_if_requested() -> void:
 			mandate_panel.queue_free()
 			mandate_panel=null
 		_open_population_ledger()
+		capture_audit_root=population_ledger_panel
 	if capture_naming_panel:
 		if mandate_panel:
 			mandate_panel.queue_free()
 			mandate_panel=null
 		_open_settlement_naming_panel()
+		capture_audit_root=settlement_naming_panel
 	if capture_knowledge_panel:
 		if mandate_panel:
 			mandate_panel.queue_free()
 			mandate_panel=null
 		_open_knowledge_panel()
+		capture_audit_root=knowledge_panel
 	if capture_world_menu:
 		if mandate_panel:
 			mandate_panel.queue_free()
 			mandate_panel=null
 		_open_world_menu()
+		capture_audit_root=world_menu_panel
 	if capture_society_panel:
 		if mandate_panel:
 			mandate_panel.queue_free()
 			mandate_panel=null
 		_open_society_panel()
+		capture_audit_root=society_panel
 	if capture_military_panel:
 		if mandate_panel:
 			mandate_panel.queue_free()
 			mandate_panel=null
 		if not MilitaryCommandUI.modal.visible:
 			MilitaryCommandUI._toggle()
+		capture_audit_root=MilitaryCommandUI.modal
+	if capture_provisions_panel:
+		if mandate_panel:
+			mandate_panel.queue_free()
+			mandate_panel=null
+		_open_provisions_panel()
+		capture_audit_root=provisions_panel
+	if capture_materials_panel:
+		if mandate_panel:
+			mandate_panel.queue_free()
+			mandate_panel=null
+		_open_materials_panel()
+		capture_audit_root=materials_panel
+	if capture_council_panel:
+		if mandate_panel:
+			mandate_panel.queue_free()
+			mandate_panel=null
+		_open_council_panel()
+		capture_audit_root=council_panel
+	if capture_government_panel:
+		if mandate_panel:
+			mandate_panel.queue_free()
+			mandate_panel=null
+		_open_government_panel()
+		capture_audit_root=government_panel
+	if capture_candidates_panel:
+		if mandate_panel:
+			mandate_panel.queue_free()
+			mandate_panel=null
+		_open_advisor_candidates("Steward")
+		_inspect_leader(0)
+		capture_audit_root=leader_panel
 	if capture_zoom > 0.0:
 		camera_target = settler_marker.position
 		camera.size = capture_zoom
@@ -448,6 +503,13 @@ func _capture_preview_if_requested() -> void:
 		_update_scale_lod()
 	for frame in 18:
 		await get_tree().process_frame
+	if capture_audit_root:
+		var audit_failures:=_capture_ui_bounds_failures(capture_audit_root)
+		if not audit_failures.is_empty():
+			for failure in audit_failures:
+				push_error(failure)
+			get_tree().quit(1)
+			return
 	if DisplayServer.get_name()!="headless":
 		var image := get_viewport().get_texture().get_image()
 		if image:
@@ -464,6 +526,29 @@ func _capture_preview_if_requested() -> void:
 	print("MORPHOLOGY RENDER ",JSON.stringify(morphology_debug))
 	print("SIMULATION SNAPSHOT ",JSON.stringify({"day":GameState.elapsed_days,"population":GameState.population_total,"births":GameState.lifetime_births,"deaths":GameState.lifetime_deaths,"traveling":travel_active,"halt_reason":GameState.convoy_emergency_halt_reason,"allocations":GameState.population_allocations,"allocation_percentages":GameState.population_allocation_percentages,"metrics":GameState.simulation_metrics,"works":GameState.settlement_completed,"discoveries":GameState.known_discoveries,"goal":GameState.campaign_goal.get("title","")}))
 	get_tree().quit()
+
+
+func _capture_ui_bounds_failures(root:Control)->Array[String]:
+	var failures:Array[String]=[]
+	var viewport_rect:=get_viewport().get_visible_rect()
+	var pending:Array[Node]=[root]
+	while not pending.is_empty():
+		var node:Node=pending.pop_back()
+		for child in node.get_children(): pending.append(child)
+		if not node is Button or not (node as Button).is_visible_in_tree(): continue
+		var button:=node as Button
+		var inside_scroll:=false
+		var ancestor:=button.get_parent()
+		while ancestor and ancestor!=root:
+			if ancestor is ScrollContainer:
+				inside_scroll=true
+				break
+			ancestor=ancestor.get_parent()
+		if inside_scroll: continue
+		var rect:=button.get_global_rect()
+		if rect.position.x<viewport_rect.position.x-1.0 or rect.position.y<viewport_rect.position.y-1.0 or rect.end.x>viewport_rect.end.x+1.0 or rect.end.y>viewport_rect.end.y+1.0:
+			failures.append("UI button '%s' leaves the viewport: %s within %s" % [button.text,rect,viewport_rect])
+	return failures
 
 func _configure_preview_province() -> void:
 	GameState.world_seed = 184271
@@ -5614,6 +5699,18 @@ func _open_materials_panel() -> void:
 	close.custom_minimum_size=Vector2(150,38)
 	close.pressed.connect(func(): materials_panel.queue_free(); materials_panel=null)
 	footer.add_child(close)
+	_constrain_modal_labels(root)
+
+
+func _constrain_modal_labels(root:Node)->void:
+	# Long live-data strings must wrap inside their assigned column instead of
+	# increasing the container's minimum width and pushing controls off-screen.
+	for child in root.get_children():
+		if child is Label:
+			var label:=child as Label
+			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		_constrain_modal_labels(child)
 
 func _material_stage_color(stage:String)->Color:
 	return {"recognized":Color("#9a835b"),"surveyed":Color("#7c9291"),"accessible":Color("#789a78"),"developed":Color("#c2a15e")}.get(stage,Color("#777d79"))
