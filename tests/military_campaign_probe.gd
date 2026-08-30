@@ -192,6 +192,9 @@ func _run()->void:
 	var released_citizen:Dictionary=GameState.citizen_by_id(int(stood_down.citizen_ids[0]))
 	assert(String(released_citizen.army_status)=="civilian")
 	assert(is_equal_approx(float(released_citizen.get("military_experience",0.0)),float(experience_before_stand_down[int(released_citizen.id)])))
+	released_citizen["service_strain"]=0.5
+	MilitaryCampaign._process_service_rest_day()
+	assert(float(released_citizen.service_strain)<0.5)
 	assert(MilitaryCampaign.validate_state().is_empty())
 	GameState.simulation_metrics["food_intake_ratio"]=0.0
 	GameState.population_allocations["Logistics"]=0
@@ -231,5 +234,20 @@ func _run()->void:
 	assert(allocated_total==GameState.able_population())
 	var cost:Dictionary=MilitaryCampaign.campaign_army_snapshot().mobilization_cost
 	assert(int(cost.citizens_withheld)==locked_count)
+	var stranded_recoveree:=released_citizen
+	stranded_recoveree["army_status"]="scattered"
+	stranded_recoveree["role"]="Defense"
+	stranded_recoveree["pre_army_role"]="Food"
+	MilitaryCampaign.home_army.scattered_ids.append(int(stranded_recoveree.id))
+	MilitaryCampaign.home_army["scattered_pool"]=(MilitaryCampaign.home_army.scattered_ids as Array).size()
+	for formation in MilitaryCampaign.home_army.formations:
+		formation["authorized_count"]=int(formation.count)
+		formation["equipment_required"]=int(formation.count)
+	MilitaryCampaign.home_army["scattered_recovery_accumulator"]=1.0
+	MilitaryCampaign._process_military_day()
+	assert(int(stranded_recoveree.id) in MilitaryCampaign.recruit_pool)
+	assert(int(stranded_recoveree.id) not in (MilitaryCampaign.home_army.scattered_ids as Array))
+	assert(String(stranded_recoveree.army_status)=="recruit")
+	assert(MilitaryCampaign.validate_state().is_empty())
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

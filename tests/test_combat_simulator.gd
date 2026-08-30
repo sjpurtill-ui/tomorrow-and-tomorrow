@@ -126,6 +126,7 @@ func test_preparation_day_restores_organization_and_delivers_limited_equipment()
 
 func test_fractional_recovery_eventually_returns_single_casualties() -> void:
 	var force:Dictionary=simulator.create_formation_force("Recovering",[{"unit":"levy","weapon":"improvised","count":8,"authorized_count":10,"equipment":10,"equipment_required":10}],0.7)
+	assert_int(force.reserve_manpower).is_equal(0)
 	force["scattered_pool"]=1
 	force["wounded_pool"]=1
 	for day in 20:

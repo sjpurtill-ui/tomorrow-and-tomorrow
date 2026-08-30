@@ -92,7 +92,9 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		"armor": armor_total / divisor,
 		"penetration": penetration_total / divisor,
 		"formations": normalized,
-		"reserve_manpower":maxi(0,roundi(float(troops)*0.20)),
+		# Campaign reserves must be backed by actual citizens. Callers may supply
+		# reserve_manpower explicitly, but forming a unit cannot conjure another 20%.
+		"reserve_manpower":0,
 		"wounded_pool":0,
 		"scattered_pool":0,
 		"dead":0
@@ -309,7 +311,7 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	prepared["reserve_manpower"]=reserves_available-from_reserves
 	prepared["formations"]=formations
 	prepared["troops"]=_formation_manpower(formations)
-	return {"force":prepared,"equipment_delivered":delivered,"equipment_unused":available_equipment,"manpower_rejoined":integrated,"scattered_returned":from_scattered,"wounded_returned":from_wounded,"reserves_arrived":from_reserves,"manpower_waiting_for_equipment":manpower_queue}
+	return {"force":prepared,"equipment_delivered":delivered,"equipment_unused":available_equipment,"manpower_rejoined":integrated,"scattered_recovered":scattered_return,"wounded_recovered":wounded_return,"scattered_returned":from_scattered,"wounded_returned":from_wounded,"reserves_arrived":from_reserves,"manpower_waiting_for_equipment":manpower_queue}
 
 
 func _formation_manpower(formations: Array) -> int:

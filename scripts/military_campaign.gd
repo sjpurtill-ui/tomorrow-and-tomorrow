@@ -727,6 +727,7 @@ func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 
 
 func _process_military_day()->void:
+	_process_service_rest_day()
 	_process_equipment_production_day()
 	_process_training_injuries_day()
 	_process_training_day()
@@ -742,10 +743,36 @@ func _process_military_day()->void:
 	home_army=prepared.force
 	_rejoin_recovered_citizens("scattered_ids",int(prepared.scattered_returned))
 	_rejoin_recovered_citizens("wounded_ids",int(prepared.wounded_returned))
+	_release_recovered_to_recruits("scattered_ids",int(prepared.get("scattered_recovered",prepared.scattered_returned))-int(prepared.scattered_returned))
+	_release_recovered_to_recruits("wounded_ids",int(prepared.get("wounded_recovered",prepared.wounded_returned))-int(prepared.wounded_returned))
 	home_army["equipment_delivered_today"]=delivered
 	_refresh_readiness()
 	home_army["campaign_day"]=int(GameState.elapsed_days)
 	army_changed.emit(home_army.duplicate(true))
+
+
+func _process_service_rest_day()->void:
+	for citizen in GameState.living_citizens():
+		if String(citizen.get("army_status","civilian")) not in ["civilian","deserter",""]: continue
+		var strain:=float(citizen.get("service_strain",0.0))
+		if strain<=0.0: continue
+		citizen["service_strain"]=move_toward(strain,0.0,0.006+_adoption("battlefield_medicine")*0.003)
+
+
+func _release_recovered_to_recruits(pool_name:String,count:int)->void:
+	var remaining:=maxi(0,count)
+	if remaining<=0: return
+	var pool:Array=(home_army.get(pool_name,[]) as Array).duplicate()
+	var numeric_name:="wounded_pool" if pool_name=="wounded_ids" else "scattered_pool"
+	while remaining>0 and not pool.is_empty():
+		var citizen_id:=int(pool.pop_front())
+		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+		if not citizen.is_empty() and bool(citizen.get("alive",true)):
+			citizen["army_status"]="recruit"
+			if citizen_id not in recruit_pool: recruit_pool.append(citizen_id)
+		remaining-=1
+	home_army[pool_name]=pool
+	home_army[numeric_name]=pool.size()
 
 
 func _process_service_strain_day()->Dictionary:
