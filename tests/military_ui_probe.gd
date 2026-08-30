@@ -41,16 +41,18 @@ func _ready()->void:
 	if not MilitaryCommandUI.aftermath_row.visible: failures.append("Pending battle aftermath is not exposed.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Aftermath controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.pending_aftermath.clear()
-	MilitaryCampaign.active_threat={"title":"Probe raiders","estimated_strength":12,"deadline_day":9}
+	MilitaryCampaign.active_threat={"title":"Probe raiders","estimated_strength":12,"deadline_day":9,"enemy_force":MilitaryCampaign.simulator.create_formation_force("Probe Raiders",[{"id":90,"unit":"levy","weapon":"improvised","count":12,"equipment":10}],0.68,0.60)}
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if not MilitaryCommandUI.threat_row.visible: failures.append("An approaching threat is not exposed in military command.")
+	if "RELATIVE STRENGTH" not in MilitaryCommandUI.summary.text: failures.append("An approaching threat has no relative-strength preview.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Threat controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.active_threat.clear()
-	MilitaryCampaign.active_engagement={"round":2,"last_order":"push","attacker":{"name":"River Host","troops":18},"defender":{"name":"Raiders","troops":11}}
+	MilitaryCampaign.active_engagement={"round":2,"last_order":"push","attacker":MilitaryCampaign.home_army.duplicate(true),"defender":MilitaryCampaign.simulator.create_formation_force("Raiders",[{"id":91,"unit":"levy","weapon":"improvised","count":44,"equipment":40}],0.72,0.68)}
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if not MilitaryCommandUI.engagement_row.visible: failures.append("A live campaign engagement does not expose round orders.")
+	if "RELATIVE STRENGTH" not in MilitaryCommandUI.summary.text or "Relative effective strength" not in MilitaryCommandUI.condition.tooltip_text: failures.append("A live battle does not switch the top bar to relative strength.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Live battle controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.active_engagement.clear()
 	if not panel.visible: failures.append("Military modal did not open.")

@@ -223,13 +223,23 @@ func _refresh()->void:
 	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	var capabilities:Dictionary=MilitaryCampaign.military_capabilities()
 	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
+	var threat:Dictionary=MilitaryCampaign.threat_snapshot()
 	var display_force:Dictionary=(engagement.get("attacker",{}) as Dictionary) if not engagement.is_empty() else army
-	var display_opponent:Dictionary=(engagement.get("defender",{}) as Dictionary) if not engagement.is_empty() else {}
+	var display_opponent:Dictionary=(engagement.get("defender",{}) as Dictionary) if not engagement.is_empty() else ((threat.get("enemy_force",{}) as Dictionary) if not threat.is_empty() else {})
 	var combat:Dictionary=MilitaryCampaign.combat_summary(display_force,display_opponent,1.0)
 	var troops:=int(army.get("troops",0)); var ready:=float(combat.get("readiness",army.get("readiness",0.0))); var capacity:=int(capabilities.get("recruitment_capacity",0))
-	summary.text="DAY %d     %d FIELD SOLDIERS     ⚔ %.1f ATTACK     🛡 %.1f DEFENSE     %d / %d MOBILIZED" % [int(GameState.elapsed_days),int(combat.get("troops",troops)),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),MilitaryCampaign._mobilized_count(),capacity]
-	condition.value=ready*100.0
-	condition.tooltip_text="Aggregate readiness: personnel condition, training, equipment, ammunition, supply, morale, and leadership."
+	if display_opponent.is_empty():
+		summary.text="DAY %d     %d FIELD SOLDIERS     ⚔ %.1f ATTACK     🛡 %.1f DEFENSE     %d / %d MOBILIZED" % [int(GameState.elapsed_days),int(combat.get("troops",troops)),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),MilitaryCampaign._mobilized_count(),capacity]
+		condition.value=ready*100.0
+		condition.tooltip_text="Aggregate readiness: personnel condition, training, equipment, ammunition, supply, morale, and leadership."
+	else:
+		var opponent_combat:Dictionary=MilitaryCampaign.combat_summary(display_opponent,display_force,MilitaryCampaign._terrain_defense())
+		var own_strength:=maxf(0.0,float(combat.get("effective_strength",0.0)))
+		var enemy_strength:=maxf(0.0,float(opponent_combat.get("effective_strength",0.0)))
+		var relative_share:=own_strength/maxf(0.001,own_strength+enemy_strength)
+		summary.text="DAY %d   ⚔ %.1f  🛡 %.1f     %s %d%%  —  RELATIVE STRENGTH  —  %d%% %s" % [int(GameState.elapsed_days),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),String(display_force.get("name","Our host")).to_upper(),roundi(relative_share*100.0),roundi((1.0-relative_share)*100.0),String(display_opponent.get("name","Enemy")).to_upper()]
+		condition.value=relative_share*100.0
+		condition.tooltip_text="Relative effective strength after cohort matchups, terrain, equipment, condition, readiness, and leadership."
 	var readiness_components:Dictionary=combat.get("readiness_components",{})
 	var weakest_key:=""; var weakest_value:=2.0
 	for key in readiness_meters:
@@ -259,7 +269,6 @@ func _refresh()->void:
 	var reputation:Dictionary=MilitaryCampaign.war_reputation_snapshot()
 	inventory.text=_inventory_summary(army)+"\n\nLogistics %d%%  •  Field supply %d%%\nLabor withheld %d  •  Workshop diversion %d%%\nUpkeep %.2f/day  •  Reputation M%d F%d G%d" % [roundi(float(capabilities.get("logistics_practice",0.0))*100.0),roundi(MilitaryCampaign.field_provision_delivery_ratio()*100.0),int(burden.get("mobilized_citizens",0)),roundi(float(burden.get("workshop_diversion",0.0))*100.0),float(burden.get("currency_upkeep_units",0.0)),roundi(float(reputation.get("mercy",0.0))*100.0),roundi(float(reputation.get("fear",0.0))*100.0),roundi(float(reputation.get("grievance",0.0))*100.0)]
 	aftermath_row.visible=not MilitaryCampaign.pending_aftermath.is_empty()
-	var threat:Dictionary=MilitaryCampaign.threat_snapshot()
 	threat_row.visible=not threat.is_empty()
 	if not threat.is_empty(): threat_label.text="⚠  %s — about %d fighters — decision due day %d" % [String(threat.get("title","Threat approaching")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0))]
 	engagement_row.visible=not engagement.is_empty()
