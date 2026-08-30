@@ -202,6 +202,7 @@ func _empty_home_army()->Dictionary:
 	force["soldier_ids"]=[]
 	force["wounded_ids"]=[]
 	force["scattered_ids"]=[]
+	force["captured_ids"]=[]
 	force["campaign_day"]=int(GameState.elapsed_days)
 	return force
 
@@ -385,6 +386,7 @@ func _complete_training(training:Dictionary)->void:
 	rebuilt["reserve_manpower"]=int(home_army.get("reserve_manpower",0))
 	rebuilt["wounded_ids"]=home_army.get("wounded_ids",[]).duplicate()
 	rebuilt["scattered_ids"]=home_army.get("scattered_ids",[]).duplicate()
+	rebuilt["captured_ids"]=home_army.get("captured_ids",[]).duplicate()
 	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
 	for citizen_id in training.soldier_ids:
 		soldier_ids.append(int(citizen_id))
@@ -478,13 +480,29 @@ func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:D
 
 
 func _mark_home_prisoners(count:int)->void:
-	var marked:=0
-	for soldier_id in home_army.get("soldier_ids",[]):
-		if marked>=count: break
+	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
+	var captured_ids:Array=home_army.get("captured_ids",[]).duplicate()
+	var marked:=mini(maxi(0,count),soldier_ids.size())
+	for index in marked:
+		var soldier_id:=int(soldier_ids.pop_back())
 		var citizen:Dictionary=GameState.citizen_by_id(int(soldier_id))
 		if citizen.is_empty(): continue
 		citizen["army_status"]="captured"
-		marked+=1
+		captured_ids.append(soldier_id)
+	var remaining_to_remove:=marked
+	var formations:Array=home_army.get("formations",[])
+	for index in range(formations.size()-1,-1,-1):
+		if remaining_to_remove<=0: break
+		var formation:Dictionary=formations[index]
+		var removed:=mini(remaining_to_remove,int(formation.get("count",0)))
+		formation["count"]=int(formation.get("count",0))-removed
+		formation["equipment"]=maxi(0,int(formation.get("equipment",0))-removed)
+		formations[index]=formation
+		remaining_to_remove-=removed
+	home_army["formations"]=formations
+	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-marked)
+	home_army["soldier_ids"]=soldier_ids
+	home_army["captured_ids"]=captured_ids
 
 
 func _record_council_battle(result:Dictionary)->void:
