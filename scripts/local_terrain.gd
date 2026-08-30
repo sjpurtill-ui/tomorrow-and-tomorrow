@@ -7324,7 +7324,8 @@ func _update_time_interface() -> void:
 	if population_summary_label:
 		var balance := float(GameState.simulation_metrics.get("food_balance",-1.0))
 		var balance_mark := "▲" if balance>=0.0 else "▼"
-		population_summary_label.text = "POP %s  •  HEALTH %d%%  •  LIFE %.0fY" % [_compact_population(GameState.population_total),roundi(GameState.population_health*100.0),GameState.projected_life_expectancy()]
+		population_summary_label.text = "POP %s  •  HEALTH %d%%" % [_compact_population(GameState.population_total),roundi(GameState.population_health*100.0)]
+		population_summary_label.tooltip_text = "Open People management. Projected life expectancy: %.1f years." % GameState.projected_life_expectancy()
 		if provisions_button:
 			var net:=float(GameState.simulation_metrics.get("food_net",0.0))
 			provisions_button.text="FOOD  %.1f DAYS %s  •  %+.1f TODAY" % [float(GameState.simulation_metrics.get("food_days",30.0)),balance_mark,net]
@@ -7354,7 +7355,7 @@ func _update_time_interface() -> void:
 	elif GameState.settlement_site_committed and "Hearth Circle" not in GameState.settlement_completed:
 		travel_status_label.text="SETTLEMENT FOUNDING  •  HEARTH CIRCLE EMERGING FROM CURRENT ROLES"
 	elif placement_building == "":
-		travel_status_label.text = ""
+		travel_status_label.text = "LEFT-CLICK LAND TO MOVE OR INSPECT  •  MOUSE WHEEL TO ZOOM  •  START SETTLEMENT WHEN READY"
 	if start_settlement_button:
 		start_settlement_button.visible=not GameState.settlement_site_committed and settler_marker!=null
 		if travel_active:

@@ -9,6 +9,7 @@ const RED:=Color("#dc806f")
 const BLUE:=Color("#75acd9")
 
 var layer:CanvasLayer
+var open_button:Button
 var modal:PanelContainer
 var summary:Label
 var condition:ProgressBar
@@ -46,6 +47,10 @@ func _ready()->void:
 
 
 func _process(delta:float)->void:
+	# Campaign dialogs are full-screen Controls on the current scene. Keep the
+	# global shortcut out of their reading order while leaving it available beside
+	# the normal top-bar navigation.
+	open_button.visible=modal.visible or not _campaign_modal_is_open()
 	refresh_accumulator+=delta
 	if modal.visible and refresh_accumulator>=0.5:
 		refresh_accumulator=0.0
@@ -58,16 +63,33 @@ func _unhandled_key_input(event:InputEvent)->void:
 		get_viewport().set_input_as_handled()
 
 
+func _campaign_modal_is_open()->bool:
+	var scene:=get_tree().current_scene
+	if scene==null:
+		return false
+	var viewport_size:=get_viewport().get_visible_rect().size
+	var pending:Array[Node]=[scene]
+	while not pending.is_empty():
+		var node:Node=pending.pop_back()
+		for child in node.get_children():
+			pending.append(child)
+		if node is Control:
+			var control:=node as Control
+			if control.is_visible_in_tree() and control.mouse_filter==Control.MOUSE_FILTER_STOP and control.size.x>=viewport_size.x*0.8 and control.size.y>=viewport_size.y*0.8:
+				return true
+	return false
+
+
 func _build_interface()->void:
 	layer=CanvasLayer.new()
-	layer.layer=90
+	layer.layer=2
 	add_child(layer)
-	var open_button:=Button.new()
+	open_button=Button.new()
 	open_button.text="⚔  MILITARY"
 	open_button.tooltip_text="Open military command (F6)"
 	open_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	open_button.position=Vector2(-150,14)
-	open_button.size=Vector2(136,38)
+	open_button.position=Vector2(-150,53)
+	open_button.size=Vector2(136,32)
 	open_button.pressed.connect(_toggle)
 	layer.add_child(open_button)
 
