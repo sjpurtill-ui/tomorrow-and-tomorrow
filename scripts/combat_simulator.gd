@@ -640,7 +640,7 @@ func _termination_event(outcome: String,attacker: Dictionary,defender: Dictionar
 	elif prisoners>0: summary="%s escapes, leaving %d prisoners behind." % [loser_name,prisoners]
 	summary+="  %s is %s." % [commander_name,commander_fate]
 	var spoils:=_battle_spoils(loser,winner,termination_type,rng)
-	return {"type":termination_type,"summary":summary,"prisoners":prisoners,"captor":winner_name,"defeated":loser_name,"commander":commander_name,"commander_fate":commander_fate,"captured_general":captured_general,"spoils":spoils}
+	return {"type":termination_type,"summary":summary,"prisoners":prisoners,"captor":winner_name,"defeated":loser_name,"commander":commander_name,"commander_record":loser_commander.duplicate(true),"commander_fate":commander_fate,"captured_general":captured_general,"spoils":spoils}
 
 
 func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: String,rng: RandomNumberGenerator) -> Dictionary:

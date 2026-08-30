@@ -534,6 +534,14 @@ func _run()->void:
 		var released_held:Dictionary=MilitaryCampaign.resolve_held_prisoners("release",1)
 		assert(int(released_held.disposed)==1)
 		assert(MilitaryCampaign.foreign_prisoners==held_before-1)
+	var preserved_general_outcome:Dictionary={}
+	MilitaryCampaign._apply_campaign_general_policy("hold",{"commander":"Preserved captain","commander_record":{"name":"Preserved captain","command":0.73,"tactics":0.81,"logistics":0.46,"resolve":0.67}},preserved_general_outcome)
+	assert(is_equal_approx(float(MilitaryCampaign.held_generals[-1].tactics),0.81))
+	var preserved_general_save:=MilitaryCampaign.export_state()
+	MilitaryCampaign.held_generals.clear()
+	assert(bool(MilitaryCampaign.import_state(preserved_general_save).get("ok",false)))
+	assert(is_equal_approx(float(MilitaryCampaign.held_generals[-1].command),0.73))
+	assert(not MilitaryCampaign.resolve_held_general(MilitaryCampaign.held_generals.size()-1,"release").has("error"))
 	MilitaryCampaign.held_generals.append({"name":"Test captive","captured_day":0})
 	var coin_before_general_ransom:=float(GameState.resource_stockpiles.get("Coin",0.0))
 	var general_disposition:Dictionary=MilitaryCampaign.resolve_held_general(0,"ransom")
@@ -788,6 +796,12 @@ func _run()->void:
 	invalid_military_save.home_army.formations[0]["authorized_count"]=int(invalid_military_save.home_army.formations[0].count)-1
 	var invalid_import:Dictionary=MilitaryCampaign.import_state(invalid_military_save)
 	assert(String(invalid_import.get("error",""))=="Invalid military save state.")
+	assert(MilitaryCampaign.validate_state().is_empty())
+	var invalid_captive_save:Dictionary=MilitaryCampaign.export_state()
+	invalid_captive_save["held_generals"]=[{"name":"","captured_day":int(GameState.elapsed_days),"command":0.5,"tactics":0.5,"logistics":0.5,"resolve":0.5}]
+	var invalid_captive_import:Dictionary=MilitaryCampaign.import_state(invalid_captive_save)
+	assert(String(invalid_captive_import.get("error",""))=="Invalid military save state.")
+	assert(str(invalid_captive_import.get("details",[])).contains("must have a name"))
 	assert(MilitaryCampaign.validate_state().is_empty())
 	var captive_reputation:Dictionary=MilitaryCampaign.war_reputation.duplicate(true)
 	var captive_candidate:Dictionary=GameState.citizen_by_id(int(MilitaryCampaign.home_army.soldier_ids[-1]))

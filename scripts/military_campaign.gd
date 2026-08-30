@@ -740,7 +740,7 @@ func _retreat_termination(attacker:Dictionary,defender:Dictionary,battle_seed:in
 	var summary:="%s breaks contact under pursuit" % String(attacker.get("name","The withdrawing army"))
 	if prisoners>0: summary+=", leaving %d stragglers captive" % prisoners
 	summary+=". %s is %s." % [String(commander.get("name","The commander")),commander_fate]
-	return {"type":"withdrawal","summary":summary,"defeated":String(attacker.get("name","Attacker")),"captor":String(defender.get("name","Defender")),"prisoners":prisoners,"spoils":spoils,"captured_general":captured_general,"commander":String(commander.get("name","The commander")),"commander_fate":commander_fate,"pursuit_pressure":pursuit_pressure}
+	return {"type":"withdrawal","summary":summary,"defeated":String(attacker.get("name","Attacker")),"captor":String(defender.get("name","Defender")),"prisoners":prisoners,"spoils":spoils,"captured_general":captured_general,"commander":String(commander.get("name","The commander")),"commander_record":commander.duplicate(true),"commander_fate":commander_fate,"pursuit_pressure":pursuit_pressure}
 
 
 func respond_to_threat(response:String)->Dictionary:
@@ -1111,6 +1111,15 @@ func validate_state()->Array[String]:
 	for item in damaged_equipment:
 		if int(damaged_equipment[item])<0: errors.append("Damaged-equipment inventory for %s is negative." % item)
 	if foreign_prisoners<0 or prisoner_custody_days<0 or escaped_prisoners_total<0: errors.append("Prisoner custody counters cannot be negative.")
+	if not is_finite(prisoner_escape_accumulator) or prisoner_escape_accumulator<0.0: errors.append("Prisoner escape accumulation must be finite and nonnegative.")
+	for held_general in held_generals:
+		var held_name:=String(held_general.get("name","")).strip_edges()
+		var captured_day:=int(held_general.get("captured_day",-1))
+		if held_name=="": errors.append("Held commander must have a name.")
+		if captured_day<0 or captured_day>int(GameState.elapsed_days): errors.append("Held commander capture day is outside the campaign timeline.")
+		for skill in ["command","tactics","logistics","resolve"]:
+			var skill_value:=float(held_general.get(skill,0.5))
+			if not is_finite(skill_value) or skill_value<0.0 or skill_value>1.0: errors.append("Held commander skill %s is outside its valid range." % skill)
 	if not active_threat.is_empty() and not active_engagement.is_empty(): errors.append("A pending threat and active engagement cannot coexist.")
 	if not active_engagement.is_empty():
 		if int(active_engagement.get("round",-1))<0 or int(active_engagement.get("round",0))>CombatSimulator.MAX_ROUNDS: errors.append("Active engagement round is outside battle limits.")
@@ -1173,7 +1182,10 @@ func _apply_imported_state(payload:Dictionary)->void:
 	equipment_queue.assign(payload.get("equipment_queue",[]))
 	_normalize_equipment_jobs()
 	foreign_prisoners=maxi(0,int(payload.get("foreign_prisoners",0)))
-	held_generals.assign(payload.get("held_generals",[]))
+	held_generals.clear()
+	for held_general_variant in payload.get("held_generals",[]):
+		if held_general_variant is Dictionary: held_generals.append((held_general_variant as Dictionary).duplicate(true))
+		else: held_generals.append({})
 	next_training_order_id=int(payload.get("next_training_order_id",_next_available_training_order_id()))
 	next_formation_id=int(payload.get("next_formation_id",_next_available_formation_id()))
 	next_equipment_job_id=int(payload.get("next_equipment_job_id",_next_available_equipment_job_id()))
@@ -2446,7 +2458,10 @@ func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dicti
 
 
 func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:Dictionary)->void:
-	var general:={"name":String(aftermath.get("commander","Unknown commander")),"captured_day":int(GameState.elapsed_days)}
+	var general:Dictionary=(aftermath.get("commander_record",{}) as Dictionary).duplicate(true)
+	general["name"]=String(general.get("name",aftermath.get("commander","Unknown commander")))
+	general["captured_day"]=int(GameState.elapsed_days)
+	for skill in ["command","tactics","logistics","resolve"]: general[skill]=clampf(float(general.get(skill,0.5)),0.0,1.0)
 	if policy.to_lower()=="hold": held_generals.append(general)
 	elif policy.to_lower()=="ransom":
 		outcome["general_war_wealth_receipt"]=_receive_war_wealth(50.0,"state treasury","Ransom for captured enemy commander")

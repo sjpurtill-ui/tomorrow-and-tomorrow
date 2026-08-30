@@ -284,7 +284,12 @@ func _refresh()->void:
 	var missing:Dictionary=MilitaryCampaign.home_captive_snapshot()
 	var custody_line:="\n\nPOW %d  •  GEN %d  •  OUR MISSING %d" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size(),int(missing.get("count",0))]
 	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n".join(formation_lines))+custody_line
-	formations.tooltip_text="Missing soldiers may return through exchange or a daily captivity check. Current average return chance: %.2f%%/day; oldest captivity: %d days." % [float(missing.get("average_daily_return_chance",0.0))*100.0,int(missing.get("oldest_days",0))]
+	var captive_tooltip:="Missing soldiers may return through exchange or a daily captivity check. Current average return chance: %.2f%%/day; oldest captivity: %d days." % [float(missing.get("average_daily_return_chance",0.0))*100.0,int(missing.get("oldest_days",0))]
+	var held_commander_lines:Array[String]=[]
+	for held_general in (army.get("held_generals",[]) as Array).slice(0,3):
+		held_commander_lines.append("%s — CMD %d  TAC %d  LOG %d  RES %d" % [String(held_general.get("name","Unknown commander")),roundi(float(held_general.get("command",0.5))*100.0),roundi(float(held_general.get("tactics",0.5))*100.0),roundi(float(held_general.get("logistics",0.5))*100.0),roundi(float(held_general.get("resolve",0.5))*100.0)])
+	if not held_commander_lines.is_empty(): captive_tooltip+="\nHeld commanders:\n"+"\n".join(held_commander_lines)
+	formations.tooltip_text=captive_tooltip
 	var commander:Dictionary=combat.get("commander",{})
 	var portrait_index:=posmod(hash(String(commander.get("name","commander"))),6)
 	commander_portrait.texture=_commander_portrait(portrait_index)
