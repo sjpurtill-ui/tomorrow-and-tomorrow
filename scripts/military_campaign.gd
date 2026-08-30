@@ -35,6 +35,7 @@ var escaped_prisoners_total:=0
 var active_threat:Dictionary={}
 var threats_resolved:=0
 var active_engagement:Dictionary={}
+var war_reputation:Dictionary={"mercy":0.0,"fear":0.0,"grievance":0.0}
 
 
 func _ready()->void:
@@ -76,6 +77,7 @@ func reset_for_new_world()->void:
 	active_threat.clear()
 	threats_resolved=0
 	active_engagement.clear()
+	war_reputation={"mercy":0.0,"fear":0.0,"grievance":0.0}
 
 
 func muster_home_army(requested_strength:=-1)->Dictionary:
@@ -498,6 +500,10 @@ func threat_snapshot()->Dictionary:
 	return active_threat.duplicate(true)
 
 
+func war_reputation_snapshot()->Dictionary:
+	return war_reputation.duplicate(true)
+
+
 func engagement_snapshot()->Dictionary:
 	return active_engagement.duplicate(true)
 
@@ -601,7 +607,7 @@ func _process_threat_day()->void:
 	if not GameState.settlement_site_committed or int(GameState.elapsed_days)<90 or not pending_aftermath.is_empty(): return
 	var population:=maxi(1,GameState.living_citizen_count()); var security:=clampf(float(GameState.simulation_metrics.get("security",0.38)),0.0,1.0)
 	var stored_value:=float(GameState.resource_stockpiles.get("Food",0.0))+float(GameState.resource_stockpiles.get("Timber",0.0))*0.5+float(GameState.resource_stockpiles.get("Copper Ore",0.0))*3.0
-	var daily_risk:=clampf(0.00010+(1.0-security)*0.00045+minf(0.00035,stored_value/maxf(1.0,float(population))*0.000004),0.00005,0.0010)
+	var daily_risk:=clampf(0.00010+(1.0-security)*0.00045+minf(0.00035,stored_value/maxf(1.0,float(population))*0.000004)+float(war_reputation.get("grievance",0.0))*0.00020-float(war_reputation.get("mercy",0.0))*0.00005,0.00005,0.0012)
 	var rng:=RandomNumberGenerator.new(); rng.seed=GameState.world_seed^int(GameState.elapsed_days)*104729^threats_resolved*7919
 	if rng.randf()>=daily_risk: return
 	var strength:=clampi(roundi(float(population)*rng.randf_range(0.045,0.11)),3,maxi(3,roundi(float(population)*0.16)))
@@ -612,7 +618,8 @@ func _process_threat_day()->void:
 	elif int(GameState.elapsed_days)>=700:
 		var line:=roundi(float(strength)*0.42); enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength-line,"equipment":strength-line},{"unit":"line_infantry","weapon":"spear","count":line,"equipment":line}]
 	else: enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength,"equipment":strength}]
-	var enemy:Dictionary=simulator.create_formation_force("Border Raiders",enemy_formations,clampf(0.48+security*0.18,0.45,0.72),clampf(0.52+float(GameState.elapsed_days)/30000.0,0.50,0.78))
+	var enemy_morale:=clampf(0.48+security*0.18+float(war_reputation.get("grievance",0.0))*0.12-float(war_reputation.get("fear",0.0))*0.10,0.32,0.88)
+	var enemy:Dictionary=simulator.create_formation_force("Border Raiders",enemy_formations,enemy_morale,clampf(0.52+float(GameState.elapsed_days)/30000.0,0.50,0.78))
 	enemy["commander"]=simulator.create_commander("Raid captain",rng.randf_range(0.32,0.62),rng.randf_range(0.34,0.66),rng.randf_range(0.24,0.55),rng.randf_range(0.38,0.68))
 	active_threat={"id":"threat_%d_%d" % [int(GameState.elapsed_days),threats_resolved],"title":"Hostile force approaching","discovered_day":int(GameState.elapsed_days),"deadline_day":int(GameState.elapsed_days)+7,"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
 	GameState.council_inbox.push_front({"id":String(active_threat.id),"advisor":"Marshal","office":"Marshal","topic":"security","act":{"type":"report"},"text":"Scouts report roughly %d hostile fighters approaching. A response is required within seven days." % strength,"urgency":0.96,"day":int(GameState.elapsed_days),"status":"unread"})
@@ -737,7 +744,8 @@ func export_state()->Dictionary:
 		"escaped_prisoners_total":escaped_prisoners_total,
 		"active_threat":active_threat.duplicate(true),
 		"threats_resolved":threats_resolved,
-		"active_engagement":active_engagement.duplicate(true)
+		"active_engagement":active_engagement.duplicate(true),
+		"war_reputation":war_reputation.duplicate(true)
 	}
 
 
@@ -867,6 +875,8 @@ func _apply_imported_state(payload:Dictionary)->void:
 	active_threat=(payload.get("active_threat",{}) as Dictionary).duplicate(true)
 	threats_resolved=maxi(0,int(payload.get("threats_resolved",0)))
 	active_engagement=(payload.get("active_engagement",{}) as Dictionary).duplicate(true)
+	war_reputation={"mercy":0.0,"fear":0.0,"grievance":0.0}
+	for key in (payload.get("war_reputation",{}) as Dictionary): war_reputation[key]=clampf(float(payload.war_reputation[key]),0.0,1.0)
 
 
 func _empty_home_army()->Dictionary:
@@ -1753,16 +1763,21 @@ func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)
 		outcome["released_prisoners"]=count-returned.size()
 	elif normalized in ["release","parole"]:
 		outcome["released_prisoners"]=count
+		_adjust_war_reputation(float(count)*0.006,0.0,-float(count)*0.004)
 		if normalized=="parole": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.015,0.0,1.0)
 	elif normalized=="ransom":
 		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+count*2.0
 		outcome["ransom_income"]=count*2
+		_adjust_war_reputation(0.0,float(count)*0.001,float(count)*0.003)
 	elif normalized=="execute":
 		outcome["executed_prisoners"]=count
 		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.06,0.0,1.0)
+		_adjust_war_reputation(0.0,float(count)*0.010,float(count)*0.014)
 	elif normalized=="enslave":
 		GameState.resource_stockpiles["Forced Labor"]=float(GameState.resource_stockpiles.get("Forced Labor",0.0))+count
 		outcome["forced_laborers"]=count
+		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))-0.035,0.0,1.0)
+		_adjust_war_reputation(0.0,float(count)*0.006,float(count)*0.012)
 	else:
 		foreign_prisoners+=count
 		outcome["held_prisoners"]=count
@@ -1805,6 +1820,8 @@ func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dicti
 		"unrestricted plunder":
 			GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+(wealth+gear_total*2+consumable_total*0.15+supplies+carts*5)*1.35
 			GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.04,0.0,1.0)
+	if policy.to_lower()=="return property": _adjust_war_reputation(0.04,0.0,-0.025)
+	elif policy.to_lower()=="unrestricted plunder": _adjust_war_reputation(0.0,0.035,0.065)
 	outcome["spoils"]={"gear":gear_total,"ammunition":consumable_total,"supplies":supplies,"carts":carts,"wealth":wealth}
 
 
@@ -1814,11 +1831,20 @@ func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:D
 	elif policy.to_lower()=="ransom":
 		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+50.0
 		outcome["general_ransom_income"]=50
-	elif policy.to_lower()=="release": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
+	elif policy.to_lower()=="release":
+		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
+		_adjust_war_reputation(0.025,0.0,-0.012)
 	elif policy.to_lower()=="execute":
 		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
+		_adjust_war_reputation(0.0,0.06,0.09)
 		outcome["general_executed"]=true
 	outcome["general_policy"]=policy
+
+
+func _adjust_war_reputation(mercy_delta:float,fear_delta:float,grievance_delta:float)->void:
+	war_reputation["mercy"]=clampf(float(war_reputation.get("mercy",0.0))+mercy_delta,0.0,1.0)
+	war_reputation["fear"]=clampf(float(war_reputation.get("fear",0.0))+fear_delta,0.0,1.0)
+	war_reputation["grievance"]=clampf(float(war_reputation.get("grievance",0.0))+grievance_delta,0.0,1.0)
 
 
 func _mark_home_prisoners(count:int)->void:
