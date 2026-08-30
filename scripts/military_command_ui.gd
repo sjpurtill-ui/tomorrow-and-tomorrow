@@ -118,6 +118,7 @@ func _build_interface()->void:
 	var production_row:=HBoxContainer.new(); supply_box.add_child(production_row)
 	produce_count=_counter(production_row,1,100,10)
 	_action_button(production_row,"Queue production",_queue_production)
+	_action_button(production_row,"Repair",_queue_repair)
 
 	threat_row=HBoxContainer.new(); threat_row.add_theme_constant_override("separation",8); outer.add_child(threat_row)
 	threat_label=Label.new(); threat_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL; threat_label.add_theme_color_override("font_color",RED); threat_row.add_child(threat_label)
@@ -294,6 +295,15 @@ func _queue_production()->void:
 	elif item in ["arrows","artillery_rounds"]: result=MilitaryCampaign.queue_consumable_production(item,count)
 	else: result=MilitaryCampaign.queue_equipment_production(item,count)
 	_report(result)
+
+
+func _queue_repair()->void:
+	if equipment_choice.selected<0: return
+	var item:=String(equipment_choice.get_item_metadata(equipment_choice.selected))
+	if item in ["transport_cart","arrows","artillery_rounds"]:
+		_report({"error":"%s is replaced through production, not equipment repair." % item.replace("_"," ").capitalize()})
+		return
+	_report(MilitaryCampaign.queue_equipment_repair(item,int(produce_count.value)))
 
 
 func _resolve_aftermath()->void:

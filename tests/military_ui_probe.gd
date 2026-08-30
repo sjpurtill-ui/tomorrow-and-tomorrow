@@ -13,6 +13,10 @@ func _ready()->void:
 	if MilitaryCommandUI.unit_choice.item_count<6: failures.append("Unit catalog is incomplete.")
 	if MilitaryCommandUI.weapon_choice.item_count!=2: failures.append("Levy training should expose exactly its two compatible weapon families.")
 	if MilitaryCommandUI.equipment_choice.item_count<10: failures.append("Production catalog is incomplete.")
+	MilitaryCommandUI.equipment_choice.select(0)
+	MilitaryCommandUI.produce_count.value=1
+	MilitaryCommandUI._queue_repair()
+	if "No damaged" not in MilitaryCommandUI.feedback.text: failures.append("Repair action is not connected to military equipment state.")
 	if MilitaryCommandUI.commander_portrait.texture==null or "CMD" not in MilitaryCommandUI.commander_details.text: failures.append("Commander portrait or command statistics are missing.")
 	if MilitaryCommandUI.readiness_meters.size()!=6 or "▼" not in MilitaryCommandUI.readiness_bottleneck.text: failures.append("Readiness components or bottleneck display are missing.")
 	if MilitaryCommandUI.prisoner_policy.item_count!=7 or MilitaryCommandUI.spoils_policy.item_count!=5 or MilitaryCommandUI.general_policy.item_count!=4: failures.append("Battle aftermath choices are incomplete.")
