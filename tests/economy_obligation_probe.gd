@@ -18,6 +18,8 @@ func _run_obligation_sequence()->void:
 	GameState.population_total=120
 	GameState.population_exact=120.0
 	GameState.settlement_site_committed=true
+	GameState.settlement_completed=["Hearth Circle"]
+	GameState.water_metrics={"intake_ratio":1.0,"source_accessible":true,"days":3.0}
 	GameState.housing_capacity=120
 	GameState.external_trade_policy="closed"
 	GameState.population_allocations={"Food":45,"Survey":0,"Extraction":0,"Construction":0,"Crafting":0,"Logistics":0,"Knowledge":0,"Administration":0,"Defense":0}

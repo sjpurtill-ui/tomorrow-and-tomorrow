@@ -23,6 +23,8 @@ func _run_scale(population:int)->void:
 	GameState.initialize_citizen_registry()
 	GameState.synchronize_population_allocations()
 	GameState.settlement_site_committed=true
+	GameState.settlement_completed=["Hearth Circle"]
+	GameState.water_metrics={"intake_ratio":1.0,"source_accessible":true,"days":3.0}
 	GameState.housing_capacity=population
 	GameState.external_trade_policy="closed"
 	GameState.simulation_metrics={"food_days":40.0,"food_consumption":float(population),"food_eaten":float(population),"food_intake_ratio":1.0,"food_production":float(population)*1.05,"logistics":0.52,"legitimacy":0.74,"storage_function":0.65}

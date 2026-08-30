@@ -22,6 +22,7 @@ func reset_for_new_world()->void:
 func initialize() -> void:
 	if initialized and not GameState.food_stocks.is_empty():
 		return
+	if GameState.founding_manifest.is_empty(): ResourceSystem.initialize()
 	initialized=true
 	if GameState.food_stocks.is_empty():
 		var existing:=float(GameState.resource_stockpiles.get("Food",GameState.population_exact*30.0))
@@ -49,9 +50,6 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 		GameState.food_stocks[food_type]=float(GameState.food_stocks.get(food_type,0.0))+float(harvest[food_type])
 	var preserved:=_preserve(logistics,makers,traveling)
 	var spoilage:=_spoil(traveling)
-	var storage_loss:=_apply_storage_capacity()
-	for food_type in storage_loss:
-		spoilage[food_type]=float(spoilage.get(food_type,0.0))+float(storage_loss[food_type])
 	var demand:=float(demand_breakdown.total)
 	var army_required:=float(demand_breakdown.get("army_field",0.0))
 	var provision_delivery_ratio:=1.0
@@ -60,6 +58,11 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 	var army_accessible:=army_required*provision_delivery_ratio
 	var accessible_demand:=maxf(0.0,demand-army_required+army_accessible)
 	var consumed:=_consume(accessible_demand)
+	# People can eat today's harvest before excess stock is discarded for lack of
+	# storage. Capacity constrains what survives the day, not what can be consumed.
+	var storage_loss:=_apply_storage_capacity()
+	for food_type in storage_loss:
+		spoilage[food_type]=float(spoilage.get(food_type,0.0))+float(storage_loss[food_type])
 	var eaten:=0.0
 	for amount in consumed.values(): eaten+=float(amount)
 	var intake_ratio:=clampf(eaten/maxf(0.01,demand),0.0,1.0)
@@ -256,7 +259,8 @@ func _spoil(traveling: bool) -> Dictionary:
 
 func _apply_storage_capacity() -> Dictionary:
 	var losses:={}
-	var capacity:=GameState.population_exact*(120.0 if "Storage Pits" in GameState.settlement_completed else 36.0)
+	var capacity:=float(GameState.founding_manifest.get("food_storage_rations",0.0))
+	if "Storage Pits" in GameState.settlement_completed: capacity+=GameState.population_exact*84.0
 	var excess:=maxf(0.0,_stock_total()-capacity)
 	for food_type in ["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"]:
 		if excess<=0.0: break

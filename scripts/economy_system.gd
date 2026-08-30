@@ -41,7 +41,7 @@ func _ensure_state()->void:
 		if not GameState.market_prices.has(resource_name):
 			GameState.market_prices[resource_name]=float(BASE_VALUES[resource_name])
 	if GameState.economy_metrics.is_empty():
-		GameState.economy_metrics={"stage":GameState.economy_stage,"monetization":0.0,"market_access":0.0,"price_index":1.0,"inflation":0.0,"trade_volume":0.0,"tax_revenue":0.0,"subsistence_share":1.0,"metal_reserve":0.0,"money_supply":0.0,"velocity":0.0,"fiscal_balance":0.0}
+		GameState.economy_metrics={"stage":GameState.economy_stage,"monetization":0.0,"market_access":0.0,"price_index":0.0,"price_observations":0,"inflation":0.0,"trade_volume":0.0,"tax_revenue":0.0,"subsistence_share":1.0,"metal_reserve":0.0,"money_supply":0.0,"velocity":0.0,"fiscal_balance":0.0}
 	if GameState.currency_supply>0.0 and GameState.private_currency+GameState.currency_hoards+GameState.public_treasury+GameState.mutual_aid_reserve<=0.0:
 		GameState.private_currency=maxf(0.0,GameState.currency_supply-GameState.public_treasury)
 	var composed_metal:=_weighed_metal_value()
@@ -52,6 +52,9 @@ func _ensure_state()->void:
 
 func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	initialize()
+	for resource_name_variant in GameState.resource_stockpiles:
+		if float(GameState.resource_stockpiles[resource_name_variant])>0.001:
+			GameState.economy_known_goods[String(resource_name_variant)]=true
 	var day:=int(GameState.elapsed_days)
 	if day==last_processed_day: return []
 	last_processed_day=day
@@ -62,7 +65,7 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	var monetization:=_monetization(market_access)
 	var trade_volume:=_trade_volume(market_access,monetization)
 	_update_currency_demand(trade_volume,monetization)
-	var price_index:=_update_prices(market_access)
+	var price_index:=_update_prices(market_access,trade_volume)
 	var external_trade:=_process_external_trade(market_access,trade_volume)
 	var market_volatility:=_market_volatility(price_index,30)
 	var reliability:=_exchange_reliability(market_access,market_volatility)
@@ -79,7 +82,7 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	var revenue:=float(finance.revenue)
 	var upkeep:=float(finance.spending)
 	var fiscal_outlook:=_fiscal_outlook_for(30.0,trade_volume,monetization,military_burden,GameState.public_treasury,GameState.private_currency,GameState.tax_rate)
-	var inflation:=clampf(price_index/maxf(0.01,previous_index)-1.0,-0.25,0.50)
+	var inflation:=clampf(price_index/maxf(0.01,previous_index)-1.0,-0.25,0.50) if price_index>0.0 and previous_index>0.0 else 0.0
 	var available_metal:=_available_metal_value()
 	var reserve:=_monetary_reserve_value()
 	var liquid_money:=maxf(0.0,GameState.private_currency)
@@ -96,7 +99,7 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	_validate_currency_conservation()
 	GameState.economy_metrics={
 		"stage":GameState.economy_stage,"stage_name":STAGE_NAMES[GameState.economy_stage],
-		"monetization":monetization,"market_access":market_access,"price_index":price_index,
+		"monetization":monetization,"market_access":market_access,"price_index":price_index,"price_observations":int(GameState.economy_metrics.get("price_observations",0))+(1 if trade_volume>0.001 else 0),
 		"inflation":inflation,"market_volatility":market_volatility,"trade_volume":trade_volume,"tax_revenue":revenue,"tax_capacity":tax_capacity,"tax_compliance":tax_capacity.compliance,"effective_tax_rate":tax_capacity.effective_rate,"tax_noncompliance_gap":tax_capacity.noncompliance_gap,"tax_liquidity_gap":tax_capacity.liquidity_gap,
 		"public_upkeep":upkeep,"fiscal_balance":revenue-upkeep,
 		"subsistence_share":1.0-monetization,"metal_available":available_metal,"weighed_metal_circulation":GameState.weighed_metal_circulation,"weighed_metal_composition":GameState.weighed_metal_composition.duplicate(true),"metal_exchange":metal_exchange,"metal_trade_turnover":metal_exchange.turnover,"metal_velocity":metal_exchange.velocity,"weighed_metal_losses":GameState.weighed_metal_losses,"metal_reserve":reserve,"reserve_composition":GameState.monetary_reserve_metals.duplicate(true),
@@ -212,11 +215,12 @@ func _transition(next_stage:String,events:Array[Dictionary],reason:String)->void
 	events.append(_event("Exchange Benchmark Reached","%s begins. %s %s" % [STAGE_NAMES[next_stage],reason,("Resource payment remains valid." if next_stage==STAGE_METAL else "Barter and weighed metal remain valid settlement media.")],"major"))
 
 func _market_access(context:Dictionary)->float:
-	if not GameState.settlement_site_committed: return 0.03
+	if not GameState.settlement_site_committed or "Hearth Circle" not in GameState.settlement_completed: return 0.0
+	if float(GameState.water_metrics.get("intake_ratio",0.0))<0.98: return 0.0
 	var logistics:=float(GameState.simulation_metrics.get("logistics",0.16))
 	var admin:=float(GameState.population_allocations.get("Administration",0))/maxf(1.0,GameState.population_exact*0.05)
 	var storage:=float(GameState.simulation_metrics.get("storage_function",0.0))
-	return clampf(0.08+logistics*0.44+admin*0.18+storage*0.12+DiscoverySystem.effect("trade_capacity")*0.32+DiscoverySystem.effect("standardization")*0.24,0.02,1.0)
+	return clampf(logistics*0.36+admin*0.14+storage*0.10+DiscoverySystem.effect("trade_capacity")*0.32+DiscoverySystem.effect("standardization")*0.24,0.0,1.0)
 
 func _monetization(market_access:float)->float:
 	match GameState.economy_stage:
@@ -231,7 +235,11 @@ func _monetization(market_access:float)->float:
 			return clampf((0.12+market_access*0.35+trust*0.35-recent_inflation*0.50)*(0.62+liquid_share*0.38),0.06,0.88)
 		_: return clampf(market_access*0.10,0.0,0.12)
 
-func _update_prices(market_access:float)->float:
+func _update_prices(market_access:float,trade_volume:float=1.0)->float:
+	# A price is evidence from exchange, not a planning estimate.  Preserve the
+	# last observed index on quiet days, but expose zero until a transaction occurs.
+	if trade_volume<=0.001:
+		return float(GameState.economy_metrics.get("price_index",0.0)) if int(GameState.economy_metrics.get("price_observations",0))>0 else 0.0
 	var weighted:=0.0
 	var weights:=0.0
 	var population:=maxf(1.0,GameState.population_exact)
@@ -254,8 +262,10 @@ func _update_prices(market_access:float)->float:
 	return weighted/maxf(1.0,weights)
 
 func _resource_is_economically_known(resource_name:String,stock:float)->bool:
-	if resource_name in ["Food","Timber","Stone","Clay","Fiber Plants"]: return true
 	if stock>0.001: return true
+	# Once any exchange has established a comparison ledger, previously quoted
+	# goods remain requestable even when their local stock reaches zero.
+	if bool(GameState.economy_known_goods.get(resource_name,false)): return true
 	for deposit_variant in GameState.resource_deposits:
 		var deposit:Dictionary=deposit_variant
 		if String(deposit.get("resource",""))==resource_name and String(deposit.get("stage","unknown"))!="unknown": return true
@@ -271,9 +281,12 @@ func _desired_stock(resource_name:String,population:float)->float:
 		_: return population*0.16
 
 func _trade_volume(market_access:float,monetization:float)->float:
+	if market_access<=0.0: return 0.0
 	var delivered:=float(GameState.material_metrics.get("delivered_today",0.0))
-	var food_flow:=maxf(0.0,float(GameState.simulation_metrics.get("food_production",0.0)))
-	return (delivered+food_flow*0.18)*market_access*(0.35+monetization*0.65)
+	var food_surplus:=maxf(0.0,float(GameState.simulation_metrics.get("food_net",float(GameState.simulation_metrics.get("food_production",0.0))-float(GameState.simulation_metrics.get("food_consumption",GameState.population_exact)))))
+	# Only surplus and newly delivered physical goods can change hands. Ordinary
+	# subsistence production is consumption, not trade.
+	return (delivered+food_surplus)*market_access*(0.35+monetization*0.65)
 
 func _process_external_trade(market_access:float,domestic_trade:float)->Dictionary:
 	var result:={"exports":0.0,"imports":0.0,"exported_goods":{},"imported_goods":{},"friction":0.0,"credit":GameState.external_trade_credit,"claim_limit":0.0,"claim_loss":0.0}

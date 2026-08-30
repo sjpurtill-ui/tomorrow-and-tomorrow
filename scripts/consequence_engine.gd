@@ -18,7 +18,7 @@ func initialize() -> void:
 	GameState.initialize_citizen_registry()
 	GameState.synchronize_population_allocations()
 	if GameState.resource_stockpiles.is_empty():
-		GameState.resource_stockpiles = {"Food":GameState.population_exact*30.0,"Timber":0.0,"Stone":0.0,"Clay":0.0,"Fiber Plants":4.0}
+		ResourceSystem.initialize()
 	GameState.simulation_metrics["health"] = GameState.population_health
 
 func apply_campaign_goal(goal: Dictionary) -> void:
@@ -294,10 +294,15 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var production_ratio:=float(food_result.food_balance)+1.0
 	var intake_ratio:=float(food_result.food_intake_ratio)
 	var malnutrition:=float(food_result.malnutrition_burden)
+	var water_intake:=clampf(float(GameState.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
 	if intake_ratio<0.95:
 		GameState.consecutive_food_shortage_days+=1.0
 	else:
 		GameState.consecutive_food_shortage_days=maxf(0.0,GameState.consecutive_food_shortage_days-2.0)
+	if water_intake<0.98:
+		GameState.consecutive_water_shortage_days+=1.0
+	else:
+		GameState.consecutive_water_shortage_days=maxf(0.0,GameState.consecutive_water_shortage_days-2.0)
 	if traveling and housing_ratio<0.68:
 		GameState.convoy_exposure_days+=1.0-housing_ratio
 	else:
@@ -306,6 +311,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	GameState.food_security = lerpf(GameState.food_security,food_security_target,0.055)
 
 	var clean_water_bonus := DiscoverySystem.effect("health_protection")+DiscoverySystem.effect("water_safety")*0.25-DiscoverySystem.effect("disease_exposure")*0.18
+	var water_health_penalty:=pow(1.0-water_intake,1.35)*0.62
 	var shelter_bonus := 0.0
 	if "Hearth Circle" in GameState.settlement_completed: shelter_bonus += 0.05
 	if "Lean-to Shelters" in GameState.settlement_completed: shelter_bonus += 0.12
@@ -313,8 +319,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if traveling:
 		travel_health_penalty=0.08+maxf(0.0,0.62-housing_ratio)*0.30+minf(0.24,GameState.consecutive_food_shortage_days*0.009)
 	var process_health_cost:=(DiscoverySystem.effect("health_risk")+DiscoverySystem.effect("pollution")*0.22+DiscoverySystem.effect("water_pollution")*0.18)*industrial_activity
-	var health_target := clampf(0.18+GameState.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-travel_health_penalty-malnutrition*0.28-process_health_cost,0.05,0.97)
+	var health_target := clampf(0.18+GameState.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty,0.02,0.97)
 	GameState.population_health = lerpf(GameState.population_health,health_target,0.022)
+	GameState.simulation_metrics["water_intake_ratio"]=water_intake
+	GameState.simulation_metrics["water_days"]=float(GameState.water_metrics.get("days",0.0))
 
 	var admin_coverage := clampf(stewards/maxf(1.0,population*0.035),0.0,1.25)
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
@@ -376,6 +384,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"Travel exhaustion":0.0,
 		"Insecurity":maxf(0.0,0.30-security)*0.025
 	}
+	var dehydration_ramp:=clampf((GameState.consecutive_water_shortage_days-1.0)/4.0,0.0,1.0)
+	mortality_components["Dehydration"]=maxf(0.0,1.0-water_intake)*(0.35+dehydration_ramp*5.0)
 	mortality_components["Work accidents"]=(0.002+extraction_pressure*0.025)*industrial_activity*maxf(0.15,1.0+DiscoverySystem.effect("disaster_risk")-DiscoverySystem.effect("mine_safety"))
 	if intake_ratio<0.98 or malnutrition>0.05:
 		var shortage_ramp:=clampf((GameState.consecutive_food_shortage_days-5.0)/45.0,0.0,1.0)

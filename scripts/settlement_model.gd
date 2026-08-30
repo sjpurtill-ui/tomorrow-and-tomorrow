@@ -81,7 +81,7 @@ func _create_founding_plots()->void:
 			"land_use":land_use,"secondary_use":"craft" if land_use=="mixed_household" else "",
 			"form":plot_form,"roof_plan":_roof_plan_for(plot_seed,material_family,plot_form),
 			"material_family":material_family,"material_mix":material_mix,"construction_recipe":"founding_salvage_and_local_materials",
-			"supply_provenance":{},"replacement_debt":{},"roof_coverage":rng.randf_range(0.20,0.34) if index<residential_count else rng.randf_range(0.08,0.24),"storeys":1,
+			"supply_provenance":{"portable_convoy_assets":true,"founding_work":"Hearth Circle"},"replacement_debt":{},"roof_coverage":rng.randf_range(0.20,0.34) if index<residential_count else rng.randf_range(0.08,0.24),"storeys":1,
 			"resident_capacity":resident_capacity,"resident_count":resident_count,"worker_capacity":2 if land_use in ["mixed_household","workshop","storage"] else 0,
 			"worker_count":1 if land_use in ["mixed_household","workshop","storage"] else 0,"storage_capacity":4.0 if land_use=="storage" else (0.8 if index<residential_count else 0.0),
 			"condition":rng.randf_range(0.72,0.88),"maintenance_debt":rng.randf_range(0.02,0.08),"service_access":clampf(1.0-center.length()/0.11,0.18,1.0),

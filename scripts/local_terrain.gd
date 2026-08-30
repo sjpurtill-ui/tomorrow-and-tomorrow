@@ -365,6 +365,7 @@ func _capture_preview_if_requested() -> void:
 			DiscoverySystem.process_day(daily_context)
 			ResourceSystem.process_day(daily_context)
 			_process_population_day(daily_context)
+			EconomySystem.process_day(daily_context)
 			_evaluate_travel_survival()
 			_process_settlement_day()
 			_refresh_discovered_resource_overlays()
@@ -3603,11 +3604,11 @@ func _refresh_age_distribution_meter() -> void:
 
 func _settlement_definitions() -> Array[Dictionary]:
 	return [
-		{"name":"Hearth Circle", "days":6.0, "requires":[], "minimum":{"Construction":3},"effect":"anchors the camp and makes communal work possible"},
-		{"name":"Lean-to Shelters", "days":9.0, "requires":["Hearth Circle"], "minimum":{"Construction":5},"effect":"protects health and expands shelter"},
-		{"name":"Storage Pits", "days":7.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Logistics":4},"effect":"slows spoilage and expands food storage"},
-		{"name":"Open Work Area", "days":12.0, "requires":["Hearth Circle"], "minimum":{"Construction":6, "Crafting":4},"effect":"improves tools and material work"},
-		{"name":"Gathering Yard", "days":10.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Extraction":4}, "known_resource":true,"effect":"organizes extraction from known deposits"}
+		{"name":"Hearth Circle", "days":6.0, "requires":[], "minimum":{"Construction":3},"materials":{"Timber":6.0,"Fiber Plants":6.0},"requires_water":true,"effect":"anchors the camp and makes communal work possible"},
+		{"name":"Lean-to Shelters", "days":9.0, "requires":["Hearth Circle"], "minimum":{"Construction":5},"materials":{"Timber":18.0,"Fiber Plants":12.0},"effect":"protects health and expands shelter"},
+		{"name":"Storage Pits", "days":7.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Logistics":4},"materials":{"Timber":4.0,"Fiber Plants":3.0},"effect":"slows spoilage and expands food storage"},
+		{"name":"Open Work Area", "days":12.0, "requires":["Hearth Circle"], "minimum":{"Construction":6, "Crafting":4},"materials":{"Timber":12.0,"Fiber Plants":5.0},"effect":"improves tools and material work"},
+		{"name":"Gathering Yard", "days":10.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Extraction":4},"materials":{"Timber":10.0,"Fiber Plants":4.0}, "known_resource":true,"effect":"organizes extraction from known deposits"}
 	]
 
 func _settlement_project_available(project: Dictionary) -> bool:
@@ -3621,6 +3622,10 @@ func _settlement_project_available(project: Dictionary) -> bool:
 			return false
 	if bool(project.get("known_resource", false)) and ResourceSystem.visible_deposits().is_empty():
 		return false
+	if bool(project.get("requires_water",false)) and not bool(GameState.water_metrics.get("source_accessible",false)):
+		return false
+	for resource_name in (project.get("materials",{}) as Dictionary):
+		if float(GameState.resource_stockpiles.get(resource_name,0.0))<float((project.materials as Dictionary)[resource_name]): return false
 	return true
 
 func _current_settlement_project() -> Dictionary:
@@ -3659,6 +3664,8 @@ func _process_settlement_day() -> void:
 	var daily_work := (builders / 8.0) * (0.82 + carriers / 30.0 + makers / 50.0)*float(GameState.simulation_metrics.get("labor_efficiency",0.72))*(1.0+DiscoverySystem.effect("construction_rate"))
 	GameState.settlement_projects[project_name] = float(GameState.settlement_projects.get(project_name, 0.0)) + daily_work
 	if float(GameState.settlement_projects[project_name]) >= float(project.days):
+		for resource_name in (project.get("materials",{}) as Dictionary):
+			GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float((project.materials as Dictionary)[resource_name]))
 		GameState.settlement_completed.append(project_name)
 		footprint_population = -1
 		if project_name == "Hearth Circle":
@@ -5232,10 +5239,12 @@ func _open_provisions_panel() -> void:
 	var forecast_30:Dictionary=metrics.get("food_forecast_30",{})
 	var forecast_90:Dictionary=metrics.get("food_forecast_90",{})
 	var shortage_90:=int(forecast_90.get("first_shortage_day",-1))
+	var water:=GameState.water_metrics
 	var outlook_text:="shortage %dd" % shortage_90 if shortage_90>0 else ("30d %.0f • 90d %.0f" % [float(forecast_30.get("ending_days",days)),float(forecast_90.get("ending_days",days))] if not forecast_90.is_empty() else ("stable" if projected>=999.0 else "%.0f days" % projected))
 	_make_provision_stat(header,"STORES","%.1f days" % days,Color("#d0b46f"))
 	_make_provision_stat(header,"TODAY'S NET","%+.1f rations" % net,Color("#78a77d") if net>=0.0 else Color("#c67462"))
 	_make_provision_stat(header,"INTAKE","%d%%" % roundi(float(metrics.get("food_intake_ratio",1.0))*100.0),Color("#83a6a0"))
+	_make_provision_stat(header,"DRINKING WATER","%.1f days • %d%%" % [float(water.get("days",0.0)),roundi(float(water.get("intake_ratio",0.0))*100.0)],Color("#6f9eaa") if float(water.get("intake_ratio",0.0))>=0.98 else Color("#c67462"))
 	_make_provision_stat(header,"SEASONAL OUTLOOK",outlook_text,Color("#c67661") if shortage_90>0 else Color("#b99369"))
 	root.add_child(HSeparator.new())
 	var scroll:=ScrollContainer.new()
@@ -5252,6 +5261,7 @@ func _open_provisions_panel() -> void:
 	stores.add_theme_constant_override("separation",7)
 	columns.add_child(stores)
 	_add_provision_section_title(stores,"STORES BY KIND","Each stock has its own shelf life; perishables are eaten first.")
+	_add_provision_bar(stores,"FRESHWATER","%.0f stored / %.0f capacity • %.0f collected • %.0f required today" % [float(water.get("stored",0.0)),float(water.get("capacity",0.0)),float(water.get("collected_today",0.0)),float(water.get("required_today",GameState.population_exact))],float(water.get("stored",0.0))/maxf(0.01,float(water.get("capacity",1.0))),Color("#6f9eaa"))
 	var stock_data:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
 	var spoilage_data:Dictionary=metrics.get("food_spoilage_by_type",{})
 	var stored_total:=maxf(0.01,float(GameState.resource_stockpiles.get("Food",0.0)))
@@ -5387,8 +5397,9 @@ func _open_materials_panel() -> void:
 	var economy_metrics:=GameState.economy_metrics
 	_make_provision_stat(economy_row,"EXCHANGE",String(economy_metrics.get("stage_name","Resource obligations")),Color("#c1a56b"))
 	_make_provision_stat(economy_row,"MARKET ACCESS","%d%%" % roundi(float(economy_metrics.get("market_access",0.0))*100.0),Color("#7f9b91"))
-	_make_provision_stat(economy_row,"PRICE INDEX","%.2f  %+.1f%%" % [float(economy_metrics.get("price_index",1.0)),float(economy_metrics.get("inflation",0.0))*100.0],Color("#aa8c68"))
-	_make_provision_stat(economy_row,"TRADE","%.1f today" % float(economy_metrics.get("trade_volume",0.0)),Color("#75939c"))
+	var observed_index:=float(economy_metrics.get("price_index",0.0))
+	_make_provision_stat(economy_row,"OBSERVED PRICE INDEX",("%.2f  %+.1f%%" % [observed_index,float(economy_metrics.get("inflation",0.0))*100.0]) if observed_index>0.0 else "No exchanges observed",Color("#aa8c68"))
+	_make_provision_stat(economy_row,"EXCHANGED SURPLUS","%.1f today" % float(economy_metrics.get("trade_volume",0.0)),Color("#75939c"))
 	if GameState.economy_stage==EconomySystem.STAGE_CURRENCY:
 		_make_provision_stat(economy_row,"TREASURY","%.1f / %.1f supply" % [GameState.public_treasury,GameState.currency_supply],Color("#c5b36f"))
 		_make_provision_stat(economy_row,"CREDIT","%.1f  •  %d%% GINI" % [GameState.credit_outstanding,roundi(float(economy_metrics.get("inequality",0.0))*100.0)],Color("#9c7f91"))

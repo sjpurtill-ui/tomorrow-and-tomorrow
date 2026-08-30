@@ -25,8 +25,9 @@ func _setup_capable_settlement()->void:
 	GameState.population_total=120
 	GameState.settlement_site_committed=true
 	GameState.settlement_completed=["Hearth Circle","Public Stores","Open Work Area"]
+	GameState.water_metrics={"intake_ratio":1.0,"source_accessible":true,"days":3.0}
 	GameState.resource_stockpiles={"Food":4800.0,"Timber":260.0,"Stone":210.0,"Clay":80.0,"Fiber Plants":75.0,"Copper Ore":320.0,"Tin Ore":30.0,"Iron Ore":40.0}
-	GameState.simulation_metrics={"food_days":40.0,"logistics":0.48,"legitimacy":0.72,"food_production":130.0,"storage_function":0.62}
+	GameState.simulation_metrics={"food_days":40.0,"food_consumption":120.0,"food_intake_ratio":1.0,"logistics":0.48,"legitimacy":0.72,"food_production":130.0,"storage_function":0.62}
 	GameState.society_capacities={"production":0.46,"institutions":0.48,"logistics":0.48}
 	GameState.population_allocations["Administration"]=7
 	GameState.material_metrics={"delivered_today":25.0,"lost_today":0.0}
@@ -113,7 +114,11 @@ func _test_reserve_capped_monetary_shock()->void:
 	for day in range(4014,4194):
 		GameState.elapsed_days=float(day)
 		EconomySystem.process_day()
-	_check(float(GameState.market_prices.Food)>price_before_issue,"large monetary issue did not feed the price level")
+	_check(is_equal_approx(float(GameState.market_prices.Food),price_before_issue),"prices moved without a post-issue exchange observation")
+	GameState.simulation_metrics["food_production"]=140.0
+	GameState.elapsed_days=4194.0
+	EconomySystem.process_day()
+	_check(float(GameState.market_prices.Food)<price_before_issue*1.10,"unspent treasury issuance created implausible transaction-price inflation")
 	_check(is_equal_approx(GameState.private_currency+GameState.currency_hoards+GameState.public_treasury+GameState.mutual_aid_reserve,GameState.currency_supply),"issuance broke account conservation")
 	_check(bool(EconomySystem.accounting_audit().ok),"long-run economy failed its accounting audit")
 

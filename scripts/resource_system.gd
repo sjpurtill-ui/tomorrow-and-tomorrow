@@ -42,8 +42,12 @@ func initialize() -> void:
 		return
 	rng.seed = GameState.world_seed ^ 0x4f1bbcdc
 	initialized = true
+	if GameState.founding_manifest.is_empty():
+		GameState.founding_manifest={"portable_shelters":30,"food_storage_rations":GameState.population_exact*30.0,"dry_storage_bulk":10.0,"covered_storage_bulk":4.0,"sealed_storage_bulk":1.0,"secure_storage_bulk":1.0,"water_vessel_days":3.0}
 	if GameState.resource_stockpiles.is_empty():
-		GameState.resource_stockpiles = {"Food":GameState.population_exact*30.0, "Timber":0.0, "Stone":0.0, "Clay":0.0, "Fiber Plants":4.0}
+		# The convoy arrives with three days in portable vessels, not an abstract
+		# permanent water supply.  Continued survival requires a reachable source.
+		GameState.resource_stockpiles = {"Food":GameState.population_exact*30.0, "Freshwater":GameState.population_exact*3.0, "Timber":12.0, "Stone":0.0, "Clay":0.0, "Fiber Plants":10.0}
 
 func register_local_occurrences(sites: Array[Dictionary], terrain: String) -> void:
 	initialize()
@@ -63,7 +67,9 @@ func register_local_occurrences(sites: Array[Dictionary], terrain: String) -> vo
 			GameState.resource_deposits.append(_deposit(resource_name, position, rng.randf_range(0.45, 1.5), rng.randf_range(800, 12000), GameState.resource_deposits.size()))
 
 func _deposit(resource_name: String, position: Vector3, quality: float, amount: float, index: int) -> Dictionary:
-	return {"id":"%s_%d" % [resource_name.to_snake_case(), index], "resource":resource_name, "position":position, "quality":quality, "remaining":amount, "initial_amount":amount, "stage":"unknown", "clues":0.0, "survey":0.0, "access":0.0, "blockers":[], "development":0.0, "route":0.0, "workers":0, "daily_yield":0.0,"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Not yet recognized","last_reported_bottleneck":""}
+	# Exposed surface water is directly observable; a deep aquifer remains hidden.
+	var initial_stage:="surveyed" if resource_name=="Freshwater" else "unknown"
+	return {"id":"%s_%d" % [resource_name.to_snake_case(), index], "resource":resource_name, "position":position, "quality":quality, "remaining":amount, "initial_amount":amount, "stage":initial_stage, "clues":1.0 if initial_stage=="surveyed" else 0.0, "survey":1.0 if initial_stage=="surveyed" else 0.0, "access":0.0, "blockers":[], "development":0.0, "route":0.0, "workers":0,"daily_yield":0.0,"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Access not organized","last_reported_bottleneck":""}
 
 func _terrain_occurrences(terrain: String) -> Array[String]:
 	var common: Array[String] = ["Clay", "Flint", "Medicinal Plants", "Limestone", "Fine Sand"]
@@ -108,11 +114,45 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 				events.append(_event("Resource Accessible", "%s can now support organized extraction." % resource_name, deposit.id))
 	var flow_events:=_process_material_flow(context)
 	events.append_array(flow_events)
+	events.append_array(_process_water_flow())
 	for event in events:
 		GameState.resource_events.push_front(event)
 	return events
 
+func _process_water_flow()->Array[Dictionary]:
+	var events:Array[Dictionary]=[]
+	var population:=maxf(1.0,GameState.population_exact)
+	var required:=population
+	var accessible_quality:=0.0
+	for deposit_variant in GameState.resource_deposits:
+		var deposit:Dictionary=deposit_variant
+		if String(deposit.get("resource",""))=="Freshwater" and String(deposit.get("stage","unknown")) in ["accessible","developed"]:
+			accessible_quality=maxf(accessible_quality,float(deposit.get("quality",0.7)))
+	var carriers:=float(GameState.population_allocations.get("Logistics",0))
+	var collection_capacity:=carriers*28.0*clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)
+	var collected:=minf(required*1.35,collection_capacity)*clampf(accessible_quality,0.0,1.25) if accessible_quality>0.0 else 0.0
+	var portable_days:=float(GameState.founding_manifest.get("water_vessel_days",3.0))
+	if "Storage Pits" in GameState.settlement_completed: portable_days+=2.0
+	if "Open Work Area" in GameState.settlement_completed: portable_days+=1.0+DiscoverySystem.effect("container_capacity")*2.0
+	var capacity:=population*portable_days
+	var stored_before:=maxf(0.0,float(GameState.resource_stockpiles.get("Freshwater",0.0)))
+	var available:=minf(capacity,stored_before+collected)
+	var consumed:=minf(required,available)
+	var stored:=maxf(0.0,available-consumed)
+	GameState.resource_stockpiles["Freshwater"]=stored
+	var intake:=clampf(consumed/maxf(0.01,required),0.0,1.0)
+	GameState.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"required_today":required,"consumed_today":consumed,"intake_ratio":intake,"days":stored/maxf(0.01,required),"source_accessible":accessible_quality>0.0}
+	GameState.water_history.append({"day":int(GameState.elapsed_days),"stored":stored,"collected":collected,"required":required,"consumed":consumed,"intake_ratio":intake})
+	if GameState.water_history.size()>370: GameState.water_history.pop_front()
+	if intake<0.98:
+		events.append(_event("Water Shortfall","Only %d%% of today's drinking-water requirement was met. Assign carriers and secure an accessible freshwater source." % roundi(intake*100.0),"Freshwater"))
+	return events
+
 func _calculate_access(deposit: Dictionary, definition: Dictionary, context: Dictionary) -> float:
+	if String(deposit.get("resource",""))=="Freshwater":
+		# Carrying from exposed surface water needs assigned hands, not years of
+		# roadbuilding or advanced hydrological practice.
+		return 1.0 if int(GameState.population_allocations.get("Extraction",0))>0 and int(GameState.population_allocations.get("Logistics",0))>0 else 0.0
 	var logistics := float(GameState.population_allocations.get("Logistics", 0)) / 5.0
 	var construction := float(GameState.population_allocations.get("Construction", 0)) / 8.0
 	var tools := float(context.get("tools", 0.25))
@@ -285,7 +325,9 @@ func _deposit_priority(deposit:Dictionary)->float:
 
 func _storage_capacities()->Dictionary:
 	var pop:=GameState.population_exact
-	var result={"yard":90.0+pop*0.75,"dry":16.0+pop*0.12,"covered":10.0,"sealed":2.0,"secure":5.0}
+	# Capacity comes from named portable assets or completed works. Bare ground can
+	# hold a small outdoor pile, but it is not dry, sealed, covered, or secure.
+	var result={"yard":maxf(12.0,pop*0.10),"dry":float(GameState.founding_manifest.get("dry_storage_bulk",0.0)),"covered":float(GameState.founding_manifest.get("covered_storage_bulk",0.0)),"sealed":float(GameState.founding_manifest.get("sealed_storage_bulk",0.0)),"secure":float(GameState.founding_manifest.get("secure_storage_bulk",0.0))}
 	if "Gathering Yard" in GameState.settlement_completed: result.yard+=320.0
 	if "Open Work Area" in GameState.settlement_completed: result.yard+=160.0; result.covered+=55.0; result.secure+=20.0
 	if "Lean-to Shelters" in GameState.settlement_completed: result.dry+=90.0

@@ -22,6 +22,8 @@ func _base(population:int=120)->void:
 	GameState.population_total=population
 	GameState.population_exact=float(population)
 	GameState.settlement_site_committed=true
+	GameState.settlement_completed=["Hearth Circle"]
+	GameState.water_metrics={"intake_ratio":1.0,"source_accessible":true,"days":3.0}
 	GameState.housing_capacity=population
 	GameState.external_trade_policy="closed"
 	GameState.population_allocations={"Food":roundi(population*0.30),"Survey":roundi(population*0.05),"Extraction":roundi(population*0.08),"Construction":roundi(population*0.07),"Crafting":roundi(population*0.05),"Logistics":roundi(population*0.05),"Knowledge":roundi(population*0.04),"Administration":roundi(population*0.05),"Defense":roundi(population*0.03)}
@@ -70,6 +72,7 @@ func _weighed_metal_trade()->void:
 	GameState.resource_stockpiles["Copper Ore"]=EconomySystem.metal_stage_requirement()/EconomySystem._metal_processing_efficiency()*1.25
 	GameState.resource_stockpiles["Timber"]=1000.0
 	GameState.resource_stockpiles["Fiber Plants"]=0.0
+	GameState.economy_known_goods["Fiber Plants"]=true
 	GameState.external_trade_policy="balanced"
 	GameState.elapsed_days=1.0
 	EconomySystem.process_day()

@@ -40,8 +40,10 @@ func _reset()->void:
 	GameState.population_exact=120.0
 	GameState.population_total=120
 	GameState.settlement_site_committed=true
+	GameState.settlement_completed=["Hearth Circle"]
+	GameState.water_metrics={"intake_ratio":1.0,"source_accessible":true,"days":3.0}
 	GameState.resource_stockpiles={"Food":3600.0,"Timber":180.0,"Stone":140.0,"Fiber Plants":55.0,"Copper Ore":0.0,"Tin Ore":0.0,"Iron Ore":0.0}
-	GameState.simulation_metrics={"food_days":30.0,"logistics":0.42,"legitimacy":0.70,"food_production":120.0,"storage_function":0.5}
+	GameState.simulation_metrics={"food_days":30.0,"food_intake_ratio":1.0,"food_consumption":120.0,"logistics":0.42,"legitimacy":0.70,"food_production":132.0,"storage_function":0.5}
 	GameState.society_capacities={"production":0.40,"institutions":0.45,"logistics":0.42}
 	GameState.population_allocations["Administration"]=6
 	GameState.material_metrics={"delivered_today":12.0,"lost_today":0.0}
