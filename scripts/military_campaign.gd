@@ -1255,9 +1255,20 @@ func _process_equipment_production_day()->void:
 func _process_training_day()->void:
 	if training_queue.is_empty(): return
 	var training_rate:=_effective_training_rate(_queued_trainees())
+	var training_equipment_budget:=military_inventory.duplicate(true)
 	for index in range(training_queue.size()-1,-1,-1):
 		var training:Dictionary=training_queue[index]
-		training["progress_days"]=float(training.get("progress_days",0.0))+training_rate
+		var weapon:=String(training.get("weapon","improvised"))
+		var available_examples:=maxi(0,int(training_equipment_budget.get(weapon,0)))
+		var examples:=mini(maxi(1,int(training.get("count",1))),available_examples)
+		training_equipment_budget[weapon]=available_examples-examples
+		var equipment_access:=clampf(float(examples)/maxf(1.0,float(training.get("count",1))),0.0,1.0)
+		var access_floor:=0.55 if weapon=="improvised" else 0.25
+		var progress_increment:=training_rate*(access_floor+(1.0-access_floor)*equipment_access)
+		training["progress_days"]=float(training.get("progress_days",0.0))+progress_increment
+		training["equipment_access_today"]=equipment_access
+		training["equipment_access_sum"]=float(training.get("equipment_access_sum",0.0))+equipment_access*progress_increment
+		training["instruction_progress_sum"]=float(training.get("instruction_progress_sum",0.0))+progress_increment
 		var completion:=clampf(float(training.progress_days)/maxf(1.0,float(training.required_days)),0.0,1.0)
 		for citizen_id in training.soldier_ids:
 			var trainee:Dictionary=GameState.citizen_by_id(int(citizen_id))
@@ -1315,13 +1326,15 @@ func _complete_training(training:Dictionary)->void:
 	var issued:=mini(count,int(military_inventory.get(weapon,0)))
 	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
 	var member_ids:Array=(training.soldier_ids as Array).duplicate()
+	var equipment_access_average:=clampf(float(training.get("equipment_access_sum",0.0))/maxf(0.01,float(training.get("instruction_progress_sum",training.get("required_days",1.0)))),0.0,1.0)
+	var equipment_training_factor:=0.72+equipment_access_average*0.28
 	var formations:Array=home_army.get("formations",[])
 	var mode:=String(training.get("mode","new"))
 	var target_index:=_formation_index(int(training.get("target_formation_id",-1))) if mode=="reinforce" else -1
 	if target_index>=0:
 		var target:Dictionary=formations[target_index]
 		var old_count:=int(target.get("count",0))
-		var new_training:=_training_quality(String(training.unit),member_ids)
+		var new_training:=_training_quality(String(training.unit),member_ids)*equipment_training_factor
 		target["count"]=old_count+count
 		target["equipment"]=int(target.get("equipment",0))+issued
 		if weapon=="bow": target["ammunition_required"]=int(target.get("authorized_count",old_count))*6
@@ -1332,7 +1345,7 @@ func _complete_training(training:Dictionary)->void:
 		formations[target_index]=target
 	else:
 		var formation_id:=next_formation_id; next_formation_id+=1
-		formations.append({"id":formation_id,"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"ammunition":0,"ammunition_required":count*6 if weapon=="bow" else 0,"training":_training_quality(String(training.unit),member_ids),"experience":_citizen_experience(member_ids),"soldier_ids":member_ids})
+		formations.append({"id":formation_id,"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"ammunition":0,"ammunition_required":count*6 if weapon=="bow" else 0,"training":_training_quality(String(training.unit),member_ids)*equipment_training_factor,"experience":_citizen_experience(member_ids),"soldier_ids":member_ids})
 	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
 	rebuilt["commander"]=_marshal_commander()
 	rebuilt["wounded_pool"]=int(home_army.get("wounded_pool",0))
