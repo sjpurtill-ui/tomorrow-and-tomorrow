@@ -462,7 +462,21 @@ func campaign_army_snapshot()->Dictionary:
 	snapshot["equipment_queue"]=equipment_queue.duplicate(true)
 	snapshot["mobilization_cost"]=_mobilization_cost()
 	snapshot["prisoner_custody"]=prisoner_custody_snapshot()
+	snapshot["economic_burden"]=economic_burden_snapshot()
 	return snapshot
+
+
+func economic_burden_snapshot()->Dictionary:
+	var mobilized:=_mobilized_count(); var field_soldiers:=int(home_army.get("troops",0)); var queued:=_queued_trainees(); var recruits:=recruit_pool.size()
+	var provisions:=float(home_army.get("provisions_required_today",0.0))
+	if int(home_army.get("provision_day",-1))<int(GameState.elapsed_days)-1: provisions=float(field_soldiers)*0.90
+	var issued_equipment:=0
+	for formation in home_army.get("formations",[]): issued_equipment+=int(formation.get("equipment",0))
+	var stored_equipment:=0; var damaged:=0
+	for item in military_inventory: stored_equipment+=int(military_inventory[item])
+	for item in damaged_equipment: damaged+=int(damaged_equipment[item])
+	var currency_upkeep_units:=float(field_soldiers)*0.025+float(maxi(0,mobilized-field_soldiers))*0.012+float(issued_equipment+stored_equipment)*0.001+float(foreign_prisoners)*0.006
+	return {"mobilized_citizens":mobilized,"field_soldiers":field_soldiers,"recruits":recruits,"trainees":queued,"citizens_withheld_by_role":_mobilization_cost().former_roles,"daily_field_provisions":provisions,"workshop_diversion":1.0-civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"issued_equipment":issued_equipment,"stored_equipment":stored_equipment,"damaged_equipment":damaged,"foreign_prisoners":foreign_prisoners,"currency_upkeep_units":currency_upkeep_units}
 
 
 func combat_summary(force:Dictionary={},opponent:Dictionary={},terrain_modifier:float=1.0)->Dictionary:
