@@ -310,6 +310,13 @@ func _run()->void:
 	exhausted_force.formations[0]["personnel_condition"]=0.20
 	var exhausted_preview:Dictionary=MilitaryCampaign.combat_summary(exhausted_force,preview_opponent)
 	assert(float(exhausted_preview.readiness_components.condition)<float(prepared_preview.readiness_components.condition))
+	var round_opening:Dictionary=MilitaryCampaign.simulator.create_formation_force("Round force",[{"unit":"line_infantry","weapon":"spear","count":20,"authorized_count":20,"equipment":20,"equipment_required":20,"personnel_condition":1.0}],0.90,0.80)
+	var round_side:Dictionary={"remaining_troops":10,"morale":0.65,"formations":round_opening.formations.duplicate(true)}
+	round_side.formations[0]["count"]=10
+	round_side.formations[0]["equipment"]=10
+	var attrited_round_force:Dictionary=MilitaryCampaign._force_from_round_result(round_opening,round_side)
+	assert(float(attrited_round_force.readiness)<float(round_opening.readiness))
+	assert(float(attrited_round_force.readiness_components.manpower)<1.0)
 	GameState.leadership_positions["Marshal"]=marshal_record
 	MilitaryCampaign.home_army["commander"]=MilitaryCampaign._marshal_commander()
 	GameState.known_discoveries.append("shield_wall")

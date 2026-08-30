@@ -655,6 +655,13 @@ func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
 		if not side.has(key): continue
 		if key=="remaining_troops": updated["troops"]=int(side[key])
 		else: updated[key]=side[key].duplicate(true) if side[key] is Array or side[key] is Dictionary else side[key]
+	# Carry the army's supply/organization context forward, but let current
+	# manpower, equipment, ammunition, condition, and morale change readiness.
+	var prior_components:Dictionary=simulator.force_readiness(previous,_force_personnel_condition(previous))
+	var current_components:Dictionary=simulator.force_readiness(updated,_force_personnel_condition(updated))
+	var context_factor:=clampf(float(previous.get("readiness",prior_components.aggregate))/maxf(0.01,float(prior_components.aggregate)),0.0,1.5)
+	updated["readiness"]=clampf(float(current_components.aggregate)*context_factor,0.0,1.5)
+	updated["readiness_components"]=current_components
 	return updated
 
 
