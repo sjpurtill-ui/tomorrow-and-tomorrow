@@ -538,6 +538,7 @@ func resolve_aftermath(prisoner_policy:String,spoils_policy:String,general_polic
 
 func campaign_army_snapshot()->Dictionary:
 	if home_army.is_empty(): home_army=_empty_home_army()
+	_synchronize_field_commander()
 	var snapshot:=home_army.duplicate(true)
 	snapshot["foreign_prisoners"]=foreign_prisoners
 	snapshot["held_generals"]=held_generals.duplicate(true)
@@ -1263,6 +1264,19 @@ func _acting_field_commander(assign_office:bool)->Dictionary:
 	return commander
 
 
+func _synchronize_field_commander()->void:
+	if home_army.is_empty(): return
+	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
+	if not marshal.is_empty():
+		home_army["commander"]=_marshal_commander()
+		return
+	var current:Dictionary=home_army.get("commander",{})
+	var current_id:=int(current.get("citizen_id",-1))
+	var current_citizen:Dictionary=GameState.citizen_by_id(current_id)
+	if current.is_empty() or (current_id>=0 and (current_citizen.is_empty() or not bool(current_citizen.get("alive",true)))):
+		home_army["commander"]=_acting_field_commander(false)
+
+
 func _remove_active_citizen(citizen_id:int)->bool:
 	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
 	var position:=soldier_ids.find(citizen_id)
@@ -1973,6 +1987,7 @@ func _army_experience()->float:
 
 func _refresh_readiness()->void:
 	if home_army.is_empty(): return
+	_synchronize_field_commander()
 	var formations:Array=home_army.get("formations",[])
 	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
 	var discipline:=clampf(float(home_army.get("discipline",0.5)),0.0,1.0)

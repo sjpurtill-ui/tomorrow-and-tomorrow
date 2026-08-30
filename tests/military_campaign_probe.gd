@@ -305,6 +305,10 @@ func _run()->void:
 	assert(float(master_commander.tactics)>float(unskilled_commander.tactics)+0.50)
 	assert(float(master_commander.logistics)>float(unskilled_commander.logistics)+0.50)
 	assert(float(master_commander.resolve)>float(unskilled_commander.resolve)+0.50)
+	MilitaryCampaign.home_army["commander"]=unskilled_commander
+	var appointed_commander:Dictionary=MilitaryCampaign.campaign_army_snapshot().commander
+	assert(int(appointed_commander.citizen_id)==int(marshal_citizen.id))
+	assert(float(appointed_commander.command)>float(unskilled_commander.command)+0.50)
 	var preview_opponent:Dictionary=MilitaryCampaign.simulator.create_formation_force("Preview opponent",[{"unit":"levy","weapon":"improvised","count":20,"equipment":20}],0.75,0.75)
 	var prepared_force:Dictionary=MilitaryCampaign.simulator.create_formation_force("Prepared",[{"unit":"line_infantry","weapon":"spear","count":20,"equipment":20,"personnel_condition":1.0}],1.0,1.0)
 	prepared_force["commander"]=master_commander
