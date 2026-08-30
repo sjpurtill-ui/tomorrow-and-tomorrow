@@ -472,7 +472,12 @@ func combat_summary(force:Dictionary={},opponent:Dictionary={},terrain_modifier:
 	var attack_strength:=0.0; var defense_strength:=0.0; var effective_strength:=0.0
 	for cohort in cohorts:
 		var count:=float(cohort.get("count",0)); attack_strength+=count*float(cohort.get("attack",0.0)); defense_strength+=count*float(cohort.get("defense",0.0)); effective_strength+=count*sqrt(maxf(0.0,float(cohort.get("attack",0.0))*float(cohort.get("defense",0.0))))
-	return {"troops":int(subject.get("troops",0)),"attack_strength":attack_strength,"defense_strength":defense_strength,"effective_strength":effective_strength,"average_attack":attack_strength/maxf(1.0,float(subject.get("troops",0))),"average_defense":defense_strength/maxf(1.0,float(subject.get("troops",0))),"commander":(subject.get("commander",{}) as Dictionary).duplicate(true)}
+	var prior_components:Dictionary=home_army.get("readiness_components",{})
+	var readiness_components:Dictionary=simulator.force_readiness(subject,float(prior_components.get("condition",1.0)))
+	var supply:=clampf(float(subject.get("supply_level",home_army.get("supply_level",1.0))),0.0,1.0); var discipline:=clampf(float(subject.get("discipline",home_army.get("discipline",0.5))),0.0,1.0)
+	readiness_components["supply"]=supply; readiness_components["discipline"]=discipline
+	var readiness:=float(readiness_components.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)
+	return {"troops":int(subject.get("troops",0)),"attack_strength":attack_strength,"defense_strength":defense_strength,"effective_strength":effective_strength,"average_attack":attack_strength/maxf(1.0,float(subject.get("troops",0))),"average_defense":defense_strength/maxf(1.0,float(subject.get("troops",0))),"readiness":readiness,"readiness_components":readiness_components,"commander":(subject.get("commander",{}) as Dictionary).duplicate(true)}
 
 
 func threat_snapshot()->Dictionary:

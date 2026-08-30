@@ -12,6 +12,8 @@ var layer:CanvasLayer
 var modal:PanelContainer
 var summary:Label
 var condition:ProgressBar
+var readiness_meters:Dictionary={}
+var readiness_bottleneck:Label
 var formations:Label
 var commander_portrait:TextureRect
 var commander_details:Label
@@ -85,6 +87,10 @@ func _build_interface()->void:
 	var close:=Button.new(); close.text="✕"; close.pressed.connect(func(): modal.hide()); title_row.add_child(close)
 	summary=Label.new(); summary.add_theme_font_size_override("font_size",17); outer.add_child(summary)
 	condition=ProgressBar.new(); condition.custom_minimum_size.y=22; condition.show_percentage=true; outer.add_child(condition)
+	var readiness_strip:=HBoxContainer.new(); readiness_strip.add_theme_constant_override("separation",6); outer.add_child(readiness_strip)
+	for entry in [["manpower","MEN",RED],["equipment","EQ",GOLD],["ammunition","AMMO",Color("#b98ccb")],["condition","COND",Color("#83b77b")],["organization","ORG",BLUE],["supply","SUP",Color("#74b9ae")]]:
+		_add_readiness_meter(readiness_strip,String(entry[0]),String(entry[1]),entry[2])
+	readiness_bottleneck=Label.new(); readiness_bottleneck.custom_minimum_size.x=126; readiness_bottleneck.vertical_alignment=VERTICAL_ALIGNMENT_CENTER; readiness_bottleneck.add_theme_color_override("font_color",MUTED); readiness_strip.add_child(readiness_bottleneck)
 
 	var columns:=HBoxContainer.new(); columns.size_flags_vertical=Control.SIZE_EXPAND_FILL; columns.add_theme_constant_override("separation",10); outer.add_child(columns)
 	var army_box:=_section(columns,"ARMY",RED)
@@ -151,6 +157,13 @@ func _counter(parent:HBoxContainer,minimum:int,maximum:int,value:int)->SpinBox:
 	var spin:=SpinBox.new(); spin.min_value=minimum; spin.max_value=maximum; spin.value=value; spin.custom_minimum_size.x=82; parent.add_child(spin); return spin
 
 
+func _add_readiness_meter(parent:HBoxContainer,key:String,caption:String,color:Color)->void:
+	var box:=VBoxContainer.new(); box.size_flags_horizontal=Control.SIZE_EXPAND_FILL; parent.add_child(box)
+	var label:=Label.new(); label.text=caption; label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; label.add_theme_font_size_override("font_size",10); label.add_theme_color_override("font_color",MUTED); box.add_child(label)
+	var meter:=ProgressBar.new(); meter.custom_minimum_size=Vector2(70,12); meter.show_percentage=false
+	var fill:=StyleBoxFlat.new(); fill.bg_color=color; fill.set_corner_radius_all(2); meter.add_theme_stylebox_override("fill",fill); box.add_child(meter); readiness_meters[key]=meter
+
+
 func _policy_choice(parent:HBoxContainer,items:Array[String],tooltip:String)->OptionButton:
 	var choice:=OptionButton.new(); choice.tooltip_text=tooltip; choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	for item in items:
@@ -211,10 +224,17 @@ func _refresh()->void:
 	var display_force:Dictionary=(engagement.get("attacker",{}) as Dictionary) if not engagement.is_empty() else army
 	var display_opponent:Dictionary=(engagement.get("defender",{}) as Dictionary) if not engagement.is_empty() else {}
 	var combat:Dictionary=MilitaryCampaign.combat_summary(display_force,display_opponent,1.0)
-	var troops:=int(army.get("troops",0)); var ready:=float(army.get("readiness",0.0)); var capacity:=int(capabilities.get("recruitment_capacity",0))
+	var troops:=int(army.get("troops",0)); var ready:=float(combat.get("readiness",army.get("readiness",0.0))); var capacity:=int(capabilities.get("recruitment_capacity",0))
 	summary.text="DAY %d     %d FIELD SOLDIERS     ⚔ %.1f ATTACK     🛡 %.1f DEFENSE     %d / %d MOBILIZED" % [int(GameState.elapsed_days),int(combat.get("troops",troops)),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),MilitaryCampaign._mobilized_count(),capacity]
 	condition.value=ready*100.0
 	condition.tooltip_text="Aggregate readiness: personnel condition, training, equipment, ammunition, supply, morale, and leadership."
+	var readiness_components:Dictionary=combat.get("readiness_components",{})
+	var weakest_key:=""; var weakest_value:=2.0
+	for key in readiness_meters:
+		var value:=clampf(float(readiness_components.get(key,1.0)),0.0,1.0); (readiness_meters[key] as ProgressBar).value=value*100.0; (readiness_meters[key] as ProgressBar).tooltip_text="%s: %d%%" % [String(key).capitalize(),roundi(value*100.0)]
+		if value<weakest_value: weakest_value=value; weakest_key=String(key)
+	readiness_bottleneck.text="▼ %s %d%%" % [weakest_key.to_upper(),roundi(weakest_value*100.0)]
+	readiness_bottleneck.tooltip_text="The weakest readiness component is the immediate constraint on field performance."
 	var formation_lines:Array[String]=[]
 	for formation in (display_force.get("formations",[]) as Array):
 		formation_lines.append("%s  %d/%d men\n  %s %d/%d  •  readiness %d%%" % [String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),roundi(float(formation.get("readiness",ready))*100.0)])
