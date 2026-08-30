@@ -25,6 +25,7 @@ AdvisorSystem="*res://scripts/advisor_system.gd"
 FoodSystem="*res://scripts/food_system.gd"
 ConsequenceEngine="*res://scripts/consequence_engine.gd"
 GenerativeDirector="*res://scripts/generative_director.gd"
+MilitaryCampaign="*res://scripts/military_campaign.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [display]

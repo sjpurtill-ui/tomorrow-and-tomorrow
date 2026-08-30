@@ -11,6 +11,9 @@ var home_army:Dictionary={}
 var battle_history:Array[Dictionary]=[]
 var pending_aftermath:Dictionary={}
 var military_inventory:Dictionary={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+var recruit_pool:Array[int]=[]
+var training_queue:Array[Dictionary]=[]
+var equipment_queue:Array[Dictionary]=[]
 var foreign_prisoners:=0
 var held_generals:Array[Dictionary]=[]
 var last_world_seed:=-2147483648
@@ -39,17 +42,27 @@ func reset_for_new_world()->void:
 	battle_history.clear()
 	pending_aftermath.clear()
 	military_inventory={"improvised":0,"spear":0,"bow":0,"sword_shield":0,"lance":0}
+	recruit_pool.clear()
+	training_queue.clear()
+	equipment_queue.clear()
 	foreign_prisoners=0
 	held_generals.clear()
 
 
 func muster_home_army(requested_strength:=-1)->Dictionary:
-	GameState.initialize_citizen_registry()
+	# Compatibility entry point: raise the requested citizens, but do not conjure
+	# trained or equipped formations. Call start_training() to field them.
+	if home_army.is_empty(): home_army=_empty_home_army()
 	var desired:=int(GameState.population_allocations.get("Defense",0)) if requested_strength<0 else maxi(0,int(requested_strength))
-	desired=mini(desired,GameState.living_citizen_count())
+	raise_recruits(maxi(0,desired-recruit_pool.size()-_queued_trainees()))
+	return campaign_army_snapshot()
+
+
+func raise_recruits(count:int)->Dictionary:
+	GameState.initialize_citizen_registry()
 	var candidates:Array[Dictionary]=[]
 	for citizen in GameState.living_citizens():
-		if String(citizen.get("army_status","civilian")) in ["killed","captured","wounded"]: continue
+		if String(citizen.get("army_status","civilian")) not in ["civilian",""]: continue
 		if GameState.citizen_age_years(citizen)<16: continue
 		candidates.append(citizen)
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
@@ -57,23 +70,43 @@ func muster_home_army(requested_strength:=-1)->Dictionary:
 		var b_defense:=1 if String(b.get("role",""))=="Defense" else 0
 		if a_defense!=b_defense: return a_defense>b_defense
 		return GameState.citizen_physical_capacity(a)>GameState.citizen_physical_capacity(b))
-	)
-	var soldiers:Array[Dictionary]=[]
-	for index in mini(desired,candidates.size()):
+	var raised:=0
+	for index in mini(maxi(0,count),candidates.size()):
 		var citizen:Dictionary=candidates[index]
-		citizen["army_status"]="active"
+		citizen["army_status"]="recruit"
 		citizen["role"]="Defense"
-		soldiers.append(citizen)
-	var formations:=_formations_for_strength(soldiers.size())
-	var force:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
-	force["commander"]=_marshal_commander()
-	force["readiness"]=float(simulator.force_readiness(force,_condition_average(soldiers)).aggregate)
-	force["soldier_ids"]=soldiers.map(func(person:Dictionary)->int: return int(person.id))
-	force["reserve_manpower"]=maxi(0,int(GameState.population_allocations.get("Defense",0))-soldiers.size())
-	force["campaign_day"]=int(GameState.elapsed_days)
-	home_army=force
+		recruit_pool.append(int(citizen.id))
+		raised+=1
+	if home_army.is_empty(): home_army=_empty_home_army()
 	army_changed.emit(home_army.duplicate(true))
-	return home_army.duplicate(true)
+	return {"requested":count,"raised":raised,"recruit_pool":recruit_pool.size()}
+
+
+func start_training(unit:String,weapon:String,count:int)->Dictionary:
+	if not simulator.UNIT_TYPES.has(unit): return {"error":"Unknown unit type: %s" % unit}
+	if not simulator.WEAPONS.has(weapon): return {"error":"Unknown weapon type: %s" % weapon}
+	var accepted:=mini(maxi(0,count),recruit_pool.size())
+	if accepted<=0: return {"error":"No recruits are available for training."}
+	var ids:Array[int]=[]
+	for index in accepted: ids.append(recruit_pool.pop_front())
+	var training_days:=int({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45}.get(unit,21))
+	training_queue.append({"unit":unit,"weapon":weapon,"count":accepted,"soldier_ids":ids,"progress_days":0.0,"required_days":training_days})
+	return {"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days}
+
+
+func queue_equipment_production(item:String,count:int)->Dictionary:
+	if not simulator.WEAPONS.has(item): return {"error":"Unknown equipment type: %s" % item}
+	var amount:=maxi(0,count)
+	if amount<=0: return {"error":"Production amount must be positive."}
+	var recipe:Dictionary=_equipment_recipe(item)
+	for material in recipe.materials:
+		var required:=float(recipe.materials[material])*amount
+		if float(GameState.resource_stockpiles.get(material,0.0))<required:
+			return {"error":"Insufficient %s: need %.1f." % [material,required]}
+	for material in recipe.materials:
+		GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
+	equipment_queue.append({"item":item,"count":amount,"progress_days":0.0,"required_days":float(recipe.days)*amount})
+	return {"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
 
 
 func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dictionary:
@@ -118,12 +151,29 @@ func resolve_aftermath(prisoner_policy:String,spoils_policy:String,general_polic
 
 
 func campaign_army_snapshot()->Dictionary:
-	if home_army.is_empty(): muster_home_army()
+	if home_army.is_empty(): home_army=_empty_home_army()
 	var snapshot:=home_army.duplicate(true)
 	snapshot["foreign_prisoners"]=foreign_prisoners
 	snapshot["held_generals"]=held_generals.duplicate(true)
 	snapshot["military_inventory"]=military_inventory.duplicate(true)
+	snapshot["recruits"]=recruit_pool.size()
+	snapshot["training_queue"]=training_queue.duplicate(true)
+	snapshot["equipment_queue"]=equipment_queue.duplicate(true)
 	return snapshot
+
+
+func _empty_home_army()->Dictionary:
+	var force:Dictionary=simulator.create_formation_force(_home_army_name(),[],_campaign_morale(),0.0)
+	force["commander"]=_marshal_commander()
+	force["soldier_ids"]=[]
+	force["campaign_day"]=int(GameState.elapsed_days)
+	return force
+
+
+func _queued_trainees()->int:
+	var total:=0
+	for entry in training_queue: total+=int(entry.get("count",0))
+	return total
 
 
 func _formations_for_strength(total:int)->Array[Dictionary]:
@@ -196,6 +246,8 @@ func _apply_home_result(side:Dictionary,rounds:Array)->void:
 
 
 func _process_military_day()->void:
+	_process_equipment_production_day()
+	_process_training_day()
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
 	var logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.5))
 	var replacements:=roundi(2.0+float(GameState.population_allocations.get("Logistics",0))*0.25)
@@ -203,6 +255,62 @@ func _process_military_day()->void:
 	home_army=prepared.force
 	home_army["campaign_day"]=int(GameState.elapsed_days)
 	army_changed.emit(home_army.duplicate(true))
+
+
+func _process_equipment_production_day()->void:
+	if equipment_queue.is_empty(): return
+	var crafting:=maxf(0.25,float(GameState.population_allocations.get("Crafting",0))*0.25)
+	var job:Dictionary=equipment_queue[0]
+	job["progress_days"]=float(job.get("progress_days",0.0))+crafting
+	if float(job.progress_days)>=float(job.required_days):
+		military_inventory[String(job.item)]=int(military_inventory.get(String(job.item),0))+int(job.count)
+		equipment_queue.pop_front()
+	else: equipment_queue[0]=job
+
+
+func _process_training_day()->void:
+	if training_queue.is_empty(): return
+	var security:=float(GameState.society_capacities.get("security",0.38))
+	var training_rate:=0.55+security*0.75
+	for index in range(training_queue.size()-1,-1,-1):
+		var training:Dictionary=training_queue[index]
+		training["progress_days"]=float(training.get("progress_days",0.0))+training_rate
+		if float(training.progress_days)<float(training.required_days):
+			training_queue[index]=training
+			continue
+		_complete_training(training)
+		training_queue.remove_at(index)
+
+
+func _complete_training(training:Dictionary)->void:
+	if home_army.is_empty(): home_army=_empty_home_army()
+	var count:=int(training.count)
+	var weapon:=String(training.weapon)
+	var issued:=mini(count,int(military_inventory.get(weapon,0)))
+	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
+	var formation:={"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"training":1.0}
+	var formations:Array=home_army.get("formations",[])
+	formations.append(formation)
+	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
+	rebuilt["commander"]=_marshal_commander()
+	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
+	for citizen_id in training.soldier_ids:
+		soldier_ids.append(int(citizen_id))
+		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if not citizen.is_empty(): citizen["army_status"]="active"
+	rebuilt["soldier_ids"]=soldier_ids
+	rebuilt["campaign_day"]=int(GameState.elapsed_days)
+	home_army=rebuilt
+
+
+func _equipment_recipe(item:String)->Dictionary:
+	return {
+		"improvised":{"materials":{"Timber":0.35},"days":0.25},
+		"spear":{"materials":{"Timber":0.65,"Stone":0.10},"days":0.55},
+		"bow":{"materials":{"Timber":0.45,"Fiber Plants":0.30},"days":0.80},
+		"sword_shield":{"materials":{"Timber":0.50,"Iron Ore":0.55},"days":1.60},
+		"lance":{"materials":{"Timber":1.10,"Iron Ore":0.20},"days":1.25}
+	}.get(item,{"materials":{},"days":1.0})
 
 
 func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)->void:
