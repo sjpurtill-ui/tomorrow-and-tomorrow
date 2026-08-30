@@ -358,6 +358,20 @@ func _run()->void:
 	assert(int(MilitaryCampaign.equipment_queue[0].id)>0)
 	assert((MilitaryCampaign.equipment_queue[0].reserved_materials as Dictionary).has("Timber"))
 	assert(MilitaryCampaign.validate_state().is_empty())
+	var stale_counter_save:=MilitaryCampaign.export_state()
+	stale_counter_save["next_training_order_id"]=1
+	stale_counter_save["next_formation_id"]=1
+	stale_counter_save["next_equipment_job_id"]=1
+	assert(bool(MilitaryCampaign.import_state(stale_counter_save).get("ok",false)))
+	assert(MilitaryCampaign.next_training_order_id>=MilitaryCampaign._next_available_training_order_id())
+	assert(MilitaryCampaign.next_formation_id>=MilitaryCampaign._next_available_formation_id())
+	assert(MilitaryCampaign.next_equipment_job_id>=MilitaryCampaign._next_available_equipment_job_id())
+	var invalid_job_save:=MilitaryCampaign.export_state()
+	invalid_job_save["equipment_queue"]=[{"id":991,"job_type":"production","item":"improvised","count":1,"completed":0,"progress_days":-1.0,"work_per_item":0.25,"required_days":0.25,"reserved_materials":{"Timber":0.35}}]
+	var invalid_job_import:Dictionary=MilitaryCampaign.import_state(invalid_job_save)
+	assert(String(invalid_job_import.get("error",""))=="Invalid military save state.")
+	assert(str(invalid_job_import.get("details",[])).contains("work values"))
+	assert(MilitaryCampaign.validate_state().is_empty())
 	var invalid:=saved.duplicate(true)
 	if not (invalid.home_army.soldier_ids as Array).is_empty(): invalid.home_army.wounded_ids.append(invalid.home_army.soldier_ids[0])
 	var rejected:Dictionary=MilitaryCampaign.import_state(invalid)

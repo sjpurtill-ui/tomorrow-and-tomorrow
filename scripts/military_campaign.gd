@@ -1047,13 +1047,31 @@ func validate_state()->Array[String]:
 			elif not bool(pooled_citizen.get("alive",true)): errors.append("Military pool references deceased citizen %d." % int(citizen_id))
 			elif String(pooled_citizen.get("army_status","civilian"))!=String(pool_spec.status): errors.append("Citizen %d status does not match the %s military pool." % [int(citizen_id),String(pool_spec.status)])
 	var training_order_ids:Dictionary={}
+	var planned_reinforcements:Dictionary={}
 	for training in training_queue:
 		var training_id:=int(training.get("id",-1))
 		if training_id<=0 or training_order_ids.has(training_id): errors.append("Training order IDs must be positive and unique.")
 		training_order_ids[training_id]=true
+		var training_mode:=String(training.get("mode","new"))
+		var training_unit:=String(training.get("unit",""))
+		var training_weapon:=String(training.get("weapon",""))
+		var training_count:=int(training.get("count",0))
+		var training_progress:=float(training.get("progress_days",0.0))
+		var training_required:=float(training.get("required_days",0.0))
+		var injury_progress:=float(training.get("injury_accumulator",0.0))
+		if training_mode not in ["new","reinforce","retrain"]: errors.append("Training order has an unknown mode.")
+		if not simulator.UNIT_TYPES.has(training_unit): errors.append("Training order references an unknown unit type.")
+		if not simulator.WEAPONS.has(training_weapon) or training_weapon not in (UNIT_EQUIPMENT.get(training_unit,[]) as Array): errors.append("Training order uses incompatible equipment.")
+		if training_count<=0: errors.append("Training order headcount must be positive.")
+		if not is_finite(training_progress) or not is_finite(training_required) or training_progress<0.0 or training_required<=0.0 or training_progress>=training_required: errors.append("Training order progress is outside its duration.")
+		if not is_finite(injury_progress) or injury_progress<0.0 or injury_progress>=1.0: errors.append("Training injury accumulation is outside its valid range.")
+		if float(training.get("equipment_access_sum",0.0))<0.0 or float(training.get("instruction_progress_sum",0.0))<0.0: errors.append("Training instruction totals cannot be negative.")
 		var trainee_ids:Array=training.get("soldier_ids",[])
-		if trainee_ids.size()!=int(training.get("count",0)): errors.append("Training order headcount does not equal its citizen IDs.")
-		if String(training.get("mode","new"))=="reinforce" and not formation_ids.has(int(training.get("target_formation_id",-1))): errors.append("Reinforcement order targets a missing formation.")
+		if trainee_ids.size()!=training_count: errors.append("Training order headcount does not equal its citizen IDs.")
+		if training_mode=="reinforce":
+			var target_formation_id:=int(training.get("target_formation_id",-1))
+			if not formation_ids.has(target_formation_id): errors.append("Reinforcement order targets a missing formation.")
+			else: planned_reinforcements[target_formation_id]=int(planned_reinforcements.get(target_formation_id,0))+training_count
 		for citizen_id in trainee_ids:
 			if seen.has(int(citizen_id)): errors.append("Citizen %d appears in more than one military pool." % int(citizen_id))
 			seen[int(citizen_id)]=true
@@ -1061,8 +1079,16 @@ func validate_state()->Array[String]:
 			if trainee.is_empty(): errors.append("Training order references missing citizen %d." % int(citizen_id))
 			elif not bool(trainee.get("alive",true)): errors.append("Training order references deceased citizen %d." % int(citizen_id))
 			elif String(trainee.get("army_status","civilian"))!="training": errors.append("Citizen %d status does not match the training queue." % int(citizen_id))
+	for formation in formations:
+		var formation_id:=int(formation.get("id",-1))
+		var vacancies:=maxi(0,int(formation.get("authorized_count",formation.get("count",0)))-int(formation.get("count",0)))
+		if int(planned_reinforcements.get(formation_id,0))>vacancies: errors.append("Reinforcement orders exceed a formation's authorized vacancies.")
 	for injury in training_injuries:
 		var citizen_id:=int(injury.get("citizen_id",-1))
+		var remaining_days:=int(injury.get("remaining_days",0))
+		var severity:=float(injury.get("severity",-1.0))
+		if remaining_days<=0: errors.append("Training injury recovery time must be positive.")
+		if not is_finite(severity) or severity<0.0 or severity>1.0: errors.append("Training injury severity is outside its valid range.")
 		if seen.has(citizen_id): errors.append("Citizen %d appears in more than one military pool." % citizen_id)
 		seen[citizen_id]=true
 		var injured_citizen:Dictionary=GameState.citizen_by_id(citizen_id)
@@ -1092,7 +1118,38 @@ func validate_state()->Array[String]:
 		var job_id:=int(job.get("id",-1))
 		if job_id<=0 or equipment_job_ids.has(job_id): errors.append("Equipment job IDs must be positive and unique.")
 		equipment_job_ids[job_id]=true
-		if int(job.get("completed",0))<0 or int(job.get("completed",0))>int(job.get("count",0)): errors.append("Equipment job completion is outside its order size.")
+		var job_type:=String(job.get("job_type","production"))
+		var job_item:=String(job.get("item",""))
+		var job_count:=int(job.get("count",0))
+		var job_completed:=int(job.get("completed",0))
+		var job_progress:=float(job.get("progress_days",0.0))
+		var job_work_per_item:=float(job.get("work_per_item",0.0))
+		var job_required:=float(job.get("required_days",0.0))
+		var recipe:Dictionary={}
+		var reservation_factor:=1.0
+		if job_type in ["production","repair"] and simulator.WEAPONS.has(job_item):
+			recipe=_equipment_recipe(job_item)
+			if job_type=="repair": reservation_factor=0.18
+		elif job_type=="consumable" and military_consumables.has(job_item): recipe=_consumable_recipe(job_item)
+		elif job_type=="transport" and job_item=="transport_cart": recipe=_transport_recipe()
+		else: errors.append("Equipment job has an unknown type or item.")
+		if job_count<=0: errors.append("Equipment job order size must be positive.")
+		if job_completed<0 or job_completed>=job_count: errors.append("Equipment job completion is outside its order size.")
+		if not is_finite(job_progress) or not is_finite(job_work_per_item) or not is_finite(job_required) or job_progress<0.0 or job_work_per_item<=0.0 or job_required<=0.0: errors.append("Equipment job work values must be finite and positive.")
+		if not recipe.is_empty():
+			var expected_work_per_item:=float(recipe.days)*(0.38 if job_type=="repair" else 1.0)
+			if not is_equal_approx(job_work_per_item,expected_work_per_item) or not is_equal_approx(job_required,expected_work_per_item*float(job_count)): errors.append("Equipment job work does not match its recipe.")
+			var expected_materials:Dictionary={}
+			for material in recipe.materials: expected_materials[material]=float(recipe.materials[material])*float(job_count)*reservation_factor
+			var reserved_materials:Dictionary=job.get("reserved_materials",{})
+			if reserved_materials.size()!=expected_materials.size(): errors.append("Equipment job material reservation does not match its recipe.")
+			for material in expected_materials:
+				if not reserved_materials.has(material) or not is_equal_approx(float(reserved_materials.get(material,-1.0)),float(expected_materials[material])): errors.append("Equipment job material reservation does not match its recipe.")
+		if job_type=="repair" and int(job.get("reserved_damaged",-1))!=job_count: errors.append("Repair job damaged-equipment reservation does not match its order size.")
+		if job_work_per_item>0.0 and (job_progress+0.000001<float(job_completed)*job_work_per_item or job_progress>=float(job_completed+1)*job_work_per_item): errors.append("Equipment job progress does not match its completed count.")
+	if next_training_order_id<_next_available_training_order_id(): errors.append("Next training order ID would duplicate an existing order.")
+	if next_formation_id<_next_available_formation_id(): errors.append("Next formation ID would duplicate an existing formation.")
+	if next_equipment_job_id<_next_available_equipment_job_id(): errors.append("Next equipment job ID would duplicate an existing job.")
 	return errors
 
 
@@ -1118,6 +1175,8 @@ func _apply_imported_state(payload:Dictionary)->void:
 	next_training_order_id=int(payload.get("next_training_order_id",_next_available_training_order_id()))
 	next_formation_id=int(payload.get("next_formation_id",_next_available_formation_id()))
 	next_equipment_job_id=int(payload.get("next_equipment_job_id",_next_available_equipment_job_id()))
+	next_training_order_id=maxi(next_training_order_id,_next_available_training_order_id())
+	next_formation_id=maxi(next_formation_id,_next_available_formation_id())
 	next_equipment_job_id=maxi(next_equipment_job_id,_next_available_equipment_job_id())
 	prisoner_custody_days=maxi(0,int(payload.get("prisoner_custody_days",0)))
 	prisoner_escape_accumulator=maxf(0.0,float(payload.get("prisoner_escape_accumulator",0.0)))
