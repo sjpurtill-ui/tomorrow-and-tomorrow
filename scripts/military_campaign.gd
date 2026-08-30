@@ -78,7 +78,9 @@ func raise_recruits(count:int)->Dictionary:
 		var a_defense:=1 if String(a.get("role",""))=="Defense" else 0
 		var b_defense:=1 if String(b.get("role",""))=="Defense" else 0
 		if a_defense!=b_defense: return a_defense>b_defense
-		return GameState.citizen_physical_capacity(a)>GameState.citizen_physical_capacity(b))
+		var a_score:=GameState.citizen_physical_capacity(a)+float(a.get("military_experience",0.0))*0.18
+		var b_score:=GameState.citizen_physical_capacity(b)+float(b.get("military_experience",0.0))*0.18
+		return a_score>b_score)
 	var capacity:=recruitment_capacity()
 	var available_capacity:=maxi(0,capacity-_mobilized_count())
 	var raised:=0
@@ -137,6 +139,7 @@ func stand_down(count:int)->Dictionary:
 	home_army["formations"]=formations
 	home_army["soldier_ids"]=active_ids
 	home_army["troops"]=active_ids.size()
+	_refresh_formation_experience()
 	_refresh_readiness()
 	army_changed.emit(home_army.duplicate(true))
 	return {"requested":requested,"released":released_ids.size(),"citizen_ids":released_ids,"returned_equipment":returned_equipment}
@@ -208,7 +211,7 @@ func military_capabilities()->Dictionary:
 	for unit in UNIT_KNOWLEDGE: units[unit]=_knowledge_gate(String(UNIT_KNOWLEDGE[unit]),0.10)
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
-	return {"units":units,"equipment":equipment,"recruitment_capacity":recruitment_capacity(),"training_rate":_training_rate(),"production_rate":_production_rate(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs")}
+	return {"units":units,"equipment":equipment,"recruitment_capacity":recruitment_capacity(),"training_rate":_training_rate(),"production_rate":_production_rate(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func military_inquiry_context()->Dictionary:
@@ -317,6 +320,7 @@ func validate_state()->Array[String]:
 		var count:=int(formation.get("count",0)); formation_total+=count
 		if count<0 or int(formation.get("equipment",0))<0: errors.append("Formation has a negative personnel or equipment count.")
 		if (formation.get("soldier_ids",[]) as Array).size()!=count: errors.append("Formation headcount does not equal its citizen IDs.")
+		if absf(float(formation.get("experience",0.0))-_citizen_experience(formation.get("soldier_ids",[])))>0.001: errors.append("Formation experience does not match its citizen roster.")
 	if formation_total!=int(home_army.get("troops",0)): errors.append("Formation manpower does not equal army troop total.")
 	if active_ids.size()!=int(home_army.get("troops",0)): errors.append("Active citizen IDs do not equal army troop total.")
 	if (home_army.get("wounded_ids",[]) as Array).size()!=int(home_army.get("wounded_pool",0)): errors.append("Wounded citizen IDs do not equal wounded pool.")
@@ -476,6 +480,7 @@ func _remove_active_citizen(citizen_id:int)->bool:
 	home_army["soldier_ids"]=soldier_ids
 	home_army["formations"]=formations
 	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-1)
+	_refresh_formation_experience()
 	return true
 
 
@@ -538,6 +543,16 @@ func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 			citizen["death_cause"]="Killed in battle"
 		elif status_queue[index]=="wounded": wounded_ids.append(int(citizen.id))
 		elif status_queue[index]=="scattered": scattered_ids.append(int(citizen.id))
+	var experience_gain:=clampf(float(rounds.size())*0.014,0.008,0.12)
+	for index in mini(status_queue.size(),casualty_ids.size()):
+		if status_queue[index]=="killed": continue
+		var casualty_survivor:Dictionary=GameState.citizen_by_id(int(casualty_ids[index]))
+		if not casualty_survivor.is_empty(): _award_combat_experience(casualty_survivor,experience_gain*0.70)
+	for citizen_id in soldier_ids:
+		var survivor:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if survivor.is_empty(): continue
+		_award_combat_experience(survivor,experience_gain)
+	for formation_index in result_formations.size(): result_formations[formation_index]["experience"]=_citizen_experience(result_formations[formation_index].get("soldier_ids",[]))
 	var persisted:=home_army.duplicate(true)
 	persisted["formations"]=result_formations
 	persisted["troops"]=int(side.get("remaining_troops",0))
@@ -661,6 +676,7 @@ func _rejoin_recovered_citizens(pool_name:String,count:int)->void:
 	home_army[pool_name]=pool
 	home_army["soldier_ids"]=soldier_ids
 	home_army["formations"]=formations
+	_refresh_formation_experience()
 
 
 func _process_equipment_production_day()->void:
@@ -686,6 +702,10 @@ func _process_training_day()->void:
 	for index in range(training_queue.size()-1,-1,-1):
 		var training:Dictionary=training_queue[index]
 		training["progress_days"]=float(training.get("progress_days",0.0))+training_rate
+		var completion:=clampf(float(training.progress_days)/maxf(1.0,float(training.required_days)),0.0,1.0)
+		for citizen_id in training.soldier_ids:
+			var trainee:Dictionary=GameState.citizen_by_id(int(citizen_id))
+			if not trainee.is_empty(): trainee["military_training"]=maxf(float(trainee.get("military_training",0.0)),completion)
 		if float(training.progress_days)<float(training.required_days):
 			training_queue[index]=training
 			continue
@@ -699,7 +719,8 @@ func _complete_training(training:Dictionary)->void:
 	var weapon:=String(training.weapon)
 	var issued:=mini(count,int(military_inventory.get(weapon,0)))
 	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
-	var formation:={"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"training":_training_quality(String(training.unit)),"soldier_ids":(training.soldier_ids as Array).duplicate()}
+	var member_ids:Array=(training.soldier_ids as Array).duplicate()
+	var formation:={"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":count,"training":_training_quality(String(training.unit),member_ids),"experience":_citizen_experience(member_ids),"soldier_ids":member_ids}
 	var formations:Array=home_army.get("formations",[])
 	formations.append(formation)
 	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
@@ -753,10 +774,39 @@ func _training_rate()->float:
 	return (0.42+security*0.55)*(1.0+_adoption("formation_drill")*0.35+_adoption("professional_corps")*0.55)
 
 
-func _training_quality(unit:String)->float:
+func _training_quality(unit:String,trainee_ids:Array=[])->float:
 	var base:=float({"levy":0.48,"line_infantry":0.58,"skirmisher":0.55,"cavalry":0.56}.get(unit,0.50))
 	var commander:Dictionary=home_army.get("commander",_marshal_commander())
-	return clampf(base+float(commander.get("command",0.5))*0.12+_adoption("formation_drill")*0.14+_adoption("professional_corps")*0.20+_adoption("military_staffs")*0.06,0.30,1.15)
+	var trainee_experience:=_citizen_experience(trainee_ids)
+	var doctrine_transfer:=_army_experience()*_adoption("professional_corps")
+	return clampf(base+float(commander.get("command",0.5))*0.12+_adoption("formation_drill")*0.14+_adoption("professional_corps")*0.12+_adoption("military_staffs")*0.06+trainee_experience*0.12+doctrine_transfer*0.12,0.30,1.15)
+
+
+func _citizen_experience(citizen_ids:Array)->float:
+	if citizen_ids.is_empty(): return 0.0
+	var total:=0.0; var found:=0
+	for citizen_id in citizen_ids:
+		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+		if citizen.is_empty(): continue
+		total+=clampf(float(citizen.get("military_experience",0.0)),0.0,1.0); found+=1
+	return total/maxf(1.0,float(found))
+
+
+func _award_combat_experience(citizen:Dictionary,gain:float)->void:
+	var prior:=clampf(float(citizen.get("military_experience",0.0)),0.0,1.0)
+	citizen["military_experience"]=clampf(prior+gain*(1.0-prior),0.0,1.0)
+	citizen["battles_survived"]=int(citizen.get("battles_survived",0))+1
+
+
+func _refresh_formation_experience()->void:
+	if home_army.is_empty(): return
+	var formations:Array=home_army.get("formations",[])
+	for index in formations.size(): formations[index]["experience"]=_citizen_experience(formations[index].get("soldier_ids",[]))
+	home_army["formations"]=formations
+
+
+func _army_experience()->float:
+	return _citizen_experience(home_army.get("soldier_ids",[])) if not home_army.is_empty() else 0.0
 
 
 func _refresh_readiness()->void:
@@ -849,6 +899,7 @@ func _mark_home_prisoners(count:int)->void:
 	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-marked)
 	home_army["soldier_ids"]=soldier_ids
 	home_army["captured_ids"]=captured_ids
+	_refresh_formation_experience()
 
 
 func _record_council_battle(result:Dictionary)->void:

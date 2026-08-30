@@ -72,11 +72,26 @@ func _run()->void:
 	var high_training:Dictionary=MilitaryCampaign.simulator.create_formation_force("High",[{"unit":"line_infantry","weapon":"spear","count":10,"equipment":10,"training":1.10}],1.0,1.0)
 	var dummy:Dictionary=MilitaryCampaign.simulator.create_formation_force("Dummy",[{"unit":"levy","weapon":"improvised","count":10,"equipment":10}],1.0,1.0)
 	assert(float(MilitaryCampaign.simulator.evaluate_force(high_training,dummy)[0].attack)>float(MilitaryCampaign.simulator.evaluate_force(low_training,dummy)[0].attack))
+	var green_force:Dictionary=MilitaryCampaign.simulator.create_formation_force("Green",[{"unit":"line_infantry","weapon":"spear","count":10,"equipment":10,"training":0.70,"experience":0.0}],1.0,1.0)
+	var veteran_force:Dictionary=MilitaryCampaign.simulator.create_formation_force("Veteran",[{"unit":"line_infantry","weapon":"spear","count":10,"equipment":10,"training":0.70,"experience":0.80}],1.0,1.0)
+	assert(float(MilitaryCampaign.simulator.evaluate_force(veteran_force,dummy)[0].attack)>float(MilitaryCampaign.simulator.evaluate_force(green_force,dummy)[0].attack))
 	var enemy:Dictionary=MilitaryCampaign.simulator.create_formation_force("Raiders",[{"unit":"levy","weapon":"improvised","count":8,"equipment":8}],0.7,0.8)
 	var battle:Dictionary=MilitaryCampaign.resolve_campaign_battle(enemy,{"seed":77,"max_rounds":2})
 	assert(not battle.has("error"))
 	var post_battle:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	assert(int(post_battle.troops)==(post_battle.soldier_ids as Array).size())
+	if not (post_battle.soldier_ids as Array).is_empty():
+		var veteran_id:=int(post_battle.soldier_ids[0])
+		var veteran:Dictionary=GameState.citizen_by_id(veteran_id)
+		assert(float(veteran.get("military_experience",0.0))>0.0)
+		assert(int(veteran.get("battles_survived",0))==1)
+		var veteran_experience:=float(veteran.military_experience)
+		var veteran_quality:=MilitaryCampaign._training_quality("line_infantry",[veteran_id])
+		veteran["military_experience"]=0.0
+		var novice_quality:=MilitaryCampaign._training_quality("line_infantry",[veteran_id])
+		veteran["military_experience"]=veteran_experience
+		MilitaryCampaign._refresh_formation_experience()
+		assert(veteran_quality>novice_quality)
 	if not MilitaryCampaign.pending_aftermath.is_empty():
 		var aftermath:Dictionary=MilitaryCampaign.resolve_aftermath("hold","army stores","hold")
 		assert(not aftermath.has("error"))
@@ -126,6 +141,7 @@ func _run()->void:
 	assert(int(MilitaryCampaign.home_army.troops)==before_stand_down-1)
 	var released_citizen:Dictionary=GameState.citizen_by_id(int(stood_down.citizen_ids[0]))
 	assert(String(released_citizen.army_status)=="civilian")
+	assert(float(released_citizen.get("military_experience",0.0))>0.0)
 	assert(MilitaryCampaign.validate_state().is_empty())
 	GameState.simulation_metrics["food_intake_ratio"]=0.0
 	GameState.population_allocations["Logistics"]=0
