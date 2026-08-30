@@ -132,6 +132,17 @@ func test_aggregate_readiness_combines_manpower_equipment_condition_and_organiza
 	assert_float(depleted_readiness.equipment).is_equal_approx(0.45,0.001)
 
 
+func test_cohort_personnel_condition_changes_its_combat_strength() -> void:
+	var healthy:Dictionary=simulator.create_formation_force("Healthy",[{"unit":"line_infantry","weapon":"spear","count":50,"equipment":50,"personnel_condition":1.0}])
+	var depleted:Dictionary=simulator.create_formation_force("Depleted",[{"unit":"line_infantry","weapon":"spear","count":50,"equipment":50,"personnel_condition":0.25}])
+	var opponent:Dictionary=simulator.create_formation_force("Opponent",[{"unit":"line_infantry","weapon":"spear","count":50,"equipment":50}])
+	var healthy_stats:Dictionary=simulator.evaluate_force(healthy,opponent)[0]
+	var depleted_stats:Dictionary=simulator.evaluate_force(depleted,opponent)[0]
+	assert_float(healthy_stats.attack).is_greater(depleted_stats.attack)
+	assert_float(healthy_stats.defense).is_greater(depleted_stats.defense)
+	assert_float(depleted_stats.personnel_condition).is_equal_approx(0.25,0.001)
+
+
 func test_preparation_day_restores_organization_and_delivers_limited_equipment() -> void:
 	var force: Dictionary = simulator.create_formation_force("Recovering", [{"unit":"line_infantry","weapon":"spear","count":80,"authorized_count":100,"equipment":40,"equipment_required":100}],0.45)
 	var result: Dictionary = simulator.advance_preparation_day(force,{"equipment_replacements":12,"organization_recovery":0.10})

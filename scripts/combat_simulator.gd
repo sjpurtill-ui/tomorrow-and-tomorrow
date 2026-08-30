@@ -87,7 +87,7 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		organization_total += count * float(unit.organization)*training_factor*(0.92+experience*0.12)
 		armor_total += count * float(weapon.armor)
 		penetration_total += count * float(weapon.penetration)
-		normalized.append({"id":int(formation.get("id",-1)),"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"ammunition":ammunition,"ammunition_required":ammunition_required,"training":training,"experience":experience,"soldier_ids":(formation.get("soldier_ids",[]) as Array).duplicate(),"wear_accumulator":float(formation.get("wear_accumulator",0.0))})
+		normalized.append({"id":int(formation.get("id",-1)),"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"ammunition":ammunition,"ammunition_required":ammunition_required,"training":training,"experience":experience,"personnel_condition":clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0),"readiness":clampf(float(formation.get("readiness",readiness)),0.0,1.5),"soldier_ids":(formation.get("soldier_ids",[]) as Array).duplicate(),"wear_accumulator":float(formation.get("wear_accumulator",0.0))})
 	var divisor := maxf(1.0, float(troops))
 	return {
 		"name": name,
@@ -252,14 +252,16 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var training_factor:=0.72+training*0.28
 		var experience:=clampf(float(formation.get("experience",0.0)),0.0,1.0)
 		var experience_factor:=0.94+experience*0.14
+		var personnel_condition:=clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0)
+		var condition_factor:=0.72+personnel_condition*0.28
 		var matchup := _weighted_matchup(unit_id, enemy_formations)
 		matchup=1.0+(matchup-1.0)*(0.65+tactics*0.70)
 		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) - _enemy_penetration(enemy_formations)) * 0.35
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
-			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*formation_attack_modifier,
-			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*formation_defense_modifier,
-			"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience
+			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier,
+			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier,
+			"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
 		})
 	return result
 

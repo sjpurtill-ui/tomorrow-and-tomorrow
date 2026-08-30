@@ -498,6 +498,21 @@ func combat_summary(force:Dictionary={},opponent:Dictionary={},terrain_modifier:
 	return {"troops":int(subject.get("troops",0)),"attack_strength":attack_strength,"defense_strength":defense_strength,"effective_strength":effective_strength,"average_attack":attack_strength/maxf(1.0,float(subject.get("troops",0))),"average_defense":defense_strength/maxf(1.0,float(subject.get("troops",0))),"readiness":readiness,"readiness_components":readiness_components,"commander":(subject.get("commander",{}) as Dictionary).duplicate(true)}
 
 
+func formation_combat_summaries(force:Dictionary={},opponent:Dictionary={},terrain_modifier:float=1.0)->Array[Dictionary]:
+	var subject:=force if not force.is_empty() else home_army
+	var opposing:=opponent if not opponent.is_empty() else {"formations":[]}
+	var evaluated:Array[Dictionary]=simulator.evaluate_force(subject,opposing,terrain_modifier)
+	var formations:Array=subject.get("formations",[])
+	var summaries:Array[Dictionary]=[]
+	for index in formations.size():
+		var formation:Dictionary=formations[index]
+		var stats:Dictionary=evaluated[index] if index<evaluated.size() else {}
+		var formation_readiness:=clampf(float(formation.get("readiness",subject.get("readiness",1.0))),0.0,1.5)
+		var count:=int(formation.get("count",0))
+		summaries.append({"id":int(formation.get("id",-1)),"attack_strength":float(stats.get("attack",0.0))*float(count)*formation_readiness,"defense_strength":float(stats.get("defense",0.0))*float(count)*formation_readiness,"readiness":formation_readiness,"condition":float(formation.get("personnel_condition",stats.get("personnel_condition",1.0))),"matchup":float(stats.get("matchup",1.0))})
+	return summaries
+
+
 func threat_snapshot()->Dictionary:
 	return active_threat.duplicate(true)
 
@@ -1810,14 +1825,28 @@ func _army_experience()->float:
 
 func _refresh_readiness()->void:
 	if home_army.is_empty(): return
+	var formations:Array=home_army.get("formations",[])
+	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
+	var discipline:=clampf(float(home_army.get("discipline",0.5)),0.0,1.0)
+	for formation_index in formations.size():
+		var formation:Dictionary=formations[formation_index]
+		var formation_soldiers:Array[Dictionary]=[]
+		for citizen_id in formation.get("soldier_ids",[]):
+			var formation_citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+			if not formation_citizen.is_empty() and bool(formation_citizen.get("alive",true)): formation_soldiers.append(formation_citizen)
+		var formation_condition:=_condition_average(formation_soldiers)
+		formation["personnel_condition"]=formation_condition
+		var formation_force:Dictionary={"formations":[formation],"morale":float(home_army.get("morale",1.0))}
+		var formation_readiness:Dictionary=simulator.force_readiness(formation_force,formation_condition)
+		formation["readiness"]=float(formation_readiness.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)
+		formations[formation_index]=formation
+	home_army["formations"]=formations
 	var soldiers:Array[Dictionary]=[]
 	for citizen_id in home_army.get("soldier_ids",[]):
 		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
 		if not citizen.is_empty() and bool(citizen.get("alive",true)): soldiers.append(citizen)
 	var condition:=_condition_average(soldiers)
 	var readiness:Dictionary=simulator.force_readiness(home_army,condition)
-	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
-	var discipline:=clampf(float(home_army.get("discipline",0.5)),0.0,1.0)
 	home_army["readiness"]=float(readiness.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)
 	home_army["readiness_components"]=readiness
 	home_army.readiness_components["supply"]=supply

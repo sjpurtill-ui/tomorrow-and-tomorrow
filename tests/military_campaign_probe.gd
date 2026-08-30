@@ -86,6 +86,9 @@ func _run()->void:
 	assert(int(army.formations[0].equipment)==raised_count)
 	assert(int(army.formations[0].id)>0)
 	assert(float(army.formations[0].training)<1.0)
+	assert(float(army.formations[0].personnel_condition)>0.0)
+	assert(float(army.formations[0].readiness)>0.0)
+	assert(float(MilitaryCampaign.formation_combat_summaries(army)[0].attack_strength)>0.0)
 	assert(float(army.readiness)>0.0 and float(army.readiness)<=1.0)
 	assert((army.readiness_components as Dictionary).has("condition"))
 	MilitaryCampaign.home_army.formations[0]["wear_accumulator"]=0.99

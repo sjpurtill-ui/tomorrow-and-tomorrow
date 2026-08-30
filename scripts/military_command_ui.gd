@@ -79,7 +79,7 @@ func _build_interface()->void:
 	layer.add_child(modal)
 
 	var outer:=VBoxContainer.new()
-	outer.add_theme_constant_override("separation",10)
+	outer.add_theme_constant_override("separation",7)
 	modal.add_child(outer)
 	var title_row:=HBoxContainer.new(); outer.add_child(title_row)
 	var title:=Label.new(); title.text="MILITARY COMMAND"; title.add_theme_font_size_override("font_size",24); title.add_theme_color_override("font_color",GOLD); title_row.add_child(title)
@@ -97,7 +97,7 @@ func _build_interface()->void:
 	var commander_row:=HBoxContainer.new(); commander_row.add_theme_constant_override("separation",8); army_box.add_child(commander_row)
 	commander_portrait=TextureRect.new(); commander_portrait.custom_minimum_size=Vector2(54,54); commander_portrait.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; commander_portrait.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; commander_row.add_child(commander_portrait)
 	commander_details=Label.new(); commander_details.size_flags_horizontal=Control.SIZE_EXPAND_FILL; commander_details.vertical_alignment=VERTICAL_ALIGNMENT_CENTER; commander_row.add_child(commander_details)
-	formations=_body_label(army_box)
+	formations=_body_label(army_box); formations.add_theme_font_size_override("font_size",14)
 	var recruit_row:=HBoxContainer.new(); army_box.add_child(recruit_row)
 	recruit_count=_counter(recruit_row,1,100,10)
 	_action_button(recruit_row,"Raise recruits",_raise_recruits)
@@ -180,7 +180,7 @@ func _action_button(parent:HBoxContainer,text_value:String,action:Callable)->voi
 
 func _panel_style(color:Color,border:Color,width:int,radius:int)->StyleBoxFlat:
 	var style:=StyleBoxFlat.new(); style.bg_color=color; style.border_color=border
-	style.set_border_width_all(width); style.set_corner_radius_all(radius); style.content_margin_left=16; style.content_margin_right=16; style.content_margin_top=12; style.content_margin_bottom=12
+	style.set_border_width_all(width); style.set_corner_radius_all(radius); style.content_margin_left=16; style.content_margin_right=16; style.content_margin_top=8; style.content_margin_bottom=8
 	return style
 
 
@@ -238,10 +238,14 @@ func _refresh()->void:
 	readiness_bottleneck.text="▼ %s %d%%" % [weakest_key.to_upper(),roundi(weakest_value*100.0)]
 	readiness_bottleneck.tooltip_text="The weakest readiness component is the immediate constraint on field performance."
 	var formation_lines:Array[String]=[]
-	for formation in (display_force.get("formations",[]) as Array):
-		formation_lines.append("%s  %d/%d men\n  %s %d/%d  •  readiness %d%%" % [String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),roundi(float(formation.get("readiness",ready))*100.0)])
+	var formation_combat:=MilitaryCampaign.formation_combat_summaries(display_force,display_opponent,1.0)
+	var displayed_formations:Array=display_force.get("formations",[])
+	for formation_index in displayed_formations.size():
+		var formation:Dictionary=displayed_formations[formation_index]
+		var formation_stats:Dictionary=formation_combat[formation_index] if formation_index<formation_combat.size() else {}
+		formation_lines.append("%s  %d/%d men  •  %s %d/%d\n  ⚔ %.1f   🛡 %.1f   RDY %d%%   COND %d%%" % [String(formation.get("unit","unit")).replace("_"," ").capitalize(),int(formation.get("count",0)),int(formation.get("authorized_count",formation.get("count",0))),String(formation.get("weapon","gear")).replace("_"," "),int(formation.get("equipment",0)),int(formation.get("equipment_required",formation.get("count",0))),float(formation_stats.get("attack_strength",0.0)),float(formation_stats.get("defense_strength",0.0)),roundi(float(formation_stats.get("readiness",ready))*100.0),roundi(float(formation_stats.get("condition",1.0))*100.0)])
 	var custody_line:="\n\nCAPTIVES  %d soldiers  •  %d generals" % [int(army.get("foreign_prisoners",0)),(army.get("held_generals",[]) as Array).size()]
-	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n\n".join(formation_lines))+custody_line
+	formations.text=("No field formations. Raise citizens, then train them." if formation_lines.is_empty() else "\n".join(formation_lines))+custody_line
 	var commander:Dictionary=combat.get("commander",{})
 	var portrait_index:=posmod(hash(String(commander.get("name","commander"))),6)
 	commander_portrait.texture=_commander_portrait(portrait_index)
@@ -258,6 +262,8 @@ func _refresh()->void:
 	if not engagement.is_empty():
 		var attacker:Dictionary=engagement.get("attacker",{}); var defender:Dictionary=engagement.get("defender",{})
 		engagement_label.text="ROUND %02d   %s %d  —  %d %s   Last: %s" % [int(engagement.get("round",0))+1,String(attacker.get("name","Army")),int(attacker.get("troops",0)),int(defender.get("troops",0)),String(defender.get("name","Enemy")),String(engagement.get("last_order","ready")).capitalize()]
+	modal.size=PANEL_SIZE
+	modal.position=-PANEL_SIZE*0.5
 
 
 func _commander_portrait(index:int)->AtlasTexture:
