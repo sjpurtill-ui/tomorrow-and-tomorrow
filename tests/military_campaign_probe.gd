@@ -77,6 +77,8 @@ func _run()->void:
 	assert(not production.has("error"))
 	var training:Dictionary=MilitaryCampaign.start_training("levy","improvised",raised_count)
 	assert(int(training.accepted)==raised_count)
+	for trainee_id in MilitaryCampaign.training_queue[-1].soldier_ids:
+		assert(String(GameState.citizen_by_id(int(trainee_id)).army_status)=="training")
 	for day in 4:
 		MilitaryCampaign._process_military_day()
 		if int(MilitaryCampaign.military_inventory.improvised)>0: break

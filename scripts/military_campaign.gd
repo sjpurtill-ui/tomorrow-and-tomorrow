@@ -220,7 +220,11 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	var accepted:=mini(maxi(0,count),recruit_pool.size())
 	if accepted<=0: return {"error":"No recruits are available for training."}
 	var ids:Array[int]=[]
-	for index in accepted: ids.append(recruit_pool.pop_front())
+	for index in accepted:
+		var citizen_id:int=int(recruit_pool.pop_front())
+		ids.append(citizen_id)
+		var trainee:Dictionary=GameState.citizen_by_id(citizen_id)
+		if not trainee.is_empty(): trainee["army_status"]="training"
 	var base_training_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(unit,21))
 	var training_days:=maxf(3.0,base_training_days*(1.0-_citizen_training(ids)*0.35))
 	var order_id:=next_training_order_id; next_training_order_id+=1
@@ -239,7 +243,11 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 	var accepted:=mini(mini(maxi(0,count),recruit_pool.size()),vacancies)
 	if accepted<=0: return {"error":"The formation has no open authorized positions or no recruits are available."}
 	var ids:Array[int]=[]
-	for index in accepted: ids.append(recruit_pool.pop_front())
+	for index in accepted:
+		var citizen_id:int=int(recruit_pool.pop_front())
+		ids.append(citizen_id)
+		var trainee:Dictionary=GameState.citizen_by_id(citizen_id)
+		if not trainee.is_empty(): trainee["army_status"]="training"
 	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(String(formation.unit),21))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	var required_days:=maxf(3.0,base_days*0.58)
