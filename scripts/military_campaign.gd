@@ -1803,6 +1803,7 @@ func _ammunition_type_for(weapon:String)->String:
 
 func _complete_training(training:Dictionary)->void:
 	if home_army.is_empty(): home_army=_empty_home_army()
+	var previous_army:Dictionary=home_army.duplicate(true)
 	var count:=int(training.count)
 	var weapon:=String(training.weapon)
 	var member_ids:Array=(training.soldier_ids as Array).duplicate()
@@ -1833,17 +1834,14 @@ func _complete_training(training:Dictionary)->void:
 		var formation_id:=next_formation_id; next_formation_id+=1
 		var equipment_required:=_equipment_required_for(String(training.unit),count)
 		formations.append({"id":formation_id,"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":equipment_required,"ammunition":0,"ammunition_required":_ammunition_required_for(weapon,equipment_required),"training":_training_quality(String(training.unit),member_ids)*equipment_training_factor,"experience":_citizen_experience(member_ids),"soldier_ids":member_ids})
-	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,_campaign_morale(),1.0)
-	rebuilt["commander"]=_marshal_commander()
-	rebuilt["wounded_pool"]=int(home_army.get("wounded_pool",0))
-	rebuilt["scattered_pool"]=int(home_army.get("scattered_pool",0))
-	rebuilt["reserve_manpower"]=0
-	rebuilt["wounded_ids"]=home_army.get("wounded_ids",[]).duplicate()
-	rebuilt["scattered_ids"]=home_army.get("scattered_ids",[]).duplicate()
-	rebuilt["captured_ids"]=home_army.get("captured_ids",[]).duplicate()
-	for key in ["supply_level","supply_components","recent_combat_days","equipment_delivered_today","ammunition_delivered_today"]:
-		if home_army.has(key): rebuilt[key]=home_army[key].duplicate(true) if home_army[key] is Dictionary else home_army[key]
-	var soldier_ids:Array=home_army.get("soldier_ids",[]).duplicate()
+	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,float(previous_army.get("morale",_campaign_morale())),float(previous_army.get("readiness",1.0)))
+	var structural_keys:Array[String]=["name","troops","attack","defense","armor","penetration","formations","soldier_ids"]
+	for key in previous_army:
+		if key in structural_keys: continue
+		var prior_value:Variant=previous_army[key]
+		rebuilt[key]=prior_value.duplicate(true) if prior_value is Array or prior_value is Dictionary else prior_value
+	if not rebuilt.has("commander"): rebuilt["commander"]=_marshal_commander()
+	var soldier_ids:Array=previous_army.get("soldier_ids",[]).duplicate()
 	for citizen_id in training.soldier_ids:
 		soldier_ids.append(int(citizen_id))
 		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))

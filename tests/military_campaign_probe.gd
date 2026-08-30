@@ -326,6 +326,10 @@ func _run()->void:
 	MilitaryCampaign.home_army["commander"]=MilitaryCampaign._marshal_commander()
 	GameState.known_discoveries.append("shield_wall")
 	GameState.discovery_adoption["shield_wall"]=0.80
+	MilitaryCampaign.home_army["service_days"]=41
+	MilitaryCampaign.home_army["provision_shortfall_total"]=12.5
+	MilitaryCampaign.home_army["battlefield_salvage_accumulators"]={"improvised":0.40}
+	MilitaryCampaign.home_army["morale"]=0.37
 	var retrain_target:=int(MilitaryCampaign.home_army.formations[0].id)
 	var experience_before_retraining:=float(MilitaryCampaign.home_army.formations[0].experience)
 	var retraining:Dictionary=MilitaryCampaign.retrain_formation(retrain_target,"line_infantry","spear")
@@ -340,6 +344,10 @@ func _run()->void:
 	assert(not MilitaryCampaign.home_army.formations.is_empty())
 	assert(String(MilitaryCampaign.home_army.formations[-1].unit)=="line_infantry")
 	assert(is_equal_approx(float(MilitaryCampaign.home_army.formations[-1].experience),experience_before_retraining))
+	assert(int(MilitaryCampaign.home_army.service_days)==41)
+	assert(is_equal_approx(float(MilitaryCampaign.home_army.provision_shortfall_total),12.5))
+	assert(is_equal_approx(float(MilitaryCampaign.home_army.battlefield_salvage_accumulators.improvised),0.40))
+	assert(is_equal_approx(float(MilitaryCampaign.home_army.morale),0.37))
 	var lifetime_deaths_before_commander:=GameState.lifetime_deaths
 	MilitaryCampaign._apply_home_commander_fate({"defeated":MilitaryCampaign.home_army.name,"commander_fate":"killed"})
 	assert(not bool(GameState.citizen_by_id(int(marshal_citizen.id)).alive))
