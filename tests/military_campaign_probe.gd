@@ -150,6 +150,13 @@ func _run()->void:
 	assert(float(equipment_need_inquiry.get("materials",0.0))>float(baseline_inquiry.get("materials",0.0)))
 	MilitaryCampaign.home_army.formations[0]["equipment"]=original_equipment
 	MilitaryCampaign.damaged_equipment["improvised"]=int(MilitaryCampaign.damaged_equipment.improvised)-1
+	MilitaryCampaign.home_army.formations[0]["wear_accumulator"]=0.0
+	MilitaryCampaign.home_army["recent_combat_days"]=0
+	MilitaryCampaign.home_army["supply_level"]=1.0
+	var equipment_before_fractional_wear:=int(MilitaryCampaign.home_army.formations[0].equipment)
+	MilitaryCampaign._process_equipment_wear_day()
+	assert(float(MilitaryCampaign.home_army.formations[0].wear_accumulator)>0.0)
+	assert(int(MilitaryCampaign.home_army.formations[0].equipment)==equipment_before_fractional_wear)
 	MilitaryCampaign.home_army.formations[0]["wear_accumulator"]=0.99
 	MilitaryCampaign.home_army["recent_combat_days"]=7
 	var damaged_before:=int(MilitaryCampaign.damaged_equipment.improvised)
