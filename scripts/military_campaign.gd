@@ -169,7 +169,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 			return {"error":"Insufficient %s: need %.1f." % [material,required]}
 	for material in recipe.materials:
 		GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
-	equipment_queue.append({"item":item,"count":amount,"progress_days":0.0,"required_days":float(recipe.days)*amount})
+	equipment_queue.append({"item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount})
 	return {"queued":amount,"item":item,"work_days":float(recipe.days)*amount}
 
 
@@ -587,10 +587,16 @@ func _rejoin_recovered_citizens(pool_name:String,count:int)->void:
 func _process_equipment_production_day()->void:
 	if equipment_queue.is_empty(): return
 	var crafting:=_production_rate()
+	if crafting<=0.0: return
 	var job:Dictionary=equipment_queue[0]
 	job["progress_days"]=float(job.get("progress_days",0.0))+crafting
-	if float(job.progress_days)>=float(job.required_days):
-		military_inventory[String(job.item)]=int(military_inventory.get(String(job.item),0))+int(job.count)
+	var work_per_item:=maxf(0.01,float(job.get("work_per_item",float(job.get("required_days",1.0))/maxf(1.0,float(job.get("count",1))))))
+	var previously_completed:=int(job.get("completed",0))
+	var completed:=mini(int(job.count),floori(float(job.progress_days)/work_per_item))
+	var produced:=maxi(0,completed-previously_completed)
+	if produced>0: military_inventory[String(job.item)]=int(military_inventory.get(String(job.item),0))+produced
+	job["completed"]=completed
+	if completed>=int(job.count):
 		equipment_queue.pop_front()
 	else: equipment_queue[0]=job
 
@@ -686,7 +692,8 @@ func _refresh_readiness()->void:
 
 
 func _production_rate()->float:
-	var crafting:=maxf(0.20,float(GameState.population_allocations.get("Crafting",0))*0.20)
+	var crafting:=float(GameState.population_allocations.get("Crafting",0))*0.16
+	if crafting<=0.0: return 0.0
 	return crafting*(0.55+float(GameState.society_capacities.get("production",0.12))*0.45+_adoption("workshop_standards")*0.45)
 
 

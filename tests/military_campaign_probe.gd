@@ -8,6 +8,8 @@ func _ready()->void:
 func _run()->void:
 	GameState.reset_for_new_world(90210)
 	GameState.initialize_citizen_registry()
+	GameState.population_allocations["Crafting"]=6
+	GameState.population_allocations["Logistics"]=4
 	GameState.resource_stockpiles={"Timber":100.0,"Stone":100.0,"Fiber Plants":100.0,"Iron Ore":100.0,"Food":1000.0}
 	MilitaryCampaign.reset_for_new_world()
 	var locked_spear:Dictionary=MilitaryCampaign.queue_equipment_production("spear",1)
@@ -22,7 +24,10 @@ func _run()->void:
 	assert(not production.has("error"))
 	var training:Dictionary=MilitaryCampaign.start_training("levy","improvised",raised_count)
 	assert(int(training.accepted)==raised_count)
-	for day in 14: MilitaryCampaign._process_military_day()
+	MilitaryCampaign._process_military_day()
+	assert(int(MilitaryCampaign.military_inventory.improvised)>0)
+	assert(int(MilitaryCampaign.military_inventory.improvised)<raised_count)
+	for day in 13: MilitaryCampaign._process_military_day()
 	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	assert(int(army.troops)==raised_count)
 	assert(int(army.formations[0].equipment)==raised_count)
