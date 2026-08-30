@@ -419,5 +419,21 @@ func _run()->void:
 	assert((MilitaryCampaign.equipment_queue[0].reserved_materials as Dictionary).has("Sulfur"))
 	assert((MilitaryCampaign.equipment_queue[0].reserved_materials as Dictionary).has("Nitrates"))
 	MilitaryCampaign.equipment_queue.clear()
+	MilitaryCampaign.active_threat={"id":"tribute_test","tribute_food":10.0,"plunder_fraction":0.10}
+	var food_before_tribute:=float(GameState.resource_stockpiles.Food)
+	var tribute_result:Dictionary=MilitaryCampaign.respond_to_threat("tribute")
+	assert(bool(tribute_result.get("resolved",false)))
+	assert(is_equal_approx(float(GameState.resource_stockpiles.Food),food_before_tribute-10.0))
+	MilitaryCampaign.active_threat={"id":"withdraw_test","tribute_food":10.0,"plunder_fraction":0.10}
+	var timber_before_withdraw:=float(GameState.resource_stockpiles.Timber)
+	var withdrawal:Dictionary=MilitaryCampaign.respond_to_threat("withdraw")
+	assert(bool(withdrawal.get("resolved",false)))
+	assert(is_equal_approx(float(GameState.resource_stockpiles.Timber),timber_before_withdraw*0.90))
+	MilitaryCampaign.active_threat={"id":"save_test","deadline_day":9999,"estimated_strength":7}
+	var threat_save:Dictionary=MilitaryCampaign.export_state()
+	MilitaryCampaign.active_threat.clear()
+	assert(bool(MilitaryCampaign.import_state(threat_save).get("ok",false)))
+	assert(String(MilitaryCampaign.threat_snapshot().get("id",""))=="save_test")
+	MilitaryCampaign.active_threat.clear()
 	print("MILITARY_CAMPAIGN_PROBE raised=%d trained=%d equipped=%d battle=%s" % [raised.raised,army.troops,army.formations[0].equipment,battle.outcome])
 	get_tree().quit()

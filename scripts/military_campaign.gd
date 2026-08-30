@@ -3,6 +3,7 @@ extends Node
 signal army_changed(army: Dictionary)
 signal battle_resolved(result: Dictionary)
 signal aftermath_required(aftermath: Dictionary)
+signal threat_changed(threat: Dictionary)
 
 const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const SAVE_VERSION:=2
@@ -31,6 +32,8 @@ var next_equipment_job_id:=1
 var prisoner_custody_days:=0
 var prisoner_escape_accumulator:=0.0
 var escaped_prisoners_total:=0
+var active_threat:Dictionary={}
+var threats_resolved:=0
 
 
 func _ready()->void:
@@ -69,6 +72,8 @@ func reset_for_new_world()->void:
 	prisoner_custody_days=0
 	prisoner_escape_accumulator=0.0
 	escaped_prisoners_total=0
+	active_threat.clear()
+	threats_resolved=0
 
 
 func muster_home_army(requested_strength:=-1)->Dictionary:
@@ -456,6 +461,69 @@ func campaign_army_snapshot()->Dictionary:
 	return snapshot
 
 
+func threat_snapshot()->Dictionary:
+	return active_threat.duplicate(true)
+
+
+func respond_to_threat(response:String)->Dictionary:
+	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
+	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
+	var choice:=response.to_lower()
+	var threat:=active_threat.duplicate(true)
+	if choice=="defend":
+		if int(home_army.get("troops",0))<=0: return {"error":"No trained field formation can defend the settlement."}
+		active_threat.clear(); threat_changed.emit({})
+		var result:=resolve_campaign_battle(threat.enemy_force,{"seed":int(threat.seed),"terrain_defense":_terrain_defense()})
+		result["threat"]=threat; threats_resolved+=1
+		return result
+	if choice=="tribute":
+		var demanded:=float(threat.get("tribute_food",0.0)); var available:=float(GameState.resource_stockpiles.get("Food",0.0))
+		if available<demanded: return {"error":"The demanded tribute requires %.1f Food; only %.1f is stored." % [demanded,available]}
+		GameState.resource_stockpiles["Food"]=available-demanded
+		GameState.simulation_metrics["security"]=clampf(float(GameState.simulation_metrics.get("security",0.38))-0.035,0.0,1.0)
+		_resolve_threat_without_battle("Tribute paid","The settlement surrendered %.1f Food to avoid battle." % demanded)
+		return {"resolved":true,"response":choice,"food_paid":demanded}
+	if choice=="withdraw":
+		var losses:Dictionary={}
+		for resource_name in ["Food","Timber","Stone","Fiber Plants"]:
+			var amount:=float(GameState.resource_stockpiles.get(resource_name,0.0))*float(threat.get("plunder_fraction",0.12))
+			GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-amount); losses[resource_name]=amount
+		_resolve_threat_without_battle("Settlement yields ground","The population avoided battle, but the hostile force stripped exposed stores.")
+		return {"resolved":true,"response":choice,"resources_lost":losses}
+	return {"error":"Unknown threat response: %s" % response}
+
+
+func _resolve_threat_without_battle(title:String,description:String)->void:
+	active_threat.clear(); threats_resolved+=1; threat_changed.emit({})
+	GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":title,"description":description,"domain":"security","severity":"warning"})
+
+
+func _process_threat_day()->void:
+	if not active_threat.is_empty():
+		if int(GameState.elapsed_days)>int(active_threat.get("deadline_day",GameState.elapsed_days)) and pending_aftermath.is_empty():
+			respond_to_threat("defend" if int(home_army.get("troops",0))>0 else "withdraw")
+		return
+	if not GameState.settlement_site_committed or int(GameState.elapsed_days)<90 or not pending_aftermath.is_empty(): return
+	var population:=maxi(1,GameState.living_citizen_count()); var security:=clampf(float(GameState.simulation_metrics.get("security",0.38)),0.0,1.0)
+	var stored_value:=float(GameState.resource_stockpiles.get("Food",0.0))+float(GameState.resource_stockpiles.get("Timber",0.0))*0.5+float(GameState.resource_stockpiles.get("Copper Ore",0.0))*3.0
+	var daily_risk:=clampf(0.00010+(1.0-security)*0.00045+minf(0.00035,stored_value/maxf(1.0,float(population))*0.000004),0.00005,0.0010)
+	var rng:=RandomNumberGenerator.new(); rng.seed=GameState.world_seed^int(GameState.elapsed_days)*104729^threats_resolved*7919
+	if rng.randf()>=daily_risk: return
+	var strength:=clampi(roundi(float(population)*rng.randf_range(0.045,0.11)),3,maxi(3,roundi(float(population)*0.16)))
+	var enemy_formations:Array[Dictionary]=[]
+	if int(GameState.elapsed_days)>=2400:
+		var archers:=roundi(float(strength)*0.28); var line:=roundi(float(strength)*0.38); var levy:=strength-archers-line
+		enemy_formations=[{"unit":"levy","weapon":"improvised","count":levy,"equipment":levy},{"unit":"line_infantry","weapon":"spear","count":line,"equipment":line},{"unit":"skirmisher","weapon":"bow","count":archers,"equipment":archers,"ammunition":archers*6}]
+	elif int(GameState.elapsed_days)>=700:
+		var line:=roundi(float(strength)*0.42); enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength-line,"equipment":strength-line},{"unit":"line_infantry","weapon":"spear","count":line,"equipment":line}]
+	else: enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength,"equipment":strength}]
+	var enemy:Dictionary=simulator.create_formation_force("Border Raiders",enemy_formations,clampf(0.48+security*0.18,0.45,0.72),clampf(0.52+float(GameState.elapsed_days)/30000.0,0.50,0.78))
+	enemy["commander"]=simulator.create_commander("Raid captain",rng.randf_range(0.32,0.62),rng.randf_range(0.34,0.66),rng.randf_range(0.24,0.55),rng.randf_range(0.38,0.68))
+	active_threat={"id":"threat_%d_%d" % [int(GameState.elapsed_days),threats_resolved],"title":"Hostile force approaching","discovered_day":int(GameState.elapsed_days),"deadline_day":int(GameState.elapsed_days)+7,"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
+	GameState.council_inbox.push_front({"id":String(active_threat.id),"advisor":"Marshal","office":"Marshal","topic":"security","act":{"type":"report"},"text":"Scouts report roughly %d hostile fighters approaching. A response is required within seven days." % strength,"urgency":0.96,"day":int(GameState.elapsed_days),"status":"unread"})
+	threat_changed.emit(active_threat.duplicate(true))
+
+
 func prisoner_food_demand()->float:
 	return float(foreign_prisoners)*0.65+float(held_generals.size())
 
@@ -571,7 +639,9 @@ func export_state()->Dictionary:
 		"next_equipment_job_id":next_equipment_job_id,
 		"prisoner_custody_days":prisoner_custody_days,
 		"prisoner_escape_accumulator":prisoner_escape_accumulator,
-		"escaped_prisoners_total":escaped_prisoners_total
+		"escaped_prisoners_total":escaped_prisoners_total,
+		"active_threat":active_threat.duplicate(true),
+		"threats_resolved":threats_resolved
 	}
 
 
@@ -694,6 +764,8 @@ func _apply_imported_state(payload:Dictionary)->void:
 	prisoner_custody_days=maxi(0,int(payload.get("prisoner_custody_days",0)))
 	prisoner_escape_accumulator=maxf(0.0,float(payload.get("prisoner_escape_accumulator",0.0)))
 	escaped_prisoners_total=maxi(0,int(payload.get("escaped_prisoners_total",0)))
+	active_threat=(payload.get("active_threat",{}) as Dictionary).duplicate(true)
+	threats_resolved=maxi(0,int(payload.get("threats_resolved",0)))
 
 
 func _empty_home_army()->Dictionary:
@@ -1014,6 +1086,7 @@ func _process_military_day()->void:
 	_process_equipment_production_day()
 	_process_training_injuries_day()
 	_process_training_day()
+	_process_threat_day()
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
 	var logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.5))
 	_update_supply_day()

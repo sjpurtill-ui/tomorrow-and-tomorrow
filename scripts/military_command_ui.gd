@@ -22,6 +22,8 @@ var weapon_choice:OptionButton
 var produce_count:SpinBox
 var equipment_choice:OptionButton
 var aftermath_row:HBoxContainer
+var threat_row:HBoxContainer
+var threat_label:Label
 var prisoner_policy:OptionButton
 var spoils_policy:OptionButton
 var general_policy:OptionButton
@@ -102,6 +104,12 @@ func _build_interface()->void:
 	var production_row:=HBoxContainer.new(); supply_box.add_child(production_row)
 	produce_count=_counter(production_row,1,100,10)
 	_action_button(production_row,"Queue production",_queue_production)
+
+	threat_row=HBoxContainer.new(); threat_row.add_theme_constant_override("separation",8); outer.add_child(threat_row)
+	threat_label=Label.new(); threat_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL; threat_label.add_theme_color_override("font_color",RED); threat_row.add_child(threat_label)
+	_action_button(threat_row,"Defend",func(): _report(MilitaryCampaign.respond_to_threat("defend")))
+	_action_button(threat_row,"Pay tribute",func(): _report(MilitaryCampaign.respond_to_threat("tribute")))
+	_action_button(threat_row,"Withdraw",func(): _report(MilitaryCampaign.respond_to_threat("withdraw")))
 
 	aftermath_row=HBoxContainer.new(); aftermath_row.add_theme_constant_override("separation",8); outer.add_child(aftermath_row)
 	var aftermath_label:=Label.new(); aftermath_label.text="BATTLE DECISION"; aftermath_label.add_theme_color_override("font_color",GOLD); aftermath_row.add_child(aftermath_label)
@@ -198,6 +206,9 @@ func _refresh()->void:
 	queues.text="Training rate %.1f/day  •  capacity %d\nWorkshop %.0f%% utilized\n\n%s" % [float(capabilities.get("training_rate",0.0)),int(capabilities.get("training_capacity",0)),float(capabilities.get("workshop_utilization",0.0))*100.0,_queue_summary(army)]
 	inventory.text=_inventory_summary(army)+"\n\nLogistics practice %d%%\nField supply access %d%%" % [roundi(float(capabilities.get("logistics_practice",0.0))*100.0),roundi(MilitaryCampaign.field_provision_delivery_ratio()*100.0)]
 	aftermath_row.visible=not MilitaryCampaign.pending_aftermath.is_empty()
+	var threat:Dictionary=MilitaryCampaign.threat_snapshot()
+	threat_row.visible=not threat.is_empty()
+	if not threat.is_empty(): threat_label.text="⚠  %s — about %d fighters — decision due day %d" % [String(threat.get("title","Threat approaching")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0))]
 
 
 func _queue_summary(army:Dictionary)->String:

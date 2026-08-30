@@ -20,6 +20,12 @@ func _ready()->void:
 	if not MilitaryCommandUI.aftermath_row.visible: failures.append("Pending battle aftermath is not exposed.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Aftermath controls make the modal clip: %s." % panel.size)
 	MilitaryCampaign.pending_aftermath.clear()
+	MilitaryCampaign.active_threat={"title":"Probe raiders","estimated_strength":12,"deadline_day":9}
+	MilitaryCommandUI._refresh()
+	await get_tree().process_frame
+	if not MilitaryCommandUI.threat_row.visible: failures.append("An approaching threat is not exposed in military command.")
+	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Threat controls make the modal clip: %s." % panel.size)
+	MilitaryCampaign.active_threat.clear()
 	if not panel.visible: failures.append("Military modal did not open.")
 	MilitaryCommandUI._toggle()
 	if panel.visible: failures.append("Military modal did not close.")
