@@ -82,6 +82,7 @@ func raise_recruits(count:int)->Dictionary:
 	var raised:=0
 	for index in mini(mini(maxi(0,count),candidates.size()),available_capacity):
 		var citizen:Dictionary=candidates[index]
+		citizen["pre_army_role"]=String(citizen.get("role","Unassigned"))
 		citizen["army_status"]="recruit"
 		citizen["role"]="Defense"
 		recruit_pool.append(int(citizen.id))
@@ -89,6 +90,54 @@ func raise_recruits(count:int)->Dictionary:
 	if home_army.is_empty(): home_army=_empty_home_army()
 	army_changed.emit(home_army.duplicate(true))
 	return {"requested":count,"raised":raised,"recruit_pool":recruit_pool.size(),"capacity":capacity}
+
+
+func stand_down(count:int)->Dictionary:
+	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before standing formations down."}
+	var requested:=maxi(0,count)
+	if requested<=0: return {"error":"Stand-down count must be positive."}
+	var remaining:=requested
+	var released_ids:Array[int]=[]
+	var returned_equipment:Dictionary={}
+	var commander_id:=int((home_army.get("commander",{}) as Dictionary).get("citizen_id",-1))
+	var formations:Array=home_army.get("formations",[])
+	for formation_index in range(formations.size()-1,-1,-1):
+		if remaining<=0: break
+		var formation:Dictionary=formations[formation_index]
+		var member_ids:Array=(formation.get("soldier_ids",[]) as Array).duplicate()
+		var removed_here:=0
+		for member_index in range(member_ids.size()-1,-1,-1):
+			if remaining<=0: break
+			var citizen_id:=int(member_ids[member_index])
+			if citizen_id==commander_id: continue
+			member_ids.remove_at(member_index)
+			released_ids.append(citizen_id)
+			removed_here+=1; remaining-=1
+		if removed_here<=0: continue
+		var weapon:=String(formation.get("weapon","improvised"))
+		var gear_returned:=mini(removed_here,int(formation.get("equipment",0)))
+		formation["count"]=maxi(0,int(formation.get("count",0))-removed_here)
+		formation["authorized_count"]=maxi(int(formation.count),int(formation.get("authorized_count",formation.count))-removed_here)
+		formation["equipment"]=maxi(0,int(formation.get("equipment",0))-gear_returned)
+		formation["equipment_required"]=maxi(int(formation.count),int(formation.get("equipment_required",formation.authorized_count))-removed_here)
+		formation["soldier_ids"]=member_ids
+		formations[formation_index]=formation
+		military_inventory[weapon]=int(military_inventory.get(weapon,0))+gear_returned
+		returned_equipment[weapon]=int(returned_equipment.get(weapon,0))+gear_returned
+	var active_ids:Array=home_army.get("soldier_ids",[]).duplicate()
+	for citizen_id in released_ids:
+		active_ids.erase(citizen_id)
+		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+		if citizen.is_empty(): continue
+		citizen["army_status"]="civilian"
+		citizen["role"]=String(citizen.get("pre_army_role",citizen.get("role","Unassigned")))
+		citizen.erase("pre_army_role")
+	home_army["formations"]=formations
+	home_army["soldier_ids"]=active_ids
+	home_army["troops"]=active_ids.size()
+	_refresh_readiness()
+	army_changed.emit(home_army.duplicate(true))
+	return {"requested":requested,"released":released_ids.size(),"citizen_ids":released_ids,"returned_equipment":returned_equipment}
 
 
 func start_training(unit:String,weapon:String,count:int)->Dictionary:
