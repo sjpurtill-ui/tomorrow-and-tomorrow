@@ -22,6 +22,9 @@ func _ready()->void:
 	if MilitaryCommandUI.commander_portrait.texture==null or "CMD" not in MilitaryCommandUI.commander_details.text: failures.append("Commander portrait or command statistics are missing.")
 	if MilitaryCommandUI.readiness_meters.size()!=6 or "▼" not in MilitaryCommandUI.readiness_bottleneck.text: failures.append("Readiness components or bottleneck display are missing.")
 	if MilitaryCommandUI.prisoner_policy.item_count!=7 or MilitaryCommandUI.spoils_policy.item_count!=5 or MilitaryCommandUI.general_policy.item_count!=4: failures.append("Battle aftermath choices are incomplete.")
+	MilitaryCampaign.military_inventory["improvised"]=3
+	MilitaryCampaign.military_consumables["arrows"]=12
+	MilitaryCampaign.held_generals=[{"name":"Captured captain"}]
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Probe Host",[
 		{"id":1,"unit":"levy","weapon":"improvised","count":30,"authorized_count":40,"equipment":26,"equipment_required":40,"personnel_condition":0.72,"readiness":0.61},
 		{"id":2,"unit":"line_infantry","weapon":"spear","count":24,"authorized_count":30,"equipment":22,"equipment_required":30,"personnel_condition":0.84,"readiness":0.73},
@@ -33,6 +36,8 @@ func _ready()->void:
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
 	if "⚔" not in MilitaryCommandUI.formations.text or "COND" not in MilitaryCommandUI.formations.text: failures.append("Formation cards omit cohort attack, defense, readiness, or condition.")
+	if "3 ready" not in MilitaryCommandUI.inventory.text or "Arrows  12" not in MilitaryCommandUI.inventory.text: failures.append("Ready equipment or ammunition is absent from the arsenal snapshot.")
+	if "1 generals" not in MilitaryCommandUI.formations.text: failures.append("Held generals are absent from the custody snapshot.")
 	if "+ 3 more cohorts" not in MilitaryCommandUI.formations.text: failures.append("Large armies are not summarized within the fixed modal.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Populated formation cards make the modal clip: %s." % panel.size)
 	MilitaryCampaign.pending_aftermath={"type":"rout","prisoners":4}

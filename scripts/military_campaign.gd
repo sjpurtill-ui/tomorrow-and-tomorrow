@@ -530,6 +530,9 @@ func campaign_army_snapshot()->Dictionary:
 	if home_army.is_empty(): home_army=_empty_home_army()
 	var snapshot:=home_army.duplicate(true)
 	snapshot["foreign_prisoners"]=foreign_prisoners
+	snapshot["held_generals"]=held_generals.duplicate(true)
+	snapshot["military_inventory"]=military_inventory.duplicate(true)
+	snapshot["military_consumables"]=military_consumables.duplicate(true)
 	snapshot["damaged_equipment"]=damaged_equipment.duplicate(true)
 	snapshot["recruits"]=recruit_pool.size()
 	snapshot["training_queue"]=training_queue.duplicate(true)
