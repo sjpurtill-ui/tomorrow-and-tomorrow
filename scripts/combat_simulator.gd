@@ -26,7 +26,7 @@ const WEAPONS := {
 	"sword_shield": {"name": "Sword & Shield", "attack": 1.12, "defense": 1.22, "armor": 0.38, "penetration": 0.42},
 	"lance": {"name": "Lances", "attack": 1.35, "defense": 0.72, "armor": 0.18, "penetration": 0.70},
 	"siege_kit": {"name":"Siege Kit","attack":0.88,"defense":0.72,"armor":0.08,"penetration":0.92},
-	"field_gun":{"name":"Field Gun","attack":2.10,"defense":0.48,"armor":0.12,"penetration":1.45}
+	"field_gun":{"name":"Field Gun","attack":5.00,"defense":0.48,"armor":0.12,"penetration":1.45}
 }
 
 # Attack multipliers against the opposing unit mix. Unlisted matchups are 1.0.
