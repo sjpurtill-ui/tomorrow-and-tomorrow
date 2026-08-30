@@ -111,6 +111,7 @@ func _calculate_demand(traveling: bool) -> Dictionary:
 	var lactation:=0.0
 	var travel:=0.0
 	var climate:=0.0
+	var prisoner_custody:=0.0
 	var active_pregnancies:Dictionary={}
 	for record in GameState.active_pregnancies():
 		active_pregnancies[int(record.get("mother_id",-1))]=record
@@ -137,11 +138,14 @@ func _calculate_demand(traveling: bool) -> Dictionary:
 		if traveling:
 			travel+=need*0.12
 		climate+=need*climate_factor
+	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	if military_campaign!=null and military_campaign.has_method("prisoner_food_demand"):
+		prisoner_custody=maxf(0.0,float(military_campaign.prisoner_food_demand()))
 	var ration_factor:=1.0-_modifier_strength("rationing")*0.30
-	var pre_ration:=base+labor+pregnancy+lactation+travel+climate
+	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoner_custody
 	return {
 		"base":base,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,
-		"travel":travel,"climate":climate,"rationing":pre_ration*(1.0-ration_factor),
+		"travel":travel,"climate":climate,"prisoner_custody":prisoner_custody,"rationing":pre_ration*(1.0-ration_factor),
 		"total":pre_ration*ration_factor
 	}
 

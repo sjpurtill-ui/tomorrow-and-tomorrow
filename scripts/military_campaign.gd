@@ -26,6 +26,9 @@ var last_processed_day:=-1
 var next_training_order_id:=1
 var next_formation_id:=1
 var next_equipment_job_id:=1
+var prisoner_custody_days:=0
+var prisoner_escape_accumulator:=0.0
+var escaped_prisoners_total:=0
 
 
 func _ready()->void:
@@ -60,6 +63,9 @@ func reset_for_new_world()->void:
 	next_training_order_id=1
 	next_formation_id=1
 	next_equipment_job_id=1
+	prisoner_custody_days=0
+	prisoner_escape_accumulator=0.0
+	escaped_prisoners_total=0
 
 
 func muster_home_army(requested_strength:=-1)->Dictionary:
@@ -356,6 +362,9 @@ func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dict
 
 func resolve_aftermath(prisoner_policy:String,spoils_policy:String,general_policy:="hold")->Dictionary:
 	if pending_aftermath.is_empty(): return {"error":"No campaign aftermath is awaiting a decision."}
+	if prisoner_policy.to_lower() not in ["hold","release","exchange","parole","ransom","execute","enslave"]: return {"error":"Unknown prisoner policy: %s" % prisoner_policy}
+	if spoils_policy.to_lower() not in ["army stores","reward troops","state treasury","return property","unrestricted plunder"]: return {"error":"Unknown spoils policy: %s" % spoils_policy}
+	if general_policy.to_lower() not in ["hold","release","ransom","execute"]: return {"error":"Unknown general policy: %s" % general_policy}
 	var outcome:Dictionary={"prisoner_policy":prisoner_policy,"spoils_policy":spoils_policy,"general_policy":general_policy}
 	var home_won:=String(pending_aftermath.get("captor",""))==String(home_army.get("name",""))
 	var prisoners:=int(pending_aftermath.get("prisoners",0))
@@ -386,7 +395,56 @@ func campaign_army_snapshot()->Dictionary:
 	snapshot["training_injuries"]=training_injuries.duplicate(true)
 	snapshot["equipment_queue"]=equipment_queue.duplicate(true)
 	snapshot["mobilization_cost"]=_mobilization_cost()
+	snapshot["prisoner_custody"]=prisoner_custody_snapshot()
 	return snapshot
+
+
+func prisoner_food_demand()->float:
+	return float(foreign_prisoners)*0.65+float(held_generals.size())
+
+
+func prisoner_custody_snapshot()->Dictionary:
+	var guards:=float(GameState.population_allocations.get("Defense",0))*0.18
+	var coverage:=clampf(guards/maxf(1.0,float(foreign_prisoners)+float(held_generals.size())*2.0),0.0,1.0)
+	return {"prisoners":foreign_prisoners,"held_generals":held_generals.size(),"custody_days":prisoner_custody_days,"guard_coverage":coverage,"food_demand":prisoner_food_demand(),"escape_risk":maxf(0.0,1.0-coverage),"escaped_total":escaped_prisoners_total}
+
+
+func exchange_prisoners(count:int)->Dictionary:
+	var exchanges:=mini(maxi(0,count),mini(foreign_prisoners,(home_army.get("captured_ids",[]) as Array).size()))
+	if exchanges<=0: return {"error":"No matched prisoners are available for exchange."}
+	foreign_prisoners-=exchanges
+	var returned_ids:=_return_home_captives(exchanges)
+	return {"exchanged":returned_ids.size(),"returned_citizen_ids":returned_ids,"foreign_prisoners":foreign_prisoners}
+
+
+func resolve_held_prisoners(policy:String,count:int)->Dictionary:
+	var normalized:=policy.to_lower()
+	if normalized not in ["release","exchange","parole","ransom","execute","enslave"]: return {"error":"Unknown held-prisoner policy: %s" % policy}
+	var amount:=mini(maxi(0,count),foreign_prisoners)
+	if amount<=0: return {"error":"No held prisoners are available for disposition."}
+	if normalized=="exchange": return exchange_prisoners(amount)
+	foreign_prisoners-=amount
+	var outcome:Dictionary={"prisoner_policy":normalized,"disposed":amount}
+	_apply_campaign_prisoner_policy(normalized,amount,outcome)
+	outcome["foreign_prisoners"]=foreign_prisoners
+	return outcome
+
+
+func resolve_held_general(index:int,policy:String)->Dictionary:
+	var normalized:=policy.to_lower()
+	if normalized not in ["release","ransom","execute"]: return {"error":"Unknown held-general policy: %s" % policy}
+	if index<0 or index>=held_generals.size(): return {"error":"Held general %d was not found." % index}
+	var general:Dictionary=held_generals.pop_at(index)
+	var outcome:Dictionary={"general":general.duplicate(true),"general_policy":normalized}
+	if normalized=="ransom":
+		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+50.0
+		outcome["ransom_income"]=50
+	elif normalized=="release":
+		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
+	else:
+		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
+		outcome["executed"]=true
+	return outcome
 
 
 func _mobilization_cost()->Dictionary:
@@ -419,7 +477,10 @@ func export_state()->Dictionary:
 		"held_generals":held_generals.duplicate(true),
 		"next_training_order_id":next_training_order_id,
 		"next_formation_id":next_formation_id,
-		"next_equipment_job_id":next_equipment_job_id
+		"next_equipment_job_id":next_equipment_job_id,
+		"prisoner_custody_days":prisoner_custody_days,
+		"prisoner_escape_accumulator":prisoner_escape_accumulator,
+		"escaped_prisoners_total":escaped_prisoners_total
 	}
 
 
@@ -502,6 +563,7 @@ func validate_state()->Array[String]:
 		if int(military_inventory[item])<0: errors.append("Military inventory for %s is negative." % item)
 	for item in damaged_equipment:
 		if int(damaged_equipment[item])<0: errors.append("Damaged-equipment inventory for %s is negative." % item)
+	if foreign_prisoners<0 or prisoner_custody_days<0 or escaped_prisoners_total<0: errors.append("Prisoner custody counters cannot be negative.")
 	var equipment_job_ids:Dictionary={}
 	for job in equipment_queue:
 		var job_id:=int(job.get("id",-1))
@@ -531,6 +593,9 @@ func _apply_imported_state(payload:Dictionary)->void:
 	next_formation_id=int(payload.get("next_formation_id",_next_available_formation_id()))
 	next_equipment_job_id=int(payload.get("next_equipment_job_id",_next_available_equipment_job_id()))
 	next_equipment_job_id=maxi(next_equipment_job_id,_next_available_equipment_job_id())
+	prisoner_custody_days=maxi(0,int(payload.get("prisoner_custody_days",0)))
+	prisoner_escape_accumulator=maxf(0.0,float(payload.get("prisoner_escape_accumulator",0.0)))
+	escaped_prisoners_total=maxi(0,int(payload.get("escaped_prisoners_total",0)))
 
 
 func _empty_home_army()->Dictionary:
@@ -817,6 +882,7 @@ func _apply_home_result(side:Dictionary,rounds:Array,battle_seed:int)->void:
 
 func _process_military_day()->void:
 	_process_service_rest_day()
+	_process_prisoner_custody_day()
 	_process_equipment_production_day()
 	_process_training_injuries_day()
 	_process_training_day()
@@ -838,6 +904,23 @@ func _process_military_day()->void:
 	_refresh_readiness()
 	home_army["campaign_day"]=int(GameState.elapsed_days)
 	army_changed.emit(home_army.duplicate(true))
+
+
+func _process_prisoner_custody_day()->Dictionary:
+	if foreign_prisoners<=0:
+		prisoner_escape_accumulator=0.0
+		return {"escaped":0,"remaining":0}
+	prisoner_custody_days+=1
+	var custody:=prisoner_custody_snapshot()
+	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
+	var daily_escape_rate:=maxf(0.0,1.0-float(custody.guard_coverage))*0.006*(1.15-cohesion*0.35)
+	prisoner_escape_accumulator+=float(foreign_prisoners)*daily_escape_rate
+	var escaped:=mini(foreign_prisoners,floori(prisoner_escape_accumulator))
+	prisoner_escape_accumulator-=float(escaped)
+	foreign_prisoners-=escaped
+	escaped_prisoners_total+=escaped
+	if escaped>0: GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Prisoners escape","description":"%d prisoners escape inadequate custody." % escaped,"domain":"security","severity":"warning"})
+	return {"escaped":escaped,"remaining":foreign_prisoners,"guard_coverage":custody.guard_coverage}
 
 
 func _process_service_rest_day()->void:
@@ -1238,8 +1321,15 @@ func _production_rate()->float:
 
 func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)->void:
 	var normalized:=policy.to_lower()
-	if normalized in ["release","exchange","parole"]:
+	if normalized=="exchange":
+		var exchanged:=mini(count,(home_army.get("captured_ids",[]) as Array).size())
+		var returned:=_return_home_captives(exchanged)
+		outcome["exchanged_prisoners"]=returned.size()
+		outcome["returned_citizen_ids"]=returned
+		outcome["released_prisoners"]=count-returned.size()
+	elif normalized in ["release","parole"]:
 		outcome["released_prisoners"]=count
+		if normalized=="parole": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.015,0.0,1.0)
 	elif normalized=="ransom":
 		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+count*2.0
 		outcome["ransom_income"]=count*2
@@ -1252,6 +1342,20 @@ func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)
 	else:
 		foreign_prisoners+=count
 		outcome["held_prisoners"]=count
+
+
+func _return_home_captives(count:int)->Array[int]:
+	var captured:Array=(home_army.get("captured_ids",[]) as Array).duplicate()
+	var returned:Array[int]=[]
+	for index in mini(maxi(0,count),captured.size()):
+		var citizen_id:=int(captured.pop_front())
+		var citizen:Dictionary=GameState.citizen_by_id(citizen_id)
+		if citizen.is_empty() or not bool(citizen.get("alive",true)): continue
+		citizen["army_status"]="recruit"
+		if citizen_id not in recruit_pool: recruit_pool.append(citizen_id)
+		returned.append(citizen_id)
+	home_army["captured_ids"]=captured
+	return returned
 
 
 func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dictionary)->void:
@@ -1278,7 +1382,13 @@ func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dicti
 func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:Dictionary)->void:
 	var general:={"name":String(aftermath.get("commander","Unknown commander")),"captured_day":int(GameState.elapsed_days)}
 	if policy.to_lower()=="hold": held_generals.append(general)
-	elif policy.to_lower()=="ransom": GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+50.0
+	elif policy.to_lower()=="ransom":
+		GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+50.0
+		outcome["general_ransom_income"]=50
+	elif policy.to_lower()=="release": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
+	elif policy.to_lower()=="execute":
+		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
+		outcome["general_executed"]=true
 	outcome["general_policy"]=policy
 
 

@@ -277,6 +277,29 @@ func _run()->void:
 	assert(allocated_total==GameState.able_population())
 	var cost:Dictionary=MilitaryCampaign.campaign_army_snapshot().mobilization_cost
 	assert(int(cost.citizens_withheld)==locked_count)
+	if not (MilitaryCampaign.home_army.captured_ids as Array).is_empty():
+		var home_captive:=int(MilitaryCampaign.home_army.captured_ids[0])
+		MilitaryCampaign.foreign_prisoners+=1
+		var exchange:Dictionary=MilitaryCampaign.exchange_prisoners(1)
+		assert(int(exchange.exchanged)==1)
+		assert(home_captive in MilitaryCampaign.recruit_pool)
+		assert(String(GameState.citizen_by_id(home_captive).army_status)=="recruit")
+	var custody_food_before:=float(FoodSystem._calculate_demand(false).prisoner_custody)
+	MilitaryCampaign.foreign_prisoners+=2
+	assert(is_equal_approx(float(FoodSystem._calculate_demand(false).prisoner_custody)-custody_food_before,1.30))
+	MilitaryCampaign.prisoner_escape_accumulator=1.0
+	var custody_result:Dictionary=MilitaryCampaign._process_prisoner_custody_day()
+	assert(int(custody_result.escaped)==1)
+	assert(int(MilitaryCampaign.prisoner_custody_snapshot().escaped_total)>0)
+	if MilitaryCampaign.foreign_prisoners>0:
+		var held_before:=MilitaryCampaign.foreign_prisoners
+		var released_held:Dictionary=MilitaryCampaign.resolve_held_prisoners("release",1)
+		assert(int(released_held.disposed)==1)
+		assert(MilitaryCampaign.foreign_prisoners==held_before-1)
+	MilitaryCampaign.held_generals.append({"name":"Test captive","captured_day":0})
+	var general_disposition:Dictionary=MilitaryCampaign.resolve_held_general(0,"ransom")
+	assert(int(general_disposition.ransom_income)==50)
+	assert(MilitaryCampaign.held_generals.is_empty())
 	var stranded_recoveree:=released_citizen
 	stranded_recoveree["army_status"]="scattered"
 	stranded_recoveree["role"]="Defense"
