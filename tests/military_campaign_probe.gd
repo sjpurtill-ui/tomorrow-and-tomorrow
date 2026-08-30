@@ -121,6 +121,10 @@ func _run()->void:
 	assert(strained_condition<rested_condition*0.75)
 	var condition_profile:Dictionary=MilitaryCampaign.force_condition_profile(army)
 	assert(int(condition_profile.total)==int(army.troops))
+	var live_condition_force:Dictionary=army.duplicate(true)
+	live_condition_force.formations[0]["count"]=maxi(0,int(live_condition_force.formations[0].count)-1)
+	live_condition_force["troops"]=int(army.troops)-1
+	assert(int(MilitaryCampaign.force_condition_profile(live_condition_force).total)==int(live_condition_force.troops))
 	condition_probe["service_strain"]=0.0
 	var baseline_inquiry:Dictionary=MilitaryCampaign.military_inquiry_context()
 	var original_supply:=float(MilitaryCampaign.home_army.get("supply_level",1.0))

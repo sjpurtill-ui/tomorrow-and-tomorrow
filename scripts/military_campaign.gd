@@ -1361,9 +1361,14 @@ func force_condition_profile(force:Dictionary={})->Dictionary:
 		{"id":"unfit","label":"Unfit","count":0,"color":"#a8514d"}
 	]
 	var capacities:Array[Dictionary]=[]
-	for citizen_id in subject.get("soldier_ids",[]):
-		var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
-		if not citizen.is_empty() and bool(citizen.get("alive",true)): capacities.append({"capacity":_military_citizen_capacity(citizen),"count":1})
+	var formation_total:=0
+	for formation in subject.get("formations",[]): formation_total+=maxi(0,int(formation.get("count",0)))
+	var roster:Array=subject.get("soldier_ids",[])
+	if roster.size()==formation_total:
+		for citizen_id in roster:
+			var citizen:Dictionary=GameState.citizen_by_id(int(citizen_id))
+			if not citizen.is_empty() and bool(citizen.get("alive",true)): capacities.append({"capacity":_military_citizen_capacity(citizen),"count":1})
+		if capacities.size()!=formation_total: capacities.clear()
 	if capacities.is_empty():
 		for formation in subject.get("formations",[]): capacities.append({"capacity":clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0),"count":maxi(0,int(formation.get("count",0)))})
 	var total:=0
