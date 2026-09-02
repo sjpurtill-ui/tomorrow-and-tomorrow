@@ -377,7 +377,7 @@ func _test_value_conserved_external_trade()->void:
 	GameState.resource_stockpiles["Fiber Plants"]=0.0
 	var timber_before:=float(GameState.resource_stockpiles.Timber)
 	var fiber_before:=float(GameState.resource_stockpiles["Fiber Plants"])
-	var result:=EconomySystem._process_external_trade(0.90,100.0)
+	var result:=EconomySystem._process_external_trade(0.90,100.0,1)
 	var imported_quantity:=0.0
 	for quantity in (result.imported_goods as Dictionary).values(): imported_quantity+=float(quantity)
 	_check(float(result.exports)>0.0,"surplus goods produced no regional export claim")
@@ -394,7 +394,7 @@ func _test_food_imports_use_authoritative_food_store()->void:
 	GameState.resource_stockpiles["Food"]=0.0
 	GameState.external_trade_credit+=50.0
 	GameState.external_trade_exports+=50.0
-	var result:=EconomySystem._process_external_trade(0.90,100.0)
+	var result:=EconomySystem._process_external_trade(0.90,100.0,1)
 	var typed_food:=0.0
 	for amount in GameState.food_stocks.values(): typed_food+=float(amount)
 	_check(float((result.imported_goods as Dictionary).get("Food",0.0))>0.0,"relief trade did not import food into a severe deficit")

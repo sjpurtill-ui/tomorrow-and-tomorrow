@@ -3,6 +3,8 @@ extends Node
 var rng := RandomNumberGenerator.new()
 var initialized := false
 
+const FOUNDING_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber Plants"]
+
 func reset_for_new_world()->void:
 	initialized=false
 	rng=RandomNumberGenerator.new()
@@ -42,12 +44,15 @@ func initialize() -> void:
 		return
 	rng.seed = GameState.world_seed ^ 0x4f1bbcdc
 	initialized = true
+	var focus_start:Dictionary=GameState.founding_focus_definition().get("starting",{})
+	var food_days:=30.0*(1.0+float(focus_start.get("food_days_ratio",0.0)))
+	var material_ratio:=1.0+float(focus_start.get("starting_materials",0.0))
 	if GameState.founding_manifest.is_empty():
-		GameState.founding_manifest={"portable_shelters":30,"food_storage_rations":GameState.population_exact*30.0,"dry_storage_bulk":10.0,"covered_storage_bulk":4.0,"sealed_storage_bulk":1.0,"secure_storage_bulk":1.0,"water_vessel_days":3.0}
+		GameState.founding_manifest={"portable_shelters":30,"food_storage_rations":GameState.population_exact*maxf(30.0,food_days),"dry_storage_bulk":10.0,"covered_storage_bulk":4.0,"sealed_storage_bulk":1.0,"secure_storage_bulk":1.0,"water_vessel_days":3.0}
 	if GameState.resource_stockpiles.is_empty():
 		# The convoy arrives with three days in portable vessels, not an abstract
 		# permanent water supply.  Continued survival requires a reachable source.
-		GameState.resource_stockpiles = {"Food":GameState.population_exact*30.0, "Freshwater":GameState.population_exact*3.0, "Timber":12.0, "Stone":0.0, "Clay":0.0, "Fiber Plants":10.0}
+		GameState.resource_stockpiles = {"Food":GameState.population_exact*food_days, "Freshwater":GameState.population_exact*3.0, "Timber":12.0*material_ratio, "Stone":0.0, "Clay":0.0, "Fiber Plants":10.0*material_ratio}
 
 func register_local_occurrences(sites: Array[Dictionary], terrain: String) -> void:
 	initialize()
@@ -59,7 +64,14 @@ func register_local_occurrences(sites: Array[Dictionary], terrain: String) -> vo
 		if resource_name == "Fertile": resource_name = "Fertile Soil"
 		var quality := rng.randf_range(0.55, 1.35)
 		var amount := rng.randf_range(600.0, 4000.0)
-		GameState.resource_deposits.append(_deposit(resource_name, site.position, quality, amount, i))
+		var deposit:=_deposit(resource_name,site.position,quality,amount,i)
+		# Founders do not arrive unable to identify trees, exposed stone, game, or
+		# usable soil.  A feature inside their actually charted starting ground is
+		# recognized by kind; survey is still required to learn quality, extent,
+		# access, and sustainable output.  Nothing beyond the fog is leaked.
+		if bool(site.get("initially_observed",false)):
+			_seed_founding_surface_recognition(deposit)
+		GameState.resource_deposits.append(deposit)
 	var possible := _terrain_occurrences(terrain)
 	for resource_name in possible:
 		if rng.randf() < 0.48:
@@ -70,6 +82,18 @@ func _deposit(resource_name: String, position: Vector3, quality: float, amount: 
 	# Exposed surface water is directly observable; a deep aquifer remains hidden.
 	var initial_stage:="surveyed" if resource_name=="Freshwater" else "unknown"
 	return {"id":"%s_%d" % [resource_name.to_snake_case(), index], "resource":resource_name, "position":position, "quality":quality, "remaining":amount, "initial_amount":amount, "stage":initial_stage, "clues":1.0 if initial_stage=="surveyed" else 0.0, "survey":1.0 if initial_stage=="surveyed" else 0.0, "access":0.0, "blockers":[], "development":0.0, "route":0.0, "workers":0,"daily_yield":0.0,"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Access not organized","last_reported_bottleneck":""}
+
+
+func _seed_founding_surface_recognition(deposit:Dictionary)->void:
+	var resource_name:=String(deposit.get("resource",""))
+	if resource_name=="Freshwater":
+		deposit["stage"]="surveyed"
+		deposit["clues"]=1.0
+		deposit["survey"]=1.0
+	elif resource_name in FOUNDING_SURFACE_RESOURCES:
+		deposit["stage"]="recognized"
+		deposit["clues"]=1.0
+		deposit["survey"]=0.0
 
 func _terrain_occurrences(terrain: String) -> Array[String]:
 	var common: Array[String] = ["Clay", "Flint", "Medicinal Plants", "Limestone", "Fine Sand"]
@@ -114,23 +138,56 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 				events.append(_event("Resource Accessible", "%s can now support organized extraction." % resource_name, deposit.id))
 	var flow_events:=_process_material_flow(context)
 	events.append_array(flow_events)
-	events.append_array(_process_water_flow())
+	events.append_array(_process_water_flow(context))
 	for event in events:
 		GameState.resource_events.push_front(event)
+	if GameState.resource_events.size()>120: GameState.resource_events.resize(120)
 	return events
 
-func _process_water_flow()->Array[Dictionary]:
+func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	var population:=maxf(1.0,GameState.population_exact)
 	var required:=population
 	var accessible_quality:=0.0
+	var nearest_source_km:=INF
+	var source_kind:="none"
+	var source_id:=""
+	var source_origin:="none"
+	var origin:Vector3=context.get("origin",GameState.settlement_founded_at)
 	for deposit_variant in GameState.resource_deposits:
 		var deposit:Dictionary=deposit_variant
-		if String(deposit.get("resource",""))=="Freshwater" and String(deposit.get("stage","unknown")) in ["accessible","developed"]:
-			accessible_quality=maxf(accessible_quality,float(deposit.get("quality",0.7)))
+		if String(deposit.get("resource",""))!="Freshwater": continue
+		var stage:=String(deposit.get("stage","unknown"))
+		if stage not in ["surveyed","accessible","developed"]: continue
+		var distance_km:=Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
+		deposit["distance_km"]=distance_km
+		# Surveyed exposed water is already a collectable geographic feature. Formal
+		# access work improves organization; it is not a prerequisite for drinking.
+		if stage in ["accessible","developed"] or distance_km<=6.0:
+			if distance_km<nearest_source_km:
+				nearest_source_km=distance_km
+				accessible_quality=float(deposit.get("quality",0.85))
+				source_kind="surveyed surface water" if stage=="surveyed" else "organized water source"
+				source_id=String(deposit.get("id","freshwater_occurrence"))
+				source_origin="recognized_occurrence"
+	var hydrology_distance:=float(context.get("surface_water_distance_km",INF))
+	if hydrology_distance<=6.0 and hydrology_distance<nearest_source_km:
+		nearest_source_km=hydrology_distance
+		accessible_quality=1.0
+		source_kind=String(context.get("surface_water_kind","visible river or drainage"))
+		source_id=String(context.get("surface_water_id","local_surface_hydrology"))
+		source_origin="mapped_hydrology"
 	var carriers:=float(GameState.population_allocations.get("Logistics",0))
-	var collection_capacity:=carriers*28.0*clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)
-	var collected:=minf(required*1.35,collection_capacity)*clampf(accessible_quality,0.0,1.25) if accessible_quality>0.0 else 0.0
+	var food_workers:=float(GameState.population_allocations.get("Food",0))
+	# Water fetching is basic subsistence work. Food workers cover an emergency
+	# collection floor; Logistics controls the organized surplus. This prevents a
+	# society from ignoring a river and dying solely because the player did not yet
+	# understand that water was hidden under a different allocation label.
+	var collection_workers:=carriers+food_workers*0.22
+	var distance_factor:=1.0/maxf(1.0,1.0+nearest_source_km*0.16) if nearest_source_km<INF else 0.0
+	var collection_capacity:=collection_workers*28.0*clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*distance_factor
+	var flow_factor:=clampf(0.75+accessible_quality*0.25,0.0,1.08)
+	var collected:=minf(required*1.35,collection_capacity)*flow_factor if accessible_quality>0.0 else 0.0
 	var portable_days:=float(GameState.founding_manifest.get("water_vessel_days",3.0))
 	if "Storage Pits" in GameState.settlement_completed: portable_days+=2.0
 	if "Open Work Area" in GameState.settlement_completed: portable_days+=1.0+DiscoverySystem.effect("container_capacity")*2.0
@@ -141,12 +198,48 @@ func _process_water_flow()->Array[Dictionary]:
 	var stored:=maxf(0.0,available-consumed)
 	GameState.resource_stockpiles["Freshwater"]=stored
 	var intake:=clampf(consumed/maxf(0.01,required),0.0,1.0)
-	GameState.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"required_today":required,"consumed_today":consumed,"intake_ratio":intake,"days":stored/maxf(0.01,required),"source_accessible":accessible_quality>0.0}
-	GameState.water_history.append({"day":int(GameState.elapsed_days),"stored":stored,"collected":collected,"required":required,"consumed":consumed,"intake_ratio":intake})
+	GameState.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"required_today":required,"consumed_today":consumed,"intake_ratio":intake,"days":stored/maxf(0.01,required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
+	GameState.water_history.append({"day":int(GameState.elapsed_days),"stored":stored,"collected":collected,"required":required,"consumed":consumed,"intake_ratio":intake,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_id":source_id,"source_origin":source_origin})
 	if GameState.water_history.size()>370: GameState.water_history.pop_front()
 	if intake<0.98:
 		events.append(_event("Water Shortfall","Only %d%% of today's drinking-water requirement was met. Assign carriers and secure an accessible freshwater source." % roundi(intake*100.0),"Freshwater"))
 	return events
+
+
+# Hydrology is a geographic source, not a fabricated point deposit. This fixed-
+# shape snapshot lets map/resource views highlight the actual recognized river
+# or drainage that supplies drinking, fishing, and sanitation work.
+func water_access_snapshot(context:Dictionary={})->Dictionary:
+	var water:Dictionary=GameState.water_metrics
+	var accessible:=bool(water.get("source_accessible",false))
+	var recognized:=bool(water.get("recognized",accessible))
+	var source_id:=String(water.get("source_id",""))
+	var source_kind:=String(water.get("source_kind","none"))
+	var source_origin:=String(water.get("source_origin","none"))
+	var distance_km:=float(water.get("source_distance_km",-1.0))
+	# The map exists before the first simulation tick. If actual authored
+	# hydrology lies inside the charted founding range, expose it immediately as
+	# recognized geography even though no day's collection ledger exists yet.
+	# This is deliberately not a fabricated point deposit or free stored water.
+	var mapped_distance:=float(context.get("surface_water_distance_km",INF))
+	var mapped_recognized:=bool(context.get("surface_water_recognized",mapped_distance<INF and mapped_distance<=72.0))
+	if mapped_recognized and (not recognized or distance_km<0.0 or mapped_distance<distance_km):
+		recognized=true
+		accessible=mapped_distance<=6.0
+		distance_km=mapped_distance
+		source_id=String(context.get("surface_water_id","local_surface_hydrology"))
+		source_kind=String(context.get("surface_water_kind","visible river or drainage"))
+		source_origin="mapped_hydrology"
+	return {
+		"accessible":accessible,"recognized":recognized,
+		"source_id":source_id,"source_kind":source_kind,
+		"source_origin":source_origin,"distance_km":distance_km,
+		"renewable":bool(water.get("renewable",accessible)),"supports_drinking":bool(water.get("supports_drinking",accessible)),
+		"supports_food_gathering":bool(water.get("supports_food_gathering",accessible)),
+		"collection_workers":float(water.get("collection_workers",0.0)),"collected_today":float(water.get("collected_today",0.0)),
+		"required_today":float(water.get("required_today",0.0)),"intake_ratio":float(water.get("intake_ratio",0.0)),
+		"bounded":true
+	}
 
 func _calculate_access(deposit: Dictionary, definition: Dictionary, context: Dictionary) -> float:
 	if String(deposit.get("resource",""))=="Freshwater":
@@ -215,7 +308,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		var knowledge_multiplier:=1.0+DiscoverySystem.effect("extraction_yield")+DiscoverySystem.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
 		if String(profile.family)=="metal": knowledge_multiplier+=DiscoverySystem.effect("metal_yield")
 		var practice_multiplier:=1.0+minf(0.35,_practice(String(deposit.resource),"extraction")*0.035)
-		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*(0.55+float(context.get("tools",0.25))*0.75)*labor_eff*knowledge_multiplier*practice_multiplier
+		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*(0.55+float(context.get("tools",0.25))*0.75)*labor_eff*knowledge_multiplier*practice_multiplier*(1.0+GameState.founding_effect("resource_output")+ProgressionSystem.effect("extraction_yield"))
 		var extracted:=minf(float(deposit.remaining),float(deposit.daily_yield))
 		deposit.remaining=float(deposit.remaining)-extracted
 		deposit.stock_at_source=float(deposit.stock_at_source)+extracted
@@ -272,7 +365,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var stored_bulk:=_stored_bulk()
 	var capacity_total:=0.0
 	for amount in capacities.values(): capacity_total+=float(amount)
-	GameState.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities}
+	var active_shipments:=0
+	for deposit in material_deposits: active_shipments+=(deposit.get("shipments",[]) as Array).size()
+	GameState.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":float(GameState.population_allocations.get("Knowledge",0)),"labor_efficiency":labor_eff,"accessible_occurrences":material_deposits.size(),"active_shipments":active_shipments,"bounded":true}
 	GameState.material_history.append({"day":int(GameState.elapsed_days),"extracted":extracted_total,"delivered":delivered_total,"lost":lost_total,"at_source":at_source,"in_transit":in_transit,"stored":stored_bulk})
 	if GameState.material_history.size()>370: GameState.material_history.pop_front()
 	return events
@@ -311,6 +406,21 @@ func storage_capacities()->Dictionary:
 
 func stored_bulk()->float:
 	return _stored_bulk()
+
+
+func resource_workforce_snapshot()->Dictionary:
+	var metrics:Dictionary=GameState.material_metrics
+	var extractors:=maxf(0.0,float(metrics.get("extraction_workers",GameState.population_allocations.get("Extraction",0))))
+	var carriers:=maxf(0.0,float(metrics.get("logistics_workers",GameState.population_allocations.get("Logistics",0))))
+	var researchers:=maxf(0.0,float(metrics.get("research_workers",GameState.population_allocations.get("Knowledge",0))))
+	return {
+		"population":GameState.population_total,"extractors":extractors,"carriers":carriers,"researchers":researchers,
+		"extracted_today":float(metrics.get("extracted_today",0.0)),"delivered_today":float(metrics.get("delivered_today",0.0)),
+		"per_extractor_output":float(metrics.get("extracted_today",0.0))/maxf(1.0,extractors),
+		"labor_efficiency":float(metrics.get("labor_efficiency",GameState.simulation_metrics.get("labor_efficiency",0.72))),
+		"accessible_occurrences":int(metrics.get("accessible_occurrences",0)),"active_shipments":int(metrics.get("active_shipments",0)),
+		"bounded":true
+	}
 
 func in_transit_for(deposit:Dictionary)->float:
 	var total:=0.0

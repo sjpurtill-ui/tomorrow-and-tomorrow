@@ -1,5 +1,11 @@
 # Tomorrow and Tomorrow
 
+## Population scale contract
+
+Population is stored and simulated only as authoritative numeric cohort counts. The game never creates one runtime object, name, household membership, pregnancy record, soldier ID, building, or UI row per human. The same six age cohorts and four reproductive stages represent 120 people, one billion people, or any scale between them.
+
+Military formations, food demand, fertility, mortality, labor, economy, resources, government, and settlement occupancy all use counts as their source of truth. Leadership and military command are institutions with aggregate capacities, never selected people. Settlement morphology is capped at 2,048 simulated plots, 1,024 routes, and 128 nuclei, with larger populations expressed through density, capacity, districts, and land-use cells. Runtime histories and ledgers have explicit retention limits. Any new population-dependent feature must preserve these rules: work per tick may depend on the fixed number of cohorts, systems, formations, districts, or visible aggregate cells—never on total population.
+
 A Godot 4 grand-strategy prototype built around an organic province map.
 
 ## Run
@@ -16,13 +22,26 @@ Open this folder in Godot 4 and run the project.
 - Province adjacency with highlighted neighbors
 - Terrain, population, and resource generation
 - Resource-first economy that can develop weighed-metal exchange, recorded credit, and conserved currency
-- A single starting settler with province-to-province movement
+- A starting population convoy with province-to-province movement
+- Eight persistent rival civilizations with aggregate demography, adaptive strategy, trade, diplomacy, interstate war, and player-facing competition
 
-## Generative campaign director
+## Competitive world
 
-Each new seeded campaign receives a founding mandate with conflicting success
-conditions and starting pressures. If no API is configured, a deterministic
-seeded director supplies a fully playable mandate.
+The `WORLD STRATEGY` panel is constrained by player knowledge. A new game names no foreign power, exposes no global rank, and reveals no foreign population, score, territory, force, intention, or relationship. The map itself is dark beyond ground observed by the founding convoy or described in a returned scout report. The player can dispatch one bounded aggregate scout party for 30, 90, 180, or 365 days. Its personnel are absent from ordinary work and its physical provisions leave storage at departure. Nothing is revealed while the party is away. On return, its bounded route becomes mapped and any polity actually encountered becomes a diplomatic contact. Early population, military, score, threat, and intention values are ranges or unknowns; sustained contact, trade, and conflict improve intelligence.
+
+Known rivals take monthly strategic turns and trade, align, fortify, contain, and fight one another whether or not the player opens the panel. Once direct contact exists, the player can open trade, offer non-aggression, send conserved food aid, contain a rival, define a war objective, declare war, launch an aggregate field campaign, or negotiate peace. Illegal, contradictory, or impossible-with-current-intelligence actions are disabled with an explanation. These choices feed the existing economy, security, cohesion, knowledge, territory, and aggregate military systems.
+
+Rival campaigns are raised from the originating civilization's simulated military population and technological capacity. Attacker, defender, terrain advantage, casualties, prisoners, and territorial transfers follow the real direction of each campaign. Battle losses are returned to the correct numeric cohorts and military totals. The world uses eight fixed polity records, six aging cohorts per polity, bounded pairwise relations, and capped histories, so running rival civilizations at one billion people each does not create additional runtime entities. See [the aggregate competition specification](docs/CIVILIZATION_COMPETITION_SPEC.md).
+
+Every contender uses the same seven equal scoring pillars: controlled population, knowledge, production, logistics, military power, resilience, and territory. Resilience itself combines health, cohesion, institutions, and food reserve. No civilization—including an AI rival—can win by score alone. After Year 20 it must maintain at least 45 food-days, 50% health, 45% cohesion, and 35% institutions; rank first overall by at least 10%; lead four of seven domains; and hold all of those conditions for twelve consecutive monthly turns. The player loses if a rival satisfies that identical rule first. Unknown contenders are still evaluated internally but cannot leak through the player-facing leaderboard.
+
+To take control of a rival's cities, build and train a field formation in `MILITARY`, open `WORLD STRATEGY`, select the rival, choose a visible front and a war objective, declare war, and launch the campaign. Objectives are bounded and explicit: take one selected region, break the rival's power by taking its capital or three regions, liberate a foreign holding, or defend against an aggressor. Before committing, the panel reports the defender estimate, intelligence confidence, supply state, casualty risk, readiness, and why the region matters. A decisive offensive victory captures that exact region and detaches real surviving trained personnel into an occupation force. The next region then becomes exposed. `REINFORCE OCCUPATION` moves more of the existing field formation into the city; `EVACUATE OCCUPATION` returns survivors and equipment but leaves the city vulnerable. War score, objective progress, exhaustion on both sides, occupation leverage, resistance, damage, integration, required garrison, relief food, production, market access, cohesion, legitimacy, territory, controlled population, rival strategy, recapture campaigns, peace terms, rank, and victory score all respond to control. Peace creates a one-year truce and preserves the negotiated control line. Taking all five regions breaks a rival's strategic urban control but does not invent individual inhabitants or erase its remaining rural population. A region held by a third rival appears under that occupier as a liberation target, preventing AI wars from creating an unreachable front.
+
+## Research program
+
+The `INQUIRY` panel contains active research projects, not passive observations. Every project states the question being tested, the current method, the permanent bounded effect it will unlock, its present bottleneck, and a projected completion horizon. The player assigns or removes aggregate observer capacity directly on each card. Progress is determined by that allocation together with civic activity, material evidence, and leadership; reallocating observers therefore changes what completes first. Completed work unlocks fixed systemic effects and later research methods without ever creating one scientist, diary, or observation record per person.
+
+## Government pronouncement interpretation
 
 To use an OpenAI-compatible generative endpoint, provide these environment
 variables before launching Godot:
@@ -34,9 +53,9 @@ variables before launching Godot:
   enables strict JSON schema for the official OpenAI endpoint
 
 The credential is read at runtime and is never written into the project. The
-model may propose prose, goals, and a small vocabulary of pressures. All output
-is validated and clamped before the deterministic consequence engine can apply
-it; generated text cannot directly change population, resources, or code.
+model may interpret a typed pronouncement only through the fixed policy catalog.
+All output is validated and clamped before the deterministic consequence engine
+can apply it; generated text cannot directly change population, resources, or code.
 
 The council's free-form pronouncement field uses the same endpoint and model.
 Pronouncements are translated into zero to three policies from a fixed allowlist.
@@ -124,8 +143,8 @@ retained when policy is repealed, superseded, or expires. These before/after val
 are explicitly observational—not a claim that the order alone caused the change—
 because staffing, resources, environment, discoveries, conflict, and other policies
 continue to affect the same metrics.
-Named advisors now react to enacted or successfully repealed policy by matching the
-policy's fixed council-affinity profile against goals already present on that advisor.
+Council institutions react to enacted or successfully repealed policy by matching the
+policy's fixed council-affinity profile against that office's public priorities.
 Support, objection, and assigned responsibility make small deterministic changes to
 trust, respect, and resentment. These reactions are stored on the sovereign order,
 shown in council history, aggregated as council support, and feed back into later
@@ -151,8 +170,8 @@ army `population` field as troop count, allowing the map layer to adopt it
 without changing army data immediately.
 
 The simulator returns a round-by-round battle record and does not mutate either
-force. World-state consequences—casualties, retreat, province control, citizen
-deaths, and historical records—remain an explicit integration step.
+force. World-state consequences—casualty counts, retreat, province control,
+population-cohort mortality, and historical records—remain an explicit integration step.
 
 For safe manual experimentation, open `res://tools/battle_lab.tscn` in Godot
 and run the current scene (F6). The Battle Lab is isolated from `GameState` and

@@ -3,258 +3,215 @@ extends GdUnitTestSuite
 
 const GAME_STATE_SCRIPT := preload("res://scripts/game_state.gd")
 const TEST_SEED := 184271
+const AGE_COHORTS := ["children", "youth", "early_adults", "established_adults", "mature_adults", "elders"]
 
 var state: Node
 
 
 func before_test() -> void:
 	state = auto_free(GAME_STATE_SCRIPT.new())
-	state.world_seed = TEST_SEED
-	state.initialize_citizen_registry()
+	state.reset_for_new_world(TEST_SEED)
+	state.initialize_population_model()
 
 
-func test_founding_population_is_fully_traceable() -> void:
+func _cohort_sum(subject: Node) -> float:
+	var total := 0.0
+	for cohort in AGE_COHORTS:
+		total += float(subject.population_cohorts.get(cohort, 0.0))
+	return total
+
+
+func _property_names(subject: Object) -> PackedStringArray:
+	var names := PackedStringArray()
+	for property in subject.get_property_list():
+		names.append(String(property.name))
+	return names
+
+
+func test_founding_population_is_six_numeric_cohorts() -> void:
 	assert_int(state.population_total).is_equal(120)
-	assert_int(state.living_citizen_count()).is_equal(120)
-
-	var names: Dictionary = {}
-	for person: Dictionary in state.citizen_registry:
-		var person_name := String(person.get("name", ""))
-		assert_str(person_name).is_not_empty()
-		assert_bool(names.has(person_name)).is_false()
-		names[person_name] = true
-		assert_int(state.citizen_age_years(person)).is_between(0, 76)
-		assert_str(String(person.get("role", ""))).is_not_empty()
+	assert_float(_cohort_sum(state)).is_equal_approx(state.population_exact, 0.001)
+	assert_int(state.population_cohorts.size()).is_equal(9)
+	for cohort in AGE_COHORTS:
+		assert_bool(state.population_cohorts[cohort] is float).is_true()
+	assert_bool(_property_names(state).has("citizen_registry")).is_false()
+	assert_bool(_property_names(state).has("active_pregnancies")).is_false()
 
 
-func test_same_world_seed_creates_same_founders() -> void:
+func test_planetary_population_does_not_create_more_runtime_records() -> void:
+	var founding_keys: int = state.population_cohorts.keys().size()
+	var pregnancy_keys: int = state.pregnancy_cohorts.keys().size()
+	state.ensure_population_total(12_000_000_000)
+	assert_int(state.population_total).is_equal(12_000_000_000)
+	assert_float(_cohort_sum(state)).is_equal_approx(12_000_000_000.0, 16.0)
+	assert_int(state.population_cohorts.keys().size()).is_equal(founding_keys)
+	assert_int(state.pregnancy_cohorts.keys().size()).is_equal(pregnancy_keys)
+	assert_int(state.population_age_profile().bands.size()).is_equal(6)
+	assert_int(state.age_distribution().size()).is_equal(17)
+
+
+func test_same_state_and_conditions_produce_same_aggregate_demography() -> void:
 	var comparison: Node = auto_free(GAME_STATE_SCRIPT.new())
-	comparison.world_seed = TEST_SEED
-	comparison.initialize_citizen_registry()
-
-	var first_names := PackedStringArray()
-	var second_names := PackedStringArray()
-	for person: Dictionary in state.citizen_registry:
-		first_names.append(String(person.get("name", "")))
-	for person: Dictionary in comparison.citizen_registry:
-		second_names.append(String(person.get("name", "")))
-
-	assert_array(first_names).is_equal(second_names)
-
-
-func test_every_citizen_has_bounded_individual_condition_stats() -> void:
-	var fields := ["strength","endurance","agility","awareness","composure","health_condition","nutrition_condition","fatigue"]
-	for person: Dictionary in state.citizen_registry:
-		for field: String in fields:
-			assert_bool(person.has(field)).is_true()
-			assert_float(float(person[field])).is_between(0.0,1.0)
-		assert_float(state.citizen_physical_capacity(person)).is_between(0.0,1.0)
+	comparison.reset_for_new_world(TEST_SEED)
+	comparison.initialize_population_model()
+	state.ensure_population_total(10_000_000)
+	comparison.ensure_population_total(10_000_000)
+	var context := {"health": 0.76, "food_security": 0.81, "housing_ratio": 0.94, "cohesion": 0.63}
+	var first: Dictionary = state.process_reproduction_day(context)
+	var second: Dictionary = comparison.process_reproduction_day(context)
+	assert_dict(first).is_equal(second)
+	assert_dict(state.population_cohorts).is_equal(comparison.population_cohorts)
+	assert_dict(state.pregnancy_cohorts).is_equal(comparison.pregnancy_cohorts)
 
 
-func test_individual_stats_are_reproducible_from_world_seed() -> void:
-	var comparison: Node = auto_free(GAME_STATE_SCRIPT.new())
-	comparison.world_seed = TEST_SEED
-	comparison.initialize_citizen_registry()
-	for index in state.citizen_registry.size():
-		var first: Dictionary = state.citizen_registry[index]
-		var second: Dictionary = comparison.citizen_registry[index]
-		assert_float(first.strength).is_equal(second.strength)
-		assert_float(first.endurance).is_equal(second.endurance)
-		assert_float(first.agility).is_equal(second.agility)
-		assert_float(first.awareness).is_equal(second.awareness)
-		assert_float(first.composure).is_equal(second.composure)
-		assert_float(first.health_condition).is_equal(second.health_condition)
-		assert_float(first.nutrition_condition).is_equal(second.nutrition_condition)
-		assert_float(first.fatigue).is_equal(second.fatigue)
+func test_role_allocations_conserve_the_able_population_at_every_scale() -> void:
+	for scale in [120, 1_000_000, 1_000_000_000, 12_000_000_000]:
+		state.ensure_population_total(scale)
+		state.synchronize_population_allocations()
+		var allocated := 0
+		for role in state.POPULATION_ROLES:
+			allocated += int(state.population_allocations.get(role, 0))
+		assert_int(allocated).is_equal(state.able_population())
 
 
-func test_age_health_nutrition_and_fatigue_change_physical_capacity() -> void:
-	var adult: Dictionary = state.citizen_registry[0].duplicate(true)
-	adult.birth_day = int(state.elapsed_days)-25*365
-	adult.strength = 0.8
-	adult.endurance = 0.8
-	adult.agility = 0.8
-	adult.health_condition = 1.0
-	adult.nutrition_condition = 1.0
-	adult.fatigue = 0.0
-	var diminished := adult.duplicate(true)
-	diminished.health_condition = 0.55
-	diminished.nutrition_condition = 0.60
-	diminished.fatigue = 0.70
-	assert_float(state.citizen_physical_capacity(adult)).is_greater(state.citizen_physical_capacity(diminished))
-
-
-func test_condition_profile_accounts_for_every_living_citizen() -> void:
-	var profile: Dictionary = state.citizen_condition_profile(state.citizen_registry)
-	var band_total := 0
-	var share_total := 0.0
-	for band: Dictionary in profile.bands:
-		band_total += int(band.count)
-		share_total += float(band.share)
-	assert_int(profile.total).is_equal(state.population_total)
-	assert_int(band_total).is_equal(state.population_total)
-	assert_float(share_total).is_equal_approx(1.0,0.0001)
-	assert_float(profile.average_capacity).is_between(0.0,1.0)
-
-
-func test_role_allocations_use_exactly_the_able_population() -> void:
-	var allocated := 0
-	for role: String in state.POPULATION_ROLES:
-		allocated += int(state.population_allocations.get(role, 0))
+func test_founding_focus_is_a_real_one_time_aggregate_choice()->void:
+	var initial_health:float=float(state.population_health)
+	var initial_security:=float(state.simulation_metrics.security)
+	var selected:Dictionary=state.select_founding_focus("defense")
+	assert_bool(bool(selected.get("ok",false))).is_true()
+	assert_str(state.founding_focus).is_equal("defense")
+	assert_float(state.population_health).is_equal(initial_health)
+	assert_float(float(state.simulation_metrics.security)).is_greater(initial_security)
+	assert_float(state.founding_effect("training_rate")).is_greater(0.0)
+	assert_float(state.founding_effect("knowledge_gain")).is_less(0.0)
+	assert_float(float(state.population_allocation_percentages.Defense)).is_equal(11.0)
+	assert_bool(state.select_founding_focus("inquiry").has("error")).is_true()
+	var allocated:=0
+	for role in state.POPULATION_ROLES: allocated+=int(state.population_allocations.get(role,0))
 	assert_int(allocated).is_equal(state.able_population())
 
-	for person: Dictionary in state.living_citizens():
-		var age: int = state.citizen_age_years(person)
-		if age >= 14 and age < 60:
-			assert_bool(String(person.get("role", "")) in state.POPULATION_ROLES).is_true()
+
+func test_every_founding_focus_has_strengths_costs_and_fixed_size_state()->void:
+	assert_int(state.founding_focus_catalog().size()).is_equal(6)
+	for definition in state.founding_focus_catalog():
+		assert_str(String(definition.get("strengths",""))).is_not_empty()
+		assert_str(String(definition.get("tradeoff",""))).is_not_empty()
+		assert_int((definition.get("allocations",{}) as Dictionary).size()).is_equal(state.POPULATION_ROLES.size())
+	state.ensure_population_total(1_000_000_000)
+	state.select_founding_focus("generations")
+	assert_int(state.founding_focus_catalog().size()).is_equal(6)
+	assert_int(state.population_cohorts.size()).is_equal(9)
 
 
-func test_deaths_record_names_places_and_causes() -> void:
-	state.elapsed_days = 45.0
-	var victims: Array[String] = state.register_deaths(2, "Exposure")
-
-	assert_int(victims.size()).is_equal(2)
-	assert_int(state.population_total).is_equal(118)
-	for victim_name: String in victims:
-		var found := false
-		for person: Dictionary in state.citizen_registry:
-			if String(person.get("name", "")) != victim_name:
-				continue
-			found = true
-			assert_bool(bool(person.get("alive", true))).is_false()
-			assert_str(String(person.get("death_cause", ""))).is_equal("Exposure")
-			assert_int(int(person.get("death_day", -1))).is_equal(45)
-			break
-		assert_bool(found).is_true()
-
-
-func test_founding_households_and_pregnancies_are_traceable() -> void:
-	var women := 0
-	var men := 0
-	var linked_children := 0
-	for person: Dictionary in state.citizen_registry:
-		assert_int(int(person.get("household_id", -1))).is_greater_equal(1)
-		assert_bool(String(person.get("sex", "")) in ["Female", "Male"]).is_true()
-		if String(person.get("sex", "")) == "Female":
-			women += 1
-		else:
-			men += 1
-		if state.citizen_age_years(person) < 14 and int(person.get("mother_id", -1)) >= 0:
-			linked_children += 1
-	assert_int(women).is_equal(60)
-	assert_int(men).is_equal(60)
-	assert_int(linked_children).is_greater(18)
-	assert_int(state.active_pregnancies().size()).is_between(1, 3)
-	for pregnancy: Dictionary in state.active_pregnancies():
-		var mother: Dictionary = state.citizen_by_id(int(pregnancy.mother_id))
-		assert_bool(mother.is_empty()).is_false()
-		assert_int(int(mother.current_pregnancy_id)).is_equal(int(pregnancy.id))
-		assert_int(int(pregnancy.due_day)).is_greater(int(state.elapsed_days))
+func test_pregnancy_pipeline_is_numeric_and_condition_sensitive() -> void:
+	state.ensure_population_total(1_000_000_000)
+	var good: Dictionary = state.process_reproduction_day({
+		"health": 0.92, "food_security": 0.96, "housing_ratio": 1.0, "cohesion": 0.80,
+		"maternal_safety": 0.35, "neonatal_survival": 0.35
+	})
+	var stressed_state: Node = auto_free(GAME_STATE_SCRIPT.new())
+	stressed_state.reset_for_new_world(TEST_SEED)
+	stressed_state.initialize_population_model()
+	stressed_state.ensure_population_total(1_000_000_000)
+	var bad: Dictionary = stressed_state.process_reproduction_day({
+		"health": 0.28, "food_security": 0.22, "housing_ratio": 0.30, "cohesion": 0.30,
+		"traveling": true
+	})
+	assert_float(float(good.annual_conceptions_expected)).is_greater(float(bad.annual_conceptions_expected))
+	assert_int(int(good.maternal_deaths_count)).is_less(int(bad.maternal_deaths_count))
+	assert_int(int(good.neonatal_deaths_count)).is_less(int(bad.neonatal_deaths_count))
+	for stage in state.pregnancy_cohorts:
+		assert_bool(state.pregnancy_cohorts[stage] is float).is_true()
+		assert_float(float(state.pregnancy_cohorts[stage])).is_greater_equal(0.0)
 
 
-func test_delivery_creates_parent_linked_newborn_and_postpartum_recovery() -> void:
-	var pregnancy: Dictionary = state.active_pregnancies()[0]
-	var mother: Dictionary = state.citizen_by_id(int(pregnancy.mother_id))
-	var father: Dictionary = state.citizen_by_id(int(pregnancy.father_id))
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 77192
-	var newborn: Dictionary = state.register_birth_from_pregnancy(pregnancy, rng)
-	assert_bool(newborn.is_empty()).is_false()
-	assert_int(int(newborn.mother_id)).is_equal(int(mother.id))
-	assert_int(int(newborn.father_id)).is_equal(int(father.id))
-	assert_int(int(newborn.household_id)).is_equal(int(mother.household_id))
-	assert_int(int(newborn.id)).is_in(mother.children_ids)
-	assert_int(int(newborn.id)).is_in(father.children_ids)
-	assert_int(int(mother.current_pregnancy_id)).is_equal(-1)
-	assert_int(int(mother.postpartum_until_day)).is_greater_equal(450)
-	assert_bool(mother in state.eligible_gestational_parents()).is_false()
+func test_numeric_deaths_conserve_population_and_report_cohorts() -> void:
+	state.ensure_population_total(1_000_000)
+	var result: Dictionary = state.register_population_deaths(125_000, "Exposure")
+	assert_int(int(result.count)).is_equal(125_000)
+	assert_int(state.population_total).is_equal(875_000)
+	var accounted := 0.0
+	for amount in (result.affected_cohorts as Dictionary).values():
+		accounted += float(amount)
+	assert_float(accounted).is_equal_approx(125_000.0, 0.01)
+	assert_float(_cohort_sum(state)).is_equal_approx(state.population_exact, 0.01)
 
 
-func test_pregnancies_respect_gestation_and_stable_population_has_plausible_births() -> void:
-	var initial_population: int = int(state.population_total)
-	var initial_partnerships: int = int(state.lifetime_partnerships)
-	var earliest_due := 100000
-	for pregnancy: Dictionary in state.active_pregnancies():
-		earliest_due = mini(earliest_due, int(pregnancy.due_day))
-	var births_before_due := 0
-	var births_over_ten_years := 0
-	var stable_context := {
-		"health": 0.86,
-		"food_security": 0.90,
-		"housing_ratio": 0.92,
-		"cohesion": 0.76,
-		"traveling": false,
-		"birth_crisis": false
+func test_mortality_cause_changes_aggregate_age_pattern() -> void:
+	var exposure_state: Node = auto_free(GAME_STATE_SCRIPT.new())
+	exposure_state.reset_for_new_world(TEST_SEED)
+	exposure_state.initialize_population_model()
+	exposure_state.ensure_population_total(1_000_000)
+	var battle_state: Node = auto_free(GAME_STATE_SCRIPT.new())
+	battle_state.reset_for_new_world(TEST_SEED)
+	battle_state.initialize_population_model()
+	battle_state.ensure_population_total(1_000_000)
+	var exposure: Dictionary = exposure_state.register_population_deaths(50_000, "Exposure")
+	var battle: Dictionary = battle_state.register_population_deaths(50_000, "Killed in battle")
+	assert_float(float(exposure.affected_cohorts.get("elders", 0.0))).is_greater(float(battle.affected_cohorts.get("elders", 0.0)))
+	assert_float(float(battle.affected_cohorts.get("early_adults", 0.0))).is_greater(float(exposure.affected_cohorts.get("early_adults", 0.0)))
+
+
+func test_age_profile_accounts_for_the_entire_population() -> void:
+	state.ensure_population_total(1_000_000_000)
+	var profile: Dictionary = state.population_age_profile()
+	var total := 0
+	for band in profile.bands:
+		total += int(band.count)
+	assert_int(total).is_equal(state.population_total)
+	assert_int(int(profile.working_age) + int(profile.dependents)).is_equal(state.population_total)
+
+
+func test_population_function_profile_conserves_roles_and_removes_real_absences()->void:
+	state.ensure_population_total(1_000_000_000)
+	var commitments:={
+		"total_absent":12_345_678,
+		"by_function":{"productive":8_000_000,"support":2_000_000,"mobilized":1_000_000,"dependent":1_345_678},
+		"records":[{"id":"test_convoy","personnel":12_345_678}]
 	}
-	for day in range(1, 3651):
-		state.elapsed_days = float(day)
-		var result: Dictionary = state.process_reproduction_day(stable_context)
-		var daily_births := int((result.get("births", []) as Array).size())
-		births_over_ten_years += daily_births
-		if day < earliest_due:
-			births_before_due += daily_births
-	assert_int(births_before_due).is_equal(0)
-	assert_int(births_over_ten_years).is_between(18, 65)
-	assert_int(state.population_total).is_greater(initial_population)
-	assert_int(int(state.lifetime_partnerships)).is_greater(initial_partnerships)
-	for person: Dictionary in state.citizen_registry:
-		if String(person.get("origin", "")) != "Born here":
-			continue
-		assert_int(int(person.get("mother_id", -1))).is_greater_equal(1)
-		assert_int(int(person.get("father_id", -1))).is_greater_equal(1)
+	var profile:Dictionary=state.population_function_profile(commitments)
+	assert_int(int(profile.accounted)).is_equal(state.population_total)
+	assert_int(int(profile.absent)).is_equal(12_345_678)
+	assert_int(int(profile.productive)).is_equal(int(state.population_allocations.Food)+int(state.population_allocations.Survey)+int(state.population_allocations.Extraction)+int(state.population_allocations.Construction)+int(state.population_allocations.Crafting)+int(state.population_allocations.Logistics)-8_000_000)
+	assert_int(int(profile.support)).is_equal(int(state.population_allocations.Knowledge)+int(state.population_allocations.Administration)-2_000_000)
+	assert_int((profile.functions as Array).size()).is_equal(5)
+	assert_bool(bool(profile.bounded)).is_true()
 
 
-func test_birth_spacing_prevents_immediate_repeat_pregnancy() -> void:
-	var pregnancies_by_mother: Dictionary = {}
-	var stable_context := {"health": 0.9, "food_security": 0.9, "housing_ratio": 0.9, "cohesion": 0.8, "traveling": false, "birth_crisis": false}
-	for day in range(1, 3651):
-		state.elapsed_days = float(day)
-		state.process_reproduction_day(stable_context)
-	for pregnancy: Dictionary in state.pregnancy_registry:
-		var mother_id: int = int(pregnancy.mother_id)
-		if not pregnancies_by_mother.has(mother_id): pregnancies_by_mother[mother_id] = []
-		(pregnancies_by_mother[mother_id] as Array).append(pregnancy)
-	for mother_id in pregnancies_by_mother:
-		var pregnancies: Array = pregnancies_by_mother[mother_id]
-		pregnancies.sort_custom(func(first: Dictionary, second: Dictionary) -> bool: return int(first.conception_day) < int(second.conception_day))
-		for index in range(1, pregnancies.size()):
-			var previous: Dictionary = pregnancies[index - 1]
-			var current: Dictionary = pregnancies[index]
-			if String(previous.get("outcome", "")) == "Live birth":
-				assert_int(int(current.conception_day) - int(previous.end_day)).is_greater_equal(450)
+func test_proportional_population_commitment_is_exact_and_constant_shape_at_planet_scale()->void:
+	state.ensure_population_total(12_000_000_000)
+	var sources:Dictionary=state.proportional_population_commitment(240_000_000)
+	var total:=0
+	for function_id in ["productive","support","mobilized","dependent"]: total+=int(sources.get(function_id,0))
+	assert_int(total).is_equal(240_000_000)
+	assert_int(sources.size()).is_equal(4)
+	var profile:Dictionary=state.population_function_profile({"total_absent":total,"by_function":sources})
+	assert_int(int(profile.accounted)).is_equal(state.population_total)
+	assert_int(int(profile.absent)).is_equal(total)
 
 
-func test_environment_changes_conception_and_pregnancy_risk_in_opposite_directions() -> void:
-	var candidates: Array[Dictionary] = state.eligible_gestational_parents()
-	assert_bool(candidates.is_empty()).is_false()
-	var mother: Dictionary = candidates[0]
-	var stable := {"health": 0.88, "food_security": 0.92, "housing_ratio": 0.92, "cohesion": 0.80, "traveling": false, "birth_crisis": false}
-	var crisis := {"health": 0.34, "food_security": 0.20, "housing_ratio": 0.28, "cohesion": 0.30, "traveling": true, "birth_crisis": true}
-	var stable_conception: float = state._conception_condition_factor(mother, stable)
-	var crisis_conception: float = state._conception_condition_factor(mother, crisis)
-	var stable_risk: float = state._pregnancy_risk_multiplier(mother, stable)
-	var crisis_risk: float = state._pregnancy_risk_multiplier(mother, crisis)
-	assert_float(stable_conception).is_greater(crisis_conception * 8.0)
-	assert_float(crisis_risk).is_greater(stable_risk * 2.0)
+func test_mobilization_above_defense_allocation_displaces_other_work_instead_of_duplication()->void:
+	state.ensure_population_total(1_000_000_000)
+	var baseline:Dictionary=state.population_function_profile()
+	var excess:=25_000_000
+	var mobilized_total:=int(baseline.mobilized)+excess
+	var profile:Dictionary=state.population_function_profile({"mobilized_total":mobilized_total,"mobilization":{"total":mobilized_total,"excess_beyond_defense":excess}})
+	assert_int(int(profile.accounted)).is_equal(state.population_total)
+	assert_int(int(profile.mobilized)).is_equal(mobilized_total)
+	assert_int(int(profile.productive)).is_equal(int(baseline.productive)-excess)
+	assert_int(int((profile.mobilized_from as Dictionary).productive)).is_equal(excess)
+	assert_int(int(profile.absent)).is_equal(0)
 
 
-func test_age_specific_fertility_has_a_biological_curve() -> void:
-	assert_float(state.age_specific_conception_rate(12)).is_equal(0.0)
-	assert_float(state.age_specific_conception_rate(25)).is_greater(state.age_specific_conception_rate(18))
-	assert_float(state.age_specific_conception_rate(25)).is_greater(state.age_specific_conception_rate(38))
-	assert_float(state.age_specific_conception_rate(46)).is_less(0.02)
-	assert_float(state.age_specific_conception_rate(52)).is_equal(0.0)
-
-
-func test_population_age_profile_accounts_for_every_living_person() -> void:
-	var profile:Dictionary=state.population_age_profile()
-	var cohort_total:=0
-	for band:Dictionary in profile.bands:
-		cohort_total+=int(band.count)
-	assert_int(int(profile.total)).is_equal(state.living_citizen_count())
-	assert_int(cohort_total).is_equal(int(profile.total))
-	assert_int(int(profile.working_age)+int(profile.dependents)).is_equal(int(profile.total))
-	assert_float(float(profile.median_age)).is_between(0.0,76.0)
-	assert_float(float(profile.dependents_per_100_workers)).is_greater_equal(0.0)
-	assert_float(float(profile.projected_life_expectancy)).is_between(1.0,110.0)
-	assert_int(int(profile.recorded_deaths)).is_equal(0)
+func test_decades_at_billion_scale_keep_constant_state_shape() -> void:
+	state.ensure_population_total(1_000_000_000)
+	var cohort_keys: int = state.population_cohorts.keys().size()
+	var pregnancy_keys: int = state.pregnancy_cohorts.keys().size()
+	var context := {"health": 0.72, "food_security": 0.82, "housing_ratio": 1.0, "cohesion": 0.60}
+	for _day in 10_000:
+		state.process_reproduction_day(context)
+	assert_int(state.population_cohorts.keys().size()).is_equal(cohort_keys)
+	assert_int(state.pregnancy_cohorts.keys().size()).is_equal(pregnancy_keys)
+	assert_int(state.demographic_remainders.keys().size()).is_equal(6)
+	assert_bool(state.population_total > 0).is_true()
+	assert_float(_cohort_sum(state)).is_equal_approx(state.population_exact, 2.0)

@@ -16,8 +16,15 @@ const POLICY_TERMS:Dictionary={
 	"directed_inquiry":["fund research","support scholars","direct inquiry","investigate","study"],
 	"craft_mobilization":["prioritize crafting","expand workshops","mobilize artisans","increase production"],
 	"route_priority":["build roads","improve routes","expand logistics","prioritize hauling"],
-	"labor_mobilization":["mobilize labor","work quotas","longer work","compulsory labor"],
-	"family_support":["support families","childcare","encourage births","parental support"]
+	"labor_mobilization":["mobilize labor","work quotas","longer work","compulsory labor","forced labor","labor draft"],
+	"family_support":["support families","childcare","encourage births","parental support","baby bonus","family allowance"],
+	"birth_restrictions":["limit births","birth quota","restrict births","discourage births","forced contraception","forced sterilization","sterilize the population","one child policy"],
+	"population_resettlement":["forced relocation","forcibly relocate","population transfer","resettle the population","remove the population","deport the population","deport a population","ethnic cleansing"],
+	"mass_repression":["execute dissidents","kill dissidents","purge dissidents","mass execution","execute the sick","kill the sick","cull the population","exterminate","genocide","eliminate the opposition"],
+	"conscription_drive":["conscription","conscript","military draft","draft the population","mobilize for war","compulsory service"],
+	"wealth_levy":["wealth tax","wealth levy","tax the rich","seize fortunes","redistribute wealth","progressive tax"],
+	"market_deregulation":["deregulate markets","free the markets","remove price controls","liberalize trade","private exchange","market freedom"],
+	"information_control":["censor","ban dissent","control the press","state propaganda","suppress information","restrict speech"]
 }
 
 const DURATION_NUMBER_WORDS:Dictionary={
@@ -359,6 +366,9 @@ func _validate(proposed:Dictionary,pronouncement_text:String="")->Dictionary:
 		if grounding_required and (normalized_basis.length()<3 or normalized_basis not in normalized_pronouncement or confidence<MIN_API_CONFIDENCE):
 			grounding_rejections+=1
 			continue
+		if grounding_required and not _policy_has_term_in_text(id,normalized_pronouncement):
+			grounding_rejections+=1
+			continue
 		var definition:Dictionary=GovernmentPolicyCatalog.definition(id)
 		var action_data:=_policy_action(pronouncement_text,basis,id)
 		if bool(action_data.get("ambiguous",false)):
@@ -430,11 +440,27 @@ func _policy_actions_in_text(text:String,policy_id:String)->Dictionary:
 	if not POLICY_TERMS.has(policy_id): return actions
 	for term_variant in POLICY_TERMS[policy_id]:
 		var term:=String(term_variant)
-		var index:=text.find(term)
+		var index:=_term_match_index(text,term)
 		while index>=0:
 			actions[_action_near_match(text,index)]=true
-			index=text.find(term,index+maxi(1,term.length()))
+			index=_term_match_index(text,term,index+maxi(1,term.length()))
 	return actions
+
+func _term_match_index(text:String,term:String,from_position:int=0)->int:
+	# Terms may be stems (forag→foraging, defen→defense), so only the left
+	# boundary is required. This prevents unrelated words such as deregulation
+	# from accidentally matching the ration stem.
+	var index:=text.find(term,maxi(0,from_position))
+	while index>=0:
+		if index==0 or not text.substr(index-1,1).to_lower() in "abcdefghijklmnopqrstuvwxyz0123456789_": return index
+		index=text.find(term,index+maxi(1,term.length()))
+	return -1
+
+func _policy_has_term_in_text(policy_id:String,text:String)->bool:
+	if not POLICY_TERMS.has(policy_id): return false
+	for term_variant in POLICY_TERMS[policy_id]:
+		if _term_match_index(text,String(term_variant))>=0: return true
+	return false
 
 func _policy_parameters(pronouncement_text:String,basis:String,definition:Dictionary)->Dictionary:
 	var clause:=_policy_clause(pronouncement_text,basis)
@@ -526,12 +552,20 @@ func _local_interpretation(text:String,public_context:Dictionary={})->Dictionary
 	var first_positions:Dictionary={}
 	for id in POLICY_TERMS:
 		for term in POLICY_TERMS[id]:
-			var match_index:=normalized.find(String(term))
+			var match_index:=_term_match_index(normalized,String(term))
 			if match_index>=0:
 				scores[id]=int(scores.get(id,0))+1
 				if not bases.has(id):
 					bases[id]=normalized.substr(match_index,String(term).length())
 					first_positions[id]=match_index
+	# A target word such as “sick” is not a care directive when it appears only
+	# inside an explicitly lethal phrase such as “execute the sick.” Preserve a
+	# separately stated care clause, but do not turn one grim directive into its
+	# own contradictory welfare policy.
+	if scores.has("mass_repression") and String(bases.get("care_rotation",""))=="sick" and "sick" in String(bases.get("mass_repression","")):
+		scores.erase("care_rotation")
+		bases.erase("care_rotation")
+		first_positions.erase("care_rotation")
 	var ranked:=scores.keys()
 	ranked.sort_custom(func(a,b):
 		var a_position:=int(first_positions.get(a,0)); var b_position:=int(first_positions.get(b,0))
@@ -592,7 +626,7 @@ func _action_near_match(text:String,match_index:int)->String:
 
 func _policy_ripple(id:String,action:String)->String:
 	var definition:Dictionary=GovernmentPolicyCatalog.definition(id)
-	if action=="repeal": return "The standing %s order is rescinded; its simulation effects end." % id.replace("_"," ")
+	if action=="repeal": return "The standing %s directive is rescinded; its simulation effects end." % id.replace("_"," ")
 	return String(definition.ripple)
 
 func _finish(request_id:String,result:Dictionary)->void:

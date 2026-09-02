@@ -21,8 +21,9 @@ func _run()->void:
 	if scenario=="restart":
 		_reset_world_systems(13579)
 		ConsequenceEngine.initialize()
-		var first_founders:Array[String]=[]
-		for person in GameState.citizen_registry.slice(0,5): first_founders.append(String(person.name))
+		DiscoverySystem.initialize()
+		var first_cohorts:Dictionary=GameState.population_cohorts.duplicate(true)
+		var first_catalog_count:int=DiscoverySystem.catalog.size()
 		GameState.elapsed_days=818.5
 		GameState.known_discoveries=["cordage","basketry"]
 		GameState.society_subcategories={"old world":{"ghost":1.0}}
@@ -31,18 +32,16 @@ func _run()->void:
 		GameState.lifetime_deaths=17
 		_reset_world_systems(13579)
 		ConsequenceEngine.initialize()
-		var repeated_founders:Array[String]=[]
-		for person in GameState.citizen_registry.slice(0,5): repeated_founders.append(String(person.name))
-		if first_founders!=repeated_founders: return _fail("same seed did not reproduce the founding population")
+		var repeated_cohorts:Dictionary=GameState.population_cohorts.duplicate(true)
+		if first_cohorts!=repeated_cohorts: return _fail("same seed did not reproduce the aggregate population state")
 		if GameState.elapsed_days!=0.0 or not GameState.known_discoveries.is_empty() or not GameState.society_subcategories.is_empty() or not GameState.council_inbox.is_empty() or GameState.lifetime_deaths!=0: return _fail("old-world simulation state survived restart")
 		DiscoverySystem.initialize()
-		if DiscoverySystem.catalog.size()!=761: return _fail("discovery catalog duplicated or failed to restore after restart")
+		if DiscoverySystem.catalog.size()!=first_catalog_count or first_catalog_count<100: return _fail("discovery catalog duplicated or failed to restore after restart: %d then %d entries" % [first_catalog_count,DiscoverySystem.catalog.size()])
 		_reset_world_systems(24680)
 		ConsequenceEngine.initialize()
-		var new_founders:Array[String]=[]
-		for person in GameState.citizen_registry.slice(0,5): new_founders.append(String(person.name))
-		if first_founders==new_founders: return _fail("new seed reproduced the same founding population")
-		print("RESTART_PROBE ",JSON.stringify({"same_seed_repeatable":true,"new_seed_changes_founders":true,"day":GameState.elapsed_days,"population":GameState.population_total}))
+		if GameState.world_seed!=24680: return _fail("new world seed did not replace the prior world identity")
+		if GameState.population_cohorts!=first_cohorts: return _fail("world identity distorted the requested aggregate starting population")
+		print("RESTART_PROBE ",JSON.stringify({"same_seed_repeatable":true,"new_world_identity":true,"day":GameState.elapsed_days,"population":GameState.population_total}))
 		return _pass(scenario)
 	if scenario=="knowledge":
 		DiscoverySystem.initialize()
@@ -97,6 +96,7 @@ func _run()->void:
 	GameState.resource_deposits=[deposit]
 	GameState.population_allocations["Extraction"]=12
 	GameState.population_allocations["Logistics"]=0 if scenario=="no-haul" else 12
+	var stored_before:=float(GameState.resource_stockpiles.get("Timber",0.0))
 	var days:=50 if scenario!="far" else 90
 	for day in days:
 		GameState.elapsed_days=float(day)
@@ -106,7 +106,7 @@ func _run()->void:
 	var stored:=float(GameState.resource_stockpiles.get("Timber",0.0))
 	print("RESOURCE_PROBE ",JSON.stringify({"scenario":scenario,"source":source,"moving":moving,"stored":stored,"extracted":deposit.lifetime_extracted,"delivered":deposit.lifetime_delivered,"travel_days":deposit.travel_days}))
 	if scenario=="no-haul":
-		if source<=1.0 or stored>0.01: return _fail("material moved without carriers or failed to accumulate at source")
+		if source<=1.0 or stored>stored_before+0.01: return _fail("material moved without carriers or failed to accumulate at source")
 	elif scenario=="haul":
 		if stored<=1.0 or float(deposit.lifetime_delivered)<=1.0: return _fail("nearby hauled material never reached storage")
 		if int(deposit.travel_days)<1: return _fail("shipment had no travel time")
@@ -133,7 +133,7 @@ func _reset_state()->void:
 	GameState.population_allocations={"Food":30,"Survey":6,"Extraction":8,"Construction":8,"Crafting":5,"Logistics":5,"Knowledge":4,"Administration":3,"Defense":3}
 	GameState.simulation_metrics={"labor_efficiency":0.78,"material_capacity":0.18,"knowledge":0.18}
 	ResourceSystem.initialized=false
-	DiscoverySystem.initialized=false
+	DiscoverySystem.reset_for_new_world()
 	ResourceSystem.initialize()
 
 func _reset_world_systems(new_seed:int)->void:
@@ -145,7 +145,6 @@ func _reset_world_systems(new_seed:int)->void:
 	_food_system().reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	WorldFacts.reset_for_new_world()
-	GenerativeDirector.reset_for_new_world()
 
 func _fail(message:String)->void:
 	push_error("Resource flow regression: "+message)

@@ -1,11 +1,12 @@
 extends Node
 
 # Food is measured internally in adult-equivalent daily rations. One ration is
-# displayed as roughly 2,400 kcal, but actual demand is calculated citizen by
-# citizen from age, work, pregnancy, lactation, travel, and climate.
+# displayed as roughly 2,400 kcal. Demand is calculated from numeric age,
+# labor, pregnancy, lactation, travel, military, and climate cohorts.
 
 const KCAL_PER_RATION := 2400.0
 const FOOD_TYPES := ["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"]
+const FOOD_ISSUE_HISTORY_LIMIT:=96
 const SPOILAGE := {
 	"Fresh plants":0.022,
 	"Fresh meat":0.045,
@@ -124,51 +125,44 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 	return result
 
 func _calculate_demand(traveling: bool) -> Dictionary:
-	var base:=0.0
+	return _calculate_aggregate_demand(traveling)
+
+func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
+	var total:=maxf(1.0,GameState.population_exact)
+	var children:=float(GameState.population_cohorts.get("children",roundi(total*0.32)))
+	var elders:=float(GameState.population_cohorts.get("elders",roundi(total*0.08)))
+	var adults:=maxf(0.0,total-children-elders)
+	# Children are a full 0–13 cohort, including infancy; its weighted average
+	# is lower than the need of an older child. These are adult-equivalent rations.
+	var children_base:=children*0.60
+	var adult_base:=adults
+	var elder_base:=elders*0.86
+	var base:=children_base+adult_base+elder_base
 	var labor:=0.0
-	var pregnancy:=0.0
-	var lactation:=0.0
-	var travel:=0.0
-	var climate:=0.0
-	var prisoner_custody:=0.0
-	var army_field:=0.0
-	var active_pregnancies:Dictionary={}
-	for record in GameState.active_pregnancies():
-		active_pregnancies[int(record.get("mother_id",-1))]=record
-	var day:=int(GameState.elapsed_days)
+	var extras:={"Food":0.17,"Extraction":0.18,"Construction":0.18,"Defense":0.12,"Survey":0.13,"Logistics":0.14,"Crafting":0.08,"Knowledge":0.04,"Administration":0.04}
+	for role in GameState.POPULATION_ROLES:
+		labor+=float(GameState.population_allocations.get(role,0))*float(extras.get(role,0.02))
+	var pregnancy:=float(GameState.estimated_active_pregnancies())*0.12
+	var lactation:=total*0.012*0.21
 	var season_wave:=sin(fmod(GameState.elapsed_days,365.0)/365.0*TAU)
-	var climate_factor:=maxf(0.0,-season_wave)*0.06
-	for person in GameState.living_citizens():
-		var age_days:=maxi(0,day-int(person.get("birth_day",day)))
-		var age:=float(age_days)/365.0
-		var need:=_age_need(age)
-		base+=need
-		var role:=String(person.get("role","Unassigned"))
-		var work_extra:=need*float({
-			"Food":0.17,"Extraction":0.18,"Construction":0.18,"Defense":0.12,
-			"Survey":0.13,"Logistics":0.14,"Crafting":0.08,"Knowledge":0.04,
-			"Administration":0.04
-		}.get(role,0.02))
-		labor+=work_extra
-		if String(person.get("army_status","civilian"))=="active": army_field+=need+work_extra+need*climate_factor+(need*0.12 if traveling else 0.0)
-		if active_pregnancies.has(int(person.get("id",-1))):
-			var gestation:=day-int((active_pregnancies[int(person.id)] as Dictionary).get("conception_day",day))
-			pregnancy+=0.05 if gestation<91 else (0.12 if gestation<182 else 0.20)
-		elif age>=15.0 and age<=49.9 and day-int(person.get("last_birth_day",-100000))<=365:
-			lactation+=0.21
-		if traveling:
-			travel+=need*0.12
-		climate+=need*climate_factor
+	var climate:=base*maxf(0.0,-season_wave)*0.06
+	var travel:=base*0.12 if traveling else 0.0
+	var prisoners:=0.0
+	var army_field:=0.0
+	var occupation_relief:=0.0
 	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
-	if military_campaign!=null and military_campaign.has_method("prisoner_food_demand"):
-		prisoner_custody=maxf(0.0,float(military_campaign.prisoner_food_demand()))
+	if military_campaign!=null:
+		if military_campaign.has_method("prisoner_food_demand"): prisoners=maxf(0.0,float(military_campaign.prisoner_food_demand()))
+		var field_personnel:=maxi(0,int(military_campaign.home_army.get("troops",0)))
+		if military_campaign.has_method("field_army_active_personnel"): field_personnel+=maxi(0,int(military_campaign.field_army_active_personnel()))
+		if military_campaign.has_method("occupation_active_personnel"): field_personnel+=maxi(0,int(military_campaign.occupation_active_personnel()))
+		army_field=float(field_personnel)*(1.12+(0.12 if traveling else 0.0)+maxf(0.0,-season_wave)*0.06)
+	var civilization_system:=get_node_or_null("/root/CivilizationSystem")
+	if civilization_system!=null and civilization_system.has_method("player_effects"):
+		occupation_relief=maxf(0.0,float(civilization_system.player_effects().get("occupation_relief_demand",0.0)))
 	var ration_factor:=1.0+_policy_effect("food_demand")
-	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoner_custody
-	return {
-		"base":base,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,
-		"travel":travel,"climate":climate,"prisoner_custody":prisoner_custody,"army_field":army_field*ration_factor,"rationing":pre_ration*(1.0-ration_factor),
-		"total":pre_ration*ration_factor
-	}
+	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoners
+	return {"base":base,"children":children_base,"adults":adult_base,"elders":elder_base,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,"travel":travel,"climate":climate,"prisoner_custody":prisoners,"army_field":minf(pre_ration,army_field*ration_factor),"occupation_relief":occupation_relief,"rationing":pre_ration*(1.0-ration_factor),"total":pre_ration*ration_factor+occupation_relief}
 
 func _age_need(age: float) -> float:
 	if age<0.5: return 0.08 # represented mostly through lactation demand
@@ -183,7 +177,13 @@ func _age_need(age: float) -> float:
 
 func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: bool) -> Dictionary:
 	var result:={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}
-	if workers<=0.0: return result
+	var occupation_transfer:=0.0
+	var civilization_system:=get_node_or_null("/root/CivilizationSystem")
+	if civilization_system!=null and civilization_system.has_method("player_effects") and not traveling:
+		occupation_transfer=maxf(0.0,float(civilization_system.player_effects().get("occupation_food_transfer",0.0)))
+	if workers<=0.0:
+		result["Dry staples"]=occupation_transfer
+		return result
 	var access:=_food_resource_access()
 	var fishing_weight:=0.16 if float(access.freshwater)>0.0 else 0.0
 	var cultivation_weight:=0.0
@@ -204,6 +204,7 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var practice:=1.0
 	practice+=DiscoverySystem.effect("foraging_yield")
 	practice+=DiscoverySystem.effect("food_output")
+	practice+=GameState.founding_effect("food_yield")+ProgressionSystem.effect("food_output")
 	practice+=_modifier_strength("abundant_game")-_modifier_strength("lean_harvest")
 	practice+=_policy_effect("food_yield")
 	var rng:=RandomNumberGenerator.new()
@@ -215,10 +216,16 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	result["Fish"]=workers*fishing_weight*5.00*fish_season*efficiency*float(GameState.food_source_health.get("Fishing",0.9))*(0.82+float(access.freshwater)*0.28)*practice*variation*route_factor
 	if cultivation_weight>0.0 and not traveling:
 		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(GameState.food_source_health.get("Cultivation",0.9))*(0.82+float(access.fertile)*0.30)*(1.0+DiscoverySystem.effect("soil_productivity")+DiscoverySystem.effect("cultivation_yield"))*variation
+	result["Dry staples"]+=occupation_transfer
 	return result
 
 func _food_resource_access() -> Dictionary:
 	var result:={"game":0.0,"freshwater":0.0,"fertile":0.0}
+	# Authored hydrology is authoritative. A settlement with direct access to a
+	# visible river must not lose fishing/water effects because no point-deposit
+	# record happened to be scattered beside it.
+	if bool(GameState.water_metrics.get("source_accessible",false)):
+		result.freshwater=1.0
 	for deposit in GameState.resource_deposits:
 		if String(deposit.get("stage","unknown")) not in ["accessible","developed"]: continue
 		var key:=String(deposit.get("resource","")).to_lower()
@@ -393,12 +400,97 @@ func _stock_total() -> float:
 	for amount in GameState.food_stocks.values(): total+=float(amount)
 	return total
 
-func remove_for_external_trade(requested:float)->float:
+
+func total_stored()->float:
 	initialize()
+	return _stock_total()
+
+func issue_for_obligation(requested:float,category:String="external",label:String="External transfer",duration_days:float=0.0,personnel:int=0)->float:
+	initialize()
+	var stock_before:=_stock_total()
 	var removed:=0.0
 	for amount in _consume(maxf(0.0,requested)).values(): removed+=float(amount)
 	_sync_total()
+	if removed>0.0001:
+		var daily_need:=maxf(0.01,float(GameState.simulation_metrics.get("food_consumption",GameState.population_exact)))
+		var departure_day:=int(GameState.elapsed_days)
+		GameState.food_issue_history.append({
+			"id":"food_issue_%d_%d" % [departure_day,GameState.food_issue_history.size()],
+			"day":departure_day,"end_day":departure_day+ceili(maxf(0.0,duration_days)),"category":category,"label":label,
+			"amount":removed,"requested":maxf(0.0,requested),"duration_days":maxf(0.0,duration_days),
+			"personnel":maxi(0,personnel),"stock_before":stock_before,"stock_after":_stock_total(),
+			"settlement_days":removed/daily_need,"withdrawal_timing":"departure","charged_at_departure":true,"recurring":false
+		})
+		while GameState.food_issue_history.size()>FOOD_ISSUE_HISTORY_LIMIT: GameState.food_issue_history.pop_front()
 	return removed
+
+
+func remove_for_external_trade(requested:float)->float:
+	return issue_for_obligation(requested,"external","External transfer")
+
+
+func remove_for_settlement_convoy(requested:float,label:String="Founding convoy",duration_days:float=0.0,personnel:int=0)->float:
+	# A founding party carries real aggregate rations from the same food ledger
+	# used by daily consumption. This remains one fixed stock dictionary at any
+	# population scale; it never creates ration or traveler entities.
+	return issue_for_obligation(requested,"settlement_convoy",label,duration_days,personnel)
+
+
+func issued_on_day(day:int)->float:
+	var total:=0.0
+	for issue_variant in GameState.food_issue_history:
+		var issue:Dictionary=issue_variant
+		if int(issue.get("day",-1))==day: total+=float(issue.get("amount",0.0))
+	return total
+
+
+# A bounded audit surface for the food panel. Daily consumers and mission
+# withdrawals are deliberately separate: scouts, envoys, and settlement
+# convoys take all travel rations once at departure and never create a hidden
+# recurring food charge while away.
+func food_account_snapshot(window_days:int=30)->Dictionary:
+	initialize()
+	var day:=int(GameState.elapsed_days)
+	var demand:Dictionary=GameState.simulation_metrics.get("food_demand_breakdown",{})
+	if demand.is_empty(): demand=_calculate_aggregate_demand(bool(GameState.convoy_traveling))
+	var total_daily:=maxf(0.0,float(demand.get("total",0.0)))
+	var army_daily:=clampf(float(demand.get("army_field",0.0)),0.0,total_daily)
+	var occupation_daily:=clampf(float(demand.get("occupation_relief",0.0)),0.0,maxf(0.0,total_daily-army_daily))
+	var settlement_daily:=maxf(0.0,total_daily-army_daily-occupation_daily)
+	var daily_consumers:Array[Dictionary]=[
+		{"id":"settlement_population","label":"SETTLEMENT POPULATION","amount":settlement_daily,"recurring":"daily","detail":{
+			"children":float(demand.get("children",0.0)),"adults":float(demand.get("adults",0.0)),"elders":float(demand.get("elders",0.0)),
+			"work_exertion":float(demand.get("labor",0.0)),"pregnancy_and_nursing":float(demand.get("pregnancy",0.0))+float(demand.get("lactation",0.0)),
+			"travel":float(demand.get("travel",0.0)),"climate":float(demand.get("climate",0.0)),"prisoner_custody":float(demand.get("prisoner_custody",0.0)),
+			"rationing_adjustment":float(demand.get("rationing",0.0))
+		}},
+		{"id":"field_military","label":"FIELD MILITARY","amount":army_daily,"recurring":"daily"},
+		{"id":"occupation_relief","label":"OCCUPIED-CIVILIAN RELIEF","amount":occupation_daily,"recurring":"daily"}
+	]
+	var recent_issues:Array[Dictionary]=[]
+	var active_commitments:Array[Dictionary]=[]
+	var withdrawn_window:=0.0
+	var window_start:=day-maxi(0,window_days)+1
+	for index in range(GameState.food_issue_history.size()-1,-1,-1):
+		var source:Dictionary=GameState.food_issue_history[index]
+		var issue:=source.duplicate(true)
+		var issue_day:=int(issue.get("day",-1))
+		var end_day:=int(issue.get("end_day",issue_day+ceili(maxf(0.0,float(issue.get("duration_days",0.0))))))
+		issue["end_day"]=end_day
+		issue["withdrawal_timing"]="departure"
+		issue["charged_at_departure"]=true
+		issue["recurring"]=false
+		issue["mission_active"]=float(issue.get("duration_days",0.0))>0.0 and day<end_day
+		if issue_day>=window_start:
+			withdrawn_window+=maxf(0.0,float(issue.get("amount",0.0)))
+			if recent_issues.size()<32: recent_issues.append(issue)
+		if bool(issue.mission_active) and active_commitments.size()<16: active_commitments.append(issue)
+	return {
+		"day":day,"stored":_stock_total(),"daily_total":total_daily,"daily_consumers":daily_consumers,
+		"withdrawn_today":issued_on_day(day),"withdrawn_in_window":withdrawn_window,"window_days":maxi(0,window_days),
+		"recent_departure_issues":recent_issues,"active_mission_provisions":active_commitments,
+		"history_limit":FOOD_ISSUE_HISTORY_LIMIT,"charged_once_at_departure":true,"bounded":true
+	}
 
 func receive_external_food(requested:float)->float:
 	initialize()

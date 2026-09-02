@@ -7,7 +7,7 @@ func _run() -> void:
 	var traveling:="--travel" in OS.get_cmdline_user_args()
 	GameState.world_seed=74119
 	GameState.province_terrain="Plains"
-	GameState.initialize_citizen_registry()
+	GameState.initialize_population_model()
 	ConsequenceEngine.initialize()
 	var checkpoints:Dictionary={}
 	for day in 365:

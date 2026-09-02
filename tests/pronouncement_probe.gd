@@ -284,7 +284,7 @@ func _test_policy_lifecycle()->void:
 
 func _test_variable_level_ripple()->void:
 	GameState.active_modifiers.clear()
-	GameState.initialize_citizen_registry()
+	GameState.initialize_population_model()
 	var baseline:Dictionary=FoodSystem._calculate_demand(false)
 	ConsequenceEngine.apply_policy("rationing",0.20,90.0,"test")
 	_expect(ConsequenceEngine.policy_effect("food_demand")<0.0,"catalog effects were not attached to a directly applied policy")

@@ -6,7 +6,9 @@ func _ready()->void:
 	_test_no_water_no_exchange()
 	_test_surplus_required_for_exchange()
 	_test_price_requires_transaction()
+	_test_foreign_trade_requires_contract()
 	_test_water_is_consumed()
+	_test_visible_surface_water_sustains_founders()
 	_test_storage_has_physical_source()
 	if not failures.is_empty():
 		for failure in failures: push_error("Realism causality: "+failure)
@@ -58,7 +60,23 @@ func _test_price_requires_transaction()->void:
 	GameState.material_metrics["delivered_today"]=5.0
 	GameState.elapsed_days=5.0
 	EconomySystem.process_day()
-	_check(float(GameState.economy_metrics.price_index)>0.0,"a physical surplus exchange generated no observed price")
+	_check(is_zero_approx(float(GameState.economy_metrics.price_index)),"unmeasured reciprocal exchange was mislabeled as a market price")
+	_check(GameState.market_prices.is_empty(),"founding society received hidden market quotes before it could record comparable exchange")
+	GameState.discovery_adoption["standard_measures"]=0.20
+	GameState.discovery_adoption["tallies"]=0.20
+	GameState.elapsed_days=6.0
+	EconomySystem.process_day()
+	_check(float(GameState.economy_metrics.price_index)>0.0,"shared measures and a physical exchange produced no recorded comparison value")
+
+func _test_foreign_trade_requires_contract()->void:
+	_base_state()
+	GameState.economy_stage=EconomySystem.STAGE_METAL
+	GameState.external_trade_policy="balanced"
+	GameState.resource_stockpiles["Timber"]=800.0
+	GameState.resource_stockpiles["Fiber Plants"]=0.0
+	var no_contract:=EconomySystem._process_external_trade(0.90,100.0,0)
+	_check(is_zero_approx(float(no_contract.exports)) and is_zero_approx(float(no_contract.imports)),"foreign goods moved without an emissary-established contract")
+	_check(not bool(no_contract.available),"foreign trade was advertised without a real counterpart")
 
 func _test_water_is_consumed()->void:
 	_base_state()
@@ -67,6 +85,26 @@ func _test_water_is_consumed()->void:
 	ResourceSystem.process_day({})
 	_check(is_zero_approx(float(GameState.resource_stockpiles.Freshwater)),"daily drinking water was not removed from stores")
 	_check(is_equal_approx(float(GameState.water_metrics.consumed_today),120.0),"water demand did not follow population")
+
+func _test_visible_surface_water_sustains_founders()->void:
+	_base_state()
+	GameState.resource_deposits=[]
+	GameState.resource_stockpiles["Freshwater"]=0.0
+	GameState.water_metrics={}
+	var opening_access:=ResourceSystem.water_access_snapshot({"surface_water_distance_km":5.5,"surface_water_recognized":true})
+	_check(bool(opening_access.recognized) and bool(opening_access.accessible),"charted founding hydrology was absent before the first simulation tick")
+	var minimum_intake:=1.0
+	for day in range(1,25):
+		GameState.elapsed_days=float(day)
+		ResourceSystem.process_day({"origin":Vector3.ZERO,"surface_water_distance_km":5.5})
+		minimum_intake=minf(minimum_intake,float(GameState.water_metrics.intake_ratio))
+	_check(minimum_intake>=0.98,"founders beside visible surface water suffered a drinking-water shortfall")
+	_check(String(GameState.water_metrics.source_kind)=="visible river or drainage","rendered hydrology was not recorded as the drinking-water source")
+	_check(float(GameState.water_metrics.source_distance_km)==5.5,"water source distance was not preserved for player-facing causality")
+	var access:=ResourceSystem.water_access_snapshot()
+	_check(bool(access.recognized) and String(access.source_origin)=="mapped_hydrology","visible hydrology was not exposed as a recognized geographic source")
+	_check(String(access.source_id)=="local_surface_hydrology","river access depended on an arbitrary point deposit")
+	_check(bool(access.supports_drinking) and bool(access.supports_food_gathering),"recognized river access did not propagate into survival and food capabilities")
 
 func _test_storage_has_physical_source()->void:
 	_base_state()

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource path="res://tools/warfare_visual_audit.gd" type="Script" id="1"]
+
+[node name="WarfareVisualAudit" type="Node3D"]
+script = ExtResource("1")

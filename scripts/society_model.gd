@@ -1,5 +1,7 @@
 extends RefCounted
 
+const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
+
 # Canonical causal contract for the civilization simulation. Discoveries may
 # only change these named coefficients; every coefficient is bounded and must
 # be consumed by at least one physical or social flow elsewhere in the game.
@@ -132,7 +134,7 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 		for id in GameState.known_discoveries:
 			var discovery:Dictionary=definitions_by_id.get(id,{})
 			if discovery.is_empty(): continue
-			var adoption:=float(GameState.discovery_adoption.get(id,0.025))
+			var adoption_level:=float(GameState.discovery_adoption.get(id,0.025))
 			var direction:=String(discovery.get("dynamic",discovery.get("direction","knowledge")))
 			var attention:=float(GameState.research_allocations.get(direction,0))
 			var relevant_activity:=0.0
@@ -140,13 +142,22 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 			var teaching:=observers/population*0.055+stewards/population*0.018+makers/population*0.012
 			var practice:=minf(0.012,relevant_activity*0.0014)
 			var directed:=minf(0.006,attention*0.0012)
-			var spread:=(0.00035+teaching+practice+directed)*(1.0+clampf(effect("adoption_rate"),-0.35,0.65))
-			spread*=1.0-adoption
+			var spread:=(0.00035+teaching+practice+directed)*(1.0+clampf(effect("adoption_rate")+GameState.founding_effect("adoption_rate")+ProgressionSystem.effect("adoption_rate"),-0.35,0.80))
+			spread*=1.0-adoption_level
 			var retention_loss:=maxf(0.0,0.00018-preserved*0.00015) if relevant_activity<=0.05 else 0.0
-			adoption=clampf(adoption+(spread-retention_loss)*adoption_days,0.015,1.0)
-			GameState.discovery_adoption[id]=adoption
+			adoption_level=clampf(adoption_level+(spread-retention_loss)*adoption_days,0.015,1.0)
+			GameState.discovery_adoption[id]=adoption_level
 		_rebuild_effect_totals(catalog)
+	GameState.societal_values=SOCIETAL_VALUES_MODEL.advance(
+		GameState.societal_values,GameState.known_discoveries,GameState.discovery_adoption,
+		_societal_value_context(context),day
+	)
 	capacities=evaluate_capacities(context)
+	capacities["institutions"]=clampf(float(capacities.institutions)+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"institutions"),0.01,1.0)
+	capacities["culture"]=clampf(float(capacities.culture)+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"cohesion"),0.01,1.0)
+	capacities["knowledge"]=clampf(float(capacities.knowledge)+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"knowledge"),0.01,1.0)
+	capacities["ecology"]=clampf(float(capacities.ecology)+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"ecology"),0.01,1.0)
+	capacities["security"]=clampf(float(capacities.security)+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"security"),0.01,1.0)
 	GameState.society_capacities=capacities.duplicate(true)
 	GameState.society_subcategories=evaluate_subcategories(context)
 	GameState.knowledge_effects=effect_totals.duplicate(true)
@@ -156,15 +167,40 @@ func register_discovery(discovery:Dictionary,catalog:Array[Dictionary])->void:
 	var id:=String(discovery.get("id",""))
 	GameState.discovery_adoption[id]=maxf(0.025,float(GameState.discovery_adoption.get(id,0.0)))
 	_rebuild_effect_totals(catalog)
+	GameState.societal_values=SOCIETAL_VALUES_MODEL.advance(
+		GameState.societal_values,GameState.known_discoveries,GameState.discovery_adoption,
+		_societal_value_context({}),int(GameState.elapsed_days)
+	)
 
-func _rebuild_effect_totals(catalog:Array[Dictionary])->void:
+
+func _societal_value_context(context:Dictionary)->Dictionary:
+	var metrics:Dictionary=GameState.simulation_metrics
+	var trade_volume:=float(GameState.external_trade_exports)+float(GameState.external_trade_imports)
+	var population:=maxf(1.0,GameState.population_exact)
+	var inequality:=0.0
+	if GameState.wealth_shares.size()>=2:
+		inequality=clampf(float(GameState.wealth_shares[-1])-float(GameState.wealth_shares[0]),0.0,1.0)
+	var war_pressure:=0.0
+	var civilization_system:Node=null
+	var main_loop:=Engine.get_main_loop()
+	if main_loop is SceneTree: civilization_system=(main_loop as SceneTree).root.get_node_or_null("CivilizationSystem")
+	if civilization_system!=null and civilization_system.has_method("military_fronts_snapshot"):
+		war_pressure=clampf(float(civilization_system.military_fronts_snapshot().get("active",0))*0.24,0.0,1.0)
+	return {
+		"food":clampf(GameState.food_security,0.0,1.0),"health":clampf(GameState.population_health,0.0,1.0),
+		"security":clampf(float(metrics.get("security",0.38)),0.0,1.0),"ecology":clampf(float(metrics.get("ecology",0.88)),0.0,1.0),
+		"knowledge":clampf(float(metrics.get("knowledge",0.18)),0.0,1.0),"trade":clampf(trade_volume/population/0.20,0.0,1.0),
+		"war_pressure":war_pressure,"inequality":inequality,"adaptability":clampf(float(context.get("adaptability",0.52)),0.0,1.0)
+	}
+
+func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	effect_totals.clear()
 	for id in GameState.known_discoveries:
 		var discovery:Dictionary=definitions_by_id.get(id,{})
 		if discovery.is_empty(): continue
-		var adoption:=clampf(float(GameState.discovery_adoption.get(id,0.025)),0.0,1.0)
+		var adoption_level:=clampf(float(GameState.discovery_adoption.get(id,0.025)),0.0,1.0)
 		for effect_name in (discovery.get("effects",{}) as Dictionary):
-			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+float(discovery.effects[effect_name])*adoption
+			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+float(discovery.effects[effect_name])*adoption_level
 	for effect_name in effect_totals:
 		var limit:Vector2=EFFECT_LIMITS.get(String(effect_name),Vector2(-0.50,0.80))
 		effect_totals[effect_name]=clampf(float(effect_totals[effect_name]),limit.x,limit.y)
@@ -172,7 +208,7 @@ func _rebuild_effect_totals(catalog:Array[Dictionary])->void:
 func effect(effect_id:String)->float:
 	return float(effect_totals.get(effect_id,0.0))
 
-func evaluate_capacities(context:Dictionary)->Dictionary:
+func evaluate_capacities(_context:Dictionary)->Dictionary:
 	var metrics:=GameState.simulation_metrics
 	var population:=maxf(1.0,GameState.population_exact)
 	var able_ratio:=clampf(float(GameState.able_population())/population,0.0,1.0)
@@ -244,7 +280,7 @@ func leadership_subcategory_effect(dynamic_id:String,subcategory:String)->float:
 	if contributors==0: return leadership_effect(dynamic_id)*0.72
 	return clampf(total/sqrt(float(contributors)),-0.075,0.10)
 
-func evaluate_subcategories(context:Dictionary)->Dictionary:
+func evaluate_subcategories(_context:Dictionary)->Dictionary:
 	var metrics:=GameState.simulation_metrics
 	var population:=maxf(1.0,GameState.population_exact)
 	var able_ratio:=clampf(float(GameState.able_population())/population,0.0,1.0)

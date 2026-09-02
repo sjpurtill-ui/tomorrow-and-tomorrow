@@ -31,6 +31,22 @@ func _base(population:int=120)->void:
 	GameState.society_capacities={"production":0.50,"institutions":0.52,"logistics":0.52}
 	GameState.material_metrics={"delivered_today":float(population)*0.10,"lost_today":0.0}
 	GameState.resource_stockpiles={"Food":float(population)*40.0,"Timber":float(population)*2.0,"Stone":float(population)*1.6,"Clay":float(population)*0.65,"Fiber Plants":float(population)*0.65,"Copper Ore":0.0,"Tin Ore":0.0,"Iron Ore":0.0}
+	_establish_trade_contract_fixture()
+
+func _establish_trade_contract_fixture()->void:
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.initialize()
+	if CivilizationSystem.civilizations.is_empty(): return
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	var relation:Dictionary=civ.get("player_relation",{})
+	relation["contact_level"]=2
+	relation["met_day"]=0
+	relation["home_location_known"]=true
+	relation["treaty"]="trade"
+	relation["trade"]=100.0
+	relation["at_war"]=false
+	civ["player_relation"]=relation
+	CivilizationSystem.civilizations[0]=civ
 
 func _enable_currency()->void:
 	GameState.discovery_adoption["tallies"]=0.75
@@ -128,7 +144,7 @@ func _foreign_claim_contraction()->void:
 	GameState.external_trade_losses=0.0
 	GameState.external_trade_credit=1000.0
 	GameState.external_trade_policy="closed"
-	var contraction:=EconomySystem._process_external_trade(0.05,0.0)
+	var contraction:=EconomySystem._process_external_trade(0.05,0.0,1)
 	_expect(float(contraction.claim_loss)>0.0,"collapsed counterpart capacity preserved every foreign claim")
 	_expect(GameState.external_trade_credit<1000.0,"foreign impairment did not reduce claims")
 	_expect(is_equal_approx(GameState.external_trade_credit,GameState.external_trade_exports-GameState.external_trade_imports-GameState.external_trade_losses),"foreign impairment escaped the trade identity")

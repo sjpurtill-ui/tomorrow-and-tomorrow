@@ -40,12 +40,46 @@ const POLICIES := {
 	"craft_mobilization":{"office":"Quartermaster","skills":["Manufacturing","Delegation"],"magnitude":0.16,"days":120.0,"ripple":"Craft capacity rises while workshops claim labor from other duties.","effects":{"labor_multiplier":-0.06,"material_target":0.22}},
 	"route_priority":{"office":"Quartermaster","skills":["Logistics","Engineering"],"magnitude":0.16,"days":240.0,"ripple":"Routes and carrying coordination improve while their upkeep consumes labor.","effects":{"labor_multiplier":-0.04,"logistics_target":0.24}},
 	"labor_mobilization":{"office":"Steward","skills":["Discipline","Delegation"],"magnitude":0.14,"days":90.0,"ripple":"Output rises under intensified work, at a cost to health, cohesion, and legitimacy.","effects":{"labor_multiplier":0.16,"health_target":-0.10,"cohesion_target":-0.14,"legitimacy_target":-0.08}},
-	"family_support":{"office":"Steward","skills":["Empathy","Medicine"],"magnitude":0.14,"days":365.0,"ripple":"Family support improves health, cohesion, and conception conditions while care claims labor.","effects":{"labor_multiplier":-0.06,"health_target":0.08,"cohesion_target":0.10,"conception_support":0.35}}
+	"family_support":{"office":"Steward","skills":["Empathy","Medicine"],"magnitude":0.14,"days":365.0,"ripple":"Family support improves health, cohesion, and conception conditions while care claims labor.","effects":{"labor_multiplier":-0.06,"health_target":0.08,"cohesion_target":0.10,"conception_support":0.35}},
+	"birth_restrictions":{"office":"Steward","skills":["Administration","Medicine"],"magnitude":0.14,"days":365.0,"ripple":"Birth restrictions reduce conception while enforcement strains health, cohesion, and legitimacy.","effects":{"conception_support":-0.55,"health_target":-0.04,"cohesion_target":-0.12,"legitimacy_target":-0.14}},
+	"population_resettlement":{"office":"Marshal","skills":["Logistics","Public Order"],"magnitude":0.16,"days":180.0,"ripple":"Forced relocation concentrates control and routes while displacement causes exposure, resistance, and loss.","effects":{"labor_multiplier":-0.12,"health_target":-0.08,"cohesion_target":-0.18,"logistics_target":0.12,"security_target":0.08,"legitimacy_target":-0.16}},
+	"mass_repression":{"office":"Marshal","skills":["Public Order","Strategy"],"magnitude":0.12,"days":90.0,"ripple":"Lethal repression may suppress an immediate threat, but deaths, fear, resistance, lost knowledge, and legitimacy damage persist.","effects":{"labor_multiplier":-0.10,"health_target":-0.12,"cohesion_target":-0.35,"knowledge_gain":-0.18,"security_target":0.22,"legitimacy_target":-0.42}},
+	"conscription_drive":{"office":"Marshal","skills":["Strategy","Delegation"],"magnitude":0.16,"days":180.0,"ripple":"Conscription increases mobilization readiness while removing labor and creating resistance; it does not create trained or equipped units.","effects":{"labor_multiplier":-0.16,"cohesion_target":-0.08,"security_target":0.30,"legitimacy_target":-0.06}},
+	"wealth_levy":{"office":"Steward","skills":["Administration","Coalition Building"],"magnitude":0.16,"days":180.0,"ripple":"A wealth levy redirects existing capacity toward common stores while collection occupies labor and provokes resistance.","effects":{"labor_multiplier":-0.06,"cohesion_target":0.06,"material_target":0.18,"legitimacy_target":0.08}},
+	"market_deregulation":{"office":"Envoy","skills":["Trade","Coalition Building"],"magnitude":0.14,"days":180.0,"ripple":"Looser exchange rules improve material and route coordination while inequality pressure strains cohesion and legitimacy.","effects":{"cohesion_target":-0.08,"material_target":0.14,"logistics_target":0.14,"legitimacy_target":-0.05}},
+	"information_control":{"office":"Marshal","skills":["Public Order","Administration"],"magnitude":0.16,"days":180.0,"ripple":"Information controls ease short-term coordination at the cost of knowledge, trust, and legitimacy.","effects":{"cohesion_target":0.05,"knowledge_gain":-0.30,"security_target":0.10,"legitimacy_target":-0.20}}
+}
+
+# Every recognized directive, whether interpreted locally or proposed by an API,
+# receives one deterministic implementation contract here. The API never sees
+# or supplies these numeric constraints. Costs are physical aggregate quantities;
+# direct effects are bounded one-time shocks, while POLICIES contains the slower
+# standing effects that continue through the normal simulation.
+const DIRECTIVE_CONTRACTS := {
+	"rationing":{"domain":"economic","administration_required":0.10,"security_required":0.00,"coercion":0.28,"food_rations_per_capita":0.0,"material_bulk_per_1000":0.0,"direct_effects":{"cohesion_delta":-0.008}},
+	"foraging_drive":{"domain":"economic","administration_required":0.08,"security_required":0.00,"coercion":0.08,"food_rations_per_capita":0.0,"material_bulk_per_1000":0.0,"direct_effects":{"ecology_delta":-0.002}},
+	"conservation_order":{"domain":"economic","administration_required":0.14,"security_required":0.05,"coercion":0.22,"food_rations_per_capita":0.0,"material_bulk_per_1000":0.0,"direct_effects":{}},
+	"care_rotation":{"domain":"demographic","administration_required":0.18,"security_required":0.00,"coercion":0.02,"food_rations_per_capita":0.08,"material_bulk_per_1000":0.0,"direct_effects":{"health_delta":0.006}},
+	"expanded_watch":{"domain":"military","administration_required":0.12,"security_required":0.10,"coercion":0.18,"food_rations_per_capita":0.03,"material_bulk_per_1000":0.0,"direct_effects":{}},
+	"public_assembly":{"domain":"social","administration_required":0.16,"security_required":0.00,"coercion":0.00,"food_rations_per_capita":0.02,"material_bulk_per_1000":0.0,"direct_effects":{"cohesion_delta":0.006,"legitimacy_delta":0.006}},
+	"emergency_building":{"domain":"economic","administration_required":0.20,"security_required":0.00,"coercion":0.06,"food_rations_per_capita":0.04,"material_bulk_per_1000":0.80,"direct_effects":{}},
+	"directed_inquiry":{"domain":"social","administration_required":0.18,"security_required":0.00,"coercion":0.00,"food_rations_per_capita":0.04,"material_bulk_per_1000":0.12,"direct_effects":{}},
+	"craft_mobilization":{"domain":"economic","administration_required":0.18,"security_required":0.00,"coercion":0.10,"food_rations_per_capita":0.03,"material_bulk_per_1000":0.45,"direct_effects":{}},
+	"route_priority":{"domain":"economic","administration_required":0.20,"security_required":0.00,"coercion":0.04,"food_rations_per_capita":0.04,"material_bulk_per_1000":0.65,"direct_effects":{}},
+	"labor_mobilization":{"domain":"economic","administration_required":0.16,"security_required":0.10,"coercion":0.55,"food_rations_per_capita":0.02,"material_bulk_per_1000":0.0,"direct_effects":{"health_delta":-0.006,"cohesion_delta":-0.008,"legitimacy_delta":-0.006}},
+	"family_support":{"domain":"demographic","administration_required":0.20,"security_required":0.00,"coercion":0.00,"food_rations_per_capita":0.10,"material_bulk_per_1000":0.0,"direct_effects":{"health_delta":0.005,"cohesion_delta":0.005}},
+	"birth_restrictions":{"domain":"demographic","administration_required":0.24,"security_required":0.16,"coercion":0.65,"food_rations_per_capita":0.02,"material_bulk_per_1000":0.0,"direct_effects":{"health_delta":-0.004,"cohesion_delta":-0.010,"legitimacy_delta":-0.012}},
+	"population_resettlement":{"domain":"demographic","administration_required":0.34,"security_required":0.34,"coercion":0.78,"food_rations_per_capita":0.16,"material_bulk_per_1000":0.18,"direct_effects":{"population_deaths_share":0.008,"health_delta":-0.012,"cohesion_delta":-0.018,"legitimacy_delta":-0.018}},
+	"mass_repression":{"domain":"military","administration_required":0.42,"security_required":0.50,"coercion":0.96,"food_rations_per_capita":0.03,"material_bulk_per_1000":0.05,"direct_effects":{"population_deaths_share":0.040,"health_delta":-0.012,"cohesion_delta":-0.030,"legitimacy_delta":-0.040}},
+	"conscription_drive":{"domain":"military","administration_required":0.26,"security_required":0.30,"coercion":0.48,"food_rations_per_capita":0.08,"material_bulk_per_1000":0.12,"direct_effects":{"cohesion_delta":-0.008,"legitimacy_delta":-0.006}},
+	"wealth_levy":{"domain":"economic","administration_required":0.28,"security_required":0.12,"coercion":0.34,"food_rations_per_capita":0.01,"material_bulk_per_1000":0.0,"direct_effects":{}},
+	"market_deregulation":{"domain":"economic","administration_required":0.18,"security_required":0.00,"coercion":0.00,"food_rations_per_capita":0.0,"material_bulk_per_1000":0.0,"direct_effects":{}},
+	"information_control":{"domain":"social","administration_required":0.30,"security_required":0.30,"coercion":0.62,"food_rations_per_capita":0.01,"material_bulk_per_1000":0.0,"direct_effects":{"knowledge_delta":-0.008,"legitimacy_delta":-0.014}}
 }
 
 # These profiles connect policy to goals advisors already possess. They do not
 # invent ideology or personality: reactions are deterministic matches against
-# each named advisor's established goals, and repeal reverses the alignment.
+# each council institution's established priorities, and repeal reverses the alignment.
 const COUNCIL_GOAL_AFFINITIES := {
 	"rationing":{"supports":["secure_supplies"],"strains":["protect_population","preserve_cohesion"]},
 	"foraging_drive":{"supports":["secure_supplies"],"strains":["study_environment"]},
@@ -58,7 +92,14 @@ const COUNCIL_GOAL_AFFINITIES := {
 	"craft_mobilization":{"supports":["improve_infrastructure","secure_materials"],"strains":[]},
 	"route_priority":{"supports":["expand_routes","avoid_isolation","create_exchange"],"strains":[]},
 	"labor_mobilization":{"supports":["establish_settlement","improve_infrastructure","secure_materials"],"strains":["protect_population","preserve_cohesion","avoid_feuds"]},
-	"family_support":{"supports":["protect_population","prevent_disease","preserve_cohesion"],"strains":[]}
+	"family_support":{"supports":["protect_population","prevent_disease","preserve_cohesion"],"strains":[]},
+	"birth_restrictions":{"supports":["formalize_administration"],"strains":["protect_population","preserve_cohesion"]},
+	"population_resettlement":{"supports":["secure_perimeter","formalize_administration"],"strains":["protect_population","preserve_cohesion","avoid_feuds"]},
+	"mass_repression":{"supports":["secure_perimeter"],"strains":["protect_population","preserve_cohesion","avoid_feuds","preserve_knowledge"]},
+	"conscription_drive":{"supports":["secure_perimeter","maintain_readiness"],"strains":["protect_population","preserve_cohesion"]},
+	"wealth_levy":{"supports":["secure_materials","formalize_administration"],"strains":["create_exchange","avoid_feuds"]},
+	"market_deregulation":{"supports":["create_exchange","expand_routes"],"strains":["preserve_cohesion"]},
+	"information_control":{"supports":["secure_perimeter","formalize_administration"],"strains":["preserve_knowledge","preserve_cohesion"]}
 }
 
 func has_policy(policy_id:String)->bool:
@@ -66,6 +107,15 @@ func has_policy(policy_id:String)->bool:
 
 func definition(policy_id:String)->Dictionary:
 	return (POLICIES.get(policy_id,{}) as Dictionary).duplicate(true)
+
+func directive_contract(policy_id:String)->Dictionary:
+	var contract:Dictionary=(DIRECTIVE_CONTRACTS.get(policy_id,{}) as Dictionary).duplicate(true)
+	if contract.is_empty(): return {}
+	var definition_value:=definition(policy_id)
+	contract["id"]=policy_id
+	contract["office"]=String(definition_value.get("office","Council"))
+	contract["second_order"]=String(definition_value.get("ripple","The directive changes simulated conditions."))
+	return contract
 
 func public_contract()->Dictionary:
 	var result:Dictionary={}
@@ -106,10 +156,17 @@ func validation_errors()->Array[String]:
 	for policy_id in POLICIES:
 		var policy:Dictionary=POLICIES[policy_id]
 		if not COUNCIL_GOAL_AFFINITIES.has(policy_id): errors.append("%s has no council goal affinity" % policy_id)
+		if not DIRECTIVE_CONTRACTS.has(policy_id): errors.append("%s has no directive implementation contract" % policy_id)
 		if String(policy.get("office","")).is_empty(): errors.append("%s has no office" % policy_id)
 		if float(policy.get("magnitude",0.0))<0.05 or float(policy.get("magnitude",0.0))>0.25: errors.append("%s has an invalid default magnitude" % policy_id)
 		if float(policy.get("days",0.0))<7.0 or float(policy.get("days",0.0))>730.0: errors.append("%s has an invalid default duration" % policy_id)
 		for channel in (policy.get("effects",{}) as Dictionary):
 			if not EFFECT_LABELS.has(channel): errors.append("%s uses unknown effect channel %s" % [policy_id,channel])
 			if not policy.effects[channel] is float and not policy.effects[channel] is int: errors.append("%s effect %s is not numeric" % [policy_id,channel])
+		var contract:Dictionary=DIRECTIVE_CONTRACTS.get(policy_id,{})
+		if String(contract.get("domain","")) not in ["demographic","economic","military","social"]: errors.append("%s has an invalid directive domain" % policy_id)
+		for required_value in ["administration_required","security_required","coercion","food_rations_per_capita","material_bulk_per_1000"]:
+			if not contract.get(required_value,null) is float and not contract.get(required_value,null) is int: errors.append("%s directive contract lacks numeric %s" % [policy_id,required_value])
+		for direct_channel in (contract.get("direct_effects",{}) as Dictionary):
+			if String(direct_channel) not in ["population_deaths_share","health_delta","cohesion_delta","knowledge_delta","security_delta","ecology_delta","legitimacy_delta"]: errors.append("%s uses unknown direct-effect channel %s" % [policy_id,direct_channel])
 	return errors
