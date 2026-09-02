@@ -185,7 +185,7 @@ func _render_stage()->void:
 	var defense:Dictionary={"stage":defense_stage,"integrity":defense_integrity,"construction":{}}
 	if include_plots:
 		renderer._create_persistent_settlement_routes(center,GameState.settlement_routes,physical)
-		renderer._create_plot_fabric(center,GameState.settlement_plots,fabric_lod,physical)
+		renderer._create_plot_fabric(center,GameState.settlement_plots,fabric_lod,physical,fabric_lod==0 and int(profile.get("stage",0))>=3)
 	renderer._create_settlement_stage_landscape(center,profile,GameState.settlement_plots,fabric_lod,physical,defense)
 	# This harness audits the strategic aerial representation directly. In gameplay
 	# the same shader crossfades away during plot-level inspection.

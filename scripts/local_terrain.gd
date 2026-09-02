@@ -1756,6 +1756,12 @@ void fragment() {
 	vec3 satellite_a = texture(regional_albedo, map_uv).rgb;
 	vec3 satellite_b = texture(regional_albedo, map_uv_rotated * 0.79 + vec2(0.41, 0.13)).rgb;
 	vec3 satellite_map = mix(satellite_a, satellite_b, 0.08);
+	// The photographic map textures carry detail, but the BIOME (vertex color)
+	// owns the hue — steppe reads tan, wetland teal, woodland deep green at
+	// every zoom instead of one endless satellite green.
+	vec3 biome_hue = vertex_tint / max(dot(vertex_tint, vec3(0.28, 0.57, 0.15)), 0.05);
+	country_map *= mix(vec3(1.0), biome_hue, 0.52);
+	satellite_map *= mix(vec3(1.0), biome_hue, 0.58);
 	vec3 local_ground_a = texture(ground_albedo, local_ground_uv).rgb;
 	vec3 local_ground_b = texture(ground_albedo, local_ground_uv_rotated).rgb;
 	vec3 local_ground_map = mix(local_ground_a, local_ground_b, 0.22);
@@ -1782,6 +1788,10 @@ void fragment() {
 	float green_bias = COLOR.g - max(COLOR.r, COLOR.b * 0.82);
 	float forest_mask = smoothstep(0.025, 0.105, green_bias) * (1.0 - smoothstep(0.30, 0.72, slope));
 	float woodland_mass = smoothstep(0.36, 0.76, biome_patch + (regional - 0.5) * 0.20);
+	// Procedural canopy mottling may only appear where the CPU biome field
+	// painted woodland-capable ground (green-biased vertex color) — the forest
+	// texture must never colonize steppe or open grassland on its own.
+	woodland_mass *= smoothstep(0.015, 0.060, green_bias);
 	forest_mask = max(forest_mask, woodland_mass * 0.46 * (1.0 - smoothstep(0.34, 0.76, slope)));
 	forest_mask *= 0.80 + broad * 0.28;
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
@@ -1872,29 +1882,86 @@ func _add_terrain_vertex(surface: SurfaceTool, grid_x: int, grid_z: int) -> void
 	surface.set_color(_terrain_color_at(x, z, height))
 	surface.add_vertex(Vector3(x, height, z))
 
+func _climate_at(x:float,z:float,height:float)->Dictionary:
+	## Earth-logic climate: latitude and altitude set temperature; the moisture
+	## field, continental interior dryness, and the river corridor's humidity
+	## set precipitation. Every biome below EMERGES from these two numbers.
+	var latitude_warmth:=1.0-clampf(absf(z)/(world_depth*0.5),0.0,1.0)
+	# Adiabatic lapse: high ground is cold ground, at any latitude.
+	var temperature:=clampf(latitude_warmth-maxf(0.0,height)*0.055,0.0,1.0)
+	# Rainfall has structure at two scales: the continental moisture belt and
+	# regional weather country (~30–300 km), so a starting region genuinely
+	# contains different lands rather than one endless climate.
+	var moisture:=moisture_noise.get_noise_2d(x,z)
+	var regional_weather:=terrain_noise.get_noise_2d(x+1700.0,z-2300.0)
+	# Deep continental interiors are drier than coasts and basins.
+	var interior:=clampf((continent_noise.get_noise_2d(x,z)-0.05)*1.2,0.0,0.5)
+	var precipitation:=clampf(0.48+moisture*0.52+regional_weather*0.34-interior*0.55,0.0,1.0)
+	# Contrast-stretch so wet and dry country both genuinely occur; a world of
+	# nothing but average rainfall is a world of one biome.
+	precipitation=clampf(0.5+(precipitation-0.5)*1.9,0.0,1.0)
+	var river_x:=_world_river_x(z)
+	var river_distance:=absf(x-river_x) if river_x!=INF else INF
+	# The river corridor is humid ground regardless of regional climate.
+	if river_distance<16.0: precipitation=maxf(precipitation,precipitation+((1.0-river_distance/16.0)*0.28))
+	return {"temperature":temperature,"precipitation":clampf(precipitation,0.0,1.0),"river_distance":river_distance}
+
+
+func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
+	## The single authority for what the land IS. Renderer, resource placement,
+	## scouting reports, and woodland density all read this one field.
+	if is_nan(height): height=_height_at(x,z)
+	if height<SEA_LEVEL:
+		return {"id":"water","label":"open water","woodland":0.0,"fertility":0.0,"forage":0.0,"game":0.0,"stone":0.0,"color":Color("#21363a")}
+	var climate:=_climate_at(x,z,height)
+	var temperature:=float(climate.temperature)
+	var precipitation:=float(climate.precipitation)
+	var river_distance:=float(climate.river_distance)
+	# Woodland needs both warmth and rain (treeline and aridity limits).
+	var woodland:=clampf((precipitation-0.40)*2.6,0.0,1.0)*clampf((temperature-0.16)*3.4,0.0,1.0)
+	if height>3.2: woodland*=1.0-clampf((height-3.2)/5.2,0.0,0.74)
+	var id:="grassland"
+	var label:="open grassland"
+	if temperature<0.16:
+		id="tundra"; label="cold barrens"
+	elif height>6.0:
+		id="upland"; label="bare upland"
+	elif river_distance<3.2 and height<3.0:
+		id="floodplain"; label="river floodplain"
+	elif precipitation>0.70 and height<0.9 and river_distance<18.0:
+		id="wetland"; label="wet meadows"
+	elif woodland>0.42:
+		id="woodland"; label="dense woodland"
+	elif precipitation<0.36:
+		id="steppe"; label="dry steppe" if temperature<0.62 else "sun-scoured drylands"
+	# Earth's soil logic: alluvium and deep grassland soils feed people;
+	# forest soils are middling, steppe and thin upland soils are poor.
+	var fertility:=0.0
+	match id:
+		"floodplain": fertility=0.95
+		"grassland": fertility=0.55+precipitation*0.25
+		"wetland": fertility=0.60
+		"woodland": fertility=0.34
+		"steppe": fertility=0.14
+		_: fertility=0.05
+	var forage:=clampf(precipitation*0.6+woodland*0.3+(0.25 if id=="wetland" else 0.0),0.0,1.0)
+	var game:=clampf(woodland*(1.6-woodland)+ (0.2 if id in ["grassland","floodplain"] else 0.0),0.0,1.0)
+	var stone:=clampf((height/6.0)*(1.0-woodland),0.0,1.0)+(0.3 if id=="upland" else 0.0)
+	# Color: continuous blends so biome borders read as transitions, not tiles.
+	var color:=Color("#7a6c4c").lerp(Color("#5f6a45"),clampf((precipitation-0.18)*3.2,0.0,1.0))
+	color=color.lerp(Color("#2c4a34"),woodland*0.9)
+	if id=="wetland": color=color.lerp(Color("#3a5348"),0.62)
+	if id=="floodplain": color=color.lerp(Color("#33553c"),0.70)
+	elif river_distance<14.0: color=color.lerp(Color("#365443"),pow(1.0-river_distance/14.0,1.35)*0.38)
+	if precipitation<0.18: color=color.lerp(Color("#8b7550"),0.5)
+	if height>3.2: color=color.lerp(Color("#77766f"),clampf((height-3.2)/5.2,0.0,0.74))
+	if temperature<0.22: color=color.lerp(Color("#bcbfb1"),clampf((0.22-temperature)*4.5,0.0,0.86))
+	return {"id":id,"label":label,"woodland":woodland,"fertility":fertility,"forage":forage,"game":game,"stone":stone,"color":color,"temperature":temperature,"precipitation":precipitation,"river_distance":river_distance}
+
+
 func _terrain_color_at(x: float, z: float, height: float) -> Color:
 	if SEAMLESS_WORLD:
-		var moisture:=moisture_noise.get_noise_2d(x,z)+terrain_noise.get_noise_2d(x+1700.0,z-2300.0)*0.36
-		var warmth:=1.0-clampf(absf(z)/(world_depth*0.5),0.0,1.0)
-		if height<SEA_LEVEL:
-			return Color("#21363a")
-		var color:=Color("#676a50")
-		if moisture>-0.12:
-			color=color.lerp(Color("#304b36"),clampf((moisture+0.24)*1.45,0.12,0.78))
-		elif moisture<-0.38:
-			color=color.lerp(Color("#8b744f"),clampf((-moisture-0.30)*1.25,0.0,0.45))
-		if warmth<0.20:
-			color=color.lerp(Color("#c4c6bd"),clampf((0.20-warmth)*4.0,0.0,0.84))
-		if height>3.2:
-			color=color.lerp(Color("#77766f"),clampf((height-3.2)/5.2,0.0,0.74))
-		var river_x:=_world_river_x(z)
-		if river_x!=INF:
-			var river_distance:=absf(x-river_x)
-			if river_distance<14.0:
-				var valley:=pow(1.0-river_distance/14.0,1.35)
-				color=color.lerp(Color("#365443"),valley*0.38)
-				if river_distance<3.8: color=color.lerp(Color("#29473a"),pow(1.0-river_distance/3.8,1.7)*0.44)
-		return color
+		return _biome_at(x,z,height).color
 	var moisture := detail_noise.get_noise_2d(x + 900.0, z - 700.0)
 	var dry_noise := terrain_noise.get_noise_2d(x - 640.0, z + 510.0)
 	var woodland_noise := terrain_noise.get_noise_2d(x * 1.35 + 1300.0, z * 1.35 - 800.0)
@@ -2214,47 +2281,49 @@ func _scatter_landscape_vegetation() -> void:
 func _survey_ground_at(position:Vector2)->Dictionary:
 	## Ground truth handed to the civilization layer so returned scout reports
 	## describe the terrain the renderer actually draws at that point.
-	var river_x:=_world_river_x(position.y)
+	var biome:=_biome_at(position.x,position.y)
 	return {
-		"woodland":_woodland_density_at(position.x,position.y),
-		"river_distance_km":absf(position.x-river_x) if river_x!=INF else INF,
+		"biome":String(biome.id),
+		"label":String(biome.label),
+		"woodland":float(biome.woodland),
+		"fertility":float(biome.fertility),
+		"river_distance_km":float(biome.river_distance),
 		"height":_height_at(position.x,position.y),
 	}
 
 
 func _woodland_density_at(x:float,z:float)->float:
-	## The single ground truth for "how wooded is this point". It mirrors the
-	## exact moisture/warmth/altitude math that paints the vertex green the
-	## terrain shader amplifies into forest cover — so whatever reads green on
-	## the map IS woodland to the simulation, and vice versa.
-	var height:=_height_at(x,z)
-	if height<SEA_LEVEL: return 0.0
-	var moisture:=moisture_noise.get_noise_2d(x,z)+terrain_noise.get_noise_2d(x+1700.0,z-2300.0)*0.36
-	if moisture<=-0.12: return 0.0
-	var density:=clampf((moisture+0.24)*1.45,0.12,0.78)
-	var warmth:=1.0-clampf(absf(z)/(world_depth*0.5),0.0,1.0)
-	if warmth<0.20: density*=1.0-clampf((0.20-warmth)*4.0,0.0,0.84)
-	if height>3.2: density*=1.0-clampf((height-3.2)/5.2,0.0,0.74)
-	return clampf(density/0.78,0.0,1.0)
+	return float(_biome_at(x,z).woodland)
 
 
 func _best_site_for(type:String,rng:RandomNumberGenerator)->Vector3:
-	## Resource sites sit where the rendered ground says they belong: timber
-	## and game in the densest woodland, stone on bare dry ground, fertile
-	## soil in the moist riverine belt.
+	## Resource sites sit where the biome field says they belong: timber in
+	## dense woodland, game on woodland edges and open grass, stone on bare
+	## high ground, fertile soil on floodplain alluvium and deep grassland
+	## soils. Fertile candidates are biased close to home first — if the
+	## settlement stands on good ground, its fertile land is beside it.
 	var best:=Vector3.ZERO
 	var best_score:=-INF
-	for attempt in 24:
-		var candidate:=_random_valid_site(rng)
+	for attempt in 30:
+		var candidate:Vector3
+		if type=="Fertile" and attempt<14:
+			var offset:=Vector2(rng.randf_range(-16.0,16.0),rng.randf_range(-16.0,16.0))
+			candidate=Vector3(world_start_position.x+offset.x,0.0,world_start_position.z+offset.y)
+			candidate.y=_height_at(candidate.x,candidate.z)
+			if candidate.y<=0.04 or candidate.y>=7.0: continue
+		else:
+			candidate=_random_valid_site(rng)
 		if candidate==Vector3.ZERO: continue
-		var density:=_woodland_density_at(candidate.x,candidate.z)
-		var river_x:=_world_river_x(candidate.z)
-		var river_distance:=absf(candidate.x-river_x) if river_x!=INF else INF
+		var biome:=_biome_at(candidate.x,candidate.z,candidate.y)
 		var score:=0.0
 		match type:
-			"Timber","Game": score=density
-			"Stone": score=(1.0-density)+clampf(candidate.y/7.0,0.0,0.5)
-			"Fertile": score=clampf(1.0-river_distance/20.0,0.0,1.0)*0.6+density*0.4
+			"Timber": score=float(biome.woodland)
+			"Game": score=float(biome.game)
+			"Stone": score=float(biome.stone)
+			"Fertile":
+				score=float(biome.fertility)
+				# Prefer the closer of two equally good grounds.
+				score+=clampf(1.0-Vector2(candidate.x,candidate.z).distance_to(Vector2(world_start_position.x,world_start_position.z))/72.0,0.0,1.0)*0.25
 			_: score=rng.randf()
 		if score>best_score:
 			best_score=score

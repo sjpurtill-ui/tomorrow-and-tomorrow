@@ -2096,19 +2096,16 @@ func _resolve_scout_windfalls(mission:Dictionary,route:Array,day:int)->Array[Str
 			var ground_note:=""
 			if ground_survey_authority.is_valid():
 				var ground:Dictionary=ground_survey_authority.call(Vector2(position.x,position.z))
-				var woodland:=float(ground.get("woodland",0.0))
-				var river_distance:=float(ground.get("river_distance_km",INF))
-				if woodland>0.45:
-					resource_name="Timber" if rng.randf()<0.65 else "Game"
-					ground_note=" in the dense woodland there"
-				elif river_distance<14.0:
-					resource_name="Fertile Soil"
-					ground_note=" on the moist riverside ground"
-				elif woodland<0.18:
-					resource_name="Stone"
-					ground_note=" on the bare open ground"
-				else:
-					resource_name="Fiber Plants" if rng.randf()<0.5 else "Game"
+				var ground_label:=String(ground.get("label","the ground"))
+				match String(ground.get("biome","")):
+					"woodland": resource_name="Timber" if rng.randf()<0.65 else "Game"
+					"floodplain": resource_name="Fertile Soil"
+					"wetland": resource_name="Fiber Plants" if rng.randf()<0.6 else "Game"
+					"grassland": resource_name="Fertile Soil" if rng.randf()<0.55 else "Game"
+					"steppe": resource_name="Fiber Plants" if rng.randf()<0.5 else "Stone"
+					"upland","tundra": resource_name="Stone"
+					_: resource_name=SCOUT_FIND_RESOURCES[rng.randi_range(0,SCOUT_FIND_RESOURCES.size()-1)]
+				ground_note=" on the %s there" % ground_label
 			var deposit:Dictionary=ResourceSystem._deposit(resource_name,position,rng.randf_range(0.55,0.95),rng.randf_range(600.0,2400.0),GameState.resource_deposits.size())
 			deposit["stage"]="recognized"
 			deposit["clues"]=1.0
