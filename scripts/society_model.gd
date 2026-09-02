@@ -257,28 +257,106 @@ func leadership_effect(dynamic_id:String)->float:
 	var total:=0.0
 	var contributors:=0
 	for office in GameState.leadership_positions:
-		if dynamic_id not in OFFICE_DYNAMICS.get(String(office),[]): continue
 		var advisor:Dictionary=GameState.leadership_positions[office]
-		var profile:Dictionary=advisor.get("dynamic_profile",{})
-		if not profile.has(dynamic_id): continue
-		total+=(float(profile[dynamic_id])-0.5)*0.18
+		var contribution:=_doctrine_dynamic_effect(String(office),advisor,dynamic_id)
+		if contribution==0.0: continue
+		total+=contribution
 		contributors+=1
 	if contributors==0: return 0.0
-	return clampf(total/sqrt(float(contributors)), -0.09,0.12)
+	return clampf(total/sqrt(float(contributors)), -0.12,0.14)
 
 func leadership_subcategory_effect(dynamic_id:String,subcategory:String)->float:
 	var total:=0.0
 	var contributors:=0
 	for office in GameState.leadership_positions:
-		if dynamic_id not in OFFICE_DYNAMICS.get(String(office),[]): continue
 		var advisor:Dictionary=GameState.leadership_positions[office]
+		if String(advisor.get("doctrine",""))!="":
+			# Doctrine institutions execute a whole portfolio; subcategories inherit
+			# the same structural strength slightly damped rather than a second
+			# random per-subcategory competence.
+			var contribution:=_doctrine_dynamic_effect(String(office),advisor,dynamic_id)*0.85
+			if contribution==0.0: continue
+			total+=contribution
+			contributors+=1
+			continue
+		if dynamic_id not in OFFICE_DYNAMICS.get(String(office),[]): continue
 		var by_dynamic:Dictionary=advisor.get("subcategory_profile",{})
 		var profile:Dictionary=by_dynamic.get(dynamic_id,{})
 		if not profile.has(subcategory): continue
 		total+=(float(profile[subcategory])-0.5)*0.15
 		contributors+=1
 	if contributors==0: return leadership_effect(dynamic_id)*0.72
-	return clampf(total/sqrt(float(contributors)),-0.075,0.10)
+	return clampf(total/sqrt(float(contributors)),-0.10,0.12)
+
+
+# -- institutional doctrines -------------------------------------------------
+# The chosen governing structure, not a hidden aptitude scalar, decides how an
+# office executes. Each doctrine reads current, player-visible state, so no
+# structure is best in every situation and none adds a thirteenth stat.
+
+func _doctrine_dynamic_effect(office:String,advisor:Dictionary,dynamic_id:String)->float:
+	var doctrine:=String(advisor.get("doctrine",""))
+	if doctrine=="":
+		# Institutions commissioned before doctrines keep their recorded profile.
+		if dynamic_id not in OFFICE_DYNAMICS.get(office,[]): return 0.0
+		var profile:Dictionary=advisor.get("dynamic_profile",{})
+		if not profile.has(dynamic_id): return 0.0
+		return (float(profile[dynamic_id])-0.5)*0.18
+	var effect_total:=0.0
+	if dynamic_id in OFFICE_DYNAMICS.get(office,[]): effect_total+=doctrine_execution_strength(doctrine)
+	effect_total+=_doctrine_side_effect(doctrine,dynamic_id)
+	return effect_total
+
+func doctrine_execution_strength(doctrine:String)->float:
+	var legitimacy:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)
+	match doctrine:
+		"directive":
+			# A central service is the strongest executor the state can field, but it
+			# runs on obedience: it weakens as legitimacy slips and works against the
+			# realm once the realm no longer believes in its orders.
+			return lerpf(-0.06,0.13,clampf((legitimacy-0.25)/0.55,0.0,1.0))
+		"federated":
+			# Federated bodies execute through local assemblies: modest alone,
+			# stronger with every settlement actually federated.
+			return 0.045+0.011*float(mini(GameState.player_settlements.size(),6))
+		"measured":
+			# A records-and-measurement service is unconditionally steady: never the
+			# strongest hand, never a liability.
+			return 0.075
+		"representative":
+			# Rotation keeps authority accountable, but capability arrives in waves
+			# as experienced cohorts hand duties to new ones.
+			return 0.065+0.045*sin(TAU*float(GameState.elapsed_days)/540.0)
+		"territorial":
+			# A territorial network holds its strength across distance; it is thin
+			# until the realm has actual territory to administer.
+			return 0.05+0.07*_territorial_spread_ratio()
+	return 0.0
+
+func _doctrine_side_effect(doctrine:String,dynamic_id:String)->float:
+	match doctrine:
+		"directive":
+			# Central command crowds out the council culture it does not consult.
+			if dynamic_id=="culture": return -0.02
+		"federated":
+			if dynamic_id=="institutions": return 0.015
+		"measured":
+			if dynamic_id=="knowledge": return 0.012
+		"representative":
+			if dynamic_id=="culture": return 0.02
+		"territorial":
+			if dynamic_id=="logistics": return 0.012
+	return 0.0
+
+func _territorial_spread_ratio()->float:
+	var origin:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var spread:=0.0
+	for settlement_variant in GameState.player_settlements:
+		var settlement:Dictionary=settlement_variant
+		var value:Variant=settlement.get("position",Vector2.ZERO)
+		var position:Vector2=value if value is Vector2 else Vector2.ZERO
+		spread=maxf(spread,position.distance_to(origin))
+	return clampf(spread/6.0+float(maxi(0,GameState.player_settlements.size()-1))*0.18,0.0,1.0)
 
 func evaluate_subcategories(_context:Dictionary)->Dictionary:
 	var metrics:=GameState.simulation_metrics

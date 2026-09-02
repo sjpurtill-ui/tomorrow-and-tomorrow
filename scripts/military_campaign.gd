@@ -917,7 +917,9 @@ func disband_field_army(army_id:int)->Dictionary:
 # --- Army builds (templates) -------------------------------------------------
 
 func _default_army_templates()->Array[Dictionary]:
-	return [{"template_id":1,"name":"LEVY BAND","entries":[{"unit":"levy","weapon":"improvised","count":20}]}]
+	# The starter build must respect the same mobilization ceiling the player's
+	# own designs are clamped to, or TRAIN under-delivers on day one.
+	return [{"template_id":1,"name":"LEVY BAND","entries":[{"unit":"levy","weapon":"improvised","count":clampi(recruitment_capacity(),1,20)}]}]
 
 
 func _ensure_army_templates()->void:
@@ -1003,20 +1005,30 @@ func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)-
 	if gate.has("error"): return gate
 	var template:Dictionary=army_templates[index]
 	var entries:Array=template.get("entries",[])
+	var applied:=delta
+	if delta>0:
+		# A build is a mobilization order. Its target can never exceed what the
+		# society could actually raise, otherwise TRAIN silently under-delivers.
+		var planned:=0
+		for entry_variant in entries: planned+=maxi(0,int((entry_variant as Dictionary).get("count",0)))
+		applied=mini(delta,maxi(0,recruitment_capacity()-planned))
+		if applied<=0: return {"error":"Mobilization capacity is %d and this build already claims all of it. Population growth and security practices such as an organized watch or public levies raise the ceiling." % recruitment_capacity()}
 	var found:=false
 	for entry_index in range(entries.size()-1,-1,-1):
 		var entry:Dictionary=entries[entry_index]
 		if String(entry.get("unit",""))!=unit or String(entry.get("weapon",""))!=weapon: continue
-		entry["count"]=maxi(0,int(entry.get("count",0))+delta)
+		entry["count"]=maxi(0,int(entry.get("count",0))+applied)
 		found=true
 		if int(entry.count)<=0: entries.remove_at(entry_index)
 		else: entries[entry_index]=entry
 		break
-	if not found and delta>0:
-		entries.append({"unit":unit,"weapon":weapon,"count":delta})
+	if not found and applied>0:
+		entries.append({"unit":unit,"weapon":weapon,"count":applied})
 	template["entries"]=entries
 	army_templates[index]=template
-	return {"ok":true,"template":template.duplicate(true)}
+	var result:Dictionary={"ok":true,"template":template.duplicate(true)}
+	if applied<delta: result["message"]="Added %d of %d — the build is now at the mobilization capacity of %d." % [applied,delta,recruitment_capacity()]
+	return result
 
 
 func queue_template_training(template_id:int)->Dictionary:
@@ -2613,13 +2625,22 @@ func _process_settlement_defense_day()->void:
 func _apply_home_siege_damage(result:Dictionary)->void:
 	if String(result.get("campaign_mode",""))!="defensive" or String(result.get("target_region_id",""))!="": return
 	_ensure_settlement_defense()
-	if int(settlement_defense.stage)<=0: return
 	var rounds:=maxi(1,int(result.get("round_count",(result.get("rounds",[]) as Array).size())))
 	var outcome:=String(result.get("outcome","inconclusive"))
 	var breached:=outcome in ["attacker_victory","defender_retreat"]
 	var damage:=clampf(float(rounds)*0.025+(0.14 if breached else 0.035),0.03,0.34)
-	settlement_defense["integrity"]=clampf(float(settlement_defense.integrity)-damage,0.0,1.0)
-	settlement_defense_changed.emit(settlement_defense_snapshot())
+	if int(settlement_defense.stage)>0:
+		settlement_defense["integrity"]=clampf(float(settlement_defense.integrity)-damage,0.0,1.0)
+		settlement_defense_changed.emit(settlement_defense_snapshot())
+	# Fortifications are not the settlement. Fighting at home now marks a bounded,
+	# contiguous group of aggregate plots, which the map renders through the same
+	# GREAT -> DESTROYED grid ladder used for maintenance and prosperity. An unfortified
+	# settlement is therefore more exposed, not magically immune to urban damage.
+	if not GameState.settlement_plots.is_empty():
+		var battle_seed:=int(result.get("seed",hash("%d:%s:%d:home_siege" % [int(GameState.elapsed_days),outcome,rounds])))
+		var fabric_severity:=clampf(float(rounds)*0.018+(0.16 if breached else 0.035),0.035,0.42)
+		var exposed_share:=clampf(0.04+float(rounds)*0.018+(0.12 if breached else 0.0),0.04,0.32)
+		SettlementModel.apply_bounded_siege_damage(battle_seed,fabric_severity,exposed_share,"home siege combat")
 
 
 func defensive_position()->Dictionary:

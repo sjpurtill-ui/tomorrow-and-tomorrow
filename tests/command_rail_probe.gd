@@ -156,9 +156,28 @@ func _ready()->void:
 	var build_snapshot:Dictionary=MilitaryCampaign.army_template_snapshot()
 	_expect((build_snapshot.templates as Array).size()>0,"no default army build exists")
 	var build_id:int=int((build_snapshot.templates as Array)[0].template_id)
-	var adjust:Dictionary=MilitaryCampaign.adjust_template_entry(build_id,"levy","improvised",10)
+	var default_target:int=int((build_snapshot.templates as Array)[0].required_total)
+	var capacity:=MilitaryCampaign.recruitment_capacity()
+	_expect(default_target<=capacity,"default build target %d exceeds mobilization capacity %d" % [default_target,capacity])
+	var shrink:Dictionary=MilitaryCampaign.adjust_template_entry(build_id,"levy","improvised",-default_target)
+	_expect(bool(shrink.get("ok",false)),"could not shrink the army build")
+	var adjust:Dictionary=MilitaryCampaign.adjust_template_entry(build_id,"levy","improvised",capacity+10)
 	_expect(bool(adjust.get("ok",false)),"could not adjust the army build")
+	var adjusted_total:=0
+	for entry_variant in ((MilitaryCampaign.army_template_snapshot().templates as Array)[0].entries as Array):
+		adjusted_total+=int((entry_variant as Dictionary).get("count",0))
+	_expect(adjusted_total==capacity,"build target %d was not clamped to mobilization capacity %d" % [adjusted_total,capacity])
 	terrain._on_hud_section_requested("",0)
+	await get_tree().process_frame
+
+	# Landmark detail: opening a charted landmark's record shows the detail dock
+	# (illustration falls back to text until the plate is imported).
+	CivilizationSystem.landmarks.append({"id":"landmark_probe","name":"The Grey Scarp","kind":"cliffs","feature_id":"scarp_wall","myth":"Probe myth line.","position":{"x":0.0,"z":0.0},"discovered_day":1,"description":"Probe survey line."})
+	terrain._open_landmark_detail(CivilizationSystem.landmarks[CivilizationSystem.landmarks.size()-1])
+	await get_tree().process_frame
+	_expect(terrain.hud.detail_dock.visible,"landmark detail dock did not open")
+	_expect(terrain.hud.handle_escape(),"escape did not consume with landmark detail open")
+	_expect(not terrain.hud.detail_dock.visible,"escape did not close the landmark detail dock")
 	await get_tree().process_frame
 
 	# Detail dock: opens beside the primary dock; Esc closes detail first.

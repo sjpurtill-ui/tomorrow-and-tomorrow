@@ -390,6 +390,7 @@ func reset_for_new_world(new_seed:int)->void:
 	demographic_ledger=[]
 	lifetime_births=0
 	lifetime_deaths=0
+	lifetime_departures=0
 	death_progress=0.0
 	consecutive_food_shortage_days=0.0
 	consecutive_water_shortage_days=0.0
@@ -658,6 +659,19 @@ func _remove_population_exact(amount:float,cause:String) -> float:
 	_normalize_population_cohorts()
 	return removed_total
 
+var lifetime_departures := 0
+
+func register_population_departures(count:int,reason:String) -> Dictionary:
+	## People who leave the civilization alive — staying with foreign bands,
+	## marrying out. Reduces the population without touching mortality records.
+	initialize_population_model()
+	var actual:=mini(maxi(0,count),maxi(0,population_total-1))
+	var removed:=_remove_population_exact(float(actual),reason)
+	var emitted:=roundi(removed)
+	lifetime_departures+=emitted
+	synchronize_population_allocations()
+	return {"count":emitted,"reason":reason,"population_after":population_total}
+
 func register_population_deaths(count:int,cause:String) -> Dictionary:
 	initialize_population_model()
 	var actual:=mini(maxi(0,count),maxi(0,population_total-1))
@@ -718,7 +732,10 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var reproductive_population:=_reproductive_age_population()
 	var active:=float(pregnancy_cohorts.get("first_trimester",0.0))+float(pregnancy_cohorts.get("second_trimester",0.0))+float(pregnancy_cohorts.get("third_trimester",0.0))
 	var postpartum:=float(pregnancy_cohorts.get("postpartum",0.0))
-	var eligible:=maxf(0.0,reproductive_population-active-postpartum*0.55)
+	# People physically away on missions (scouts, envoys, convoys) are drawn
+	# from the working-age cohort; they cannot conceive at home while out.
+	var absent_adults:=maxf(0.0,float(context.get("absent_adults",0.0)))
+	var eligible:=maxf(0.0,reproductive_population-active-postpartum*0.55-absent_adults)
 	var baseline_annual:=float(population_cohorts.get("youth",0.0))*0.45*0.23+float(population_cohorts.get("early_adults",0.0))*0.50*0.285+float(population_cohorts.get("established_adults",0.0))*0.45*0.18+float(population_cohorts.get("mature_adults",0.0))*0.16*0.040
 	var availability:=clampf(eligible/maxf(1.0,reproductive_population),0.0,1.0)
 	var annual_conceptions:=baseline_annual*_conception_condition_factor(context)*availability

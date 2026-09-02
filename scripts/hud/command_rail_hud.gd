@@ -671,7 +671,11 @@ func _unhandled_key_input(event:InputEvent)->void:
 		get_viewport().set_input_as_handled()
 
 func _dock_interaction_active(panel:Control)->bool:
-	## Never rebuild while the player is mid-typing in a dock input.
+	## Never rebuild while the player is mid-typing in a dock input, and never
+	## rebuild under the pointer: destroying the hovered control closes its
+	## tooltip instantly and can pull a button out from under a click. The body
+	## refreshes on the next tick after the pointer leaves the panel.
+	if panel.get_global_rect().has_point(panel.get_global_mouse_position()): return true
 	for editor_variant in panel.find_children("*","LineEdit",true,false):
 		var editor:=editor_variant as LineEdit
 		if editor and (editor.has_focus() or not editor.text.strip_edges().is_empty()): return true
@@ -689,11 +693,16 @@ func handle_escape()->bool:
 		return true
 	return false
 
-func _season_name(day_of_year:int)->String:
-	if day_of_year<=91: return "Spring"
-	if day_of_year<=182: return "Summer"
-	if day_of_year<=273: return "Autumn"
-	return "Winter"
+func _temperature_text()->String:
+	# Temperature replaces the season name: it carries the same annual signal the
+	# food model actually uses, plus day-scale weather, and it is local truth
+	# rather than a calendar label.
+	var today:float=terrain.site_temperature_c()
+	var yesterday:float=terrain.site_temperature_c(maxf(0.0,GameState.elapsed_days-1.0))
+	var trend:="→"
+	if today-yesterday>0.3: trend="↑"
+	elif today-yesterday<-0.3: trend="↓"
+	return "%d°C %s" % [roundi(today),trend]
 
 func refresh()->void:
 	if terrain==null: return
@@ -709,11 +718,13 @@ func _refresh_time()->void:
 	var year:=absolute_day/365+1
 	var day_of_year:=absolute_day%365+1
 	var speed:=int(terrain.game_speed)
-	var signature:="%d|%d|%d" % [year,day_of_year,speed]
+	var temperature_text:=_temperature_text()
+	var signature:="%d|%d|%d|%s" % [year,day_of_year,speed,temperature_text]
 	if signature==_time_signature: return
 	_time_signature=signature
 	var speed_text:="paused" if speed==0 else SPEED_TOOLTIPS[clampi(speed,0,5)]
-	time_text.text="[b][color=#f0e6d1]Year %d · Day %d[/color][/b][color=#8a948f] · %s · %s[/color]" % [year,day_of_year,_season_name(day_of_year),speed_text]
+	time_text.text="[b][color=#f0e6d1]Year %d · Day %d[/color][/b][color=#8a948f] · %s · %s[/color]" % [year,day_of_year,temperature_text,speed_text]
+	time_pill.tooltip_text="Local air temperature at the settlement. The annual warm–cold cycle drives food yields and cold-season rations; the arrow is the day-to-day trend."
 	_style_speed_buttons(speed)
 	time_pill.reset_size()
 	_layout()

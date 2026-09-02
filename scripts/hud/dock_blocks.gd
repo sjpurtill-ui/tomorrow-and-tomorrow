@@ -31,6 +31,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"caps": _render_caps(section,block)
 			"actions": _render_actions(section,block)
 			"order": _render_order(section,block)
+			"image": _render_image(section,block)
 			_: _render_text(section,block)
 
 
@@ -195,6 +196,16 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 		var inner:=HBoxContainer.new()
 		inner.add_theme_constant_override("separation",10)
 		row.add_child(inner)
+		var icon_variant:Variant=item.get("icon")
+		if icon_variant is Texture2D:
+			var icon_rect:=TextureRect.new()
+			icon_rect.texture=icon_variant
+			icon_rect.custom_minimum_size=Vector2(24,24)
+			icon_rect.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+			icon_rect.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon_rect.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+			icon_rect.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			inner.add_child(icon_rect)
 		var text_column:=VBoxContainer.new()
 		text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		text_column.add_theme_constant_override("separation",1)
@@ -206,6 +217,10 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 			var sub_label:=Tokens.make_label(String(item.sub),11,Tokens.MUTED)
 			sub_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 			text_column.add_child(sub_label)
+		if String(item.get("detail",""))!="":
+			var detail_label:=Tokens.make_label(String(item.detail),11,Tokens.TEXT_SOFT)
+			detail_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			text_column.add_child(detail_label)
 		if String(item.get("value",""))!="":
 			var value_label:=Tokens.make_label(String(item.value),12,item.get("value_color",Tokens.BODY_2))
 			value_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
@@ -299,6 +314,26 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		var action:Variant=item.get("on_press")
 		if action is Callable and not disabled:
 			button.pressed.connect(action)
+
+
+static func _render_image(parent:VBoxContainer,block:Dictionary)->void:
+	## An illustration plate (landmark art, future portraits). Falls back to
+	## quiet text while the referenced image has not been produced yet.
+	var path:=String(block.get("path",""))
+	if path=="" or not ResourceLoader.exists(path):
+		if String(block.get("fallback",""))!="":
+			var fallback:=Tokens.make_label(String(block.fallback),11,Tokens.MUTED)
+			fallback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			parent.add_child(fallback)
+		return
+	var frame:=TextureRect.new()
+	frame.texture=load(path)
+	frame.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	frame.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	frame.custom_minimum_size=Vector2(0,216)
+	frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	frame.tooltip_text=String(block.get("tip",""))
+	parent.add_child(frame)
 
 
 static func _render_text(parent:VBoxContainer,block:Dictionary)->void:

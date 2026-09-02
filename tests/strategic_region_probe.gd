@@ -3,7 +3,7 @@ extends Node
 func _ready()->void:
 	_run_shape_audit()
 	_run_capture_and_recapture_loop()
-	print("STRATEGIC_REGION_PASS regions=",CivilizationSystem.MAX_RIVAL_CIVILIZATIONS*CivilizationSystem.STRATEGIC_REGIONS_PER_CIV," occupation_forces=",MilitaryCampaign.occupation_forces.size())
+	print("STRATEGIC_REGION_PASS regions=",CivilizationSystem.civilizations.size()*CivilizationSystem.STRATEGIC_REGIONS_PER_CIV," occupation_forces=",MilitaryCampaign.occupation_forces.size())
 	get_tree().quit()
 
 

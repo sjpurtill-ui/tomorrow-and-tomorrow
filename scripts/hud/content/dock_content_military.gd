@@ -111,6 +111,16 @@ func _formation_blocks(army:Dictionary)->Array:
 		blocks.append({"type":"text","heading":"HOME FORCE","text":"No trained formations are at home. Train an army build to create them."})
 	else:
 		blocks.append({"type":"rows","heading":"HOME FORCE","note":"trained cohorts","items":formation_items})
+	var releasable:=maxi(0,int(army.get("troops",0)))+maxi(0,MilitaryCampaign.aggregate_recruits)
+	if releasable>0:
+		blocks.append({"type":"actions","items":[
+			{"label":"STAND DOWN 10","sub":"release to labor",
+			"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.demobilize(10)),
+			"tip":"Return up to 10 recruits or home troops to the civilian labor pool; their equipment goes back to stores"},
+			{"label":"STAND DOWN ALL","sub":"disband the home force",
+			"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.demobilize(releasable)),
+			"tip":"Return every recruit and home formation to the civilian labor pool; equipment goes back to stores. Field armies are untouched."},
+		]})
 	var defense:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
 	blocks.append({"type":"tiles","heading":"SETTLEMENT DEFENSE","items":[
 		{"label":"WORKS","value":String(defense.get("short","Open ground")),"note":"integrity %d%%" % roundi(float(defense.get("integrity",0.0))*100.0),"note_color":Tokens.RED if float(defense.get("integrity",0.0))<0.4 else Tokens.MUTED,"tip":String(defense.get("description",""))},
@@ -125,7 +135,7 @@ func _formation_blocks(army:Dictionary)->Array:
 func _builds_blocks(capabilities:Dictionary)->Array:
 	var blocks:Array=[]
 	var snapshot:Dictionary=MilitaryCampaign.army_template_snapshot()
-	blocks.append({"type":"text","text":"A build is a reusable army design. Add cohorts, TRAIN the build as one order (recruits are raised automatically), then DEPLOY it as a field army. Recruit reserve: %d." % int(snapshot.get("recruit_reserve",0))})
+	blocks.append({"type":"text","text":"A build is a reusable army design. Add cohorts, TRAIN the build as one order (recruits are raised automatically), then DEPLOY it as a field army. Recruit reserve: %d · mobilization %d of %d capacity." % [int(snapshot.get("recruit_reserve",0)),MilitaryCampaign._mobilized_count(),int(capabilities.get("recruitment_capacity",0))]})
 	var units:Dictionary=capabilities.get("units",{})
 	var unit_equipment:Dictionary=capabilities.get("unit_equipment",{})
 	for template_variant in (snapshot.get("templates",[]) as Array):
@@ -142,8 +152,8 @@ func _builds_blocks(capabilities:Dictionary)->Array:
 				"pct":"%d ready" % int(entry.get("ready",0)),
 				"color":UNIT_COLORS.get(unit,Tokens.MUTED),
 				"tip":"%d ready at home · %d in training · target %d" % [int(entry.get("ready",0)),int(entry.get("in_training",0)),int(entry.get("count",0))],
-				"on_minus":func()->void: MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,-10),
-				"on_plus":func()->void: MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,10),
+				"on_minus":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,-10)),
+				"on_plus":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,10)),
 			})
 		var deployable:=bool(template.get("deployable",false))
 		var ready_note:="%d of %d trained" % [int(template.get("ready_total",0)),int(template.get("required_total",0))]
@@ -178,7 +188,7 @@ func _builds_blocks(capabilities:Dictionary)->Array:
 			added+=1
 			command_items.append({
 				"label":"+10 %s" % _unit_label(unit_id).to_upper(),"sub":weapon_id.replace("_"," "),
-				"on_press":func()->void: MilitaryCampaign.adjust_template_entry(template_id,unit_id,weapon_id,10),
+				"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit_id,weapon_id,10)),
 				"tip":"Add a %s cohort to this build" % _unit_label(unit_id),
 			})
 		blocks.append({"type":"actions","items":command_items})

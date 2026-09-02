@@ -127,11 +127,17 @@ func _council_blocks()->Array:
 			var response:Dictionary=response_variant
 			var label:=String(response.get("label",""))
 			if label=="": continue
+			# Every response carries its authored consequence line; a decision the
+			# player cannot price is not a decision.
+			var ripple:=String(response.get("ripple",response.get("hint","")))
+			var effect_id:=String(response.get("effect",""))
+			var duration_days:=roundi(float(response.get("days",0.0)))
+			var enacts:="Enacts the %s policy for %d days." % [effect_id.replace("_"," "),duration_days] if effect_id!="" else "No standing policy is enacted."
 			response_items.append({
-				"label":label.to_upper(),"sub":String(response.get("hint","")),
-				"primary":String(response.get("effect",""))!="",
+				"label":label.to_upper(),"sub":ripple,
+				"primary":effect_id!="",
 				"on_press":AdvisorSystem.respond_to_council_item.bind(item_id,label),
-				"tip":String(response.get("hint","Choose this response")),
+				"tip":"%s\n%s" % [ripple,enacts] if ripple!="" else enacts,
 			})
 		if not response_items.is_empty():
 			blocks.append({"type":"actions","items":response_items})

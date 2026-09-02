@@ -114,9 +114,10 @@ func test_mature_rivals_unlock_the_same_bounded_modern_organizational_families()
 func test_architecture_is_derived_from_values_without_per_building_state()->void:
 	var inquiry:=MODEL.architecture_snapshot(MODEL.initial_state("inquiry",8,"a"))
 	var defense:=MODEL.architecture_snapshot(MODEL.initial_state("defense",8,"b"))
-	assert_int(inquiry.size()).is_equal(6)
+	assert_int(inquiry.size()).is_equal(11)
 	assert_float(float(defense.axiality)).is_greater(float(inquiry.axiality))
 	assert_float(float(inquiry.permeability)).is_greater(float(defense.permeability))
+	assert_float(float(inquiry.inquiry_openness)).is_greater(float(defense.inquiry_openness))
 
 
 func test_compact_save_round_trip_rebuilds_derived_identity_and_institutions()->void:

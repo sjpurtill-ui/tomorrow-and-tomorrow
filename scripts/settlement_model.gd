@@ -13,7 +13,9 @@ const MAX_PLAYER_SETTLEMENTS:=256
 const SETTLEMENT_BORDER_VERTICES:=32
 const MAX_TERRITORY_ACCESS_AXES:=8
 const MAX_OCCUPIED_STRATEGIC_REGIONS:=40
+const MAX_BATTLE_DAMAGED_PLOTS:=24
 const SETTLEMENT_CONVOY_KM_PER_DAY:=16.0
+const COASTAL_CONTEXT_FIELDS:=["shoreline_access","marine_opportunity","salt_opportunity","storm_exposure","erosion_exposure","open_water_exposure"]
 
 func reset_for_new_world()->void:
 	# All authoritative data lives in GameState and is reset atomically there.
@@ -81,8 +83,18 @@ func _vector2_value(value:Variant)->Vector2:
 
 func _sanitized_territory_context(context:Dictionary,previous:Dictionary={})->Dictionary:
 	var sanitized:=previous.duplicate(true)
-	for key in ["terrain_permeability","water_access","work_access","travel_access"]:
+	for key in ["terrain_permeability","water_access","work_access","travel_access"]+COASTAL_CONTEXT_FIELDS:
 		if context.has(key): sanitized[key]=clampf(float(context.get(key,0.0)),0.0,1.0)
+	# Shore bearing and distance are geographic evidence rather than capacities. Keep
+	# them separately from the normalized coastal fields so the playfield can put a
+	# waterfront on the actual seaward edge instead of assigning generic port art to
+	# an arbitrary city block.
+	if context.has("coast_direction"):
+		var coast_direction:=_vector2_value(context.get("coast_direction",Vector2.ZERO))
+		if coast_direction.length_squared()>0.000001:
+			sanitized["coast_direction"]=coast_direction.normalized()
+	if context.has("nearest_open_water_km"):
+		sanitized["nearest_open_water_km"]=clampf(float(context.get("nearest_open_water_km",INF)),0.0,1000.0)
 	if context.has("access_axes"):
 		var axes:Array[Dictionary]=[]
 		for axis_variant in context.get("access_axes",[]):
@@ -118,6 +130,35 @@ func _province_terrain_permeability()->float:
 	if "desert" in terrain: return 0.58
 	if "coast" in terrain: return 0.72
 	return 0.86
+
+
+func coastal_site_profile(record_or_context:Dictionary={})->Dictionary:
+	# Coast is an aggregate site condition, not a free harbor or a spawned resource.
+	# Immediate benefits represent shoreline gathering and near-shore food. Movement
+	# and trade remain locked behind broad, research-driven civilization capacities.
+	var context:Dictionary=record_or_context.get("territory_context",record_or_context)
+	var shoreline:=clampf(float(context.get("shoreline_access",0.0)),0.0,1.0)
+	var marine:=clampf(float(context.get("marine_opportunity",0.0)),0.0,1.0)*shoreline
+	var salt:=clampf(float(context.get("salt_opportunity",0.0)),0.0,1.0)*shoreline
+	var storm:=clampf(float(context.get("storm_exposure",0.0)),0.0,1.0)*shoreline
+	var erosion:=clampf(float(context.get("erosion_exposure",0.0)),0.0,1.0)*shoreline
+	var open_water:=clampf(float(context.get("open_water_exposure",0.0)),0.0,1.0)*shoreline
+	var infrastructure_tier:=clampi(int(ProgressionSystem.domain_tier("infrastructure")),0,8)
+	var logistics_tier:=clampi(int(ProgressionSystem.domain_tier("logistics")),0,8)
+	var knowledge_tier:=clampi(int(ProgressionSystem.domain_tier("knowledge")),0,8)
+	var movement_gate:=1.0 if infrastructure_tier>=2 and logistics_tier>=2 and knowledge_tier>=2 else 0.0
+	var trade_gate:=1.0 if infrastructure_tier>=3 and logistics_tier>=3 and knowledge_tier>=2 else 0.0
+	var exposure:=clampf(storm*0.62+erosion*0.38,0.0,1.0)
+	return {
+		"coastal":shoreline>0.05,"shoreline_access":shoreline,"marine_opportunity":marine,
+		"salt_opportunity":salt,"storm_exposure":storm,"erosion_exposure":erosion,
+		"open_water_exposure":open_water,"food_output_bonus":minf(0.08,shoreline*0.035+marine*0.045),
+		"foraging_bonus":minf(0.06,shoreline*0.025+marine*0.025+salt*0.010),
+		"maintenance_pressure":exposure*0.07,"claim_multiplier":1.0-exposure*0.06,
+		"maritime_movement_factor":shoreline*open_water*movement_gate,
+		"maritime_trade_factor":shoreline*open_water*trade_gate,
+		"movement_knowledge_ready":movement_gate>0.0,"trade_knowledge_ready":trade_gate>0.0
+	}
 
 func _territory_access_axes(record:Dictionary)->Array[Dictionary]:
 	var context:Dictionary=record.get("territory_context",{})
@@ -179,8 +220,10 @@ func _territory_drivers(record:Dictionary,population:float)->Dictionary:
 	var institutions:=clampf(float(GameState.society_capacities.get("institutions",0.25))+DiscoverySystem.effect("state_capacity"),0.0,1.0)
 	var population_pressure:=clampf(log(maxf(1.0,population)+1.0)/log(1_000_000_001.0),0.0,1.0)
 	var maturity:=clampf(sqrt(float(age_days)/1825.0),0.0,1.0)
-	var support:=clampf(population_pressure*0.22+work*0.18+travel*0.19+terrain*0.12+water*0.10+logistics*0.10+institutions*0.09,0.0,1.0)
-	return {"population":population_pressure,"work":work,"travel":travel,"terrain":terrain,"water":water,"logistics":logistics,"institutions":institutions,"maturity":maturity,"support":support,"access_axes":_territory_access_axes(record)}
+	var coast:=coastal_site_profile(record)
+	travel=maxf(travel,float(coast.maritime_movement_factor)*0.34)
+	var support:=clampf(population_pressure*0.22+work*0.18+travel*0.19+terrain*0.12+water*0.10+logistics*0.10+institutions*0.09-float(coast.maintenance_pressure)*0.25,0.0,1.0)
+	return {"population":population_pressure,"work":work,"travel":travel,"terrain":terrain,"water":water,"logistics":logistics,"institutions":institutions,"maturity":maturity,"support":support,"access_axes":_territory_access_axes(record),"coastal_site":coast}
 
 func _committed_satellite_share(include_convoy:=true)->float:
 	var share:=0.0
@@ -237,6 +280,8 @@ func _base_claim_radius_km(record:Dictionary,population:float)->float:
 	if bool(record.get("primary",false)):
 		worked_area_km2+=float(GameState.settlement_completed.size())*0.045+float(GameState.settlement_routes.size())*0.0015
 	var radius:=sqrt(maxf(0.12,worked_area_km2)/PI)
+	var coast:=coastal_site_profile(record)
+	radius*=float(coast.claim_multiplier)
 	if bool(record.get("primary",false)):
 		var fabric_extent:=0.0
 		for plot in GameState.settlement_plots:
@@ -298,6 +343,7 @@ func settlement_network_snapshot()->Dictionary:
 		record["controlled_area_km2"]=_polygon_area_km2(boundary)
 		record["boundary"]=boundary
 		record["territory_drivers"]=drivers
+		record["intrinsic_site"]=coastal_site_profile(record)
 		if bool(record.get("primary",false)): record["name"]=_primary_settlement_name()
 		public_settlements.append(record)
 	return {
@@ -2172,21 +2218,63 @@ func plots_for_lod(lod:int)->Array[Dictionary]:
 func apply_plot_damage(plot_id:int,severity:float,cause:String)->Dictionary:
 	for plot in GameState.settlement_plots:
 		if int(plot.get("id",-1))!=plot_id: continue
-		var bounded:=clampf(severity,0.0,1.0)
-		plot["pre_damage_use"]=String(plot.get("land_use",""))
-		plot["condition"]=clampf(float(plot.get("condition",1.0))-bounded,0.0,1.0)
-		plot["damaged_day"]=int(floor(GameState.elapsed_days))
-		var damage:Dictionary=plot.get("damage",{}).duplicate(true)
-		var channel:="fire" if "fire" in cause.to_lower() else "structural"
-		damage[channel]=clampf(float(damage.get(channel,0.0))+bounded,0.0,1.0)
-		plot["damage"]=damage
-		plot["status"]="ruin" if float(plot.condition)<0.20 else "damaged"
-		plot["repair_state"]="unrepairable" if String(plot.status)=="ruin" else "awaiting_assessment"
-		GameState.settlement_plot_history.append({"day":int(floor(GameState.elapsed_days)),"plot_id":plot_id,"event":"damage","new_state":plot.status,"cause":cause})
+		_apply_damage_to_plot_record(plot,clampf(severity,0.0,1.0),cause)
+		_record_plot_damage_history(plot,cause)
 		GameState.morphology_revision+=1
 		rebuild_summary()
 		return plot
 	return {}
+
+
+func apply_bounded_siege_damage(seed:int,severity:float,extent_share:float,cause:String)->Array[int]:
+	# A battle damages a coherent part of the persistent aggregate fabric. It never
+	# spawns one record per building: even a billion-person megalopolis changes at most
+	# this fixed number of already-simulated plots in one engagement.
+	var eligible:Array[Dictionary]=[]
+	for plot in GameState.settlement_plots:
+		if String(plot.get("status","active")) in ["vacant","ruin","reclaimed"]: continue
+		if String(plot.get("land_use","")) in ["field","pasture","water","waste"]: continue
+		eligible.append(plot)
+	if eligible.is_empty(): return []
+	var epicenter:Vector2=Vector2(eligible[posmod(seed,eligible.size())].get("centroid",Vector2.ZERO))
+	eligible.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var a_distance:=Vector2(a.get("centroid",Vector2.ZERO)).distance_squared_to(epicenter)
+		var b_distance:=Vector2(b.get("centroid",Vector2.ZERO)).distance_squared_to(epicenter)
+		if not is_equal_approx(a_distance,b_distance): return a_distance<b_distance
+		return posmod(int(a.get("id",0))^seed,2147483647)<posmod(int(b.get("id",0))^seed,2147483647)
+	)
+	var affected_count:=clampi(ceili(float(eligible.size())*clampf(extent_share,0.01,1.0)),1,mini(MAX_BATTLE_DAMAGED_PLOTS,eligible.size()))
+	var bounded_severity:=clampf(severity,0.0,1.0)
+	var affected:Array[int]=[]
+	for index in affected_count:
+		var plot:Dictionary=eligible[index]
+		var falloff:=lerpf(1.0,0.38,float(index)/maxf(1.0,float(affected_count-1)))
+		_apply_damage_to_plot_record(plot,bounded_severity*falloff,cause)
+		_record_plot_damage_history(plot,cause)
+		affected.append(int(plot.get("id",-1)))
+	if not affected.is_empty():
+		GameState.morphology_revision+=1
+		if GameState.settlement_plot_history.size()>MAX_PLOT_HISTORY:
+			GameState.settlement_plot_history=GameState.settlement_plot_history.slice(GameState.settlement_plot_history.size()-MAX_PLOT_HISTORY)
+		rebuild_summary()
+	return affected
+
+
+func _apply_damage_to_plot_record(plot:Dictionary,severity:float,cause:String)->void:
+	var bounded:=clampf(severity,0.0,1.0)
+	if String(plot.get("pre_damage_use",""))=="": plot["pre_damage_use"]=String(plot.get("land_use",""))
+	plot["condition"]=clampf(float(plot.get("condition",1.0))-bounded,0.0,1.0)
+	plot["damaged_day"]=int(floor(GameState.elapsed_days))
+	var damage:Dictionary=plot.get("damage",{}).duplicate(true)
+	var channel:="fire" if "fire" in cause.to_lower() else "structural"
+	damage[channel]=clampf(float(damage.get(channel,0.0))+bounded,0.0,1.0)
+	plot["damage"]=damage
+	plot["status"]="ruin" if float(plot.condition)<0.20 else "damaged"
+	plot["repair_state"]="unrepairable" if String(plot.status)=="ruin" else "awaiting_assessment"
+
+
+func _record_plot_damage_history(plot:Dictionary,cause:String)->void:
+	GameState.settlement_plot_history.append({"day":int(floor(GameState.elapsed_days)),"plot_id":int(plot.get("id",-1)),"event":"damage","new_state":plot.status,"cause":cause})
 
 func apply_area_damage(center_km:Vector2,radius_km:float,severity:float,cause:String)->Array[int]:
 	var affected:Array[int]=[]

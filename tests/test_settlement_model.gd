@@ -75,6 +75,58 @@ func test_initial_extent_is_human_scale()->void:
 	var extent:=maxf(maximum.x-minimum.x,maximum.y-minimum.y)
 	assert_float(extent).is_between(0.10,0.22)
 
+
+func test_coastal_site_advantage_is_modest_intrinsic_and_exposure_has_a_cost()->void:
+	var previous_levels:=ProgressionSystem.domain_levels.duplicate(true)
+	for domain in ["infrastructure","logistics","knowledge"]: ProgressionSystem.domain_levels[domain]=0
+	var coast:Dictionary=model.coastal_site_profile({
+		"shoreline_access":1.0,"marine_opportunity":0.9,"salt_opportunity":0.8,
+		"storm_exposure":0.7,"erosion_exposure":0.6,"open_water_exposure":0.9
+	})
+	assert_bool(bool(coast.coastal)).is_true()
+	assert_float(float(coast.food_output_bonus)).is_between(0.01,0.08)
+	assert_float(float(coast.foraging_bonus)).is_between(0.01,0.06)
+	assert_float(float(coast.maintenance_pressure)).is_greater(0.0)
+	assert_float(float(coast.claim_multiplier)).is_less(1.0)
+	assert_float(float(coast.maritime_movement_factor)).is_equal(0.0)
+	assert_float(float(coast.maritime_trade_factor)).is_equal(0.0)
+	ProgressionSystem.domain_levels=previous_levels
+
+
+func test_coastal_maritime_reach_remains_research_gated()->void:
+	var context:={"shoreline_access":1.0,"marine_opportunity":1.0,"open_water_exposure":1.0}
+	var previous_levels:=ProgressionSystem.domain_levels.duplicate(true)
+	ProgressionSystem.domain_levels["infrastructure"]=2
+	ProgressionSystem.domain_levels["logistics"]=2
+	ProgressionSystem.domain_levels["knowledge"]=2
+	var movement:Dictionary=model.coastal_site_profile(context)
+	assert_bool(bool(movement.movement_knowledge_ready)).is_true()
+	assert_bool(bool(movement.trade_knowledge_ready)).is_false()
+	assert_float(float(movement.maritime_movement_factor)).is_greater(0.0)
+	ProgressionSystem.domain_levels["infrastructure"]=3
+	ProgressionSystem.domain_levels["logistics"]=3
+	var trade:Dictionary=model.coastal_site_profile(context)
+	assert_bool(bool(trade.trade_knowledge_ready)).is_true()
+	assert_float(float(trade.maritime_trade_factor)).is_greater(0.0)
+	ProgressionSystem.domain_levels=previous_levels
+
+
+func test_inland_settlement_receives_no_coastal_bonus()->void:
+	var inland:Dictionary=model.coastal_site_profile({})
+	assert_bool(bool(inland.coastal)).is_false()
+	assert_float(float(inland.food_output_bonus)).is_equal(0.0)
+	assert_float(float(inland.foraging_bonus)).is_equal(0.0)
+
+
+func test_coastal_geography_keeps_real_shore_bearing_and_distance()->void:
+	var sanitized:Dictionary=model._sanitized_territory_context({
+		"shoreline_access":0.9,"coast_direction":Vector2(3.0,-4.0),
+		"nearest_open_water_km":2.75
+	})
+	assert_float(Vector2(sanitized.coast_direction).x).is_equal_approx(0.6,0.0001)
+	assert_float(Vector2(sanitized.coast_direction).y).is_equal_approx(-0.8,0.0001)
+	assert_float(float(sanitized.nearest_open_water_km)).is_equal_approx(2.75,0.0001)
+
 func test_settlement_border_is_bounded_irregular_and_expands_with_supported_population()->void:
 	var initial:Dictionary=model.settlement_network_snapshot()
 	assert_int(int(initial.count)).is_equal(1)
@@ -266,6 +318,23 @@ func test_damage_and_abandonment_persist_without_erasing_lineage()->void:
 	assert_str(String(GameState.settlement_plots[0].status)).is_equal("vacant")
 	assert_array(GameState.settlement_plots[0].polygon).is_equal(polygon)
 	assert_int(GameState.settlement_plot_history.size()).is_greater(GameState.settlement_plots.size())
+
+
+func test_siege_damage_changes_one_bounded_contiguous_aggregate_area()->void:
+	var original_count:=GameState.settlement_plots.size()
+	var affected:Array[int]=model.apply_bounded_siege_damage(9413,0.32,0.48,"home siege combat")
+	assert_int(affected.size()).is_between(1,mini(model.MAX_BATTLE_DAMAGED_PLOTS,original_count))
+	assert_int(GameState.settlement_plots.size()).is_equal(original_count)
+	var affected_centers:Array[Vector2]=[]
+	for plot in GameState.settlement_plots:
+		if int(plot.get("id",-1)) not in affected: continue
+		assert_bool(String(plot.get("status","")) in ["damaged","ruin"]).is_true()
+		affected_centers.append(Vector2(plot.get("centroid",Vector2.ZERO)))
+	var maximum_span:=0.0
+	for a in affected_centers:
+		for b in affected_centers: maximum_span=maxf(maximum_span,a.distance_to(b))
+	assert_float(maximum_span).is_less(0.20)
+	assert_array(model.validate_state()).is_empty()
 
 func test_population_alone_cannot_create_a_town()->void:
 	GameState.ensure_population_total(5000)

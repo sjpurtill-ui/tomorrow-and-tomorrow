@@ -39,6 +39,37 @@ func test_subcategory_strength_changes_that_real_subcategory()->void:
 	assert_float(model.leadership_subcategory_effect("health","Water & sanitation")).is_less(0.0)
 
 
+func _institution(doctrine:String)->Dictionary:
+	return {"name":"Test Institution","doctrine":doctrine,"dynamic_profile":{},"subcategory_profile":{}}
+
+func test_directive_doctrine_runs_on_legitimacy()->void:
+	GameState.leadership_positions={"Steward":_institution("directive")}
+	GameState.simulation_metrics["legitimacy"]=0.85
+	var strong:float=model.leadership_effect("demography")
+	GameState.simulation_metrics["legitimacy"]=0.10
+	var collapsed:float=model.leadership_effect("demography")
+	assert_float(strong).is_greater(0.0)
+	assert_float(collapsed).is_less(0.0)
+
+func test_federated_doctrine_scales_with_settlements()->void:
+	GameState.leadership_positions={"Steward":_institution("federated")}
+	GameState.player_settlements=[]
+	var alone:float=model.leadership_effect("demography")
+	GameState.player_settlements=[{"position":Vector2.ZERO},{"position":Vector2(2,0)},{"position":Vector2(0,3)}]
+	var federated:float=model.leadership_effect("demography")
+	assert_float(alone).is_greater(0.0)
+	assert_float(federated).is_greater(alone)
+
+func test_no_doctrine_is_best_in_every_condition()->void:
+	GameState.simulation_metrics["legitimacy"]=0.95
+	assert_float(model.doctrine_execution_strength("directive")).is_greater(model.doctrine_execution_strength("measured"))
+	GameState.simulation_metrics["legitimacy"]=0.20
+	assert_float(model.doctrine_execution_strength("measured")).is_greater(model.doctrine_execution_strength("directive"))
+
+func test_directive_doctrine_erodes_council_culture()->void:
+	GameState.leadership_positions={"Steward":_institution("directive")}
+	assert_float(model.leadership_effect("culture")).is_less(0.0)
+
 func test_catalog_validation_rejects_dependency_cycles()->void:
 	var cyclic_catalog:Array[Dictionary]=[
 		{"id":"watch","requires":["drill"],"effects":{"warfare_readiness":0.01}},

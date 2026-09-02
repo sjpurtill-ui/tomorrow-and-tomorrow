@@ -132,6 +132,14 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 	var children:=float(GameState.population_cohorts.get("children",roundi(total*0.32)))
 	var elders:=float(GameState.population_cohorts.get("elders",roundi(total*0.08)))
 	var adults:=maxf(0.0,total-children-elders)
+	# Mission parties (scouts, envoys, convoys) took their full travel rations
+	# at departure; while away they are not mouths at the home fires. Without
+	# this the settlement pays for them twice.
+	var civilization_system:=get_node_or_null("/root/CivilizationSystem")
+	var away_adults:=0.0
+	if civilization_system!=null and civilization_system.has_method("mission_absent_personnel"):
+		away_adults=clampf(float(civilization_system.mission_absent_personnel()),0.0,adults)
+	adults-=away_adults
 	# Children are a full 0–13 cohort, including infancy; its weighted average
 	# is lower than the need of an older child. These are adult-equivalent rations.
 	var children_base:=children*0.60
@@ -142,6 +150,9 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 	var extras:={"Food":0.17,"Extraction":0.18,"Construction":0.18,"Defense":0.12,"Survey":0.13,"Logistics":0.14,"Crafting":0.08,"Knowledge":0.04,"Administration":0.04}
 	for role in GameState.POPULATION_ROLES:
 		labor+=float(GameState.population_allocations.get(role,0))*float(extras.get(role,0.02))
+	# Role allocations still count mission-absent people; their exertion ration
+	# travels with them, so scale the home labor surcharge down proportionally.
+	labor*=1.0-clampf(away_adults/maxf(1.0,float(GameState.able_population())),0.0,0.45)
 	var pregnancy:=float(GameState.estimated_active_pregnancies())*0.12
 	var lactation:=total*0.012*0.21
 	var season_wave:=sin(fmod(GameState.elapsed_days,365.0)/365.0*TAU)
@@ -157,12 +168,11 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 		if military_campaign.has_method("field_army_active_personnel"): field_personnel+=maxi(0,int(military_campaign.field_army_active_personnel()))
 		if military_campaign.has_method("occupation_active_personnel"): field_personnel+=maxi(0,int(military_campaign.occupation_active_personnel()))
 		army_field=float(field_personnel)*(1.12+(0.12 if traveling else 0.0)+maxf(0.0,-season_wave)*0.06)
-	var civilization_system:=get_node_or_null("/root/CivilizationSystem")
 	if civilization_system!=null and civilization_system.has_method("player_effects"):
 		occupation_relief=maxf(0.0,float(civilization_system.player_effects().get("occupation_relief_demand",0.0)))
 	var ration_factor:=1.0+_policy_effect("food_demand")
 	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoners
-	return {"base":base,"children":children_base,"adults":adult_base,"elders":elder_base,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,"travel":travel,"climate":climate,"prisoner_custody":prisoners,"army_field":minf(pre_ration,army_field*ration_factor),"occupation_relief":occupation_relief,"rationing":pre_ration*(1.0-ration_factor),"total":pre_ration*ration_factor+occupation_relief}
+	return {"base":base,"children":children_base,"adults":adult_base,"elders":elder_base,"mission_absent":away_adults,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,"travel":travel,"climate":climate,"prisoner_custody":prisoners,"army_field":minf(pre_ration,army_field*ration_factor),"occupation_relief":occupation_relief,"rationing":pre_ration*(1.0-ration_factor),"total":pre_ration*ration_factor+occupation_relief}
 
 func _age_need(age: float) -> float:
 	if age<0.5: return 0.08 # represented mostly through lactation demand
@@ -185,7 +195,9 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 		result["Dry staples"]=occupation_transfer
 		return result
 	var access:=_food_resource_access()
-	var fishing_weight:=0.16 if float(access.freshwater)>0.0 else 0.0
+	var coastal:=_coastal_food_profile(traveling)
+	var coastal_fishing_weight:=float(coastal.shoreline_access)*0.07+float(coastal.marine_opportunity)*0.05
+	var fishing_weight:=maxf(0.16 if float(access.freshwater)>0.0 else 0.0,coastal_fishing_weight)
 	var cultivation_weight:=0.0
 	if "seed_selection" in GameState.known_discoveries and GameState.settlement_site_committed:
 		cultivation_weight=(0.34+float(access.fertile)*0.10)*maxf(0.05,DiscoverySystem.adoption("seed_selection"))
@@ -211,13 +223,24 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	rng.seed=GameState.world_seed^int(GameState.elapsed_days+1.0)*7919
 	var variation:=rng.randf_range(0.93,1.07)
 	var route_factor:=0.48+clampf(float(GameState.population_allocations.get("Logistics",0))/maxf(1.0,GameState.population_exact*0.08),0.0,1.0)*0.08 if traveling else 1.0
-	result["Fresh plants"]=workers*gathering_weight*4.55*terrain_gather*plant_season*efficiency*ecological*float(GameState.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor
+	result["Fresh plants"]=workers*gathering_weight*4.55*terrain_gather*plant_season*efficiency*ecological*float(GameState.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor*(1.0+float(coastal.foraging_bonus))
 	result["Fresh meat"]=workers*hunting_weight*4.85*terrain_hunt*game_season*efficiency*ecological*float(GameState.food_source_health.get("Hunting",0.9))*(1.0+float(access.game)*0.18)*(1.0+DiscoverySystem.effect("hunting_yield"))*practice*variation*route_factor
-	result["Fish"]=workers*fishing_weight*5.00*fish_season*efficiency*float(GameState.food_source_health.get("Fishing",0.9))*(0.82+float(access.freshwater)*0.28)*practice*variation*route_factor
+	var fishing_access:=maxf(float(access.freshwater),float(coastal.marine_opportunity)*0.90)
+	result["Fish"]=workers*fishing_weight*5.00*fish_season*efficiency*float(GameState.food_source_health.get("Fishing",0.9))*(0.82+fishing_access*0.28)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))
 	if cultivation_weight>0.0 and not traveling:
 		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(GameState.food_source_health.get("Cultivation",0.9))*(0.82+float(access.fertile)*0.30)*(1.0+DiscoverySystem.effect("soil_productivity")+DiscoverySystem.effect("cultivation_yield"))*variation
 	result["Dry staples"]+=occupation_transfer
 	return result
+
+
+func _coastal_food_profile(traveling:bool)->Dictionary:
+	var empty:={"shoreline_access":0.0,"marine_opportunity":0.0,"food_output_bonus":0.0,"foraging_bonus":0.0}
+	if traveling or not GameState.settlement_site_committed: return empty
+	for settlement_variant in GameState.player_settlements:
+		var settlement:Dictionary=settlement_variant
+		if bool(settlement.get("primary",false)):
+			return SettlementModel.coastal_site_profile(settlement)
+	return empty
 
 func _food_resource_access() -> Dictionary:
 	var result:={"game":0.0,"freshwater":0.0,"fertile":0.0}

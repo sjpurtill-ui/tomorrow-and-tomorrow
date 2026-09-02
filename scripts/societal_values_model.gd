@@ -573,5 +573,13 @@ static func _derive_architecture(state:Dictionary)->Dictionary:
 		"civic_space":clampf(float(values.collective_obligation)*0.42+float(values.common_stewardship)*0.38+float(values.pluralism)*0.20,0.0,1.0),
 		"permeability":clampf(float(values.openness)*0.62+float(values.pluralism)*0.38,0.0,1.0),
 		"defensive_depth":clampf((1.0-float(values.openness))*0.46+float(values.centralization)*0.32+float(values.hierarchy)*0.22,0.0,1.0),
-		"terrain_conformity":clampf(float(values.ecological_restraint)*0.78+(1.0-float(values.centralization))*0.22,0.0,1.0)
+		"terrain_conformity":clampf(float(values.ecological_restraint)*0.78+(1.0-float(values.centralization))*0.22,0.0,1.0),
+		# These five bounded practices keep different social priorities visible at
+		# Google-Earth scale. They are derived from the same aggregate lived values,
+		# not from founding-focus labels, so architecture changes as the society does.
+		"productive_order":clampf(float(values.common_stewardship)*0.44+float(values.ecological_restraint)*0.32+float(values.collective_obligation)*0.24,0.0,1.0),
+		"lineage_clustering":clampf((1.0-float(values.experimentation))*0.36+float(values.restorative_justice)*0.30+float(values.collective_obligation)*0.24+(1.0-float(values.achieved_status))*0.10,0.0,1.0),
+		"inquiry_openness":clampf(float(values.experimentation)*0.40+float(values.pluralism)*0.25+float(values.openness)*0.20+float(values.achieved_status)*0.15,0.0,1.0),
+		"industrial_intensity":clampf(float(values.achieved_status)*0.30+float(values.experimentation)*0.25+(1.0-float(values.ecological_restraint))*0.35+float(values.centralization)*0.10,0.0,1.0),
+		"exchange_network":clampf(float(values.openness)*0.42+float(values.pluralism)*0.22+float(values.achieved_status)*0.18+(1.0-float(values.centralization))*0.18,0.0,1.0)
 	}

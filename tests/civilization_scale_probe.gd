@@ -7,7 +7,8 @@ func _ready()->void:
 	GameState.settlement_completed=["Hearth Circle"]
 	GameState.resource_stockpiles={"Food":40_000_000_000.0,"Timber":5_000_000_000.0,"Stone":5_000_000_000.0}
 	CivilizationSystem.reset_for_new_world()
-	assert(CivilizationSystem.civilizations.size()==CivilizationSystem.MAX_RIVAL_CIVILIZATIONS)
+	var rival_count:=CivilizationSystem.civilizations.size()
+	assert(rival_count>=CivilizationSystem.MIN_RIVAL_CIVILIZATIONS and rival_count<=CivilizationSystem.MAX_RIVAL_CIVILIZATIONS)
 	for index in CivilizationSystem.civilizations.size():
 		var civ:Dictionary=CivilizationSystem.civilizations[index]
 		var scaled_population:=1_000_000_000.0+float(index)*125_000_000.0
@@ -19,7 +20,7 @@ func _ready()->void:
 			civ.strategic_regions[region_index]["population"]=scaled_population*float(civ.strategic_regions[region_index].population_share)
 		CivilizationSystem.civilizations[index]=civ
 	CivilizationSystem.advance_to_day(36_500)
-	assert(CivilizationSystem.civilizations.size()==CivilizationSystem.MAX_RIVAL_CIVILIZATIONS)
+	assert(CivilizationSystem.civilizations.size()==rival_count)
 	for civ in CivilizationSystem.civilizations: assert((civ.strategic_regions as Array).size()==CivilizationSystem.STRATEGIC_REGIONS_PER_CIV)
 	var ai_wars:=0
 	var ai_trade_pairs:=0
@@ -83,10 +84,10 @@ func _ready()->void:
 	var retreat:=MilitaryCampaign.advance_engagement("retreat")
 	assert(not retreat.has("error"))
 	var competition:=CivilizationSystem.competition_snapshot()
-	assert((competition.leaders as Array).size()==CivilizationSystem.MAX_RIVAL_CIVILIZATIONS+1)
-	assert(int(competition.player_rank)>=1 and int(competition.player_rank)<=CivilizationSystem.MAX_RIVAL_CIVILIZATIONS+1)
+	assert((competition.leaders as Array).size()==rival_count+1)
+	assert(int(competition.player_rank)>=1 and int(competition.player_rank)<=rival_count+1)
 	var exported:=CivilizationSystem.export_state()
-	assert(JSON.stringify(exported).length()<250_000)
+	assert(JSON.stringify(exported).length()<60_000+rival_count*30_000)
 	assert(bool(CivilizationSystem.import_state(exported).get("ok",false)))
-	print("CIVILIZATION_SCALE_PASS rivals=%d regions=%d ai_occupied=%d turns=%d active_ai_wars=%d historical_wars=%d ai_trade_pairs=%d player_rank=%d state_bytes=%d" % [CivilizationSystem.civilizations.size(),CivilizationSystem.MAX_RIVAL_CIVILIZATIONS*CivilizationSystem.STRATEGIC_REGIONS_PER_CIV,ai_controlled_regions,CivilizationSystem.turn_index,ai_wars,historical_wars,ai_trade_pairs,int(competition.player_rank),JSON.stringify(exported).length()])
+	print("CIVILIZATION_SCALE_PASS rivals=%d regions=%d ai_occupied=%d turns=%d active_ai_wars=%d historical_wars=%d ai_trade_pairs=%d player_rank=%d state_bytes=%d" % [rival_count,rival_count*CivilizationSystem.STRATEGIC_REGIONS_PER_CIV,ai_controlled_regions,CivilizationSystem.turn_index,ai_wars,historical_wars,ai_trade_pairs,int(competition.player_rank),JSON.stringify(exported).length()])
 	get_tree().quit(0)

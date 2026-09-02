@@ -25,6 +25,32 @@ func _stage_population(stage:String)->int:
 	}.get(stage,500000)
 
 
+func _find_coastal_audit_position(renderer:Node3D,origin:Vector3)->Vector3:
+	# Find a true land/water edge without changing the authored terrain. The coarse
+	# march ignores narrow rivers; the open-water checks favor an ocean or large lake.
+	for bearing_index in 24:
+		var direction:=Vector2.from_angle(TAU*float(bearing_index)/24.0)
+		var side:=Vector2(-direction.y,direction.x)
+		var last_land:=Vector2(origin.x,origin.z)
+		for distance_index in 160:
+			var distance:=50.0*float(distance_index+1)
+			var sample:=Vector2(origin.x,origin.z)+direction*distance
+			if renderer._height_at(sample.x,sample.y)>renderer.SEA_LEVEL+0.015:
+				last_land=sample
+				continue
+			var broad_water:bool=renderer._height_at((sample+direction*12.0+side*6.0).x,(sample+direction*12.0+side*6.0).y)<=renderer.SEA_LEVEL+0.015 and renderer._height_at((sample+direction*12.0-side*6.0).x,(sample+direction*12.0-side*6.0).y)<=renderer.SEA_LEVEL+0.015
+			if not broad_water: continue
+			var land_edge:=last_land
+			var water_edge:=sample
+			for unused in 12:
+				var midpoint:=land_edge.lerp(water_edge,0.5)
+				if renderer._height_at(midpoint.x,midpoint.y)>renderer.SEA_LEVEL+0.015: land_edge=midpoint
+				else: water_edge=midpoint
+			var inland:=land_edge-direction*0.45
+			return Vector3(inland.x,renderer._height_at(inland.x,inland.y),inland.y)
+	return origin
+
+
 func _build_ground(renderer:Node3D,center:Vector3,span:float)->MeshInstance3D:
 	var resolution:=161
 	var surface:=SurfaceTool.new()
@@ -78,7 +104,7 @@ func _multimesh_audit(node:Node)->Dictionary:
 
 
 func _render_stage()->void:
-	var stage:=_argument("--stage=","city").strip_edges().to_lower()
+	var stage:=_argument("--stage=","city").strip_edges().to_lower().replace("_"," ")
 	if stage not in ["founding camp","hamlet","village","town","city","metropolis","megalopolis"]: stage="city"
 	var population:=maxi(1,int(_argument("--population=",str(_stage_population(stage)))))
 	var output_path:=_argument("--output=","user://settlement_stage_visual_audit.png")
@@ -96,14 +122,20 @@ func _render_stage()->void:
 	var fabric_lod:=clampi(int(_argument("--fabric-lod=","0" if stage in ["founding camp","hamlet","village"] else "1")),0,2)
 	var aerial_lod_argument:=_argument("--aerial-lod=","auto").strip_edges().to_lower()
 	var oblique_view:=_argument("--view=","aerial").strip_edges().to_lower()=="oblique"
+	var district_condition:=clampi(int(_argument("--district-condition=","-1")),-1,7)
+	var default_technology_tier:int=int({"founding camp":0,"hamlet":1,"village":2,"town":3,"city":4,"metropolis":6,"megalopolis":8}.get(stage,4))
+	var technology_tier:=clampi(int(_argument("--technology-tier=",str(default_technology_tier))),0,8)
+	var coastal_audit:=_argument("--coastal=","0")=="1"
 
 	GameState.reset_for_new_world(741991)
 	GameState.select_founding_focus(focus)
 	GameState.societal_values=VALUES.initial_state(focus,GameState.world_seed,"player")
 	GameState.settlement_name="Visual Audit"
 	GameState.ensure_population_total(population)
-	ProgressionSystem.domain_levels["infrastructure"]=8
-	ProgressionSystem.domain_levels["production"]=8
+	ProgressionSystem.domain_levels["infrastructure"]=technology_tier
+	ProgressionSystem.domain_levels["production"]=technology_tier
+	ProgressionSystem.domain_levels["logistics"]=technology_tier
+	ProgressionSystem.domain_levels["knowledge"]=technology_tier
 
 	var renderer:=RENDERER.new()
 	renderer._configure_seamless_world()
@@ -111,11 +143,15 @@ func _render_stage()->void:
 	renderer._configure_noise()
 	renderer._prepare_river_course()
 	var center:Vector3=renderer._find_camp_position()
+	if coastal_audit: center=_find_coastal_audit_position(renderer,center)
 	renderer.world_start_position=center
 	GameState.settlement_founded_at=center
 	GameState.settlement_site_committed=true
 	GameState.settlement_completed.append("Hearth Circle")
 	SettlementModel.ensure_founded()
+	if coastal_audit and not GameState.player_settlements.is_empty():
+		var coast_context:Dictionary=renderer._settlement_coastal_context(Vector2(center.x,center.z),0.78)
+		SettlementModel.set_settlement_territory_context(String(GameState.player_settlements[0].get("id","")),coast_context)
 	# Give post-camp audits the same persistent-ground conversion that play earns.
 	# The city silhouette is still forced for comparison, but the close fabric beneath
 	# it remains an actual founding morphology rather than a hand-authored prop.
@@ -154,6 +190,11 @@ func _render_stage()->void:
 				"id":99001+route_index,"kind":"engineered_audit_route","active":true,
 				"surface_tier":route_tier,"hierarchy":"regional_engineered"
 			})
+	# Monthly setup may legitimately re-evaluate progression. Restore the explicitly
+	# requested audit tier immediately before rendering so the screenshot compares the
+	# intended era instead of whichever bootstrap state completed last.
+	for domain in ["infrastructure","production","logistics","knowledge"]:
+		ProgressionSystem.domain_levels[domain]=technology_tier
 
 	var profile:Dictionary=renderer._settlement_expansion_visual_profile({
 		"classification":stage,"population":population,"stage_progress":0.0
@@ -177,6 +218,7 @@ func _render_stage()->void:
 	camera.make_current()
 	renderer.camera=camera
 	renderer.camera_target=center
+	renderer.district_condition_visual_override=district_condition
 	add_child(_build_ground(renderer,center,audit_extent*1.35))
 	var physical:=Node3D.new()
 	physical.name="AuditedUrbanSystem"
@@ -185,7 +227,7 @@ func _render_stage()->void:
 	var defense:Dictionary={"stage":defense_stage,"integrity":defense_integrity,"construction":{}}
 	if include_plots:
 		renderer._create_persistent_settlement_routes(center,GameState.settlement_routes,physical)
-		renderer._create_plot_fabric(center,GameState.settlement_plots,fabric_lod,physical,fabric_lod==0 and int(profile.get("stage",0))>=3)
+		renderer._create_plot_fabric(center,GameState.settlement_plots,fabric_lod,physical,fabric_lod==0)
 	renderer._create_settlement_stage_landscape(center,profile,GameState.settlement_plots,fabric_lod,physical,defense)
 	# This harness audits the strategic aerial representation directly. In gameplay
 	# the same shader crossfades away during plot-level inspection.
@@ -216,6 +258,7 @@ func _render_stage()->void:
 	if image:
 		image.save_png(ProjectSettings.globalize_path(output_path))
 		var multimesh_audit:=_multimesh_audit(physical)
+		var coastal_profile:Dictionary=renderer._settlement_coastal_visual_profile(Vector2(center.x,center.z))
 		var vertex_total:=0
 		for child in physical.get_children():
 			if child is MeshInstance3D and (child as MeshInstance3D).mesh:
@@ -223,9 +266,10 @@ func _render_stage()->void:
 				for surface_index in child_mesh.get_surface_count(): vertex_total+=child_mesh.surface_get_array_len(surface_index)
 		print("SETTLEMENT VISUAL AUDIT ",JSON.stringify({
 			"stage":stage,"population":population,"radius_km":layout.radius,
-			"damage":damage,"defense":defense_stage,"route_tier":route_tier,
+			"damage":damage,"defense":defense_stage,"route_tier":route_tier,"technology_tier":technology_tier,"coastal":coastal_audit,
 			"engineered_routes":engineered_routes,"include_plots":include_plots,"agriculture":audit_agriculture,
 			"fabric_lod":fabric_lod,"aerial_lod":audit_aerial_lod,"view":"oblique" if oblique_view else "aerial","plots":GameState.settlement_plots.size(),"vertices":vertex_total,
+			"shoreline_access":coastal_profile.get("shoreline_access",0.0),"open_water_km":coastal_profile.get("nearest_open_water_km",INF),"maritime_visual_ready":coastal_profile.get("maritime_visual_ready",false),
 			"multimesh_instances":multimesh_audit.instances,"multimesh_batches":multimesh_audit.batches,"multimesh_template_vertices":multimesh_audit.template_vertices,
 			"surfaces":physical.get_child_count(),"output":ProjectSettings.globalize_path(output_path)
 		}))

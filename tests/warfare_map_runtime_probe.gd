@@ -31,6 +31,26 @@ func _ready()->void:
 		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
 		_expect((marker.get_node("SelectedRing") as MeshInstance3D).visible,"selected army has no distinct selection halo")
 		_expect(label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"army label inherits the regional marker scale")
+		_expect(_render_element_count(marker)<=13,"one aggregate player counter exceeds the fixed render-element budget")
+		_expect(marker.get_node_or_null("RoleGlyphPrimary")!=null and marker.get_node_or_null("RoleGlyphSecondary")!=null,"aggregate counter is missing its reusable role glyphs")
+		_expect(marker.get_node_or_null("RoleInfantryA")==null and marker.get_node_or_null("RoleArmoredHull")==null,"aggregate counter still retains dormant role-specific branches")
+		var damaged_army:=army.duplicate(true)
+		damaged_army["readiness"]=0.18
+		damaged_army["wounded_pool"]=8000
+		damaged_army["formations"]=[{"unit":"modern_artillery","count":8000,"equipment_condition":0.30}]
+		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(damaged_army,320.0,true))
+		var damage_scars:=marker.get_node("DamageScars") as MultiMeshInstance3D
+		_expect(damage_scars.multimesh.visible_instance_count>=2,"severe formation damage has no bounded scar cue")
+		_expect((marker.get_node("ReadinessPip") as MeshInstance3D).scale.z<0.45,"broken readiness does not visibly shorten the edge readiness tab")
+		_expect((marker.get_node("RoleGlyphPrimary") as MeshInstance3D).visible,"composition role disappears when damage/readiness changes")
+		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
+	var foreign_counter:Node3D=terrain._create_warfare_formation_marker("ForeignBudgetProbe",false)
+	terrain.add_child(foreign_counter)
+	var foreign_view:Dictionary=PRESENTATION.foreign_marker({"id":"foreign_probe","civilization":"Cedar League","identified":true,"hostile":true,"strength_estimate_low":900,"strength_estimate_high":1500,"readiness_estimate_low":0.42,"readiness_estimate_high":0.66,"formation_role":"armored","formation_era":3,"damage_estimate":0.36,"position":{"x":origin.x+8.0,"z":origin.z+8.0}},320.0)
+	terrain._apply_warfare_formation_view(foreign_counter,foreign_view)
+	_expect(_render_element_count(foreign_counter)<=14,"one observed foreign counter exceeds the fixed render-element budget")
+	_expect((foreign_counter.get_node("RoleGlyphSecondary") as MeshInstance3D).visible,"identified foreign composition does not reach the aggregate role glyph")
+	foreign_counter.queue_free()
 	army["status"]="moving"
 	army["destination_id"]="probe_objective"
 	army["destination_name"]="North Crossing"
@@ -91,3 +111,9 @@ func _army(army_id:int,origin:Vector3)->Dictionary:
 
 func _expect(condition:bool,message:String)->void:
 	if not condition: failures.append(message)
+
+
+func _render_element_count(root:Node)->int:
+	var total:=1 if root is GeometryInstance3D else 0
+	for child in root.get_children(): total+=_render_element_count(child)
+	return total

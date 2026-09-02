@@ -578,7 +578,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var reproduction:=GameState.process_reproduction_day({
 		"health":GameState.population_health,"food_security":GameState.food_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
-		"birth_crisis":birth_crisis,"conception_support":DiscoverySystem.effect("conception_support")+policy_effect("conception_support")+GameState.founding_effect("conception_support")+ProgressionSystem.effect("conception_support"),
+		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0)),
+		"conception_support":DiscoverySystem.effect("conception_support")+policy_effect("conception_support")+GameState.founding_effect("conception_support")+ProgressionSystem.effect("conception_support"),
 		"maternal_safety":DiscoverySystem.effect("maternal_safety"),"neonatal_survival":DiscoverySystem.effect("neonatal_survival")
 	})
 	var births_today:=int(reproduction.get("births_count",0))

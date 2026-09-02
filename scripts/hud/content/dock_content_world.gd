@@ -57,6 +57,18 @@ func _contacts_blocks()->Array:
 		blocks.append({"type":"text","heading":"KNOWN CONTACTS","text":"No polity has been confirmed. An encounter site is not a diplomatic destination until scouts locate a settlement."})
 	else:
 		blocks.append({"type":"rows","heading":"KNOWN CONTACTS","note":"click for the full record","items":items})
+	var rumor_items:Array=[]
+	for rumor_variant in CivilizationSystem.rumored_civilizations_snapshot():
+		var rumor:Dictionary=rumor_variant
+		rumor_items.append({
+			"name":String(rumor.get("name","An unnamed people")),
+			"sub":"heard day %d · somewhere to the %s · %s" % [int(rumor.get("day",0)),String(rumor.get("direction","?")),String(rumor.get("distance_hint",""))],
+			"value":"RUMOR","value_color":Tokens.MUTED,
+			"accent":Tokens.MUTED,
+			"tip":"Hearsay from newcomers: a name and a rough direction, nothing confirmed. Scouts ranging that way may find them.",
+		})
+	if not rumor_items.is_empty():
+		blocks.append({"type":"rows","heading":"RUMORED PEOPLES","note":"names and directions only","items":rumor_items})
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var known_destinations:=0
 	for encounter_variant in encounters:
@@ -78,12 +90,13 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 	var party_items:Array=[]
 	for party_variant in (exploration.get("parties",[]) as Array):
 		var party:Dictionary=party_variant
+		var overdue:=int(party.get("overdue_days",0))
 		party_items.append({
 			"name":String(party.get("target_label","Scout party away")),
-			"sub":"%d people · %d days remaining" % [int(party.get("personnel",0)),int(party.get("days_remaining",0))],
-			"value":"%d%%" % roundi(float(party.get("progress",0.0))*100.0),"value_color":Tokens.TEAL,
-			"accent":Tokens.TEAL,
-			"tip":String(party.get("turnback_reason","Observations remain aboard the party until it returns.")),
+			"sub":"%d people · OVERDUE %d day%s" % [int(party.get("personnel",0)),overdue,"" if overdue==1 else "s"] if overdue>0 else "%d people · %d days remaining" % [int(party.get("personnel",0)),int(party.get("days_remaining",0))],
+			"value":"%d%%" % roundi(float(party.get("progress",0.0))*100.0),"value_color":Tokens.AMBER if overdue>0 else Tokens.TEAL,
+			"accent":Tokens.AMBER if overdue>0 else Tokens.TEAL,
+			"tip":"The road decides the true return day; an overdue party is not yet a lost one." if overdue>0 else String(party.get("turnback_reason","Observations remain aboard the party until it returns.")),
 		})
 	if party_items.is_empty():
 		var latest:Dictionary=exploration.get("latest_report",{})
@@ -134,4 +147,7 @@ func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:
 
 func signature()->Array:
 	var exploration:Dictionary=CivilizationSystem.exploration_status()
-	return [CivilizationSystem.contact_encounters_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),int(exploration.get("report_count",0))]
+	var overdue_total:=0
+	for party_variant in (exploration.get("parties",[]) as Array):
+		overdue_total+=int((party_variant as Dictionary).get("overdue_days",0))
+	return [CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0))]

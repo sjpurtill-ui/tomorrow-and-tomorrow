@@ -698,8 +698,8 @@ func test_records_contact_and_inference_progressively_reveal_strategic_compariso
 
 
 func test_world_uses_fixed_aggregate_civilization_records()->void:
-	assert_int(system.civilizations.size()).is_equal(system.MAX_RIVAL_CIVILIZATIONS)
-	assert_int(system.foreign_formations.size()).is_equal(system.MAX_FOREIGN_FORMATIONS)
+	assert_int(system.civilizations.size()).is_between(system.MIN_RIVAL_CIVILIZATIONS,system.MAX_RIVAL_CIVILIZATIONS)
+	assert_int(system.foreign_formations.size()).is_equal(system.civilizations.size()*system.FOREIGN_FORMATIONS_PER_CIV)
 	for civ in system.civilizations:
 		assert_int((civ.cohorts as Dictionary).size()).is_equal(6)
 		assert_int((civ.strategic_regions as Array).size()).is_equal(system.STRATEGIC_REGIONS_PER_CIV)
@@ -1218,8 +1218,8 @@ func test_rivals_trade_and_fight_each_other_without_player_scripts()->void:
 
 func test_competition_includes_player_and_every_rival_with_explicit_victory_state()->void:
 	var snapshot:Dictionary=system.competition_snapshot()
-	assert_int((snapshot.leaders as Array).size()).is_equal(system.MAX_RIVAL_CIVILIZATIONS+1)
-	assert_int(int(snapshot.player_rank)).is_between(1,system.MAX_RIVAL_CIVILIZATIONS+1)
+	assert_int((snapshot.leaders as Array).size()).is_equal(system.civilizations.size()+1)
+	assert_int(int(snapshot.player_rank)).is_between(1,system.civilizations.size()+1)
 	assert_bool(["ongoing","victory","defeat"].has(String(snapshot.outcome))).is_true()
 	assert_str(String(snapshot.victory_rule)).contains("four strategic domains")
 
@@ -1232,10 +1232,11 @@ func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:
 		civ["cohorts"]=system._scaled_cohorts(civ.cohorts,1_000_000_000.0)
 		system.civilizations[index]=civ
 	system.advance_to_day(36_500)
-	assert_int(system.civilizations.size()).is_equal(system.MAX_RIVAL_CIVILIZATIONS)
+	assert_int(system.civilizations.size()).is_between(system.MIN_RIVAL_CIVILIZATIONS,system.MAX_RIVAL_CIVILIZATIONS)
 	# Richer bounded war, intelligence, and travel histories increased the fixed
-	# record payload without making it depend on population or entity count.
-	assert_int(JSON.stringify(system.export_state()).length()).is_less(280_000)
+	# record payload without making it depend on population; the payload scales
+	# only with the world's drawn rival count, never with entity counts.
+	assert_int(JSON.stringify(system.export_state()).length()).is_less(60_000+system.civilizations.size()*30_000)
 	assert_array(system.validate_state()).is_empty()
 
 

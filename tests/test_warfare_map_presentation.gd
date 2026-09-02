@@ -11,7 +11,8 @@ func test_player_marker_communicates_owner_strength_readiness_supply_and_selecti
 	assert_str(String(marker.label)).contains("12.5K")
 	assert_str(String(marker.label)).contains("READY 78%")
 	assert_str(String(marker.label)).contains("SUPPLY 64%")
-	assert_str(String(marker.color)).is_equal(PRESENTATION.PLAYER_SELECTED_COLOR)
+	assert_str(String(marker.color)).is_equal(PRESENTATION.PLAYER_COLOR)
+	assert_str(String(marker.selection_color)).is_equal(PRESENTATION.PLAYER_SELECTED_COLOR)
 
 
 func test_world_scale_hides_formation_detail_but_preserves_aggregate_front()->void:
@@ -35,6 +36,7 @@ func test_moving_army_exposes_one_bounded_path_and_objective()->void:
 	army["arrival_day"]=42
 	var marker:=PRESENTATION.player_marker(army,320.0,false)
 	assert_bool(bool(marker.show_path)).is_true()
+	assert_bool(bool(marker.show_objective_label)).is_false()
 	assert_str(String(marker.destination_id)).is_equal("region_alpha")
 	assert_dict(marker.destination_position).is_not_empty()
 	var world_marker:=PRESENTATION.player_marker(army,12_000.0,false)
@@ -83,6 +85,34 @@ func test_counter_role_and_era_follow_real_aggregate_composition()->void:
 	assert_int(int(levy_view.formation_era)).is_equal(0)
 
 
+func test_formation_condition_is_aggregate_bounded_and_damage_sensitive()->void:
+	var army:=_army(4,1000)
+	army["wounded_pool"]=220
+	army["scattered_pool"]=120
+	army["captured_pool"]=60
+	army["formations"]=[{"unit":"levy","count":1000,"equipment_condition":0.48}]
+	var state:Dictionary=PRESENTATION.formation_visual_state(army)
+	assert_str(String(state.damage_state)).is_equal("damaged")
+	assert_float(float(state.damage_ratio)).is_between(0.30,0.62)
+	assert_int(int(state.element_budget)).is_equal(7)
+	var view:=PRESENTATION.player_marker(army,48.0,false)
+	assert_str(String(view.damage_state)).is_equal("damaged")
+	assert_float(float(view.damage_ratio)).is_greater(0.0)
+	assert_str(String(view.label)).contains("DAMAGED")
+
+
+func test_readiness_changes_formation_order_without_adding_map_elements()->void:
+	var ready:=_army(5,5000)
+	var broken:=_army(6,5000)
+	broken["readiness"]=0.18
+	var ready_state:Dictionary=PRESENTATION.formation_visual_state(ready)
+	var broken_state:Dictionary=PRESENTATION.formation_visual_state(broken)
+	assert_str(String(ready_state.order_state)).is_equal("ordered")
+	assert_str(String(broken_state.order_state)).is_equal("broken")
+	assert_float(float(broken_state.scatter)).is_greater(float(ready_state.scatter))
+	assert_int(int(broken_state.element_budget)).is_equal(int(ready_state.element_budget))
+
+
 func test_local_formation_report_stays_in_three_compact_lines()->void:
 	var army:=_army(1,12_500)
 	army.status="moving"
@@ -111,6 +141,86 @@ func test_regional_stacked_armies_collapse_to_one_aggregate_label()->void:
 	var visible_labels:Array=snapshot.player.filter(func(view:Dictionary)->bool: return bool(view.show_label))
 	assert_int(visible_labels.size()).is_equal(1)
 	assert_str(String(visible_labels[0].label)).contains("12 ARMIES")
+	var occupied_display_slots:Dictionary={}
+	for view in snapshot.player:
+		var offset:Dictionary=view.get("display_offset",{})
+		var slot:="%.3f:%.3f" % [float(offset.get("x",0.0)),float(offset.get("z",0.0))]
+		assert_bool(occupied_display_slots.has(slot)).is_false()
+		occupied_display_slots[slot]=true
+
+
+func test_regional_foreign_stack_uses_unique_nonoverlapping_counter_slots()->void:
+	var sightings:Array=[]
+	for sighting_id in 8:
+		var sighting:=_foreign()
+		sighting["id"]="foreign_%d" % sighting_id
+		sighting["position"]={"x":12.0,"z":8.0}
+		sightings.append(sighting)
+	var snapshot:=PRESENTATION.build_snapshot(320.0,[],sightings,[],[_home()],{},0)
+	var occupied_display_slots:Dictionary={}
+	var minimum_spacing:=float(snapshot.marker_scale)*6.25
+	for view in snapshot.foreign:
+		var offset:Dictionary=view.get("display_offset",{})
+		var point:=Vector2(float(offset.get("x",0.0)),float(offset.get("z",0.0)))
+		var slot:="%.3f:%.3f" % [point.x,point.y]
+		assert_bool(occupied_display_slots.has(slot)).is_false()
+		for occupied_variant in occupied_display_slots.values():
+			assert_float(point.distance_to(occupied_variant as Vector2)).is_greater_equal(minimum_spacing*0.75)
+		occupied_display_slots[slot]=point
+	var visible_labels:Array=snapshot.foreign.filter(func(view:Dictionary)->bool: return bool(view.show_label))
+	assert_int(visible_labels.size()).is_equal(1)
+	assert_str(String(visible_labels[0].label)).contains("8 ARMIES")
+
+
+func test_opposing_formations_at_one_location_receive_separate_faction_lanes()->void:
+	var army:=_army(1,4000)
+	army["position"]={"x":12.0,"z":8.0}
+	var sighting:=_foreign()
+	sighting["position"]={"x":12.0,"z":8.0}
+	var snapshot:=PRESENTATION.build_snapshot(320.0,[army],[sighting],[],[_home()],{},1)
+	var player_offset:Dictionary=snapshot.player[0].display_offset
+	var foreign_offset:Dictionary=snapshot.foreign[0].display_offset
+	assert_bool(bool(snapshot.player[0].contested_location)).is_true()
+	assert_bool(bool(snapshot.foreign[0].contested_location)).is_true()
+	assert_float(absf(float(player_offset.x)-float(foreign_offset.x))).is_greater_equal(float(snapshot.marker_scale)*7.4)
+	assert_bool(bool(snapshot.player[0].show_label)).is_true()
+	assert_bool(bool(snapshot.foreign[0].show_label)).is_false()
+	assert_bool(bool(snapshot.foreign[0].label_suppressed_by_contact)).is_true()
+
+
+func test_foreign_sighting_only_claims_movement_when_observed()->void:
+	var stationary:=PRESENTATION.foreign_marker(_foreign(),48.0)
+	assert_bool(bool(stationary.moving)).is_false()
+	var moving_sighting:=_foreign()
+	moving_sighting["movement_observed"]=true
+	moving_sighting["heading"]=1.25
+	var moving:=PRESENTATION.foreign_marker(moving_sighting,48.0)
+	assert_bool(bool(moving.moving)).is_true()
+	assert_float(float(moving.heading)).is_equal_approx(1.25,0.001)
+
+
+func test_observed_foreign_damage_and_identified_role_reach_the_fixed_counter()->void:
+	var sighting:=_foreign()
+	sighting["identified"]=true
+	sighting["formation_role"]="artillery"
+	sighting["formation_era"]=2
+	sighting["damage_estimate"]=0.47
+	var view:Dictionary=PRESENTATION.foreign_marker(sighting,48.0)
+	assert_str(String(view.formation_role)).is_equal("artillery")
+	assert_int(int(view.formation_era)).is_equal(2)
+	assert_str(String(view.damage_state)).is_equal("damaged")
+	assert_float(float(view.damage_ratio)).is_equal_approx(0.47,0.001)
+	assert_str(String(view.label)).contains("DAMAGED")
+
+
+func test_occupation_front_is_distinct_from_battle_and_generic_objective()->void:
+	var front:=_front()
+	front["occupation_personnel"]=3200
+	var view:=PRESENTATION.front_marker(front,_objective(),320.0,false)
+	assert_bool(bool(view.occupation_active)).is_true()
+	assert_int(int(view.occupation_personnel)).is_equal(3200)
+	assert_str(String(view.phase)).is_equal("OCCUPATION")
+	assert_str(String(view.label)).contains("OCCUPATION FRONT")
 
 
 func test_continental_label_budget_prioritizes_selected_and_moving_armies()->void:

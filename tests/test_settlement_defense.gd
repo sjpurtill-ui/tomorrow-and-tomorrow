@@ -28,6 +28,8 @@ func test_defense_upgrade_consumes_materials_and_improves_home_ground()->void:
 
 
 func test_home_siege_damages_defenses_and_reduces_their_bonus()->void:
+	GameState.settlement_completed=["Hearth Circle"]
+	SettlementModel.ensure_founded()
 	MilitaryCampaign.settlement_defense={"stage":3,"integrity":1.0,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":0}
 	var bonus_before:=float(MilitaryCampaign.settlement_defense_snapshot().defense_bonus)
 	MilitaryCampaign._apply_home_siege_damage({"campaign_mode":"defensive","target_region_id":"","round_count":4,"outcome":"attacker_victory"})
@@ -35,7 +37,22 @@ func test_home_siege_damages_defenses_and_reduces_their_bonus()->void:
 	assert_float(float(defense.integrity)).is_less(1.0)
 	assert_float(float(defense.defense_bonus)).is_less(bonus_before)
 	assert_float(float(MilitaryCampaign.store_protection().structural_protection)).is_greater(0.0)
+	var damaged_plots:=0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("status","")) in ["damaged","ruin"]: damaged_plots+=1
+	assert_int(damaged_plots).is_between(1,SettlementModel.MAX_BATTLE_DAMAGED_PLOTS)
 	assert_array(MilitaryCampaign.validate_state()).is_empty()
+
+
+func test_unfortified_home_is_not_immune_to_settlement_grid_damage()->void:
+	GameState.settlement_completed=["Hearth Circle"]
+	SettlementModel.ensure_founded()
+	MilitaryCampaign.settlement_defense={"stage":0,"integrity":1.0,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":0}
+	MilitaryCampaign._apply_home_siege_damage({"campaign_mode":"defensive","target_region_id":"","round_count":3,"outcome":"attacker_victory","seed":8123})
+	var damaged_plots:=0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("status","")) in ["damaged","ruin"]: damaged_plots+=1
+	assert_int(damaged_plots).is_greater(0)
 
 
 func test_billion_population_keeps_one_fixed_defense_record()->void:
