@@ -328,6 +328,7 @@ func _ready() -> void:
 	_configure_noise()
 	_prepare_river_course()
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_scout_land_at"))
+	CivilizationSystem.set_ground_survey_authority(Callable(self,"_survey_ground_at"))
 	world_start_position = _find_camp_position()
 	CivilizationSystem.register_player_origin(Vector2(world_start_position.x,world_start_position.z))
 	_refresh_discovery_mask(true)
@@ -2210,6 +2211,57 @@ func _scatter_landscape_vegetation() -> void:
 	forest.material_override = material
 	add_child(forest)
 
+func _survey_ground_at(position:Vector2)->Dictionary:
+	## Ground truth handed to the civilization layer so returned scout reports
+	## describe the terrain the renderer actually draws at that point.
+	var river_x:=_world_river_x(position.y)
+	return {
+		"woodland":_woodland_density_at(position.x,position.y),
+		"river_distance_km":absf(position.x-river_x) if river_x!=INF else INF,
+		"height":_height_at(position.x,position.y),
+	}
+
+
+func _woodland_density_at(x:float,z:float)->float:
+	## The single ground truth for "how wooded is this point". It mirrors the
+	## exact moisture/warmth/altitude math that paints the vertex green the
+	## terrain shader amplifies into forest cover — so whatever reads green on
+	## the map IS woodland to the simulation, and vice versa.
+	var height:=_height_at(x,z)
+	if height<SEA_LEVEL: return 0.0
+	var moisture:=moisture_noise.get_noise_2d(x,z)+terrain_noise.get_noise_2d(x+1700.0,z-2300.0)*0.36
+	if moisture<=-0.12: return 0.0
+	var density:=clampf((moisture+0.24)*1.45,0.12,0.78)
+	var warmth:=1.0-clampf(absf(z)/(world_depth*0.5),0.0,1.0)
+	if warmth<0.20: density*=1.0-clampf((0.20-warmth)*4.0,0.0,0.84)
+	if height>3.2: density*=1.0-clampf((height-3.2)/5.2,0.0,0.74)
+	return clampf(density/0.78,0.0,1.0)
+
+
+func _best_site_for(type:String,rng:RandomNumberGenerator)->Vector3:
+	## Resource sites sit where the rendered ground says they belong: timber
+	## and game in the densest woodland, stone on bare dry ground, fertile
+	## soil in the moist riverine belt.
+	var best:=Vector3.ZERO
+	var best_score:=-INF
+	for attempt in 24:
+		var candidate:=_random_valid_site(rng)
+		if candidate==Vector3.ZERO: continue
+		var density:=_woodland_density_at(candidate.x,candidate.z)
+		var river_x:=_world_river_x(candidate.z)
+		var river_distance:=absf(candidate.x-river_x) if river_x!=INF else INF
+		var score:=0.0
+		match type:
+			"Timber","Game": score=density
+			"Stone": score=(1.0-density)+clampf(candidate.y/7.0,0.0,0.5)
+			"Fertile": score=clampf(1.0-river_distance/20.0,0.0,1.0)*0.6+density*0.4
+			_: score=rng.randf()
+		if score>best_score:
+			best_score=score
+			best=candidate
+	return best
+
+
 func _scatter_trees() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = terrain_noise.seed ^ 0x27d4eb2d
@@ -2219,7 +2271,7 @@ func _scatter_trees() -> void:
 		# Surface water is a continuous authored river system, not a random deposit.
 		# Keep one aggregate occurrence for simulation/progression gates, anchored on
 		# the actual channel nearest the founding watershed, and draw no fake dot.
-		var center := _surface_water_site_near(world_start_position) if type=="Freshwater" else _random_valid_site(rng)
+		var center := _surface_water_site_near(world_start_position) if type=="Freshwater" else _best_site_for(type,rng)
 		if center == Vector3.ZERO:
 			continue
 		resource_sites.append({"type":type,"position":center,"range":13.0,"initially_observed":_world_position_is_revealed(center)})
@@ -3113,17 +3165,18 @@ func _refresh_settlement_footprint(force := false) -> void:
 	settlement_land_use_root.name = "PersistentSettlementMorphology"
 	add_child(settlement_land_use_root)
 	_rebuild_close_vegetation(center)
-	var render_routes:Array[Dictionary]=GameState.settlement_routes
-	if morphology_lod==0: render_routes=_settlement_routes_in_current_detail_view(render_routes,center)
-	_create_persistent_settlement_routes(center, render_routes, settlement_land_use_root)
-	var render_plots:Array[Dictionary]=_settlement_model().plots_for_lod(morphology_lod)
-	if morphology_lod==0: render_plots=_settlement_plots_in_current_detail_view(render_plots,center)
-	_create_plot_fabric(center, render_plots, morphology_lod, settlement_land_use_root)
 	var expansion_profile:=_settlement_expansion_visual_profile({
 		"classification":settlement_classification,
 		"population":footprint_population,
 		"stage_progress":stage_progress
 	})
+	var render_routes:Array[Dictionary]=GameState.settlement_routes
+	if morphology_lod==0: render_routes=_settlement_routes_in_current_detail_view(render_routes,center)
+	_create_persistent_settlement_routes(center, render_routes, settlement_land_use_root)
+	var render_plots:Array[Dictionary]=_settlement_model().plots_for_lod(morphology_lod)
+	if morphology_lod==0: render_plots=_settlement_plots_in_current_detail_view(render_plots,center)
+	var aggregate_neighborhood_scale:=morphology_lod==0 and int(expansion_profile.get("stage",0))>=3
+	_create_plot_fabric(center, render_plots, morphology_lod, settlement_land_use_root,aggregate_neighborhood_scale)
 	# Plot fabric supplies the remembered street-by-street settlement. Mature urban
 	# systems also need a bounded, stage-specific silhouette that remains legible
 	# after billions of residents have collapsed into aggregate simulation records.
@@ -4278,7 +4331,9 @@ func _settlement_district_condition(candidate:Dictionary,damage_ratio:float,cont
 	var local_variation:=(float((local_seed>>8)%1000)/999.0-0.5)*0.12
 	var condition_score:=clampf(health*0.30+food*0.25+cohesion*0.20+material_capacity*0.15+legitimacy*0.10+local_variation,0.0,1.0)
 	var condition:=0 if condition_score>=0.84 else (1 if condition_score>=0.72 else (2 if condition_score>=0.60 else (3 if condition_score>=0.48 else (4 if condition_score>=0.36 else 5))))
-	if damage_ratio>0.01:
+	if damage_ratio>=0.98:
+		condition=7
+	elif damage_ratio>0.01:
 		var cell:=Vector2i(candidate.get("cell",Vector2i.ZERO))
 		var sector:=Vector2i(floori(float(cell.x)/3.0),floori(float(cell.y)/3.0))
 		var sector_seed:=absi(hash("%d:%d:%d:district_damage" % [GameState.world_seed,sector.x,sector.y]))
@@ -4383,7 +4438,7 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 	parent.add_child(clipmap_root)
 	# Google-Earth inspection always uses one atlas instance per aggregate neighborhood.
 	# Era selects the atlas family; it must never switch back to building-like glyphs.
-	if _create_settlement_district_atlas_clipmap(candidates,damage_ratio,clipmap_root): return
+	var uses_atlas:=_create_settlement_district_atlas_clipmap(candidates,damage_ratio,clipmap_root)
 	# Eight mixed-block silhouettes produce many visible combinations after deterministic
 	# proportion and roof variation. Civic and productive blocks retain their own batch,
 	# for ten fixed draws at any population.
@@ -4435,6 +4490,7 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 		road_material.cull_mode=BaseMaterial3D.CULL_DISABLED
 		road_mesh_instance.material_override=road_material
 		clipmap_root.add_child(road_mesh_instance)
+	if uses_atlas: return
 	for group_index in groups.size():
 		var group:Array=groups[group_index]
 		if group.is_empty(): continue
@@ -6716,7 +6772,7 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 			surface.set_uv(Vector2(-1.0,-1.0))
 			surface.add_vertex(world_point)
 
-func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
+func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D,suppress_urban_detail:=false) -> void:
 	if plots.is_empty():
 		return
 	var ground_surface := SurfaceTool.new()
@@ -6757,6 +6813,10 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		var plot_color := _settlement_plot_color(plot)
 		var status := String(plot.get("status", "active"))
 		var land_use := String(plot.get("land_use", "vacant"))
+		# Once a place reads at aggregate neighborhood scale, its bounded historic plot
+		# ledger must not appear underneath as a second field of tiny roof glyphs. Worked
+		# land and water remain geographic; built plots are represented by the atlas.
+		if suppress_urban_detail and land_use not in ["field","pasture","water","waste"]: continue
 		var ground_inset:=1.0 if land_use in ["field","water","waste"] else 0.76
 		if _settlement_plot_has_aggregate_density(plot,plot_index,plots.size(),lod):
 			# Middle zoom needs a coherent inhabited footprint, not one dark pixel per

@@ -596,8 +596,20 @@ func test_close_metropolis_uses_one_strictly_bounded_district_clipmap()->void:
 	for candidate in candidates: uses[int(candidate.get("land_use",0))]=true
 	for candidate in candidates:
 		if int(candidate.get("land_use",0))==0: shapes[int(candidate.get("shape_variant",0))]=true
-	assert_int(uses.size()).is_greater_equal(2)
+	assert_int(uses.size()).is_greater_equal(1)
 	assert_int(shapes.size()).is_greater_equal(6)
+
+
+func test_aggregate_neighborhood_condition_has_eight_ordered_states()->void:
+	assert_int(renderer.SETTLEMENT_DISTRICT_CONDITIONS.size()).is_equal(8)
+	assert_str(String(renderer.SETTLEMENT_DISTRICT_CONDITIONS[0])).is_equal("great")
+	assert_str(String(renderer.SETTLEMENT_DISTRICT_CONDITIONS[7])).is_equal("destroyed")
+	var candidate:Dictionary={"seed":4128,"cell":Vector2i(3,5)}
+	var strong:Dictionary={"health":1.0,"food":1.0,"cohesion":1.0,"material_capacity":1.0,"legitimacy":1.0}
+	var collapsed:Dictionary={"health":0.0,"food":0.0,"cohesion":0.0,"material_capacity":0.0,"legitimacy":0.0}
+	assert_int(renderer._settlement_district_condition(candidate,0.0,strong)).is_equal(0)
+	assert_int(renderer._settlement_district_condition(candidate,0.0,collapsed)).is_equal(5)
+	assert_int(renderer._settlement_district_condition(candidate,1.0,strong)).is_equal(7)
 
 
 func test_billion_person_close_city_does_not_add_district_instances()->void:

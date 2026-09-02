@@ -99,6 +99,9 @@ var last_observation_day:=-1
 var war_history:Array[Dictionary]=[]
 var next_war_id:=1
 var scout_land_authority:Callable=Callable()
+## Reads the rendered ground (woodland density, river distance, height) so
+## returned reports describe what the map actually shows there.
+var ground_survey_authority:Callable=Callable()
 
 
 func _ready()->void:
@@ -759,6 +762,10 @@ func _player_scout_risk_snapshot(mission:Dictionary)->Dictionary:
 # Scouting geography is supplied by the rendered world's authoritative height
 # field. Fog is knowledge, never a terrain type: without this authority the
 # simulation must not assume that an unknown straight line is dry land.
+func set_ground_survey_authority(survey_query:Callable)->void:
+	ground_survey_authority=survey_query
+
+
 func set_scout_geography_authority(land_query:Callable)->void:
 	scout_land_authority=land_query
 	_audit_active_scout_land_route()
@@ -2074,6 +2081,8 @@ func _resolve_scout_windfalls(mission:Dictionary,route:Array,day:int)->Array[Str
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=last_world_seed^day*179424673^duration*15485867^int(mission.get("mission_id",0))*982451653
 	# 1) Recognized deposits: the party marks workable occurrences on its chart.
+	# What they find is what the rendered ground actually is there — timber in
+	# visible woodland, stone on bare high ground, fertile soil by the river.
 	if route.size()>=4:
 		var find_count:=0
 		var find_chance:=clampf(0.35+float(duration)/365.0*0.40,0.0,0.80)
@@ -2084,13 +2093,29 @@ func _resolve_scout_windfalls(mission:Dictionary,route:Array,day:int)->Array[Str
 			var waypoint:Dictionary=route[waypoint_index]
 			var position:=Vector3(float(waypoint.get("x",0.0))+rng.randf_range(-6.0,6.0),0.0,float(waypoint.get("z",0.0))+rng.randf_range(-6.0,6.0))
 			var resource_name:=SCOUT_FIND_RESOURCES[rng.randi_range(0,SCOUT_FIND_RESOURCES.size()-1)]
+			var ground_note:=""
+			if ground_survey_authority.is_valid():
+				var ground:Dictionary=ground_survey_authority.call(Vector2(position.x,position.z))
+				var woodland:=float(ground.get("woodland",0.0))
+				var river_distance:=float(ground.get("river_distance_km",INF))
+				if woodland>0.45:
+					resource_name="Timber" if rng.randf()<0.65 else "Game"
+					ground_note=" in the dense woodland there"
+				elif river_distance<14.0:
+					resource_name="Fertile Soil"
+					ground_note=" on the moist riverside ground"
+				elif woodland<0.18:
+					resource_name="Stone"
+					ground_note=" on the bare open ground"
+				else:
+					resource_name="Fiber Plants" if rng.randf()<0.5 else "Game"
 			var deposit:Dictionary=ResourceSystem._deposit(resource_name,position,rng.randf_range(0.55,0.95),rng.randf_range(600.0,2400.0),GameState.resource_deposits.size())
 			deposit["stage"]="recognized"
 			deposit["clues"]=1.0
 			deposit["survey"]=0.55
 			GameState.resource_deposits.append(deposit)
 			var origin_distance:=roundi(player_world_origin.distance_to(Vector2(position.x,position.z)))
-			windfalls.append("They mark a workable %s occurrence about %d km out; it now appears on the resource layer." % [resource_name.to_lower(),origin_distance])
+			windfalls.append("They mark a workable %s occurrence about %d km out%s; it now appears on the resource layer." % [resource_name.to_lower(),origin_distance,ground_note])
 	# 2) Field evidence: the returned charts and accounts circulate through the
 	# collective mind, raising the evidence signals that ongoing inquiry lines
 	# actually feed on (the same pathway as daily activity) — not a flat bonus
