@@ -63,12 +63,14 @@ func _government_brief(governance:Dictionary)->Dictionary:
 
 func _government_blocks(governance:Dictionary)->Array:
 	var office_items:Array=[]
-	for office in ["Steward","Quartermaster","Marshal","Loremaster","Envoy"]:
+	for office_variant in ["Steward","Quartermaster","Scholar","Marshal","Envoy"]:
+		var office:=String(office_variant)
+		var open_appointment:=func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_appointments.gd").new(terrain,hud,office))
 		if GameState.leadership_positions.has(office):
 			var advisor:Dictionary=GameState.leadership_positions[office]
-			office_items.append({"name":String(office),"sub":String(advisor.get("name","Unknown")),"value":"FILLED","value_color":Tokens.GREEN,"accent":Tokens.GREEN,"tip":"Office holder executes matching policy at full effect"})
+			office_items.append({"name":office,"sub":String(advisor.get("name","Unknown")),"value":"FILLED","value_color":Tokens.GREEN,"accent":Tokens.GREEN,"on_click":open_appointment,"tip":"Click to review or replace the commissioned institution"})
 		else:
-			office_items.append({"name":String(office),"sub":"vacant · execution reduced","value":"VACANT","value_color":Tokens.AMBER,"accent":Tokens.AMBER,"tip":"Vacant offices execute matching policy at reduced effect"})
+			office_items.append({"name":office,"sub":"vacant · execution reduced · click to appoint","value":"APPOINT","value_color":Tokens.GOLD_BRIGHT,"accent":Tokens.AMBER,"on_click":open_appointment,"tip":"Click to commission an institution for this portfolio"})
 	var load:=clampf(float(governance.get("administrative_load",0.0)),0.0,1.0)
 	var churn:=clampf(float(governance.get("policy_churn",0.0)),0.0,1.0)
 	var support:=clampf(float(governance.get("council_support",0.6)),0.0,1.0)
@@ -154,10 +156,39 @@ func _council_blocks()->Array:
 		"helper":"Interpreted into at most three bounded policies from the fixed catalog. Nothing changes until the interpretation executes.",
 		"status":_pronouncement_status_text(),
 	})
-	var merged:=AdvisorSystem.routine_report_count()
-	if merged>0:
-		blocks.append({"type":"text","heading":"RECENT","text":"Merged %d routine report%s. Answered items stay quiet for a year unless severity escalates." % [merged,"" if merged==1 else "s"]})
+	var merged_items:Array=AdvisorSystem.merged_report_items(6)
+	if not merged_items.is_empty():
+		var merged_rows:Array=[]
+		for merged_variant in merged_items:
+			var merged_item:Dictionary=merged_variant
+			var merged_id:=String(merged_item.get("id",""))
+			var deferred:=String(merged_item.get("status","unread"))=="deferred"
+			var occurrences:=int(merged_item.get("occurrences",1))
+			merged_rows.append({
+				"name":String(merged_item.get("text","Report")).split("\n")[0],
+				"sub":"%s · day %d%s%s" % [String(merged_item.get("office","Council")),int(merged_item.get("day",0))," · merged ×%d" % occurrences if occurrences>1 else ""," · deferred" if deferred else ""],
+				"value":"RESTORE" if deferred else "","value_color":Tokens.GOLD,
+				"accent":Tokens.AMBER if deferred else Color(0,0,0,0),
+				"on_click":(_restore_deferred.bind(merged_id)) if deferred else null,
+				"tip":String(merged_item.get("text",""))+("\n\nClick to return this deferred decision to the queue." if deferred else ""),
+			})
+		blocks.append({"type":"rows","heading":"MERGED & ROUTINE REPORTS","note":"%d held quiet" % AdvisorSystem.routine_report_count(),"items":merged_rows})
+	blocks.append({"type":"text","heading":"HOW MERGING WORKS","text":"Repeat reports about the same condition fold into one entry instead of stacking up. Dismissed decisions defer here and only return to the queue if the condition worsens."})
 	return blocks
+
+func _restore_deferred(item_id:String)->void:
+	for item_variant in GameState.council_inbox:
+		var item:Dictionary=item_variant
+		if String(item.get("id",""))!=item_id: continue
+		if String(item.get("status","unread"))=="deferred":
+			item["status"]="unread"
+			item["day"]=int(GameState.elapsed_days)
+		break
+	if hud:
+		hud.dismissed_alert_ids.erase(item_id)
+		hud._queue_signature="__stale__"
+		hud.refresh()
+		hud.live_refresh_dock()
 
 func _pronouncement_status_text()->String:
 	for order_variant in GameState.sovereign_orders:

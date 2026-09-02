@@ -58,6 +58,44 @@ func test_billion_strength_changes_label_not_runtime_shape()->void:
 	assert_bool(bool(snapshot.bounded)).is_true()
 
 
+func test_formation_echelon_is_bounded_and_reports_scale_without_more_units()->void:
+	assert_int(PRESENTATION.formation_echelon(120)).is_equal(1)
+	assert_int(PRESENTATION.formation_echelon(1200)).is_equal(2)
+	assert_int(PRESENTATION.formation_echelon(12_000)).is_equal(3)
+	assert_int(PRESENTATION.formation_echelon(1_000_000_000)).is_equal(4)
+	var billion:=PRESENTATION.player_marker(_army(1,1_000_000_000),48.0,false)
+	assert_int(int(billion.echelon)).is_equal(4)
+
+
+func test_counter_role_and_era_follow_real_aggregate_composition()->void:
+	var artillery_army:=_army(2,12_000)
+	artillery_army.formations=[
+		{"unit":"rifle_infantry","count":9000},
+		{"unit":"modern_artillery","count":3000}
+	]
+	var view:=PRESENTATION.player_marker(artillery_army,48.0,false)
+	assert_str(String(view.formation_role)).is_equal("artillery")
+	assert_int(int(view.formation_era)).is_equal(3)
+	var levy_army:=_army(3,12_000)
+	levy_army.formations=[{"unit":"levy","count":12_000}]
+	var levy_view:=PRESENTATION.player_marker(levy_army,48.0,false)
+	assert_str(String(levy_view.formation_role)).is_equal("infantry")
+	assert_int(int(levy_view.formation_era)).is_equal(0)
+
+
+func test_local_formation_report_stays_in_three_compact_lines()->void:
+	var army:=_army(1,12_500)
+	army.status="moving"
+	army.destination_name="North Road"
+	army.destination_position={"x":20.0,"z":10.0}
+	army.arrival_day=84
+	var view:=PRESENTATION.player_marker(army,48.0,true)
+	assert_int(String(view.label).split("\n").size()).is_equal(3)
+	assert_str(String(view.label)).contains("READY 78%")
+	assert_str(String(view.label)).contains("SUPPLY 64%")
+	assert_float(absf(float(view.heading))).is_greater(0.01)
+
+
 func test_unknown_objectives_do_not_receive_invented_map_coordinates()->void:
 	var snapshot:=PRESENTATION.build_snapshot(400.0,[],[],[_front()],[_home()],{},0)
 	assert_array(snapshot.fronts).is_empty()

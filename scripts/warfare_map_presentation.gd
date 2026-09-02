@@ -28,6 +28,50 @@ static func marker_scale(camera_size:float)->float:
 	return clampf(camera_size*0.016,0.45,32.0)
 
 
+static func formation_echelon(personnel:int)->int:
+	# Four visual bars communicate the order of magnitude of a formation without
+	# making its map node count proportional to troop count. A billion-person force
+	# still owns exactly the same fixed counter geometry as a small detachment.
+	if personnel>=100_000: return 4
+	if personnel>=10_000: return 3
+	if personnel>=1_000: return 2
+	return 1
+
+
+static func formation_role(army:Dictionary)->String:
+	# The counter glyph reflects the formation's real aggregate composition. Weighted
+	# roles allow scarce high-impact armor or artillery to define how a combined force
+	# is read without drawing a tank, gun, mount, or soldier for every cohort.
+	var weights:Dictionary={"infantry":0.0,"mobile":0.0,"artillery":0.0,"armored":0.0}
+	for formation_variant in (army.get("formations",[]) as Array):
+		var formation:Dictionary=formation_variant
+		var count:=maxf(0.0,float(formation.get("count",0)))
+		var unit:=String(formation.get("unit","levy"))
+		if unit=="armored_formation": weights.armored=float(weights.armored)+count*4.0
+		elif unit in ["motorized_infantry","cavalry"]: weights.mobile=float(weights.mobile)+count*1.65
+		elif unit in ["siege_engineer","field_artillery","modern_artillery"]: weights.artillery=float(weights.artillery)+count*3.25
+		else: weights.infantry=float(weights.infantry)+count
+	var role:="infantry"
+	var highest:=float(weights.infantry)
+	for candidate in ["mobile","artillery","armored"]:
+		if float(weights[candidate])>highest:
+			role=candidate
+			highest=float(weights[candidate])
+	return role
+
+
+static func formation_era(army:Dictionary)->int:
+	# A bounded capability band changes counter finish, never its scene complexity.
+	# 0 pre-gunpowder, 1 gunpowder, 2 industrial, 3 mechanized/modern.
+	var era:=0
+	for formation_variant in (army.get("formations",[]) as Array):
+		var unit:=String((formation_variant as Dictionary).get("unit","levy"))
+		if unit in ["motorized_infantry","armored_formation","modern_artillery"]: era=maxi(era,3)
+		elif unit in ["rifle_infantry","machine_gun_company"]: era=maxi(era,2)
+		elif unit in ["siege_engineer","field_artillery"]: era=maxi(era,1)
+	return era
+
+
 static func build_snapshot(camera_size:float,armies:Array,foreign_sightings:Array,fronts:Array,destinations:Array,engagement:Dictionary={},selected_army_id:int=0)->Dictionary:
 	var band:=scale_band(camera_size)
 	var player:Array[Dictionary]=[]
@@ -199,19 +243,25 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 	var readiness_text:=readiness_band(readiness)
 	var label:=""
 	if band=="local":
-		label="%s • %s\n%s %d%% • SUPPLY %d%%%s" % [String(army.get("name","FIELD ARMY")).to_upper(),compact_count(troops),readiness_text,roundi(readiness*100.0),roundi(supply*100.0),(" • → %s D%d" % [destination.to_upper(),int(army.get("arrival_day",0))]) if moving else " • %s" % destination.to_upper()]
+		label="%s • %s\n%s %d%% • SUPPLY %d%%\n%s" % [String(army.get("name","FIELD ARMY")).to_upper(),compact_count(troops),readiness_text,roundi(readiness*100.0),roundi(supply*100.0),("→ %s • D%d" % [destination.to_upper(),int(army.get("arrival_day",0))]) if moving else destination.to_upper()]
 	elif band=="regional":
-		label="YOU • %s\n%s %d%% • %s" % [compact_count(troops),readiness_text,roundi(readiness*100.0),("→ %s" % destination.to_upper()) if moving else destination.to_upper()]
+		label="YOU • %s • %s %d%%\n%s" % [compact_count(troops),readiness_text,roundi(readiness*100.0),("→ %s" % destination.to_upper()) if moving else destination.to_upper()]
 	elif band=="continental":
 		label="YOU %s • R%d%s" % [compact_count(troops),roundi(readiness*100.0)," →" if moving else ""]
+	var position_data:Dictionary=(army.get("position",{}) as Dictionary).duplicate(true)
+	var destination_data:Dictionary=(army.get("destination_position",{}) as Dictionary).duplicate(true)
+	var heading:=0.0
+	if moving and destination_data.has("x") and destination_data.has("z"):
+		var heading_delta:=Vector2(float(destination_data.get("x",0.0))-float(position_data.get("x",0.0)),float(destination_data.get("z",0.0))-float(position_data.get("z",0.0)))
+		if heading_delta.length_squared()>0.000001: heading=-heading_delta.angle()-PI*0.5
 	return {
 		"id":str(int(army.get("army_id",0))),"owner":"player","owner_label":"YOU","visible":band not in ["ground","world"],
 		"show_label":band in ["local","regional"] or (band=="continental" and (selected or moving)),"label":label,
 		"selected":selected,"moving":moving,"color":PLAYER_SELECTED_COLOR if selected else PLAYER_COLOR,
-		"troops":troops,"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
-		"position":(army.get("position",{}) as Dictionary).duplicate(true),"destination_id":String(army.get("destination_id","")),
+		"troops":troops,"echelon":formation_echelon(troops),"formation_role":formation_role(army),"formation_era":formation_era(army),"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
+		"position":position_data,"destination_id":String(army.get("destination_id","")),"heading":heading,
 		"destination_name":destination,
-		"destination_position":(army.get("destination_position",{}) as Dictionary).duplicate(true),"distance_remaining_km":float(army.get("distance_remaining_km",0.0)),
+		"destination_position":destination_data,"distance_remaining_km":float(army.get("distance_remaining_km",0.0)),
 		"arrival_day":int(army.get("arrival_day",-1)),"scale":marker_scale(camera_size),"show_path":moving and band in ["local","regional","continental"]
 	}
 
@@ -228,14 +278,14 @@ static func foreign_marker(sighting:Dictionary,camera_size:float)->Dictionary:
 	var owner:=String(sighting.get("civilization","FOREIGN")) if identified else "UNIDENTIFIED"
 	var label:=""
 	if band=="local":
-		label="%s • ~%s–%s\nR~%d–%d%% • %.0f KM%s" % [owner.to_upper(),compact_count(low),compact_count(high),roundi(readiness_low*100.0),roundi(readiness_high*100.0),float(sighting.get("distance_km",0.0))," • REPORT" if scout else ""]
+		label="%s\n~%s–%s OBSERVED\nR~%d–%d%% • %.0f KM%s" % [owner.to_upper(),compact_count(low),compact_count(high),roundi(readiness_low*100.0),roundi(readiness_high*100.0),float(sighting.get("distance_km",0.0))," • REPORT" if scout else ""]
 	elif band=="regional":
 		label="%s • ~%s–%s\nR~%d–%d%%" % [owner.to_upper(),compact_count(low),compact_count(high),roundi(readiness_low*100.0),roundi(readiness_high*100.0)]
 	return {
 		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["local","regional"],
 		"show_label":band in ["local","regional"],"label":label,"selected":false,"moving":true,
 		"color":HOSTILE_COLOR if hostile else (SCOUT_COLOR if scout else FOREIGN_COLOR),"hostile":hostile,"scout":scout,"identified":identified,
-		"strength_low":low,"strength_high":high,"readiness_low":readiness_low,"readiness_high":readiness_high,
+		"strength_low":low,"strength_high":high,"echelon":formation_echelon(high),"readiness_low":readiness_low,"readiness_high":readiness_high,
 		"readiness_color":readiness_color((readiness_low+readiness_high)*0.5),"position":(sighting.get("position",{}) as Dictionary).duplicate(true),"scale":marker_scale(camera_size)
 	}
 
@@ -253,11 +303,12 @@ static func front_marker(front:Dictionary,destination:Dictionary,camera_size:flo
 	elif band=="regional":
 		label="%s\n%s • %d%% • FIELD %s" % ["BATTLE IN PROGRESS" if engagement_active else String(front.get("war_name","ACTIVE FRONT")).to_upper(),String(front.get("objective","OBJECTIVE")).to_upper(),roundi(progress*100.0),compact_count(fielded)]
 	elif band=="local":
-		label="%s • %s %d%%\nFIELD %s • READY %d%% • SUPPLY %d%%" % ["BATTLE" if engagement_active else String(front.get("war_name","ACTIVE FRONT")).to_upper(),String(front.get("target","HOME TERRITORY")).to_upper(),roundi(progress*100.0),compact_count(fielded),roundi(readiness*100.0),roundi(clampf(float(front.get("supply",0.0)),0.0,1.0)*100.0)]
+		label="%s • %s %d%%\nFIELD %s\nREADY %d%% • SUPPLY %d%%" % ["BATTLE" if engagement_active else String(front.get("war_name","ACTIVE FRONT")).to_upper(),String(front.get("target","HOME TERRITORY")).to_upper(),roundi(progress*100.0),compact_count(fielded),roundi(readiness*100.0),roundi(clampf(float(front.get("supply",0.0)),0.0,1.0)*100.0)]
 	return {
 		"id":String(front.get("id","")),"visible":band!="ground","show_label":band!="ground","label":label,
-		"engagement":engagement_active,"color":ENGAGEMENT_COLOR if engagement_active else FRONT_COLOR,"progress":progress,"field_personnel":fielded,
-		"readiness":readiness,"readiness_color":readiness_color(readiness),"target_region_id":String(front.get("target_region_id","")),"position":(destination.get("position",{}) as Dictionary).duplicate(true),"scale":marker_scale(camera_size)*1.16
+		"engagement":engagement_active,"color":ENGAGEMENT_COLOR if engagement_active else FRONT_COLOR,
+		"attacker_color":PLAYER_COLOR,"defender_color":HOSTILE_COLOR,"progress":progress,"field_personnel":fielded,
+		"readiness":readiness,"readiness_color":readiness_color(readiness),"target_region_id":String(front.get("target_region_id","")),"position":(destination.get("position",{}) as Dictionary).duplicate(true),"scale":marker_scale(camera_size)*1.05
 	}
 
 

@@ -387,7 +387,10 @@ func _build_decision_queue()->void:
 func dismiss_alert(alert_id:String)->void:
 	if not dismissed_alert_ids.has(alert_id):
 		dismissed_alert_ids.append(alert_id)
-	_queue_signature=""
+	# Deferral is persistent: the item leaves the queue and will not return
+	# unless its condition escalates. The record stays in the council ledger.
+	AdvisorSystem.defer_council_item(alert_id)
+	_queue_signature="__stale__"
 	refresh()
 
 func _severity_color(severity:String)->Color:
@@ -747,7 +750,7 @@ func _refresh_kpis()->void:
 	_layout()
 
 func _refresh_badges()->void:
-	var decisions:=AdvisorSystem.council_decision_items(9).size()
+	var decisions:=AdvisorSystem.council_decision_items(9,false).size()
 	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
 	var visible_foreign:=int(observation.get("visible_count",0))
 	var metrics:Dictionary=GameState.simulation_metrics
@@ -760,12 +763,12 @@ func _refresh_badges()->void:
 	_set_badge("economy","!" if danger else "",Tokens.RED)
 
 func _refresh_queue()->void:
-	var items:Array=[]
-	for item_variant in AdvisorSystem.council_decision_items(9):
-		var item:Dictionary=item_variant
-		if dismissed_alert_ids.has(String(item.get("id",""))): continue
-		items.append(item)
-	var signature:=""
+	# Only unread decisions interrupt at the bottom right; answered history,
+	# deferred decisions, and merged routine reports live in the council dock.
+	# Deferral is tracked on the ledger item itself, so an escalated condition
+	# can legitimately reappear here even after an earlier dismissal.
+	var items:Array=AdvisorSystem.council_decision_items(9,false)
+	var signature:="sig:"
 	for item_variant in items:
 		signature+=String((item_variant as Dictionary).get("id",""))+"|"
 	if signature==_queue_signature: return
@@ -811,7 +814,10 @@ func _refresh_toolbar()->void:
 	settle.text=settle_text
 	settle.tooltip_text=settle_tooltip
 	settle.disabled=settle_disabled
-	scouts.text="SEND SCOUTS" if not bool(exploration.get("active",false)) else "SCOUTS AWAY · %dD" % int(exploration.get("days_remaining",0))
+	if bool(exploration.get("can_begin",true)):
+		scouts.text="SEND SCOUTS" if not bool(exploration.get("active",false)) else "SEND SCOUTS · %d AWAY" % int(exploration.get("active_count",1))
+	else:
+		scouts.text="SCOUTS AWAY · %dD" % int(exploration.get("days_remaining",0))
 	scouts.disabled=bool(scout_presentation.disabled)
 	scouts.tooltip_text=String(scout_presentation.tooltip)
 	diplomat.text="SEND DIPLOMAT" if not bool(diplomatic_status.get("active",false)) else "ENVOYS AWAY · %dD" % int(diplomatic_status.get("days_remaining",0))

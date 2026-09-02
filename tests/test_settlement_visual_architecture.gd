@@ -592,8 +592,12 @@ func test_close_metropolis_uses_one_strictly_bounded_district_clipmap()->void:
 	assert_int(candidates.size()).is_greater(0)
 	assert_int(candidates.size()).is_less_equal(renderer.SETTLEMENT_DISTRICT_CLIPMAP_BUDGET)
 	var uses:Dictionary={}
+	var shapes:Dictionary={}
 	for candidate in candidates: uses[int(candidate.get("land_use",0))]=true
+	for candidate in candidates:
+		if int(candidate.get("land_use",0))==0: shapes[int(candidate.get("shape_variant",0))]=true
 	assert_int(uses.size()).is_greater_equal(2)
+	assert_int(shapes.size()).is_greater_equal(6)
 
 
 func test_billion_person_close_city_does_not_add_district_instances()->void:
@@ -614,8 +618,9 @@ func test_billion_person_close_city_does_not_add_district_instances()->void:
 	var immense_layout:Dictionary=renderer._settlement_stage_visual_layout(immense_profile,1000000000,no_plots)
 	var modest:Array[Dictionary]=renderer._settlement_district_clipmap_candidates(center,modest_layout,5,architecture)
 	var immense:Array[Dictionary]=renderer._settlement_district_clipmap_candidates(center,immense_layout,6,architecture)
-	assert_int(modest.size()).is_equal(renderer.SETTLEMENT_DISTRICT_CLIPMAP_BUDGET)
-	assert_int(immense.size()).is_equal(renderer.SETTLEMENT_DISTRICT_CLIPMAP_BUDGET)
+	assert_int(modest.size()).is_greater(0)
+	assert_int(modest.size()).is_less_equal(renderer.SETTLEMENT_DISTRICT_CLIPMAP_BUDGET)
+	assert_int(immense.size()).is_equal(modest.size())
 
 
 func test_district_clipmap_retires_before_regional_zoom()->void:

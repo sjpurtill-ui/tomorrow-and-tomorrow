@@ -114,6 +114,20 @@ func generate_consequence_item(event: Dictionary) -> Dictionary:
 			existing["severity"]=severity
 			existing["urgency"]=maxf(float(existing.get("urgency",0.0)),_council_severity_urgency(severity))
 			return existing
+		if String(existing.get("status","unread"))=="deferred":
+			# The Sovereign waved this condition off. It keeps merging silently
+			# and only returns to the queue if it genuinely escalates.
+			existing["text"]=text
+			existing["last_day"]=current_day
+			existing["occurrences"]=int(existing.get("occurrences",1))+1
+			if _council_severity_rank(severity)>_council_severity_rank(String(existing.get("deferred_severity",prior_severity))):
+				existing["status"]="unread"
+				existing["day"]=current_day
+				existing["severity"]=severity
+				existing["urgency"]=_council_severity_urgency(severity)
+				return existing
+			existing["severity"]=severity
+			return {}
 		# An answered condition does not become a fresh sovereign interruption on
 		# every simulation cooldown. Escalation may reopen it immediately; otherwise
 		# a full year must pass before the same decision can be raised again.
@@ -136,28 +150,55 @@ func _council_severity_rank(severity:String)->int:
 func _council_severity_urgency(severity:String)->float:
 	return {"notice":0.42,"warning":0.68,"danger":0.84,"critical":0.96}.get(severity.to_lower(),0.68)
 
-func council_decision_items(limit:=12)->Array[Dictionary]:
+func council_decision_items(limit:=12,include_history:=true)->Array[Dictionary]:
 	var unread:Array[Dictionary]=[]
 	var history:Array[Dictionary]=[]
 	for item_variant in GameState.council_inbox:
 		var item:Dictionary=item_variant
 		if not _responses_change_state(item.get("responses",[])): continue
-		if String(item.get("status","unread"))=="unread": unread.append(item)
-		elif history.size()<6: history.append(item)
+		var status:=String(item.get("status","unread"))
+		if status=="unread": unread.append(item)
+		elif status!="deferred" and history.size()<6: history.append(item)
 	var visible:Array[Dictionary]=[]
 	for item in unread:
 		if visible.size()>=limit: break
 		visible.append(item)
-	for item in history:
-		if visible.size()>=limit: break
-		visible.append(item)
+	if include_history:
+		for item in history:
+			if visible.size()>=limit: break
+			visible.append(item)
 	return visible
+
+func defer_council_item(item_id:String)->void:
+	## Dismissing a queue card defers the decision: it stays in the ledger,
+	## keeps merging silently, and returns only if its condition escalates.
+	for item_variant in GameState.council_inbox:
+		var item:Dictionary=item_variant
+		if String(item.get("id",""))!=item_id: continue
+		if String(item.get("status","unread"))=="unread":
+			item["status"]="deferred"
+			item["deferred_day"]=int(GameState.elapsed_days)
+			item["deferred_severity"]=String(item.get("severity","warning"))
+		return
+
+func merged_report_items(limit:=8)->Array[Dictionary]:
+	## Routine reports and deferred decisions — everything the queue keeps
+	## quiet — so the ledger stays reachable from the council view.
+	var merged:Array[Dictionary]=[]
+	for item_variant in GameState.council_inbox:
+		var item:Dictionary=item_variant
+		var routine:=not _responses_change_state(item.get("responses",[]))
+		var deferred:=String(item.get("status","unread"))=="deferred"
+		if not routine and not deferred: continue
+		merged.append(item)
+		if merged.size()>=limit: break
+	return merged
 
 func routine_report_count()->int:
 	var count:=0
 	for item_variant in GameState.council_inbox:
 		var item:Dictionary=item_variant
-		if not _responses_change_state(item.get("responses",[])): count+=1
+		if not _responses_change_state(item.get("responses",[])) or String(item.get("status","unread"))=="deferred": count+=1
 	return count
 
 func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:

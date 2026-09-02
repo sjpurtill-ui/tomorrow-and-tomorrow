@@ -11,6 +11,9 @@ const MILITARY_DEVELOPMENT:=preload("res://scripts/military_development_catalog.
 const SAVE_VERSION:=7
 const MAX_OCCUPATION_FORCES:=40
 const ABSOLUTE_MAX_FIELD_ARMIES:=12
+const RUNNER_INTERVAL_DAYS:=5
+const RUNNER_SPEED_KM_DAY:=30.0
+const RUNNERS_PER_ARMY:=2
 const ABSOLUTE_MAX_PRODUCTION_LINES:=12
 const FIELD_FORTIFICATION_MAX_BONUS:=0.22
 const FORTIFIED_STORES_MAX_PROTECTION:=0.60
@@ -67,6 +70,14 @@ var war_reputation:Dictionary={"mercy":0.0,"fear":0.0,"grievance":0.0}
 var occupation_forces:Array[Dictionary]=[]
 var field_armies:Array[Dictionary]=[]
 var next_field_army_id:=1
+## Runner messages in flight from field armies back to the settlement. Until
+## signal-era development, the government knows only what runners deliver.
+var runner_messages:Array[Dictionary]=[]
+## Army build templates: a named composition of unit/weapon counts. Training
+## fills the build from the recruit pool; deployment lifts matching trained
+## formations out of the home force as one field army.
+var army_templates:Array[Dictionary]=[]
+var next_army_template_id:=1
 var settlement_defense:Dictionary={}
 
 
@@ -130,7 +141,10 @@ func reset_for_new_world()->void:
 	war_reputation={"mercy":0.0,"fear":0.0,"grievance":0.0}
 	occupation_forces.clear()
 	field_armies.clear()
+	runner_messages.clear()
 	next_field_army_id=1
+	army_templates=_default_army_templates()
+	next_army_template_id=army_templates.size()+1
 	settlement_defense=_default_settlement_defense()
 	settlement_defense_changed.emit(settlement_defense_snapshot())
 
@@ -699,7 +713,7 @@ func field_army_capacity()->int:
 
 
 func field_armies_snapshot()->Dictionary:
-	return {"armies":field_armies.duplicate(true),"active":field_armies.size(),"capacity":field_army_capacity(),"destinations":CivilizationSystem.military_movement_destinations() if CivilizationSystem!=null and CivilizationSystem.has_method("military_movement_destinations") else []}
+	return {"armies":field_armies.duplicate(true),"active":field_armies.size(),"capacity":field_army_capacity(),"live_reports":_live_army_reporting(),"runner_messages_in_flight":runner_messages.size(),"destinations":CivilizationSystem.military_movement_destinations() if CivilizationSystem!=null and CivilizationSystem.has_method("military_movement_destinations") else []}
 
 
 func front_force_snapshot(civ_id:String,region_id:String)->Dictionary:
@@ -758,6 +772,10 @@ func create_field_army(personnel:int,custom_name:String="")->Dictionary:
 	if requested<=0: return {"error":"Choose a positive number of trained personnel."}
 	if requested>available: return {"error":"Only %d unassigned trained personnel are at home." % available}
 	var detached:=_detach_occupation_formations(requested)
+	return _assemble_field_army(detached,custom_name)
+
+
+func _assemble_field_army(detached:Array[Dictionary],custom_name:String="")->Dictionary:
 	var actual:=0
 	for formation in detached: actual+=maxi(0,int(formation.get("count",0)))
 	if actual<=0: return {"error":"No trained formations could be assigned."}
@@ -780,6 +798,11 @@ func create_field_army(personnel:int,custom_name:String="")->Dictionary:
 	force["arrival_day"]=-1
 	force["supply_level"]=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
 	force["commander"]=(home_army.get("commander",_marshal_commander()) as Dictionary).duplicate(true)
+	# Runners carry the army's reports home; without them (and before signal-era
+	# development) the government would know nothing of a distant force.
+	force["runner_count"]=RUNNERS_PER_ARMY
+	force["last_runner_departure_day"]=int(GameState.elapsed_days)
+	force["last_report"]=_army_report_snapshot(force)
 	field_armies.append(force)
 	_refresh_readiness()
 	army_changed.emit(home_army.duplicate(true))
@@ -841,6 +864,40 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	return {"ok":true,"army":army.duplicate(true),"message":"%s is moving to %s: %.0f km, about %d days at %.1f km/day." % [String(army.name),String(army.destination_name),distance,ceili(distance/maxf(0.1,speed)),speed]}
 
 
+func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
+	## Map-order movement to a free position on scouted ground. The caller (the
+	## map layer) validates that the point is charted, dry land before issuing;
+	## this guard re-checks so a stray order can never march into the unknown.
+	var index:=_field_army_index(army_id)
+	if index<0: return {"error":"Select a valid field army."}
+	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
+	var target:=Vector2(x,z)
+	if CivilizationSystem!=null:
+		if CivilizationSystem.has_method("_position_is_revealed") and not CivilizationSystem._position_is_revealed(target):
+			return {"error":"That ground is uncharted. Armies march only where returned scout reports have charted land; send scouts first."}
+		if CivilizationSystem.has_method("_scout_land_at") and not CivilizationSystem._scout_land_at(target):
+			return {"error":"That point is open water. Armies need a charted land destination."}
+	var army:Dictionary=field_armies[index]
+	var current_position:Dictionary=army.get("position",{})
+	var start:=Vector2(float(current_position.get("x",0.0)),float(current_position.get("z",0.0)))
+	var distance:=start.distance_to(target)
+	if distance<0.5: return {"ok":true,"message":"%s is already at that position." % String(army.get("name","The army"))}
+	var speed:=_field_army_speed(army)
+	army["status"]="moving"
+	army["origin_position"]=current_position.duplicate(true)
+	army["destination_id"]="field_position"
+	army["destination_name"]=label
+	army["destination_position"]={"x":target.x,"z":target.y}
+	army["distance_total_km"]=distance
+	army["distance_remaining_km"]=distance
+	army["departure_day"]=int(GameState.elapsed_days)
+	army["arrival_day"]=int(GameState.elapsed_days)+ceili(distance/maxf(0.1,speed))
+	army["speed_km_day"]=speed
+	field_armies[index]=army
+	army_changed.emit(home_army.duplicate(true))
+	return {"ok":true,"army":army.duplicate(true),"message":"%s marches to the marked ground: %.0f km, about %d days at %.1f km/day. Runners will carry its reports home." % [String(army.name),distance,ceili(distance/maxf(0.1,speed)),speed]}
+
+
 func return_field_army(army_id:int)->Dictionary:
 	return move_field_army(army_id,"player_home")
 
@@ -855,6 +912,215 @@ func disband_field_army(army_id:int)->Dictionary:
 	_rebuild_home_army_with(additions)
 	army_changed.emit(home_army.duplicate(true))
 	return {"ok":true,"returned":int(army.get("troops",0)),"message":"%s dissolved at home; %d trained personnel and their issued equipment returned to the unassigned field pool." % [String(army.get("name","Field army")),int(army.get("troops",0))]}
+
+
+# --- Army builds (templates) -------------------------------------------------
+
+func _default_army_templates()->Array[Dictionary]:
+	return [{"template_id":1,"name":"LEVY BAND","entries":[{"unit":"levy","weapon":"improvised","count":20}]}]
+
+
+func _ensure_army_templates()->void:
+	if army_templates.is_empty():
+		army_templates=_default_army_templates()
+		next_army_template_id=army_templates.size()+1
+
+
+func _template_index(template_id:int)->int:
+	_ensure_army_templates()
+	for index in army_templates.size():
+		if int((army_templates[index] as Dictionary).get("template_id",0))==template_id: return index
+	return -1
+
+
+func _matching_home_count(unit:String,weapon:String)->int:
+	var total:=0
+	for formation_variant in home_army.get("formations",[]):
+		var formation:Dictionary=formation_variant
+		if String(formation.get("unit",""))==unit and String(formation.get("weapon",""))==weapon: total+=maxi(0,int(formation.get("count",0)))
+	return total
+
+
+func _matching_training_count(unit:String,weapon:String)->int:
+	var total:=0
+	for order_variant in training_queue:
+		var order:Dictionary=order_variant
+		if String(order.get("mode",""))=="reinforce": continue
+		if String(order.get("unit",""))==unit and String(order.get("weapon",""))==weapon: total+=maxi(0,int(order.get("count",0)))
+	return total
+
+
+func army_template_snapshot()->Dictionary:
+	_ensure_army_templates()
+	var capabilities_units:Dictionary={}
+	for unit in UNIT_KNOWLEDGE: capabilities_units[unit]=_knowledge_gate(String(UNIT_KNOWLEDGE[unit]),0.10)
+	var templates:Array[Dictionary]=[]
+	for template_variant in army_templates:
+		var template:Dictionary=template_variant
+		var entries:Array[Dictionary]=[]
+		var required_total:=0
+		var ready_total:=0
+		var training_total:=0
+		var deployable:=true
+		for entry_variant in (template.get("entries",[]) as Array):
+			var entry:Dictionary=entry_variant
+			var unit:=String(entry.get("unit","levy"))
+			var weapon:=String(entry.get("weapon","improvised"))
+			var count:=maxi(0,int(entry.get("count",0)))
+			var ready:=_matching_home_count(unit,weapon)
+			var training:=_matching_training_count(unit,weapon)
+			required_total+=count
+			ready_total+=mini(ready,count)
+			training_total+=training
+			if ready<count: deployable=false
+			entries.append({"unit":unit,"weapon":weapon,"count":count,"ready":ready,"in_training":training,"unlocked":bool((capabilities_units.get(unit,{}) as Dictionary).get("unlocked",false)) if capabilities_units.get(unit) is Dictionary else true})
+		templates.append({"template_id":int(template.get("template_id",0)),"name":String(template.get("name","ARMY BUILD")),"entries":entries,"required_total":required_total,"ready_total":ready_total,"in_training_total":training_total,"deployable":deployable and required_total>0,"missing":maxi(0,required_total-ready_total)})
+	return {"templates":templates,"recruit_reserve":aggregate_recruits,"army_capacity":field_army_capacity(),"armies_active":field_armies.size()}
+
+
+func create_army_template(name:String="")->Dictionary:
+	if army_templates.size()>=8: return {"error":"Keep at most eight army builds; delete one first."}
+	var label:=name.strip_edges()
+	if label=="": label="BUILD %d" % next_army_template_id
+	var template:Dictionary={"template_id":next_army_template_id,"name":label.to_upper(),"entries":[]}
+	next_army_template_id+=1
+	army_templates.append(template)
+	return {"ok":true,"template":template.duplicate(true)}
+
+
+func delete_army_template(template_id:int)->Dictionary:
+	var index:=_template_index(template_id)
+	if index<0: return {"error":"That army build no longer exists."}
+	if army_templates.size()<=1: return {"error":"Keep at least one army build."}
+	army_templates.remove_at(index)
+	return {"ok":true}
+
+
+func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)->Dictionary:
+	var index:=_template_index(template_id)
+	if index<0: return {"error":"That army build no longer exists."}
+	var gate:=_training_gate(unit,weapon)
+	if gate.has("error"): return gate
+	var template:Dictionary=army_templates[index]
+	var entries:Array=template.get("entries",[])
+	var found:=false
+	for entry_index in range(entries.size()-1,-1,-1):
+		var entry:Dictionary=entries[entry_index]
+		if String(entry.get("unit",""))!=unit or String(entry.get("weapon",""))!=weapon: continue
+		entry["count"]=maxi(0,int(entry.get("count",0))+delta)
+		found=true
+		if int(entry.count)<=0: entries.remove_at(entry_index)
+		else: entries[entry_index]=entry
+		break
+	if not found and delta>0:
+		entries.append({"unit":unit,"weapon":weapon,"count":delta})
+	template["entries"]=entries
+	army_templates[index]=template
+	return {"ok":true,"template":template.duplicate(true)}
+
+
+func queue_template_training(template_id:int)->Dictionary:
+	## One order: raise the recruits the build still needs, then queue typed
+	## training for every under-strength entry.
+	var index:=_template_index(template_id)
+	if index<0: return {"error":"That army build no longer exists."}
+	var template:Dictionary=army_templates[index]
+	var shortfalls:Array[Dictionary]=[]
+	var total_missing:=0
+	for entry_variant in (template.get("entries",[]) as Array):
+		var entry:Dictionary=entry_variant
+		var unit:=String(entry.get("unit","levy"))
+		var weapon:=String(entry.get("weapon","improvised"))
+		var missing:=maxi(0,int(entry.get("count",0))-_matching_home_count(unit,weapon)-_matching_training_count(unit,weapon))
+		if missing<=0: continue
+		shortfalls.append({"unit":unit,"weapon":weapon,"missing":missing})
+		total_missing+=missing
+	if total_missing<=0: return {"ok":true,"message":"%s is fully trained or already in the queue. Deploy it when every cohort reads ready." % String(template.get("name","The build"))}
+	if aggregate_recruits<total_missing:
+		var raise_result:=raise_recruits(total_missing-aggregate_recruits)
+		if raise_result.has("error") and aggregate_recruits<=0: return raise_result
+	var queued:=0
+	var messages:Array[String]=[]
+	for shortfall_variant in shortfalls:
+		var shortfall:Dictionary=shortfall_variant
+		var take:=mini(int(shortfall.missing),aggregate_recruits)
+		if take<=0:
+			messages.append("%s ×%d waits for recruits" % [String(shortfall.unit),int(shortfall.missing)])
+			continue
+		var order:=start_training(String(shortfall.unit),String(shortfall.weapon),take)
+		if order.has("error"):
+			messages.append(String(order.error))
+			continue
+		queued+=take
+	if queued<=0: return {"error":"Nothing could be queued: %s" % ("  ".join(messages) if not messages.is_empty() else "no recruits are available.")}
+	var message:="%s: %d trainees queued toward the build." % [String(template.get("name","Build")),queued]
+	if queued<total_missing: message+="  %d more wait for recruitment capacity; queue the build again as capacity recovers." % (total_missing-queued)
+	if not messages.is_empty(): message+="  "+"  ".join(messages)
+	return {"ok":true,"queued":queued,"message":message}
+
+
+func _detach_matching_formations(entries:Array)->Array[Dictionary]:
+	var detached:Array[Dictionary]=[]
+	var formations:Array=home_army.get("formations",[])
+	var taken_total:=0
+	for entry_variant in entries:
+		var entry:Dictionary=entry_variant
+		var unit:=String(entry.get("unit","levy"))
+		var weapon:=String(entry.get("weapon","improvised"))
+		var remaining:=maxi(0,int(entry.get("count",0)))
+		for index in range(formations.size()-1,-1,-1):
+			if remaining<=0: break
+			var formation:Dictionary=formations[index]
+			if String(formation.get("unit",""))!=unit or String(formation.get("weapon",""))!=weapon: continue
+			var original_count:=maxi(0,int(formation.get("count",0)))
+			if original_count<=0: continue
+			var take:=mini(remaining,original_count)
+			var split:Dictionary=formation.duplicate(true)
+			var equipment_take:=mini(int(formation.get("equipment",0)),roundi(float(formation.get("equipment",0))*float(take)/float(original_count)))
+			var ammunition_take:=mini(int(formation.get("ammunition",0)),roundi(float(formation.get("ammunition",0))*float(take)/float(original_count)))
+			split["count"]=take
+			split["authorized_count"]=take
+			split["equipment"]=equipment_take
+			split["equipment_required"]=_equipment_required_for(unit,take)
+			split["ammunition"]=ammunition_take
+			split["ammunition_required"]=_ammunition_required_for(weapon,int(split.equipment_required))
+			detached.push_front(split)
+			formation["count"]=original_count-take
+			formation["authorized_count"]=maxi(int(formation.count),int(formation.get("authorized_count",original_count))-take)
+			formation["equipment"]=maxi(0,int(formation.get("equipment",0))-equipment_take)
+			formation["equipment_required"]=_equipment_required_for(unit,int(formation.authorized_count))
+			formation["ammunition"]=maxi(0,int(formation.get("ammunition",0))-ammunition_take)
+			formation["ammunition_required"]=_ammunition_required_for(weapon,int(formation.equipment_required))
+			remaining-=take
+			taken_total+=take
+			if int(formation.count)<=0: formations.remove_at(index)
+			else: formations[index]=formation
+	home_army["formations"]=formations
+	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-taken_total)
+	return detached
+
+
+func deploy_army_from_template(template_id:int,custom_name:String="")->Dictionary:
+	if not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
+	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d field armies." % [field_armies.size(),field_army_capacity()]}
+	var index:=_template_index(template_id)
+	if index<0: return {"error":"That army build no longer exists."}
+	var template:Dictionary=army_templates[index]
+	var entries:Array=template.get("entries",[])
+	if entries.is_empty(): return {"error":"The build has no cohorts. Add units to it first."}
+	for entry_variant in entries:
+		var entry:Dictionary=entry_variant
+		var unit:=String(entry.get("unit","levy"))
+		var weapon:=String(entry.get("weapon","improvised"))
+		if _matching_home_count(unit,weapon)<int(entry.get("count",0)):
+			return {"error":"%s needs %d trained %s (%s); only %d are ready at home. Queue the build's training first." % [String(template.get("name","The build")),int(entry.get("count",0)),unit.replace("_"," "),weapon.replace("_"," "),_matching_home_count(unit,weapon)]}
+	var detached:=_detach_matching_formations(entries)
+	var label:=custom_name.strip_edges()
+	if label=="": label="%s Army" % _ordinal_army_name(next_field_army_id)
+	var result:=_assemble_field_army(detached,label)
+	if result.has("ok"):
+		result["message"]="%s deployed from the %s build. Select it on the map and right-click charted land to march." % [label,String(template.get("name","army"))]
+	return result
 
 
 func _rebuild_home_army_with(additions:Array)->void:
@@ -913,8 +1179,85 @@ func _process_field_army_movement_day()->void:
 			army["location_name"]=String(army.get("destination_name","DESTINATION"))
 			army["destination_id"]=""
 			army["arrival_day"]=int(GameState.elapsed_days)
-			GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d personnel and %d%% supply." % [String(army.name),String(army.location_name),int(army.troops),roundi(float(army.supply_level)*100.0)],"domain":"security","severity":"notice"})
+			if _army_is_home(army) or _live_army_reporting():
+				GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d personnel and %d%% supply." % [String(army.name),String(army.location_name),int(army.troops),roundi(float(army.supply_level)*100.0)],"domain":"security","severity":"notice"})
+			else:
+				# Arrival is itself only known at home once a runner delivers it.
+				army=_dispatch_army_runner(army,int(GameState.elapsed_days))
 		field_armies[index]=army
+
+
+func _live_army_reporting()->bool:
+	## Signal-era development (telegraph/radio tier) replaces physical runners.
+	return int(military_development_snapshot().get("tier",0))>=5
+
+
+func _army_report_snapshot(army:Dictionary)->Dictionary:
+	return {
+		"day":int(GameState.elapsed_days),
+		"position":(army.get("position",{}) as Dictionary).duplicate(true),
+		"status":String(army.get("status","stationed")),
+		"location_name":String(army.get("location_name","")),
+		"destination_name":String(army.get("destination_name","")),
+		"troops":int(army.get("troops",0)),
+		"supply_level":float(army.get("supply_level",1.0)),
+		"morale":float(army.get("morale",0.5)),
+		"readiness":float(army.get("readiness",0.5)),
+		"distance_remaining_km":float(army.get("distance_remaining_km",0.0)),
+		"arrival_day":int(army.get("arrival_day",-1)),
+	}
+
+
+func _army_is_home(army:Dictionary)->bool:
+	return String(army.get("status","stationed"))=="stationed" and String(army.get("location_id",""))=="player_home"
+
+
+func _dispatch_army_runner(army:Dictionary,day:int)->Dictionary:
+	if int(army.get("runner_count",0))<=0: return army
+	var position:Dictionary=army.get("position",{})
+	var here:=Vector2(float(position.get("x",0.0)),float(position.get("z",0.0)))
+	var home_destination:=_movement_destination("player_home")
+	var home_position:Dictionary=home_destination.get("position",{"x":0.0,"z":0.0})
+	var home:=Vector2(float(home_position.get("x",0.0)),float(home_position.get("z",0.0)))
+	var travel_days:=maxi(0,ceili(here.distance_to(home)/maxf(1.0,RUNNER_SPEED_KM_DAY)))
+	runner_messages.append({"army_id":int(army.get("army_id",0)),"army_name":String(army.get("name","FIELD ARMY")),"sent_day":day,"arrival_day":day+travel_days,"snapshot":_army_report_snapshot(army)})
+	army["last_runner_departure_day"]=day
+	return army
+
+
+func _process_army_runners_day()->void:
+	var day:=int(GameState.elapsed_days)
+	var live:=_live_army_reporting()
+	for index in field_armies.size():
+		var army:Dictionary=field_armies[index]
+		if live or _army_is_home(army):
+			# At home (or with signal-era communications) the government simply
+			# knows; runners are only the early-game information carrier.
+			army["last_report"]=_army_report_snapshot(army)
+			field_armies[index]=army
+			continue
+		if day-int(army.get("last_runner_departure_day",day))>=RUNNER_INTERVAL_DAYS:
+			army=_dispatch_army_runner(army,day)
+		field_armies[index]=army
+	if runner_messages.is_empty(): return
+	var remaining_messages:Array[Dictionary]=[]
+	for message_variant in runner_messages:
+		var message:Dictionary=message_variant
+		if day<int(message.get("arrival_day",day)):
+			remaining_messages.append(message)
+			continue
+		var army_index:=_field_army_index(int(message.get("army_id",-1)))
+		if army_index>=0:
+			var army:Dictionary=field_armies[army_index]
+			var snapshot:Dictionary=message.get("snapshot",{})
+			# Never let an older runner overwrite a newer report.
+			if int(snapshot.get("day",-1))>int((army.get("last_report",{}) as Dictionary).get("day",-1)):
+				army["last_report"]=snapshot.duplicate(true)
+				field_armies[army_index]=army
+				var report_day:=int(snapshot.get("day",day))
+				var status_text:="held position at %s" % String(snapshot.get("location_name","the field")) if String(snapshot.get("status","stationed"))=="stationed" else "was marching on %s with %.0f km remaining" % [String(snapshot.get("destination_name","its objective")),float(snapshot.get("distance_remaining_km",0.0))]
+				GameState.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of day %d the army %s with %d personnel and %d%% supply." % [String(message.get("army_name","the field army")),report_day,status_text,int(snapshot.get("troops",0)),roundi(float(snapshot.get("supply_level",1.0))*100.0)],"domain":"security","severity":"notice"})
+	runner_messages=remaining_messages
 
 
 func military_capabilities()->Dictionary:
@@ -1655,6 +1998,9 @@ func export_state()->Dictionary:
 		"war_reputation":war_reputation.duplicate(true),
 		"occupation_forces":occupation_forces.duplicate(true),
 		"field_armies":field_armies.duplicate(true),
+		"runner_messages":runner_messages.duplicate(true),
+		"army_templates":army_templates.duplicate(true),
+		"next_army_template_id":next_army_template_id,
 		"next_field_army_id":next_field_army_id,
 		"settlement_defense":settlement_defense.duplicate(true)
 	}
@@ -1927,6 +2273,14 @@ func _apply_imported_state(payload:Dictionary)->void:
 	field_armies.clear()
 	for force_variant in payload.get("field_armies",[]):
 		if force_variant is Dictionary: field_armies.append((force_variant as Dictionary).duplicate(true))
+	runner_messages.clear()
+	for message_variant in payload.get("runner_messages",[]):
+		if message_variant is Dictionary: runner_messages.append((message_variant as Dictionary).duplicate(true))
+	army_templates.clear()
+	for template_variant in payload.get("army_templates",[]):
+		if template_variant is Dictionary: army_templates.append((template_variant as Dictionary).duplicate(true))
+	if army_templates.is_empty(): army_templates=_default_army_templates()
+	next_army_template_id=maxi(1,int(payload.get("next_army_template_id",army_templates.size()+1)))
 	next_field_army_id=maxi(1,int(payload.get("next_field_army_id",1)))
 	for force in field_armies: next_field_army_id=maxi(next_field_army_id,int(force.get("army_id",0))+1)
 	settlement_defense=(payload.get("settlement_defense",_default_settlement_defense()) as Dictionary).duplicate(true)
@@ -2390,6 +2744,7 @@ func _process_military_day()->void:
 	_process_training_day()
 	_process_training_program_day()
 	_process_field_army_movement_day()
+	_process_army_runners_day()
 	_process_threat_day()
 	if not active_engagement.is_empty(): return
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return

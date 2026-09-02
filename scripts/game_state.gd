@@ -217,6 +217,32 @@ var simulation_metrics := {
 var simulation_trends: Dictionary = {}
 var simulation_events: Array[Dictionary] = []
 var last_simulation_event_days: Dictionary = {}
+## Evidence signals contributed by returned field parties (scouts, envoys).
+## Each entry is signal_name -> {"strength": float, "until_day": int}. While a
+## report circulates, matching discovery lines find their evidence environment
+## genuinely richer — the same pathway daily activity signals use.
+var field_observation_signals: Dictionary = {}
+
+
+func register_field_observations(signals:Dictionary,until_day:int)->void:
+	for signal_name in signals:
+		var strength:=clampf(float(signals[signal_name]),0.0,1.0)
+		var existing:Dictionary=field_observation_signals.get(String(signal_name),{})
+		field_observation_signals[String(signal_name)]={
+			"strength":maxf(strength,float(existing.get("strength",0.0))),
+			"until_day":maxi(until_day,int(existing.get("until_day",0))),
+		}
+
+
+func active_field_observation_signals(day:int)->Dictionary:
+	var active:Dictionary={}
+	for signal_name in field_observation_signals.keys():
+		var record:Dictionary=field_observation_signals[signal_name]
+		if day>int(record.get("until_day",0)):
+			field_observation_signals.erase(signal_name)
+			continue
+		active[signal_name]=float(record.get("strength",0.0))
+	return active
 var demographic_ledger: Array[Dictionary] = []
 var lifetime_births := 0
 var lifetime_deaths := 0
@@ -360,6 +386,7 @@ func reset_for_new_world(new_seed:int)->void:
 	simulation_trends={}
 	simulation_events=[]
 	last_simulation_event_days={}
+	field_observation_signals={}
 	demographic_ledger=[]
 	lifetime_births=0
 	lifetime_deaths=0

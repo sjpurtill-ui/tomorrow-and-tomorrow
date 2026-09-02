@@ -75,11 +75,14 @@ func _ready()->void:
 	terrain._on_hud_section_requested("military",0)
 	await get_tree().process_frame
 	_expect(terrain.hud.dock.visible and terrain.hud.active_section=="military","Military did not open in the dock")
-	_expect(_has_text(terrain.hud.dock,"PERSONNEL"),"Military dock is missing the personnel readout")
+	_expect(_has_text(terrain.hud.dock,"SETTLEMENT DEFENSE"),"Military dock is missing the defense readout")
+	terrain._on_hud_section_requested("military",1)
+	await get_tree().process_frame
+	_expect(_has_text(terrain.hud.dock,"BUILD"),"Military dock is missing army builds")
 	terrain._open_war_planning()
-	_expect(MilitaryCommandUI.modal.visible,"war planning did not open from the military dock")
-	_expect(MilitaryCommandUI.command_tabs and MilitaryCommandUI.command_tabs.get_tab_count()==5,"war planning is not split into five focused sections")
-	MilitaryCommandUI.modal.hide()
+	await get_tree().process_frame
+	_expect(terrain.hud.detail_dock.visible,"war planning did not open as a detail dock")
+	_expect(_has_text(terrain.hud.detail_dock,"War Planning"),"war planning detail is missing its heading")
 	terrain._on_hud_section_requested("",0)
 	await get_tree().process_frame
 

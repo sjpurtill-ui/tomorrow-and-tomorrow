@@ -56,6 +56,27 @@ func _build_ground(renderer:Node3D,center:Vector3,span:float)->MeshInstance3D:
 	return ground
 
 
+func _multimesh_audit(node:Node)->Dictionary:
+	var instance_count:=0
+	var batch_count:=0
+	var mesh_vertices:=0
+	for child in node.get_children():
+		if child is MultiMeshInstance3D:
+			var instance:=child as MultiMeshInstance3D
+			if instance.multimesh:
+				batch_count+=1
+				instance_count+=instance.multimesh.instance_count
+				if instance.multimesh.mesh:
+					for surface_index in instance.multimesh.mesh.get_surface_count():
+						var arrays:=instance.multimesh.mesh.surface_get_arrays(surface_index)
+						if not arrays.is_empty(): mesh_vertices+=(arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+		var nested:=_multimesh_audit(child)
+		instance_count+=int(nested.instances)
+		batch_count+=int(nested.batches)
+		mesh_vertices+=int(nested.template_vertices)
+	return {"instances":instance_count,"batches":batch_count,"template_vertices":mesh_vertices}
+
+
 func _render_stage()->void:
 	var stage:=_argument("--stage=","city").strip_edges().to_lower()
 	if stage not in ["founding camp","hamlet","village","town","city","metropolis","megalopolis"]: stage="city"
@@ -71,8 +92,10 @@ func _render_stage()->void:
 	var route_tier:=clampi(int(_argument("--route-tier=","0")),0,8)
 	var engineered_routes:=clampi(int(_argument("--engineered-routes=","1")),0,24)
 	var include_plots:=_argument("--include-plots=","1")!="0"
+	var audit_agriculture:=_argument("--agriculture=","0")=="1"
 	var fabric_lod:=clampi(int(_argument("--fabric-lod=","0" if stage in ["founding camp","hamlet","village"] else "1")),0,2)
-	var audit_aerial_lod:=clampf(float(_argument("--aerial-lod=","1.0")),0.0,1.0)
+	var aerial_lod_argument:=_argument("--aerial-lod=","auto").strip_edges().to_lower()
+	var oblique_view:=_argument("--view=","aerial").strip_edges().to_lower()=="oblique"
 
 	GameState.reset_for_new_world(741991)
 	GameState.select_founding_focus(focus)
@@ -114,6 +137,17 @@ func _render_stage()->void:
 		plot["condition"]=(0.18+float(plot_index%5)*0.06) if damaged else 0.88
 		if damaged: plot["status"]="ruin" if plot_index%4==0 else "damaged"
 		plot["prosperity"]=0.62
+	if audit_agriculture:
+		var converted_fields:=0
+		for plot_index in GameState.settlement_plots.size():
+			if converted_fields>=6: break
+			var plot:Dictionary=GameState.settlement_plots[plot_index]
+			if String(plot.get("land_use","")) in ["water","waste","communal","civic","sacred"]: continue
+			plot["land_use"]="field"
+			plot["field_pattern"]="smallholder_mosaic"
+			plot["cultivation_phase"]="mature" if plot_index%2==0 else "growing"
+			plot["crop_family"]=["grain","pulses","roots"][plot_index%3]
+			converted_fields+=1
 	if route_tier>0:
 		for route_index in engineered_routes:
 			GameState.settlement_routes.append({
@@ -132,10 +166,11 @@ func _render_stage()->void:
 	# founding camp occupy a few pixels, hiding precisely the roof and yard transition
 	# this harness now exists to inspect.
 	camera.size=maxf(0.10,float(_argument("--zoom=",str(audit_extent))))
+	var audit_aerial_lod:=smoothstep(0.72,3.20,camera.size) if aerial_lod_argument=="auto" else clampf(float(aerial_lod_argument),0.0,1.0)
 	# Near-overhead Google-Earth inspection: enough obliquity to reveal massing and
 	# relief, but not enough for mountain elevation to collapse the footprint to a
 	# horizon strip.
-	camera.position=center+Vector3(camera.size*0.08,camera.size*1.25,camera.size*0.12)
+	camera.position=center+(Vector3(camera.size*0.34,camera.size*0.76,camera.size*0.46) if oblique_view else Vector3(camera.size*0.08,camera.size*1.25,camera.size*0.12))
 	camera.current=true
 	add_child(camera)
 	camera.look_at(center,Vector3.UP)
@@ -180,11 +215,18 @@ func _render_stage()->void:
 	var image:=get_viewport().get_texture().get_image()
 	if image:
 		image.save_png(ProjectSettings.globalize_path(output_path))
+		var multimesh_audit:=_multimesh_audit(physical)
+		var vertex_total:=0
+		for child in physical.get_children():
+			if child is MeshInstance3D and (child as MeshInstance3D).mesh:
+				var child_mesh:Mesh=(child as MeshInstance3D).mesh
+				for surface_index in child_mesh.get_surface_count(): vertex_total+=child_mesh.surface_get_array_len(surface_index)
 		print("SETTLEMENT VISUAL AUDIT ",JSON.stringify({
 			"stage":stage,"population":population,"radius_km":layout.radius,
 			"damage":damage,"defense":defense_stage,"route_tier":route_tier,
-			"engineered_routes":engineered_routes,"include_plots":include_plots,
-			"fabric_lod":fabric_lod,"aerial_lod":audit_aerial_lod,"plots":GameState.settlement_plots.size(),
+			"engineered_routes":engineered_routes,"include_plots":include_plots,"agriculture":audit_agriculture,
+			"fabric_lod":fabric_lod,"aerial_lod":audit_aerial_lod,"view":"oblique" if oblique_view else "aerial","plots":GameState.settlement_plots.size(),"vertices":vertex_total,
+			"multimesh_instances":multimesh_audit.instances,"multimesh_batches":multimesh_audit.batches,"multimesh_template_vertices":multimesh_audit.template_vertices,
 			"surfaces":physical.get_child_count(),"output":ProjectSettings.globalize_path(output_path)
 		}))
 	# Release the off-tree renderer and its shared shader before the audit process

@@ -117,7 +117,7 @@ func test_scouts_reveal_nothing_until_their_return_then_chart_route_and_contact(
 	assert_int(GameState.food_issue_history.size()).is_equal(1)
 	var scout_issue:Dictionary=GameState.food_issue_history[0]
 	assert_str(String(scout_issue.category)).is_equal("scouting")
-	assert_float(float(scout_issue.amount)).is_equal_approx(float(system.scout_mission.provisions),0.001)
+	assert_float(float(scout_issue.amount)).is_equal_approx(float((system.scout_missions[0] as Dictionary).provisions),0.001)
 	assert_int(int(scout_issue.duration_days)).is_equal(365)
 	assert_float(float(scout_issue.stock_before)-float(scout_issue.stock_after)).is_equal_approx(float(scout_issue.amount),0.001)
 	assert_bool(bool(scout_issue.charged_at_departure)).is_true()
@@ -126,13 +126,13 @@ func test_scouts_reveal_nothing_until_their_return_then_chart_route_and_contact(
 	assert_int((food_account.active_mission_provisions as Array).size()).is_equal(1)
 	assert_float(float(food_account.withdrawn_today)).is_equal_approx(float(scout_issue.amount),0.001)
 	var commitments:Dictionary=system.player_population_commitments()
-	assert_int(int(commitments.total_absent)).is_equal(int(system.scout_mission.personnel))
-	assert_int(int((commitments.by_function as Dictionary).productive)).is_equal(int(system.scout_mission.personnel))
+	assert_int(int(commitments.total_absent)).is_equal(int((system.scout_missions[0] as Dictionary).personnel))
+	assert_int(int((commitments.by_function as Dictionary).productive)).is_equal(int((system.scout_missions[0] as Dictionary).personnel))
 	assert_int(int(system.player_population_function_profile().accounted)).is_equal(GameState.population_total)
 	# Put one test polity on the already-generated expedition route. Production
 	# worlds remain planetary in scale; this fixture proves that an actual crossed
 	# route becomes contact only after the physical report returns.
-	var mission_route:Array=system.scout_mission.route
+	var mission_route:Array=(system.scout_missions[0] as Dictionary).route
 	var encounter_waypoint:Dictionary=mission_route[mission_route.size()/2]
 	var contact_civ:Dictionary=system.civilizations[0]
 	contact_civ["position"]=Vector2(float(encounter_waypoint.x)/18000.0,float(encounter_waypoint.z)/9000.0)
@@ -140,8 +140,8 @@ func test_scouts_reveal_nothing_until_their_return_then_chart_route_and_contact(
 	contact_civ["logistics"]=0.0
 	contact_civ["knowledge"]=0.0
 	system.civilizations[0]=contact_civ
-	system.scout_mission["concealment"]=1.0
-	system.scout_mission["evasion"]=1.0
+	system.scout_missions[0]["concealment"]=1.0
+	system.scout_missions[0]["evasion"]=1.0
 	assert_float(FoodSystem.total_stored()).is_less(food_before)
 	assert_float(float(system.player_effects().get("scout_labor_absence",0.0))).is_greater(0.0)
 	var in_transit_map:Dictionary=system.discovery_map_snapshot()
@@ -267,7 +267,7 @@ func test_ocean_separated_known_target_is_blocked_before_people_or_food_depart()
 	var dispatch:Dictionary=system.dispatch_scouts(30,target_id)
 	assert_bool(dispatch.has("error")).is_true()
 	assert_float(FoodSystem.total_stored()).is_equal_approx(food_before,0.001)
-	assert_dict(system.scout_mission).is_empty()
+	assert_array(system.scout_missions).is_empty()
 
 
 func test_returned_report_and_world_map_preserve_the_exact_physical_land_trail()->void:
@@ -283,12 +283,12 @@ func test_returned_report_and_world_map_preserve_the_exact_physical_land_trail()
 	system.civilizations[0]=civ
 	var target_id:="settlement:%s" % String(civ.id)
 	assert_bool(bool(system.dispatch_scouts(30,target_id).get("ok",false))).is_true()
-	var departed_route:Array=system.scout_mission.route.duplicate(true)
+	var departed_route:Array=((system.scout_missions[0] as Dictionary).route as Array).duplicate(true)
 	assert_bool(system._scout_route_is_land(departed_route)).is_true()
-	system.scout_mission["concealment"]=1.0
-	system.scout_mission["evasion"]=1.0
+	system.scout_missions[0]["concealment"]=1.0
+	system.scout_missions[0]["evasion"]=1.0
 	system.advance_to_day(30)
-	assert_dict(system.scout_mission).is_empty()
+	assert_array(system.scout_missions).is_empty()
 	var report:Dictionary=system.scout_reports[0]
 	assert_array(report.route).is_equal(departed_route)
 	assert_array(report.return_route).is_equal(system._reverse_scout_route(departed_route))
@@ -323,8 +323,8 @@ func test_contact_sites_unlock_targeted_investigation_and_confirm_nearby_home_se
 	assert_bool(bool(before_encounter.get("home_location_known",false))).is_false()
 	assert_dict(before_encounter.get("home_position",{})).is_empty()
 	assert_bool(bool(system.dispatch_scouts(30,contact_target).get("ok",false))).is_true()
-	system.scout_mission["concealment"]=1.0
-	system.scout_mission["evasion"]=1.0
+	system.scout_missions[0]["concealment"]=1.0
+	system.scout_missions[0]["evasion"]=1.0
 	system.advance_to_day(30)
 	var resolved:Dictionary=(system.civilizations[0].player_relation as Dictionary)
 	assert_bool(bool(resolved.get("home_location_known",false))).is_true()
@@ -341,12 +341,12 @@ func test_contact_sites_unlock_targeted_investigation_and_confirm_nearby_home_se
 
 func test_returning_scouts_can_recruit_a_small_aggregate_wandering_group()->void:
 	var population_before:=GameState.population_total
-	system.scout_mission={"duration_days":365,"target_id":"open_world","target_kind":"explore"}
+	var recruitment_mission:Dictionary={"mission_id":99,"duration_days":365,"target_id":"open_world","target_kind":"explore"}
 	var recruited:=0
 	for day in range(1,200):
-		recruited=system._resolve_scout_recruitment(day)
+		recruited=system._resolve_scout_recruitment(recruitment_mission,day)
 		if recruited>0: break
-	assert_int(recruited).is_between(1,7)
+	assert_int(recruited).is_between(2,12)
 	assert_int(GameState.population_total).is_equal(population_before+recruited)
 	assert_float(float(GameState.population_cohorts.get("working_age",0.0))).is_greater(0.0)
 
@@ -534,15 +534,15 @@ func test_intercepted_player_scouts_lose_the_entire_unreturned_report()->void:
 	var original_areas:=(system.fog_snapshot().areas as Array).size()
 	var population_before:=GameState.population_total
 	assert_bool(bool(system.dispatch_scouts(90).get("ok",false))).is_true()
-	var route:Array=system.scout_mission.route
+	var route:Array=(system.scout_missions[0] as Dictionary).route
 	var hazard_waypoint:Dictionary=route[route.size()/2]
 	var intercepting_civ:Dictionary=system.civilizations[0]
 	intercepting_civ["position"]=Vector2(float(hazard_waypoint.x)/18000.0,float(hazard_waypoint.z)/9000.0)
 	system.civilizations[0]=intercepting_civ
-	var interception:Dictionary=system._resolve_player_scout_interception(90,0.0,1.0)
+	var interception:Dictionary=system._resolve_player_scout_interception(system.scout_missions[0],90,0.0,1.0)
 	assert_bool(bool(interception.get("intercepted",false))).is_true()
 	assert_str(String(interception.get("fate",""))).is_equal("destroyed")
-	system._fail_player_scout_mission(interception,90)
+	system._fail_player_scout_mission(system.scout_missions[0],interception,90)
 	assert_bool(bool(system.exploration_status().active)).is_false()
 	assert_int((system.fog_snapshot().areas as Array).size()).is_equal(original_areas)
 	assert_int(int(system.exploration_status().report_count)).is_equal(0)

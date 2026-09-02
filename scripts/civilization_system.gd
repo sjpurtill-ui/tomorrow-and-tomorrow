@@ -75,7 +75,8 @@ var competition_outcome:="ongoing"
 var competition_winner_id:=""
 var contender_dominance_turns:Dictionary={}
 var player_territory_balance:=0.0
-var scout_mission:Dictionary={}
+var scout_missions:Array[Dictionary]=[]
+var next_scout_mission_id:=1
 var scout_reports:Array[Dictionary]=[]
 var last_scout_outcome:Dictionary={}
 var diplomatic_mission:Dictionary={}
@@ -88,6 +89,11 @@ var fog_revision:=0
 var player_world_origin:=Vector2.ZERO
 var foreign_formations:Array[Dictionary]=[]
 var foreign_sightings:Array[Dictionary]=[]
+## Named landmarks charted by returned scout parties. They anchor navigation:
+## every known landmark slightly extends how far later parties can safely
+## range, and each is stamped on the map once its ground is revealed.
+var landmarks:Array[Dictionary]=[]
+var next_landmark_id:=1
 var observation_revision:=0
 var last_observation_day:=-1
 var war_history:Array[Dictionary]=[]
@@ -122,7 +128,8 @@ func reset_for_new_world()->void:
 	competition_winner_id=""
 	contender_dominance_turns={"player":0}
 	player_territory_balance=0.0
-	scout_mission.clear()
+	scout_missions.clear()
+	next_scout_mission_id=1
 	scout_reports.clear()
 	last_scout_outcome.clear()
 	diplomatic_mission.clear()
@@ -135,6 +142,8 @@ func reset_for_new_world()->void:
 	player_world_origin=Vector2.ZERO
 	foreign_formations.clear()
 	foreign_sightings.clear()
+	landmarks.clear()
+	next_landmark_id=1
 	observation_revision=0
 	last_observation_day=-1
 	war_history.clear()
@@ -521,8 +530,7 @@ func advance_to_day(target_day:int)->void:
 		_process_strategic_turn(last_turn_day)
 	last_processed_day=target_day
 	_process_foreign_scout_reports(target_day)
-	if not scout_mission.is_empty() and target_day>=int(scout_mission.get("return_day",target_day+1)):
-		_complete_scout_mission(target_day)
+	_complete_due_scout_missions(target_day)
 	_process_diplomatic_mission(target_day)
 	_process_local_observation(target_day)
 
@@ -594,7 +602,7 @@ func discovery_map_snapshot()->Dictionary:
 		"encounters":contact_encounters_snapshot(),
 		"visible_formations":(observation.get("visible",[]) as Array).duplicate(true),
 		"current_origin":{"x":player_world_origin.x,"z":player_world_origin.y},
-		"active_scout_party":not scout_mission.is_empty()
+		"active_scout_party":not scout_missions.is_empty()
 	}
 
 
@@ -911,29 +919,53 @@ func _plan_open_scout_route(one_way_range:float,rng:RandomNumberGenerator)->Dict
 
 
 func _audit_active_scout_land_route()->void:
-	if scout_mission.is_empty() or not scout_land_authority.is_valid(): return
-	var route:Array=scout_mission.get("route",[])
-	if String(scout_mission.get("travel_mode","land"))=="land" and _scout_route_is_land(route): return
-	var safe_route:Array[Dictionary]=[]
-	if not route.is_empty():
-		var first:Dictionary=route[0]
-		safe_route.append(first.duplicate(true))
-		for route_index in route.size()-1:
-			var a_data:Dictionary=route[route_index]
-			var b_data:Dictionary=route[route_index+1]
-			var a:=Vector2(float(a_data.get("x",0.0)),float(a_data.get("z",0.0)))
-			var b:=Vector2(float(b_data.get("x",0.0)),float(b_data.get("z",0.0)))
-			if not _scout_segment_is_land(a,b): break
-			safe_route.append(b_data.duplicate(true))
-	if safe_route.is_empty(): safe_route.append({"x":player_world_origin.x,"z":player_world_origin.y})
-	if safe_route.size()==1: safe_route.append(safe_route[0].duplicate(true))
-	scout_mission["route"]=safe_route
-	scout_mission["planned_distance"]=_scout_route_distance(safe_route)
-	scout_mission["reached_target"]=false
-	scout_mission["travel_mode"]="land"
-	scout_mission["route_status"]="turning_back"
-	scout_mission["turnback_reason"]="The planned route met open water. The land party turned back; no observations beyond the dry route can return."
-	scout_mission["return_day"]=mini(int(scout_mission.get("return_day",int(GameState.elapsed_days)+1)),int(GameState.elapsed_days)+maxi(1,ceili(float(scout_mission.get("planned_distance",0.0))/14.0)))
+	if scout_missions.is_empty() or not scout_land_authority.is_valid(): return
+	for mission_index in scout_missions.size():
+		var mission:Dictionary=scout_missions[mission_index]
+		var route:Array=mission.get("route",[])
+		if String(mission.get("travel_mode","land"))=="land" and _scout_route_is_land(route): continue
+		var safe_route:Array[Dictionary]=[]
+		if not route.is_empty():
+			var first:Dictionary=route[0]
+			safe_route.append(first.duplicate(true))
+			for route_index in route.size()-1:
+				var a_data:Dictionary=route[route_index]
+				var b_data:Dictionary=route[route_index+1]
+				var a:=Vector2(float(a_data.get("x",0.0)),float(a_data.get("z",0.0)))
+				var b:=Vector2(float(b_data.get("x",0.0)),float(b_data.get("z",0.0)))
+				if not _scout_segment_is_land(a,b): break
+				safe_route.append(b_data.duplicate(true))
+		if safe_route.is_empty(): safe_route.append({"x":player_world_origin.x,"z":player_world_origin.y})
+		if safe_route.size()==1: safe_route.append(safe_route[0].duplicate(true))
+		mission["route"]=safe_route
+		mission["planned_distance"]=_scout_route_distance(safe_route)
+		mission["reached_target"]=false
+		mission["travel_mode"]="land"
+		mission["route_status"]="turning_back"
+		mission["turnback_reason"]="The planned route met open water. The land party turned back; no observations beyond the dry route can return."
+		mission["return_day"]=mini(int(mission.get("return_day",int(GameState.elapsed_days)+1)),int(GameState.elapsed_days)+maxi(1,ceili(float(mission.get("planned_distance",0.0))/14.0)))
+		scout_missions[mission_index]=mission
+
+
+func scout_party_capacity()->int:
+	## How many aggregate scout parties can be away at once. Purely a function
+	## of population: roughly one organizable party per 60 people.
+	return clampi(GameState.population_total/60,1,6)
+
+
+func _soonest_returning_mission()->Dictionary:
+	var soonest:Dictionary={}
+	for mission_variant in scout_missions:
+		var mission:Dictionary=mission_variant
+		if soonest.is_empty() or int(mission.get("return_day",0))<int(soonest.get("return_day",0)): soonest=mission
+	return soonest
+
+
+func _complete_due_scout_missions(day:int)->void:
+	for mission_variant in scout_missions.duplicate():
+		var mission:Dictionary=mission_variant
+		if day>=int(mission.get("return_day",day+1)):
+			_complete_scout_mission(mission,day)
 
 
 func exploration_status()->Dictionary:
@@ -941,16 +973,26 @@ func exploration_status()->Dictionary:
 	var known:=0
 	for civ in civilizations:
 		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: known+=1
-	var active:=not scout_mission.is_empty()
+	var active:=not scout_missions.is_empty()
 	var current_day:=int(GameState.elapsed_days)
-	var remaining:=maxi(0,int(scout_mission.get("return_day",current_day))-current_day) if active else 0
-	var duration:=maxi(1,int(scout_mission.get("duration_days",1))) if active else 1
-	var risk:=_player_scout_risk_snapshot(scout_mission) if active else {}
+	# Scalar fields describe the soonest-returning party for legacy callers;
+	# `parties` carries the complete concurrent picture.
+	var mission:=_soonest_returning_mission()
+	var remaining:=maxi(0,int(mission.get("return_day",current_day))-current_day) if active else 0
+	var duration:=maxi(1,int(mission.get("duration_days",1))) if active else 1
+	var risk:=_player_scout_risk_snapshot(mission) if active else {}
 	var missing:=_captured_player_scout_count()
+	var capacity:=scout_party_capacity()
+	var parties:Array[Dictionary]=[]
+	for party_variant in scout_missions:
+		var party:Dictionary=party_variant
+		var party_remaining:=maxi(0,int(party.get("return_day",current_day))-current_day)
+		var party_duration:=maxi(1,int(party.get("duration_days",1)))
+		parties.append({"mission_id":int(party.get("mission_id",0)),"personnel":int(party.get("personnel",0)),"days_remaining":party_remaining,"return_day":int(party.get("return_day",-1)),"duration_days":party_duration,"progress":clampf(1.0-float(party_remaining)/float(party_duration),0.0,1.0),"target_id":String(party.get("target_id","")),"target_label":String(party.get("target_label","OPEN EXPLORATION")),"route_status":String(party.get("route_status","")),"turnback_reason":String(party.get("turnback_reason","")),"provisions":float(party.get("provisions",0.0))})
 	var idle_message:="The last scout party did not return, so none of its observations became knowledge. %d scouts remain missing from the population's available labor." % missing if missing>0 else ("No foreign polity has been met. Choose how long a scout party may range before it must return." if known==0 else "Dispatch another scout party; only its returned report reveals new ground or contacts.")
-	var active_message:="Scout party is away. Its observations remain aboard the party; interception can erase the entire report before it returns."
-	if active and String(scout_mission.get("route_status",""))=="turning_back": active_message=String(scout_mission.get("turnback_reason","The land route was blocked, so the party is turning back."))
-	return {"active":active,"progress":clampf(1.0-float(remaining)/float(duration),0.0,1.0) if active else 0.0,"days_remaining":remaining,"return_day":int(scout_mission.get("return_day",-1)),"duration_days":int(scout_mission.get("duration_days",0)),"personnel":int(scout_mission.get("personnel",0)),"provisions":float(scout_mission.get("provisions",0.0)),"target_id":String(scout_mission.get("target_id","")),"target_kind":String(scout_mission.get("target_kind","explore")),"target_label":String(scout_mission.get("target_label","OPEN EXPLORATION")),"travel_mode":String(scout_mission.get("travel_mode","land")),"route_status":String(scout_mission.get("route_status","")),"contacted_count":known,"can_begin":not active,"report_count":scout_reports.size(),"latest_report":scout_reports[0].duplicate(true) if not scout_reports.is_empty() else {},"last_outcome":last_scout_outcome.duplicate(true),"missing_scouts":missing,"risk":risk,"message":active_message if active else idle_message}
+	var active_message:="%d scout part%s away. Observations remain aboard each party; interception can erase an entire report before it returns." % [scout_missions.size(),"y is" if scout_missions.size()==1 else "ies are"]
+	if active and String(mission.get("route_status",""))=="turning_back": active_message=String(mission.get("turnback_reason","The land route was blocked, so the party is turning back."))
+	return {"active":active,"progress":clampf(1.0-float(remaining)/float(duration),0.0,1.0) if active else 0.0,"days_remaining":remaining,"return_day":int(mission.get("return_day",-1)),"duration_days":int(mission.get("duration_days",0)),"personnel":int(mission.get("personnel",0)),"provisions":float(mission.get("provisions",0.0)),"target_id":String(mission.get("target_id","")),"target_kind":String(mission.get("target_kind","explore")),"target_label":String(mission.get("target_label","OPEN EXPLORATION")),"travel_mode":String(mission.get("travel_mode","land")),"route_status":String(mission.get("route_status","")),"contacted_count":known,"can_begin":scout_missions.size()<capacity,"active_count":scout_missions.size(),"capacity":capacity,"parties":parties,"report_count":scout_reports.size(),"latest_report":scout_reports[0].duplicate(true) if not scout_reports.is_empty() else {},"last_outcome":last_scout_outcome.duplicate(true),"missing_scouts":missing,"risk":risk,"message":active_message if active else idle_message}
 
 
 func scout_target_options()->Array[Dictionary]:
@@ -999,7 +1041,7 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world")->Dicti
 	var personnel:=clampi(roundi(population*0.012),6,80)
 	var provisions:=float(personnel)*float(duration_days)*0.55
 	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.16)),0.0,1.0)
-	var one_way_range:=float(duration_days)*14.0*(0.72+logistics*0.28)
+	var one_way_range:=float(duration_days)*14.0*(0.72+logistics*0.28)*scout_range_factor()
 	var target_distance:=0.0
 	var target_position:Dictionary=target.get("position",{})
 	if target_position.has("x") and target_position.has("z"):
@@ -1009,10 +1051,12 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world")->Dicti
 		route_plan=_plan_scout_land_route(player_world_origin,Vector2(float(target_position.x),float(target_position.z)))
 	var planning_mission:={"duration_days":duration_days,"concealment":clampf(0.72+clampf(float(GameState.combined_intelligence),0.0,1.0)*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93),"evasion":clampf(0.76+logistics*0.14+clampf(float(GameState.combined_intelligence),0.0,1.0)*0.08,0.74,0.95)}
 	var risk:=_player_scout_risk_snapshot(planning_mission)
+	var committed_scouts:=0
+	for mission_variant in scout_missions: committed_scouts+=int((mission_variant as Dictionary).get("personnel",0))
 	var blocker:=""
-	if not scout_mission.is_empty(): blocker="A scout party is already away."
+	if scout_missions.size()>=scout_party_capacity(): blocker="All %d scout parties this population can organize are already away." % scout_party_capacity()
 	elif not scout_land_authority.is_valid(): blocker="No terrain survey is available. Unknown ground cannot be assumed to be land."
-	elif population<float(personnel)+12.0: blocker="The population cannot spare a viable party."
+	elif population<float(personnel+committed_scouts)+12.0: blocker="The population cannot spare another viable party."
 	elif FoodSystem.total_stored()+0.0001<provisions: blocker="Requires %.1f Food; only %.1f is stored." % [provisions,FoodSystem.total_stored()]
 	elif target_distance>one_way_range: blocker="This mission can reach about %.0f km, but the target is %.0f km away. Choose a longer expedition." % [one_way_range,target_distance]
 	elif not route_plan.is_empty() and not bool(route_plan.get("ok",false)): blocker=String(route_plan.get("reason","No continuous land-only route reaches this target."))
@@ -1030,8 +1074,8 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world")->Dictionar
 	var provisions:=float(quote.provisions)
 	var target_option:Dictionary=quote.target
 	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^int(GameState.elapsed_days)*104729^duration_days*8191^scout_reports.size()*65537^String(target_option.id).hash()
-	var one_way_range:=float(duration_days)*14.0*(0.72+clampf(float(GameState.simulation_metrics.get("logistics",0.16)),0.0,1.0)*0.28)
+	rng.seed=last_world_seed^int(GameState.elapsed_days)*104729^duration_days*8191^scout_reports.size()*65537^String(target_option.id).hash()^next_scout_mission_id*2654435761
+	var one_way_range:=float(duration_days)*14.0*(0.72+clampf(float(GameState.simulation_metrics.get("logistics",0.16)),0.0,1.0)*0.28)*scout_range_factor()
 	var target_position:Dictionary=target_option.get("position",{})
 	var route_plan:Dictionary=quote.get("route_plan",{})
 	if String(target_option.get("kind","explore"))=="explore": route_plan=_plan_open_scout_route(one_way_range,rng)
@@ -1051,9 +1095,11 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world")->Dictionar
 	var field_knowledge:=clampf(float(GameState.combined_intelligence),0.0,1.0)
 	var concealment:=clampf(0.72+field_knowledge*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93)
 	var evasion:=clampf(0.76+logistics*0.14+field_knowledge*0.08,0.74,0.95)
-	scout_mission={"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
-	var risk:=_player_scout_risk_snapshot(scout_mission)
-	scout_mission["estimated_interception_risk"]=float(risk.estimated_risk)
+	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
+	next_scout_mission_id+=1
+	var risk:=_player_scout_risk_snapshot(mission)
+	mission["estimated_interception_risk"]=float(risk.estimated_risk)
+	scout_missions.append(mission)
 	var message:="A %d-person aggregate scout party departs for %d days to %s with %.1f Food. It is fast and concealed (evasion %d%%), but every observation remains aboard the party and is lost if it cannot return. Estimated route risk: %s." % [personnel,duration_days,String(target_option.label).capitalize(),issued_provisions,roundi(evasion*100.0),String(risk.label)]
 	_record_world_event("Scout party departs",message,"diplomacy",start_day)
 	return {"ok":true,"message":message,"status":exploration_status()}
@@ -1735,13 +1781,13 @@ func interrogate_captured_scouts(civ_id:String,method:String,disclosure_roll_ove
 	return {"ok":true,"method":normalized,"truthful":truthful,"disclosed":disclosed,"intelligence_gain":gain,"deaths":deaths,"information_remaining":float(cohort.information_remaining),"message":message}
 
 
-func _resolve_player_scout_interception(day:int,interception_roll_override:float=-1.0,fate_roll_override:float=-1.0)->Dictionary:
-	if scout_mission.is_empty(): return {"intercepted":false}
-	var hazards:=_player_scout_hazards(scout_mission)
+func _resolve_player_scout_interception(mission:Dictionary,day:int,interception_roll_override:float=-1.0,fate_roll_override:float=-1.0)->Dictionary:
+	if mission.is_empty(): return {"intercepted":false}
+	var hazards:=_player_scout_hazards(mission)
 	for hazard_index in hazards.size():
 		var hazard:Dictionary=hazards[hazard_index]
 		var civ_id:=String(hazard.get("civ_id",""))
-		var rng:=RandomNumberGenerator.new(); rng.seed=last_world_seed^day*961748927^civ_id.hash()^hazard_index*15485863
+		var rng:=RandomNumberGenerator.new(); rng.seed=last_world_seed^day*961748927^civ_id.hash()^hazard_index*15485863^int(mission.get("mission_id",0))*7919
 		var interception_roll:=interception_roll_override if interception_roll_override>=0.0 else rng.randf()
 		if interception_roll>=float(hazard.get("chance",0.0)): continue
 		var aggression:=clampf(float(hazard.get("aggression",0.5)),0.0,1.0)
@@ -1751,8 +1797,8 @@ func _resolve_player_scout_interception(day:int,interception_roll_override:float
 	return {"intercepted":false}
 
 
-func _fail_player_scout_mission(interception:Dictionary,day:int)->void:
-	var personnel:=maxi(0,int(scout_mission.get("personnel",0)))
+func _fail_player_scout_mission(mission:Dictionary,interception:Dictionary,day:int)->void:
+	var personnel:=maxi(0,int(mission.get("personnel",0)))
 	var civ_id:=String(interception.get("civ_id",""))
 	var fate:=String(interception.get("fate","destroyed"))
 	var civ_index:=_civilization_index(civ_id)
@@ -1775,7 +1821,15 @@ func _fail_player_scout_mission(interception:Dictionary,day:int)->void:
 	var message:=String(last_scout_outcome.message)
 	_record_world_event("Scout party overdue",message,"diplomacy",day)
 	GameState.simulation_events.push_front({"day":day,"title":"SCOUT PARTY OVERDUE","description":message,"domain":"security","severity":"major"})
-	scout_mission.clear()
+	_erase_scout_mission(mission)
+
+
+func _erase_scout_mission(mission:Dictionary)->void:
+	var mission_id:=int(mission.get("mission_id",-1))
+	for index in scout_missions.size():
+		if int((scout_missions[index] as Dictionary).get("mission_id",-2))==mission_id:
+			scout_missions.remove_at(index)
+			return
 
 
 func _closest_route_encounter(route:Array,target:Vector2)->Dictionary:
@@ -1805,12 +1859,12 @@ func _reverse_scout_route(route:Array)->Array[Dictionary]:
 	return reversed
 
 
-func _complete_scout_mission(day:int)->void:
-	var interception:=_resolve_player_scout_interception(day)
+func _complete_scout_mission(mission:Dictionary,day:int)->void:
+	var interception:=_resolve_player_scout_interception(mission,day)
 	if bool(interception.get("intercepted",false)):
-		_fail_player_scout_mission(interception,day)
+		_fail_player_scout_mission(mission,interception,day)
 		return
-	var route:Array=scout_mission.get("route",[])
+	var route:Array=mission.get("route",[])
 	# One aggregate capsule trail follows the physical chart. Do not convert its
 	# samples into circles: circle consolidation was what inflated a returned line
 	# into an impossible continental reveal.
@@ -1839,37 +1893,42 @@ func _complete_scout_mission(day:int)->void:
 		contact_records.append(contact_record)
 		var contact_description:="Returning scouts report direct contact with people of the %s at the marked point on their charted route. This is the encounter site, not a revealed homeland." % String(civ.name)
 		_publish_observed_event("First contact — %s" % String(civ.name),contact_description,day,{"kind":"first_contact","civ_id":String(civ.id),"formation_id":"","formation_kind":"returned scout party","identified":true,"position":contact_record.position})
-	var targeted_finding:=_resolve_targeted_scout_report(day)
-	var recruits:=_resolve_scout_recruitment(day)
+	var targeted_finding:=_resolve_targeted_scout_report(mission,day)
+	var recruits:=_resolve_scout_recruitment(mission,day)
+	var windfalls:=_resolve_scout_windfalls(mission,route,day)
+	windfalls.append_array(_resolve_route_military_sightings(mission,route,day))
+	var landmark_line:=_resolve_scout_landmark(mission,route,day)
+	if landmark_line!="": windfalls.append(landmark_line)
 	var return_route:=_reverse_scout_route(route)
-	var report:Dictionary={"day":day,"duration_days":int(scout_mission.duration_days),"personnel":int(scout_mission.personnel),"distance_km":roundi(_scout_route_distance(route)*2.0),"mission_kind":String(scout_mission.get("target_kind","explore")),"target_id":String(scout_mission.get("target_id","open_world")),"target_label":String(scout_mission.get("target_label","OPEN EXPLORATION")),"target_finding":targeted_finding,"contacts":contacts,"contact_records":contact_records,"route":route.duplicate(true),"return_route":return_route,"travel_mode":String(scout_mission.get("travel_mode","land")),"route_status":String(scout_mission.get("route_status","returned")),"turnback_reason":String(scout_mission.get("turnback_reason","")),"new_contact_count":contacts.size(),"recruits":recruits}
+	var report:Dictionary={"day":day,"duration_days":int(mission.duration_days),"personnel":int(mission.personnel),"distance_km":roundi(_scout_route_distance(route)*2.0),"mission_kind":String(mission.get("target_kind","explore")),"target_id":String(mission.get("target_id","open_world")),"target_label":String(mission.get("target_label","OPEN EXPLORATION")),"target_finding":targeted_finding,"contacts":contacts,"contact_records":contact_records,"route":route.duplicate(true),"return_route":return_route,"travel_mode":String(mission.get("travel_mode","land")),"route_status":String(mission.get("route_status","returned")),"turnback_reason":String(mission.get("turnback_reason","")),"new_contact_count":contacts.size(),"recruits":recruits,"windfalls":windfalls.duplicate()}
 	scout_reports.push_front(report)
 	if scout_reports.size()>SCOUT_REPORT_LIMIT: scout_reports.resize(SCOUT_REPORT_LIMIT)
 	var finding:="No organized foreign polity was encountered." if contacts.is_empty() else ("Direct contact was established with %s." % ", ".join(contacts))
 	if targeted_finding!="": finding+=" "+targeted_finding
 	if recruits>0: finding+=" The scouts also return with %d wanderers who agreed to join the settlement." % recruits
+	for windfall in windfalls: finding+=" "+windfall
 	var turnback_note:=String(report.get("turnback_reason",""))
 	if turnback_note!="": finding="%s %s" % [turnback_note,finding]
 	var message:="The scout party returns after %d days and charts roughly %d km of land travel. %s The map now reveals only the physical route contained in its returned report." % [int(report.duration_days),int(report.distance_km),finding]
 	last_scout_outcome={"day":day,"status":"returned","personnel":int(report.personnel),"message":message}
 	_record_world_event("Scout party returns",message,"diplomacy",day)
 	GameState.simulation_events.push_front({"day":day,"title":"SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major"})
-	scout_mission.clear()
+	_erase_scout_mission(mission)
 
 
-func _resolve_targeted_scout_report(day:int)->String:
-	var kind:=String(scout_mission.get("target_kind","explore"))
+func _resolve_targeted_scout_report(mission:Dictionary,day:int)->String:
+	var kind:=String(mission.get("target_kind","explore"))
 	if kind not in ["investigate_contact","observe_settlement"]: return ""
-	if String(scout_mission.get("route_status",""))=="turning_back":
-		return String(scout_mission.get("turnback_reason","The land route was blocked, so the party turned back."))
-	if not bool(scout_mission.get("reached_target",false)): return "The party could not reach its intended target."
-	var civ_id:=String(scout_mission.get("target_civ_id",""))
+	if String(mission.get("route_status",""))=="turning_back":
+		return String(mission.get("turnback_reason","The land route was blocked, so the party turned back."))
+	if not bool(mission.get("reached_target",false)): return "The party could not reach its intended target."
+	var civ_id:=String(mission.get("target_civ_id",""))
 	var index:=_civilization_index(civ_id)
 	if index<0: return "The intended polity could no longer be identified."
 	var civ:Dictionary=civilizations[index]
 	var relation:=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
-	var duration:=maxi(1,int(scout_mission.get("duration_days",30)))
-	var target_position_data:Dictionary=scout_mission.get("target_position",{})
+	var duration:=maxi(1,int(mission.get("duration_days",30)))
+	var target_position_data:Dictionary=mission.get("target_position",{})
 	var target_position:=Vector2(float(target_position_data.get("x",0.0)),float(target_position_data.get("z",0.0)))
 	var result:=""
 	if kind=="investigate_contact":
@@ -1900,16 +1959,165 @@ func _resolve_targeted_scout_report(day:int)->String:
 	return result
 
 
-func _resolve_scout_recruitment(day:int)->int:
-	var duration:=maxi(1,int(scout_mission.get("duration_days",30)))
+func _resolve_scout_recruitment(mission:Dictionary,day:int)->int:
+	var duration:=maxi(1,int(mission.get("duration_days",30)))
 	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*32452843^duration*49979687^scout_reports.size()*86028121^String(scout_mission.get("target_id","open_world")).hash()
-	var chance:=clampf(0.10+float(duration)/365.0*0.25+(0.05 if String(scout_mission.get("target_kind","explore"))=="explore" else 0.0),0.0,0.42)
+	rng.seed=last_world_seed^day*32452843^duration*49979687^scout_reports.size()*86028121^String(mission.get("target_id","open_world")).hash()
+	var chance:=clampf(0.18+float(duration)/365.0*0.30+(0.05 if String(mission.get("target_kind","explore"))=="explore" else 0.0),0.0,0.55)
 	if rng.randf()>=chance: return 0
-	var maximum:=clampi(1+duration/70,2,7)
-	var count:=rng.randi_range(1,maximum)
+	# Whole families and small bands join, not lone stragglers.
+	var maximum:=clampi(3+duration/45,4,12)
+	var count:=rng.randi_range(2,maximum)
 	GameState.register_population_arrivals(count,"wanderers recruited by returning scouts")
 	return count
+
+
+const SCOUT_FIND_RESOURCES:Array[String]=["Timber","Stone","Fiber Plants","Fertile Soil","Game"]
+const LANDMARK_LIMIT:=40
+const LANDMARK_KINDS:Array[Array]=[
+	["ridge","%s Ridge","A long spine of high ground visible for a day's walk."],
+	["vale","%s Vale","A sheltered valley the party used as a waymark."],
+	["ford","%s Ford","A reliable shallow crossing the party waded twice."],
+	["stones","The %s Stones","Weathered standing stones no living people claim."],
+	["grove","%s Grove","An old stand of trees unlike the surrounding country."],
+	["springs","%s Springs","Water rising warm from the ground year-round."],
+	["cliffs","The %s Cliffs","A pale scarp face the party steered by for days."],
+	["sink","%s Hollow","A broad depression that gathers mist each morning."],
+]
+const LANDMARK_ADJECTIVES:Array[String]=["Grey","Red","Broken","Silent","Far","White","Thorn","Crow","Elder","Hollow","Bright","Ash","Wind","Stone","Lark"]
+
+
+func scout_range_factor()->float:
+	## Every named landmark is a navigational anchor; a charted lattice of
+	## waymarks lets later parties range measurably farther with the same food.
+	return minf(1.20,1.0+0.02*float(landmarks.size()))
+
+
+func landmarks_snapshot()->Array[Dictionary]:
+	return landmarks.duplicate(true)
+
+
+func _resolve_scout_landmark(mission:Dictionary,route:Array,day:int)->String:
+	if landmarks.size()>=LANDMARK_LIMIT or route.size()<4: return ""
+	var duration:=maxi(1,int(mission.get("duration_days",30)))
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=last_world_seed^day*217645199^int(mission.get("mission_id",0))*373587883^duration*10007
+	if rng.randf()>=clampf(0.30+float(duration)/365.0*0.35,0.0,0.65): return ""
+	var waypoint:Dictionary=route[rng.randi_range(route.size()/2,route.size()-1)]
+	var position:=Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0)))
+	for landmark_variant in landmarks:
+		var existing_position:Dictionary=(landmark_variant as Dictionary).get("position",{})
+		if position.distance_to(Vector2(float(existing_position.get("x",0.0)),float(existing_position.get("z",0.0))))<40.0: return ""
+	var kind:Array=LANDMARK_KINDS[rng.randi_range(0,LANDMARK_KINDS.size()-1)]
+	var adjective:=LANDMARK_ADJECTIVES[rng.randi_range(0,LANDMARK_ADJECTIVES.size()-1)]
+	var landmark_name:=String(kind[1]) % adjective
+	var landmark:Dictionary={"id":"landmark_%d" % next_landmark_id,"name":landmark_name,"kind":String(kind[0]),"position":{"x":position.x,"z":position.y},"discovered_day":day,"description":String(kind[2])}
+	next_landmark_id+=1
+	landmarks.append(landmark)
+	_record_world_event("Landmark named",'The returning party names "%s", %d km from home. %s' % [landmark_name,roundi(player_world_origin.distance_to(position)),String(kind[2])],"diplomacy",day)
+	return 'They name "%s" along the route — one more waymark extending how far future parties can safely range.' % landmark_name
+
+
+func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->Array[String]:
+	## Early-game field intelligence: a party that crossed near a foreign
+	## column reports it on return, through the same sighting pipeline the
+	## home lookouts use — dated to the march, not to today.
+	var findings:Array[String]=[]
+	if route.size()<2: return findings
+	for formation_variant in foreign_formations:
+		if findings.size()>=2: break
+		var formation:Dictionary=formation_variant
+		var closest_distance:=INF
+		var closest_point:=Vector2.ZERO
+		for waypoint_variant in route:
+			var waypoint:Dictionary=waypoint_variant
+			var point:=Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0)))
+			var distance:=_formation_route_distance_to(formation,point)
+			if distance<closest_distance:
+				closest_distance=distance
+				closest_point=point
+		if closest_distance>45.0: continue
+		var formation_id:=String(formation.get("id",""))
+		var civ_id:=String(formation.get("civ_id",""))
+		var civ_index:=_civilization_index(civ_id)
+		if civ_index<0: continue
+		var civ:Dictionary=civilizations[civ_index]
+		var relation:=_relation_with_strategy_defaults(civ.player_relation,civ)
+		var identified:=int(relation.get("contact_level",0))>=2
+		relation["contact_level"]=maxi(int(relation.get("contact_level",0)),1)
+		relation["contact_intelligence"]=maxf(float(relation.get("contact_intelligence",0.0)),0.08)
+		civ["player_relation"]=relation
+		civilizations[civ_index]=civ
+		var strength:=maxf(1.0,float(civ.get("military_population",0.0))*float(formation.get("strength_share",0.08)))
+		var sighting_index:=_formation_sighting_index(formation_id)
+		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.get("kind","formation")),"last_seen_day":day,"position":{"x":closest_point.x,"z":closest_point.y},"distance_km":player_world_origin.distance_to(closest_point),"strength":strength,"readiness":float(formation.get("readiness",0.5)),"visible":false,"source":"returned_scout_report"}
+		if sighting_index<0:
+			foreign_sightings.push_front(sighting)
+			if foreign_sightings.size()>FOREIGN_SIGHTING_LIMIT: foreign_sightings.resize(FOREIGN_SIGHTING_LIMIT)
+		else: foreign_sightings[sighting_index]=sighting
+		var observed_name:=String(civ.get("name","an unidentified polity")) if identified else "an unidentified polity"
+		var kind_label:=String(formation.get("kind","formation")).replace("_"," ")
+		var strength_text:="roughly %d under arms" % roundi(strength) if strength>=5.0 else "of unknown strength"
+		var description:="Returning scouts report a %s of %s — %s — moving near the marked point on their charted route. The report is days old; the column has since moved." % [kind_label,observed_name,strength_text]
+		_publish_observed_event("Scouts report foreign %s" % kind_label,description,day,{"kind":"unit_sighting","civ_id":civ_id if identified else "","formation_id":formation_id,"formation_kind":kind_label,"identified":identified,"position":sighting.position})
+		findings.append("They crossed the trail of a foreign %s (%s) and marked where they saw it." % [kind_label,strength_text])
+	if not findings.is_empty():
+		observation_revision+=1
+	return findings
+
+func _resolve_scout_windfalls(mission:Dictionary,route:Array,day:int)->Array[String]:
+	## The concrete wins a returned party can bring home beyond charted ground
+	## and contacts: recognized deposits along the route, field evidence for
+	## running investigations, and salvage carried back.
+	var windfalls:Array[String]=[]
+	var duration:=maxi(1,int(mission.get("duration_days",30)))
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=last_world_seed^day*179424673^duration*15485867^int(mission.get("mission_id",0))*982451653
+	# 1) Recognized deposits: the party marks workable occurrences on its chart.
+	if route.size()>=4:
+		var find_count:=0
+		var find_chance:=clampf(0.35+float(duration)/365.0*0.40,0.0,0.80)
+		if rng.randf()<find_chance: find_count+=1
+		if duration>=180 and rng.randf()<0.45: find_count+=1
+		for find_index in find_count:
+			var waypoint_index:=rng.randi_range(route.size()/3,route.size()-1)
+			var waypoint:Dictionary=route[waypoint_index]
+			var position:=Vector3(float(waypoint.get("x",0.0))+rng.randf_range(-6.0,6.0),0.0,float(waypoint.get("z",0.0))+rng.randf_range(-6.0,6.0))
+			var resource_name:=SCOUT_FIND_RESOURCES[rng.randi_range(0,SCOUT_FIND_RESOURCES.size()-1)]
+			var deposit:Dictionary=ResourceSystem._deposit(resource_name,position,rng.randf_range(0.55,0.95),rng.randf_range(600.0,2400.0),GameState.resource_deposits.size())
+			deposit["stage"]="recognized"
+			deposit["clues"]=1.0
+			deposit["survey"]=0.55
+			GameState.resource_deposits.append(deposit)
+			var origin_distance:=roundi(player_world_origin.distance_to(Vector2(position.x,position.z)))
+			windfalls.append("They mark a workable %s occurrence about %d km out; it now appears on the resource layer." % [resource_name.to_lower(),origin_distance])
+	# 2) Field evidence: the returned charts and accounts circulate through the
+	# collective mind, raising the evidence signals that ongoing inquiry lines
+	# actually feed on (the same pathway as daily activity) — not a flat bonus
+	# to one lucky project.
+	var circulation_days:=clampi(30+duration/3,30,150)
+	var strength:=clampf(0.45+float(duration)/365.0*0.35,0.45,0.80)
+	var observed_signals:Dictionary={"exploration":strength,"travel":strength*0.85,"survey":strength*0.75,"nature":strength*0.6}
+	var signal_summary:="exploration, travel, and natural-cycle"
+	match String(mission.get("target_kind","explore")):
+		"investigate_contact":
+			observed_signals["administration"]=strength*0.6
+			observed_signals["information"]=strength*0.6
+			signal_summary="route, contact, and organizational"
+		"observe_settlement":
+			observed_signals["defense"]=strength*0.7
+			observed_signals["construction"]=strength*0.5
+			observed_signals["administration"]=strength*0.6
+			signal_summary="defensive works, construction, and organizational"
+	GameState.register_field_observations(observed_signals,day+circulation_days)
+	windfalls.append("Their charts and accounts circulate for ~%d days, enriching %s evidence for every inquiry that feeds on it." % [circulation_days,signal_summary])
+	# 3) Salvage: hides, cordage fiber, seasoned wood carried home.
+	if rng.randf()<0.45:
+		var salvage_resource:="Fiber Plants" if rng.randf()<0.5 else "Timber"
+		var salvage_amount:=float(3+duration/30)
+		GameState.resource_stockpiles[salvage_resource]=float(GameState.resource_stockpiles.get(salvage_resource,0.0))+salvage_amount
+		windfalls.append("The party hauls back %.0f bulk of %s gathered on the route." % [salvage_amount,salvage_resource.to_lower()])
+	return windfalls
 
 
 func _process_player_contact(day:int)->void:
@@ -1925,8 +2133,7 @@ func _process_player_contact(day:int)->void:
 			relation["contact_intelligence"]=clampf(float(relation.contact_intelligence)+access,0.0,0.95)
 		civ["player_relation"]=relation
 		civilizations[index]=civ
-	if not scout_mission.is_empty() and day>=int(scout_mission.get("return_day",day+1)):
-		_complete_scout_mission(day)
+	_complete_due_scout_missions(day)
 
 
 func _choose_strategy(civ:Dictionary)->String:
@@ -3143,11 +3350,12 @@ func player_population_commitments()->Dictionary:
 	if tree and tree.root: military_campaign=tree.root.get_node_or_null("MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("population_commitment_snapshot"):
 		mobilization=military_campaign.population_commitment_snapshot()
-	if not scout_mission.is_empty():
-		var scouts:=maxi(0,int(scout_mission.get("personnel",0)))
+	for mission_variant in scout_missions:
+		var mission:Dictionary=mission_variant
+		var scouts:=maxi(0,int(mission.get("personnel",0)))
 		if scouts>0:
 			by_function.productive=int(by_function.productive)+scouts
-			records.append({"id":"scout_party","label":"SCOUT PARTY","kind":"scouting","personnel":scouts,"depart_day":int(scout_mission.get("start_day",GameState.elapsed_days)),"return_day":int(scout_mission.get("return_day",GameState.elapsed_days)),"source":"productive"})
+			records.append({"id":"scout_party_%d" % int(mission.get("mission_id",0)),"label":"SCOUT PARTY","kind":"scouting","personnel":scouts,"depart_day":int(mission.get("start_day",GameState.elapsed_days)),"return_day":int(mission.get("return_day",GameState.elapsed_days)),"source":"productive"})
 	var missing_scouts:=_captured_player_scout_count()
 	if missing_scouts>0:
 		by_function.productive=int(by_function.productive)+missing_scouts
@@ -3228,7 +3436,8 @@ func player_effects()->Dictionary:
 	var occupation_burden:=clampf(resistance_load/maxf(1.0,GameState.population_exact+occupied_population),0.0,1.0)
 	var war_exhaustion:=clampf(active_war_exhaustion/maxf(1.0,float(war_count)),0.0,1.0) if war_count>0 else 0.0
 	var commitments:=player_population_commitments()
-	var scout_personnel:=(float(scout_mission.get("personnel",0.0)) if not scout_mission.is_empty() else 0.0)+float(_captured_player_scout_count())
+	var scout_personnel:=float(_captured_player_scout_count())
+	for mission_variant in scout_missions: scout_personnel+=float((mission_variant as Dictionary).get("personnel",0.0))
 	var scout_labor_absence:=clampf(scout_personnel/maxf(1.0,float(GameState.able_population())),0.0,0.45)
 	var mobilization_excess:=maxi(0,int((commitments.mobilization as Dictionary).get("excess_beyond_defense",0)))
 	var labor_unavailable:=maxi(0,int(commitments.working_absent))+mobilization_excess
@@ -3769,7 +3978,7 @@ func export_state()->Dictionary:
 		for point_key in ["point_a","point_b"]:
 			var point:Variant=exported_formations[index].get(point_key,Vector2.ZERO)
 			if point is Vector2: exported_formations[index][point_key]={"x":point.x,"y":point.y}
-	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_mission":scout_mission.duplicate(true),"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
+	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"landmarks":landmarks.duplicate(true),"next_landmark_id":next_landmark_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
 
 
 func import_state(payload:Dictionary)->Dictionary:
@@ -3812,7 +4021,8 @@ func _migrate_legacy_state(payload:Dictionary)->Dictionary:
 	for civ in incoming_civilizations: streaks[String((civ as Dictionary).get("id",""))]=0
 	migrated["contender_dominance_turns"]=streaks
 	migrated["competition_winner_id"]="player" if String(migrated.get("competition_outcome","ongoing"))=="victory" else ""
-	migrated["scout_mission"]={}
+	migrated["scout_missions"]=[]
+	migrated["next_scout_mission_id"]=1
 	migrated["scout_reports"]=[]
 	migrated["last_scout_outcome"]={}
 	migrated["captured_player_scouts"]={}
@@ -3978,7 +4188,7 @@ func _migrate_v8_state(payload:Dictionary)->Dictionary:
 func _payload_shape_error(payload:Dictionary)->String:
 	for key in ["civilizations","world_events","pending_player_incidents","scout_reports","diplomatic_history","revealed_areas","foreign_formations","foreign_sightings","war_history"]:
 		if not payload.get(key,[]) is Array: return "Civilization save field '%s' must be an array." % key
-	for key in ["contender_dominance_turns","scout_mission","last_scout_outcome","diplomatic_mission","captured_player_scouts","captured_foreign_scouts","player_world_origin"]:
+	for key in ["contender_dominance_turns","last_scout_outcome","diplomatic_mission","captured_player_scouts","captured_foreign_scouts","player_world_origin"]:
 		if not payload.get(key,{}) is Dictionary: return "Civilization save field '%s' must be a dictionary." % key
 	for entry in (payload.get("civilizations",[]) as Array):
 		if not entry is Dictionary: return "Civilization save contains a non-dictionary polity record."
@@ -4020,7 +4230,16 @@ func _apply_state(payload:Dictionary)->void:
 	competition_outcome=String(payload.get("competition_outcome","ongoing"))
 	competition_winner_id=String(payload.get("competition_winner_id",""))
 	player_territory_balance=float(payload.get("player_territory_balance",0.0))
-	scout_mission=(payload.get("scout_mission",{}) as Dictionary).duplicate(true)
+	scout_missions.assign((payload.get("scout_missions",[]) as Array).duplicate(true))
+	# Older saves carried one scout_mission dictionary; wrap it into the list.
+	var legacy_mission:Dictionary=payload.get("scout_mission",{}) if payload.get("scout_mission",{}) is Dictionary else {}
+	if scout_missions.is_empty() and not legacy_mission.is_empty():
+		legacy_mission=legacy_mission.duplicate(true)
+		if not legacy_mission.has("mission_id"): legacy_mission["mission_id"]=1
+		scout_missions.append(legacy_mission)
+	next_scout_mission_id=maxi(1,int(payload.get("next_scout_mission_id",scout_missions.size()+1)))
+	landmarks.assign((payload.get("landmarks",[]) as Array).duplicate(true))
+	next_landmark_id=maxi(1,int(payload.get("next_landmark_id",landmarks.size()+1)))
 	scout_reports.assign((payload.get("scout_reports",[]) as Array).duplicate(true))
 	last_scout_outcome=(payload.get("last_scout_outcome",{}) as Dictionary).duplicate(true)
 	diplomatic_mission=(payload.get("diplomatic_mission",{}) as Dictionary).duplicate(true)
@@ -4219,18 +4438,19 @@ func validate_state()->Array[String]:
 			elif points is Array:
 				for point in points:
 					if not point is Dictionary or not is_finite(float(point.get("x",NAN))) or not is_finite(float(point.get("z",NAN))): errors.append("Revealed trail contains an invalid point.")
-	if not scout_mission.is_empty():
-		if int(scout_mission.get("duration_days",0)) not in SCOUT_DURATIONS: errors.append("Scout mission duration is invalid.")
-		if int(scout_mission.get("return_day",-1))<=int(scout_mission.get("start_day",-1)): errors.append("Scout mission return day must follow departure.")
-		var route:Variant=scout_mission.get("route",[])
+	for mission_variant in scout_missions:
+		var mission:Dictionary=mission_variant
+		if int(mission.get("duration_days",0)) not in SCOUT_DURATIONS: errors.append("Scout mission duration is invalid.")
+		if int(mission.get("return_day",-1))<=int(mission.get("start_day",-1)): errors.append("Scout mission return day must follow departure.")
+		var route:Variant=mission.get("route",[])
 		if not route is Array or route.size()<2 or route.size()>SCOUT_ROUTE_POINT_LIMIT: errors.append("Scout mission route must remain bounded.")
 		elif route is Array:
 			for point in route:
 				if not point is Dictionary or not is_finite(float(point.get("x",NAN))) or not is_finite(float(point.get("z",NAN))): errors.append("Scout mission route contains an invalid point.")
-			if String(scout_mission.get("travel_mode","land"))=="land" and scout_land_authority.is_valid() and not _scout_route_is_land(route): errors.append("Land scout mission route crosses non-land terrain.")
-		if String(scout_mission.get("travel_mode","land"))!="land": errors.append("Scout travel mode is unavailable without an implemented maritime expedition capability.")
+			if String(mission.get("travel_mode","land"))=="land" and scout_land_authority.is_valid() and not _scout_route_is_land(route): errors.append("Land scout mission route crosses non-land terrain.")
+		if String(mission.get("travel_mode","land"))!="land": errors.append("Scout travel mode is unavailable without an implemented maritime expedition capability.")
 		for scout_trait in ["concealment","evasion"]:
-			var scout_trait_value:=float(scout_mission.get(scout_trait,NAN))
+			var scout_trait_value:=float(mission.get(scout_trait,NAN))
 			if not is_finite(scout_trait_value) or scout_trait_value<0.0 or scout_trait_value>1.0: errors.append("Scout mission %s must be normalized." % scout_trait)
 	if not diplomatic_mission.is_empty():
 		if not ids.has(String(diplomatic_mission.get("civ_id",""))): errors.append("Diplomatic mission references an unknown civilization.")

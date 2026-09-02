@@ -72,6 +72,33 @@ func _ready()->void:
 	_expect(GameState.council_inbox.size()==inbox_before,"dismiss deleted a council record")
 	_expect(hud.dismissed_alert_ids.has("probe_item_0"),"dismissed id was not tracked")
 
+	# Dismissing down to an empty queue must actually clear the rendered cards
+	# (regression: the stale-signature sentinel collided with the empty state).
+	for item_variant in GameState.council_inbox.duplicate():
+		hud.dismiss_alert(String((item_variant as Dictionary).get("id","")))
+	await get_tree().process_frame
+	var stale_cards:=0
+	for child in queue.get_children():
+		if child is PanelContainer: stale_cards+=1
+	_expect(stale_cards==0,"dismissing every decision left %d stale cards rendered" % stale_cards)
+
+	# A deferred food condition merges silently instead of resurfacing…
+	terrain._generate_leader_candidates("Steward")
+	AdvisorSystem.appoint(String(terrain.leader_candidates[0].name),"Steward")
+	var food_item:Dictionary=AdvisorSystem.generate_consequence_item({"condition_id":"probe_food_shortage","title":"Shortage Forecast","description":"Stores fail soon.","domain":"food","severity":"warning"})
+	var food_id:=String(food_item.get("id",""))
+	hud.refresh()
+	await get_tree().process_frame
+	hud.dismiss_alert(food_id)
+	var remerge:Dictionary=AdvisorSystem.generate_consequence_item({"condition_id":"probe_food_shortage","title":"Shortage Forecast","description":"Stores still fail soon.","domain":"food","severity":"warning"})
+	_expect(remerge.is_empty(),"a deferred condition resurfaced without escalating")
+	_expect(AdvisorSystem.council_decision_items(9,false).is_empty() or String((AdvisorSystem.council_decision_items(9,false)[0] as Dictionary).get("id",""))!=food_id,"deferred decision stayed in the queue")
+	# …but escalation reopens it.
+	var escalated:Dictionary=AdvisorSystem.generate_consequence_item({"condition_id":"probe_food_shortage","title":"Shortage Forecast","description":"Stores fail imminently.","domain":"food","severity":"critical"})
+	_expect(not escalated.is_empty() and String(escalated.get("status",""))=="unread","an escalated condition did not reopen the deferred decision")
+	_expect(AdvisorSystem.merged_report_items(8).size()>=0,"merged report accessor failed")
+	AdvisorSystem.defer_council_item(food_id)
+
 	# Toolbar sits inside the viewport and recenters when a section opens.
 	var toolbar:Control=hud.find_child("MapToolbar",true,false)
 	_expect(toolbar!=null,"map toolbar missing")
@@ -103,6 +130,34 @@ func _ready()->void:
 	terrain._change_research_domain_allocation("nutrition",1)
 	_expect(int(GameState.research_allocations.get("nutrition",0))==nutrition_before+1,"inquiry attention step did not change the allocation")
 	terrain._change_research_domain_allocation("nutrition",-1)
+	terrain._on_hud_section_requested("",0)
+	await get_tree().process_frame
+
+	# Government appointments: office rows open the appointment detail and
+	# commissioning actually fills the office.
+	terrain._on_hud_section_requested("civ",1)
+	await get_tree().process_frame
+	GameState.leadership_positions.erase("Steward")
+	var appointments=preload("res://scripts/hud/content/dock_detail_appointments.gd").new(terrain,hud,"Steward")
+	hud.open_detail(appointments)
+	await get_tree().process_frame
+	_expect(hud.detail_dock.visible,"appointment detail did not open")
+	_expect(terrain.leader_candidates.size()>0,"no candidate institutions were generated")
+	if terrain.leader_candidates.size()>0:
+		appointments._commission(String(terrain.leader_candidates[0].name))
+		_expect(GameState.leadership_positions.has("Steward"),"commissioning did not fill the Steward office")
+	hud.close_detail()
+	terrain._on_hud_section_requested("",0)
+	await get_tree().process_frame
+
+	# Army builds: adjusting and training a build reaches the campaign.
+	terrain._on_hud_section_requested("military",1)
+	await get_tree().process_frame
+	var build_snapshot:Dictionary=MilitaryCampaign.army_template_snapshot()
+	_expect((build_snapshot.templates as Array).size()>0,"no default army build exists")
+	var build_id:int=int((build_snapshot.templates as Array)[0].template_id)
+	var adjust:Dictionary=MilitaryCampaign.adjust_template_entry(build_id,"levy","improvised",10)
+	_expect(bool(adjust.get("ok",false)),"could not adjust the army build")
 	terrain._on_hud_section_requested("",0)
 	await get_tree().process_frame
 
