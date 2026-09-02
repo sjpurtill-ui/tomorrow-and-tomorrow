@@ -30,7 +30,8 @@ const SETTLEMENT_DETAIL_SCALE := 0.002
 const SETTLEMENT_FABRIC_MAX_ZOOM := 28.0
 const SETTLEMENT_INSPECTION_ZOOM := 0.42
 const SETTLEMENT_AGGREGATE_DENSITY_BUDGET := 192
-const SETTLEMENT_DISTRICT_CLIPMAP_BUDGET := 768
+const SETTLEMENT_DISTRICT_CLIPMAP_BUDGET := 128
+const SETTLEMENT_DISTRICT_CONDITIONS := ["great","okay","fine","normal","bad","poor","damaged","destroyed"]
 const SECONDARY_SETTLEMENT_FOOTPRINT_PATCH_BUDGET := 512
 const SECONDARY_SETTLEMENT_CORRIDOR_BUDGET := 128
 const CONVOY_DETAIL_SCALE := 0.0012
@@ -4088,7 +4089,9 @@ func _settlement_district_clipmap_candidates(center:Vector3,layout:Dictionary,st
 	# covers the whole visible district before the fixed budget fills; the former 22x
 	# density exhausted all 384 instances nearest the camera target and produced an
 	# artificial circular island of roofs at every zoom.
-	var cell_size:=clampf(camera.size/18.0,0.010,0.14)
+	# One cell is an aggregate neighborhood footprint at Google-Earth scale. It is
+	# intentionally much larger than a building and the complete visible kit is capped.
+	var cell_size:=clampf(camera.size/7.0,0.028,0.34)
 	var view_radius:=maxf(camera.size*0.92,cell_size*8.0)
 	var half_steps:=clampi(ceili(view_radius/cell_size),8,28)
 	var base_cell:=Vector2i(floori((center.x+local_target.x)/cell_size),floori((center.z+local_target.y)/cell_size))
@@ -4117,7 +4120,7 @@ func _settlement_district_clipmap_candidates(center:Vector3,layout:Dictionary,st
 				var direction:=Vector2.from_angle(float(corridor_angle))
 				var side:=Vector2(-direction.y,direction.x)
 				corridor_influence=maxf(corridor_influence,1.0-clampf(absf(local_point.dot(side))/maxf(0.08,radius*0.075),0.0,1.0))
-			var occupancy:=clampf(0.82-radial_t*0.44+centre_influence*0.34+corridor_influence*0.18+(0.5-permeability)*0.14,0.18,0.98)*0.86
+			var occupancy:=clampf(0.84-radial_t*0.42+centre_influence*0.34+corridor_influence*0.18+(0.5-permeability)*0.14,0.20,0.98)*0.78
 			# High-civic-space cultures preserve recurring commons; permeability creates
 			# finer gaps and passages without changing the bounded number of candidates.
 			var open_space_sample:=float((seed>>7)%1000)/999.0
@@ -4261,6 +4264,113 @@ func _settlement_clipmap_block_mesh(land_use:int,architecture:Dictionary,shape_v
 	return surface.commit()
 
 
+func _settlement_district_condition(candidate:Dictionary,damage_ratio:float,context:Dictionary={})->int:
+	# Conditions describe the aggregate neighborhood, never individual households.
+	# Peace-time quality comes from actual society-wide capacities with restrained local
+	# variation. Siege damage operates on coarse 3x3 sectors so ruins form contiguous
+	# scars rather than evenly sprinkling every tile with the same damage tint.
+	var health:=clampf(float(context.get("health",GameState.population_health)),0.0,1.0)
+	var food:=clampf(float(context.get("food",GameState.food_security)),0.0,1.0)
+	var cohesion:=clampf(float(context.get("cohesion",GameState.simulation_metrics.get("cohesion",0.58))),0.0,1.0)
+	var material_capacity:=clampf(float(context.get("material_capacity",GameState.simulation_metrics.get("material_capacity",0.12))),0.0,1.0)
+	var legitimacy:=clampf(float(context.get("legitimacy",GameState.simulation_metrics.get("legitimacy",0.62))),0.0,1.0)
+	var local_seed:=int(candidate.get("seed",1))
+	var local_variation:=(float((local_seed>>8)%1000)/999.0-0.5)*0.12
+	var condition_score:=clampf(health*0.30+food*0.25+cohesion*0.20+material_capacity*0.15+legitimacy*0.10+local_variation,0.0,1.0)
+	var condition:=0 if condition_score>=0.84 else (1 if condition_score>=0.72 else (2 if condition_score>=0.60 else (3 if condition_score>=0.48 else (4 if condition_score>=0.36 else 5))))
+	if damage_ratio>0.01:
+		var cell:=Vector2i(candidate.get("cell",Vector2i.ZERO))
+		var sector:=Vector2i(floori(float(cell.x)/3.0),floori(float(cell.y)/3.0))
+		var sector_seed:=absi(hash("%d:%d:%d:district_damage" % [GameState.world_seed,sector.x,sector.y]))
+		var sector_sample:=float(sector_seed%1000)/999.0
+		if sector_sample<damage_ratio*0.48: condition=7
+		elif sector_sample<damage_ratio*1.35: condition=maxi(condition,6)
+	return condition
+
+
+func _settlement_district_atlas_mesh()->ArrayMesh:
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var vertices:=[Vector3(-0.5,0.0,-0.5),Vector3(0.5,0.0,-0.5),Vector3(0.5,0.0,0.5),Vector3(-0.5,0.0,0.5)]
+	var uvs:=[Vector2(0.0,0.0),Vector2(1.0,0.0),Vector2(1.0,1.0),Vector2(0.0,1.0)]
+	for vertex_index in [0,1,2,0,2,3]:
+		surface.set_uv(uvs[vertex_index])
+		surface.add_vertex(vertices[vertex_index])
+	surface.generate_normals()
+	return surface.commit()
+
+
+func _settlement_district_atlas_material(atlas:Texture2D)->ShaderMaterial:
+	var material:=ShaderMaterial.new()
+	var shader:=Shader.new()
+	shader.code="""
+shader_type spatial;
+render_mode blend_mix, depth_prepass_alpha, cull_disabled, unshaded;
+uniform sampler2D atlas_texture : source_color, filter_linear_mipmap_anisotropic;
+varying flat vec4 district_data;
+
+void vertex(){
+	district_data=INSTANCE_CUSTOM;
+}
+
+float hash21(vec2 point){
+	return fract(sin(dot(point,vec2(127.1,311.7)))*43758.5453);
+}
+
+void fragment(){
+	float tile=floor(district_data.r*15.0+0.5);
+	vec2 atlas_cell=vec2(mod(tile,4.0),floor(tile/4.0));
+	vec4 sample_color=texture(atlas_texture,(UV+atlas_cell)/4.0);
+	bool fringe=sample_color.r>sample_color.g*1.42 && sample_color.r>sample_color.b*1.42 && sample_color.g<0.48;
+	if(sample_color.a<0.10 || fringe) discard;
+	float condition=floor(district_data.g*7.0+0.5);
+	float wear=condition/7.0;
+	float breakup=hash21(floor(UV*14.0)+district_data.bb*97.0);
+	float loss=smoothstep(0.55,1.0,wear)*0.82;
+	if(condition>=6.0 && breakup<loss) discard;
+	vec3 poor_tone=mix(sample_color.rgb,vec3(0.30,0.27,0.23),smoothstep(0.42,0.78,wear)*0.62);
+	vec3 damage_tone=mix(poor_tone,vec3(0.20,0.16,0.13),smoothstep(0.72,1.0,wear)*0.68);
+	float upkeep=mix(1.10,0.76,smoothstep(0.0,0.72,wear));
+	ALBEDO=damage_tone*upkeep;
+	ROUGHNESS=mix(0.82,1.0,wear);
+	ALPHA=sample_color.a;
+}
+"""
+	material.shader=shader
+	material.set_shader_parameter("atlas_texture",atlas)
+	return material
+
+
+func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],damage_ratio:float,parent:Node3D)->bool:
+	var atlas:Texture2D=load("res://assets/textures/settlement_district_atlas_prehistoric_v1.png")
+	if atlas==null: return false
+	var multi:=MultiMesh.new()
+	multi.transform_format=MultiMesh.TRANSFORM_3D
+	multi.use_custom_data=true
+	multi.instance_count=candidates.size()
+	multi.mesh=_settlement_district_atlas_mesh()
+	for index in candidates.size():
+		var candidate:Dictionary=candidates[index]
+		var point:=Vector2(candidate.point)
+		var seed:=int(candidate.seed)
+		var land_use:=clampi(int(candidate.get("land_use",0)),0,2)
+		var tile_index:=seed%16
+		if land_use==1: tile_index=[0,2,6,9,12,14][seed%6]
+		elif land_use==2: tile_index=[3,5,8,10,15][seed%5]
+		var condition:=_settlement_district_condition(candidate,damage_ratio)
+		var footprint_size:=float(candidate.get("cell_size",0.20))*lerpf(1.16,1.34,float((seed>>11)%1000)/999.0)
+		var basis:=Basis(Vector3.UP,float(candidate.angle)).scaled(Vector3(footprint_size,1.0,footprint_size))
+		var origin:=Vector3(point.x,_close_surface_height_at(point.x,point.y)+0.0031,point.y)
+		multi.set_instance_transform(index,Transform3D(basis,origin))
+		multi.set_instance_custom_data(index,Color(float(tile_index)/15.0,float(condition)/7.0,float((seed>>17)%1000)/999.0,float(land_use)/2.0))
+	var instance:=MultiMeshInstance3D.new()
+	instance.name="AggregateNeighborhoodFootprints"
+	instance.multimesh=multi
+	instance.material_override=_settlement_district_atlas_material(atlas)
+	parent.add_child(instance)
+	return true
+
+
 func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:int,architecture:Dictionary,damage_ratio:float,palette:Dictionary,parent:Node3D)->void:
 	var candidates:=_settlement_district_clipmap_candidates(center,layout,stage,architecture)
 	if candidates.is_empty(): return
@@ -4271,6 +4381,9 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 	var clipmap_root:=Node3D.new()
 	clipmap_root.name="PersistentDistrictClipmap"
 	parent.add_child(clipmap_root)
+	# Google-Earth inspection always uses one atlas instance per aggregate neighborhood.
+	# Era selects the atlas family; it must never switch back to building-like glyphs.
+	if _create_settlement_district_atlas_clipmap(candidates,damage_ratio,clipmap_root): return
 	# Eight mixed-block silhouettes produce many visible combinations after deterministic
 	# proportion and roof variation. Civic and productive blocks retain their own batch,
 	# for ten fixed draws at any population.
@@ -4295,7 +4408,7 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 	var road_surface:=SurfaceTool.new()
 	road_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var road_segment_count:=0
-	var road_color:Color=Color(palette.base).lerp(Color("#6a5840"),0.62).darkened(0.08)
+	var road_color:Color=Color(palette.base).lerp(Color("#463b2d"),0.72).darkened(0.16)
 	road_color.a=1.0
 	for road_candidate in candidates:
 		var road_cell:=Vector2i(road_candidate.cell)
@@ -4305,13 +4418,13 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 			var east_x:=float(road_cell.x+1)*road_cell_size
 			var east_start:=Vector2(east_x,float(road_cell.y)*road_cell_size)-Vector2(center.x,center.z)
 			var east_finish:=Vector2(east_x,float(road_cell.y+1)*road_cell_size)-Vector2(center.x,center.z)
-			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,PackedVector2Array([east_start,east_finish]),road_cell_size*0.045,road_color,0.00274,1)
+			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,PackedVector2Array([east_start,east_finish]),road_cell_size*0.018,road_color,0.00274,1)
 		var south_key:="%d:%d" % [road_cell.x,road_cell.y+1]
 		if occupied_cells.has(south_key):
 			var south_z:=float(road_cell.y+1)*road_cell_size
 			var south_start:=Vector2(float(road_cell.x)*road_cell_size,south_z)-Vector2(center.x,center.z)
 			var south_finish:=Vector2(float(road_cell.x+1)*road_cell_size,south_z)-Vector2(center.x,center.z)
-			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,PackedVector2Array([south_start,south_finish]),road_cell_size*0.045,road_color,0.00274,1)
+			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,PackedVector2Array([south_start,south_finish]),road_cell_size*0.018,road_color,0.00274,1)
 	if road_segment_count>0:
 		var road_mesh_instance:=MeshInstance3D.new()
 		road_mesh_instance.name="DistrictRoadGrid"
@@ -9532,13 +9645,16 @@ func _refresh_landmark_markers()->void:
 			marker=Label3D.new()
 			marker.name="Landmark_%s" % landmark_id
 			marker.text=String(landmark.get("name","LANDMARK")).to_upper()
-			marker.font_size=52
+			# Match the settlement map label's footprint: landmarks are quiet
+			# waymarks, not banners.
+			marker.font_size=10
 			marker.modulate=Color("#c8ad72")
-			marker.outline_size=10
-			marker.outline_modulate=Color(0.04,0.06,0.06,0.9)
+			marker.outline_size=4
+			marker.outline_modulate=Color(0.018,0.026,0.028,0.97)
 			marker.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 			marker.fixed_size=true
-			marker.pixel_size=0.0016
+			marker.no_depth_test=true
+			marker.render_priority=9
 			var position_data:Dictionary=landmark.get("position",{})
 			var world_position:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0)))
 			world_position.y=_height_at(world_position.x,world_position.z)+0.4
