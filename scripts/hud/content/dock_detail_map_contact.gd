@@ -64,7 +64,17 @@ func _scout_tab(sighting:Dictionary,kpis:Array)->Dictionary:
 	var blocks:Array=[]
 	if not last_outcome.is_empty():
 		blocks.append({"type":"text","heading":"RESULT","text":String(last_outcome.get("message",last_outcome.get("error","No interception occurred.")))})
-	blocks.append({"type":"text","heading":"WHAT THIS MEANS","text":"These scouts are physically carrying observations home. You do not chase their icon by colliding an army with it: your nearby watch and available pursuers make one immediate interception attempt."})
+	blocks.append({"type":"text","heading":"PURSUIT","text":"Select a fast field army and order it to pursue. Cavalry can close on foot scouts; infantry and siege baggage slow a mixed force. Capturing scouts can provoke their people. The local watch can also attempt an immediate interception below."})
+	var army:=_selected_army()
+	if army.is_empty():
+		blocks.append({"type":"actions","items":[{"label":"SELECT NEAREST FIELD ARMY","on_press":_select_nearest_army}]})
+	else:
+		var availability:Dictionary=MilitaryCampaign.map_engagement_availability(int(army.get("army_id",0)),formation_id)
+		blocks.append({"type":"text","heading":"SELECTED PURSUERS","text":"%s · %.1f km/day sustained march" % [String(army.get("name","Army")),MilitaryCampaign._field_army_speed(army)]})
+		if bool(availability.get("can_order",false)):
+			blocks.append({"type":"actions","items":[{"label":"PURSUE AND CAPTURE","primary":true,"on_press":_order_engagement.bind(bool(availability.get("can_engage",false)))}]})
+		else:
+			blocks.append({"type":"text","heading":"PURSUIT BLOCKED","text":String(availability.get("error","Contact lost"))})
 	blocks.append({"type":"actions","heading":"INTERCEPT NOW","items":[
 		{"label":"CAPTURE SCOUTS · %d%%" % capture_chance,"sub":"prisoners + carried notes","primary":true,"on_press":_resolve_scout.bind("capture"),"tip":"One immediate pursuit. Success stops the report and creates a captive cohort for questioning; failure loses contact."},
 		{"label":"ATTACK SCOUTS · %d%%" % attack_chance,"sub":"higher chance · no intelligence","on_press":_resolve_scout.bind("destroy"),"tip":"One immediate lethal pursuit. Success destroys the report but yields no prisoners or notes and sharply raises grievance."},

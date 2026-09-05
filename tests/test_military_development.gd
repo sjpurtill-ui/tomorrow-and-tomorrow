@@ -139,6 +139,47 @@ func test_battle_ledger_separates_real_military_and_civilian_deaths()->void:
 	assert_int(int(system.war_history_snapshot()[0].casualties[civ_id].civilian_dead)).is_equal(civilian_dead)
 
 
+func test_mobility_rewards_mounted_pursuit_but_respects_baggage_and_supply()->void:
+	var riders:Dictionary={"formations":[{"unit":"cavalry","count":20,"training":0.8,"personnel_condition":1.0}],"supply_level":1.0}
+	var foot:Dictionary={"formations":[{"unit":"levy","count":20,"training":0.8,"personnel_condition":1.0}],"supply_level":1.0}
+	assert_float(MilitaryCampaign._field_army_speed(riders)).is_greater(MilitaryCampaign._field_army_speed(foot)*1.8)
+	var mixed:Dictionary=riders.duplicate(true)
+	mixed.formations.append({"unit":"siege_engineer","count":2,"training":0.8,"personnel_condition":1.0})
+	assert_float(MilitaryCampaign._field_army_speed(mixed)).is_less(MilitaryCampaign._field_army_speed(foot))
+	var hungry:Dictionary=riders.duplicate(true)
+	hungry["supply_level"]=0.1
+	assert_float(MilitaryCampaign._field_army_speed(hungry)).is_less(MilitaryCampaign._field_army_speed(riders)*0.7)
+
+
+func test_mounted_army_can_order_pursuit_of_a_scout_without_formal_war()->void:
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.register_player_origin(Vector2.ZERO)
+	CivilizationSystem.set_scout_geography_authority(func(_point:Vector2)->bool: return true)
+	var scout_index:=CivilizationSystem.foreign_formations.find_custom(func(entry:Dictionary)->bool: return String(entry.get("kind",""))=="scout")
+	var scout:Dictionary=CivilizationSystem.foreign_formations[scout_index]
+	scout["point_a"]=Vector2(10,0)
+	scout["point_b"]=Vector2(100,0)
+	scout["leg_days"]=6.0
+	scout["depart_day"]=0
+	scout["disabled_until_day"]=0
+	scout["evaded_until_day"]=0
+	CivilizationSystem.foreign_formations[scout_index]=scout
+	GameState.elapsed_days=0
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Riders",[{"id":1,"unit":"cavalry","weapon":"lance","count":20,"training":0.8,"equipment":20}],0.8,0.8)
+	MilitaryCampaign.home_army["supply_level"]=1.0
+	var created:Dictionary=MilitaryCampaign.create_field_army(20)
+	var army_id:=int(created.army.army_id)
+	CivilizationSystem._process_local_observation(0,true)
+	var available:Dictionary=MilitaryCampaign.map_engagement_availability(army_id,String(scout.id))
+	assert_bool(bool(available.get("can_order",false))).is_true()
+	var ordered:Dictionary=MilitaryCampaign.order_field_army_intercept(army_id,String(scout.id))
+	assert_bool(bool(ordered.get("ok",false))).is_true()
+	MilitaryCampaign._process_field_army_movement_day()
+	assert_str(String(MilitaryCampaign.field_armies[0].status)).is_equal("stationed")
+	assert_bool(MilitaryCampaign.field_armies[0].has("target_formation_id")).is_false()
+	assert_bool(MilitaryCampaign.active_engagement.is_empty()).is_true()
+
+
 func test_trained_personnel_form_a_bounded_army_and_move_over_known_geography()->void:
 	var formation:={"id":1,"unit":"line_infantry","weapon":"spear","count":1000,"authorized_count":1000,"equipment":1000,"equipment_required":1000,"ammunition":0,"ammunition_required":0,"training":0.72,"experience":0.18,"personnel_condition":0.86}
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Home reserve",[formation],0.72,0.70)
