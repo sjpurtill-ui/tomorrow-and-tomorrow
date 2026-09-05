@@ -125,6 +125,7 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	return result
 
 func process_city_resources(settlement_id:String,context:Dictionary,daily_work:Callable=Callable())->void:
+	if not String(settlement_record(settlement_id).get("occupied_by","")).is_empty():return
 	var record:=settlement_record(settlement_id)
 	if record.is_empty() or bool(record.get("primary",false)): return
 	if int(record.get("last_resource_day",-1))>=int(GameState.elapsed_days): return
@@ -202,6 +203,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	if not bool(capacity.ready) or GameState.player_settlements.size()<2: return
 	var available_transport:Dictionary={}
 	for source in GameState.player_settlements:
+		if not String(source.get("occupied_by","")).is_empty():continue
 		var share:=_settlement_population(source)/maxf(1.0,GameState.population_exact)
 		var workforce:=0.0
 		for amount in GameState.population_allocations.values(): workforce+=float(amount)
@@ -213,6 +215,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)
 	# One request per good per city; no citizen or merchant entities are created.
 	for destination in GameState.player_settlements:
+		if not String(destination.get("occupied_by","")).is_empty():continue
 		var destination_population:=_settlement_population(destination)
 		var destination_stores:=_city_stores(destination)
 		for resource_name in CITY_TRADE_GOODS:
@@ -227,6 +230,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 			var nearest:=INF
 			var surplus:=0.0
 			for source in GameState.player_settlements:
+				if not String(source.get("occupied_by","")).is_empty():continue
 				if String(source.id)==String(destination.id) or float(available_transport.get(source.id,0.0))<=0.01: continue
 				var distance:=_record_position(source).distance_to(_record_position(destination))
 				if distance>float(capacity.range_km) or distance>=nearest: continue
@@ -603,7 +607,8 @@ func _committed_satellite_share(include_convoy:=true)->float:
 			share+=maxf(0.0,float(settlement.get("population_share",0.0)))
 	if include_convoy and bool(GameState.settlement_convoy.get("active",false)):
 		share+=maxf(0.0,float(GameState.settlement_convoy.get("population_share",0.0)))
-	return clampf(share,0.0,0.92)
+	share+=float(MilitaryCampaign.recovery.data.remnant.get("people",0))/maxf(1,GameState.population_exact)
+	return clampf(share,0.0,1.0)
 
 func primary_population_exact()->float:
 	return maxf(1.0,GameState.population_exact*(1.0-_committed_satellite_share()))
@@ -2786,7 +2791,10 @@ func validate_settlement_network()->PackedStringArray:
 		var convoy_progress:=float(GameState.settlement_convoy.get("progress",-1.0))
 		if not is_finite(convoy_progress) or convoy_progress<0.0 or convoy_progress>1.0: errors.append("settlement convoy has invalid progress")
 		if String(GameState.settlement_convoy.get("phase","")) not in ["traveling","arrived"]: errors.append("settlement convoy has an invalid lifecycle phase")
-	if satellite_share>0.92: errors.append("satellite settlements and convoys consume too much of the aggregate population")
+	var recovery_capital:=false
+	for city in GameState.player_settlements:
+		if bool(city.get("recovery_capital",false)):recovery_capital=true
+	if satellite_share>(1.0 if recovery_capital else .92): errors.append("satellite settlements and convoys consume too much of the aggregate population")
 	for settlement in settlement_network_snapshot().settlements:
 		var boundary:PackedVector2Array=settlement.get("boundary",PackedVector2Array())
 		if boundary.size()!=SETTLEMENT_BORDER_VERTICES: errors.append("settlement %s has an invalid bounded border" % String(settlement.get("id","")))

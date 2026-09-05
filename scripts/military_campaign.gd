@@ -78,6 +78,7 @@ var siege_history:Array[Dictionary]=[]
 var war_reputation:Dictionary={"mercy":0.0,"fear":0.0,"grievance":0.0}
 var occupation_forces:Array[Dictionary]=[]
 var occupation_transfers=preload("res://scripts/occupation_transfers.gd").new()
+var recovery=preload("res://scripts/siege_recovery.gd").new()
 var field_armies:Array[Dictionary]=[]
 var next_field_army_id:=1
 ## Runner messages in flight from field armies back to the settlement. Until
@@ -120,6 +121,7 @@ func _process(_delta:float)->void:
 
 
 func reset_for_new_world()->void:
+	recovery.reset()
 	occupation_transfers.reset()
 	last_world_seed=GameState.world_seed
 	last_processed_day=int(GameState.elapsed_days)
@@ -1786,6 +1788,7 @@ func _engagement_enemy_side(engagement:Dictionary)->String:
 
 func _home_defense_force()->Dictionary:
 	var force:=home_army.duplicate(true)
+	force.readiness=float(force.get("readiness",.5))*recovery.defense_factor()
 	var trained:=maxi(0,int(force.get("troops",0)))
 	var militia:=maxi(0,_home_garrison_target()-trained)
 	if militia<=0: return force
@@ -1793,7 +1796,7 @@ func _home_defense_force()->Dictionary:
 	var formation_id:=next_formation_id
 	next_formation_id+=1
 	formations.append({"id":formation_id,"unit":"levy","weapon":"improvised","count":militia,"authorized_count":militia,"equipment":0,"equipment_required":militia,"ammunition":0,"ammunition_required":0,"training":0.20,"experience":0.0,"personnel_condition":_trainee_condition(),"emergency_militia":true})
-	var assembled:Dictionary=simulator.create_formation_force(_home_army_name(),formations,float(force.get("morale",_campaign_morale())),maxf(0.18,float(force.get("readiness",0.18))))
+	var assembled:Dictionary=simulator.create_formation_force(_home_army_name(),formations,float(force.get("morale",_campaign_morale())),maxf(0.08,float(force.get("readiness",0.18))))
 	assembled["commander"]=(force.get("commander",_marshal_commander()) as Dictionary).duplicate(true)
 	assembled["supply_level"]=float(force.get("supply_level",1.0))
 	assembled["emergency_militia_personnel"]=militia
@@ -1910,6 +1913,8 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 			strategic_outcome["occupation_force"]=garrison
 		elif bool(strategic_outcome.get("region_recaptured",false)):
 			strategic_outcome["occupation_force_loss"]=remove_occupation_force(source_civ_id,String(strategic_outcome.get("target_region_id",final_result.target_region_id)),false)
+		if bool(strategic_outcome.get("decisive",false)) and not bool(strategic_outcome.get("player_won",false)) and String(final_result.campaign_mode)=="defensive" and String(final_result.target_region_id).is_empty() and not bool(final_result.field_encounter) and String(threat.get("incident_kind","campaign"))!="raid":
+			strategic_outcome["player_occupation"]=recovery.capture(source_civ_id)
 		committed["strategic_outcome"]=strategic_outcome
 	return committed
 
@@ -2139,6 +2144,7 @@ func register_scout_interrogation(method:String,deaths:int=0)->Dictionary:
 
 
 func field_provision_delivery_ratio()->float:
+	if recovery.home_unavailable():return 0.0
 	var troops:=int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()
 	if troops<=0: return 1.0
 	var workers:=float(GameState.population_allocations.get("Logistics",0))
@@ -2316,6 +2322,7 @@ func export_state()->Dictionary:
 		"war_reputation":war_reputation.duplicate(true),
 		"occupation_forces":occupation_forces.duplicate(true),
 		"occupation_transfers":occupation_transfers.data.duplicate(true),
+		"siege_recovery":recovery.data.duplicate(true),
 		"field_armies":field_armies.duplicate(true),
 		"runner_messages":runner_messages.duplicate(true),
 		"army_templates":army_templates.duplicate(true),
@@ -2326,6 +2333,9 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if not payload.get("siege_recovery",{}) is Dictionary:return {"error":"Invalid siege recovery state."}
+	var recovery_errors:Array[String]=preload("res://scripts/siege_recovery.gd").validate(payload.get("siege_recovery",{}))
+	if not recovery_errors.is_empty():return {"error":"Invalid siege recovery state.","details":recovery_errors}
 	if not payload.get("occupation_transfers",{}) is Dictionary: return {"error":"Invalid occupation population state."}
 	var transfer_errors:Array[String]=preload("res://scripts/occupation_transfers.gd").validate(payload.get("occupation_transfers",{}))
 	if not transfer_errors.is_empty(): return {"error":"Invalid occupation population state.","details":transfer_errors}
@@ -2577,6 +2587,8 @@ func validate_state()->Array[String]:
 	return errors
 
 func _apply_imported_state(payload:Dictionary)->void:
+	recovery.reset()
+	recovery.data.merge(payload.get("siege_recovery",{}).duplicate(true),true)
 	occupation_transfers.reset()
 	occupation_transfers.data.merge(payload.get("occupation_transfers",{}).duplicate(true),true)
 	active_siege=(payload.get("active_siege",{}) as Dictionary).duplicate(true)
@@ -3184,6 +3196,12 @@ func _reconcile_external_military_mortality()->Dictionary:
 
 
 func _process_military_day()->void:
+	recovery.advance(last_processed_day)
+	if recovery.home_unavailable():
+		_process_field_army_movement_day()
+		_process_army_runners_day()
+		occupation_transfers.advance(last_processed_day)
+		return
 	if active_engagement.is_empty(): _reconcile_external_military_mortality()
 	_process_settlement_defense_day()
 	_process_service_rest_day()
@@ -3266,7 +3284,8 @@ func _home_captive_return_chance(_cohort:Dictionary,days_captive:int)->float:
 
 
 func _process_home_captives_day(return_chance_override:float=-1.0)->Dictionary:
-	var captured:=maxi(0,int(home_army.get("captured_pool",0)))
+	var held:=mini(recovery.held_military(),maxi(0,int(home_army.get("captured_pool",0))))
+	var captured:=maxi(0,int(home_army.get("captured_pool",0))-held)
 	if captured<=0:
 		home_army["captive_days"]=0
 		home_army["captive_return_accumulator"]=0.0
@@ -3276,7 +3295,7 @@ func _process_home_captives_day(return_chance_override:float=-1.0)->Dictionary:
 	var accumulator:=float(home_army.get("captive_return_accumulator",0.0))+float(captured)*clampf(chance,0.0,1.0)
 	var returned:=mini(captured,floori(accumulator))
 	accumulator-=returned
-	home_army["captured_pool"]=captured-returned
+	home_army["captured_pool"]=captured-returned+held
 	home_army["captive_days"]=days if captured>returned else 0
 	home_army["captive_return_accumulator"]=accumulator if captured>returned else 0.0
 	if returned>0:
@@ -3985,9 +4004,10 @@ func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)
 
 
 func _return_home_captives(count:int)->int:
-	var captured:=maxi(0,int(home_army.get("captured_pool",0)))
+	var held:=mini(recovery.held_military(),maxi(0,int(home_army.get("captured_pool",0))))
+	var captured:=maxi(0,int(home_army.get("captured_pool",0))-held)
 	var returned:=mini(maxi(0,count),captured)
-	home_army["captured_pool"]=captured-returned
+	home_army["captured_pool"]=captured-returned+held
 	if returned>0: aggregate_recruits+=returned
 	return returned
 
@@ -4299,8 +4319,8 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 	if order=="withdraw":
 		_end_siege("The player orders withdrawal from the siege.",true,String(saved.mode)=="offensive")
 		if String(saved.mode)=="defensive":
-			active_threat=(saved.threat as Dictionary).duplicate(true)
-			return respond_to_threat("withdraw")
+			threats_resolved+=1
+			return recovery.capture(String(saved.attacker_id))
 		return {"ok":true,"message":"The siege is lifted; the field army begins its physical return route if available."}
 	return {"error":"Unknown siege order."}
 

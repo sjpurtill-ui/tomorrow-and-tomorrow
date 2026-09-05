@@ -41,6 +41,8 @@ func tab(_sub:int)->Dictionary:
 	else:
 		brief={"tone":"warn","title":"%d front%s active" % [fronts.size(),"" if fronts.size()==1 else "s"],"why":"Set each front's stance; armies fight by it until you change it."}
 	var blocks:Array=[]
+	if not MilitaryCampaign.recovery.data.occupied.is_empty() or not MilitaryCampaign.recovery.absent_group().is_empty():
+		blocks.append({"type":"actions","items":[{"label":"SURVIVAL & INDEPENDENCE","sub":"survivors, occupied cities and recovery","on_press":func()->void:preload("res://scripts/hud/recovery_screen.gd").open()}]})
 	var siege:=MilitaryCampaign.siege_public_snapshot()
 	if not siege.is_empty():
 		brief={"tone":"warn","title":"Siege of "+String(siege.target_name),"why":"Hold the approaches, seek terms, or leave. Orders continue as time passes; no daily micromanagement is required."}
