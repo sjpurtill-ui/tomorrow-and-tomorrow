@@ -829,6 +829,10 @@ func test_poor_condition_stays_inhabited_while_damage_removes_structure()->void:
 	assert_str(strategic_shader.replace("\r\n","\n")).contains("if(district_condition<6.0){\n\t\t\t// Existing unbuilt neighborhood ground")
 	assert_str(strategic_shader).contains("garden_noise=mix(0.5,garden_noise,garden_detail);")
 	assert_str(strategic_shader).contains("garden_access*=step(0.66,")
+	assert_str(strategic_shader).contains("float lost_structure=occupied_block*(1.0-neighborhood_survival);")
+	assert_str(strategic_shader).contains("ruin_trace*lost_structure*roof_resolved*neighborhood_visibility")
+	assert_str(strategic_shader).contains("debris_break=mix(0.5,debris_break,debris_detail);")
+	assert_str(strategic_shader).contains("activity_spot*=neighborhood_survival;")
 
 
 func test_neighborhood_atlas_family_follows_era_land_use_and_civic_practice()->void:
