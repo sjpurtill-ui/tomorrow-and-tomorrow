@@ -1,0 +1,20 @@
+# Expedition cover collection
+
+Four additional covers generated with the built-in image generation tool. Originals copied unchanged into `assets/textures/expeditions/`. The original dawn cover remains the fallback. These are symbolic journal illustrations; the route chart and report contain the actual findings. No runtime image API calls.
+
+## chronicle-forest.png
+
+Use case: stylized-concept. Asset type: decorative panoramic cover painting for a historical civilization game's expedition journal. Landscape 3:1. Sophisticated painterly gouache with fine engraved field-journal lines, handmade texture, deep petrol teal shadows, muted sage, antique gold light and restrained copper. Awe and vastness. Tiny anonymous ancient travelers in simple cloaks carrying packs and walking staffs, landscape dominates. Full bleed, no text, no borders, no UI, no modern objects, no fantasy creatures, no castles, no treasure. Symbolic landscape illustration, not a map or a claim of a particular discovery. Readable cropped to a wide 740 by 225 header. Scene: A party following a path beneath immense ancient forest trees, fern-covered roots, misty turquoise distance, slanting golden sunlight illuminating a quiet clearing. Travelers small in lower left, rich layered canopy.
+
+## chronicle-desert.png
+
+Use case: stylized-concept. Asset type: decorative panoramic cover painting for a historical civilization game's expedition journal. Landscape 3:1. Sophisticated painterly gouache with fine engraved field-journal lines, handmade texture, deep petrol teal shadows, muted sage, antique gold light and restrained copper. Awe and vastness. Tiny anonymous ancient travelers in simple cloaks carrying packs and walking staffs, landscape dominates. Full bleed, no text, no borders, no UI, no modern objects, no fantasy creatures, no castles, no treasure. Symbolic landscape illustration, not a map or a claim of a particular discovery. Readable cropped to a wide 740 by 225 header. Scene: A tiny party crossing a wind-carved desert ridge above sweeping ochre dunes and distant rose-colored mesas. Luminous pale gold evening sky, blue teal shadows, tremendous empty distance and elegant sand patterns.
+
+## chronicle-mountains.png
+
+Use case: stylized-concept. Asset type: decorative panoramic cover painting for a historical civilization game's expedition journal. Landscape 3:1. Sophisticated painterly gouache with fine engraved field-journal lines, handmade texture, deep petrol teal shadows, muted sage, antique gold light and restrained copper. Awe and vastness. Tiny anonymous ancient travelers in simple cloaks carrying packs and walking staffs, landscape dominates. Full bleed, no text, no borders, no UI, no modern objects, no fantasy creatures, no castles, no treasure. Symbolic landscape illustration, not a map or a claim of a particular discovery. Readable cropped to a wide 740 by 225 header. Scene: A tiny party threading a rugged mountain pass, towering slate peaks, far snowcaps, turquoise mist pooling in a deep valley. Last copper sunlight catches the rock faces. Monumental scale, quiet courage.
+
+## chronicle-river.png
+
+Use case: stylized-concept. Asset type: decorative panoramic cover painting for a historical civilization game's expedition journal. Landscape 3:1. Sophisticated painterly gouache with fine engraved field-journal lines, handmade texture, deep petrol teal shadows, muted sage, antique gold light and restrained copper. Awe and vastness. Tiny anonymous ancient travelers in simple cloaks carrying packs and walking staffs, landscape dominates. Full bleed, no text, no borders, no UI, no modern objects, no fantasy creatures, no castles, no treasure. Symbolic landscape illustration, not a map or a claim of a particular discovery. Readable cropped to a wide 740 by 225 header. Scene: A tiny party standing on a riverbank above a vast winding river and layered wetlands, golden reeds, distant cliffs, pale dawn reflecting in the water. A few small birds over luminous mist. Sweeping graceful river composition.
+

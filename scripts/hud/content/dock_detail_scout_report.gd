@@ -52,7 +52,7 @@ func tab(_sub:int)->Dictionary:
 	var blocks:Array=[]
 	if _sub==0:
 		var discoveries:Array=report.get("discoveries",[])
-		blocks.append({"type":"image","path":"res://assets/textures/expeditions/chronicle-dawn.png","height":225,"cover":true,"tip":"Expedition chronicle cover illustration. The returned route chart is in Journey & Accounts."})
+		blocks.append({"type":"image","path":_cover_path(),"height":225,"cover":true,"tip":"Symbolic expedition cover inspired by the recorded journey. The actual route chart is in Journey & Accounts."})
 		if not contacts.is_empty():
 			blocks.append({"type":"discovery","kind":"encounter","title":"Other people, beyond our horizon","description":"Direct contact with %s." % ", ".join(PackedStringArray(contacts)),"consequence":"Their encounter sites are marked on the returned route. Contact is a beginning; it does not reveal their homeland."})
 		for finding in discoveries:
@@ -124,3 +124,19 @@ func tab(_sub:int)->Dictionary:
 
 func signature()->Array:
 	return [int(report.get("day",0)),String(report.get("target_id",""))]
+
+func _cover_path()->String:
+	# Read saved observations, never resurvey a changed world or consume simulation RNG.
+	var journal:= " ".join(PackedStringArray(report.get("journal",[]))).to_lower()
+	var candidates:Array[String]=[]
+	var keywords:Dictionary={"forest":["woodland","forest"],"desert":["drylands","desert","dunes"],"mountains":["summit","high bare ground","mountain","treeline"],"river":["running water","river","wetland","floodplain"]}
+	for scene in keywords:
+		for word in keywords[scene]:
+			if String(word) in journal:
+				candidates.append(scene)
+				break
+	var selected:="dawn"
+	if not candidates.is_empty():
+		var identity:="%s:%s:%s" % [report.get("mission_id",0),report.get("day",0),report.get("target_id","")]
+		selected=candidates[posmod(identity.hash(),candidates.size())]
+	return "res://assets/textures/expeditions/chronicle-%s.png" % selected

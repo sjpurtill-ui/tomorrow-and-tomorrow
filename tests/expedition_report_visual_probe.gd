@@ -31,5 +31,13 @@ func _ready()->void:
 		await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("res://artifacts/expedition-journey.png")
+		var scene_journals:Dictionary={"forest":"Through ancient woodland.","desert":"Across sun-scoured drylands.","mountains":"The road climbed through high bare ground.","river":"They forded running water once."}
+		for scene in scene_journals:
+			provider.report["journal"]=[scene_journals[scene]]
+			assert(provider._cover_path().ends_with("chronicle-%s.png" % scene))
+			dock.present(provider,0)
+			await get_tree().process_frame
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png("res://artifacts/expedition-%s.png" % scene)
 	print("EXPEDITION_REPORT_VISUAL_PROBE PASS")
 	get_tree().quit()
