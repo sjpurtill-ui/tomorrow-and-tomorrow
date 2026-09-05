@@ -190,7 +190,7 @@ func migrate()->void:
 func stage(mission:Dictionary,observer:String,position:Vector2,quality:float,day:int,reference:String)->void:
 	if not mission.has("city_observations"): mission["city_observations"]={}
 	for place:Dictionary in sites():
-		if place.civ_id==observer or (observer!="player" and place.civ_id!="player"): continue
+		if place.civ_id==observer: continue
 		if position.distance_to(vector(place.position))>SIGHT_RADIUS: continue
 		var observation:=capture(observer,place.city_id,quality,day,"physical reconnaissance",reference)
 		if not observation.is_empty(): mission.city_observations[place.city_id]=observation
@@ -229,7 +229,7 @@ func deliver(mission:Dictionary,observer:String,day:int)->Array[Dictionary]:
 	if route.is_empty() and mission.has_all(["point_a","point_b"]): route=[point(mission.point_a),point(mission.point_b)]
 	if not route.is_empty():
 		for place:Dictionary in sites():
-			if place.civ_id==observer or (observer!="player" and place.civ_id!="player"): continue
+			if place.civ_id==observer: continue
 			if records.get(observer,{}).has(place.city_id) or mission.get("city_observations",{}).has(place.city_id): continue
 			if system._route_distance_to_point(route,vector(place.position))>SIGHT_RADIUS: continue
 			var unknown:=place.duplicate(true); unknown.name="Reported settlement"; unknown.civ_id=""
