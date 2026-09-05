@@ -12502,6 +12502,8 @@ func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->vo
 			# Levy / generic infantry: crossed spear or staff silhouettes.
 			primary.mesh=bar.call(2.08,0.19); primary.rotation.y=0.72; primary.visible=true
 			secondary.mesh=bar.call(2.08,0.19); secondary.rotation.y=-0.72; secondary.visible=true
+	for glyph in glyphs:
+		glyph.set_meta("glyph_base_position",glyph.position)
 
 
 func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
@@ -12526,8 +12528,10 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 	for role_part_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
 		var role_part:=marker.get_node_or_null(String(role_part_name)) as MeshInstance3D
 		if role_part:
-			role_part.position.x=-1.85+role_offset.x
-			role_part.position.z=role_offset.z
+			# Preserve wheels, spearheads and barrels relative to the authored symbol.
+			# Replacing every X/Z with one anchor collapsed them into a single blob.
+			var authored:Vector3=role_part.get_meta("glyph_base_position",Vector3(-0.72,0.40,0.0))
+			role_part.position=authored+Vector3(-1.13,0,0)+role_offset
 	var era:=clampi(int(view.get("formation_era",0)),0,3)
 	var era_tones:=[color.darkened(0.16),color.lerp(Color("#c49a5d"),0.48),color.lerp(Color("#b9c0c1"),0.52),color.lerp(Color("#78c6d2"),0.56)]
 	var command_spine:=marker.get_node_or_null("CommandSpine") as MeshInstance3D

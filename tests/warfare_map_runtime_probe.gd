@@ -52,6 +52,28 @@ func _ready()->void:
 		_expect((marker.get_node("ReadinessPip") as MeshInstance3D).scale.z<0.45,"broken readiness does not visibly shorten the edge readiness tab")
 		_expect((marker.get_node("RoleGlyphPrimary") as MeshInstance3D).visible,"composition role disappears when damage/readiness changes")
 		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
+	if marker:
+		for icon_unit in ["line_infantry","cavalry","siege_engineer","field_artillery","motorized_infantry","armored_formation"]:
+			var icon_army:=army.duplicate(true)
+			icon_army.formations=[{"unit":icon_unit,"count":8000}]
+			var icon_view:=PRESENTATION.player_marker(icon_army,320.0,true)
+			terrain._apply_warfare_formation_view(marker,icon_view)
+			var primary:=marker.get_node("RoleGlyphPrimary") as MeshInstance3D
+			var positions:Dictionary={}
+			for part_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
+				var part:=marker.get_node(part_name) as MeshInstance3D
+				positions[part_name]=part.position
+				var expected:Vector3=Vector3(part.get_meta("glyph_base_position"))-Vector3(primary.get_meta("glyph_base_position"))
+				_expect((part.position-primary.position).is_equal_approx(expected),"%s lost authored offsets for %s" % [icon_unit,part_name])
+			terrain._apply_warfare_formation_view(marker,icon_view)
+			for part_name in positions:
+				_expect((marker.get_node(part_name) as Node3D).position.is_equal_approx(positions[part_name]),"%s icon drifts on repeated updates" % icon_unit)
+			icon_army.readiness=0.1
+			terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(icon_army,320.0,true))
+			for part_name in positions:
+				var part:=marker.get_node(part_name) as Node3D
+				var expected:Vector3=Vector3(positions[part_name])-Vector3(positions["RoleGlyphPrimary"])
+				_expect((part.position-primary.position).is_equal_approx(expected),"broken readiness collapses %s silhouette" % icon_unit)
 	var foreign_counter:Node3D=terrain._create_warfare_formation_marker("ForeignBudgetProbe",false)
 	terrain.add_child(foreign_counter)
 	var foreign_view:Dictionary=PRESENTATION.foreign_marker({"id":"foreign_probe","civilization":"Cedar League","identified":true,"hostile":true,"strength_estimate_low":900,"strength_estimate_high":1500,"readiness_estimate_low":0.42,"readiness_estimate_high":0.66,"formation_role":"armored","formation_era":3,"damage_estimate":0.36,"position":{"x":origin.x+8.0,"z":origin.z+8.0}},320.0)
