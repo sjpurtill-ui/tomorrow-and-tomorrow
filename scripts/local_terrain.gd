@@ -12212,15 +12212,11 @@ func _refresh_nomad_sighting_markers()->void:
 		if stale and is_instance_valid(stale): stale.queue_free()
 		nomad_sighting_markers.erase(sighting_id)
 
-func _on_scout_report_returned(report:Dictionary)->void:
-	## A returned expedition is an event worth full attention: the world pauses
-	## and the complete report opens in the detail dock. Choosing any speed
-	## resumes time — the pause is an invitation to read, not a lock.
-	_set_game_speed(0.0)
+func _on_scout_report_returned(_report:Dictionary)->void:
+	# The simulation owns report delivery and storage. Arrival is a notification,
+	# not a request to change the player's speed or replace the open detail panel.
 	if travel_status_label:
-		travel_status_label.text="A SCOUT PARTY HAS RETURNED — THE WORLD WAITS WHILE YOU READ ITS REPORT"
-	if hud:
-		hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(self,hud,report))
+		travel_status_label.text="SCOUT PARTY RETURNED — report available in WORLD > SCOUTING"
 
 
 func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:

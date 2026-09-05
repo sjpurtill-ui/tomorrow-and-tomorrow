@@ -1,7 +1,7 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 ## Detail dock: one returned scout expedition's full report. Opened
-## automatically when a party comes home — the world pauses so the report can
-## be read; choosing any speed resumes it.
+## on demand after a party comes home — the report can
+## be read without changing simulation speed.
 
 var report:Dictionary={}
 
@@ -73,7 +73,7 @@ func tab(_sub:int)->Dictionary:
 			if roadside_notes:
 				blocks.append({"type":"discovery","kind":"roadside supplies","title":"What sustained the journey","description":"The party recorded ordinary materials along the road and any supplies it carried home.","consequence":"These are useful local resupply notes, not distant treasure. The original locations and quantities are preserved in Journey & Accounts."})
 			if report.get("windfalls",[]).is_empty(): blocks.append({"type":"text","text":"The route is the discovery. No additional finds were recorded on this journey."})
-		blocks.append({"type":"text","text":"Read Journey & Accounts for the road, encounters and supplies. The world remains paused; choose a speed when you are ready."})
+		blocks.append({"type":"text","text":"Read Journey & Accounts for the road, encounters and supplies. Reading a report leaves your chosen simulation speed unchanged."})
 		return {"kpis":kpis,"brief":brief,"blocks":blocks}
 	blocks.append({"type":"expedition_chart","route":report.get("route",[]),"discoveries":report.get("discoveries",[])})
 	if is_recruitment:
@@ -112,7 +112,7 @@ func tab(_sub:int)->Dictionary:
 		for windfall in windfalls: findings.append("• "+String(windfall))
 		if not findings.is_empty():
 			blocks.append({"type":"text","heading":"FINDINGS","text":"\n".join(findings)})
-	blocks.append({"type":"text","text":"The world is paused while you read. Choose any speed to resume."})
+	blocks.append({"type":"text","text":"Reports stay available here; pause or change speed whenever you choose."})
 	return {"kpis":kpis,"brief":brief,"blocks":blocks}
 
 func signature()->Array:

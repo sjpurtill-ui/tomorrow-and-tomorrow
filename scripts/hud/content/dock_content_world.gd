@@ -105,13 +105,15 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 			latest_sub="last report day %d" % int(latest.get("day",0))
 		party_items.append({"name":"No party away","sub":latest_sub,"value":"","tip":String(exploration.get("message",""))})
 	blocks.append({"type":"rows","heading":"PARTIES","note":"%d of %d away" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1))],"items":party_items})
-	var latest_report:Dictionary=exploration.get("latest_report",{})
-	if not latest_report.is_empty():
-		blocks.append({"type":"actions","items":[{
-			"label":"OPEN LAST EXPEDITION REPORT","sub":"day %d · %s" % [int(latest_report.get("day",0)),String(latest_report.get("target_label","open exploration")).to_lower()],
-			"on_press":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,latest_report)),
-			"tip":"Reopen the most recent returned expedition's full record — journey, contacts, findings, and losses",
-		}]})
+	var report_actions:Array=[]
+	for report_record:Dictionary in CivilizationSystem.scout_reports:
+		var saved_report:=report_record.duplicate(true)
+		report_actions.append({
+			"label":"READ EXPEDITION REPORT", "sub":"day %d · %s" % [int(saved_report.get("day",0)),String(saved_report.get("target_label","open exploration")).to_lower()],
+			"on_press":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report)),
+			"tip":"Read this returned expedition's journey, findings and losses. Your simulation speed is unchanged.",
+		})
+	if not report_actions.is_empty(): blocks.append({"type":"actions","heading":"RETURNED REPORTS","items":report_actions})
 	var can_begin:=bool(exploration.get("can_begin",true))
 	var duration_items:Array=[]
 	for duration in [30,90,180,365]:
