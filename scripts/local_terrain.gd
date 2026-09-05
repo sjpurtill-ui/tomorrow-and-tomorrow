@@ -9123,7 +9123,9 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 			# drained/paved routes must survive the close-map LOD instead of becoming
 			# fainter precisely when their roof fabric appears.
 			route_color.a=maxf(route_color.a,0.52+0.07*float(surface_tier-3))
-		if camera!=null and camera.size<=0.42 and route_kind=="camp_path": route_color.a=maxf(route_color.a,0.22)
+		# The same saved path must retain its contrast regardless of the zoom at
+		# mesh creation. Screen-space filtering belongs to the road material.
+		if route_kind=="camp_path": route_color.a=maxf(route_color.a,0.22)
 		for index in points.size() - 1:
 			var start := points[index]
 			var finish := points[index + 1]
