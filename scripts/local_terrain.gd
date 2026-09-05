@@ -7748,7 +7748,22 @@ void fragment() {
 		fabric=mix(fabric,roof_tone,urban_roof_coverage*0.86);
 		float garden_interior=smoothstep(0.015,0.18,min(neighborhood_edge.x,neighborhood_edge.y));
 		vec3 garden_tone=mix(COLOR.rgb*0.78,vec3(0.22,0.27,0.16),0.38);
-		fabric=mix(fabric,garden_tone,(1.0-occupied_block)*garden_interior*neighborhood_visibility*0.40);
+		if(district_condition<6.0){
+			// Existing unbuilt neighborhood ground is mottled canopy and worn access,
+			// not a blank rectangular plate. This adds no simulated park or tree.
+			float garden_noise=value_noise(neighborhood_local*vec2(7.0,6.0)+neighborhood_cell*19.0+vec2(district_seed*37.0,61.0));
+			float garden_detail=1.0-smoothstep(0.006,0.025,pixel_span);
+			garden_noise=mix(0.5,garden_noise,garden_detail);
+			float garden_canopy=smoothstep(0.32,0.72,garden_noise);
+			vec3 canopy_tone=mix(vec3(0.18,0.26,0.15),vec3(0.36,0.43,0.27),garden_noise);
+			float garden_upkeep=mix(0.68,0.38,smoothstep(3.0,5.0,district_condition));
+			garden_tone=mix(garden_tone,canopy_tone,(0.35+garden_canopy*0.65)*garden_upkeep);
+			float access_center=0.5+0.12*sin(neighborhood_local.y*6.0+district_seed*17.0);
+			float garden_access=1.0-smoothstep(0.008,0.019+lane_aa,abs(neighborhood_local.x-access_center));
+			garden_access*=step(0.66,hash21(neighborhood_cell+vec2(37.0,district_seed*29.0)))*garden_detail;
+			garden_tone=mix(garden_tone,COLOR.rgb*0.92,garden_access*0.35);
+		}
+		fabric=mix(fabric,garden_tone,(1.0-occupied_block)*garden_interior*neighborhood_visibility*(district_condition<6.0 ? 0.85 : 0.40));
 		vec3 lane_tone=mix(COLOR.rgb,vec3(0.40,0.355,0.27),0.42);
 		fabric=mix(fabric,lane_tone,local_lane*neighborhood_visibility*road_survival*0.42);
 		// Sparse warm concentrations suggest fires, busy yards and denser inhabited
