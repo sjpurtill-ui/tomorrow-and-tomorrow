@@ -12109,7 +12109,7 @@ func _refresh_contact_encounter_markers()->void:
 	for marker_variant in contact_encounter_markers.values():
 		var marker:Node3D=marker_variant
 		if marker==null or not is_instance_valid(marker): continue
-		marker.visible=camera!=null and camera.size<=1800.0 and _world_position_is_revealed(marker.global_position)
+		marker.visible=camera!=null and camera.size<=1800.0 # A reported city location is known even when surrounding terrain is not surveyed.
 		var label:=marker.get_node_or_null("SettlementLabel") as Label3D
 		# The discovery map preserves distant locations. A terrain label is useful
 		# only when the player has zoomed into the observed place; keeping fixed-size
@@ -17375,7 +17375,8 @@ func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 		if not position_data.has("x") or not position_data.has("z"): return
 		_close_civilizations_panel()
 		var target:=Vector3(float(position_data.x),0.0,float(position_data.z))
-		if camera: camera.size=minf(camera.size,58.0)
+		zoom_target_size=-1.0
+		if camera: camera.size=minf(camera.size,18.0 if use_settlement else 58.0)
 		_set_camera_target(target)
 		if travel_status_label:
 			var notice:="KNOWN HOME SETTLEMENT  •  %s" % String(encounter.get("name","FOREIGN POLITY")).to_upper() if use_settlement else "ENCOUNTER SITE  •  %s  •  THEIR HOMELAND REMAINS UNLOCATED" % String(encounter.get("name","FOREIGN POLITY")).to_upper()

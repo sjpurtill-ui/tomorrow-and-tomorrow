@@ -51,6 +51,12 @@ func tab(_sub:int)->Dictionary:
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var mission_active:=bool(diplomatic_status.get("active",false))
 	blocks.append({"type":"actions","items":[
+		{"label":"SHOW HOME ON MAP","sub":"focus the reported settlement and its name",
+		"disabled":not bool(relation.get("home_location_known",false)),
+		"on_press":func()->void:
+			hud.close_detail(); hud.close_dock()
+			terrain._focus_known_world_point(civ_id,"settlement"),
+		"tip":"Uses the reported home location; surrounding unknown terrain remains hidden."},
 		{"label":"SEND DIPLOMAT","sub":"goodwill delegation","primary":true,
 		"disabled":mission_active or not bool(relation.get("home_location_known",false)),
 		"on_press":func()->void: terrain._open_diplomat_dispatch_panel(civ_id),
