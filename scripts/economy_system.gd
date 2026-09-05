@@ -8,7 +8,7 @@ const STAGE_SUBSISTENCE := "subsistence"
 const STAGE_METAL := "weighed_metal"
 const STAGE_CURRENCY := "currency"
 const STAGE_NAMES := {
-	STAGE_SUBSISTENCE:"Resource obligations",
+	STAGE_SUBSISTENCE:"Direct allocation & reciprocity",
 	STAGE_METAL:"Weighed-metal exchange",
 	STAGE_CURRENCY:"Currency economy"
 }
@@ -37,11 +37,8 @@ func _ensure_state()->void:
 		GameState.economy_stage=STAGE_SUBSISTENCE
 	if GameState.public_spending_priority not in PUBLIC_SPENDING_PRIORITIES:
 		GameState.public_spending_priority="balanced"
-	for resource_name in BASE_VALUES:
-		if not GameState.market_prices.has(resource_name):
-			GameState.market_prices[resource_name]=float(BASE_VALUES[resource_name])
 	if GameState.economy_metrics.is_empty():
-		GameState.economy_metrics={"stage":GameState.economy_stage,"monetization":0.0,"market_access":0.0,"price_index":0.0,"price_observations":0,"inflation":0.0,"trade_volume":0.0,"tax_revenue":0.0,"subsistence_share":1.0,"metal_reserve":0.0,"money_supply":0.0,"velocity":0.0,"fiscal_balance":0.0}
+		GameState.economy_metrics={"stage":GameState.economy_stage,"stage_name":STAGE_NAMES[GameState.economy_stage],"monetization":0.0,"market_access":0.0,"distribution_reach":0.0,"price_index":0.0,"price_observations":0,"inflation":0.0,"trade_volume":0.0,"reciprocal_surplus":0.0,"active_trade_partners":0,"foreign_trade_available":false,"tax_revenue":0.0,"subsistence_share":1.0,"metal_reserve":0.0,"money_supply":0.0,"velocity":0.0,"fiscal_balance":0.0}
 	if GameState.currency_supply>0.0 and GameState.private_currency+GameState.currency_hoards+GameState.public_treasury+GameState.mutual_aid_reserve<=0.0:
 		GameState.private_currency=maxf(0.0,GameState.currency_supply-GameState.public_treasury)
 	var composed_metal:=_weighed_metal_value()
@@ -60,13 +57,15 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	last_processed_day=day
 	var events:Array[Dictionary]=[]
 	_update_benchmarks(events)
-	var previous_index:=float(GameState.economy_metrics.get("price_index",1.0))
+	var previous_index:=float(GameState.economy_metrics.get("price_index",0.0))
 	var market_access:=_market_access(context)
 	var monetization:=_monetization(market_access)
 	var trade_volume:=_trade_volume(market_access,monetization)
 	_update_currency_demand(trade_volume,monetization)
 	var price_index:=_update_prices(market_access,trade_volume)
-	var external_trade:=_process_external_trade(market_access,trade_volume)
+	var active_trade_partners:=active_external_trade_partner_count()
+	var external_trade:=_process_external_trade(market_access,trade_volume,active_trade_partners)
+	var recorded_comparison_today:=trade_volume>0.001 and _comparison_values_observable()
 	var market_volatility:=_market_volatility(price_index,30)
 	var reliability:=_exchange_reliability(market_access,market_volatility)
 	var currency_liquidity:=_process_currency_liquidity(reliability,market_volatility)
@@ -99,8 +98,8 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	_validate_currency_conservation()
 	GameState.economy_metrics={
 		"stage":GameState.economy_stage,"stage_name":STAGE_NAMES[GameState.economy_stage],
-		"monetization":monetization,"market_access":market_access,"price_index":price_index,"price_observations":int(GameState.economy_metrics.get("price_observations",0))+(1 if trade_volume>0.001 else 0),
-		"inflation":inflation,"market_volatility":market_volatility,"trade_volume":trade_volume,"tax_revenue":revenue,"tax_capacity":tax_capacity,"tax_compliance":tax_capacity.compliance,"effective_tax_rate":tax_capacity.effective_rate,"tax_noncompliance_gap":tax_capacity.noncompliance_gap,"tax_liquidity_gap":tax_capacity.liquidity_gap,
+		"monetization":monetization,"market_access":market_access,"distribution_reach":market_access,"price_index":price_index,"price_observations":int(GameState.economy_metrics.get("price_observations",0))+(1 if recorded_comparison_today else 0),
+		"inflation":inflation,"market_volatility":market_volatility,"trade_volume":trade_volume,"reciprocal_surplus":trade_volume,"active_trade_partners":active_trade_partners,"foreign_trade_available":active_trade_partners>0,"tax_revenue":revenue,"tax_capacity":tax_capacity,"tax_compliance":tax_capacity.compliance,"effective_tax_rate":tax_capacity.effective_rate,"tax_noncompliance_gap":tax_capacity.noncompliance_gap,"tax_liquidity_gap":tax_capacity.liquidity_gap,
 		"public_upkeep":upkeep,"fiscal_balance":revenue-upkeep,
 		"subsistence_share":1.0-monetization,"metal_available":available_metal,"weighed_metal_circulation":GameState.weighed_metal_circulation,"weighed_metal_composition":GameState.weighed_metal_composition.duplicate(true),"metal_exchange":metal_exchange,"metal_trade_turnover":metal_exchange.turnover,"metal_velocity":metal_exchange.velocity,"weighed_metal_losses":GameState.weighed_metal_losses,"metal_reserve":reserve,"reserve_composition":GameState.monetary_reserve_metals.duplicate(true),
 		"money_supply":GameState.currency_supply,"money_demand":GameState.currency_demand,"liquid_money":liquid_money,"transactional_money":liquid_money,"transactional_share":currency_liquidity.transactional_share,"treasury":GameState.public_treasury,"private_currency":GameState.private_currency,"currency_hoards":GameState.currency_hoards,"currency_liquidity":currency_liquidity,"currency_confidence":currency_liquidity.confidence,"hoard_share":currency_liquidity.hoard_share,"velocity":velocity,
@@ -220,7 +219,8 @@ func _market_access(context:Dictionary)->float:
 	var logistics:=float(GameState.simulation_metrics.get("logistics",0.16))
 	var admin:=float(GameState.population_allocations.get("Administration",0))/maxf(1.0,GameState.population_exact*0.05)
 	var storage:=float(GameState.simulation_metrics.get("storage_function",0.0))
-	return clampf(logistics*0.36+admin*0.14+storage*0.10+DiscoverySystem.effect("trade_capacity")*0.32+DiscoverySystem.effect("standardization")*0.24,0.0,1.0)
+	var foreign_access:=float(CivilizationSystem.player_effects().market_access_bonus)
+	return clampf(logistics*0.36+admin*0.14+storage*0.10+DiscoverySystem.effect("trade_capacity")*0.32+DiscoverySystem.effect("standardization")*0.24+GameState.founding_effect("trade_access")+ProgressionSystem.effect("trade_capacity")+foreign_access,0.0,1.0)
 
 func _monetization(market_access:float)->float:
 	match GameState.economy_stage:
@@ -236,8 +236,13 @@ func _monetization(market_access:float)->float:
 		_: return clampf(market_access*0.10,0.0,0.12)
 
 func _update_prices(market_access:float,trade_volume:float=1.0)->float:
-	# A price is evidence from exchange, not a planning estimate.  Preserve the
-	# last observed index on quiet days, but expose zero until a transaction occurs.
+	# A comparison value is recorded evidence, not a hidden design constant and
+	# not a foreign market quote. Founders can allocate goods and reciprocate
+	# immediately, but they cannot report prices until shared measures and tallies
+	# make separate exchanges comparable. Later exchange stages already require
+	# those practices at their transition gates.
+	if not _comparison_values_observable():
+		return 0.0
 	if trade_volume<=0.001:
 		return float(GameState.economy_metrics.get("price_index",0.0)) if int(GameState.economy_metrics.get("price_observations",0))>0 else 0.0
 	var weighted:=0.0
@@ -260,6 +265,16 @@ func _update_prices(market_access:float,trade_volume:float=1.0)->float:
 		weighted+=float(GameState.market_prices[resource_name])/float(BASE_VALUES[resource_name])*weight
 		weights+=weight
 	return weighted/maxf(1.0,weights)
+
+
+func _comparison_values_observable()->bool:
+	if GameState.economy_stage!=STAGE_SUBSISTENCE:
+		return true
+	return DiscoverySystem.adoption("standard_measures")>=0.15 and DiscoverySystem.adoption("tallies")>=0.12
+
+
+func active_external_trade_partner_count()->int:
+	return maxi(0,int(CivilizationSystem.player_effects().get("active_trade_partners",0)))
 
 func _resource_is_economically_known(resource_name:String,stock:float)->bool:
 	if stock>0.001: return true
@@ -288,8 +303,14 @@ func _trade_volume(market_access:float,monetization:float)->float:
 	# subsistence production is consumption, not trade.
 	return (delivered+food_surplus)*market_access*(0.35+monetization*0.65)
 
-func _process_external_trade(market_access:float,domestic_trade:float)->Dictionary:
-	var result:={"exports":0.0,"imports":0.0,"exported_goods":{},"imported_goods":{},"friction":0.0,"credit":GameState.external_trade_credit,"claim_limit":0.0,"claim_loss":0.0}
+func _process_external_trade(market_access:float,domestic_trade:float,contract_partners_override:int=-1)->Dictionary:
+	# The optional override is an isolated accounting-test seam. Runtime callers
+	# always pass the authoritative treaty count produced by CivilizationSystem.
+	var active_partners:=active_external_trade_partner_count() if contract_partners_override<0 else maxi(0,contract_partners_override)
+	var result:={"exports":0.0,"imports":0.0,"exported_goods":{},"imported_goods":{},"friction":0.0,"credit":GameState.external_trade_credit,"claim_limit":0.0,"claim_loss":0.0,"partners":active_partners,"available":active_partners>0}
+	if active_partners<=0:
+		_update_food_import_dependence(0.0)
+		return result
 	if GameState.economy_stage==STAGE_SUBSISTENCE:
 		_update_food_import_dependence(0.0)
 		return result
@@ -378,7 +399,7 @@ func _process_external_trade(market_access:float,domestic_trade:float)->Dictiona
 	return result
 
 func _remove_trade_resource(resource_name:String,requested:float)->float:
-	if resource_name=="Food": return FoodSystem.remove_for_external_trade(requested)
+	if resource_name=="Food": return FoodSystem.issue_for_obligation(requested,"trade","Food export")
 	var available:=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0)))
 	var removed:=minf(available,maxf(0.0,requested))
 	GameState.resource_stockpiles[resource_name]=available-removed
@@ -421,7 +442,7 @@ func _real_economy_accounts(trade_volume:float,market_access:float,military_burd
 	if GameState.convoy_traveling:
 		housing_ratio=clampf(0.20+float(GameState.population_allocations.get("Logistics",0))/maxf(1.0,population*0.10)*0.27+float(GameState.population_allocations.get("Construction",0))/maxf(1.0,population*0.12)*0.17,0.0,0.86)
 	var essential_coverage:=clampf(food_coverage*0.62+material_coverage*0.18+housing_ratio*0.20,0.0,1.0)
-	var mobilized:=_first_numeric(military_burden,["mobilized_citizens","field_soldiers"])
+	var mobilized:=_first_numeric(military_burden,["mobilized_population","field_personnel","mobilized_citizens","field_soldiers"])
 	var security_duty:=maxf(mobilized,float(GameState.population_allocations.get("Defense",0))*0.50)
 	var workshop_diversion:=clampf(_first_numeric(military_burden,["workshop_diversion"]),0.0,1.0)
 	var diverted_craft_labor:=float(GameState.population_allocations.get("Crafting",0))*workshop_diversion
@@ -1347,18 +1368,21 @@ func _ledger(kind:String,amount:float,source:String,destination:String,memo:Stri
 
 func quote(resource_name:String,quantity:float=1.0)->Dictionary:
 	initialize()
-	var unit:=float(GameState.market_prices.get(resource_name,BASE_VALUES.get(resource_name,1.0)))
-	return {"resource":resource_name,"quantity":maxf(0.0,quantity),"unit_value":unit,"total_value":unit*maxf(0.0,quantity),"stage":GameState.economy_stage,"settlement_medium":settlement_medium()}
+	var observed:=GameState.market_prices.has(resource_name) and int(GameState.economy_metrics.get("price_observations",0))>0
+	var unit:=float(GameState.market_prices.get(resource_name,0.0)) if observed else 0.0
+	return {"resource":resource_name,"quantity":maxf(0.0,quantity),"unit_value":unit,"total_value":unit*maxf(0.0,quantity),"observed":observed,"stage":GameState.economy_stage,"settlement_medium":settlement_medium()}
 
 func settlement_medium()->String:
 	match GameState.economy_stage:
 		STAGE_METAL: return "resources, labor obligations, or weighed metal"
 		STAGE_CURRENCY: return "currency, weighed metal, resources, or recorded credit"
-		_: return "resources, labor, and reciprocal obligations"
+		_: return "direct allocation of physical resources, shared reserves, labor, and reciprocal obligations"
 
 func known_market_snapshot()->Array[Dictionary]:
 	initialize()
 	var result:Array[Dictionary]=[]
+	if int(GameState.economy_metrics.get("price_observations",0))<=0:
+		return result
 	for resource_name_variant in BASE_VALUES:
 		var resource_name:=String(resource_name_variant)
 		var stock:=float(GameState.resource_stockpiles.get(resource_name,0.0))
@@ -1370,7 +1394,9 @@ func known_market_snapshot()->Array[Dictionary]:
 
 func market_trend(resource_name:String,lookback_days:int=30)->Dictionary:
 	initialize()
-	var current:=float(GameState.market_prices.get(resource_name,BASE_VALUES.get(resource_name,1.0)))
+	if not GameState.market_prices.has(resource_name):
+		return {"resource":resource_name,"days":lookback_days,"first":0.0,"current":0.0,"change":0.0,"high":0.0,"low":0.0,"observed":false}
+	var current:=float(GameState.market_prices.get(resource_name,0.0))
 	var first:=current
 	var high:=current
 	var low:=current
@@ -1422,7 +1448,10 @@ func _threshold_event(events:Array[Dictionary],id:String,title:String,descriptio
 	var key:="economy_"+id
 	if int(GameState.last_simulation_event_days.get(key,-100000))+cooldown>int(GameState.elapsed_days): return
 	GameState.last_simulation_event_days[key]=int(GameState.elapsed_days)
-	events.append(_event(title,description,"warning"))
+	var event:=_event(title,description,"warning")
+	event["condition_id"]=key
+	event["recurring_condition"]=true
+	events.append(event)
 
 func _event(title:String,description:String,severity:String)->Dictionary:
 	return {"day":int(GameState.elapsed_days),"title":title,"description":description,"domain":"economy","severity":severity}

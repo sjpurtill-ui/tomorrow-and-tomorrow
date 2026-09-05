@@ -15,20 +15,29 @@ func _ready()->void:
 	if MilitaryCommandUI.unit_choice.item_count<6: failures.append("Unit catalog is incomplete.")
 	if MilitaryCommandUI.weapon_choice.item_count!=2: failures.append("Levy training should expose exactly its two compatible weapon families.")
 	if MilitaryCommandUI.equipment_choice.item_count<10: failures.append("Production catalog is incomplete.")
+	if MilitaryCommandUI.training_program_choice.item_count!=4: failures.append("Army and command exercise choices are incomplete.")
+	if MilitaryCommandUI.training_program_button.text!="START PROGRAM": failures.append("Training-program order is not exposed in military command.")
+	if "BLOCKED" not in MilitaryCommandUI.begin_training_button.tooltip_text or "NEXT" not in MilitaryCommandUI.begin_training_button.tooltip_text: failures.append("Training does not explain its initial blocker and exact recovery action.")
+	if MilitaryCommandUI.settlement_defense_button.disabled and ("BLOCKED" not in MilitaryCommandUI.settlement_defense_button.tooltip_text or "NEXT" not in MilitaryCommandUI.settlement_defense_button.tooltip_text): failures.append("Settlement defense does not explain its blocker and recovery action.")
+	MilitaryCommandUI._open_field_armies()
+	await get_tree().process_frame
+	if "NEXT" not in MilitaryCommandUI.field_army_feedback.text: failures.append("Empty field-army flow has no visible next action.")
+	if not MilitaryCommandUI.field_army_form_button.disabled or "BLOCKED" not in MilitaryCommandUI.field_army_form_button.tooltip_text or "NEXT" not in MilitaryCommandUI.field_army_form_button.tooltip_text: failures.append("Army formation does not explain why it is blocked and how to recover.")
+	MilitaryCommandUI.field_army_dialog.hide()
 	MilitaryCommandUI.equipment_choice.select(0)
 	MilitaryCommandUI.produce_count.value=1
 	MilitaryCommandUI._queue_repair()
 	if "No damaged" not in MilitaryCommandUI.feedback.text: failures.append("Repair action is not connected to military equipment state.")
 	MilitaryCommandUI._reinforce_weakest()
 	if "No depleted" not in MilitaryCommandUI.feedback.text: failures.append("Automatic reinforcement targeting is not connected.")
-	if MilitaryCommandUI.commander_portrait.texture==null or "CMD" not in MilitaryCommandUI.commander_details.text: failures.append("Commander portrait or command statistics are missing.")
+	if MilitaryCommandUI.commander_badge.text!="CMD" or "CMD" not in MilitaryCommandUI.commander_details.text: failures.append("Institutional command badge or command statistics are missing.")
 	if MilitaryCommandUI.readiness_meters.size()!=6 or "▼" not in MilitaryCommandUI.readiness_bottleneck.text: failures.append("Readiness components or bottleneck display are missing.")
-	if "Training accident risk" not in MilitaryCommandUI.queues.tooltip_text: failures.append("Training safety and medical advancement are not explained in command.")
+	if "training accident risk" not in MilitaryCommandUI.queues.tooltip_text.to_lower() or "extra rations" not in MilitaryCommandUI.queues.tooltip_text: failures.append("Recruit safety and exercise costs are not explained in command.")
 	if MilitaryCommandUI.prisoner_policy.item_count!=7 or MilitaryCommandUI.spoils_policy.item_count!=5 or MilitaryCommandUI.general_policy.item_count!=4: failures.append("Battle aftermath choices are incomplete.")
 	MilitaryCampaign.military_inventory["improvised"]=3
 	MilitaryCampaign.military_consumables["arrows"]=12
 	MilitaryCampaign.foreign_prisoners=2
-	MilitaryCampaign.held_generals=[{"name":"Captured captain"}]
+	MilitaryCampaign.held_generals=[{"name":"Captured raid command group"}]
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Probe Host",[
 		{"id":1,"unit":"levy","weapon":"improvised","count":30,"authorized_count":40,"equipment":26,"equipment_required":40,"personnel_condition":0.72,"readiness":0.61},
 		{"id":2,"unit":"line_infantry","weapon":"spear","count":24,"authorized_count":30,"equipment":22,"equipment_required":30,"personnel_condition":0.84,"readiness":0.73},
@@ -39,12 +48,18 @@ func _ready()->void:
 	],0.76,0.65)
 	MilitaryCommandUI._refresh()
 	await get_tree().process_frame
+	MilitaryCommandUI._open_field_armies()
+	await get_tree().process_frame
+	if MilitaryCommandUI.field_army_form_button.disabled: failures.append("Army formation remains blocked with trained home personnel available.")
+	if "CURRENT" not in MilitaryCommandUI.field_army_form_button.tooltip_text or "ACTION" not in MilitaryCommandUI.field_army_form_button.tooltip_text or "CONSEQUENCE" not in MilitaryCommandUI.field_army_form_button.tooltip_text: failures.append("Available army formation omits current state, action, or consequence.")
+	if "BLOCKED" not in MilitaryCommandUI.field_army_move_button.tooltip_text or "NEXT" not in MilitaryCommandUI.field_army_move_button.tooltip_text: failures.append("Army movement does not explain its no-army blocker and recovery action.")
+	MilitaryCommandUI.field_army_dialog.hide()
 	if "⚔" not in MilitaryCommandUI.formations.text or "COND" not in MilitaryCommandUI.formations.text: failures.append("Formation cards omit cohort attack, defense, readiness, or condition.")
 	if "🏹" not in MilitaryCommandUI.formations.text: failures.append("Formation cards omit unit-type iconography.")
 	if not MilitaryCommandUI.condition_bands.ready.visible or not MilitaryCommandUI.condition_bands.capable.visible: failures.append("Army personnel condition is not visible as a segmented heatmap.")
 	if (panel.get_child(0) as Control).get_combined_minimum_size().y>panel.size.y-16.0: failures.append("Populated military content clips inside the fixed modal.")
 	if "3 ready" not in MilitaryCommandUI.inventory.text or "Arrows  12" not in MilitaryCommandUI.inventory.text: failures.append("Ready equipment or ammunition is absent from the arsenal snapshot.")
-	if "GEN 1" not in MilitaryCommandUI.formations.text or "OUR MISSING" not in MilitaryCommandUI.formations.text: failures.append("Held generals or missing home soldiers are absent from the custody snapshot.")
+	if "COMMAND GROUPS 1" not in MilitaryCommandUI.formations.text or "OUR CAPTIVES" not in MilitaryCommandUI.formations.text: failures.append("Held command groups or captive population are absent from the custody snapshot.")
 	if not MilitaryCommandUI.aftermath_row.visible or MilitaryCommandUI.aftermath_label.text!="HELD CAPTIVES": failures.append("Held captives do not expose a delayed disposition decision.")
 	if MilitaryCommandUI.spoils_policy.visible: failures.append("Spoils policy remains visible after immediate battle aftermath has ended.")
 	if "+ 3 more cohorts" not in MilitaryCommandUI.formations.text: failures.append("Large armies are not summarized within the fixed modal.")
@@ -55,7 +70,7 @@ func _ready()->void:
 	if not MilitaryCommandUI.aftermath_row.visible: failures.append("Pending battle aftermath is not exposed.")
 	if MilitaryCommandUI.aftermath_label.text!="BATTLE DECISION" or not MilitaryCommandUI.spoils_policy.visible: failures.append("Immediate battle aftermath does not restore the spoils decision.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Aftermath controls make the modal clip: %s." % panel.size)
-	MilitaryCommandUI._report({"message":"A deliberately long battle report must remain available without growing the fixed command modal beyond its safe viewport, even when it contains prisoner, commander, equipment, supply, and treasury outcomes."})
+	MilitaryCommandUI._report({"message":"A deliberately long battle report must remain available without growing the fixed command modal beyond its safe viewport, even when it contains prisoner, command, equipment, supply, and treasury outcomes."})
 	await get_tree().process_frame
 	if MilitaryCommandUI.feedback.tooltip_text!=MilitaryCommandUI.feedback.text: failures.append("Trimmed battle feedback does not preserve its full report in a tooltip.")
 	if panel.size.y>get_viewport().get_visible_rect().size.y-60.0: failures.append("Long battle feedback makes the modal clip: %s." % panel.size)

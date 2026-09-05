@@ -12,10 +12,12 @@ func before_test()->void:
 
 func _reset_fixture(seed:int)->void:
 	GameState.reset_for_new_world(seed)
-	GameState.initialize_citizen_registry()
+	GameState.initialize_population_model()
 	GameState.settlement_completed=["Hearth Circle"]
 	GameState.settlement_founded_at=Vector3(14.0,0.0,-9.0)
 	GameState.elapsed_days=19.0
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.register_player_origin(Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z))
 	model.ensure_founded()
 
 func _count_use(land_use:String)->int:
@@ -73,6 +75,230 @@ func test_initial_extent_is_human_scale()->void:
 	var extent:=maxf(maximum.x-minimum.x,maximum.y-minimum.y)
 	assert_float(extent).is_between(0.10,0.22)
 
+func test_settlement_border_is_bounded_irregular_and_expands_with_supported_population()->void:
+	var initial:Dictionary=model.settlement_network_snapshot()
+	assert_int(int(initial.count)).is_equal(1)
+	assert_int(int(initial.runtime_people_entities)).is_equal(0)
+	var first:Dictionary=initial.settlements[0]
+	var initial_radius:=float(first.claim_radius_km)
+	assert_int((first.boundary as PackedVector2Array).size()).is_equal(model.SETTLEMENT_BORDER_VERTICES)
+	assert_float(initial_radius).is_between(0.32,2.0)
+	GameState.ensure_population_total(2400)
+	GameState.population_allocations["Survey"]=80
+	GameState.population_allocations["Administration"]=70
+	GameState.simulation_metrics["logistics"]=0.68
+	GameState.elapsed_days+=730.0
+	var expanded:Dictionary=model.settlement_network_snapshot().settlements[0]
+	assert_float(float(expanded.claim_radius_km)).is_greater(initial_radius)
+	assert_float(float(expanded.controlled_area_km2)).is_greater(float(first.controlled_area_km2))
+	assert_int((expanded.boundary as PackedVector2Array).size()).is_equal(model.SETTLEMENT_BORDER_VERTICES)
+
+func test_founding_lifecycle_stops_calling_committed_ground_a_convoy()->void:
+	GameState.settlement_completed=[]
+	GameState.settlement_site_committed=false
+	GameState.settlement_convoy={}
+	assert_str(GameState.settlement_lifecycle_phase()).is_equal("founding_expedition")
+	assert_bool(GameState.founding_expedition_active()).is_true()
+	GameState.settlement_site_committed=true
+	assert_str(GameState.settlement_lifecycle_phase()).is_equal("founding_site")
+	assert_bool(GameState.founding_expedition_active()).is_false()
+	GameState.settlement_completed=["Hearth Circle"]
+	assert_str(GameState.settlement_lifecycle_phase()).is_equal("established_network")
+	GameState.settlement_convoy={"active":true}
+	assert_str(GameState.settlement_lifecycle_phase()).is_equal("expansion_convoy")
+
+func test_model_rejects_an_uncharted_convoy_destination_even_without_the_ui()->void:
+	GameState.ensure_population_total(1000)
+	GameState.resource_stockpiles={"Food":100000.0,"Timber":1000.0,"Fiber Plants":1000.0}
+	var destination:=Vector2(GameState.settlement_founded_at.x+500.0,GameState.settlement_founded_at.z)
+	var assessment:Dictionary=model.known_land_assessment(destination)
+	assert_bool(bool(assessment.known)).is_false()
+	var quote:Dictionary=model.settlement_convoy_quote(destination,30.0)
+	assert_bool(bool(quote.ok)).is_false()
+	assert_str(String(quote.reason)).contains("uncharted")
+
+func test_convoy_quote_requires_a_continuous_returned_chart_and_real_travel_time()->void:
+	GameState.ensure_population_total(1000)
+	GameState.resource_stockpiles={"Food":1_000_000.0,"Timber":1000.0,"Fiber Plants":1000.0}
+	var origin:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var charted_destination:=origin+Vector2(64.0,0.0)
+	var timed:Dictionary=model.settlement_convoy_quote(charted_destination,0.1)
+	assert_bool(bool(timed.ok)).is_true()
+	assert_float(float(timed.duration_days)).is_equal_approx(4.0,0.001)
+	var disconnected_destination:=origin+Vector2(180.0,0.0)
+	CivilizationSystem._add_revealed_area(disconnected_destination,42.0,"isolated returned chart")
+	assert_bool(bool(model.known_land_assessment(disconnected_destination).known)).is_true()
+	var disconnected:Dictionary=model.settlement_convoy_quote(disconnected_destination,20.0)
+	assert_bool(bool(disconnected.ok)).is_false()
+	assert_bool(bool(disconnected.get("known_route",true))).is_false()
+	assert_str(String(disconnected.reason)).contains("route crosses uncharted ground")
+
+func test_access_axes_make_the_fixed_border_follow_rivers_routes_and_work()->void:
+	var settlement_id:=String(GameState.player_settlements[0].id)
+	var axes:Array[Dictionary]=[]
+	for index in 16:
+		axes.append({"kind":"river" if index==0 else "route","direction":Vector2.RIGHT.rotated(float(index)*0.01),"influence":1.0})
+	var update:Dictionary=model.set_settlement_territory_context(settlement_id,{"terrain_permeability":0.9,"water_access":1.0,"work_access":0.8,"travel_access":0.8,"access_axes":axes})
+	assert_bool(bool(update.ok)).is_true()
+	assert_int(int(update.axis_count)).is_equal(model.MAX_TERRITORY_ACCESS_AXES)
+	var settlement:Dictionary=model.settlement_network_snapshot().settlements[0]
+	var center:Vector2=settlement.position
+	var east:=0.0
+	var west:=0.0
+	for point in (settlement.boundary as PackedVector2Array):
+		east=maxf(east,point.x-center.x)
+		west=maxf(west,center.x-point.x)
+	assert_float(east).is_greater(west)
+	assert_float(float(settlement.territory_drivers.water)).is_equal(1.0)
+	assert_float(float(settlement.territory_drivers.work)).is_greater_equal(0.8)
+
+func test_coastal_site_has_modest_bounded_subsistence_opportunity_and_exposure_cost()->void:
+	GameState.province_terrain="Plains"
+	var settlement_id:=String(GameState.player_settlements[0].id)
+	var neutral_update:Dictionary=model.set_settlement_territory_context(settlement_id,{"terrain_permeability":0.72,"water_access":0.4,"work_access":0.5,"travel_access":0.5,"shoreline_access":0.0})
+	assert_bool(bool(neutral_update.ok)).is_true()
+	var inland:Dictionary=model.settlement_network_snapshot().settlements[0]
+	var inland_support:=float(inland.territory_drivers.support)
+	var inland_radius:=float(inland.claim_radius_km)
+	var resources_before:=GameState.resource_stockpiles.duplicate(true)
+	var deposits_before:=GameState.resource_deposits.duplicate(true)
+	var coastal_update:Dictionary=model.set_settlement_territory_context(settlement_id,{"shoreline_access":0.82,"marine_productivity":0.72,"salt_opportunity":0.55,"storm_exposure":0.64,"erosion_exposure":0.46,"open_water_exposure":0.58})
+	assert_bool(bool(coastal_update.ok)).is_true()
+	var coastal:Dictionary=model.settlement_network_snapshot().settlements[0]
+	var profile:Dictionary=coastal.intrinsic
+	assert_bool(bool(profile.coastal)).is_true()
+	assert_float(float(profile.early_food_factor)).is_between(1.0,1.08)
+	assert_float(float(profile.foraging_factor)).is_between(1.0,1.06)
+	assert_float(float(profile.marine_food_share)).is_between(0.0,0.08)
+	assert_float(float(profile.marine_opportunity)).is_greater(0.0)
+	assert_float(float(profile.salt_opportunity)).is_greater(0.0)
+	assert_float(float(profile.waterborne_access_potential)).is_between(0.0,0.42)
+	assert_float(float(profile.maintenance_factor)).is_greater(1.0)
+	assert_float(float(coastal.territory_drivers.support)).is_less(inland_support)
+	assert_float(float(coastal.claim_radius_km)).is_less(inland_radius)
+	assert_int(int(profile.runtime_people_entities)).is_equal(0)
+	assert_bool(bool(profile.bounded)).is_true()
+	# Opportunity is not a magical resource occurrence or stockpile.
+	assert_dict(GameState.resource_stockpiles).is_equal(resources_before)
+	assert_array(GameState.resource_deposits).is_equal(deposits_before)
+	assert_array(model.validate_settlement_network()).is_empty()
+
+func test_coast_does_not_unlock_maritime_trade_or_movement_without_specific_knowledge()->void:
+	GameState.province_terrain="Coast"
+	GameState.known_discoveries=[]
+	GameState.discovery_adoption={}
+	var preknowledge:Dictionary=model.settlement_intrinsic_profile()
+	assert_bool(bool(preknowledge.coastal)).is_true()
+	assert_float(float(preknowledge.waterborne_access_potential)).is_greater(0.0)
+	assert_bool(bool(preknowledge.maritime_trade_ready)).is_false()
+	assert_bool(bool(preknowledge.maritime_movement_ready)).is_false()
+	assert_float(float(preknowledge.maritime_trade_factor)).is_equal(0.0)
+	assert_float(float(preknowledge.maritime_movement_factor)).is_equal(0.0)
+	GameState.known_discoveries=["boat_building","coastal_navigation","port_operations","maritime_supply"]
+	GameState.discovery_adoption={"boat_building":0.6,"coastal_navigation":0.5,"port_operations":0.4,"maritime_supply":0.45}
+	var learned:Dictionary=model.settlement_intrinsic_profile()
+	assert_bool(bool(learned.maritime_trade_ready)).is_true()
+	assert_bool(bool(learned.maritime_movement_ready)).is_true()
+	assert_float(float(learned.maritime_trade_factor)).is_greater(0.0)
+	assert_float(float(learned.maritime_movement_factor)).is_greater(0.0)
+
+func test_shore_food_is_real_but_does_not_follow_traveling_parties()->void:
+	GameState.water_metrics["source_accessible"]=false
+	GameState.resource_deposits=[]
+	GameState.province_terrain="Plains"
+	var inland:Dictionary=FoodSystem._produce(100.0,0.7,0.7,false)
+	GameState.province_terrain="Coast"
+	var coastal:Dictionary=FoodSystem._produce(100.0,0.7,0.7,false)
+	var traveling:Dictionary=FoodSystem._produce(100.0,0.7,0.7,true)
+	assert_float(float(inland.Fish)).is_equal(0.0)
+	assert_float(float(coastal.Fish)).is_greater(0.0)
+	assert_float(float(traveling.Fish)).is_equal(0.0)
+
+func test_paid_aggregate_convoy_seeds_a_second_settlement_without_creating_people_entities()->void:
+	GameState.ensure_population_total(1000)
+	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":5000.0,"Preserved food":1000.0}
+	GameState.resource_stockpiles={"Food":6000.0,"Timber":500.0,"Fiber Plants":500.0}
+	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
+	var quote:Dictionary=model.settlement_convoy_quote(destination,1.0)
+	assert_bool(bool(quote.ok)).is_true()
+	var quoted_sources:=0
+	for amount in (quote.population_sources as Dictionary).values(): quoted_sources+=int(amount)
+	assert_int(quoted_sources).is_equal(int(quote.population))
+	var food_before:=float(GameState.resource_stockpiles.Food)
+	var timber_before:=float(GameState.resource_stockpiles.Timber)
+	var started:Dictionary=model.begin_settlement_convoy(destination,1.0)
+	assert_bool(bool(started.ok)).is_true()
+	assert_bool(bool(GameState.settlement_convoy.active)).is_true()
+	assert_dict(GameState.settlement_convoy.population_sources).is_equal(quote.population_sources)
+	var convoy_profile:=GameState.population_function_profile({"total_absent":int(quote.population),"by_function":quote.population_sources})
+	assert_int(int(convoy_profile.absent)).is_equal(int(quote.population))
+	assert_int(int(convoy_profile.accounted)).is_equal(GameState.population_total)
+	assert_float(float(GameState.resource_stockpiles.Food)).is_less(food_before)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber_before)
+	assert_int(roundi(model.primary_population_exact())).is_equal(960)
+	assert_str(String(GameState.food_issue_history.back().category)).is_equal("settlement_convoy")
+	assert_bool(bool(GameState.food_issue_history.back().charged_at_departure)).is_true()
+	GameState.elapsed_days=float(GameState.settlement_convoy.arrival_day)
+	model.update_settlement_convoy(destination,1.0)
+	var completed:Dictionary=model.complete_settlement_convoy(destination)
+	assert_bool(bool(completed.ok)).is_true()
+	var network:Dictionary=model.settlement_network_snapshot()
+	assert_int(int(network.count)).is_equal(2)
+	assert_int(int(network.runtime_people_entities)).is_equal(0)
+	var represented:=0
+	for settlement in network.settlements: represented+=int(settlement.population)
+	assert_int(represented).is_equal(GameState.population_total)
+	assert_array(model.validate_settlement_network()).is_empty()
+
+func test_convoy_cannot_arrive_early_or_found_anywhere_except_its_approved_site()->void:
+	GameState.ensure_population_total(1000)
+	GameState.resource_stockpiles={"Food":100000.0,"Timber":1000.0,"Fiber Plants":1000.0}
+	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
+	var started:Dictionary=model.begin_settlement_convoy(destination,1.0)
+	assert_bool(bool(started.ok)).is_true()
+	model.update_settlement_convoy(destination,1.0)
+	assert_float(float(GameState.settlement_convoy.progress)).is_equal(0.0)
+	assert_bool(bool(model.complete_settlement_convoy(destination).ok)).is_false()
+	GameState.elapsed_days=float(GameState.settlement_convoy.arrival_day)
+	model.update_settlement_convoy(destination,1.0)
+	var diverted:Dictionary=model.complete_settlement_convoy(destination+Vector2(1.0,0.0))
+	assert_bool(bool(diverted.ok)).is_false()
+	assert_str(String(diverted.reason)).contains("approved")
+	assert_bool(bool(model.complete_settlement_convoy(destination).ok)).is_true()
+
+func test_billion_person_civilization_keeps_fixed_border_resolution()->void:
+	GameState.ensure_population_total(1_000_000_000)
+	var network:Dictionary=model.settlement_network_snapshot()
+	assert_int(int(network.count)).is_equal(1)
+	assert_int((network.settlements[0].boundary as PackedVector2Array).size()).is_equal(model.SETTLEMENT_BORDER_VERTICES)
+	assert_int(int(network.runtime_people_entities)).is_equal(0)
+	var territory:Dictionary=model.territory_control_snapshot()
+	assert_int(int(territory.settlement_claim_count)).is_equal(1)
+	assert_int(int(territory.runtime_people_entities)).is_equal(0)
+	assert_bool(bool(territory.bounded)).is_true()
+
+func test_conquest_uses_the_existing_bounded_strategic_region_in_the_territory_snapshot()->void:
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	var regions:Array=civ.strategic_regions
+	var original:Dictionary=(regions[0] as Dictionary).duplicate(true)
+	var occupied:Dictionary=original.duplicate(true)
+	occupied["controller"]="player"
+	occupied["integration"]=0.24
+	occupied["resistance"]=0.63
+	occupied["occupation_turns"]=3
+	regions[0]=occupied
+	civ["strategic_regions"]=regions
+	CivilizationSystem.civilizations[0]=civ
+	var territory:Dictionary=model.territory_control_snapshot()
+	assert_int(int(territory.occupied_region_count)).is_equal(1)
+	assert_int(int(territory.record_count)).is_equal(int(territory.settlement_claim_count)+1)
+	assert_int(int(territory.record_count)).is_less_equal(int(territory.record_limit))
+	assert_str(String(territory.occupied_regions[0].id)).is_equal(String(occupied.id))
+	assert_float(float(territory.occupied_regions[0].integration)).is_equal_approx(0.24,0.0001)
+	regions[0]=original
+	civ["strategic_regions"]=regions
+	CivilizationSystem.civilizations[0]=civ
+
 func test_same_seed_produces_identical_plot_history()->void:
 	var first:=GameState.settlement_plots.duplicate(true)
 	_reset_fixture(TEST_SEED)
@@ -87,7 +313,7 @@ func test_same_seed_produces_identical_plot_history()->void:
 func test_population_change_does_not_move_existing_plots()->void:
 	var polygons:Array=[]
 	for plot in GameState.settlement_plots: polygons.append((plot.polygon as PackedVector2Array).duplicate())
-	GameState.ensure_living_population(220)
+	GameState.ensure_population_total(220)
 	model.ensure_founded()
 	model.rebuild_summary()
 	for index in polygons.size(): assert_array(GameState.settlement_plots[index].polygon).is_equal(polygons[index])
@@ -104,7 +330,7 @@ func test_damage_and_abandonment_persist_without_erasing_lineage()->void:
 	assert_int(GameState.settlement_plot_history.size()).is_greater(GameState.settlement_plots.size())
 
 func test_population_alone_cannot_create_a_town()->void:
-	GameState.ensure_living_population(5000)
+	GameState.ensure_population_total(5000)
 	GameState.simulation_metrics["logistics"]=0.05
 	GameState.simulation_metrics["legitimacy"]=0.25
 	GameState.settlement_completed=["Hearth Circle"]
@@ -114,7 +340,7 @@ func test_population_alone_cannot_create_a_town()->void:
 
 func test_household_growth_requires_pressure_labor_and_delivered_materials()->void:
 	var original_residential:=_count_use("residential_compound")
-	GameState.ensure_living_population(240)
+	GameState.ensure_population_total(240)
 	GameState.population_allocations["Construction"]=8
 	GameState.resource_stockpiles={}
 	GameState.elapsed_days=60.0
@@ -133,7 +359,7 @@ func test_household_growth_requires_pressure_labor_and_delivered_materials()->vo
 
 func test_growth_plot_completes_without_moving_older_ground()->void:
 	var first_polygon:PackedVector2Array=GameState.settlement_plots[0].polygon.duplicate()
-	GameState.ensure_living_population(240)
+	GameState.ensure_population_total(240)
 	GameState.population_allocations["Construction"]=8
 	GameState.resource_stockpiles={"Timber":8.0,"Fiber Plants":6.0}
 	GameState.elapsed_days=60.0
@@ -304,7 +530,7 @@ func test_role_reallocation_visibly_idles_and_reopens_working_ground()->void:
 	assert_str(String(field.status)).is_equal("active")
 
 func test_overflow_population_claims_temporary_ground_without_free_housing()->void:
-	GameState.ensure_living_population(420)
+	GameState.ensure_population_total(420)
 	GameState.population_allocations["Construction"]=4
 	GameState.population_allocations["Logistics"]=4
 	GameState.resource_stockpiles={}
@@ -343,7 +569,7 @@ func test_overflow_population_claims_temporary_ground_without_free_housing()->vo
 	assert_str(String(camp.get("repair_state",""))).is_equal("ground_reclaimed")
 
 func test_resource_backed_infill_adds_capacity_without_rewriting_plot_geometry()->void:
-	GameState.ensure_living_population(280)
+	GameState.ensure_population_total(280)
 	GameState.population_allocations["Construction"]=12
 	GameState.population_allocations["Logistics"]=6
 	GameState.resource_stockpiles={"Timber":30.0,"Fiber Plants":24.0}
@@ -367,3 +593,161 @@ func test_resource_backed_infill_adds_capacity_without_rewriting_plot_geometry()
 	assert_float(float(infilled.roof_coverage)).is_greater(0.30)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(30.0)
 	assert_array(model.validate_state()).is_empty()
+
+func test_elapsed_centuries_alone_do_not_repaint_inherited_fabric()->void:
+	var original_polygons:Dictionary={}
+	for plot in GameState.settlement_plots:
+		original_polygons[int(plot.id)]=(plot.polygon as PackedVector2Array).duplicate()
+	GameState.settlement_founded_day=0
+	GameState.elapsed_days=65700.0
+	for role in GameState.population_allocations: GameState.population_allocations[role]=0
+	var events:Array[Dictionary]=[]
+	model._evolve_inherited_fabric(65700,events)
+	assert_array(events).is_empty()
+	for plot in GameState.settlement_plots:
+		assert_int(int(plot.get("fabric_generation",0))).is_equal(0)
+		assert_array(plot.polygon).is_equal(original_polygons[int(plot.id)])
+
+func test_supported_fabric_evolves_in_place_and_records_route_surface()->void:
+	GameState.settlement_founded_day=0
+	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Storage Pits","Open Work Area","Gathering Yard"]
+	GameState.population_allocations["Construction"]=50
+	GameState.population_allocations["Crafting"]=22
+	GameState.population_allocations["Logistics"]=12
+	GameState.simulation_metrics["labor_efficiency"]=0.72
+	GameState.resource_stockpiles["Timber"]=120.0
+	GameState.resource_stockpiles["Fiber Plants"]=80.0
+	GameState.settlement_nuclei.append({"id":2,"kind":"market_crossing","position":Vector2(0.11,0.03),"pull":0.72,"active":true,"created_day":1200,"absorbed_day":-1})
+	var original_polygons:Dictionary={}
+	for plot in GameState.settlement_plots:
+		original_polygons[int(plot.id)]=(plot.polygon as PackedVector2Array).duplicate()
+	var events:Array[Dictionary]=[]
+	model._evolve_inherited_fabric(9000,events)
+	assert_int(events.size()).is_equal(1)
+	var changed_plot_id:=int(events[0].plot_id)
+	var changed:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if int(plot.id)==changed_plot_id: changed=plot
+		assert_array(plot.polygon).is_equal(original_polygons[int(plot.id)])
+	assert_dict(changed).is_not_empty()
+	assert_int(int(changed.fabric_generation)).is_equal(1)
+	assert_str(String(changed.morphology_era)).is_equal("foothold")
+	var frontage_id:=int(changed.frontage_route_id)
+	var surfaced:=false
+	for route in GameState.settlement_routes:
+		if int(route.id)==frontage_id:
+			surfaced=String(route.get("surface",""))=="cleared_earth"
+	assert_bool(surfaced).is_true()
+
+func test_later_functional_districts_require_matching_roles_age_and_materials()->void:
+	GameState.settlement_founded_day=0
+	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Open Work Area"]
+	GameState.population_allocations["Construction"]=18
+	GameState.population_allocations["Crafting"]=0
+	GameState.population_allocations["Logistics"]=100
+	GameState.resource_stockpiles={"Timber":80.0,"Fiber Plants":50.0}
+	var events:Array[Dictionary]=[]
+	model._attempt_functional_growth(5475,events)
+	assert_str(String(GameState.settlement_plots.back().land_use)).is_equal("market")
+
+	_reset_fixture(TEST_SEED+1)
+	GameState.settlement_founded_day=0
+	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Open Work Area"]
+	GameState.population_allocations["Construction"]=18
+	GameState.population_allocations["Administration"]=100
+	GameState.resource_stockpiles={"Timber":80.0,"Fiber Plants":50.0}
+	events.clear()
+	model._attempt_functional_growth(10950,events)
+	assert_str(String(GameState.settlement_plots.back().land_use)).is_equal("civic")
+
+	_reset_fixture(TEST_SEED+2)
+	GameState.settlement_founded_day=0
+	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Open Work Area"]
+	GameState.known_discoveries.append("stone_selection")
+	GameState.population_allocations["Construction"]=18
+	GameState.population_allocations["Extraction"]=100
+	GameState.resource_stockpiles={"Stone":80.0,"Timber":50.0}
+	events.clear()
+	model._attempt_functional_growth(18250,events)
+	assert_str(String(GameState.settlement_plots.back().land_use)).is_equal("dirty_industry")
+
+func test_growth_rejects_submerged_ground_before_scoring_access()->void:
+	var context:={
+		"settlement_origin":GameState.settlement_founded_at,
+		"buildable_land_at":func(_x:float,_z:float)->bool: return false
+	}
+	var score:float=model._growth_site_score(Vector2(1.0,1.0),0.006,"residential_compound",context)
+	assert_float(score).is_less(-9000.0)
+
+func test_later_material_transition_is_seeded_and_physically_paid()->void:
+	GameState.known_discoveries.append("stone_selection")
+	GameState.resource_stockpiles["Stone"]=50.0
+	GameState.resource_stockpiles["Timber"]=20.0
+	var candidate_plot:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if absi(int(plot.get("seed",1)))%10 in [0,3,6,8]:
+			candidate_plot=plot
+			break
+	assert_dict(candidate_plot).is_not_empty()
+	candidate_plot["fabric_generation"]=6
+	var cost:Dictionary=model._fabric_upgrade_cost(candidate_plot,7)
+	var stone_before:=float(GameState.resource_stockpiles.Stone)
+	var events:Array[Dictionary]=[]
+	model._apply_fabric_upgrade({"plot":candidate_plot,"next_tier":7,"cost":cost},25550,events)
+	assert_str(String(candidate_plot.material_family)).is_equal("stone")
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(stone_before)
+	assert_int(int(candidate_plot.fabric_generation)).is_equal(7)
+	assert_array(events).has_size(1)
+
+func test_mature_population_founds_paid_connected_quarter_beyond_inherited_core()->void:
+	GameState.settlement_founded_day=0
+	GameState.ensure_population_total(6200)
+	GameState.population_allocations["Construction"]=80
+	GameState.population_allocations["Logistics"]=45
+	GameState.population_allocations["Administration"]=24
+	GameState.simulation_metrics["logistics"]=0.52
+	GameState.known_discoveries.append("route_memory")
+	GameState.resource_stockpiles={"Timber":120.0,"Fiber Plants":90.0}
+	var original_plot_count:=GameState.settlement_plots.size()
+	var original_nucleus_count:=GameState.settlement_nuclei.size()
+	var original_extent:=0.0
+	for plot in GameState.settlement_plots:
+		original_extent=maxf(original_extent,Vector2(plot.centroid).length())
+	var timber_before:=float(GameState.resource_stockpiles.Timber)
+	var events:Array[Dictionary]=[]
+	var flat_context:={
+		"settlement_origin":GameState.settlement_founded_at,
+		"buildable_land_at":func(_x:float,_z:float)->bool: return true,
+		"terrain_height_at":func(_x:float,_z:float)->float: return 0.0,
+		"river_distance_at":func(_x:float,_z:float)->float: return INF
+	}
+	model._attempt_mature_district_expansion(1800,events,flat_context)
+	assert_int(GameState.settlement_nuclei.size()).is_equal(original_nucleus_count+1)
+	assert_str(String(GameState.settlement_nuclei.back().kind)).is_equal("satellite_quarter")
+	assert_int(GameState.settlement_plots.size()).is_greater(original_plot_count)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber_before)
+	assert_array(events).has_size(1)
+	assert_int(int(events[0].plots)).is_greater_equal(3)
+	var expanded_extent:=0.0
+	for plot in GameState.settlement_plots:
+		expanded_extent=maxf(expanded_extent,Vector2(plot.centroid).length())
+	assert_float(expanded_extent).is_greater(original_extent+0.06)
+	var connector_found:=false
+	for route in GameState.settlement_routes:
+		if String(route.get("kind",""))=="district_connector" and String(route.get("hierarchy",""))=="main_approach":
+			connector_found=true
+			assert_int((route.points as PackedVector2Array).size()).is_equal(6)
+	assert_bool(connector_found).is_true()
+	assert_array(model.validate_state()).is_empty()
+
+func test_population_alone_cannot_found_a_satellite_quarter()->void:
+	GameState.settlement_founded_day=0
+	GameState.ensure_population_total(6200)
+	GameState.resource_stockpiles={"Timber":120.0,"Fiber Plants":90.0}
+	var original_plots:=GameState.settlement_plots.size()
+	var original_nuclei:=GameState.settlement_nuclei.size()
+	var events:Array[Dictionary]=[]
+	model._attempt_mature_district_expansion(1800,events,{})
+	assert_array(events).is_empty()
+	assert_int(GameState.settlement_plots.size()).is_equal(original_plots)
+	assert_int(GameState.settlement_nuclei.size()).is_equal(original_nuclei)

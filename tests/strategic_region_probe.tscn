@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource path="res://tests/strategic_region_probe.gd" type="Script" id="1"]
+
+[node name="StrategicRegionProbe" type="Node"]
+script = ExtResource("1")

@@ -3,7 +3,7 @@ extends Node
 func _ready()->void:
 	GameState.world_seed=24681357
 	GameState.elapsed_days=0.0
-	GameState.initialize_citizen_registry()
+	GameState.initialize_population_model()
 	GameState.population_health=0.78
 	GameState.food_security=0.82
 	GameState.housing_capacity=140

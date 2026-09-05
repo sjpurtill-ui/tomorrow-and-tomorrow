@@ -19,7 +19,7 @@ func initialize() -> void:
 	_seed_world_truth()
 
 func _seed_world_truth() -> void:
-	WorldFacts.set_fact("civilization", "population", 120, "public")
+	WorldFacts.set_fact("civilization", "population", GameState.population_total, "public")
 	WorldFacts.set_fact("civilization", "sovereign", "player", "public")
 	WorldFacts.set_fact("civilization", "food_days", 30.0, "internal")
 	WorldFacts.set_fact("civilization", "settlement_status", "unsettled", "public")
@@ -56,7 +56,7 @@ func appoint(advisor_name: String, office: String) -> bool:
 	if advisor.is_empty():
 		return false
 	GameState.leadership_positions[office] = advisor
-	_record_memory(advisor_name, "The Sovereign appointed me as %s." % office, 0.85, "duty")
+	_record_memory(advisor_name, "The Sovereign commissioned this institution for the %s portfolio." % office, 0.85, "duty")
 	return true
 
 func advisor_by_name(advisor_name: String) -> Dictionary:
@@ -90,12 +90,75 @@ func generate_consequence_item(event: Dictionary) -> Dictionary:
 	var domain := String(event.get("domain","population"))
 	var office := String(office_by_domain.get(domain,"Steward"))
 	if not GameState.leadership_positions.has(office): return {}
-	var advisor:Dictionary=GameState.leadership_positions[office]
 	var responses:=_responses_for_domain(domain)
+	# A council interruption is a decision, not a second event log. Economy,
+	# materials, and other observational domains already have dedicated records;
+	# if the council cannot offer an order that changes simulation state, it stays
+	# out of the sovereign inbox entirely.
+	if not _responses_change_state(responses): return {}
+	var advisor:Dictionary=GameState.leadership_positions[office]
 	var text := "Sovereign, %s %s" % [String(event.get("description","Conditions require attention.")),_recommendation_for(advisor,domain)]
-	var item := {"id":"consequence_%d_%d" % [int(GameState.elapsed_days),rng.randi()],"advisor":advisor.name,"office":office,"topic":domain,"act":{"type":"warn"},"text":text,"urgency":0.82,"day":int(GameState.elapsed_days),"status":"unread","responses":responses}
+	var condition_key:=String(event.get("condition_id",event.get("title",domain))).strip_edges().to_lower().replace(" ","_")
+	var severity:=String(event.get("severity","warning"))
+	var current_day:=int(GameState.elapsed_days)
+	for existing_variant in GameState.council_inbox:
+		var existing:Dictionary=existing_variant
+		if String(existing.get("condition_key",""))!=condition_key: continue
+		var prior_severity:=String(existing.get("severity","warning"))
+		var last_day:=int(existing.get("last_day",existing.get("day",-100000)))
+		if String(existing.get("status","unread"))=="unread":
+			existing["text"]=text
+			existing["day"]=current_day
+			existing["last_day"]=current_day
+			existing["occurrences"]=int(existing.get("occurrences",1))+1
+			existing["severity"]=severity
+			existing["urgency"]=maxf(float(existing.get("urgency",0.0)),_council_severity_urgency(severity))
+			return existing
+		# An answered condition does not become a fresh sovereign interruption on
+		# every simulation cooldown. Escalation may reopen it immediately; otherwise
+		# a full year must pass before the same decision can be raised again.
+		if _council_severity_rank(severity)<=_council_severity_rank(prior_severity) and current_day-last_day<365:
+			return {}
+	var item := {"id":"consequence_%d_%d" % [current_day,rng.randi()],"advisor":advisor.name,"office":office,"topic":domain,"act":{"type":"warn"},"text":text,"urgency":_council_severity_urgency(severity),"day":current_day,"last_day":current_day,"status":"unread","responses":responses,"condition_key":condition_key,"severity":severity,"occurrences":1}
 	GameState.council_inbox.push_front(item)
+	if GameState.council_inbox.size()>80: GameState.council_inbox.resize(80)
 	return item
+
+func _responses_change_state(responses:Array)->bool:
+	for option_variant in responses:
+		var option:Dictionary=option_variant
+		if String(option.get("effect","")).strip_edges()!="": return true
+	return false
+
+func _council_severity_rank(severity:String)->int:
+	return {"notice":0,"warning":1,"danger":2,"critical":3}.get(severity.to_lower(),1)
+
+func _council_severity_urgency(severity:String)->float:
+	return {"notice":0.42,"warning":0.68,"danger":0.84,"critical":0.96}.get(severity.to_lower(),0.68)
+
+func council_decision_items(limit:=12)->Array[Dictionary]:
+	var unread:Array[Dictionary]=[]
+	var history:Array[Dictionary]=[]
+	for item_variant in GameState.council_inbox:
+		var item:Dictionary=item_variant
+		if not _responses_change_state(item.get("responses",[])): continue
+		if String(item.get("status","unread"))=="unread": unread.append(item)
+		elif history.size()<6: history.append(item)
+	var visible:Array[Dictionary]=[]
+	for item in unread:
+		if visible.size()>=limit: break
+		visible.append(item)
+	for item in history:
+		if visible.size()>=limit: break
+		visible.append(item)
+	return visible
+
+func routine_report_count()->int:
+	var count:=0
+	for item_variant in GameState.council_inbox:
+		var item:Dictionary=item_variant
+		if not _responses_change_state(item.get("responses",[])): count+=1
+	return count
 
 func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 	initialize()
@@ -132,12 +195,12 @@ func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 		"provisions_low":
 			text="Sovereign, fewer than three days of provisions remain. Route foraging supplies only %d%% of need. Another delay may force a halt." % supply_ratio
 		"arrival":
-			text="Sovereign, the convoy has reached the ordered ground. The people are regrouping and counting losses, stores, and usable shelter."
+			text="Sovereign, the convoy has reached the ordered ground. Population groups are regrouping while losses, stores, and usable shelter are assessed."
 		"settlement":
 			var known_resources:=int(data.get("known_resources",0))
-			text="Sovereign, your order is given. The convoy is halting here to establish a permanent home. Stores stand at %.1f days, and %d nearby resource %s known. The builders are organizing the first Hearth Circle from the roles you assigned." % [food_days,known_resources,"site is" if known_resources==1 else "sites are"]
+			text="Sovereign, your directive is given. The convoy is halting here to establish a permanent home. Stores stand at %.1f days, and %d nearby resource %s known. The builders are organizing the first Hearth Circle from the roles you assigned." % [food_days,known_resources,"site is" if known_resources==1 else "sites are"]
 		"halt":
-			text="Sovereign, the column has stopped. %s" % String(data.get("reason","Continuing would endanger the people."))
+			text="Sovereign, the column has stopped. %s" % String(data.get("reason","Continuing would endanger the population."))
 		_:
 			text="Sovereign, the travel council reports that the convoy is %d%% through its present route." % progress
 	var item:={
@@ -152,14 +215,14 @@ func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 	return item
 
 func _recommendation_for(advisor: Dictionary,domain: String) -> String:
-	var forceful: bool = "Ruthless" in advisor.traits or "Ambitious" in advisor.traits
-	var cautious: bool = "Cautious" in advisor.traits or "Compassionate" in advisor.traits
-	if domain=="food": return "I recommend emergency gathering." if forceful else ("I recommend measured rationing." if cautious else "I require a clear rule for provisions.")
+	var forceful: bool = "Directive" in advisor.traits or "Centralized" in advisor.traits
+	var cautious: bool = "Consensus-driven" in advisor.traits or "Representative" in advisor.traits
+	if domain=="food": return "We recommend emergency gathering." if forceful else ("We recommend measured rationing." if cautious else "The office requires a clear rule for provisions.")
 	if domain=="health": return "The sick must be placed into a protected care rotation."
 	if domain=="ecology": return "We must restrict nearby gathering before the damage becomes permanent." if cautious else "We can accept depletion now if survival demands it."
-	if domain=="legitimacy": return "Call the households together and explain the burden you require."
+	if domain=="legitimacy": return "Call representative assemblies and explain the burden you require."
 	if domain=="security": return "Expand the watch even though other work will slow."
-	return "Your order will decide which cost the people accept."
+	return "Your directive will decide which cost the population bears."
 
 func _responses_for_domain(domain: String) -> Array[Dictionary]:
 	if domain=="food": return [
@@ -177,13 +240,13 @@ func _responses_for_domain(domain: String) -> Array[Dictionary]:
 	]
 	if domain=="legitimacy": return [
 		{"label":"Call a public assembly","effect":"public_assembly","magnitude":0.24,"days":120.0,"ripple":"Legitimacy and cohesion improve; administration is occupied."},
-		{"label":"Reassert the order","effect":"expanded_watch","magnitude":0.16,"days":90.0,"ripple":"Compliance is guarded; resentment remains unresolved."}
+		{"label":"Reassert the directive","effect":"expanded_watch","magnitude":0.16,"days":90.0,"ripple":"Compliance is guarded; resentment remains unresolved."}
 	]
 	if domain=="security": return [
 		{"label":"Expand the watch","effect":"expanded_watch","magnitude":0.24,"days":180.0,"ripple":"Security improves while scarce labor remains committed."},
-		{"label":"Rely on cohesion","effect":"public_assembly","magnitude":0.14,"days":90.0,"ripple":"Households coordinate voluntarily; direct readiness stays limited."}
+		{"label":"Rely on cohesion","effect":"public_assembly","magnitude":0.14,"days":90.0,"ripple":"Local assemblies coordinate voluntarily; direct readiness stays limited."}
 	]
-	return [{"label":"Acknowledge the report","effect":"","magnitude":0.0,"days":1.0,"ripple":"No standing order is changed."}]
+	return [{"label":"Acknowledge the report","effect":"","magnitude":0.0,"days":1.0,"ripple":"No standing directive is changed."}]
 
 func _plan_advice(advisor: Dictionary, topic: String, urgency: float) -> Dictionary:
 	var relationship: Dictionary = advisor.relationships.sovereign
@@ -199,22 +262,22 @@ func _meaning_for(topic: String, act_type: String) -> String:
 	return meanings.get(topic, "%s requires a sovereign decision" % topic)
 
 func _desired_effect(topic: String) -> String:
-	return "obtain a clear sovereign order concerning %s" % topic
+	return "obtain a clear sovereign directive concerning %s" % topic
 
 func _tone_for(advisor: Dictionary) -> String:
-	if "Ruthless" in advisor.traits: return "severe"
-	if "Cautious" in advisor.traits: return "guarded"
-	if "Charismatic" in advisor.traits: return "confident"
-	if "Meticulous" in advisor.traits: return "precise"
+	if "Directive" in advisor.traits: return "severe"
+	if "Consensus-driven" in advisor.traits: return "guarded"
+	if "Representative" in advisor.traits: return "confident"
+	if "Expert-led" in advisor.traits: return "precise"
 	return "formal"
 
 func _render_locally(advisor: Dictionary, act: Dictionary) -> String:
 	var templates := {
-		"report":"Sovereign, my office reports that %s.",
-		"recommend":"Sovereign, I recommend action: %s.",
+		"report":"Sovereign, this office reports that %s.",
+		"recommend":"Sovereign, we recommend action: %s.",
 		"warn":"Sovereign, this cannot be neglected: %s.",
-		"object":"Sovereign, I must object. %s.",
-		"evade":"Sovereign, the matter remains uncertain. I can only say that %s.",
+		"object":"Sovereign, this office must object. %s.",
+		"evade":"Sovereign, the matter remains uncertain. The office can only report that %s.",
 		"conceal":"Sovereign, there is little of consequence to report, beyond this: %s."
 	}
 	return templates.get(act.type, "Sovereign, %s.") % act.meaning
@@ -232,7 +295,7 @@ func issue_order(order_type: String, target: String, parameters: Dictionary, add
 	if GameState.sovereign_orders.size()>100: GameState.sovereign_orders.resize(100)
 	if addressed_office != "" and GameState.leadership_positions.has(addressed_office):
 		var advisor: Dictionary = GameState.leadership_positions[addressed_office]
-		_record_memory(advisor.name, "The Sovereign ordered %s concerning %s." % [order_type,target], 0.78, "order")
+		_record_memory(advisor.name, "The Sovereign issued a %s directive concerning %s." % [order_type,target], 0.78, "directive")
 	return order
 
 func begin_pronouncement(text:String)->Dictionary:
@@ -258,24 +321,34 @@ func execute_pronouncement(text:String,interpretation:Dictionary,existing_order:
 		for parameter_key in ["action_source","parameter_basis","magnitude_source","duration_source"]:
 			if policy.has(parameter_key): metadata[parameter_key]=String(policy[parameter_key])
 		if action=="repeal":
-			policy["repealed_active_policy"]=ConsequenceEngine.repeal_policy(effect_id,String(policy.get("ripple","Order rescinded.")),metadata)
+			policy["repealed_active_policy"]=ConsequenceEngine.repeal_policy(effect_id,String(policy.get("ripple","Directive rescinded.")),metadata)
 			policy["execution_factor"]=1.0
 		else:
-			var execution:=execution_modifier(office,policy.get("skills",[]))
+			var office_execution:=execution_modifier(office,policy.get("skills",[]))
 			var requested:=float(policy.get("magnitude",0.0))
-			var effective:=clampf(requested*execution,0.02,0.25)
 			policy["requested_magnitude"]=requested
-			policy["magnitude"]=effective
-			policy["execution_factor"]=execution
+			policy["office_execution_factor"]=office_execution
 			policy["executor"]=_executor_name(office)
 			metadata["executor"]=String(policy.executor)
-			metadata["execution_factor"]=execution
+			metadata["office_execution_factor"]=office_execution
 			metadata["requested_magnitude"]=requested
-			var applied:=ConsequenceEngine.apply_policy(effect_id,effective,float(policy.get("days",30.0)),String(policy.get("ripple","Order enacted.")),metadata)
-			policy["applied"]=applied
-			policy["skipped_as_stale"]=not applied
-			if applied and GameState.leadership_positions.has(office):
-				_record_memory(String(GameState.leadership_positions[office].get("name","")),"I was charged with executing the Sovereign's %s pronouncement." % effect_id.replace("_"," "),0.76,"duty")
+			var directive_result:=ConsequenceEngine.apply_directive(effect_id,requested,float(policy.get("days",30.0)),String(policy.get("ripple","Directive enacted.")),metadata,office_execution)
+			var assessment:Dictionary=directive_result.get("assessment",{})
+			policy["magnitude"]=float(assessment.get("effective_magnitude",0.0))
+			policy["execution_factor"]=float(assessment.get("implementation_rate",0.0))
+			policy["implementation_rate"]=float(assessment.get("implementation_rate",0.0))
+			policy["implementation_capacity"]=(assessment.get("capacity",{}) as Dictionary).duplicate(true)
+			policy["implementation_constraints"]=(assessment.get("constraints",{}) as Dictionary).duplicate(true)
+			policy["directive_costs"]=(directive_result.get("costs",assessment.get("costs",{})) as Dictionary).duplicate(true)
+			policy["compliance"]=float(assessment.get("compliance",0.0))
+			policy["resistance"]=float(assessment.get("resistance",0.0))
+			policy["direct_effects"]=(directive_result.get("direct_effects",{}) as Dictionary).duplicate(true)
+			policy["second_order_consequence"]=String(assessment.get("second_order_consequence",policy.get("ripple","")))
+			policy["blocker"]=String(directive_result.get("error",""))
+			policy["applied"]=bool(directive_result.get("applied",false))
+			policy["skipped_as_stale"]=bool(directive_result.get("stale",false))
+			if bool(policy.applied) and GameState.leadership_positions.has(office):
+				_record_memory(String(GameState.leadership_positions[office].get("name","")),"This institution was charged with implementing the Sovereign's %s directive." % effect_id.replace("_"," "),0.76,"duty")
 		executed.append(policy)
 	result["policies"]=executed
 	var political_reactions:=_apply_pronouncement_reactions(executed)
@@ -339,7 +412,7 @@ func _apply_pronouncement_reactions(policies:Array[Dictionary])->Array[Dictionar
 		if not aligned_goals.is_empty(): reason_parts.append("advances "+_readable_goals(aligned_goals))
 		if not opposed_goals.is_empty(): reason_parts.append("strains "+_readable_goals(opposed_goals))
 		if has_duty: reason_parts.append("assigns %s responsibility" % ", ".join(duty_offices))
-		var summary:="%s %s the order%s." % [advisor_name,stance," because "+" and ".join(reason_parts) if not reason_parts.is_empty() else ""]
+		var summary:="%s %s the directive%s." % [advisor_name,stance," because "+" and ".join(reason_parts) if not reason_parts.is_empty() else ""]
 		var reaction:={"advisor":advisor_name,"stance":stance,"alignment":alignment,"policy_ids":changed_ids.duplicate(),"aligned_goals":aligned_goals,"opposed_goals":opposed_goals,"duty_offices":duty_offices,"trust_delta":trust_delta,"respect_delta":respect_delta,"resentment_delta":resentment_delta,"trust_after":float(sovereign.trust),"respect_after":float(sovereign.respect),"resentment_after":float(sovereign.resentment),"summary":summary}
 		reactions.append(reaction)
 		if not advisor.has("memories"): advisor["memories"]=[]
@@ -373,6 +446,9 @@ func refresh_pronouncement_statuses()->void:
 				stale+=1
 				reasons.append("stale")
 				continue
+			if not bool(policy.get("applied",false)) and not String(policy.get("blocker","")).is_empty():
+				reasons.append("blocked")
+				continue
 			var matching:Dictionary={}
 			for modifier_variant in GameState.active_modifiers:
 				var modifier:Dictionary=modifier_variant
@@ -398,7 +474,7 @@ func refresh_pronouncement_statuses()->void:
 			order["status"]="partially_active"
 		elif stale==enacted:
 			order["status"]="stale"
-		elif not reasons.is_empty() and reasons.all(func(reason:String): return reason==reasons[0]) and reasons[0] in ["expired","repealed","superseded","stale"]:
+		elif not reasons.is_empty() and reasons.all(func(reason:String): return reason==reasons[0]) and reasons[0] in ["expired","repealed","superseded","stale","blocked"]:
 			order["status"]=reasons[0]
 		else:
 			order["status"]="closed"
@@ -428,8 +504,13 @@ func respond_to_council_item(item_id: String, response: String) -> void:
 			item.response = response
 			for option in item.get("responses",[]):
 				if String(option.get("label",""))==response and String(option.get("effect",""))!="":
-					ConsequenceEngine.apply_policy(String(option.effect),float(option.get("magnitude",0.0)),float(option.get("days",30.0)),String(option.get("ripple",response)))
-			_record_memory(item.advisor, "The Sovereign responded '%s' to my counsel about %s." % [response,item.topic],0.62,"council")
+					var effect_id:=String(option.effect)
+					var definition:=GovernmentPolicyCatalog.definition(effect_id)
+					var office:=String(definition.get("office",item.get("office","Council")))
+					var execution:=execution_modifier(office,definition.get("skills",[]))
+					var directive:=ConsequenceEngine.apply_directive(effect_id,float(option.get("magnitude",0.0)),float(option.get("days",30.0)),String(option.get("ripple",response)),{"office":office,"executor":_executor_name(office),"council_item_id":item_id},execution)
+					item["directive_result"]=directive.duplicate(true)
+			_record_memory(item.advisor, "The Sovereign responded '%s' to this institution's counsel about %s." % [response,item.topic],0.62,"council")
 			return
 
 func _record_memory(advisor_name: String, summary: String, importance: float, emotion: String) -> void:

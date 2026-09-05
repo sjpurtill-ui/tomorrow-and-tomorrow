@@ -23,6 +23,7 @@ Settlement labels are descriptions of function. Crossing a population number mus
 6. **Progression is an envelope, not a script.** Year bands define plausible available forms. Resources, discoveries, institutions, climate, shocks, and choices determine what actually appears.
 7. **Decay is visible.** Population loss does not make polygons vanish. Vacant plots, gardens, salvage, burned shells, and ruins create legible history.
 8. **Render aggregates.** At high altitude, batch plots by visual class. Do not create one node or draw call per building.
+9. **Culture is spatial grammar, not an asset list.** Civilization values alter alignment, courts, permeability, enclosure, monumentality, and terrain response. They do not select a literal building for every household.
 
 ## 3. Human distance model
 
@@ -67,6 +68,8 @@ Citizen registry / households         resources / logistics / discoveries
       batched plot meshes         functional class + UI
             |
     altitude-dependent visual detail
+                 ^
+       six-value architecture profile
 ```
 
 `SettlementModel` owns morphology rules. `GameState` owns serializable campaign state. `local_terrain.gd` only converts model output into meshes and UI. The renderer must not invent, move, or delete plots based on the current population.
@@ -78,9 +81,80 @@ Citizen registry / households         resources / logistics / discoveries
 - Morphology updates once every 30 simulated days.
 - Classification updates every 30 days and immediately after major shocks.
 - Expensive district and catchment summaries update once per simulated year.
-- Rendering rebuilds only when `morphology_revision` changes or the LOD band changes.
+- Rendering rebuilds only when a quantized visible morphology signature, the LOD band, or a quantized civilization architecture band changes. Tiny prosperity and condition drift remains authoritative but does not churn the mesh until it crosses a visible tone bucket.
 
 This keeps a 200-year simulation tractable and prevents the visible settlement from flickering every time population changes.
+
+### Civilization-level built expression
+
+`SocietalValuesModel` derives exactly six bounded visual values—axiality, monumentality, civic space, permeability, defensive depth, and terrain conformity. `local_terrain.gd` consumes them while constructing the existing plot batches:
+
+- axiality aligns roof masses and main approaches toward a persistent civic axis;
+- terrain conformity bends the same masses along local contours;
+- civic space preserves irregular shared courts inside communal, market, sacred, and civic plots;
+- monumentality changes the mass and vertical emphasis of public fabric;
+- permeability changes lane prominence and openings in compound edges;
+- defensive depth produces tighter perimeter compounds and stronger enclosure without claiming that an unfortified settlement has walls.
+
+The renderer stores no cultural building instances. A billion-person civilization still adds six floats, and a visible settlement still commits a bounded set of combined surfaces. Slow value drift is quantized into twenty visual bands per axis so it can change the landscape over generations without forcing daily mesh rebuilds.
+
+### Bounded urban stage renderer
+
+The implemented strategic renderer expresses founding camp, hamlet, village, town,
+city, metropolis, and megalopolis as a nested physical grammar rather than seven
+icons or seven authored models.
+
+- Population changes geographic extent through a stage-specific aggregate density;
+  it never creates one render item per resident.
+- Existing nuclei remain fixed as later stages add new cores and satellite towns.
+  Classification can add complexity but cannot teleport inherited centres.
+- District cover grows around those centres. Transport connects inhabited places;
+  it does not generate a radial star or imply an unexplained orbital belt.
+- Broad developed corridors use feathered, world-space fabric. Major transport
+  lines remain thinner and appear only where routes or infrastructure support them.
+- Circumferential transport requires both infrastructure capability and an actually
+  engineered route surface. Capability alone never paints a ring.
+- Preserved open space is expressed as irregular pockets and breaks in the urban
+  fabric, not rectangular green bars.
+- Aggregate construction tone is weighted from the material families of real plot
+  area. Organic, earth, and stone building histories therefore remain visible at
+  regional scale without simulating every roof.
+- Civic and productive anchors come from real active land uses. Industrial belts
+  require production capability and render as bounded irregular districts.
+- Water channels and cliff-scale gradients clip every aggregate patch and ribbon.
+  World cities follow buildable valleys and terraces instead of draping across
+  rivers, oceans, or peaks.
+- The aggregate aerial mesh crossfades before plot-level inspection. Authoritative
+  roofs, yards, scars, paths, and damage become the close-view source of truth.
+
+Urban cover, metropolitan mobility, preserved open space, and skyline/defense
+massing are the only four late-stage batches. The billion-person unengineered probe
+must remain below 5,000 vertices; the fully engineered probe must remain below
+9,000. The shader supplies stable world-space block, street, canopy, and material
+grain, so visual richness does not add objects or draw calls.
+
+`tools/settlement_stage_visual_audit.tscn` is the visual-regression harness. It can
+render any stage, population, material family, and founding focus without starting
+the full simulation. Audit city, metropolis, and megalopolis at strategic scale and
+compare at least organic/provision, earth/industry, and stone/defense variants before
+accepting morphology changes.
+
+### Planetary marker and border budget
+
+- Only settlement boundaries intersecting the current orthographic view are tessellated.
+- Relief sampling becomes coarser by zoom band; the authoritative 32-point border never changes.
+- Camera panning crosses large view buckets before a border batch rebuild is permitted.
+- All visible secondary-settlement symbols use one `MultiMeshInstance3D` draw.
+- Every visible secondary settlement also receives physical urban cover in one shared surface. Geographic radius follows aggregate population and stage density, while topology is capped at 512 total patches for the entire network.
+- Larger places receive additional persistent lobes only after every visible place receives a core. This keeps a megalopolis polycentric without erasing small settlements under the same camera.
+- Only recorded access axes may add a secondary-settlement corridor, and the complete view is capped at 128 such corridors.
+- Labels are population-prioritized and thin from 24 to 16 to 8 as the camera reaches continental scale.
+- Beyond the territorial display LOD, settlements remain simulated but generate no border vertices.
+- Close inspection retains only plots and routes intersecting the camera view plus a safety margin.
+- Intermediate zoom keeps every plot's ground/land-use signal but caps roof, yard, field-row, and repair detail at 768, 512, or 320 stable plot samples.
+- Sampled roofs expand into a few aggregate masses so coverage survives without pretending that every household has been rendered.
+
+The number of simulated people therefore has no renderer cost, and the number of owned settlements affects only the visible/candidate scan rather than scene-node or draw-call count.
 
 ## 5. Persistent data model
 
@@ -281,7 +355,7 @@ When `Hearth Circle` completes:
 4. Create short desire-path segments between household compounds, water, storage, and the hearth.
 5. Keep the initial occupied footprint approximately 100–220 m across, modified by terrain and household dispersion.
 
-These are plot aggregates, not necessarily one household each. The citizen registry already has `household_id`; assign households deterministically to residential plots without storing citizen IDs in the geometry itself.
+These are spatial aggregates, not one household or dwelling each. Assign numeric resident and household-equivalent counts to residential plots; never store human IDs or household membership records in settlement geometry.
 
 ### 6.2 Polygon construction
 
@@ -622,7 +696,7 @@ Looting may devastate a plot's function while leaving its shell intact. A visual
 
 ### 7.5 Immediate civilian and service consequences
 
-Plot resolution returns exposure; population systems determine individual outcomes. Household plot assignment should make risk non-uniform without requiring full tactical citizen simulation.
+Plot resolution returns exposure; the demographic system applies it to numeric population cohorts. Resident-density and household-equivalent distributions make risk non-uniform without tactical human simulation.
 
 Possible consequences:
 
@@ -718,7 +792,7 @@ return_propensity = security
                   - opportunity_elsewhere
 ```
 
-Track displaced cohorts in aggregate to avoid bloating every citizen record:
+Track displaced population cohorts in aggregate; there are no citizen records to bloat:
 
 ```gdscript
 {
@@ -737,7 +811,7 @@ Track displaced cohorts in aggregate to avoid bloating every citizen record:
 }
 ```
 
-Use the citizen registry for actual people when scale permits, but store cohort summaries for spatial allocation and long simulations. Cohort totals must reconcile with living displaced citizens; do not create replacement residents from plot demand.
+Use cohort summaries at every scale. Displaced totals must reconcile with the authoritative numeric population cohorts; plot demand never creates replacement residents.
 
 ### 7.8 Repopulation changes plots unevenly
 
@@ -974,6 +1048,49 @@ Every entry below is subordinate to the resource rules in section 6.6. Reference
 - **Morphology:** city, town network, dispersed agrarian region, fortified centre, port corridor, or partially abandoned landscape are all valid outcomes.
 - **Failure form:** a former city can end year 200 as inhabited fragments among fields and ruins while retaining the classification history of its peak.
 
+## Bounded visual grammar from camp to megalopolis
+
+The renderer distinguishes seven achieved functional stages: founding camp, hamlet,
+village, town, city, metropolis, and megalopolis. Population alone must not promote a
+classified camp into town or city graphics. Functional classification, infrastructure,
+production, route engineering, persistent plots, societal architecture, and damage all
+contribute to the resulting form.
+
+Mature stages add a nested sequence of polycentric cores, development corridors,
+satellite centres, green seams, industrial/logistics belts, and skyline samples. Earlier
+cores retain their seeded locations when a later stage is reached. Axiality,
+monumentality, civic space, permeability, defensive depth, and terrain conformity alter
+geometry as well as palette. Vertical massing is capped by infrastructure progress;
+industrial belts require production progress; circumferential connectors require actual
+engineered-route or infrastructure capacity.
+
+Stage labels are thresholds, not visual jump cuts. While the current label remains
+authoritative, the renderer quantizes progress toward the next stage from the weakest
+real functional gate. A city approaching metropolitan function may therefore accumulate
+additional persistent cores, satellite centres, corridors, and spatial weight before the
+classification changes; a populous but disconnected city does not. Bounded neighbourhood
+lobes and asymmetric development arms fill the aggregate footprint between authoritative
+plots without inventing per-building state. Ordinary town approaches terminate at real
+nuclei and grow outward; only mature metropolitan systems acquire selected through-routes.
+
+Settlement defense is part of the same physical history. Watch posts, earthworks,
+palisades, walled districts, and bastion networks are batched into the existing urban and
+massing surfaces. Construction reveals deterministic advancing sections rather than a
+ghosted complete wall. Integrity loss removes deterministic sections and lowers surviving
+mass, so siege damage remains visible after combat. The strongest network is capped at
+four strategic rings, twelve post/bastion proxies, and the same four total stage surfaces.
+Five-percent construction and integrity buckets prevent daily fractional work from
+thrashing the renderer.
+
+The strategic stage renderer commits no more than four batched surfaces for the primary
+urban system. A megalopolis uses at most eight cores, eight satellite centres, eight
+corridors, twenty-four aggregate neighbourhood patches, three broken circumferential
+connectors, four green seams, and sixty-four skyline mass proxies. Geometry is clipped to
+authoritative land and river channels and remains fixed-budget at a billion residents.
+Roofs and parcels cull at regional scale;
+the bounded metropolis/megalopolis system persists farther so a hundreds-of-kilometres
+urban region remains visible before finally collapsing into its strategic locator.
+
 ## 10. Rendering specification
 
 ### 10.1 LOD bands
@@ -1070,10 +1187,10 @@ In `scripts/local_terrain.gd`:
 - Calculate footprint bounds from polygons.
 - Stop calling `_create_urban_fabric()` after migration succeeds.
 
-### Phase C: household and functional demand
+### Phase C: residential and functional demand
 
-- Derive occupied residential capacity from living household count and population.
-- Link plots to aggregate household counts, not individual citizen references.
+- Derive occupied residential capacity from population, density, and aggregate household-equivalent demand.
+- Link plots only to numeric resident and household-equivalent counts, never human references.
 - Generate workshop, storage, market, civic, hospitality, water, and waste demand from real simulation metrics.
 - Add construction recipes, reservations, consumption, provenance, valid substitutions, and incomplete-project states.
 - Require delivered stock rather than known deposits for all plot construction and repair.
@@ -1168,7 +1285,7 @@ Create `tests/test_settlement_model.gd`.
 27. Vacant capacity alone does not trigger return when security, water, food, claim certainty, or expected peace is inadequate.
 28. Returning households prefer viable origin plots or appropriate livelihoods, while contested or hazardous plots can remain vacant during broader population recovery.
 29. Repeated conflict can interrupt repair and displace partially returned households without resetting plot history.
-30. Repopulation reconciles with living citizens/displaced cohorts and never creates people merely to fill repaired plots.
+30. Repopulation reconciles with authoritative population and displaced-cohort counts and never creates population merely to fill repaired plots.
 
 ### Renderer tests / probes
 

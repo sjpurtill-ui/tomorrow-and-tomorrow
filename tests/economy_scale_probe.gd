@@ -18,9 +18,8 @@ func _run_scale(population:int)->void:
 	EconomySystem.reset_for_new_world()
 	GameState.population_total=population
 	GameState.population_exact=float(population)
-	GameState.citizen_registry=[]
-	GameState.citizen_registry_initialized=false
-	GameState.initialize_citizen_registry()
+	GameState.population_cohorts={}
+	GameState.initialize_population_model()
 	GameState.synchronize_population_allocations()
 	GameState.settlement_site_committed=true
 	GameState.settlement_completed=["Hearth Circle"]

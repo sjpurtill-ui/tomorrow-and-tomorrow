@@ -107,8 +107,14 @@ func _init_statistic_panels(state: STATE) -> void:
 	btn_down.texture_normal = texture_normal
 	btn_down.texture_hover = texture_hover
 	btn_down.texture_pressed = texture_pressed
-	btn_up.pressed.connect(_on_button_up.bind(state))
-	btn_down.pressed.connect(_on_button_down.bind(state))
+	# Editor settings changes rebuild the icons and call this initializer again.
+	# Reuse the same bound callables without registering duplicate connections.
+	var up_callback := _on_button_up.bind(state)
+	var down_callback := _on_button_down.bind(state)
+	if not btn_up.pressed.is_connected(up_callback):
+		btn_up.pressed.connect(up_callback)
+	if not btn_down.pressed.is_connected(down_callback):
+		btn_down.pressed.connect(down_callback)
 
 
 func _on_button_up(state: STATE) -> void:

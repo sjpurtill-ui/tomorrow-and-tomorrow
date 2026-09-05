@@ -14,19 +14,27 @@ func _ready()->void:
 	var terrain:=TERRAIN_SCENE.instantiate()
 	add_child(terrain)
 	await get_tree().process_frame
-	AdvisorSystem.register_advisors([{"name":"Route Speaker","background":"Caravan Organizer","skills":{"Administration":72,"Logistics":78}}])
+	AdvisorSystem.register_advisors([{"name":"ROUTE COORDINATION COUNCIL","background":"Caravan Organizer","skills":{"Administration":72,"Logistics":78}}])
 	terrain._open_council_panel()
 	await get_tree().process_frame
 	var config_label:=terrain.council_panel.find_child("InterpreterConfigLabel",true,false) as Label
-	_expect(config_label!=null and "INTERPRETER • DETERMINISTIC OFFLINE" in config_label.text,"council did not disclose its safe interpreter configuration mode")
+	_expect(config_label!=null and "POLICY INTERPRETATION  •  LOCAL RULES" in config_label.text,"council did not disclose its safe local interpretation mode")
 	if config_label: _expect("credential" in config_label.tooltip_text.to_lower() and "displayed" in config_label.tooltip_text.to_lower(),"interpreter status did not disclose credential redaction")
 	var order_input:LineEdit=null
 	for candidate in terrain.council_panel.find_children("*","LineEdit",true,false):
-		if "sovereign order" in String(candidate.placeholder_text).to_lower():
+		if candidate.name=="CouncilConversationInput":
 			order_input=candidate
 			break
 	_expect(order_input!=null,"real council panel did not expose its pronouncement field")
 	if order_input:
+		order_input.text="What would rationing do to our food stores?"
+		order_input.text_submitted.emit(order_input.text)
+		_expect(GameState.sovereign_orders.is_empty(),"conversation question was executed as a decree")
+		_expect(is_instance_valid(LeaderConversation.panel) and LeaderConversation.panel.visible,"council input did not open the conversation")
+		_expect(LeaderConversation.transcript.get_parsed_text().contains("What would rationing"),"council did not forward the player's question")
+		LeaderConversation.panel.hide()
+		# Keep checking the legacy explicit interpreter's order lifecycle below;
+		# the visible council input now takes the conversational route above.
 		order_input.text="Ration food and improve routes."
 		terrain._issue_freeform_order(order_input)
 		_expect(not order_input.editable,"input remained editable during interpretation")
@@ -49,27 +57,30 @@ func _ready()->void:
 		_expect(ConsequenceEngine.modifier_strength("route_priority")>0.0,"typed route language did not reach game modifiers")
 		var reopened_input:LineEdit=null
 		for candidate in terrain.council_panel.find_children("*","LineEdit",true,false):
-			if "sovereign order" in String(candidate.placeholder_text).to_lower(): reopened_input=candidate; break
+			if candidate.name=="CouncilConversationInput": reopened_input=candidate; break
 		_expect(reopened_input and reopened_input.editable and reopened_input.text.is_empty(),"pronouncement field did not recover after completion")
 		_expect(terrain.pronouncement_status_label and "INTERPRETED VIA" in terrain.pronouncement_status_label.text,"council did not display interpretation provenance")
 		terrain._open_council_panel()
 		await get_tree().process_frame
 		var visible_policy_text:=""
-		for label in terrain.council_panel.find_children("*","Label",true,false): visible_policy_text+=String(label.text)+"\n"
-		_expect("ACTIVE STANDING POLICIES" in visible_policy_text,"council did not expose the active-policy ledger")
+		var policy_audit_text:=""
+		for label in terrain.council_panel.find_children("*","Label",true,false):
+			visible_policy_text+=String(label.text)+"\n"
+			policy_audit_text+=String(label.tooltip_text)+"\n"
+		_expect("POLICIES IN FORCE" in visible_policy_text,"council did not expose the active-policy ledger")
 		_expect("RATIONING" in visible_policy_text and "ROUTE PRIORITY" in visible_policy_text,"active typed policies were absent from the government ledger")
-		_expect("DAYS REMAIN" in visible_policy_text,"active policy duration was not visible")
-		_expect("VARIABLES" in visible_policy_text and "food demand" in visible_policy_text and "logistics" in visible_policy_text,"active ledger did not disclose affected game variables")
-		_expect("GROUNDED READING" in visible_policy_text and "ration" in visible_policy_text.to_lower(),"council did not show the phrase grounding its interpreted policy")
-		_expect("ACTION SOURCE • deterministic enact reading of player clause" in visible_policy_text,"council did not disclose deterministic action polarity")
-		_expect("TERMS • catalog defaults" in visible_policy_text,"council did not disclose where policy strength and duration came from")
-		_expect("OBSERVED SINCE ORDER" in visible_policy_text and "OBSERVED •" in visible_policy_text,"council did not expose linked metric observations in active and historical records")
+		_expect("DAYS LEFT" in visible_policy_text,"active policy duration was not visible")
+		_expect("CHANGES" in visible_policy_text and "food demand" in visible_policy_text and "logistics" in visible_policy_text,"active ledger did not disclose affected game variables")
+		_expect("GROUNDED READING" in policy_audit_text and "ration" in policy_audit_text.to_lower(),"council audit tooltip did not preserve the phrase grounding its interpreted policy")
+		_expect("ACTION SOURCE  •  deterministic enact reading of player clause" in policy_audit_text,"council audit tooltip did not disclose deterministic action polarity")
+		_expect("TERMS  •  catalog defaults" in policy_audit_text,"council audit tooltip did not disclose where policy strength and duration came from")
+		_expect("LATEST OBSERVED" in visible_policy_text,"council did not expose the latest linked metric observation")
 		_expect("ACTIVE" in visible_policy_text,"pronouncement history did not display reconciled lifecycle status")
-		_expect("GOVERNANCE LOAD" in visible_policy_text and "POLICY CHURN" in visible_policy_text and "COUNCIL SUPPORT" in visible_policy_text,"council did not expose government burden and political support")
-		_expect("COUNCIL •" in visible_policy_text and "Route Speaker" in visible_policy_text,"pronouncement history did not expose named advisor reactions")
+		_expect("ADMINISTRATION USED" in visible_policy_text and "RECENT POLICY CHANGES" in visible_policy_text and "COUNCIL SUPPORT" in visible_policy_text,"council did not expose government burden and political support")
+		_expect("COUNCIL RESPONSE" in visible_policy_text and "ROUTE COORDINATION COUNCIL" in visible_policy_text,"pronouncement history did not expose institutional council reactions")
 		var ambiguity_input:LineEdit=null
 		for candidate in terrain.council_panel.find_children("*","LineEdit",true,false):
-			if "sovereign order" in String(candidate.placeholder_text).to_lower(): ambiguity_input=candidate; break
+			if "policy to enact" in String(candidate.placeholder_text).to_lower(): ambiguity_input=candidate; break
 		if ambiguity_input:
 			ambiguity_input.text="End rationing. Ration food and improve routes."
 			terrain._issue_freeform_order(ambiguity_input)
@@ -79,12 +90,12 @@ func _ready()->void:
 			terrain._open_council_panel()
 			await get_tree().process_frame
 			var ambiguity_text:=""
-			for label in terrain.council_panel.find_children("*","Label",true,false): ambiguity_text+=String(label.text)+"\n"
-			_expect("UNRESOLVED • BOUNDED LOCAL INTERPRETATION" in ambiguity_text and "contradictory" in ambiguity_text,"partial pronouncement history hid or mislabelled a withheld contradictory clause")
+			for label in terrain.council_panel.find_children("*","Label",true,false): ambiguity_text+=String(label.text)+"\n"+String(label.tooltip_text)+"\n"
+			_expect("UNRESOLVED" in ambiguity_text and "BOUNDED LOCAL INTERPRETATION" in ambiguity_text and "contradictory" in ambiguity_text,"partial pronouncement history hid or mislabelled a withheld contradictory clause")
 			_expect(ConsequenceEngine.modifier_strength("rationing")>0.0,"withheld contradiction incorrectly ended the existing rationing policy")
 		var cancellation_input:LineEdit=null
 		for candidate in terrain.council_panel.find_children("*","LineEdit",true,false):
-			if "sovereign order" in String(candidate.placeholder_text).to_lower(): cancellation_input=candidate; break
+			if candidate.name=="CouncilConversationInput": cancellation_input=candidate; break
 		if cancellation_input:
 			cancellation_input.text="Expand the watch."
 			terrain._issue_freeform_order(cancellation_input)
@@ -92,7 +103,7 @@ func _ready()->void:
 			terrain._open_council_panel()
 			var cancel_button:Button=null
 			for button in terrain.council_panel.find_children("*","Button",true,false):
-				if String(button.text)=="CANCEL PENDING INTERPRETATION": cancel_button=button; break
+				if String(button.text)=="WITHDRAW PENDING POLICY": cancel_button=button; break
 			_expect(cancel_button!=null,"pending pronouncement exposed no cancellation control")
 			if cancel_button: cancel_button.pressed.emit()
 			await get_tree().process_frame

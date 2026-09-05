@@ -34,6 +34,19 @@ func _setup_capable_settlement()->void:
 	GameState.discovery_adoption["tallies"]=0.70
 	GameState.discovery_adoption["standard_measures"]=0.70
 	GameState.discovery_adoption["copper_smelting"]=0.0
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.initialize()
+	if not CivilizationSystem.civilizations.is_empty():
+		var civ:Dictionary=CivilizationSystem.civilizations[0]
+		var relation:Dictionary=civ.get("player_relation",{})
+		relation["contact_level"]=2
+		relation["met_day"]=0
+		relation["home_location_known"]=true
+		relation["treaty"]="trade"
+		relation["trade"]=100.0
+		relation["at_war"]=false
+		civ["player_relation"]=relation
+		CivilizationSystem.civilizations[0]=civ
 
 func _test_benchmarks_require_real_capability()->void:
 	GameState.elapsed_days=1.0
