@@ -12395,6 +12395,11 @@ func _order_selected_army_to_screen(screen_position:Vector2)->void:
 		return
 	var hit_position:Vector3=hit.position
 	var target:=Vector2(hit_position.x,hit_position.z)
+	var city_target:=_contact_encounter_at(hit_position,0.15)
+	if city_target.has("city_id"):
+		var city_order:=MilitaryCampaign.move_field_army(selected_army_id,String(city_target.city_id))
+		if travel_status_label:travel_status_label.text=String(city_order.get("error",city_order.get("message","City approach ordered.")))
+		return
 	if not CivilizationSystem._position_is_revealed(target):
 		if travel_status_label: travel_status_label.text="UNCHARTED GROUND  •  armies march only where returned scout reports have charted land"
 		return
@@ -19501,6 +19506,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		# Double-click the settlement fabric to inspect the city even near counters.
+		if event.double_click:
+			var city_hit:Dictionary=_terrain_hit(event.position)
+			if city_hit.get("position") is Vector3:
+				var selected_city:=_contact_encounter_at(city_hit.position,0.15)
+				if selected_city.has("city_id"):
+					CivilizationSystem.city_intelligence.open(String(selected_city.city_id));get_viewport().set_input_as_handled();return
 		# Target counters win hit-testing when formations overlap. Otherwise the
 		# player can see a scout or enemy but can only select their own army under
 		# it — precisely the opposite of the action they are trying to take.

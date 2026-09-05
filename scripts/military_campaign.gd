@@ -1025,6 +1025,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 
 
 func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
+	if not active_siege.is_empty():return {"can_order":false,"can_engage":false,"error":"Resolve the current siege first."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"can_order":false,"can_engage":false,"error":"Select one field army first."}
 	if not active_engagement.is_empty(): return {"can_order":false,"can_engage":false,"error":"Finish the active battle before ordering another engagement."}
@@ -1032,7 +1033,6 @@ func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
 	if not pending_aftermath.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the current battle aftermath first."}
 	var sighting:Dictionary=CivilizationSystem.visible_formation_sighting(formation_id)
 	if sighting.is_empty(): return {"can_order":false,"can_engage":false,"error":"Contact has been lost. Reacquire the formation before issuing an order."}
-	if not bool(sighting.get("carries_report",false)) and not bool(sighting.get("hostile",false)): return {"can_order":false,"can_engage":false,"error":"This is not an enemy force. A state of war must exist before a field army can attack it."}
 	var army:Dictionary=field_armies[index]
 	if int(army.get("troops",0))<=0: return {"can_order":false,"can_engage":false,"error":"The selected field army has no personnel able to fight."}
 	var army_position:Dictionary=army.get("position",{})
@@ -1084,6 +1084,8 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 		field_armies[index].erase("target_formation_id")
 		field_armies[index].erase("order_kind")
 	var engagement:=begin_threat_engagement()
+	if engagement.has("error"):return engagement
+	active_engagement.threat["war_id"]=CivilizationSystem.record_player_hostile_order(String(incident.source_civ_id),"","A player army attacked a foreign field force.")
 	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"CONTACT â€” %s has engaged %s. Open WAR PLANNING to order HOLD, PUSH, or RETREAT." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
 
 
@@ -2085,7 +2087,10 @@ func launch_offensive(civ_id:String,region_id:String="")->Dictionary:
 	if availability.has("error"): return availability
 	var incident:Dictionary=availability.incident
 	_create_civilization_threat(incident,"offensive")
-	return begin_threat_engagement()
+	var result:=begin_threat_engagement()
+	if not result.has("error"):
+		active_engagement.threat["war_id"]=CivilizationSystem.record_player_hostile_order(civ_id,region_id,"A player army attacked the settlement without awaiting a declaration.")
+	return result
 
 
 func raid_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
@@ -4247,7 +4252,11 @@ func start_offensive_siege(civ_id:String,region_id:String)->Dictionary:
 	var available:=offensive_siege_availability(civ_id,region_id)
 	if available.has("error"): return available
 	_create_civilization_threat(available.incident,"offensive")
-	return begin_siege()
+	var result:=begin_siege()
+	if not result.has("error"):
+		active_siege.threat["war_id"]=CivilizationSystem.record_player_hostile_order(civ_id,region_id,"A player army began a hostile siege.")
+	else:active_threat.clear()
+	return result
 
 func begin_siege()->Dictionary:
 	if not active_siege.is_empty() or not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Resolve the current military operation first."}
