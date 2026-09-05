@@ -625,7 +625,9 @@ func _build_dock()->void:
 	dock.visible=false
 	add_child(dock)
 	dock.close_requested.connect(func()->void: section_requested.emit("",0))
-	dock.tab_changed.connect(func(_sub:int)->void: _dock_signature=[])
+	dock.tab_changed.connect(func(sub:int)->void:
+		_dock_signature=[]
+		if dock.provider and dock.provider.has_method("open_expanded_tab") and dock.provider.open_expanded_tab(sub): close_dock())
 	detail_dock=DockPanelScript.new()
 	detail_dock.name="DetailDock"
 	detail_dock.visible=false
@@ -638,8 +640,10 @@ func register_provider(id:String,provider:Object)->void:
 func has_provider(id:String)->bool:
 	return providers.has(id)
 
-func open_dock(section:String,sub:int)->void:
+func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	if not providers.has(section): return
+	if expanded and providers[section].has_method("open_expanded_tab") and providers[section].open_expanded_tab(sub):
+		close_dock();return
 	var was_open:=dock.visible
 	if section!=active_section: close_detail()
 	_layout()

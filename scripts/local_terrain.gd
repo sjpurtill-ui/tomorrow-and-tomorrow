@@ -17143,8 +17143,21 @@ func _open_scout_dispatch_panel()->void:
 	scout_dispatch_panel.z_index=70
 	interface_layer.add_child(scout_dispatch_panel)
 	var dimmer:=ColorRect.new(); dimmer.size=scout_dispatch_panel.size; dimmer.color=Color(0.005,0.010,0.012,0.84); dimmer.mouse_filter=Control.MOUSE_FILTER_STOP; scout_dispatch_panel.add_child(dimmer)
-	var modal:=PanelContainer.new(); modal.position=scout_dispatch_panel.size*0.5-Vector2(330,235); modal.size=Vector2(660,470); modal.add_theme_stylebox_override("panel",_population_report_style(Color("#7ca39d"))); scout_dispatch_panel.add_child(modal)
-	var root:=VBoxContainer.new(); root.add_theme_constant_override("separation",9); modal.add_child(root)
+	var modal:=PanelContainer.new()
+	modal.name="ScoutDispatchCard"
+	# This screen owns its bounded scroll layout. The generic every-frame fit
+	# wrapper otherwise alternates wrapped text width and scale indefinitely.
+	modal.set_meta("viewport_fit_hosted",true)
+	modal.size=Vector2(minf(900,scout_dispatch_panel.size.x-40),scout_dispatch_panel.size.y-48)
+	modal.position=(scout_dispatch_panel.size-modal.size)*.5
+	modal.add_theme_stylebox_override("panel",_population_report_style(Color("#7ca39d")))
+	scout_dispatch_panel.add_child(modal)
+	var shell:=VBoxContainer.new();shell.add_theme_constant_override("separation",9);modal.add_child(shell)
+	var scroll:=ScrollContainer.new();scroll.name="ScoutContentScroll"
+	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;shell.add_child(scroll)
+	var root:=VBoxContainer.new();root.size_flags_horizontal=Control.SIZE_EXPAND_FILL;root.add_theme_constant_override("separation",9);scroll.add_child(root)
 	var heading:=Label.new(); heading.text="DISPATCH SCOUT PARTY"; heading.add_theme_font_size_override("font_size",22); heading.add_theme_color_override("font_color",Color("#d9c99e")); root.add_child(heading)
 	var explanation:=Label.new(); explanation.text="Choose how long one fast aggregate party may remain away. The route, terrain, sightings, and contacts remain physically with the scouts and reveal nothing until they return. On a planetary map, short missions are local reconnaissance—not automatic contact. Time is paused while this panel is open; the road decides the true return day, so parties run early or late." ; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
 	var exploration:=CivilizationSystem.exploration_status()
@@ -17190,7 +17203,7 @@ func _open_scout_dispatch_panel()->void:
 		heading_selector.item_selected.connect(_select_scout_heading.bind(heading_selector,duration_grid,target_selector))
 		target_selector.item_selected.connect(_select_scout_target.bind(target_selector,duration_grid,heading_selector))
 	scout_dispatch_status=Label.new(); scout_dispatch_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; scout_dispatch_status.add_theme_font_size_override("font_size",11); scout_dispatch_status.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(scout_dispatch_status)
-	var footer:=HBoxContainer.new(); footer.alignment=BoxContainer.ALIGNMENT_END; root.add_child(footer)
+	var footer:=HBoxContainer.new(); footer.alignment=BoxContainer.ALIGNMENT_END; shell.add_child(footer)
 	var reports:=Button.new(); reports.text="ALL CITY REPORTS"; reports.custom_minimum_size=Vector2(180,38); reports.pressed.connect(func(): CivilizationSystem.city_intelligence.open()); footer.add_child(reports)
 	var close:=Button.new(); close.text="CLOSE"; close.custom_minimum_size=Vector2(140,38); close.pressed.connect(_close_scout_dispatch_panel); footer.add_child(close)
 
