@@ -22,6 +22,15 @@ and battle scales before integration, especially deep mixed siege columns.
 
 ## Next passes
 
+Pass 5: band-limited procedural roof courses (reed fibres, bindings, boards,
+plaster and masonry joints) using projected pixel size. Texture mipmaps cannot
+filter these analytic patterns. Inspected town-courses-filtered.png; shader
+compiled in the actual Compatibility renderer, with the same layout/palette.
+72 combined graphics tests passed. Temporal shimmer still needs a moving-camera
+review; this static capture is not a motion quality guarantee. Main advanced to
+11516ba while this worker was active: its river/woodland hunks do not overlap
+these roof/shader hunks, and were not edited here.
+
 Pass 4: source-controlled mipmapped imports for six terrain/settlement albedos.
 Their custom samplers requested mipmaps but Godot's default imports generated
 none. Matched town-fabric.png / town-filtered.png captures show the high-frequency

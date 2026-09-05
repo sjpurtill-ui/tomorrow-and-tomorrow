@@ -7706,21 +7706,30 @@ void fragment() {
 		vec2 roof_cross=vec2(-roof_axis.y,roof_axis.x);
 		float along=dot(world_position.xz,roof_axis);
 		float across=dot(world_position.xz,roof_cross);
+		// Analytic roof courses have no texture mipmaps. Fade their contrast once
+		// a pixel spans a course; otherwise aerial movement aliases them into sparks.
+		float roof_pixel_span=max(length(dFdx(world_position.xz)),length(dFdy(world_position.xz)));
 		float fibre=abs(fract(along*1450.0+UV2.y*7.0)-0.5)*2.0;
+		fibre=mix(0.5,fibre,1.0-smoothstep(0.25,0.75,roof_pixel_span*1450.0));
 		float roof_stain=value_noise(world_position.xz*520.0+vec2(181.0,-63.0));
+		roof_stain=mix(0.5,roof_stain,1.0-smoothstep(0.25,0.75,roof_pixel_span*520.0));
 		if (roof_cell.x<0.5) {
 			float binding=smoothstep(0.38,0.49,abs(fract(across*390.0+UV2.y*11.0)-0.5));
+			binding=mix(0.13,binding,1.0-smoothstep(0.25,0.75,roof_pixel_span*390.0));
 			fabric*=0.73+fibre*0.20+binding*0.16+roof_stain*0.12;
 		} else if (roof_cell.x<1.5) {
 			float board=pow(abs(fract(across*920.0+UV2.y*13.0)-0.5)*2.0,5.0);
+			board=mix(0.166667,board,1.0-smoothstep(0.25,0.75,roof_pixel_span*920.0));
 			fabric*=0.76+board*0.25+roof_stain*0.14;
 		} else if (roof_cell.x<2.5) {
 			float plaster=value_noise(vec2(along*310.0,across*470.0)+UV2.y*19.0);
+			plaster=mix(0.5,plaster,1.0-smoothstep(0.25,0.75,roof_pixel_span*470.0));
 			fabric*=0.78+plaster*0.30+roof_stain*0.10;
 		} else {
 			float joint_a=pow(abs(fract(along*610.0+UV2.y*5.0)-0.5)*2.0,7.0);
 			float joint_b=pow(abs(fract(across*740.0+UV2.y*9.0)-0.5)*2.0,7.0);
-			fabric*=0.70+max(joint_a,joint_b)*0.23+roof_stain*0.18;
+			float joints=mix(0.222222,max(joint_a,joint_b),1.0-smoothstep(0.25,0.75,roof_pixel_span*740.0));
+			fabric*=0.70+joints*0.23+roof_stain*0.18;
 		}
 		fabric=mix(fabric,fabric*vec3(0.72,0.67,0.56),smoothstep(0.72,0.90,roof_stain)*0.32);
 	} else {
