@@ -78,8 +78,8 @@ func _ready()->void:
 		var route_marker:Node3D=terrain.player_scout_route_markers.get(str(mission.get("mission_id","")),null)
 		_expect(route_marker!=null and is_instance_valid(route_marker),"active directed scout order has no map corridor")
 		if route_marker and is_instance_valid(route_marker):
-			var route_label:=route_marker.get_node_or_null("ScoutOrderLabel") as Label3D
-			_expect(route_label!=null and "NORTH" in route_label.text,"scout corridor does not label the ordered heading")
+			var overlay:=route_marker.find_child("ScoutRouteOverlay",true,false)
+			_expect(overlay!=null and "North" in String(overlay.caption),"scout route hover detail lost the ordered heading")
 	CivilizationSystem.scout_missions.clear()
 	var recruiting:Dictionary=CivilizationSystem.dispatch_scouts(30,"recruit_people","east")
 	_expect(bool(recruiting.get("ok",false)),"recruiting expedition ignored or rejected its heading: %s" % recruiting.get("error",""))
