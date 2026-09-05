@@ -4215,6 +4215,7 @@ func _redact_known_foreign_profile(profile:Dictionary)->Dictionary:
 	for key in ["health","cohesion","knowledge","production","logistics","institutions","ecology","military_readiness","command_readiness","food_days","territory","home_control","relative_military_power","military_replacement_coverage","world_reach"]: visible[key]=-1.0
 	for key in ["military_era_tier","military_production_lines","training_cycles","home_regions_controlled","home_regions_total","diplomatic_partners","diplomatic_rivals"]: visible[key]=-1
 	visible["training_focus"]="unknown"; visible["military_era"]="unknown"; visible["strategic_status"]="PARTIALLY OBSERVED"
+	visible["founding_focus"]=String(profile.get("founding_focus","unknown")) if float(profile.get("intel_confidence",0))>=0.58 else "unknown"
 	visible["rival_intent"]="Unconfirmed beyond dated reports"; visible["threat_level"]="UNCERTAIN"
 	visible["strategic_regions"]=city_intelligence.public_regions(String(profile.id))
 	visible["population_scope"]="observed cities only; not a national census"
