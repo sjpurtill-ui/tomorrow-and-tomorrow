@@ -39,6 +39,18 @@ survival rules: poor is occupied; physical damage removes roof sectors.
 
 ## Limitations
 
+## Follow-up: live ownership fade
+
+The claim wash previously jumped to 30% of its strategic opacity immediately
+above 2.4 km. It now enters smoothly over 2.4–4.4 km. Base claim alpha remains in
+the vertices and a live material multiplier follows the camera, independent of
+quantized network geometry rebuilds. Ownership geometry and values are unchanged.
+72 architecture tests passed including the new monotonic, near-threshold and
+same-material regression. Inspected city-claim-smooth.png at 2.41 km. Label offset
+and plot LOD changes at that boundary remain separate from this tint fix.
+
+## Remaining limitations
+
 This remains abstract aerial geometry, not individually modeled city buildings.
 Static captures do not establish moving-camera performance or shimmer freedom.
 Existing full-scene capture teardown texture/RID warnings remain. Godot may

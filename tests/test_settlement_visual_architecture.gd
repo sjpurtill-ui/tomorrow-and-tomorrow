@@ -552,6 +552,27 @@ func test_controlled_ground_wash_disappears_during_close_inspection()->void:
 	assert_float(renderer._settlement_claim_fill_alpha(0.07)).is_greater(0.06)
 
 
+func test_claim_tint_enters_gradually_and_updates_without_rebuilding_geometry()->void:
+	var test_camera:Camera3D=auto_free(Camera3D.new())
+	renderer.camera=test_camera
+	var root:Node3D=auto_free(Node3D.new())
+	renderer.settlement_border_root=root
+	var wash:=MeshInstance3D.new()
+	wash.name="ControlledGroundWash"
+	var material:=StandardMaterial3D.new()
+	wash.material_override=material
+	root.add_child(wash)
+	var previous:=0.0
+	for zoom in [2.39,2.41,3.0,4.4,40.0,180.0]:
+		test_camera.size=zoom
+		renderer._update_settlement_claim_opacity()
+		assert_object(wash.material_override).is_same(material)
+		assert_float(material.albedo_color.a).is_greater_equal(previous)
+		if zoom<2.42: assert_float(material.albedo_color.a).is_less(0.0001)
+		previous=material.albedo_color.a
+	assert_float(previous).is_equal_approx(1.0,0.00001)
+
+
 func test_resource_labels_yield_to_settlement_identity_at_regional_zoom()->void:
 	var test_camera:Camera3D=auto_free(Camera3D.new())
 	test_camera.size=100.0
