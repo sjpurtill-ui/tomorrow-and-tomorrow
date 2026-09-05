@@ -353,13 +353,20 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 
 
 func cancel_training(order_id:int)->Dictionary:
-	for index in training_queue.size():
-		var order:Dictionary=training_queue[index]
-		if int(order.get("id",-1))!=order_id: continue
-		var returned:=maxi(0,int(order.get("count",0)))
+	for order:Dictionary in training_queue:
+		if int(order.get("id",-1))!=order_id:continue
+		var batch:=int(order.get("build_batch",-1))
+		var returned:=0
+		for index in range(training_queue.size()-1,-1,-1):
+			var member:Dictionary=training_queue[index]
+			if int(member.get("id",-1))!=order_id and (batch<0 or int(member.get("build_batch",-1))!=batch):continue
+			returned+=maxi(0,int(member.get("count",0)))
+			var weapon:=String(member.get("weapon","improvised"))
+			military_inventory[weapon]=int(military_inventory.get(weapon,0))+int(member.get("reserved_equipment",0))
+			training_queue.remove_at(index)
 		aggregate_recruits+=returned
-		training_queue.remove_at(index)
-		return {"cancelled":true,"order_id":order_id,"returned":returned,"progress_retained":float(order.get("progress_days",0.0)),"message":"Training order %d cancelled; %d personnel returned to the recruit reserve." % [order_id,returned]}
+		if batch>=0:cancel_template_recruitment(batch)
+		return {"cancelled":true,"order_id":order_id,"returned":returned,"progress_retained":float(order.get("progress_days",0.0)),"message":"Training cancelled for the whole order; %d personnel returned to the recruit reserve and reserved equipment returned to stores." % returned}
 	return {"error":"Training order %d was not found." % order_id}
 
 
@@ -1160,8 +1167,8 @@ func army_template_snapshot()->Dictionary:
 			ready_total+=mini(ready,count)
 			training_total+=training
 			if ready<count: deployable=false
-			entries.append({"unit":unit,"weapon":weapon,"count":count,"ready":mini(ready,count),"home_available":ready,"in_training":training,"unlocked":bool((capabilities_units.get(unit,{}) as Dictionary).get("unlocked",false)) if capabilities_units.get(unit) is Dictionary else true})
-		templates.append({"template_id":int(template.get("template_id",0)),"name":String(template.get("name","ARMY BUILD")),"entries":entries,"required_total":required_total,"ready_total":ready_total,"in_training_total":training_total,"deployable":deployable and required_total>0 and field_armies.size()<field_army_capacity(),"missing":maxi(0,required_total-ready_total)})
+			entries.append({"unit":unit,"weapon":weapon,"count":count,"ready":mini(ready,count),"home_available":ready,"in_training":training,"unfilled":maxi(0,count-ready-training),"unlocked":bool((capabilities_units.get(unit,{}) as Dictionary).get("unlocked",false)) if capabilities_units.get(unit) is Dictionary else true})
+		templates.append({"template_id":int(template.get("template_id",0)),"name":String(template.get("name","ARMY BUILD")),"entries":entries,"required_total":required_total,"ready_total":ready_total,"in_training_total":training_total,"deployable":deployable and required_total>0 and field_armies.size()<field_army_capacity(),"missing":maxi(0,required_total-ready_total),"unfilled":maxi(0,required_total-ready_total-training_total),"recruitment_requested":bool(template.get("recruitment_requested",false)),"blocker":" ".join(template_training_quote(int(template.template_id)).get("blockers",[]))})
 	return {"templates":templates,"recruit_reserve":aggregate_recruits,"army_capacity":field_army_capacity(),"armies_active":field_armies.size()}
 
 
@@ -1216,44 +1223,76 @@ func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)-
 	return result
 
 
-func queue_template_training(template_id:int)->Dictionary:
-	## One order: raise the recruits the build still needs, then queue typed
-	## training for every under-strength entry.
+func template_training_quote(template_id:int)->Dictionary:
 	var index:=_template_index(template_id)
-	if index<0: return {"error":"That army build no longer exists."}
+	if index<0:return {"error":"Build not found."}
 	var template:Dictionary=army_templates[index]
-	var shortfalls:Array[Dictionary]=[]
-	var total_missing:=0
-	for entry_variant in (template.get("entries",[]) as Array):
-		var entry:Dictionary=entry_variant
-		var unit:=String(entry.get("unit","levy"))
-		var weapon:=String(entry.get("weapon","improvised"))
-		var missing:=maxi(0,int(entry.get("count",0))-_matching_home_count(unit,weapon)-_matching_training_count(unit,weapon))
-		if missing<=0: continue
-		shortfalls.append({"unit":unit,"weapon":weapon,"missing":missing})
-		total_missing+=missing
-	if total_missing<=0: return {"ok":true,"message":"%s is fully trained or already in the queue. Deploy it when every cohort reads ready." % String(template.get("name","The build"))}
-	if aggregate_recruits<total_missing:
-		var raise_result:=raise_recruits(total_missing-aggregate_recruits)
-		if raise_result.has("error") and aggregate_recruits<=0: return raise_result
+	var required:=0;var missing:=0;var active:=0;var shortfalls:Array[Dictionary]=[]
+	var blockers:Array[String]=[];var equipment:Dictionary={};var baseline_days:=0.0
+	for entry:Dictionary in template.get("entries",[]):
+		var unit:=String(entry.unit);var weapon:=String(entry.weapon);var count:=int(entry.count)
+		var gate:=_training_gate(unit,weapon)
+		if gate.has("error"):blockers.append(String(gate.error))
+		var home:=_matching_home_count(unit,weapon);var training:=_matching_training_count(unit,weapon)
+		var need:=maxi(0,count-home-training)
+		if bool(gate.get("prototype",false)) and need>PROTOTYPE_COHORT_LIMIT:blockers.append("Prototype intake exceeds the experimental cohort limit.")
+		required+=count;missing+=need;active+=training
+		if need>0:shortfalls.append({"unit":unit,"weapon":weapon,"missing":need})
+		baseline_days=maxf(baseline_days,UnitCatalog.training_days(unit))
+		var held:=0
+		for formation:Dictionary in home_army.get("formations",[]):
+			if String(formation.get("unit",""))==unit and String(formation.get("weapon",""))==weapon:held+=int(formation.get("equipment",0))
+		equipment[weapon]=int(equipment.get(weapon,0))+maxi(0,_equipment_required_for(unit,count)-held)
+	if active>0:blockers.append("%d people are already training; the next full intake waits for their outcome." % active)
+	if required>training_capacity()-_queued_trainees():blockers.append("Full-build class needs %d places; %d available. More Defense instructors or established training practices expand capacity." % [required,maxi(0,training_capacity()-_queued_trainees())])
+	var people_room:=aggregate_recruits+maxi(0,recruitment_capacity()-_mobilized_count())
+	if missing>people_room:blockers.append("%d recruits needed; %d can currently be mobilized." % [missing,people_room])
+	for weapon:String in equipment:
+		var shortfall:=maxi(0,int(equipment[weapon])-int(military_inventory.get(weapon,0)))
+		if shortfall>0:blockers.append("%d %s equipment sets missing; produce them in Supply." % [shortfall,weapon.replace("_"," ")])
+	var food:=float(required)*baseline_days
+	if FoodSystem.total_stored()<food:blockers.append("At least %.0f rations needed for the full class; %.0f stored." % [food,FoodSystem.total_stored()])
+	if not active_engagement.is_empty() or not pending_aftermath.is_empty():blockers.append("Resolve the battle or aftermath first.")
+	if recovery.home_unavailable():blockers.append("Home is occupied.")
+	return {"can_start":blockers.is_empty() and missing>0,"missing":missing,"required":required,"shortfalls":shortfalls,"blockers":blockers,"food":food}
+func queue_template_training(template_id:int,retain_order:bool=true)->Dictionary:
+	var index:=_template_index(template_id)
+	if index<0:return {"error":"Build not found."}
+	var template:Dictionary=army_templates[index]
+	if retain_order:template.recruitment_requested=true
+	var quote:=template_training_quote(template_id)
+	if int(quote.get("missing",0))<=0:return {"ok":true,"queued":0,"message":"The build's people are assembled or already training. Check condition and equipment before deployment."}
+	if not bool(quote.get("can_start",false)):
+		return {"ok":true,"queued":0,"waiting":true,"message":"WAITING — no partial intake started. "+" ".join(quote.get("blockers",[]))}
+	# All entries pass together before any people or equipment move.
+	var needed:=int(quote.missing)
+	if aggregate_recruits<needed:raise_recruits(needed-aggregate_recruits)
 	var queued:=0
-	var messages:Array[String]=[]
-	for shortfall_variant in shortfalls:
-		var shortfall:Dictionary=shortfall_variant
-		var take:=mini(int(shortfall.missing),aggregate_recruits)
-		if take<=0:
-			messages.append("%s Ã—%d waits for recruits" % [String(shortfall.unit),int(shortfall.missing)])
-			continue
-		var order:=start_training(String(shortfall.unit),String(shortfall.weapon),take)
-		if order.has("error"):
-			messages.append(String(order.error))
-			continue
-		queued+=int(order.get("accepted",0))
-	if queued<=0: return {"error":"Nothing could be queued: %s" % ("  ".join(messages) if not messages.is_empty() else "no recruits are available.")}
-	var message:="%s: %d trainees queued toward the build." % [String(template.get("name","Build")),queued]
-	if queued<total_missing: message+="  %d places remain unfilled. Available recruits, mobilization limits, and prototype limits determine what can train now." % (total_missing-queued)
-	if not messages.is_empty(): message+="  "+"  ".join(messages)
-	return {"ok":true,"queued":queued,"message":message}
+	for entry:Dictionary in template.get("entries",[]):
+		var unit:=String(entry.unit);var weapon:=String(entry.weapon);var count:=int(entry.count)
+		var existing:=mini(count,_matching_home_count(unit,weapon))
+		var detached:=_detach_matching_formations([{"unit":unit,"weapon":weapon,"count":existing}]) if existing>0 else []
+		var experience_sum:=0.0;var condition_sum:=float(count-existing)*_trainee_condition();var skill_sum:=0.0
+		for formation:Dictionary in detached:
+			var people:=int(formation.count)
+			experience_sum+=float(formation.get("experience",0))*people
+			condition_sum+=float(formation.get("personnel_condition",1))*people
+			skill_sum+=float(formation.get("training",0))*people
+			military_inventory[weapon]=int(military_inventory.get(weapon,0))+int(formation.get("equipment",0))
+			# Ammunition remains in the home stock, not lost during instruction.
+			var ammo:=_ammunition_type_for(weapon)
+			if ammo!="":military_consumables[ammo]=int(military_consumables.get(ammo,0))+int(formation.get("ammunition",0))
+		aggregate_recruits+=existing
+		var result:=start_training(unit,weapon,count)
+		var order:Dictionary=training_queue[-1]
+		order.build_batch=template_id;order.experience=experience_sum/maxi(1,count)
+		order.prior_skill=skill_sum/maxi(1,existing);order.prior_personnel=existing
+		order.personnel_condition=condition_sum/maxi(1,count)
+		var reserved:=_equipment_required_for(unit,count)
+		order.reserved_equipment=reserved
+		military_inventory[weapon]=int(military_inventory.get(weapon,0))-reserved
+		queued+=int(result.get("accepted",0))
+	return {"ok":true,"queued":queued,"message":"All %d soldiers entered the build's training together, including existing personnel. Equipment is reserved; the complete intake finishes together." % queued}
 
 
 func _detach_matching_formations(entries:Array)->Array[Dictionary]:
@@ -1324,6 +1363,7 @@ func deploy_army_from_template(template_id:int,custom_name:String="")->Dictionar
 	if label=="": label="%s Army" % _ordinal_army_name(next_field_army_id)
 	var result:=_assemble_field_army(detached,label)
 	if result.has("ok"):
+		template.recruitment_requested=false
 		result["message"]="%s deployed with %d soldiers. %d remain in the home reserve; %d trained soldiers total. Deployment transfers soldiers; it does not remove them." % [label,int(result.get("army",{}).get("troops",0)),int(home_army.get("troops",0)),int(home_army.get("troops",0))+field_army_active_personnel()]
 	return result
 
@@ -2174,7 +2214,7 @@ func record_daily_provisions(required:float,delivered:float)->void:
 		var shortfall:=maxf(0.0,home_need-home_received)
 		home_army["provision_shortfall_total"]=float(home_army.get("provision_shortfall_total",0.0))+shortfall
 		home_army["provision_shortfall_days"]=int(home_army.get("provision_shortfall_days",0))+1 if shortfall>0.01 else 0
-		var condition_target:=clampf(GameState.population_health*0.55+GameState.food_security*0.20+provision_ratio*0.25,0.0,1.0)
+		var condition_target:=clampf(GameState.population_health*0.55+GameState.food_security*0.20+provision_ratio*0.25-float(home_army.get("service_strain",0))*.20,0.0,1.0)
 		var formations:Array=home_army.get("formations",[])
 		for index in formations.size(): formations[index]["personnel_condition"]=move_toward(float(formations[index].get("personnel_condition",condition_target)),condition_target,0.014)
 		home_army["formations"]=formations
@@ -2488,12 +2528,14 @@ func validate_state()->Array[String]:
 		var training_progress:=float(training.get("progress_days",0.0))
 		var training_required:=float(training.get("required_days",0.0))
 		var injury_progress:=float(training.get("injury_accumulator",0.0))
+		if int(training.get("reserved_equipment",0))<0:errors.append("Reserved training equipment cannot be negative.")
+		if training.has("build_batch") and int(training.build_batch)<=0:errors.append("Invalid training batch identity.")
 		if training.has("soldier_ids"): errors.append("Training order contains forbidden individual soldier records.")
 		if training_mode not in ["new","reinforce","retrain"]: errors.append("Training order has an unknown mode.")
 		if not simulator.UNIT_TYPES.has(training_unit): errors.append("Training order references an unknown unit type.")
 		if not simulator.WEAPONS.has(training_weapon) or training_weapon not in UnitCatalog.equipment_for(training_unit): errors.append("Training order uses incompatible equipment.")
 		if training_count<=0: errors.append("Training order headcount must be positive.")
-		if not is_finite(training_progress) or not is_finite(training_required) or training_progress<0.0 or training_required<=0.0 or training_progress>=training_required: errors.append("Training order progress is outside its duration.")
+		if not is_finite(training_progress) or not is_finite(training_required) or training_progress<0.0 or training_required<=0.0 or (training_progress>=training_required and not training.has("build_batch")): errors.append("Training order progress is outside its duration.")
 		if not is_finite(injury_progress) or injury_progress<0.0 or injury_progress>=1.0: errors.append("Training injury accumulation is outside its valid range.")
 		if training_mode=="reinforce":
 			var target_formation_id:=int(training.get("target_formation_id",-1))
@@ -3211,6 +3253,7 @@ func _process_military_day()->void:
 	_process_home_captives_day()
 	_process_equipment_production_day()
 	_process_training_injuries_day()
+	_process_requested_templates()
 	_ensure_automatic_basic_training()
 	_process_training_day()
 	_process_training_program_day()
@@ -3335,13 +3378,15 @@ func _process_aggregate_service_strain_day()->Dictionary:
 	# supplied garrisons recover strain; only combat, privation, or broken morale can
 	# drive sustained desertion. The old unconditional daily increase eventually
 	# erased every peacetime garrison.
-	var hardship_strain:=(1.0-supply)*0.008+(0.004 if int(home_army.get("recent_combat_days",0))>0 else 0.0)+maxf(0.0,0.72-morale)*0.004
+	# Strain tends toward current hardship; moderate supply is not an endless
+	# daily debt. Recovery and fatigue belong to daily simulation, never UI reads.
+	var combat:=int(home_army.get("recent_combat_days",0))>0
+	var hardship:=clampf(maxf(0,.70-supply)/.70+maxf(0,.50-morale)*1.5+(.55 if combat else 0),0,1)
 	var current_strain:=float(home_army.get("service_strain",0.0))
-	var average_strain:=clampf(current_strain+hardship_strain*(1.0-discipline*0.25),0.0,1.0)
-	if hardship_strain<=0.0001:
-		average_strain=move_toward(average_strain,0.0,0.003+discipline*0.0015)
+	var average_strain:=move_toward(current_strain,hardship,.012 if hardship<current_strain else .006)
+
 	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
-	var pressure:=(maxf(0.0,average_strain-0.42)*0.020+maxf(0.0,0.42-supply)*0.024+maxf(0.0,0.32-morale)*0.018)*(1.15-discipline*0.65)*(1.10-cohesion*0.35)
+	var pressure:=(maxf(0.0,average_strain-0.42)*0.020*clampf(hardship*2.0,0,1)+maxf(0.0,0.42-supply)*0.024+maxf(0.0,0.32-morale)*0.018)*(1.15-discipline*0.65)*(1.10-cohesion*0.35)
 	var accumulator:=float(home_army.get("desertion_accumulator",0.0))+float(troops)*pressure; var deserted:=mini(troops,floori(accumulator)); accumulator-=deserted
 	if deserted>0:
 		_stand_down_aggregate(deserted); home_army["desertions_total"]=int(home_army.get("desertions_total",0))+deserted
@@ -3654,13 +3699,16 @@ func _process_training_day()->void:
 	var training_equipment_budget:=military_inventory.duplicate(true)
 	for index in range(training_queue.size()-1,-1,-1):
 		var training:Dictionary=training_queue[index]
+		if training.has("build_batch") and float(training.progress_days)>=float(training.required_days):continue
 		var weapon:=String(training.get("weapon","improvised"))
-		var available_examples:=maxi(0,int(training_equipment_budget.get(weapon,0)))
+		var reserved_examples:=maxi(0,int(training.get("reserved_equipment",0)))
+		var available_examples:=maxi(0,int(training_equipment_budget.get(weapon,0)))+reserved_examples
 		var examples_required:=_equipment_required_for(String(training.get("unit","levy")),int(training.get("count",1)))
 		var examples:=mini(maxi(1,examples_required),available_examples)
-		training_equipment_budget[weapon]=available_examples-examples
+		training_equipment_budget[weapon]=maxi(0,available_examples-examples-reserved_examples)
 		var equipment_access:=clampf(float(examples)/maxf(1.0,float(examples_required)),0.0,1.0)
 		var access_floor:=0.55 if weapon=="improvised" else 0.25
+		if training.has("personnel_condition"):training.personnel_condition=move_toward(float(training.personnel_condition),_trainee_condition(),.014)
 		var progress_increment:=training_rate*(access_floor+(1.0-access_floor)*equipment_access)
 		training["progress_days"]=float(training.get("progress_days",0.0))+progress_increment
 		training["equipment_access_today"]=equipment_access
@@ -3675,13 +3723,17 @@ func _process_training_day()->void:
 			training["count"]=int(training.count)-injuries
 			training_injury_pool+=injuries
 		if int(training.count)<=0:
+			military_inventory[weapon]=int(military_inventory.get(weapon,0))+int(training.get("reserved_equipment",0))
 			training_queue.remove_at(index)
 			continue
 		if float(training.progress_days)<float(training.required_days):
 			training_queue[index]=training
 			continue
+		if training.has("build_batch"):
+			training_queue[index]=training;continue
 		_complete_training(training)
 		training_queue.remove_at(index)
+	_complete_ready_build_batches()
 
 
 func _process_training_injuries_day()->void:
@@ -3714,6 +3766,8 @@ func _ensure_automatic_basic_training()->void:
 	# Assignment to Defense is enough to start basic levy/watch instruction. Players
 	# still order every advanced unit, weapon conversion, reinforcement, and exercise.
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty(): return
+	for template:Dictionary in army_templates:
+		if bool(template.get("recruitment_requested",false)):return
 	var target:=_home_garrison_target()
 	var committed:=maxi(0,int(home_army.get("troops",0)))+_automatic_basic_trainees()
 	var shortage:=maxi(0,target-committed)
@@ -3773,9 +3827,11 @@ func _complete_training(training:Dictionary)->void:
 	if target_index>=0:
 		var reinforcement_target:Dictionary=formations[target_index]
 		equipment_needed=maxi(0,int(reinforcement_target.get("equipment_required",_equipment_required_for(String(training.unit),int(reinforcement_target.get("authorized_count",reinforcement_target.get("count",0))))))-int(reinforcement_target.get("equipment",0)))
-	var issued:=mini(equipment_needed,int(military_inventory.get(weapon,0)))
-	military_inventory[weapon]=int(military_inventory.get(weapon,0))-issued
+	var reserved:=int(training.get("reserved_equipment",0))
+	var issued:=mini(equipment_needed,reserved+int(military_inventory.get(weapon,0)))
+	military_inventory[weapon]=int(military_inventory.get(weapon,0))+reserved-issued
 	var new_training:=_training_quality(String(training.unit),retained_experience)*equipment_training_factor
+	if training.has("prior_skill"):new_training=maxf(new_training,float(training.prior_skill))
 	if target_index>=0:
 		var target:Dictionary=formations[target_index]
 		var old_count:=int(target.get("count",0))
@@ -3789,7 +3845,7 @@ func _complete_training(training:Dictionary)->void:
 	else:
 		var formation_id:=next_formation_id; next_formation_id+=1
 		var equipment_required:=_equipment_required_for(String(training.unit),count)
-		var completed_formation:Dictionary={"id":formation_id,"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":equipment_required,"ammunition":0,"ammunition_required":_ammunition_required_for(weapon,equipment_required),"training":new_training,"experience":retained_experience,"personnel_condition":_trainee_condition()}
+		var completed_formation:Dictionary={"id":formation_id,"unit":String(training.unit),"weapon":weapon,"count":count,"authorized_count":count,"equipment":issued,"equipment_required":equipment_required,"ammunition":0,"ammunition_required":_ammunition_required_for(weapon,equipment_required),"training":new_training,"experience":retained_experience,"personnel_condition":float(training.get("personnel_condition",_trainee_condition()))}
 		if bool(training.get("prototype",false)): completed_formation["prototype"]=true
 		formations.append(completed_formation)
 	var rebuilt:Dictionary=simulator.create_formation_force(_home_army_name(),formations,float(previous_army.get("morale",_campaign_morale())),float(previous_army.get("readiness",1.0)))
@@ -3926,17 +3982,16 @@ func _refresh_readiness()->void:
 	var discipline:=clampf(float(home_army.get("discipline",0.5)),0.0,1.0)
 	var exercise_bonus:=clampf(float(home_army.get("exercise_readiness_bonus",0.0)),0.0,0.20)
 	var base_condition:=clampf(GameState.population_health*0.55+GameState.food_security*0.18+_population_shelter_condition()*0.12+supply*0.15,0.0,1.0)
-	var service_penalty:=clampf(float(home_army.get("service_strain",0.0))*0.30,0.0,0.30)
 	for formation_index in formations.size():
 		var formation:Dictionary=formations[formation_index]
-		var formation_condition:=clampf(float(formation.get("personnel_condition",base_condition))*0.72+base_condition*0.28-service_penalty,0.0,1.0)
+		var formation_condition:=clampf(float(formation.get("personnel_condition",base_condition)),0.0,1.0)
 		formation["personnel_condition"]=formation_condition
 		var formation_force:Dictionary={"formations":[formation],"morale":float(home_army.get("morale",1.0))}
 		var formation_readiness:Dictionary=simulator.force_readiness(formation_force,formation_condition)
 		formation["readiness"]=clampf(float(formation_readiness.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)+exercise_bonus,0.0,1.25)
 		formations[formation_index]=formation
 	home_army["formations"]=formations
-	var readiness:Dictionary=simulator.force_readiness(home_army,base_condition)
+	var readiness:Dictionary=simulator.force_readiness(home_army,_force_personnel_condition(home_army))
 	home_army["readiness"]=clampf(float(readiness.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)+exercise_bonus,0.0,1.25)
 	home_army["readiness_components"]=readiness
 	home_army.readiness_components["supply"]=supply
@@ -4442,3 +4497,49 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 	if not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value:battle=engagement_snapshot()
 	elif not battle_history.is_empty() and int(battle_history[0].get("seed",-2))==seed_value:battle=battle_history[0].duplicate(true)
 	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",GameState.settlement_name)) if String(archived_home.get("name",GameState.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not battle.is_empty() and not active_engagement.is_empty(),"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
+
+func template_recruitment_blocker()->String:
+	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return "Resolve the battle or aftermath before recruiting."
+	if recovery.home_unavailable():return "Home is occupied."
+	if _mobilized_count()>=recruitment_capacity() and aggregate_recruits<=0:return "Mobilization full: %d of %d people; growth or military institutions must expand capacity." % [_mobilized_count(),recruitment_capacity()]
+	return "Available places will enter training on the next simulation day while the order is active."
+func cancel_template_recruitment(template_id:int)->Dictionary:
+	var index:=_template_index(template_id)
+	if index<0:return {"error":"Build not found."}
+	army_templates[index].recruitment_requested=false
+	return {"ok":true,"message":"Further recruitment stopped. Existing soldiers and queued trainees remain."}
+func _process_requested_templates()->void:
+	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return
+	for template:Dictionary in army_templates:
+		if bool(template.get("recruitment_requested",false)):queue_template_training(int(template.template_id),false)
+func grouped_home_formations(force:Dictionary={})->Array[Dictionary]:
+	var source:=home_army if force.is_empty() else force
+	var groups:Dictionary={}
+	for formation:Dictionary in source.get("formations",[]):
+		var key:=str([formation.get("unit","levy"),formation.get("weapon","improvised"),formation.get("prototype",false)])
+		if not groups.has(key):
+			groups[key]={"unit":formation.get("unit","levy"),"weapon":formation.get("weapon","improvised"),"prototype":formation.get("prototype",false),"count":0,"authorized_count":0,"equipment":0,"equipment_required":0,"ammunition":0,"ammunition_required":0,"training":0.0,"personnel_condition":0.0,"cohorts":0,"lowest_condition":1.0,"highest_condition":0.0}
+		var group:Dictionary=groups[key];var count:=int(formation.get("count",0))
+		group.cohorts=int(group.cohorts)+1
+		for field in ["count","authorized_count","equipment","equipment_required","ammunition","ammunition_required"]:group[field]=int(group[field])+int(formation.get(field,0))
+		for field in ["training","personnel_condition"]:group[field]=float(group[field])+float(formation.get(field,0))*count
+		group.lowest_condition=minf(float(group.lowest_condition),float(formation.get("personnel_condition",1)))
+		group.highest_condition=maxf(float(group.highest_condition),float(formation.get("personnel_condition",1)))
+	var result:Array[Dictionary]=[]
+	for group:Dictionary in groups.values():
+		for field in ["training","personnel_condition"]:group[field]=float(group[field])/maxi(1,int(group.count))
+		result.append(group)
+	return result
+
+func _complete_ready_build_batches()->void:
+	var batches:Dictionary={}
+	for order:Dictionary in training_queue:
+		if order.has("build_batch"):
+			var id:=int(order.build_batch)
+			batches[id]=bool(batches.get(id,true)) and float(order.progress_days)>=float(order.required_days)
+	for id in batches:
+		if not bool(batches[id]):continue
+		for index in range(training_queue.size()-1,-1,-1):
+			var order:Dictionary=training_queue[index]
+			if int(order.get("build_batch",-1))==int(id):
+				_complete_training(order);training_queue.remove_at(index)

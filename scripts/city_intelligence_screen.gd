@@ -25,6 +25,11 @@ func _ready()->void:
 		if city.city_id==city_id: selector.select(selector.item_count-1)
 	selector.item_selected.connect(func(_index:int): refresh())
 	report=RichTextLabel.new(); report.bbcode_enabled=false; report.size_flags_vertical=SIZE_EXPAND_FILL; report.add_theme_font_size_override("normal_font_size",20); root.add_child(report)
+	var map_button:=Button.new();map_button.text="SHOW THIS CITY ON MAP";root.add_child(map_button)
+	map_button.pressed.connect(func()->void:
+		if selector.item_count==0:return
+		var scene:=get_tree().current_scene
+		if scene and scene.has_method("_focus_known_city"):scene._focus_known_city(String(selector.get_selected_metadata())))
 	var actions:=HBoxContainer.new(); root.add_child(actions)
 	duration=OptionButton.new(); actions.add_child(duration)
 	for days:int in CivilizationSystem.SCOUT_DURATIONS: duration.add_item("%d-day reconnaissance" % days); duration.set_item_metadata(duration.item_count-1,days)

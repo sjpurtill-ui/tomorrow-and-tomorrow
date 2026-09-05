@@ -12098,7 +12098,8 @@ func _refresh_contact_encounter_markers()->void:
 	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities():
 		var location:Dictionary=city.position
 		if camera!=null and Vector2(camera.global_position.x,camera.global_position.z).distance_to(Vector2(float(location.x),float(location.z)))>camera.size*1.5+100.0: continue
-		confirmed.append({"city_id":city.city_id,"civ_id":city.civ_id,"name":city.name,"x":float(location.x),"z":float(location.z)})
+		city.erase("age_days");city.erase("freshness")
+		confirmed.append({"detailed":camera!=null and camera.size<=2.0,"city_id":city.city_id,"civ_id":city.civ_id,"name":city.name,"x":float(location.x),"z":float(location.z),"report":city})
 	if camera!=null:
 		confirmed.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return Vector2(a.x,a.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z))<Vector2(b.x,b.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z)))
 	if confirmed.size()>64: confirmed.resize(64)
@@ -12114,30 +12115,38 @@ func _refresh_contact_encounter_markers()->void:
 			marker.set_meta("civilization_id",String(site.civ_id)); marker.set_meta("city_id",String(site.city_id))
 			marker.set_meta("settlement_name",String(site.name))
 			marker.position=Vector3(float(site.x),_height_at(float(site.x),float(site.z))+0.05,float(site.z))
-			var accent:=Color.from_hsv(float(abs(String(site.city_id).hash())%1000)/1000.0,0.34,0.82)
-			var material:=StandardMaterial3D.new(); material.albedo_color=accent.darkened(0.28); material.emission_enabled=true; material.emission=accent.darkened(0.58); material.emission_energy_multiplier=0.42; material.roughness=0.88
-			var boundary:=MeshInstance3D.new(); boundary.name="ObservedFootprint"
-			var ring:=TorusMesh.new(); ring.inner_radius=2.4; ring.outer_radius=2.7; ring.rings=32; ring.ring_segments=8; boundary.mesh=ring; boundary.material_override=material; marker.add_child(boundary)
-			var rng:=RandomNumberGenerator.new(); rng.seed=GameState.world_seed^String(site.city_id).hash()
-			for cluster_index in 6:
-				var structure:=MeshInstance3D.new()
-				var structure_mesh:=BoxMesh.new(); structure_mesh.size=Vector3(rng.randf_range(0.8,1.8),rng.randf_range(0.45,1.25),rng.randf_range(0.8,1.8)); structure.mesh=structure_mesh; structure.material_override=material
-				var radial:=Vector2.RIGHT.rotated(rng.randf_range(0.0,TAU))*rng.randf_range(0.4,2.2)
-				structure.position=Vector3(radial.x,float(structure_mesh.size.y)*0.5,radial.y); structure.rotation.y=rng.randf_range(0.0,TAU); marker.add_child(structure)
-			var label:=Label3D.new(); label.name="SettlementLabel"; label.text="%s" % String(site.name).to_upper(); label.font_size=13; label.outline_size=6; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0.0,3.4,0.0); label.modulate=accent.lightened(0.22); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
+			# Close view is actual terrain-aligned settlement fabric, not kilometre-scale boxes.
+			marker.position.y=0
+			var footprint_radius:=.065
+			if bool(site.detailed):
+				var fabric:=preload("res://scripts/foreign_settlement_visual.gd").new()
+				fabric.build(site.report,_close_surface_height_at)
+				fabric.position.x=0;fabric.position.z=0;marker.add_child(fabric)
+				footprint_radius=fabric.footprint_radius
+			var label:=Label3D.new();label.name="SettlementLabel";label.text=String(site.name).to_upper()
+			label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+			label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("ded4b5")
+			label.position=Vector3(0,_height_at(site.x,site.z)+.015,-footprint_radius*1.15)
+			marker.add_child(label)
+			var pin:=Label3D.new();pin.name="RegionalCityPin";pin.text="◆";pin.font_size=15;pin.outline_size=5
+			pin.billboard=BaseMaterial3D.BILLBOARD_ENABLED;pin.fixed_size=true;pin.no_depth_test=true
+			pin.modulate=Color("d9cba3");pin.position=Vector3(0,_height_at(site.x,site.z)+.015,0);marker.add_child(pin)
+
 			add_child(marker)
 			contact_encounter_markers[String(site.city_id)]=marker
 		rendered_contact_encounter_signature=signature
 	for marker_variant in contact_encounter_markers.values():
 		var marker:Node3D=marker_variant
 		if marker==null or not is_instance_valid(marker): continue
-		marker.visible=camera!=null and camera.size<=1800.0 # A reported city location is known even when surrounding terrain is not surveyed.
+		marker.visible=camera!=null # A reported city location is known even when surrounding terrain is not surveyed.
 		var label:=marker.get_node_or_null("SettlementLabel") as Label3D
 		# The discovery map preserves distant locations. A terrain label is useful
 		# only when the player has zoomed into the observed place; keeping fixed-size
 		# names visible at regional scale recreates the giant persistent annotations
 		# the compact world map was introduced to replace.
-		if label: label.visible=camera!=null and camera.size<=24.0
+		if label: label.visible=camera!=null and camera.size<=2.0
+		var pin:=marker.get_node_or_null("RegionalCityPin") as Label3D
+		if pin:pin.visible=camera!=null and camera.size>2.0
 
 
 func _refresh_foreign_formation_markers()->void:
@@ -17418,7 +17427,9 @@ func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 		_close_civilizations_panel()
 		var target:=Vector3(float(position_data.x),0.0,float(position_data.z))
 		zoom_target_size=-1.0
-		if camera: camera.size=minf(camera.size,18.0 if use_settlement else 58.0)
+		if camera:
+			var report:=CivilizationSystem.city_intelligence.known("player",CivilizationSystem.city_intelligence.primary_id(civ_id))
+			camera.size=preload("res://scripts/foreign_settlement_visual.gd").framing_size(report) if use_settlement else minf(camera.size,58.0)
 		_set_camera_target(target)
 		if travel_status_label:
 			var notice:="KNOWN HOME SETTLEMENT  •  %s" % String(encounter.get("name","FOREIGN POLITY")).to_upper() if use_settlement else "ENCOUNTER SITE  •  %s  •  THEIR HOMELAND REMAINS UNLOCATED" % String(encounter.get("name","FOREIGN POLITY")).to_upper()
@@ -19782,3 +19793,13 @@ func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
 		if keep.has(id): continue
 		var stale:Node3D=close_army_figures[id]
 		remove_child(stale); stale.queue_free(); close_army_figures.erase(id)
+
+func _focus_known_city(city_id:String)->void:
+	var report:=CivilizationSystem.city_intelligence.known("player",city_id)
+	if report.is_empty():return
+	if hud:hud.close_detail();hud.close_dock()
+	if is_instance_valid(CivilizationSystem.city_intelligence.screen_layer):CivilizationSystem.city_intelligence.screen_layer.queue_free()
+	_close_civilizations_panel();zoom_target_size=-1
+	camera.size=preload("res://scripts/foreign_settlement_visual.gd").framing_size(report)
+	_set_camera_target(Vector3(float(report.position.x),0,float(report.position.z)))
+	_refresh_contact_encounter_markers()

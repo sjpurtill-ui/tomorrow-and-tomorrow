@@ -91,6 +91,7 @@ func capture(civ_id:String)->Dictionary:
 	entry.captive_people=active_people
 	entry.captive_injuries=int(MilitaryCampaign.home_army.get("wounded_pool",0))+MilitaryCampaign.training_injury_pool
 	entry.captive_disabled=int(MilitaryCampaign.home_army.get("severe_disabled_pool",0))
+	entry.seized_training=MilitaryCampaign.training_queue.duplicate(true)
 	MilitaryCampaign.aggregate_recruits=0;MilitaryCampaign.training_queue.clear();MilitaryCampaign.training_injury_pool=0
 	entry.seized_production=MilitaryCampaign.equipment_queue.duplicate(true);MilitaryCampaign.equipment_queue.clear()
 	MilitaryCampaign.home_army.captured_pool=int(MilitaryCampaign.home_army.get("captured_pool",0))+active_people

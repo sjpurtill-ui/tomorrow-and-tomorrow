@@ -29,13 +29,13 @@ func tab(sub:int)->Dictionary:
 	var watch:=int(GameState.population_allocations.get("Defense",0))
 	var mobilized:=MilitaryCampaign._mobilized_count()
 	var mobilization_cap:=int(capabilities.get("recruitment_capacity",0))
-	var organization:=clampf(float(army.get("organization",0.0)),0.0,1.0)
+	var organization:=clampf(float(army.get("readiness",0.0)),0.0,1.0)
 	var upkeep:=float(army.get("provisions_required_today",0.0))
 	var ledger:=MilitaryCampaign.personnel_ledger()
 	var kpis:Array=[
 		{"label":"TOTAL PERSONNEL","value":str(ledger.total),"live_value":func()->String: return str(MilitaryCampaign.personnel_ledger().total),"live_delta":func()->String: return "%d training" % int(MilitaryCampaign.personnel_ledger().training),"delta":"%d training" % int(ledger.training),"delta_color":Tokens.MUTED,"accent":Tokens.RED,"tip":"Everyone in military service, including reserves, trainees, deployed soldiers, and recovery pools. Deployment does not change this total."},
 		{"label":"FIELD SOLDIERS","value":str(ledger.field),"live_value":func()->String: return str(MilitaryCampaign.personnel_ledger().field),"live_delta":func()->String: return "%d armies" % MilitaryCampaign.field_armies.size(),"delta":"%d armies" % MilitaryCampaign.field_armies.size(),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Deployed maneuver armies vs command capacity"},
-		{"label":"READINESS","value":"%d%%" % roundi(organization*100.0),"live_value":func()->String: return "%d%%" % roundi(float(MilitaryCampaign.home_army.get("organization",0))*100),"delta":"","accent":Tokens.AMBER,"tip":"Organization and condition of the home force"},
+		{"label":"READINESS","value":"%d%%" % roundi(organization*100.0),"live_value":func()->String: return "%d%%" % roundi(float(MilitaryCampaign.home_army.get("readiness",0))*100),"delta":"","accent":Tokens.AMBER,"tip":"Organization and condition of the home force"},
 		{"label":"UPKEEP","value":"%.1f" % upkeep,"live_value":func()->String: return "%.1f" % float(MilitaryCampaign.campaign_army_snapshot().get("provisions_required_today",0)),"delta":"rations/day","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Daily provision cost of everyone under arms"},
 	]
 	var brief:Dictionary=_command_brief()
@@ -101,22 +101,22 @@ func _formation_blocks(army:Dictionary)->Array:
 			"tip":"Dissolve the selected army into the home force (only while stationed at home)"},
 		]})
 	var formation_items:Array=[]
-	for formation_variant in (army.get("formations",[]) as Array):
+	for formation_variant in MilitaryCampaign.grouped_home_formations(army):
 		var formation:Dictionary=formation_variant
 		var unit:=String(formation.get("unit","levy"))
 		var band:=UnitCatalog.readiness_band(formation)
 		formation_items.append({
 			"name":"%s%s · %s" % ["PROTOTYPE " if bool(formation.get("prototype",false)) else "",_unit_label(unit),String(formation.get("weapon","improvised")).replace("_"," ")],
-			"sub":"%s · training %d%% · condition %d%%" % [band,roundi(float(formation.get("training",0.0))*100.0),roundi(float(formation.get("personnel_condition",1.0))*100.0)],
-			"value":"%d/%d" % [int(formation.get("count",0)),int(formation.get("authorized_count",0))],
+			"sub":"%s · drill skill %d%% · condition %d%%" % [band,roundi(float(formation.get("training",0.0))*100.0),roundi(float(formation.get("personnel_condition",1.0))*100.0)],
+			"value":"%d soldiers" % int(formation.get("count",0)),
 			"value_color":Tokens.BODY_2,
 			"accent":UNIT_COLORS.get(unit,Tokens.MUTED),
-			"tip":"Equipment %d of %d · ammunition %d of %d" % [int(formation.get("equipment",0)),int(formation.get("equipment_required",0)),int(formation.get("ammunition",0)),int(formation.get("ammunition_required",0))],
+			"tip":"Completed instruction; drill skill is proficiency, not unfinished course progress. Equipment %d of %d · ammunition %d of %d" % [int(formation.get("equipment",0)),int(formation.get("equipment_required",0)),int(formation.get("ammunition",0)),int(formation.get("ammunition_required",0))],
 		})
 	if formation_items.is_empty():
 		blocks.append({"type":"text","heading":"HOME FORCE","text":"No trained formations are at home. Train an army build to create them."})
 	else:
-		blocks.append({"type":"rows","heading":"HOME FORCE","note":"trained cohorts","items":formation_items})
+		blocks.append({"type":"rows","heading":"HOME FORCE","note":"grouped by unit and equipment","items":formation_items})
 	var releasable:=maxi(0,int(army.get("troops",0)))+maxi(0,MilitaryCampaign.aggregate_recruits)
 	if releasable>0:
 		blocks.append({"type":"actions","items":[
@@ -157,16 +157,18 @@ func _builds_blocks(capabilities:Dictionary)->Array:
 			entry_items.append({
 				"name":"%s · %s" % [_unit_label(unit),weapon.replace("_"," ")],
 				"count":int(entry.get("count",0)),
-				"pct":"%d/%d ready" % [int(entry.get("ready",0)),int(entry.get("count",0))],
+				"pct":"%d/%d at home" % [int(entry.get("ready",0)),int(entry.get("count",0))],
 				"live_pct":func()->String: return _entry_status(template_id,unit,weapon),
 				"color":UNIT_COLORS.get(unit,Tokens.MUTED),
-				"tip":"%d ready at home · %d in training · target %d" % [int(entry.get("ready",0)),int(entry.get("in_training",0)),int(entry.get("count",0))],
-				"on_minus":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,-10)),
-				"on_plus":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,10)),
+				"tip":"%d assembled at home · %d in training · target %d; assembled does not mean combat-ready" % [int(entry.get("ready",0)),int(entry.get("in_training",0)),int(entry.get("count",0))],
+				"on_minus":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,-1)),
+				"on_plus":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,1)),
 			})
 		var deployable:=bool(template.get("deployable",false))
-		var ready_note:="%d of %d trained" % [int(template.get("ready_total",0)),int(template.get("required_total",0))]
+		var ready_note:="%d of %d assembled" % [int(template.get("ready_total",0)),int(template.get("required_total",0))]
 		if int(template.get("in_training_total",0))>0: ready_note+=" · %d in training" % int(template.get("in_training_total",0))
+		ready_note+=" · %d unfilled" % int(template.get("unfilled",0))
+		blocks.append({"type":"text","heading":"RECRUITMENT ORDER","text":("Full-intake order pending until deployment. " if bool(template.get("recruitment_requested",false)) else "Not ordered. RECRUIT & TRAIN waits for a complete intake. ")+String(template.get("blocker",""))})
 		if entry_items.is_empty():
 			blocks.append({"type":"text","heading":"BUILD · %s" % String(template.get("name","BUILD")),"note":"shared reserve","text":"Empty build — add cohorts below."})
 		else:
@@ -201,6 +203,8 @@ func _builds_blocks(capabilities:Dictionary)->Array:
 				"tip":"The principle is understood but not yet established practice. Raise one experimental cohort at %.1f× training time; its service spreads the practice." % MilitaryCampaign.PROTOTYPE_TRAINING_MULTIPLIER,
 			})
 			break
+		if bool(template.get("recruitment_requested",false)):
+			command_items.append({"label":"STOP RECRUITMENT","sub":"keep current soldiers","on_press":func()->void:terrain._report_military_action(MilitaryCampaign.cancel_template_recruitment(template_id))})
 		var added:=0
 		for unit_variant in units:
 			if added>=3: break
@@ -340,7 +344,7 @@ func _training_blocks()->Array:
 func _build_status(template_id:int)->String:
 	for item:Dictionary in MilitaryCampaign.army_template_snapshot().templates:
 		if int(item.template_id)==template_id:
-			return "%d ready · %d training · %d target" % [item.ready_total,item.in_training_total,item.required_total]
+			return "%d at home + %d training + %d unfilled = %d target" % [item.ready_total,item.in_training_total,item.unfilled,item.required_total]
 	return "Build removed"
 
 func _training_status(order_id:int)->String:
@@ -363,5 +367,5 @@ func _entry_status(template_id:int,unit:String,weapon:String)->String:
 		if int(item.template_id)!=template_id: continue
 		for entry:Dictionary in item.entries:
 			if entry.unit==unit and entry.weapon==weapon:
-				return "%d ready · %d training" % [entry.ready,entry.in_training]
+				return "%d at home + %d training + %d unfilled = %d target" % [entry.ready,entry.in_training,entry.unfilled,entry.count]
 	return "Removed"
