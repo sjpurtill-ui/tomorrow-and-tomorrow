@@ -215,3 +215,8 @@ func _wealth_tab()->Dictionary:
 	else: blocks.append({"type":"text","heading":"WEALTH BEFORE MONEY","text":"This economy uses direct allocation and reciprocity. Material stores above belong to the selected city. No issued-currency treasury or household-currency trend exists yet."})
 	blocks.append({"type":"text","heading":"WHAT THESE ACCOUNTS COVER","text":"Goods and reserves are physical wealth. Currency balances are separate city accounts and must not be added to material units. The current aggregate records do not provide a historical monetary valuation of buildings, land, private enterprises or household possessions."})
 	return {"kpis":[],"brief":{},"blocks":blocks}
+
+func open_expanded_tab(sub:int)->bool:
+	if sub!=1:return false
+	preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"materials")
+	return true

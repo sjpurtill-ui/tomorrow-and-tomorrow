@@ -1,0 +1,11 @@
+# Expanded knowledge views and scouting layout
+
+Basecc5ffc5. Inquiry / Tech Tree and Economy / Materials now open large viewport surfaces directly from their real tabs. The Inquiry graph draws actual authored prerequisite edges, colored discovered nodes and labeled gray locked questions without hidden outcome names/effects. Domain/search controls, pan/zoom/fit, previous/next keyboard-accessible selection and an actual Research action remain available. Unknown outcomes are also redacted from the retained ledger. Discovered effects and descriptions appear in selection details. Direct Attention and the original detailed ledger remain accessible.
+
+Materials uses existing resource icons and recognized deposits/owned stock, grouping actual materials in a responsive grid rather than inventing a dependency tree. Stored bulk, reported daily flow, accessible sites and selected-city controls are visible. One explicitly unknown placeholder communicates undiscovered materials without revealing hidden deposits. Local Logistics, resource map and full ledger/charts/trade remain accessible. Simulation/save authorities unchanged.
+
+Crowded scout dispatch reproduced59 content size/scale changes in60frames with12parties. Cause: generic viewport-fit wrapper recomputed wrapped-label width and scale every frame. This modal now owns a bounded scroll layout and opts out of that wrapper. Footer stays fixed; vertical scrollbar space stays reserved.24-party stress fixture afterfix:0geometrychanges/60frames,scroll retained; normal empty-party target/heading selection remains intact. No recruitment, travel timing or knowledge rules changed.
+
+Validation:42 focused cases (3 knowledge boundaries/material data,39 existing UI) pass. Actual Atlas probe enters from both tabs at1280x900/800x600, verifies bounds, graph selection, real Research action without granting discovery, and ledger fallback. Muted hidden GPU captures inspected for both surfaces. Scout headless/GPU probes confirm stable geometry, retained scroll and normal dispatch. All owned graphical probes exited. Some shutdowns report2ObjectDBinstances/1resource; no universal clean shutdown claim.
+
+Integrate for the next coherent version; do not restart the running player yet. Occupation, siege recovery/presentation and final release checks remain separate checklist items.

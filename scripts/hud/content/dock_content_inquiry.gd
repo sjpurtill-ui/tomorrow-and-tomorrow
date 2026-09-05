@@ -235,9 +235,12 @@ func _technology_blocks()->Array:
 	for technology in technologies:
 		var id:=String(technology.id)
 		var status:=String(technology.status)
+		if status=="LOCKED":
+			blocks.append({"type":"rows","items":[{"name":"Unexplored question","sub":"LOCKED","detail":"Earlier knowledge or further evidence is needed. The outcome is not yet known.","accent":Tokens.MUTED}]})
+			continue
 		var detail:=String(technology.get("observation",""))+"\n"+_established_effect_text(technology)
 		var children:Array=technology.leads_to
-		if not children.is_empty(): detail+="\nOPENS → "+", ".join(children)
+		if not children.is_empty(): detail+="\nOpens %d further avenues of inquiry." % children.size()
 		var prerequisites:Array=[]
 		for requirement in technology.get("requires",[]): prerequisites.append(String(DiscoverySystem.discovery_definition(String(requirement)).get("name",requirement)))
 		if not prerequisites.is_empty(): detail+="\nREQUIRES → "+", ".join(prerequisites)
@@ -262,6 +265,11 @@ func _latest_discovery_block()->Dictionary:
 		for candidate in DiscoverySystem.technology_catalog:
 			if String(discovery.id) in candidate.get("requires",[]): next.append(String(candidate.name))
 		var description:=String(discovery.get("observation",""))+"\n"+_established_effect_text(discovery)
-		if not next.is_empty(): description+="\nNew avenues: "+", ".join(next)
+		if not next.is_empty(): description+="\nOpens %d further avenues of inquiry." % next.size()
 		return {"type":"text","heading":"DISCOVERED · "+String(discovery.name),"text":description}
 	return {}
+
+func open_expanded_tab(sub:int)->bool:
+	if sub!=1:return false
+	preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"inquiry")
+	return true
