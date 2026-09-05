@@ -58,6 +58,15 @@ func _ready()->void:
 				if (marker.get_node(glyph_name) as MeshInstance3D).visible: visible_icon_parts+=1
 			_expect(visible_icon_parts>=1,"%s icon has no visible silhouette" % historical_unit)
 		var damaged_army:=army.duplicate(true)
+		terrain._configure_warfare_role_glyph(marker,"mobile","cavalry")
+		var horse_mesh:ArrayMesh=marker.get_node("RoleGlyphPrimary").mesh
+		var horse_arrays:=horse_mesh.surface_get_arrays(0)
+		_expect(horse_arrays[Mesh.ARRAY_VERTEX].size()==144,"horse silhouette exceeds its fixed 144 vertex budget")
+		_expect(horse_arrays[Mesh.ARRAY_NORMAL][0].y>0.99,"horse silhouette top faces down")
+		_expect(not marker.get_node("RoleGlyphSecondary").visible and not marker.get_node("RoleGlyphTertiary").visible,"cavalry retains the person-like disc assembly")
+		terrain._configure_warfare_role_glyph(marker,"infantry","line_infantry")
+		var spear_mesh:ArrayMesh=marker.get_node("RoleGlyphSecondary").mesh
+		_expect(spear_mesh.surface_get_array_len(0)==24,"infantry spearhead is not a real triangular prism")
 		damaged_army["readiness"]=0.18
 		damaged_army["wounded_pool"]=8000
 		damaged_army["formations"]=[{"unit":"modern_artillery","count":8000,"equipment_condition":0.30}]
