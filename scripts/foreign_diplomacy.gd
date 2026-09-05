@@ -86,15 +86,32 @@ func send(id:String,accord:String,tone:String,generous:bool=false)->Dictionary:
 	remember(id,"You sent a proposal for %s. The answer is still on the road." % ACCORDS[accord].name)
 	return result
 
+func send_audience(id:String)->Dictionary:
+	if leader(id).is_empty(): return {"error":"Establish direct contact first."}
+	if bool(ForeignDialogue.access(id).ok): return {"error":"Your envoy channel is already established; continue the conversation."}
+	var result:=CivilizationSystem.dispatch_diplomat(id,"","leader_parley")
+	if result.has("error"): return result
+	CivilizationSystem.diplomatic_mission["leader_audience"]=true
+	remember(id,"Delegates departed to establish an audience. No agreement was proposed.")
+	return result
+
 func resolve(id:String)->Dictionary:
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
 	var terms:Dictionary=mission.get("leader_terms",{})
 	var p:=leader(id)
+	if not p.is_empty() and String(mission.get("civ_id",""))==id and bool(mission.get("leader_audience",false)):
+		if int(GameState.elapsed_days)<int(mission.get("return_day",2147483647)): return {"error":"The audience report is still traveling."}
+		p["audience_day"]=int(GameState.elapsed_days)
+		mission["leader_audience"]=false
+		var greeting:="The delegates established an audience with %s. The envoy channel is open for continued discussion; no agreement has been made." % String(p.name)
+		remember(id,greeting)
+		return {"ok":true,"message":greeting}
 	if p.is_empty() or String(mission.get("civ_id",""))!=id or int(GameState.elapsed_days)<int(mission.get("return_day",2147483647)) or not valid_terms(terms): return {"error":"No returned leader proposal is available."}
 	if int(terms.serial)<=int(p.resolved): return {"error":"This answer has already been received."}
 	if int(terms.serial)!=int(p.serial): return {"error":"This answer does not match the dispatched proposal."}
 	var f:=forecast(id,String(terms.accord),String(terms.tone),bool(terms.generous))
 	p.resolved=int(terms.serial)
+	p["audience_day"]=int(GameState.elapsed_days)
 	var outcome:String=f.get("outcome","refuse")
 	if String(f.get("blocker",""))!="": outcome="refuse"
 	var civ:=civilization(id); var relation:Dictionary=civ.player_relation
@@ -149,10 +166,13 @@ func valid_terms(t:Dictionary)->bool:
 	return t.has_all(["accord","tone","generous","cost","serial"]) and ACCORDS.has(t.accord) and TONES.has(t.tone) and t.generous is bool and t.cost==(12 if t.generous else 4) and (t.serial is int or t.serial is float) and float(t.serial)>=1
 
 func export_state()->Dictionary:
-	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true)}
+	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true),"dialogue":ForeignDialogue.export_state()}
 
 func import_state(data:Dictionary)->Dictionary:
 	if data.get("seed")!=GameState.world_seed or not data.get("leaders") is Dictionary or data.leaders.size()>8: return {"error":"Invalid foreign leader state."}
+	if not ForeignDialogue.validate_state(data.get("dialogue",{})): return {"error":"Invalid foreign discussion history."}
+	for id in data.get("dialogue",{}):
+		if not data.leaders.has(id): return {"error":"Discussion references an unknown leader."}
 	for id in data.leaders:
 		var p:Variant=data.leaders[id]
 		if not id is String or not p is Dictionary or not p.has_all(["name","temperament","bio","trust","memories","accord","counter","next_day","serial","resolved"]): return {"error":"Incomplete foreign leader."}
@@ -160,13 +180,14 @@ func import_state(data:Dictionary)->Dictionary:
 		for field in ["trust","next_day","serial","resolved"]:
 			if not (p[field] is int or p[field] is float) or not is_finite(float(p[field])): return {"error":"Invalid foreign leader value."}
 		if absf(float(p.trust))>1 or p.next_day<0 or p.resolved<0 or p.serial<p.resolved: return {"error":"Invalid foreign leader history."}
+		if p.has("audience_day") and (not (p.audience_day is int or p.audience_day is float) or not is_finite(float(p.audience_day)) or p.audience_day<0): return {"error":"Invalid audience date."}
 		if not p.memories is Array or p.memories.size()>12 or not p.accord is Dictionary or not p.counter is Dictionary: return {"error":"Invalid foreign commitments."}
 		for m in p.memories:
 			if not m is Dictionary or not m.get("text") is String or m.text.length()>2000 or not (m.get("day") is int or m.get("day") is float): return {"error":"Invalid foreign memory."}
 		if not p.counter.is_empty() and not ACCORDS.has(p.counter.get("accord","")): return {"error":"Invalid counteroffer."}
 		if not p.accord.is_empty():
 			if not ACCORDS.has(p.accord.get("kind","")) or p.accord.get("bonus",0) not in [.08,.12] or not (p.accord.get("until") is int or p.accord.get("until") is float) or not is_finite(float(p.accord.until)) or p.accord.until<0: return {"error":"Invalid active understanding."}
-	leaders=data.leaders.duplicate(true); seed_value=GameState.world_seed; ForeignDialogue.reset()
+	leaders=data.leaders.duplicate(true); seed_value=GameState.world_seed; ForeignDialogue.import_state(data.get("dialogue",{}))
 	return {"ok":true}
 
 func open(id:String)->void:

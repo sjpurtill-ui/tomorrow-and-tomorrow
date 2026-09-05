@@ -160,9 +160,9 @@ func _test_terminal_api_fallback_progress()->void:
 	_expect(String(fallback_result.get("source",""))=="deterministic interpreter" and int(fallback_result.get("api_attempts",0))==2,"terminal API failure did not produce an auditable deterministic fallback")
 	var stages:Array[String]=[]
 	for progress in fallback_progress: stages.append(String(progress.get("stage","")))
-	_expect(stages.count("requesting")==2 and stages.has("retrying") and stages.has("fallback"),"terminal failure did not emit the complete fallback lifecycle")
+	_expect(stages.count("requesting")==2 and stages.has("retrying") and stages.has("unavailable"),"terminal failure did not emit the recoverable unavailable lifecycle")
 	var resolved:=AdvisorSystem.execute_pronouncement(String(pending_order.parameters.text),fallback_result,pending_order)
-	_expect(String(resolved.status)=="active" and ConsequenceEngine.modifier_strength("expanded_watch")>0.0,"safe deterministic fallback did not resolve the original typed order")
+	_expect(bool(fallback_result.get("service_failure",false)) and ConsequenceEngine.modifier_strength("expanded_watch")==0.0,"service failure silently executed the typed order")
 
 func _capture_fallback_result(_request_id:String,result:Dictionary)->void:
 	fallback_result=result
@@ -184,7 +184,7 @@ func _test_malformed_contract_fallback()->void:
 	_expect(String(malformed_contract_result.get("source",""))=="deterministic interpreter" and int(malformed_contract_result.get("api_attempts",0))==2,"malformed typed contract was accepted or skipped the bounded fallback path")
 	_expect(String(malformed_contract_result.get("provider_request_id",""))!="malformed-contract-provider","malformed contract retained provider acceptance provenance")
 	var resolved:=AdvisorSystem.execute_pronouncement(String(pending_order.parameters.text),malformed_contract_result,pending_order)
-	_expect(String(resolved.status)=="active" and ConsequenceEngine.modifier_strength("expanded_watch")>0.0,"malformed-contract fallback did not preserve the typed deterministic order")
+	_expect(bool(malformed_contract_result.get("service_failure",false)) and ConsequenceEngine.modifier_strength("expanded_watch")==0.0,"malformed service response silently executed the typed order")
 
 func _capture_malformed_contract_result(_request_id:String,result:Dictionary)->void:
 	malformed_contract_result=result
@@ -203,7 +203,7 @@ func _test_redirect_refusal()->void:
 	_expect(String(redirect_result.get("source",""))=="deterministic interpreter","provider redirect was followed instead of falling back safely")
 	_expect(String(redirect_result.get("provider_request_id",""))!="redirect-followed","redirected provider response crossed the transport boundary")
 	var resolved:=AdvisorSystem.execute_pronouncement(String(pending_order.parameters.text),redirect_result,pending_order)
-	_expect(String(resolved.status)=="active" and ConsequenceEngine.modifier_strength("expanded_watch")>0.0,"redirect refusal did not preserve the bounded local interpretation")
+	_expect(bool(redirect_result.get("service_failure",false)) and ConsequenceEngine.modifier_strength("expanded_watch")==0.0,"redirect failure silently enacted the order")
 
 func _capture_redirect_result(_request_id:String,result:Dictionary)->void:
 	redirect_result=result
@@ -222,7 +222,7 @@ func _test_oversized_response_refusal()->void:
 	_expect(String(oversize_result.get("source",""))=="deterministic interpreter" and int(oversize_result.get("api_attempts",0))==2,"oversized provider body was accepted or did not fail through the bounded retry path")
 	_expect(String(oversize_result.get("provider_request_id",""))!="oversized-provider-response","oversized provider payload reached policy validation")
 	var resolved:=AdvisorSystem.execute_pronouncement(String(pending_order.parameters.text),oversize_result,pending_order)
-	_expect(String(resolved.status)=="active" and ConsequenceEngine.modifier_strength("expanded_watch")>0.0,"oversize refusal did not preserve the bounded local interpretation")
+	_expect(bool(oversize_result.get("service_failure",false)) and ConsequenceEngine.modifier_strength("expanded_watch")==0.0,"oversize failure silently enacted the order")
 
 func _capture_oversize_result(_request_id:String,result:Dictionary)->void:
 	oversize_result=result
