@@ -67,7 +67,7 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 	for id in UNIT_IDS: total += maxi(0, int(counts.get(id, 0)))
 	represented_troops = total
 	var desired := mini(figure_budget(total), clampi(figure_limit,1,MAX_FIGURES))
-	var key := "%s/%s/%s" % [counts, faction, spacing]
+	var key := "%s/%s/%s/%d" % [counts, faction, spacing, desired]
 	if signature == key: return
 	signature = key
 	figure_count = desired
@@ -87,17 +87,19 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 	remainders.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a.remainder) > float(b.remainder))
 	for i in desired-assigned: allocations[remainders[i].id] += 1
 	var columns := maxi(1, ceili(sqrt(float(desired) * 1.6)))
-	var rows := ceili(float(desired) / float(columns))
-	var has_support := int(counts.get("cavalry",0))+int(counts.get("siege_engineer",0))+int(counts.get("field_artillery",0)) > 0
-	var has_vehicle := int(counts.get("motorized_infantry",0))>0
-	has_support = has_support or int(counts.get("horse_archer",0))+int(counts.get("camel_cavalry",0))>0
-	has_vehicle = has_vehicle or int(counts.get("chariot_archer",0))>0
-	var rank_spacing := maxf(spacing,5.0) if has_vehicle else (maxf(spacing,3.2) if has_support else spacing)
-	for id in CLASSICAL_IDS:
-		if id != "legionary_infantry" and int(counts.get(id,0)) > 0:
-			rank_spacing = maxf(rank_spacing,6.0)
-	if int(counts.get("bombard",0)) > 0: rank_spacing = maxf(rank_spacing,4.0)
-	if int(counts.get("counterweight_trebuchet",0)) > 0: rank_spacing = maxf(rank_spacing,9.0)
+	# Give each arm room for its equipment without blowing apart every infantry
+	# rank when a single horse or siege engine joins the force.
+	var layouts:Dictionary={}
+	var depth:=0.0
+	var frontage:=maxf(float(columns)*spacing,6.0)
+	for id in RANK_ORDER:
+		var amount:=int(allocations[id])
+		if amount==0: continue
+		var pitch:=visual_spacing(id,spacing)
+		var group_columns:=mini(amount,maxi(1,floori(frontage/pitch)))
+		var group_rows:=ceili(float(amount)/float(group_columns))
+		layouts[id]={"pitch":pitch,"columns":group_columns,"depth":depth}
+		depth+=float(group_rows)*pitch+maxf(spacing,1.0)
 	var slot := 0
 	for id in RANK_ORDER:
 		var amount := int(allocations[id])
@@ -118,9 +120,17 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 		multimesh.use_colors = true
 		multimesh.mesh = asset.mesh
 		multimesh.instance_count = amount
+		var layout:Dictionary=layouts[id]
+		var rank_spacing:=float(layout.pitch)
+		var group_columns:=int(layout.columns)
 		for i in amount:
-			var x := (float(slot % columns) - float(columns-1)*0.5)*rank_spacing
-			var z := (float(slot / columns) - float(rows-1)*0.5)*rank_spacing
+			var x := (float(i % group_columns) - float(group_columns-1)*0.5)*rank_spacing
+			var z := float(layout.depth)+float(i / group_columns)*rank_spacing-depth*0.5+rank_spacing*0.5
+			# Light troops screen in staggered, loose files; drilled infantry keeps
+			# its crisp line. Deterministic offsets remain stable during refreshes.
+			if id in ["skirmisher","slinger","javelin_skirmisher","horse_archer"]:
+				x+=sin(float(i)*2.399)*rank_spacing*0.16
+				z+=cos(float(i)*2.399)*rank_spacing*0.12
 			multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY, Vector3(x,0,z)))
 			multimesh.set_instance_color(i, Color.WHITE)
 			multimesh.set_instance_custom_data(i, Color(float(slot % 13)/13.0,0,0,1))
@@ -132,6 +142,15 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 		add_child(batch)
 		batches[id] = batch; materials.append(material)
 	_set_clip_parameters()
+
+static func visual_spacing(id:String,spacing:float)->float:
+	if id=="counterweight_trebuchet": return maxf(spacing,9.0)
+	if id in ["war_elephant","battering_ram","siege_tower"]: return maxf(spacing,6.0)
+	if id in ["motorized_infantry","chariot_archer"]: return maxf(spacing,5.0)
+	if id=="bombard": return maxf(spacing,4.0)
+	if id in ["cavalry","horse_archer","camel_cavalry","siege_engineer","field_artillery"]: return maxf(spacing,3.2)
+	if id in ["skirmisher","slinger","javelin_skirmisher"]: return spacing*1.3
+	return spacing
 
 func set_animation(value: String, restart: bool = false) -> void:
 	if not value in ["idle", "walk", "attack", "death"]: value = "idle"
