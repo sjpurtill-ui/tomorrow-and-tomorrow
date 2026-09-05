@@ -147,6 +147,15 @@ func _ready()->void:
 		_expect(front_marker.get_node("FrontPlate").material_override.render_priority<front_marker.get_node("FrontCore").material_override.render_priority,"front plate covers the battle core")
 		_expect("BATTLE IN PROGRESS" in (front_marker.get_node("FrontLabel") as Label3D).text,"front marker does not distinguish an active local engagement")
 		_expect((front_marker.get_node("FrontLabel") as Label3D).global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"front label inherits the regional front scale")
+	# A fixed 0.20km lift detached fronts from their real ground near local zoom.
+	for zoom in [8.0,20.0,320.0]:
+		terrain.camera.size=zoom
+		terrain._refresh_warfare_front_markers([PRESENTATION.front_marker(front,destination,zoom,true)])
+		var grounded_front:Node3D=terrain.warfare_front_markers.get("front_probe",null)
+		_expect(grounded_front!=null and grounded_front.visible,"local front disappeared during ground-clearance update")
+		if grounded_front:
+			var lift:float=grounded_front.position.y-terrain._height_at(grounded_front.position.x,grounded_front.position.z)
+			_expect(absf(lift-PRESENTATION.marker_ground_clearance(zoom))<0.00001,"front does not use zoom-aware ground clearance")
 	terrain.camera.size=12_000.0
 	terrain._refresh_player_field_army_markers()
 	marker=terrain.player_field_army_markers.get("1",null)

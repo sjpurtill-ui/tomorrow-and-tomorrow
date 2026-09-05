@@ -12902,7 +12902,7 @@ func _refresh_warfare_front_markers(front_views:Array)->void:
 	var visible_ids:Dictionary={}
 	for view_variant in front_views:
 		var view:Dictionary=view_variant; var front_id:=String(view.get("id","")); visible_ids[front_id]=true
-		var position_data:Dictionary=view.get("position",{}); var position:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0))); position.y=_height_at(position.x,position.z)+0.20
+		var position_data:Dictionary=view.get("position",{}); var position:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0))); position.y=_height_at(position.x,position.z)+WarfareMapPresentation.marker_ground_clearance(camera.size if camera else 190.0)
 		var marker:Node3D=warfare_front_markers.get(front_id,null)
 		if marker==null or not is_instance_valid(marker):
 			marker=_create_warfare_front_marker(front_id); add_child(marker); warfare_front_markers[front_id]=marker
