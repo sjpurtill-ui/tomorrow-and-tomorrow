@@ -7442,6 +7442,7 @@ void fragment() {
 	float fine=value_noise(world_position.xz*215.0+vec2(-47.0,71.0));
 	float dry=smoothstep(0.64,0.88,value_noise(world_position.xz*73.0+vec2(91.0,17.0)));
 	vec3 fabric=COLOR.rgb*(0.82+broad*0.23+(fine-0.5)*0.18*grain_strength);
+	float urban_roof_coverage=0.0;
 	if ((fabric_kind==0 || fabric_kind==1 || fabric_kind==2 || fabric_kind==3 || fabric_kind==7) && UV.x>=0.0 && UV.y>=0.0) {
 		// World units are kilometres. Material detail repeats in metres rather
 		// than stretching once from one parcel corner to the other. Fields retain
@@ -7610,23 +7611,71 @@ void fragment() {
 		// distant city.  These are aggregate blocks and courtyards, not individual
 		// buildings and never pasted aerial photographs.
 		vec2 neighborhood_point=urban_point*vec2(3.55,3.18);
+		// Inherited streets bend locally; strongly axial cultures retain straighter
+		// alignments. The field stays world anchored as the camera moves.
+		vec2 street_warp=vec2(value_noise(urban_point*1.7+vec2(29.0,11.0)),value_noise(urban_point*1.9+vec2(-17.0,43.0)))-vec2(0.5);
+		neighborhood_point+=street_warp*(district_family==1.0 ? 0.035 : 0.24);
 		vec2 neighborhood_local=fract(neighborhood_point);
 		vec2 neighborhood_cell=floor(neighborhood_point);
 		vec2 neighborhood_edge=min(neighborhood_local,vec2(1.0)-neighborhood_local);
 		float neighborhood_break=value_noise(neighborhood_cell*0.73+vec2(district_seed*53.0,19.0));
-		float local_lane=1.0-smoothstep(0.018,0.050,min(neighborhood_edge.x,neighborhood_edge.y));
-		float occupied_block=step(0.20+neighborhood_break*0.28,hash21(neighborhood_cell+vec2(31.0,district_seed*67.0)));
+		float lane_aa=max(fwidth(neighborhood_point.x),fwidth(neighborhood_point.y))*0.5;
+		float local_lane=1.0-smoothstep(0.007,0.016+lane_aa,min(neighborhood_edge.x,neighborhood_edge.y));
+		float occupied_block=step(0.08+neighborhood_break*0.20,hash21(neighborhood_cell+vec2(31.0,district_seed*67.0)));
 		float neighborhood_survival=strategic_structure_survival(district_condition,neighborhood_local,neighborhood_cell);
 		float block_tone=0.72+neighborhood_break*0.30;
 		vec3 neighborhood_detail=COLOR.rgb*block_tone;
 		fabric=mix(fabric,neighborhood_detail,occupied_block*neighborhood_survival*neighborhood_visibility*0.46);
-		fabric=mix(fabric,COLOR.rgb*0.34,local_lane*neighborhood_visibility*road_survival*0.24);
+		// Forty-eight deterministic layout variants combine courts, parallel rows,
+		// detached compounds and dense infill. These are flat aerial roof coverage,
+		// not modern building photos or new per-resident scene objects.
+		float layout_variant=floor(hash21(neighborhood_cell+vec2(district_seed*173.0,59.0))*48.0);
+		float layout_form=mod(layout_variant,6.0);
+		vec2 plot_frequency=vec2(12.0,10.0);
+		if(layout_form==1.0) plot_frequency=vec2(8.0,15.0);
+		if(layout_form==2.0) plot_frequency=vec2(15.0,8.0);
+		if(layout_form==3.0) plot_frequency=vec2(9.0,9.0);
+		vec2 parcel_local=vary_strategic_district_uv(neighborhood_local,neighborhood_cell,district_seed+0.17);
+		vec2 roof_point=parcel_local*plot_frequency;
+		vec2 roof_cell=floor(roof_point);
+		vec2 roof_local=fract(roof_point);
+		float roof_roll=hash21(roof_cell+neighborhood_cell*19.0+vec2(layout_variant,73.0));
+		float roof_cross_roll=hash21(roof_cell+neighborhood_cell*23.0+vec2(41.0,layout_variant));
+		vec2 roof_center=vec2(0.5)+(vec2(roof_roll,roof_cross_roll)-vec2(0.5))*0.20;
+		vec2 roof_extent=mix(vec2(0.27,0.24),vec2(0.43,0.40),vec2(roof_cross_roll,roof_roll));
+		vec2 roof_edge=roof_extent-abs(roof_local-roof_center);
+		float roof_aa=max(fwidth(roof_point.x),fwidth(roof_point.y))*0.55;
+		float roof_mask=smoothstep(-roof_aa,roof_aa,min(roof_edge.x,roof_edge.y));
+		if(layout_form==3.0 && roof_roll>0.4){
+			float court_distance=max(abs(roof_local.x-roof_center.x),abs(roof_local.y-roof_center.y));
+			roof_mask*=smoothstep(0.13-roof_aa,0.13+roof_aa,court_distance);
+		}
+		roof_mask*=step(layout_form==5.0 ? 0.30 : 0.12,roof_roll)*(1.0-local_lane);
+		float roof_resolved=1.0-smoothstep(0.0025,0.009,pixel_span);
+		vec2 shadow_edge=roof_extent-abs(roof_local-roof_center-vec2(0.055,0.075));
+		float roof_shadow=smoothstep(-roof_aa,roof_aa,min(shadow_edge.x,shadow_edge.y))*(1.0-roof_mask);
+		fabric=mix(fabric,COLOR.rgb*0.38,roof_shadow*occupied_block*neighborhood_survival*roof_resolved*0.38);
+		vec3 roof_tone=COLOR.rgb*mix(0.82,1.28,roof_roll);
+		roof_tone=mix(roof_tone,vec3(0.48,0.43,0.34),0.22);
+		float roof_plane=smoothstep(-roof_aa,roof_aa,roof_local.x-roof_center.x);
+		float roof_weather=value_noise(urban_point*370.0+vec2(layout_variant*3.0,roof_roll*19.0));
+		roof_weather=mix(0.5,roof_weather,1.0-smoothstep(0.25,0.75,pixel_span*370.0));
+		roof_tone*=0.82+roof_plane*0.16+roof_weather*0.08;
+		if(district_condition<6.0) roof_tone*=condition_upkeep;
+		urban_roof_coverage=roof_mask*occupied_block*neighborhood_survival*roof_resolved;
+		fabric=mix(fabric,roof_tone,urban_roof_coverage*0.86);
+		float garden_interior=smoothstep(0.015,0.18,min(neighborhood_edge.x,neighborhood_edge.y));
+		vec3 garden_tone=mix(COLOR.rgb*0.78,vec3(0.22,0.27,0.16),0.38);
+		fabric=mix(fabric,garden_tone,(1.0-occupied_block)*garden_interior*neighborhood_visibility*0.40);
+		vec3 lane_tone=mix(COLOR.rgb,vec3(0.40,0.355,0.27),0.42);
+		fabric=mix(fabric,lane_tone,local_lane*neighborhood_visibility*road_survival*0.42);
 		// Sparse warm concentrations suggest fires, busy yards and denser inhabited
 		// centres at Google-Earth scale. They are deliberately aggregate bright spots.
 		vec2 activity_delta=neighborhood_local-vec2(0.5);
 		float activity_seed=hash21(neighborhood_cell+vec2(109.0,district_seed*137.0));
 		float activity_spot=(1.0-smoothstep(0.035,0.16,length(activity_delta)))*step(0.965,activity_seed)*occupied_block;
-		fabric=mix(fabric,vec3(0.80,0.60,0.28),activity_spot*neighborhood_visibility*0.48);
+		vec3 activity_tone=mix(COLOR.rgb,vec3(0.63,0.57,0.45),0.60);
+		fabric=mix(fabric,activity_tone,activity_spot*neighborhood_visibility*0.32);
 		vec2 regional_point=urban_point*vec2(0.40,0.34);
 		vec2 regional_local=fract(regional_point);
 		vec2 regional_edge=min(regional_local,vec2(1.0)-regional_local);
@@ -7751,6 +7800,12 @@ void fragment() {
 	fabric=mix(fabric,fabric*vec3(1.10,1.035,0.86),dry*0.14*grain_strength);
 	ALBEDO=fabric;
 	float material_alpha=COLOR.a;
+	if (fabric_kind==5) {
+		// Roofs are occupied surface, not a translucent tint over untouched grass.
+		// Preserve the geographic boundary fade while giving resolved roofs presence.
+		float roof_alpha=smoothstep(0.02,0.24,COLOR.a)*0.96;
+		material_alpha=mix(material_alpha,roof_alpha,urban_roof_coverage);
+	}
 	if (fabric_kind==3) {
 		// Keep occupied roofs legible at village altitude. Fade continuously with
 		// the camera, not a vertex color baked during an arbitrary mesh rebuild.
