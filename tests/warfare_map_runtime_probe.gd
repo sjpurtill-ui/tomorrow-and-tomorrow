@@ -155,6 +155,31 @@ func _ready()->void:
 		var objective_label:=path.get_node("MovementObjective/ObjectiveLabel") as Label3D
 		_expect(objective_label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"movement objective label inherits the objective marker scale")
 	var front:={"id":"front_probe","war_name":"War of North Crossing","opponent":"Cedar League","target_region_id":"probe_objective","target":"North Crossing","objective":"Take North Crossing","progress":0.36,"field_personnel":8000,"inbound_personnel":0,"occupation_personnel":0,"readiness":0.62,"supply":0.58}
+	var planned_route:Array=[{"x":origin.x,"z":origin.z},{"x":origin.x,"z":origin.z-0.02}]
+	var scout_mission:Dictionary={"mission_id":"scale_probe","ordered_heading":"north","return_day":100000,"route":planned_route.duplicate(true)}
+	CivilizationSystem.scout_missions.assign([scout_mission])
+	var previous_scout_id:=0
+	for zoom in [0.035,0.8,20.0,40.0,320.0]:
+		terrain.camera.size=zoom
+		terrain._refresh_player_scout_route_markers()
+		var scout_marker:Node3D=terrain.player_scout_route_markers.get("scale_probe")
+		_expect(scout_marker!=null,"planned scout corridor disappears during zoom")
+		if scout_marker:
+			var current_id:=scout_marker.get_instance_id()
+			_expect(current_id!=previous_scout_id,"scout route retains geometry from a different zoom")
+			previous_scout_id=current_id
+			var profile:Dictionary=terrain._scout_route_visual_profile(zoom)
+			_expect(is_equal_approx(float(scout_marker.get_meta("route_width")),float(profile.width)),"actual scout refresh uses wrong-band width")
+			_expect(float(profile.width)/zoom<0.0024,"scout corridor covers excessive screen width")
+			var pennants:MultiMeshInstance3D=scout_marker.get_node("ScoutDirectionPennants")
+			_expect(pennants.multimesh.instance_count==(5 if zoom<=80.0 else 4),"actual scout caller supplied the wrong scale band")
+			_expect(scout_marker.get_node("ScoutOrderLabel").visible==(zoom>=8.0),"close scout corridor retains a giant destination label")
+			terrain._refresh_player_scout_route_markers()
+			_expect(terrain.player_scout_route_markers.get("scale_probe").get_instance_id()==current_id,"stationary zoom rebuilds the scout route every frame")
+	_expect(scout_mission.route==planned_route,"visual refresh changed the ordered route")
+	CivilizationSystem.scout_missions.clear()
+	terrain._refresh_player_scout_route_markers()
+	terrain.camera.size=320.0
 	for direction in [Vector2.UP,Vector2.RIGHT,Vector2.DOWN,Vector2.LEFT]:
 		var target:Vector3=origin+Vector3(direction.x,0,direction.y)*20.0
 		var route:Array=[{"x":origin.x,"z":origin.z},{"x":target.x,"z":target.z}]

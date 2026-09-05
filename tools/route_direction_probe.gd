@@ -13,6 +13,7 @@ func capture()->void:
 	camera.position=Vector3(0,100,0)
 	scene.add_child(camera)
 	camera.look_at(Vector3.ZERO,Vector3.FORWARD)
+	renderer.camera=camera
 	var environment:=WorldEnvironment.new()
 	environment.environment=Environment.new()
 	environment.environment.background_mode=Environment.BG_COLOR
