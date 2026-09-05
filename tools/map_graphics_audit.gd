@@ -177,6 +177,36 @@ func _ready()->void:
 			material.shader.code=material.shader.code.replace(", depth_test_disabled", "")
 	if "--hide-rivers" in OS.get_cmdline_user_args():
 		for river in terrain.river_overlays: river.visible=false
+	if "--sliced-detail-profile" in OS.get_cmdline_user_args():
+		terrain._request_close_terrain_job(terrain.settler_marker.position)
+		var close_span:float=terrain.camera.size
+		terrain.camera.size=2.0
+		terrain._advance_close_terrain_job()
+		assert(terrain.close_terrain_job==null,"Zooming out must cancel pending close detail")
+		terrain.camera.size=close_span
+		terrain._request_close_terrain_job(terrain.settler_marker.position)
+		var convoy_origin:Vector3=terrain.settler_marker.position
+		terrain.settler_marker.position.x+=0.01
+		terrain._advance_close_terrain_job()
+		assert(terrain.close_terrain_job==null,"Moving the convoy must cancel stale close detail")
+		terrain.settler_marker.position=convoy_origin
+		terrain._request_close_terrain_job(terrain.settler_marker.position)
+		var close_frames:=0
+		for frame in 2000:
+			terrain._advance_close_terrain_job()
+			close_frames+=1
+			if terrain.close_terrain_job==null: break
+			await get_tree().process_frame
+		assert(terrain.close_terrain_job==null and terrain.detail_terrain_patch!=null,"Sliced close detail must finish")
+		var sliced_arrays:Array=terrain.detail_terrain_patch.mesh.surface_get_arrays(0)
+		var sliced_expanded:Array=[]
+		for attribute in [Mesh.ARRAY_VERTEX,Mesh.ARRAY_NORMAL,Mesh.ARRAY_COLOR]:
+			var values:Array=[]
+			for vertex_index in sliced_arrays[Mesh.ARRAY_INDEX]: values.append(sliced_arrays[attribute][vertex_index])
+			sliced_expanded.append(values)
+		var sliced_hash:=hash(var_to_bytes(sliced_expanded))
+		assert(sliced_hash==2888042706,"Sliced default fixture must match synchronous triangle attributes")
+		print("SLICED_DETAIL_PROFILE frames=",close_frames," max_sample_slice_usec=",terrain.close_terrain_last_slice_usec," finish_usec=",terrain.close_terrain_last_finish_usec," mesh_hash=",sliced_hash)
 	if "--detail-build-profile" in OS.get_cmdline_user_args():
 		var detail_times:Array[int]=[]
 		var mesh_fingerprint:=0

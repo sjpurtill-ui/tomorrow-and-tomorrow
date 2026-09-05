@@ -168,6 +168,9 @@ var map_selection_marker:MeshInstance3D
 var map_selection_generation:=0
 var settlement_visual_root: Node3D
 var detail_terrain_patch: MeshInstance3D
+var close_terrain_job:RefCounted
+var close_terrain_last_slice_usec:=0
+var close_terrain_last_finish_usec:=0
 var close_vegetation_root: Node3D
 var close_vegetation_revision := -1
 var convoy_map_icon: Node3D
@@ -878,6 +881,7 @@ func _configure_preview_province() -> void:
 	GameState.province_mask = mask
 
 func _process(delta: float) -> void:
+	_advance_close_terrain_job()
 	_refresh_discovery_mask()
 	_refresh_woodland_visuals()
 	_process_camera_navigation(delta)
@@ -2945,7 +2949,7 @@ func _update_scale_lod() -> void:
 
 	var detail_visible:=camera.size<=1.8
 	if detail_visible and detail_terrain_patch==null and settler_marker and not _camera_in_motion():
-		_build_detail_terrain_patch(settler_marker.position)
+		_request_close_terrain_job(settler_marker.position)
 	if detail_terrain_patch:
 		detail_terrain_patch.visible = detail_visible
 	if close_vegetation_root:
@@ -3176,7 +3180,47 @@ func _set_camera_target(target: Vector3) -> void:
 	camera_target=target
 	_update_camera()
 
+func _request_close_terrain_job(center:Vector3)->void:
+	var point:=Vector2(center.x,center.z)
+	if close_terrain_job!=null and close_terrain_job.center==point: return
+	close_terrain_job=preload("res://scripts/close_terrain_job.gd").new(112,0.42,point,func(x:float,z:float)->Array:
+		var height:=_close_surface_height_at(x,z)+0.00045
+		var step:=0.02
+		var dx:=(_height_at(x+step,z)-_height_at(x-step,z))/(step*2.0)
+		var dz:=(_height_at(x,z+step)-_height_at(x,z-step))/(step*2.0)
+		return [height,Vector3(-dx,1.0,-dz).normalized(),_terrain_color_at(x,z,height)])
+
+func _advance_close_terrain_job()->void:
+	if close_terrain_job==null: return
+	if camera==null or camera.size>1.8 or settler_marker==null:
+		close_terrain_job=null
+		return
+	if Vector2(settler_marker.position.x,settler_marker.position.z)!=close_terrain_job.center:
+		close_terrain_job=null
+		return
+	if _camera_in_motion(): return
+	if not close_terrain_job.advance(2500): return
+	close_terrain_last_slice_usec=close_terrain_job.max_slice_usec
+	var started:=Time.get_ticks_usec()
+	var center:Vector3=settler_marker.position
+	var mesh:ArrayMesh=close_terrain_job.commit()
+	close_terrain_job=null
+	_install_close_terrain_mesh(mesh,center)
+	close_terrain_last_finish_usec=Time.get_ticks_usec()-started
+
+func _install_close_terrain_mesh(mesh:ArrayMesh,center:Vector3)->void:
+	detail_surface_center=Vector2(center.x,center.z)
+	if detail_terrain_patch: detail_terrain_patch.queue_free()
+	detail_terrain_patch=MeshInstance3D.new()
+	detail_terrain_patch.name="SettlementGroundDetail"
+	detail_terrain_patch.mesh=mesh
+	detail_terrain_patch.material_override=_create_terrain_material()
+	detail_terrain_patch.visible=camera!=null and camera.size<=1.8
+	add_child(detail_terrain_patch)
+	_rebuild_close_vegetation(center)
+
 func _build_detail_terrain_patch(center: Vector3) -> void:
+	close_terrain_job=null
 	detail_surface_center=Vector2(center.x,center.z)
 	var resolution := 112
 	var span := 0.42
@@ -3199,13 +3243,7 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 			normals[index]=Vector3(-dx,1.0,-dz).normalized()
 			colors[index]=_terrain_color_at(world_x,world_z,height)
 	var mesh:=preload("res://scripts/close_terrain_mesh.gd").build(resolution,vertices,normals,colors)
-	detail_terrain_patch = MeshInstance3D.new()
-	detail_terrain_patch.name = "SettlementGroundDetail"
-	detail_terrain_patch.mesh = mesh
-	detail_terrain_patch.material_override = _create_terrain_material()
-	detail_terrain_patch.visible = false
-	add_child(detail_terrain_patch)
-	_rebuild_close_vegetation(center)
+	_install_close_terrain_mesh(mesh,center)
 
 func _near_persistent_settlement_surface(local_point: Vector2) -> bool:
 	var consolidated_clearance:=0.0
