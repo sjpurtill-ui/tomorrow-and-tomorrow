@@ -55,6 +55,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var demand_breakdown:=_calculate_demand(traveling)
 	var harvest:=_produce(workers,labor_efficiency,ecology,traveling)
+	if GameState.resource_settlement_id.is_empty() and not traveling:
+		var access:=MilitaryCampaign.siege_home_food_access()
+		for food_type in harvest: harvest[food_type]*=access
 	for food_type in harvest:
 		GameState.food_stocks[food_type]=float(GameState.food_stocks.get(food_type,0.0))+float(harvest[food_type])
 	var preserved:=_preserve(logistics,makers,traveling)

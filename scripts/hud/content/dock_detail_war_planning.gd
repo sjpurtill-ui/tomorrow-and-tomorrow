@@ -27,7 +27,7 @@ func tab(_sub:int)->Dictionary:
 		{"label":"FRONTS","value":str(fronts.size()),"delta":"active","accent":Tokens.RED if fronts.size()>0 else Tokens.MUTED,"tip":"Wars with a live objective"},
 		{"label":"THREAT","value":"YES" if not threat.is_empty() else "none","delta":"","accent":Tokens.RED if not threat.is_empty() else Tokens.GREEN,"tip":"An enemy force demands a response"},
 		{"label":"BATTLE","value":"LIVE" if not engagement.is_empty() else "none","delta":"","accent":Tokens.RED if not engagement.is_empty() else Tokens.MUTED,"tip":"An engagement is being fought"},
-		{"label":"REPUTATION","value":"M%d F%d" % [roundi(float(reputation.get("mercy",0.0))*100.0),roundi(float(reputation.get("fear",0.0))*100.0)],"delta":"G%d" % roundi(float(reputation.get("grievance",0.0))*100.0),"accent":Tokens.AMBER,"tip":"Mercy · fear · grievance, as the world remembers your wars"},
+		{"label":"REPUTATION","value":"Mercy %d" % roundi(float(reputation.get("mercy",0.0))*100.0),"delta":"Fear %d · Grievance %d" % [roundi(float(reputation.get("fear",0.0))*100.0),roundi(float(reputation.get("grievance",0.0))*100.0)],"accent":Tokens.AMBER,"tip":"Mercy · fear · grievance, as the world remembers your wars"},
 	]
 	var brief:Dictionary
 	if not aftermath.is_empty():
@@ -41,6 +41,10 @@ func tab(_sub:int)->Dictionary:
 	else:
 		brief={"tone":"warn","title":"%d front%s active" % [fronts.size(),"" if fronts.size()==1 else "s"],"why":"Set each front's stance; armies fight by it until you change it."}
 	var blocks:Array=[]
+	var siege:=MilitaryCampaign.siege_public_snapshot()
+	if not siege.is_empty():
+		brief={"tone":"warn","title":"Siege of "+String(siege.target_name),"why":"Hold the approaches, seek terms, or leave. Orders continue as time passes; no daily micromanagement is required."}
+		blocks.append_array(_siege_blocks(siege))
 	if not threat.is_empty():
 		blocks.append({"type":"rows","heading":"THREAT","items":[{
 			"name":String(threat.get("title","Enemy force")),
@@ -48,6 +52,7 @@ func tab(_sub:int)->Dictionary:
 			"value":"","accent":Tokens.RED,"tip":"An unanswered threat resolves against you at the deadline",
 		}]})
 		blocks.append({"type":"actions","items":[
+			{"label":"HOLD DEFENSES","sub":"begin a sustained siege","on_press":func()->void: _siege_notice(MilitaryCampaign.begin_siege()),"tip":"Shelter behind prepared defenses. Food access and endurance change with time; raids cannot be besieged."},
 			{"label":"DEFEND","sub":"meet them under arms","primary":true,"on_press":func()->void: MilitaryCampaign.respond_to_threat("defend"),"tip":"Fight with the home force and fortifications"},
 			{"label":"PAY TRIBUTE","sub":"%.0f food" % float(threat.get("tribute_food",0.0)),"on_press":func()->void: MilitaryCampaign.respond_to_threat("tribute"),"tip":"Buy them off from the food reserve"},
 			{"label":"WITHDRAW","sub":"yield the ground","on_press":func()->void: MilitaryCampaign.respond_to_threat("withdraw"),"tip":"Evacuate and concede what they came for"},
@@ -122,4 +127,37 @@ func tab(_sub:int)->Dictionary:
 	return {"kpis":kpis,"brief":brief,"blocks":blocks}
 
 func signature()->Array:
-	return [MilitaryCampaign.threat_snapshot().size(),MilitaryCampaign.engagement_snapshot().size(),MilitaryCampaign.pending_aftermath.size(),CivilizationSystem.military_fronts_snapshot().get("fronts",[]).size(),MilitaryCampaign.foreign_prisoners]
+	return [JSON.stringify(MilitaryCampaign.siege_public_snapshot()),MilitaryCampaign.threat_snapshot().size(),MilitaryCampaign.engagement_snapshot().size(),MilitaryCampaign.pending_aftermath.size(),CivilizationSystem.military_fronts_snapshot().get("fronts",[]).size(),MilitaryCampaign.foreign_prisoners]
+
+
+func _siege_notice(result:Dictionary)->void:
+	if terrain and is_instance_valid(terrain.get("travel_status_label")): terrain.travel_status_label.text=String(result.get("error",result.get("message","Siege orders updated.")))
+	if hud and hud.has_method("request_immediate_dock_refresh"): hud.request_immediate_dock_refresh()
+
+func _siege_blocks(siege:Dictionary)->Array:
+	var identity:=String(siege.id)
+	var rival:=String(siege.defender_id if String(siege.mode)=="offensive" else siege.attacker_id)
+	var rows:Array=[
+		{"name":"DURATION","sub":"Days holding siege positions","value":"%d days" % int(siege.days)},
+		{"name":"ACCESS RESTRICTED","sub":"Estimated share of land approaches held","value":"%d%%" % roundi(float(siege.blockade)*100)},
+		{"name":"ASSAULT PRESSURE","sub":"Estimated weakening of prepared defenses; does not guarantee victory","value":"%d%%" % roundi(float(siege.pressure)*100)},
+		{"name":"YOUR SUPPLY","sub":"Latest delivered ration coverage","value":"%d%%" % roundi(float(siege.own_supply_ratio)*100)},
+		{"name":"CIVILIAN HARDSHIP","sub":String(siege.civilian_hardship),"value":""},
+		{"name":"BESIEGER ENDURANCE","sub":String(siege.besieger_endurance),"value":""},
+		{"name":"ENEMY SUPPLIES","sub":String(siege.enemy_supply_assessment),"value":"reported day %d" % int(siege.enemy_supply_report_day) if int(siege.enemy_supply_report_day)>=0 else "UNKNOWN"},
+	]
+	if float(siege.own_food_days)>=0: rows.append({"name":"HOME FOOD RESERVE","sub":"Current food stores at current demand; not a guaranteed survival countdown","value":"%.1f days" % float(siege.own_food_days)})
+	var blocks:Array=[{"type":"rows","heading":"SIEGE · "+String(siege.target_name),"items":rows},{"type":"actions","items":[
+		{"label":"CONTINUE","sub":"hold current orders","on_press":func()->void: _siege_notice(MilitaryCampaign.siege_order(identity,"continue"))},
+		{"label":"NEGOTIATE","sub":"seek terms through envoys","on_press":func()->void: ForeignDiplomacy.open(rival)},
+		{"label":"RELIEF & ALLIES","sub":"review real commitments and ability","on_press":func()->void: _open_siege_relief(identity)},
+		{"label":"ASSAULT" if String(siege.mode)=="offensive" else "SORTIE","sub":"fight from current conditions","on_press":func()->void: _siege_notice(MilitaryCampaign.siege_order(identity,"assault"))},
+		{"label":"WITHDRAW","sub":"lift siege / yield ground","on_press":func()->void: _siege_notice(MilitaryCampaign.siege_order(identity,"withdraw"))},
+	]},{"type":"text","text":"Outside work and food access remain restricted while the siege holds. Relief camps use their own provisions and remain their allies' people. No fresh enemy store count is assumed from an old report."}]
+
+	# Keep the orders visible before the longer supply assessment.
+	return [blocks[1],blocks[0],blocks[2]]
+
+func _open_siege_relief(siege_id:String)->void:
+	if ForeignDiplomacy.has_method("open_relief"): ForeignDiplomacy.call("open_relief",siege_id)
+	else: _siege_notice({"error":"Relief diplomacy is not available in this development build."})

@@ -17006,7 +17006,10 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 	var action_descriptions:={"open_trade":"Send a trade proposal. It can begin only after envoys reach them and carry acceptance home.","non_aggression":"Send a non-aggression proposal. No compact exists until the physical round trip is complete.","send_aid":"Send envoys carrying physical food aid; both travel rations and aid leave your reserve at departure.","contain":"End the current compact and adopt a hostile peacetime containment posture.","seek_peace":"Send peace envoys. Any response remains unknown until the delegation returns.","declare_war":"Send a physical declaration. War begins only when the message reaches them.","launch_raid":"Strike a known region for portable stores without attempting occupation; this sharply raises hostility and may begin a war.","launch_campaign":"Commit the existing aggregate field formation against this rival's simulated garrison.","reinforce_occupation":"Move trained field personnel into the selected occupation force. Coverage suppresses rebellion and supports integration.","evacuate_occupation":"Withdraw the selected occupation force into the recruit reserve, returning its issued equipment but leaving control exposed to uprising or recapture."}
 	var action_recoveries:={"open_trade":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","non_aggression":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","send_aid":"Locate their settlement, restore the required physical Food, and finish any active diplomatic mission.","contain":"Resolve the current war or incompatible treaty state, then choose containment again.","seek_peace":"Enter a war, then send peace envoys after locating the opponent's settlement.","declare_war":"Locate their settlement, choose a war objective, and finish any active diplomatic mission before sending the declaration.","launch_raid":"Select a known region, move a field army there, and ensure no truce or non-aggression compact is active.","launch_campaign":"Raise and train personnel, form a maneuver army, move it to this selected objective, and resolve any active battle.","reinforce_occupation":"Train unassigned home personnel, then select a region you already control.","evacuate_occupation":"Select a controlled region with an occupation force still stationed there."}
 	var action_consequences:={"open_trade":"No trade begins until acceptance physically returns.","non_aggression":"No compact begins until acceptance physically returns.","send_aid":"Travel rations and the aid cargo leave physical stores at departure.","contain":"Trade and diplomatic access end immediately and tension rises.","seek_peace":"The war continues until an accepted response returns.","declare_war":"War begins when the declaration reaches them, not when it departs.","launch_raid":"The stationed army fights and may take portable stores, but cannot capture territory; reprisals become more likely.","launch_campaign":"The stationed army fights; military and civilian losses, damage, and control changes enter permanent history.","reinforce_occupation":"Field personnel leave the reserve to suppress resistance and support integration.","evacuate_occupation":"Personnel and equipment return, but resistance or recapture may end control."}
-	for action_entry in [["PROPOSE TRADE","open_trade"],["PROPOSE NON-AGGRESSION","non_aggression"],["SEND FOOD AID","send_aid"],["CONTAIN","contain"],["SEND PEACE ENVOYS","seek_peace"],["SEND WAR DECLARATION","declare_war"],["RAID REGION","launch_raid"],["LAUNCH CAMPAIGN","launch_campaign"],["REINFORCE OCCUPATION","reinforce_occupation"],["EVACUATE OCCUPATION","evacuate_occupation"]]:
+	action_descriptions["launch_siege"]="Invest this settlement with the army already stationed there. Food access, reserves and endurance change over time."
+	action_recoveries["launch_siege"]="Move a field army to a known enemy settlement and resolve the current military operation."
+	action_consequences["launch_siege"]="The army holds the approaches until relieved, withdrawn or ordered to assault. No territory transfers merely by starting a siege."
+	for action_entry in [["PROPOSE TRADE","open_trade"],["PROPOSE NON-AGGRESSION","non_aggression"],["SEND FOOD AID","send_aid"],["CONTAIN","contain"],["SEND PEACE ENVOYS","seek_peace"],["SEND WAR DECLARATION","declare_war"],["RAID REGION","launch_raid"],["LAUNCH CAMPAIGN","launch_campaign"],["BESIEGE SETTLEMENT","launch_siege"],["REINFORCE OCCUPATION","reinforce_occupation"],["EVACUATE OCCUPATION","evacuate_occupation"]]:
 		var action_button:=Button.new()
 		action_button.text=String(action_entry[0])
 		action_button.custom_minimum_size=Vector2(0,36)
@@ -17014,7 +17017,8 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 		action_button.add_theme_font_size_override("font_size",10)
 		var action_id:=String(action_entry[1])
 		var availability:Dictionary
-		if action_id=="launch_campaign": availability=MilitaryCampaign.offensive_campaign_availability(String(profile.id),selected_civilization_region_id)
+		if action_id=="launch_siege": availability=MilitaryCampaign.offensive_siege_availability(String(profile.id),selected_civilization_region_id)
+		elif action_id=="launch_campaign": availability=MilitaryCampaign.offensive_campaign_availability(String(profile.id),selected_civilization_region_id)
 		elif action_id=="launch_raid": availability=MilitaryCampaign.raid_campaign_availability(String(profile.id),selected_civilization_region_id)
 		elif action_id in ["reinforce_occupation","evacuate_occupation"]: availability=MilitaryCampaign.occupation_action_availability(String(profile.id),selected_civilization_region_id,action_id)
 		else: availability=CivilizationSystem.player_action_availability(String(profile.id),action_id)
@@ -17377,6 +17381,14 @@ func _select_war_goal(index:int,selector:OptionButton,civ_id:String)->void:
 
 
 func _conduct_civilization_action(civ_id:String,action:String)->void:
+	if action=="launch_siege":
+		var siege_result:=MilitaryCampaign.start_offensive_siege(civ_id,selected_civilization_region_id)
+		civilization_feedback_text=String(siege_result.get("error",siege_result.get("message","Siege orders issued.")))
+		selected_civilization_id=civ_id
+		_close_civilizations_panel()
+		if siege_result.has("error"): _open_civilizations_panel()
+		else: _open_war_planning()
+		return
 	if action in ["launch_campaign","launch_raid"]:
 		var campaign:Dictionary=MilitaryCampaign.launch_raid(civ_id,selected_civilization_region_id) if action=="launch_raid" else MilitaryCampaign.launch_offensive(civ_id,selected_civilization_region_id)
 		civilization_feedback_text=String(campaign.get("error","Campaign launched; issue round orders through Military Command."))

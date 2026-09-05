@@ -2834,7 +2834,12 @@ func _advance_civilization(civ:Dictionary)->Dictionary:
 	var labor_share:=clampf(working_age/population,0.0,1.0)
 	var reproductive_population:=float(cohorts.get("youth",0.0))*0.45+float(cohorts.get("early_adults",0.0))*0.50+float(cohorts.get("established_adults",0.0))*0.45+float(cohorts.get("mature_adults",0.0))*0.16
 	var reproductive_factor:=clampf((reproductive_population/population)/0.285,0.45,1.35)
+	var siege_access:=MilitaryCampaign.siege_effects_for_civilization(String(civ.id))
+	var siege_output:=float(siege_access.food_output_multiplier)
 	var food_ratio:=float(civ.food_capacity)/population
+	if siege_output<1.0:
+		# Existing reserves bridge lost production before starvation affects cohorts.
+		food_ratio=minf(food_ratio,food_ratio*siege_output+maxf(0,float(civ.food_days))/30.0)
 	var health:=clampf(float(civ.health),0.05,0.98)
 	var war_pressure:=clampf(float(_war_count(civ))*0.22,0.0,0.70)
 	var environment:Dictionary=civ.get("environment_profile",{})
@@ -2857,8 +2862,8 @@ func _advance_civilization(civ:Dictionary)->Dictionary:
 	var next_population:=maxf(1.0,population+births-deaths)
 	var capacity_change:=population*(0.0015+float(allocations.sustenance)*0.010+float(civ.production)*0.0025)*(0.70+float(civ.ecology)*0.30)*(0.55+labor_share*0.72)*float(control_effects.food_factor)*lerpf(0.62,1.34,environmental_food)*(1.0+float(founding_effects.get("food_yield",0.0))+ProgressionSystem.rival_effect(civ,"food_output"))
 	civ["food_capacity"]=maxf(1.0,float(civ.food_capacity)+capacity_change-float(civ.food_capacity)*0.0006)
-	var monthly_balance:=float(civ.food_capacity)/maxf(1.0,next_population)-1.0
-	civ["food_days"]=clampf(float(civ.food_days)+monthly_balance*7.5,0.0,180.0)
+	var monthly_balance:=float(civ.food_capacity)*float(siege_access.food_output_multiplier)/maxf(1.0,next_population)-1.0
+	civ["food_days"]=clampf(float(civ.food_days)+monthly_balance*(30.0 if siege_output<1.0 else 7.5),0.0,180.0)
 	civ["health"]=clampf(health+(monthly_balance*0.0025)+(0.0012 if float(civ.food_days)>20.0 else 0.0)-war_pressure*0.0018-environmental_health_pressure*0.00035,0.05,0.98)
 	civ["cohesion"]=clampf(float(civ.cohesion)+float(civ.institutions)*0.0012-float(civ.aggression)*war_pressure*0.0018+float(allocations.diplomacy)*0.0010,0.05,0.98)
 	civ["knowledge"]=clampf(float(civ.knowledge)+(0.00045+float(allocations.knowledge)*0.0045)*(0.55+float(civ.cohesion)*0.45)*float(control_effects.knowledge_factor)*(1.0+float(founding_effects.get("knowledge_gain",0.0))+ProgressionSystem.rival_effect(civ,"knowledge_rate")),0.02,1.0)

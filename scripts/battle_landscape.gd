@@ -16,11 +16,10 @@ static func encounter_position(engagement:Dictionary)->Vector2:
 	if target.has("x") and target.has("z"): return Vector2(target.x,target.z)
 	var region_id:=String(threat.get("target_region_id",""))
 	if not region_id.is_empty():
-		for civ:Dictionary in CivilizationSystem.civilizations:
-			for region:Dictionary in civ.get("regions",[]):
-				if String(region.get("id",""))==region_id:
-					var p:Dictionary=region.get("position",{})
-					if p.has("x") and p.has("z"): return Vector2(p.x,p.z)
+		for destination:Dictionary in CivilizationSystem.military_movement_destinations():
+			if String(destination.id)==region_id:
+				var p:Dictionary=destination.position
+				return Vector2(float(p.x),float(p.z))
 	var army_id:=int(engagement.get("home_force_id",0))
 	if army_id>0:
 		for army:Dictionary in MilitaryCampaign.field_armies_snapshot().get("armies",[]):
