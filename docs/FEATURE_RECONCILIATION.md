@@ -39,7 +39,47 @@ warnings remain in runtime probes.
 
 Animated armies, historical figures, ambitions, community networks, diplomacy,
 current terrain and the subsequent graphics work were integrated before this
-pass. Expedition findings, mobility and billion-scale verification are being
-reconciled in a separate scoped handoff; completion is recorded after integration.
+pass. Expedition findings, mobility and billion-scale verification were integrated from the scoped handoff below. Combined validation follows.
 
 See `WORKER_HANDOFF.md` for ownership, worktree and integration rules.
+
+## Expedition, mobility and scale handoff (worker evidence)
+
+# Feature reconciliation — September 5, 2026
+
+Worker checkout: `C:/Users/sjpur/tt-feature-reconciliation`, branch `codex/feature-reconciliation`, base `9c0aaacd7bc6c37dcbc705ead87cccf06119f157`.
+
+This is a feature inventory, not a claim that a passing subset proves every game feature complete. Canonical integration and editor launch belong to the integrator.
+
+| Work | Evidence and disposition |
+| --- | --- |
+| Billion-scale population, resources, food, labor and military counts | Already in base. Population probe passes at one billion, nine cohort keys, one 500,000-person formation after one million recruits, and three consequence days. No ordinary citizen registry restored. |
+| Bounded civilization simulation | Already in base. Century probe passes: 23 rivals, 115 regions, 1,217 turns, bounded events and 446,929-byte exported civilization state in this fixture. |
+| Bounded named leaders | Preserve current GovernmentPeopleSystem and its 96-person ceiling, rather than restoring the superseded institutional-only or 512-citizen implementations. |
+| Expedition chronicles and route chart | Omitted from base; restored selectively from 818d9d8, followed by later decisions. Two report tabs, actual days away and grounded discovery records. |
+| Five expedition paintings | Omitted from base; restored from 12a60ea plus original dawn cover. Static reusable art, no runtime image-generation charges. |
+| Retired illustrated landmarks | Apply 1d7b045 after the chronicle to preserve the later retirement decision; old artwork is archived, not deleted. Existing genuine findings survive load. |
+| Mounted scout pursuit and sustained march speeds | Omitted from base; restored from 8cb853b. Army proximity, speed, readiness and scout evasion affect interception; mixed columns respect their slowest element. |
+| Scout hover presentation | Selectively reimplemented from 37d92d9/b9c9ae3. Hover-only route captions replace permanent labels. Preserve newer grounded ribbons, correct directional triangles, layer priorities, scale cache and zoom handling instead of replacing the whole renderer with the old overlay. |
+| Battle view and unit builds | Already in base: 27 models / 108 animation clips verified. Military UI exposes Inspect in 3D and View Battle. Historical appearance variants are not all separate recruitable combat classes. Battle probe passes with a 192-figure ceiling. |
+| Decree statistics / remaining civic checkpoint | b5d794d and d085c74 audited separately by canonical integrator; do not restore an obsolete duplicate LeaderConversation authority. Not claimed complete by this worker. |
+
+## Verification in reconciliation checkout
+
+- Import completed; no parser failure observed.
+- Expedition, civilization and military-development suites: 92/92 pass. Civic implementation suite separately: 4/4 pass. An initial mistyped civic test path was corrected and rerun; it was not counted as coverage.
+- Population and civilization scale probes pass (figures above).
+- Scout gamble dispatch/return probe passes; status calls measured in microseconds in this fixture.
+- Warfare runtime passes headless and GPU, preserving route geometry/direction tests and asserting hover account presence / permanent labels hidden.
+- All 27 model imports and 108 animated clips pass verification.
+- Battle graphics probe passes combat invariance, metadata, casualties, reset, retreat, pause, save and fixed visual count.
+- Whole-game save/load probe passes. Only dedicated QA slots used; player saves and running session untouched.
+- Actual report dock GPU probe passes and captures both tabs and four alternate paintings. Inspected `artifacts/expedition-report.png` and `artifacts/expedition-journey.png`.
+
+Existing Godot shutdown texture/RID/ObjectDB leak diagnostics remain on several graphical probes. Passing assertions do not establish unlimited-world performance or zero leaks. Paid API behavior is not covered by these offline checks.
+
+## Integration
+
+Review and cherry-pick this branch's task commits in order. Shared hunks include civilization_system.gd, military_campaign.gd, local_terrain.gd, dock_blocks.gd and save_load_probe.gd. Preserve newer integrator civic work when resolving. Do not copy whole systems from the consolidated/archived branch. Before announcing shipment, verify the main report component exposes both tabs, five asset paths exist, the actual return handler opens that component, and the canonical combined tests pass.
+
+User requested visible Godot editor and game with supported built-in external-script reload / live scene synchronization after integration. Preserve any unsaved current session; ask before replacing it if necessary. Worker did not launch a preview as the player game.

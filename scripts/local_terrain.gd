@@ -12908,8 +12908,18 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var first_line:="SCOUT ORDER · %s" % ordered if ordered!="" else "SCOUTS · PARTY CHOSE %s" % planned
 	label.text="%s\nPLANNED CORRIDOR · DUE DAY %d" % [first_line,int(mission.get("return_day",0))]
 	label.font_size=10; label.outline_size=5; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.render_priority=10; label.modulate=amber.lightened(0.22); label.outline_modulate=Color(0.01,0.015,0.017,0.98)
-	label.visible=band!="ground"
+	label.visible=false # Route details belong to hover, not permanent map clutter.
 	label.position=Vector3(endpoint.x,_close_surface_height_at(endpoint.x,endpoint.y)+minf(1.2,maxf(0.001,visual_zoom*0.016)),endpoint.y); root.add_child(label)
+	var hover_layer:=CanvasLayer.new()
+	hover_layer.layer=0
+	root.add_child(hover_layer)
+	var hover:=preload("res://scripts/hud/scout_route_overlay.gd").new()
+	hover.name="ScoutRouteOverlay"
+	hover.camera=camera
+	for point in route_points:
+		hover.points.append(Vector3(point.x,_close_surface_height_at(point.x,point.y)+clearance,point.y))
+	hover.caption="%s · planned route · due day %d" % [first_line.capitalize(),int(mission.get("return_day",0))]
+	hover_layer.add_child(hover)
 	_configure_warfare_overlay_layers(root,10)
 	return root
 
