@@ -7330,7 +7330,8 @@ func _commit_settlement_surface(surface: SurfaceTool, node_name: String, parent:
 		elif node_name=="PersistentMetropolitanMobility": fabric_kind=7
 		elif node_name in ["PersistentFieldGround","PersistentCultivationRows"]: fabric_kind=1
 		elif node_name=="PersistentRoofFabric": fabric_kind=3
-		elif node_name in ["PersistentYardVariation","PersistentDesirePaths"]: fabric_kind=2
+		elif node_name=="PersistentDesirePaths": fabric_kind=8
+		elif node_name=="PersistentYardVariation": fabric_kind=2
 		material=_settlement_fabric_material(fabric_kind,0.74 if fabric_kind==1 else (0.62 if fabric_kind==3 else 0.48))
 	else:
 		var standard:=StandardMaterial3D.new()
@@ -7474,14 +7475,14 @@ void fragment() {
 	float dry=smoothstep(0.64,0.88,value_noise(world_position.xz*73.0+vec2(91.0,17.0)));
 	vec3 fabric=COLOR.rgb*(0.82+broad*0.23+(fine-0.5)*0.18*grain_strength);
 	float urban_roof_coverage=0.0;
-	if ((fabric_kind==0 || fabric_kind==1 || fabric_kind==2 || fabric_kind==3 || fabric_kind==7) && UV.x>=0.0 && UV.y>=0.0) {
+	if ((fabric_kind==0 || fabric_kind==1 || fabric_kind==2 || fabric_kind==3 || fabric_kind==7 || fabric_kind==8) && UV.x>=0.0 && UV.y>=0.0) {
 		// World units are kilometres. Material detail repeats in metres rather
 		// than stretching once from one parcel corner to the other. Fields retain
 		// their simulated row geometry above this base grain; roofs retain their
 		// individual course/repair overlays.
 		// Roof cells cover roughly a 3.8 m span. The former 1.6 m repetition forced
 		// mipmapping to average reed bindings and board joints into a flat colour.
-		float physical_frequency=fabric_kind==3 ? 260.0 : (fabric_kind==1 ? 165.0 : ((fabric_kind==2 || fabric_kind==7) ? 230.0 : 120.0));
+		float physical_frequency=fabric_kind==3 ? 260.0 : (fabric_kind==1 ? 165.0 : ((fabric_kind==2 || fabric_kind==7 || fabric_kind==8) ? 230.0 : 120.0));
 		float material_phase=fract(UV2.y+hash21(floor(UV*4.0)+vec2(17.0,43.0)));
 		float material_orientation=fabric_kind==3 ? 0.0 : fract(UV2.x+0.25);
 		// Roof meshes carry a true ridge-aligned 0..1 UV footprint. Ground fabrics
@@ -7542,6 +7543,11 @@ void fragment() {
 			// replacement crop color shared by every field in every season.
 			float field_surface_value=clamp(source_luma/0.50,0.74,1.24);
 			fabric=COLOR.rgb*field_surface_value;
+		} else if (fabric_kind==8) {
+			// A saved lane's surface tier supplies its earth/stone/paving color.
+			// Reuse grain, not the dirt photograph's hue, on every road era.
+			float road_surface_value=clamp(source_luma/0.50,0.80,1.18);
+			fabric=COLOR.rgb*road_surface_value;
 		} else {
 			photographic*=mix(vec3(1.0),tint,0.08);
 			fabric=mix(fabric,photographic,0.94);
@@ -8942,7 +8948,7 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 		route_color.a = 0.12 if route_kind=="field_track" else (0.19 if route_kind=="camp_path" else 0.18)
 		if hierarchy=="farm_lane": route_color.a=0.22
 		elif hierarchy=="lane": route_color.a=0.34
-		elif hierarchy=="main_approach": route_color=Color("#756347"); route_color.a=0.54
+		elif hierarchy=="main_approach": route_color.a=0.54
 		if hierarchy in ["lane","main_approach"]:
 			route_color=route_color.lerp(Color("#94866d"),civic_space*0.10)
 		if surface_tier>=3 and route_kind!="camp_path":
