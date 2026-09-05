@@ -312,6 +312,7 @@ var discovery_mask_texture:ImageTexture
 const LANDSCAPE_VISUALS:=preload("res://scripts/landscape_resource_visuals.gd")
 var woodland_visual_areas:=PackedVector4Array()
 var woodland_visual_key:=""
+var woodland_harvest_detail:MultiMeshInstance3D
 var woodland_visual_materials:Array[WeakRef]=[]
 var terrain_fog_materials:Array[ShaderMaterial]=[]
 var rendered_fog_revision:=-1
@@ -2512,7 +2513,9 @@ func _register_woodland_material(material:ShaderMaterial)->void:
 
 func _refresh_woodland_visuals(force:bool=false)->void:
 	var key:="%d:%d:%d" % [int(GameState.elapsed_days),floori(camera_target.x/8.0),floori(camera_target.z/8.0)]
-	if not force and key==woodland_visual_key: return
+	if not force and key==woodland_visual_key:
+		_refresh_woodland_harvest_detail(false)
+		return
 	woodland_visual_key=key
 	var ledgers:Array=[GameState.resource_deposits]
 	for city in GameState.player_settlements:
@@ -2529,6 +2532,18 @@ func _refresh_woodland_visuals(force:bool=false)->void:
 		material.set_shader_parameter("woodland_area_count",woodland_visual_areas.size())
 		material.set_shader_parameter("woodland_areas",padded)
 	woodland_visual_materials=living
+	_refresh_woodland_harvest_detail(true)
+
+func _refresh_woodland_harvest_detail(force:bool=false)->void:
+	if camera==null: return
+	if woodland_harvest_detail==null:
+		woodland_harvest_detail=preload("res://scripts/woodland_harvest_detail.gd").new()
+		woodland_harvest_detail.name="HarvestedWoodlandDetail"
+		add_child(woodland_harvest_detail)
+	woodland_harvest_detail.refresh(Vector2(camera_target.x,camera_target.z),camera.size,woodland_visual_areas,GameState.world_seed,int(GameState.elapsed_days),
+		func(point:Vector2)->float: return float(_biome_at(point.x,point.y).woodland) if _height_at(point.x,point.y)>SEA_LEVEL+0.015 else 0.0,
+		func(point:Vector2)->bool: return _world_position_is_revealed(Vector3(point.x,0,point.y)),
+		func(point:Vector2)->float: return _close_surface_height_at(point.x,point.y),force)
 
 func _woodland_density_at(x:float,z:float)->float:
 	return float(_biome_at(x,z).woodland)*LANDSCAPE_VISUALS.retained_at(Vector2(x,z),woodland_visual_areas)
