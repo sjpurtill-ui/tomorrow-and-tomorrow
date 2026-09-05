@@ -153,6 +153,10 @@ var river_course := PackedFloat32Array()
 var world_tributary_courses: Array[Array] = []
 var river_terrain_height_texture:ImageTexture
 var river_terrain_grid:=Vector4.ZERO
+var rendered_regional_heights:=PackedFloat32Array()
+var detail_surface_center:=Vector2.ZERO
+var woodland_harvest_surface_key:=""
+const RENDERED_SURFACE:=preload("res://scripts/rendered_surface_height.gd")
 var river_overlays: Array[MeshInstance3D] = []
 var lens_panel: PanelContainer
 var lens_body: RichTextLabel
@@ -1647,6 +1651,7 @@ func _advance_terrain_patch()->void:
 	regional_patch_span=terrain_patch_job.span
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
 	var height_image:=Image.create_from_data(terrain_patch_job.resolution,terrain_patch_job.resolution,false,Image.FORMAT_RF,terrain_patch_job.heights.to_byte_array())
+	rendered_regional_heights=terrain_patch_job.heights
 	river_terrain_height_texture=ImageTexture.create_from_image(height_image)
 	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(terrain_patch_job.resolution))
 	for river in river_overlays: _bind_river_terrain(river.material_override)
@@ -2534,8 +2539,23 @@ func _refresh_woodland_visuals(force:bool=false)->void:
 	woodland_visual_materials=living
 	_refresh_woodland_harvest_detail(true)
 
+func _harvest_ground_height_at(point:Vector2)->float:
+	var result:=_height_at(point.x,point.y)
+	if RENDERED_SURFACE.contains(point,river_terrain_grid) and not rendered_regional_heights.is_empty():
+		result=RENDERED_SURFACE.sample(point,river_terrain_grid,func(cell:Vector2i)->float: return rendered_regional_heights[cell.y*int(river_terrain_grid.w)+cell.x])
+	var detail_grid:=Vector4(detail_surface_center.x,detail_surface_center.y,0.42,112.0)
+	if detail_terrain_patch and detail_terrain_patch.visible and RENDERED_SURFACE.contains(point,detail_grid):
+		var detail_height:=RENDERED_SURFACE.sample(point,detail_grid,func(cell:Vector2i)->float:
+			var vertex:=detail_surface_center+(Vector2(cell)/111.0-Vector2(0.5,0.5))*0.42
+			return _close_surface_height_at(vertex.x,vertex.y)+0.00045,false)
+		result=maxf(result,detail_height)
+	return result
+
 func _refresh_woodland_harvest_detail(force:bool=false)->void:
 	if camera==null: return
+	var surface_key:="%s:%s:%s" % [river_terrain_grid,detail_surface_center,detail_terrain_patch!=null and detail_terrain_patch.visible]
+	force=force or surface_key!=woodland_harvest_surface_key
+	woodland_harvest_surface_key=surface_key
 	if woodland_harvest_detail==null:
 		woodland_harvest_detail=preload("res://scripts/woodland_harvest_detail.gd").new()
 		woodland_harvest_detail.name="HarvestedWoodlandDetail"
@@ -2543,7 +2563,7 @@ func _refresh_woodland_harvest_detail(force:bool=false)->void:
 	woodland_harvest_detail.refresh(Vector2(camera_target.x,camera_target.z),camera.size,woodland_visual_areas,GameState.world_seed,int(GameState.elapsed_days),
 		func(point:Vector2)->float: return float(_biome_at(point.x,point.y).woodland) if _height_at(point.x,point.y)>SEA_LEVEL+0.015 else 0.0,
 		func(point:Vector2)->bool: return _world_position_is_revealed(Vector3(point.x,0,point.y)),
-		func(point:Vector2)->float: return _close_surface_height_at(point.x,point.y),force)
+		func(point:Vector2)->float: return _harvest_ground_height_at(point),force)
 
 func _woodland_density_at(x:float,z:float)->float:
 	return float(_biome_at(x,z).woodland)*LANDSCAPE_VISUALS.retained_at(Vector2(x,z),woodland_visual_areas)
@@ -3156,6 +3176,7 @@ func _set_camera_target(target: Vector3) -> void:
 	_update_camera()
 
 func _build_detail_terrain_patch(center: Vector3) -> void:
+	detail_surface_center=Vector2(center.x,center.z)
 	var resolution := 112
 	var span := 0.42
 	var surface := SurfaceTool.new()
