@@ -28,6 +28,16 @@ and battle scales before integration, especially deep mixed siege columns.
 
 ## Next passes
 
+Pass 7: traced slow mature-scene captures to autoload catch-up, not mesh creation.
+The fixture jumps GameState.elapsed_days; CivilizationSystem/MilitaryCampaign
+then simulated all skipped days before yielding a frame, even with terrain
+speed paused. visual_capture_isolation.gd now disables their automatic processing
+and ProgressionSystem's automatic progression after constructing the QA scene.
+This affects only the self-terminating isolation scene; gameplay is untouched.
+The 180-year developed-town capture now completes and town-developed.png was
+inspected. No production trace code was retained. Rerunning the 800-year city
+fixture now that its unrelated simulation catch-up is excluded.
+
 Pass 6: widened large-equipment groups instead of constraining them to infantry
 frontage. Classical capture exposed five elephants in one long file; the new
 layout uses a compact 3+2 block. Siege-only review also stays in distinct groups
