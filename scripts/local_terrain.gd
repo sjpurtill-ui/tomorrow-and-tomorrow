@@ -8955,6 +8955,19 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 	if variation_count>0:
 		_commit_settlement_surface(variation_surface,"PersistentYardVariation",parent,true)
 
+func _settlement_route_join_offset(points:PackedVector2Array,index:int,width:float)->Vector2:
+	var incoming:Vector2=points[index]-points[maxi(0,index-1)]
+	var outgoing:Vector2=points[mini(points.size()-1,index+1)]-points[index]
+	if incoming.is_zero_approx(): incoming=outgoing
+	if outgoing.is_zero_approx(): outgoing=incoming
+	var first:=Vector2(-incoming.y,incoming.x).normalized()
+	var second:=Vector2(-outgoing.y,outgoing.x).normalized()
+	var bisector:=(first+second).normalized()
+	if bisector.is_zero_approx(): return first*width
+	# Shared, bounded miters join adjacent quads without extra meshes or spikes.
+	return bisector*width/maxf(0.5,bisector.dot(first))
+
+
 func _create_persistent_settlement_routes(center: Vector3, routes: Array[Dictionary], parent: Node3D) -> void:
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -8967,6 +8980,12 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 		if not bool(route.get("active", true)):
 			continue
 		var points: PackedVector2Array = route.get("points", PackedVector2Array())
+		# Ignore collapsed segments in a local render copy, never in saved routes.
+		var distinct_points:=PackedVector2Array()
+		for point in points:
+			if distinct_points.is_empty() or point.distance_squared_to(distinct_points[-1])>=0.0000001:
+				distinct_points.append(point)
+		points=distinct_points
 		if points.size() < 2:
 			continue
 		var route_kind:=String(route.get("kind","desire_path"))
@@ -9010,8 +9029,9 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 			var direction := finish - start
 			if direction.length_squared() < 0.0000001:
 				continue
-			var side := Vector2(-direction.y, direction.x).normalized() * width
-			var route_vertices:=[start-side,finish-side,finish+side,start-side,finish+side,start+side]
+			var start_side:=_settlement_route_join_offset(points,index,width)
+			var finish_side:=_settlement_route_join_offset(points,index+1,width)
+			var route_vertices:=[start-start_side,finish-finish_side,finish+finish_side,start-start_side,finish+finish_side,start+start_side]
 			var route_uvs:=[Vector2(0.0,0.0),Vector2(1.0,0.0),Vector2(1.0,1.0),Vector2(0.0,0.0),Vector2(1.0,1.0),Vector2(0.0,1.0)]
 			for vertex_index in route_vertices.size():
 				var point_2d:Vector2=route_vertices[vertex_index]
