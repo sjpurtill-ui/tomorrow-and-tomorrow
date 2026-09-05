@@ -107,6 +107,27 @@ func _ready()->void:
 		var close_marker:=close_marker_variant as Node3D
 		_expect(close_marker.visible,"army icon disappears at close zoom")
 		_expect(close_marker.scale.x<0.20,"close-zoom army icon retains an oversized minimum scale")
+	for figures:Node3D in terrain.close_army_figures.values():
+		_expect(figures.get_node_or_null("Strength")==null,"close figures duplicate the counter's soldier label")
+	# The counter and figures must consume the same last-known report. The real
+	# army has travelled away; neither zooming nor its ground mesh may expose it.
+	var reported_army:=_army(71,origin+Vector3(0.5,0,0))
+	reported_army["status"]="moving"
+	reported_army["location_id"]="away"
+	reported_army["last_report"]={"day":0,"position":{"x":origin.x,"z":origin.z},"status":"stationed","troops":600,"supply_level":0.8}
+	MilitaryCampaign.field_armies.assign([reported_army])
+	terrain.camera_target=origin
+	terrain.camera.size=1.0
+	terrain.game_speed=0.0
+	_expect(not bool(MilitaryCampaign.field_armies_snapshot().get("live_reports",true)),"report fixture unexpectedly has live military signals")
+	terrain._refresh_player_field_army_markers()
+	var reported_figures:Node3D=terrain.close_army_figures.get("71",null)
+	_expect(reported_figures!=null,"reported army lost its close formation")
+	if reported_figures:
+		_expect(is_equal_approx(reported_figures.position.x,origin.x) and is_equal_approx(reported_figures.position.z,origin.z),"close figures expose live coordinates instead of the runner report")
+		_expect(reported_figures.represented_troops==600,"close figures ignore reported strength")
+		_expect(reported_figures.clip=="idle","a stationary report animates as a live moving army")
+	_expect(MilitaryCampaign.field_armies[0].position.x==origin.x+0.5,"visual report handling mutated the real army")
 	if not failures.is_empty():
 		for failure in failures: push_error(failure)
 		get_tree().quit(1)

@@ -11962,7 +11962,9 @@ func _refresh_player_field_army_markers()->void:
 		if stale_path and is_instance_valid(stale_path): stale_path.queue_free()
 		player_field_army_paths.erase(army_id)
 	_refresh_warfare_front_markers(presentation.get("fronts",[]))
-	_refresh_close_army_figures(state.get("armies",[]),selected_army_id)
+	# Ground representatives must agree with the same runner report and selection
+	# as the counter. Zooming in must not reveal an away army's live coordinates.
+	_refresh_close_army_figures(reported_armies,marker_selected_id)
 
 
 var landmark_markers:Dictionary={}
@@ -19361,8 +19363,8 @@ func _select_city(settlement_id:String)->void:
 	_refresh_discovered_resource_overlays()
 
 func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
-	# Strategic counters disappear below size 8. Ground figures use the same
-	# kilometre coordinates and building-detail scale as the city inspection view.
+	# Counters remain the single label/selection surface at every visible scale.
+	# Ground figures add bounded detail in the city inspection view.
 	var candidates:Array[Dictionary]=[]
 	if camera and camera.size<8.0:
 		for army:Dictionary in armies:
@@ -19390,9 +19392,6 @@ func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
 			figures=ArmyFigureFormationScript.new(); figures.name="CloseArmy_"+id
 			add_child(figures); close_army_figures[id]=figures
 			figures.scale=Vector3.ONE*SETTLEMENT_DETAIL_SCALE
-			var label:=Label3D.new(); label.name="Strength"; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-			label.fixed_size=true; label.font_size=12; label.outline_size=4; label.no_depth_test=true
-			label.scale=Vector3.ONE/SETTLEMENT_DETAIL_SCALE; figures.add_child(label)
 		var world:Vector3=candidate.world
 		# Multiple hosts can share one simulation location. Separate the bounded
 		# visual blocks without changing their authoritative army coordinates.
@@ -19427,9 +19426,6 @@ func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
 				var movement:=figures.create_tween()
 				movement.tween_property(figures,"position",world,0.35).set_trans(Tween.TRANS_SINE)
 				figures.set_meta("movement_tween",movement)
-		var strength:=figures.get_node("Strength") as Label3D
-		strength.position=Vector3(0,3.6,0)
-		strength.text="%s • %s\n%d representative figures" % [String(army.get("name","FIELD ARMY")),WarfareMapPresentation.compact_count(int(army.get("troops",0))),int(figures.figure_count)]
 	for id in close_army_figures.keys():
 		if keep.has(id): continue
 		var stale:Node3D=close_army_figures[id]
