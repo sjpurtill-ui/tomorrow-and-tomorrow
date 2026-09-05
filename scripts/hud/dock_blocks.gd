@@ -3,6 +3,7 @@ class_name DockBlocks
 ## items carry Callables ("on_press", "on_minus", "on_plus", "on_click",
 ## "on_submit"). Block shape reference: design handoff Dock Panel.dc.html.
 
+const Live:=preload("res://scripts/hud/live_value_binding.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const HealthHistoryChart:=preload("res://scripts/hud/health_history_chart.gd")
 const ExpeditionChart:=preload("res://scripts/hud/expedition_chart.gd")
@@ -165,7 +166,9 @@ static func _render_alloc(parent:VBoxContainer,block:Dictionary)->void:
 		name_label.tooltip_text=String(item.get("tip",""))
 		row.add_child(name_label)
 		if String(item.get("pct",""))!="":
-			row.add_child(Tokens.make_label(String(item.pct),10,Tokens.MUTED))
+			var pct_label:=Tokens.make_label(String(item.pct),10,Tokens.MUTED)
+			row.add_child(pct_label)
+			Live.attach(pct_label,"text",item.get("live_pct"))
 		var count_label:=Tokens.make_label(str(int(item.get("count",0))),13,Tokens.INK)
 		count_label.custom_minimum_size=Vector2(40,0)
 		count_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
@@ -270,6 +273,7 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 		row.add_theme_stylebox_override("panel",Tokens.row_style(item.get("accent",Color(0,0,0,0))))
 		row.tooltip_text=String(item.get("tip",""))
 		list.add_child(row)
+		Live.attach(row,"tooltip_text",item.get("live_tip"))
 		var inner:=HBoxContainer.new()
 		inner.add_theme_constant_override("separation",10)
 		row.add_child(inner)
@@ -290,18 +294,22 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 		var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.INK)
 		name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		text_column.add_child(name_label)
+		Live.attach(name_label,"text",item.get("live_name"))
 		if String(item.get("sub",""))!="":
 			var sub_label:=Tokens.make_label(String(item.sub),11,Tokens.MUTED)
 			sub_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 			text_column.add_child(sub_label)
+			Live.attach(sub_label,"text",item.get("live_sub"))
 		if String(item.get("detail",""))!="":
 			var detail_label:=Tokens.make_label(String(item.detail),11,Tokens.TEXT_SOFT)
 			detail_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			text_column.add_child(detail_label)
+			Live.attach(detail_label,"text",item.get("live_detail"))
 		if String(item.get("value",""))!="":
 			var value_label:=Tokens.make_label(String(item.value),12,item.get("value_color",Tokens.BODY_2))
 			value_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 			inner.add_child(value_label)
+			Live.attach(value_label,"text",item.get("live_value"))
 		var action:Variant=item.get("on_click")
 		if action is Callable:
 			row.mouse_filter=Control.MOUSE_FILTER_STOP
@@ -372,6 +380,8 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		button.add_theme_stylebox_override("disabled",Tokens.action_button_style(false))
 		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		grid.add_child(button)
+		Live.attach(button,"disabled",item.get("live_disabled"))
+		Live.attach(button,"tooltip_text",item.get("live_tip"))
 		var column:=VBoxContainer.new()
 		column.set_anchors_preset(Control.PRESET_FULL_RECT)
 		column.alignment=BoxContainer.ALIGNMENT_CENTER
@@ -383,14 +393,19 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		label.clip_text=true
 		label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		column.add_child(label)
+		Live.attach(label,"text",item.get("live_label"))
+		if item.has("live_disabled"):
+			Live.attach(label,"theme_override_colors/font_color",func()->Color: return Tokens.DISABLED if button.disabled else (Tokens.GOLD_BRIGHT if primary else Tokens.BODY))
 		if String(item.get("sub",""))!="":
 			var sub_label:=Tokens.make_label(String(item.sub),10,Tokens.MUTED)
 			sub_label.clip_text=true
 			sub_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			column.add_child(sub_label)
+			Live.attach(sub_label,"text",item.get("live_sub"))
 		var action:Variant=item.get("on_press")
-		if action is Callable and not disabled:
+		if action is Callable:
 			button.pressed.connect(func()->void:
+				if button.disabled: return
 				(action as Callable).call()
 				_request_rebuild(button))
 
@@ -595,6 +610,7 @@ static func _render_text(parent:VBoxContainer,block:Dictionary)->void:
 	var body:=Tokens.make_label(String(block.get("text","")),12,Tokens.TEXT_SOFT)
 	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(body)
+	Live.attach(body,"text",block.get("live_text"))
 
 
 static func _render_order(parent:VBoxContainer,block:Dictionary)->void:

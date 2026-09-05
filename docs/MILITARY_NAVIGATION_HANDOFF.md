@@ -1,0 +1,11 @@
+# Army navigation and live recruitment controls
+
+Base98f6b87. Successful deployment closes the dock, selects the real new army at home and focuses a readable18km map view with pending zoom cancelled. Own reported markers no longer disappear because a cosmetic offset lies over unsurveyed ground. Away armies still use returned runner positions; terrain knowledge is unchanged. Recruit & Deploy exposes Find your armies; roster quantities say soldiers.
+
+Training rows show estimated calendar days plus effective instruction progress and equipment/capacity bottlenecks. Shared reserve/build counts, personnel KPIs, training progress, deploy availability and command skills update in place while hovered. Deployment checks use the same read-only availability routine as the actual transaction. New training orders retain start day; old orders report unknown elapsed time. Training rates and population/equipment transfer rules are unchanged.
+
+Validation:49 cases (10 training accounting,39 UI) pass,0 errors/failures/orphans. Actual four-tab/deployment probe passes including stable button identity across disabled/enabled transitions, cancelling world zoom, visible own marker, report-only distant focus, exact122 total/100 deployed/22reserve and save/load. Muted hidden GPU capture visibly shows selected named100-soldier army; probe exited. Earlier probe shutdown sometimes reported2 ObjectDB instances and1resource; no universal clean shutdown claim.
+
+Save investigation: preserved current11:15 September5 campaign evidence outside source. It already stores default Inquiry weights, empty targets, no field armies, and directed Research for SeanTown. Load and full terrain startup retain those saved values. Separate-process settings_roundtrip_probe passes deliberately changed domain weights, completed finding, directed Research, second city Auto, selected settlement, labor mode and API preference. It uses its own disposable slot. Original reported reset is not reproduced or claimed fixed; no prior user values guessed, no live save overwritten. Deployment after that save cannot be inferred from its empty roster.
+
+No incremental player restart. Included in next coherent release checklist; integration does not mean already loaded in current80a2fc4 player.
