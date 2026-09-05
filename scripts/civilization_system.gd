@@ -2961,7 +2961,7 @@ func _advance_strategic_regions(civ:Dictionary,population_factor:float)->Array[D
 	var relation:Dictionary=civ.get("player_relation",{})
 	for region_variant in civ.get("strategic_regions",[]):
 		var region:Dictionary=(region_variant as Dictionary).duplicate(true)
-		region["population"]=maxf(0.0001,float(region.get("population",0.0001))*population_factor)
+		region["population"]=maxf(0.0,float(region.get("population",0.0))*population_factor)
 		var controller:=String(region.get("controller",String(civ.id)))
 		if controller=="player":
 			region["occupation_turns"]=int(region.get("occupation_turns",0))+1
@@ -3000,7 +3000,7 @@ func _advance_strategic_regions(civ:Dictionary,population_factor:float)->Array[D
 func _scale_strategic_region_populations(civ:Dictionary,population_factor:float)->Dictionary:
 	var regions:Array=(civ.get("strategic_regions",[]) as Array).duplicate(true)
 	for index in regions.size():
-		regions[index]["population"]=maxf(0.0001,float(regions[index].get("population",0.0001))*clampf(population_factor,0.0,1.0))
+		regions[index]["population"]=maxf(0.0,float(regions[index].get("population",0.0))*clampf(population_factor,0.0,1.0))
 	civ["strategic_regions"]=regions
 	return civ
 
@@ -3452,6 +3452,41 @@ func set_occupation_policy(civ_id:String,region_id:String,order:String)->Diction
 	civilizations[index]=civ
 	_record_world_event("Occupation administration",String(region.name)+": "+String(result.message),"war",int(GameState.elapsed_days))
 	return result
+
+func occupation_resident_order(civ_id:String,region_id:String,order:String,count:int=0)->Dictionary:
+	var index:=_civilization_index(civ_id)
+	if index<0:return {"error":"Unknown region owner."}
+	var civ:Dictionary=civilizations[index]
+	var position:=_region_index(civ,region_id)
+	if position<0 or String(civ.strategic_regions[position].controller)!="player":return {"error":"Select a region under your occupation."}
+	var region:Dictionary=civ.strategic_regions[position]
+	if order=="restore_self_rule":
+		var withdrawal:Dictionary={}
+		if not MilitaryCampaign.occupation_force_for_region(civ_id,region_id).is_empty():
+			withdrawal=MilitaryCampaign.evacuate_occupation(civ_id,region_id)
+			if withdrawal.has("error"):return withdrawal
+		var restored:=abandon_occupied_region(civ_id,region_id)
+		if restored.has("error"):return restored
+		return {"ok":true,"message":"Local control returned to the original polity. The occupation force is returning physically; prior damage and grievance remain."}
+	if order!="kill_residents" or count<1:return {"error":"Choose a valid resident order and headcount."}
+	if MilitaryCampaign.occupation_force_for_region(civ_id,region_id).is_empty():return {"error":"No occupation force controls this location."}
+	if count>floori(float(region.population)):return {"error":"The requested count exceeds the residents here."}
+	var deaths:=_apply_rival_civilian_deaths(civ,region_id,count)
+	civ=deaths.civilization
+	region=civ.strategic_regions[position]
+	var governance:=OCCUPATION_GOVERNANCE.state(region)
+	governance.grievance=1.0;governance.trust=0.0;governance.legitimacy=0.0
+	governance.welfare=maxf(0,float(governance.welfare)-.25)
+	governance["mass_killing_deaths"]=int(governance.get("mass_killing_deaths",0))+int(deaths.dead)
+	region.governance=governance;region.resistance=clampf(float(region.resistance)+.35,0,1)
+	civ.strategic_regions[position]=region
+	civ.military_population=minf(float(civ.military_population),_working_age_population(civ.cohorts)*.55)
+	civ.player_relation.opinion=-1.0;civ.player_relation.border_tension=1.0
+	civilizations[index]=civ
+	var message:="%d residents were killed in %s. These are deaths, not transfers. Survivors retain lasting grievance; relations with their polity have collapsed." % [int(deaths.dead),String(region.name)]
+	_record_world_event("Mass killing of residents",message,"war",int(GameState.elapsed_days))
+	return {"ok":true,"dead":int(deaths.dead),"message":message}
+
 
 func occupation_governance_snapshot(civ_id:String,region_id:String)->Dictionary:
 	var region:=region_snapshot(civ_id,region_id)
@@ -4320,7 +4355,7 @@ func _rebuild_competition(advance_outcome:bool=false,evaluation_day:int=-1)->voi
 		dominance_turns=int(contender_dominance_turns.get("player",0))
 		var effects:=player_effects()
 		var collapsing:=GameState.population_health<0.12 and GameState.food_security<0.12 and float(GameState.simulation_metrics.get("legitimacy",0.62))<0.12 and float(effects.hostile_pressure)>0.35
-		collapse_turns=collapse_turns+1 if collapsing and MilitaryCampaign.recovery.data.occupied.is_empty() and MilitaryCampaign.recovery.data.remnant.is_empty() else 0
+		collapse_turns=collapse_turns+1 if collapsing and not MilitaryCampaign.recovery.has_active_occupation() and MilitaryCampaign.recovery.data.remnant.is_empty() else 0
 		var winning_id:=""
 		for contender_id in contender_dominance_turns:
 			if int(contender_dominance_turns[contender_id])>=12: winning_id=String(contender_id); break

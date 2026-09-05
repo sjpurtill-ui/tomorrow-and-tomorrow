@@ -95,6 +95,44 @@ func test_invalid_rebuilding_site_does_not_create_a_city()->void:
 	prepare_success();model().capture(civ_id());model().advance(3)
 	var count:=GameState.player_settlements.size()
 	model().surface_assessor=func(_p:Vector3)->Dictionary:return {"valid":false,"reason":"River channel"}
-	assert_bool(model().seek_site("east").has("error")).is_true()
+	assert_bool(model().seek_site("east").has("ok")).is_true()
+	model().advance(7)
 	assert_int(GameState.player_settlements.size()).is_equal(count)
 	assert_str(String(model().data.remnant.phase)).is_equal("camped")
+
+func test_siege_visual_poll_does_not_allocate_military_ids()->void:
+	var before:=MilitaryCampaign.next_formation_id
+	for i in 20:MilitaryCampaign.siege_visual_snapshot()
+	assert_int(MilitaryCampaign.next_formation_id).is_equal(before)
+func test_liberation_ends_occupation_continuity_and_rejects_new_orders()->void:
+	model().capture(civ_id())
+	assert_bool(model().has_active_occupation()).is_true()
+	var entry:Dictionary=model().data.occupied[0]
+	entry.liberated=true
+	assert_bool(model().has_active_occupation()).is_false()
+	assert_bool(model().queue_resistance(String(entry.city_id),"protect").has("error")).is_true()
+
+func test_independence_can_succeed_and_releases_captives_without_new_troops()->void:
+	MilitaryCampaign.aggregate_recruits=5
+	model().capture(civ_id())
+	var entry:Dictionary=model().data.occupied[0]
+	entry.region.governance.support=1.0;entry.region.governance.local_institutions=1.0
+	var chosen:=0
+	for day in range(30,200):
+		var rng:=RandomNumberGenerator.new();rng.seed=GameState.world_seed^day*8191^hash(String(entry.city_id))
+		if rng.randf()<.65:chosen=day;break
+	entry.order={"kind":"revolt"}
+	var people:=GameState.population_total
+	model()._resolve_resistance(entry,chosen)
+	assert_bool(bool(entry.get("liberated",false))).is_true()
+	assert_int(GameState.population_total).is_equal(people)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(0)
+	assert_int(model().held_military()).is_equal(0)
+	assert_bool(model().home_unavailable()).is_false()
+func test_malformed_survivor_state_rejected()->void:
+	prepare_success()
+	var bad:Dictionary=model().data.duplicate(true)
+	bad.remnant.route=[{"x":1}]
+	assert_array(preload("res://scripts/siege_recovery.gd").validate(bad)).is_not_empty()
+	bad=model().data.duplicate(true);bad.remnant.erase("functions")
+	assert_array(preload("res://scripts/siege_recovery.gd").validate(bad)).is_not_empty()

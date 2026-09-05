@@ -68,3 +68,25 @@ func test_no_room_at_arrival_waits_and_consumes_finite_food()->void:
 	assert_bool(bool(model().data.transfers[0].arrived)).is_true()
 	assert_float(GameState.population_exact).is_equal(before)
 	assert_float(float(model().data.transfers[0].food)).is_equal(0.0)
+
+func test_captured_destination_does_not_absorb_arrivals()->void:
+	assert_bool(model().depart(civ_id(),region_id(),5,"citizen").has("ok")).is_true()
+	var before:=GameState.population_exact
+	SettlementModel.settlement_record(SettlementModel._primary_settlement_id()).occupied_by=civ_id()
+	model().advance(12)
+	assert_float(GameState.population_exact).is_equal(before)
+	assert_int(model().data.transfers.size()).is_equal(1)
+func test_mass_killing_removes_exact_residents_and_retains_harm()->void:
+	var before:=total()
+	var region_before:=float(CivilizationSystem.civilizations[0].strategic_regions[0].population)
+	var result:=CivilizationSystem.occupation_resident_order(civ_id(),region_id(),"kill_residents",2)
+	assert_int(int(result.get("dead",0))).is_equal(2)
+	assert_float(total()).is_equal_approx(before-2.0,.0001)
+	var region:Dictionary=CivilizationSystem.region_snapshot(civ_id(),region_id())
+	assert_float(float(region.population)).is_equal_approx(region_before-2.0,.0001)
+	assert_float(float(region.governance.grievance)).is_equal(1.0)
+func test_malformed_transfer_route_is_rejected()->void:
+	assert_bool(model().depart(civ_id(),region_id(),5,"citizen").has("ok")).is_true()
+	var bad:Dictionary=model().data.duplicate(true)
+	bad.transfers[0].route=[{"x":1}]
+	assert_array(preload("res://scripts/occupation_transfers.gd").validate(bad)).is_not_empty()

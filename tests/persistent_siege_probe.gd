@@ -40,6 +40,20 @@ func _ready()->void:
 	assert(MilitaryCampaign.active_engagement.is_empty())
 	assert(is_instance_valid(persistent))
 	assert(not persistent.last_snapshot.active)
+	if DisplayServer.get_name()!="headless":
+		for population in [200,1000000000]:
+			var sample:Dictionary=persistent.last_snapshot.duplicate(true);sample.population=population
+			persistent.set_process(false)
+			persistent.scene.configure(sample)
+			var frames:Array[float]=[]
+			var previous:=Time.get_ticks_usec()
+			for frame in 150:
+				await get_tree().process_frame
+				var now:=Time.get_ticks_usec()
+				if frame>=30:frames.append(float(now-previous)/1000.0)
+				previous=now
+			frames.sort()
+			print("SIEGE_STEADY population=",population," p50_ms=",frames[60]," p95_ms=",frames[114]," static_memory=",OS.get_static_memory_usage()," figures=",persistent.scene.figure_count," buildings=",persistent.scene.building_count)
 	persistent.queue_free();await get_tree().process_frame
 	print("PERSISTENT_SIEGE_PASS open/unwalled/earthworks/palisade/stone, two sizes, camera, reopen")
 	get_tree().quit()

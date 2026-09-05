@@ -12,6 +12,7 @@ func reset()->void:
 func preview(civ_id:String,region_id:String,count:int,status:String)->Dictionary:
 	if not STATUSES.has(status): return {"error":"Choose citizenship, slavery or coerced penal status."}
 	if SettlementModel._primary_settlement_id().is_empty(): return {"error":"Establish a home settlement before moving residents there."}
+	if MilitaryCampaign.recovery.home_unavailable(): return {"error":"The destination is occupied."}
 	if count<1: return {"error":"Choose at least one resident."}
 	if data.transfers.size()>=MAX_TRANSFERS: return {"error":"All eight transport groups are already traveling."}
 	if data.groups.size()+data.transfers.size()>=MAX_GROUPS: return {"error":"The community-record capacity is full."}
@@ -108,7 +109,7 @@ func _day(day:int)->void:
 
 func _housing_room(city_id:String)->int:
 	var city:=SettlementModel.settlement_record(city_id)
-	if city.is_empty(): return 0
+	if city.is_empty() or not String(city.get("occupied_by","")).is_empty(): return 0
 	var housing:int=SettlementModel.with_city_resources(city_id,func()->int:return GameState.housing_capacity)
 	return maxi(0,housing-ceili(SettlementModel._settlement_population(city)))
 
@@ -174,7 +175,9 @@ static func validate(payload:Dictionary)->Array[String]:
 		ids[transfer_id]=true;greatest_id=maxi(greatest_id,transfer_id)
 		if String(transfer.get("destination","")).is_empty() or not transfer.get("cohorts",{}) is Dictionary: errors.append("Invalid transfer destination or cohorts.")
 		if not STATUSES.has(String(transfer.get("status",""))) or int(transfer.get("people",-1))<0: errors.append("Invalid traveling population or status.")
-		if not transfer.get("route",[]) is Array or transfer.get("route",[]).size()>512: errors.append("Invalid transfer route.")
+		if not preload("res://scripts/siege_recovery.gd").valid_route(transfer.get("route")): errors.append("Invalid transfer route.")
+		if not transfer.has_all(["depart_day","position","origin_name","origin_region_name","mortality_remainder","source","region","arrived"]): errors.append("Incomplete traveling cohort.")
+		if not preload("res://scripts/siege_recovery.gd").valid_point(transfer.get("position")): errors.append("Invalid transfer position.")
 		for field in ["food","distance","traveled"]:
 			var value:=float(transfer.get(field,NAN))
 			if not is_finite(value) or value<0: errors.append("Invalid transfer quantity.")

@@ -866,6 +866,7 @@ func _field_army_index(army_id:int)->int:
 
 
 func _movement_destination(destination_id:String)->Dictionary:
+	if destination_id=="player_home" and recovery.home_unavailable():return {}
 	if CivilizationSystem==null or not CivilizationSystem.has_method("military_movement_destinations"): return {}
 	for destination_variant in CivilizationSystem.military_movement_destinations():
 		var destination:Dictionary=destination_variant
@@ -1084,6 +1085,7 @@ func return_field_army(army_id:int)->Dictionary:
 
 
 func disband_field_army(army_id:int)->Dictionary:
+	if recovery.home_unavailable():return {"error":"The home settlement is occupied. Reach a free settlement before dissolving the army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
 	var army:Dictionary=field_armies[index]
@@ -1786,15 +1788,15 @@ func _engagement_enemy_side(engagement:Dictionary)->String:
 	return "defender" if _engagement_home_side(engagement)=="attacker" else "attacker"
 
 
-func _home_defense_force()->Dictionary:
+func _home_defense_force(allocate_id:bool=true)->Dictionary:
 	var force:=home_army.duplicate(true)
 	force.readiness=float(force.get("readiness",.5))*recovery.defense_factor()
 	var trained:=maxi(0,int(force.get("troops",0)))
 	var militia:=maxi(0,_home_garrison_target()-trained)
 	if militia<=0: return force
 	var formations:Array=(force.get("formations",[]) as Array).duplicate(true)
-	var formation_id:=next_formation_id
-	next_formation_id+=1
+	var formation_id:=next_formation_id if allocate_id else -1
+	if allocate_id:next_formation_id+=1
 	formations.append({"id":formation_id,"unit":"levy","weapon":"improvised","count":militia,"authorized_count":militia,"equipment":0,"equipment_required":militia,"ammunition":0,"ammunition_required":0,"training":0.20,"experience":0.0,"personnel_condition":_trainee_condition(),"emergency_militia":true})
 	var assembled:Dictionary=simulator.create_formation_force(_home_army_name(),formations,float(force.get("morale",_campaign_morale())),maxf(0.08,float(force.get("readiness",0.18))))
 	assembled["commander"]=(force.get("commander",_marshal_commander()) as Dictionary).duplicate(true)
@@ -4212,6 +4214,7 @@ func begin_siege()->Dictionary:
 		position=Vector2(float(point.x),float(point.z))
 	active_threat["target_position"]={"x":position.x,"z":position.y}
 	active_siege={"id":"siege_%d_%d_%d_%d" % [GameState.world_seed,day,army_id,threats_resolved],"active":true,"mode":"offensive" if offensive else "defensive","attacker_id":"player" if offensive else rival,"defender_id":rival if offensive else "player","start_day":day,"last_day":day,"days":0,"target_position":{"x":position.x,"z":position.y},"region_id":region_id,"army_id":army_id,"threat":active_threat.duplicate(true),"pressure":0.0,"fatigue":0.0,"blockade":0.0,"hardship":0.0,"starving_days":0,"relief":[]}
+	if not offensive:active_siege.home_city={"id":SettlementModel._primary_settlement_id(),"name":GameState.settlement_name,"population":SettlementModel.primary_population_exact(),"defense_stage":int(settlement_defense.get("stage",0))}
 	active_threat.clear()
 	if offensive: field_armies[index]["status"]="besieging"
 	if not offensive and ForeignDiplomacy.has_method("notify_defensive_siege"): ForeignDiplomacy.call("notify_defensive_siege",rival,"player",String(active_siege.id),day)
@@ -4424,13 +4427,18 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 		var ruin:Dictionary=fields.get("damage",{})
 		if not ruin.is_empty():damage=(float(ruin.low)+float(ruin.high))*.5
 		description="Representative layout from dated reports. Building materials and exact interior layout are unconfirmed."
+	var archived_home:Dictionary=operation.get("home_city",{})
+	var same_home:=String(archived_home.get("id",SettlementModel._primary_settlement_id()))==SettlementModel._primary_settlement_id() and not recovery.home_unavailable()
+	if not offensive and not same_home:
+		population=float(archived_home.get("population",population));defense_stage=int(archived_home.get("defense_stage",defense_stage))
+		description="Last observed city layout at the siege. Occupation and recovery continue through Survival & Independence."
 	var own_force:Dictionary={}
 	if offensive:
 		var index:=_field_army_index(int(operation.get("army_id",0)))
 		if index>=0:own_force=field_armies[index].duplicate(true)
-	else:own_force=_home_defense_force()
+	elif same_home:own_force=_home_defense_force(false)
 	var battle:Dictionary={}
 	var seed_value:=int((operation.get("threat",{}) as Dictionary).get("seed",-1))
 	if not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value:battle=engagement_snapshot()
 	elif not battle_history.is_empty() and int(battle_history[0].get("seed",-2))==seed_value:battle=battle_history[0].duplicate(true)
-	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(GameState.settlement_name if GameState.settlement_name!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not battle.is_empty() and not active_engagement.is_empty(),"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
+	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",GameState.settlement_name)) if String(archived_home.get("name",GameState.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not battle.is_empty() and not active_engagement.is_empty(),"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
