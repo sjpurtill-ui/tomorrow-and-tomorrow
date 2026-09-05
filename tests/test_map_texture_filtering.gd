@@ -22,3 +22,13 @@ func test_aerial_materials_have_real_mip_chains()->void:
 		if pixels==null: continue
 		assert_bool(pixels.has_mipmaps()).is_true()
 		assert_int(pixels.get_mipmap_count()).is_greater(0)
+
+
+func test_both_roof_eras_actually_sample_their_mip_chains()->void:
+	var renderer:Node3D=auto_free(preload("res://scripts/local_terrain.gd").new())
+	var material:ShaderMaterial=renderer._settlement_fabric_material(3,0.62)
+	for sampler in ["roof_material_atlas","late_roof_material_atlas"]:
+		assert_str(material.shader.code).contains("uniform sampler2D %s : source_color, filter_linear_mipmap, repeat_disable;" % sampler)
+		var texture:=material.get_shader_parameter(sampler) as Texture2D
+		assert_object(texture).is_not_null()
+		if texture: assert_bool(texture.get_image().has_mipmaps()).is_true()
