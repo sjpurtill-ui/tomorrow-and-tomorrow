@@ -2,6 +2,7 @@ extends Node
 
 signal army_changed(army: Dictionary)
 signal battle_resolved(result: Dictionary)
+signal battle_started(engagement: Dictionary)
 signal aftermath_required(aftermath: Dictionary)
 signal threat_changed(threat: Dictionary)
 signal settlement_defense_changed(defense: Dictionary)
@@ -961,10 +962,12 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
+	if int(field_armies[index].get("troops",0))<=0:return {"error":"This force has no active soldiers. Its remaining recovery and occupation records are available in Military."}
 	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
 	var destination:=_movement_destination(destination_id)
 	if destination.is_empty(): return {"error":"That destination is unknown. Only returned exploration and contact reports can support an army movement order."}
 	var army:Dictionary=field_armies[index]
+	army.erase("city_operation")
 	var current_position:Dictionary=army.get("position",{})
 	var target_position:Dictionary=destination.get("position",{})
 	var start:=Vector2(float(current_position.get("x",0.0)),float(current_position.get("z",0.0)))
@@ -996,6 +999,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	## this guard re-checks so a stray order can never march into the unknown.
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
+	if int(field_armies[index].get("troops",0))<=0:return {"error":"This force has no active soldiers. Its remaining recovery and occupation records are available in Military."}
 	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
 	var target:=Vector2(x,z)
 	if CivilizationSystem!=null:
@@ -1004,6 +1008,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 		if CivilizationSystem.has_method("_scout_land_at") and not CivilizationSystem._scout_land_at(target):
 			return {"error":"That point is open water. Armies need a charted land destination."}
 	var army:Dictionary=field_armies[index]
+	army.erase("city_operation")
 	var current_position:Dictionary=army.get("position",{})
 	var start:=Vector2(float(current_position.get("x",0.0)),float(current_position.get("z",0.0)))
 	var distance:=start.distance_to(target)
@@ -1454,6 +1459,11 @@ func _process_field_army_movement_day()->void:
 				# Arrival is itself only known at home once a runner delivers it.
 				army=_dispatch_army_runner(army,int(GameState.elapsed_days))
 		field_armies[index]=army
+		if remaining<=0.001 and army.has("city_operation"):
+			var planned:Dictionary=army.city_operation.duplicate(true)
+			field_armies[index].erase("city_operation")
+			var result:=order_city_operation(int(army.army_id),String(planned.civ_id),String(planned.region_id),bool(planned.besiege))
+			GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"City order blocked" if result.has("error") else "City engagement begins","description":String(result.get("error","The army reached its ordered city and began hostilities.")),"domain":"security","severity":"warning"})
 		if remaining<=0.001 and not intercept_target_id.is_empty():
 			var contact_result:=launch_map_engagement(int(army.get("army_id",0)),intercept_target_id)
 			if contact_result.has("error"):
@@ -1870,11 +1880,13 @@ func begin_threat_engagement()->Dictionary:
 	var battle_ground:=float(threat.get("terrain_defense",1.0)) if offensive or defending_occupation else _terrain_defense()
 	active_engagement={"threat":threat,"campaign_mode":String(threat.get("campaign_mode","defensive")),"home_side":"attacker" if offensive else "defender","home_force_kind":"occupation" if defending_occupation else ("field_army" if field_army_index>=0 else "field"),"home_force_id":field_army_id if field_army_index>=0 else 0,"home_force_civ_id":target_civ_id if defending_occupation else "","home_force_region_id":target_region_id if defending_occupation else "","attacker":attacker,"defender":defender,"attacker_initial":int(attacker.troops),"defender_initial":int(defender.troops),"round":0,"rounds":[],"seed":int(threat.seed),"terrain_defense":battle_ground,"status":"active","last_order":"hold"}
 	active_threat.clear(); threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
+	battle_started.emit(active_engagement.duplicate(true))
 	return engagement_snapshot()
 
 
 func advance_engagement(order:String="hold")->Dictionary:
 	if active_engagement.is_empty(): return {"error":"No campaign battle is active."}
+	active_engagement.erase("awaiting_player_view")
 	var command:=order.to_lower()
 	if command not in ["hold","push","retreat"]: return {"error":"Unknown battle order: %s" % order}
 	if command=="retreat": return _finish_active_engagement(true,{})
@@ -2062,7 +2074,7 @@ func has_active_operation_for_civ(civ_id:String)->bool:
 	return false
 
 
-func offensive_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
+func offensive_campaign_availability(civ_id:String,region_id:String="",army_id:int=0)->Dictionary:
 	if not active_siege.is_empty(): return {"error":"Resolve the current siege before starting another operation."}
 	if not active_engagement.is_empty(): return {"error":"Finish the active campaign engagement first."}
 	if not active_threat.is_empty(): return {"error":"Resolve the approaching campaign before launching another."}
@@ -2072,7 +2084,7 @@ func offensive_campaign_availability(civ_id:String,region_id:String="")->Diction
 	var maneuver_army:Dictionary={}
 	for force_variant in field_armies:
 		var force:Dictionary=force_variant
-		if String(force.get("status","stationed"))=="stationed" and String(force.get("location_id",""))==region_id and int(force.get("troops",0))>0:
+		if (army_id==0 or int(force.get("army_id",0))==army_id) and String(force.get("status","stationed"))=="stationed" and String(force.get("location_id",""))==region_id and int(force.get("troops",0))>0:
 			maneuver_army=force; break
 	if maneuver_army.is_empty(): return {"error":"Move a field army to the selected region before launching this campaign. Army movement is no longer instantaneous."}
 	var committed_strength:=int(maneuver_army.get("troops",0))
@@ -2082,8 +2094,50 @@ func offensive_campaign_availability(civ_id:String,region_id:String="")->Diction
 	return {"ok":true,"incident":incident,"field_army":maneuver_army.duplicate(true)}
 
 
-func launch_offensive(civ_id:String,region_id:String="")->Dictionary:
-	var availability:=offensive_campaign_availability(civ_id,region_id)
+func city_force_summary(region_id:String)->String:
+	var garrison:=0;var scattered:=0
+	for force:Dictionary in occupation_forces:
+		if String(force.get("region_id",""))==region_id:garrison+=int(force.get("troops",0))
+	for force:Dictionary in field_armies:
+		if String(force.get("location_id",""))==region_id:scattered+=int(force.get("scattered_pool",0))
+	var text:="%d soldiers in your garrison · %d scattered personnel." % [garrison,scattered]
+	for battle:Dictionary in battle_history:
+		if String(battle.get("target_region_id",""))!=region_id:continue
+		var side:Dictionary=battle.get(String(battle.get("home_side","attacker")),{})
+		text="Battle day %d: %d killed, %d wounded, %d scattered. " % [int(battle.get("day",0)),int(side.get("dead",0)),int(side.get("wounded_pool",0)),int(side.get("scattered_pool",0))]+text
+		break
+	return text
+
+func city_operation_quote(army_id:int,civ_id:String,region_id:String)->Dictionary:
+	if not active_engagement.is_empty() or not active_siege.is_empty() or not active_threat.is_empty() or not pending_aftermath.is_empty():return {"error":"Resolve the current battle, siege or aftermath first."}
+	var index:=_field_army_index(army_id)
+	if index<0 or int(field_armies[index].get("troops",0))<=0:return {"error":"No active soldiers in the selected army. Choose another army."}
+	var report:Dictionary=CivilizationSystem.city_intelligence.known("player",region_id)
+	if report.is_empty() or _movement_destination(region_id).is_empty():return {"error":"No returned report identifies this destination."}
+	if civ_id=="" or civ_id=="player":return {"error":"Identify the foreign settlement before ordering an attack."}
+	var point:Dictionary=field_armies[index].get("position",{})
+	if not point.has_all(["x","z"]):return {"error":"The army has no valid physical position."}
+	var distance:=Vector2(float(point.x),float(point.z)).distance_to(Vector2(float(report.position.x),float(report.position.z)))
+	return {"ok":true,"at_target":distance<=0.5,"distance_km":distance,"days":ceili(distance/maxf(.1,_field_army_speed(field_armies[index])))}
+
+func order_city_operation(army_id:int,civ_id:String,region_id:String,besiege:bool=false)->Dictionary:
+	var quote:=city_operation_quote(army_id,civ_id,region_id)
+	if quote.has("error"):return quote
+	var index:=_field_army_index(army_id)
+	if not bool(quote.at_target):
+		var result:=move_field_army(army_id,region_id)
+		if result.has("error"):return result
+		field_armies[index]["city_operation"]={"civ_id":civ_id,"region_id":region_id,"besiege":besiege}
+		return {"ok":true,"queued":true,"message":"%s: marching %.1f km, about %d days, then %s. War starts on hostile contact, not departure." % [String(field_armies[index].name),float(quote.distance_km),int(quote.days),"besieging the city" if besiege else "attacking the city"]}
+	var old_location:=String(field_armies[index].get("location_id",""));var old_status:=String(field_armies[index].get("status","stationed"))
+	field_armies[index]["location_id"]=region_id;field_armies[index]["status"]="stationed";field_armies[index].erase("city_operation")
+	var result:=start_offensive_siege(civ_id,region_id,army_id) if besiege else launch_offensive(civ_id,region_id,army_id)
+	if result.has("error"):
+		field_armies[index]["location_id"]=old_location;field_armies[index]["status"]=old_status
+	return result
+
+func launch_offensive(civ_id:String,region_id:String="",army_id:int=0)->Dictionary:
+	var availability:=offensive_campaign_availability(civ_id,region_id,army_id)
 	if availability.has("error"): return availability
 	var incident:Dictionary=availability.incident
 	_create_civilization_threat(incident,"offensive")
@@ -2126,6 +2180,7 @@ func _resolve_threat_without_battle(title:String,description:String)->void:
 func _process_threat_day()->void:
 	if not active_siege.is_empty(): return
 	if not active_engagement.is_empty():
+		if bool(active_engagement.get("awaiting_player_view",false)):return
 		advance_engagement("hold")
 		return
 	if not active_threat.is_empty():
@@ -2135,7 +2190,7 @@ func _process_threat_day()->void:
 				var investment:=begin_siege()
 				if bool(investment.get("ok",false)): return
 			respond_to_threat("defend" if int(settlement_defense_snapshot().get("garrison_personnel",0))>0 or int(occupation_defense.get("troops",0))>0 else "withdraw")
-			while not active_engagement.is_empty(): advance_engagement("hold")
+			while not active_engagement.is_empty() and not bool(active_engagement.get("awaiting_player_view",false)): advance_engagement("hold")
 		return
 	if not GameState.settlement_site_committed or int(GameState.elapsed_days)<90 or not pending_aftermath.is_empty(): return
 	var incident:=CivilizationSystem.consume_player_incident()
@@ -4242,14 +4297,14 @@ func _demobilize_disabled(requested:int)->int:
 	return amount
 
 
-func offensive_siege_availability(civ_id:String,region_id:String)->Dictionary:
-	var available:=offensive_campaign_availability(civ_id,region_id)
+func offensive_siege_availability(civ_id:String,region_id:String,army_id:int=0)->Dictionary:
+	var available:=offensive_campaign_availability(civ_id,region_id,army_id)
 	if available.has("error"): return available
 	if bool(available.incident.get("liberation_campaign",false)): return {"error":"Sieges currently require an opponent-owned settlement; use the existing liberation campaign for occupied foreign regions."}
 	return available
 
-func start_offensive_siege(civ_id:String,region_id:String)->Dictionary:
-	var available:=offensive_siege_availability(civ_id,region_id)
+func start_offensive_siege(civ_id:String,region_id:String,army_id:int=0)->Dictionary:
+	var available:=offensive_siege_availability(civ_id,region_id,army_id)
 	if available.has("error"): return available
 	_create_civilization_threat(available.incident,"offensive")
 	var result:=begin_siege()

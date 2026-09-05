@@ -34,7 +34,7 @@ func tab(sub:int)->Dictionary:
 	var ledger:=MilitaryCampaign.personnel_ledger()
 	var kpis:Array=[
 		{"label":"TOTAL PERSONNEL","value":str(ledger.total),"live_value":func()->String: return str(MilitaryCampaign.personnel_ledger().total),"live_delta":func()->String: return "%d training" % int(MilitaryCampaign.personnel_ledger().training),"delta":"%d training" % int(ledger.training),"delta_color":Tokens.MUTED,"accent":Tokens.RED,"tip":"Everyone in military service, including reserves, trainees, deployed soldiers, and recovery pools. Deployment does not change this total."},
-		{"label":"FIELD SOLDIERS","value":str(ledger.field),"live_value":func()->String: return str(MilitaryCampaign.personnel_ledger().field),"live_delta":func()->String: return "%d armies" % MilitaryCampaign.field_armies.size(),"delta":"%d armies" % MilitaryCampaign.field_armies.size(),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Deployed maneuver armies vs command capacity"},
+		{"label":"FIELD SOLDIERS","value":str(ledger.field),"live_value":func()->String: return str(MilitaryCampaign.personnel_ledger().field),"live_delta":func()->String: return "%d active armies" % MilitaryCampaign.field_armies.filter(func(force:Dictionary)->bool:return int(force.get("troops",0))>0).size(),"delta":"%d active armies" % MilitaryCampaign.field_armies.filter(func(force:Dictionary)->bool:return int(force.get("troops",0))>0).size(),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Deployed maneuver armies vs command capacity"},
 		{"label":"READINESS","value":"%d%%" % roundi(organization*100.0),"live_value":func()->String: return "%d%%" % roundi(float(MilitaryCampaign.home_army.get("readiness",0))*100),"delta":"","accent":Tokens.AMBER,"tip":"Organization and condition of the home force"},
 		{"label":"UPKEEP","value":"%.1f" % upkeep,"live_value":func()->String: return "%.1f" % float(MilitaryCampaign.campaign_army_snapshot().get("provisions_required_today",0)),"delta":"rations/day","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Daily provision cost of everyone under arms"},
 	]
@@ -46,6 +46,9 @@ func tab(sub:int)->Dictionary:
 	return {"kpis":kpis,"brief":brief,"blocks":_formation_blocks(army)}
 
 func _command_brief()->Dictionary:
+	if not MilitaryCampaign.pending_aftermath.is_empty() and not MilitaryCampaign.battle_history.is_empty():
+		var battle:Dictionary=MilitaryCampaign.battle_history[0]
+		return {"tone":"warn","title":"Battle finished · review the aftermath","why":MilitaryCampaign.city_force_summary(String(battle.get("target_region_id",""))),"action_label":"REVIEW AFTERMATH","on_action":func():terrain._open_war_planning()}
 	if not MilitaryCampaign.threat_snapshot().is_empty() or not MilitaryCampaign.engagement_snapshot().is_empty() or not MilitaryCampaign.pending_aftermath.is_empty():
 		return {"tone":"danger","title":"A war decision awaits","why":"A threat, battle, or aftermath needs your order.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
 	if MilitaryCampaign.field_armies.is_empty() and int(MilitaryCampaign.campaign_army_snapshot().get("troops",0))<=0:
@@ -64,6 +67,7 @@ func _formation_blocks(army:Dictionary)->Array:
 	var army_items:Array=[]
 	for force_variant in (snapshot.get("armies",[]) as Array):
 		var force:Dictionary=force_variant
+		if int(force.get("troops",0))<=0:continue
 		var army_id:=int(force.get("army_id",0))
 		var at_home:=String(force.get("status","stationed"))=="stationed" and String(force.get("location_id",""))=="player_home"
 		var report:Dictionary=force.get("last_report",{})
@@ -100,6 +104,15 @@ func _formation_blocks(army:Dictionary)->Array:
 			"on_press":func()->void: MilitaryCampaign.disband_field_army(terrain.selected_army_id),
 			"tip":"Dissolve the selected army into the home force (only while stationed at home)"},
 		]})
+	var garrisons:Array=[]
+	for force:Dictionary in MilitaryCampaign.occupation_forces:
+		if int(force.get("troops",0))<=0:continue
+		var owner:=String(force.civ_id);var region:=String(force.region_id)
+		garrisons.append({"name":String(force.get("region_name","Occupied settlement")),"value":"%d soldiers" % int(force.troops),"sub":"Occupation garrison · click to manage","on_click":func():preload("res://scripts/hud/occupation_view.gd").open(owner,region)})
+	if not garrisons.is_empty():blocks.append({"type":"rows","heading":"YOUR GARRISONS","items":garrisons})
+	for force:Dictionary in MilitaryCampaign.field_armies:
+		if int(force.get("troops",0))>0:continue
+		blocks.append({"type":"text","heading":String(force.get("name","Former field force")),"text":"No active field soldiers. %d scattered, %d wounded, %d recorded killed. Recovery records are retained; occupation soldiers appear above." % [int(force.get("scattered_pool",0)),int(force.get("wounded_pool",0)),int(force.get("dead",0))]})
 	var formation_items:Array=[]
 	for formation_variant in MilitaryCampaign.grouped_home_formations(army):
 		var formation:Dictionary=formation_variant

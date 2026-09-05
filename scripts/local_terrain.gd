@@ -369,6 +369,8 @@ func _ready() -> void:
 		get_tree().root.set_meta("saved_campaign_resumed",true)
 		print("SAVED_CAMPAIGN_RESUMED: ",String(restored.message),"; settlement=",GameState.settlement_name,"; seed=",GameState.world_seed)
 	if not MilitaryCampaign.threat_changed.is_connected(_on_military_threat_attention): MilitaryCampaign.threat_changed.connect(_on_military_threat_attention)
+	if not MilitaryCampaign.battle_started.is_connected(_on_city_battle_started):MilitaryCampaign.battle_started.connect(_on_city_battle_started)
+	if not MilitaryCampaign.aftermath_required.is_connected(_on_city_aftermath):MilitaryCampaign.aftermath_required.connect(_on_city_aftermath)
 	if not MilitaryCampaign.battle_resolved.is_connected(_on_battle_attention): MilitaryCampaign.battle_resolved.connect(_on_battle_attention)
 	_restore_military_attention.call_deferred()
 	_trace_load("ready")
@@ -11337,7 +11339,18 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	_update_scale_bar()
 
 
+func _on_city_battle_started(_engagement:Dictionary)->void:
+	_set_game_speed(0)
+	MilitaryCampaign.active_engagement["awaiting_player_view"]=true
+	MilitaryCommandUI.call_deferred("_open_battle_graphics")
+func _on_city_aftermath(_aftermath:Dictionary)->void:
+	_set_game_speed(0)
+	_open_war_planning.call_deferred()
+
 func _restore_military_attention()->void:
+	if not MilitaryCampaign.pending_aftermath.is_empty():
+		_pause_for_military_attention("saved_aftermath","BATTLE AFTERMATH AWAITS","The last battle ended. Review surviving soldiers, occupation assignments and scattered personnel in Military before issuing another operation.")
+		return
 	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat)
 	elif not MilitaryCampaign.active_engagement.is_empty(): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.")
 
@@ -12190,6 +12203,9 @@ func _refresh_player_field_army_markers()->void:
 	var live_reports:=bool(state.get("live_reports",true))
 	for army_variant in (state.get("armies",[]) as Array):
 		var army:Dictionary=(army_variant as Dictionary).duplicate(true)
+		if int(army.get("troops",0))<=0:
+			if selected_army_id==int(army.get("army_id",0)):_clear_army_selection()
+			continue
 		var at_home:=String(army.get("status","stationed"))=="stationed" and String(army.get("location_id",""))=="player_home"
 		var report:Dictionary=army.get("last_report",{})
 		if not live_reports and not at_home and not report.is_empty():
@@ -12234,6 +12250,12 @@ func _refresh_player_field_army_markers()->void:
 	_refresh_warfare_front_markers(presentation.get("fronts",[]))
 	# Ground representatives must agree with the same runner report and selection
 	# as the counter. Zooming in must not reveal an away army's live coordinates.
+	for occupation:Dictionary in MilitaryCampaign.occupation_forces:
+		if int(occupation.get("troops",0))<=0:continue
+		var report:Dictionary=CivilizationSystem.city_intelligence.known("player",String(occupation.get("region_id","")))
+		if report.is_empty():continue
+		var display:=occupation.duplicate(true);display["army_id"]=-1-absi(String(occupation.region_id).hash());display["position"]=report.position;display["status"]="stationed";display["garrison_visual"]=true
+		reported_armies.append(display)
 	_refresh_close_army_figures(reported_armies,marker_selected_id)
 
 
@@ -12824,6 +12846,15 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 			label.pixel_size=0.0003125
 		label.text=String(view.get("label","")); label.visible=bool(view.get("show_label",false)); label.modulate=color.lightened(0.28)
 		if label.visible: label.visible=_warfare_label_has_clear_space(label)
+	# Close figures must not be painted over by the depth-independent counter plate.
+	var inspect_figures:=view.has("troops") and camera!=null and camera.size<0.35
+	for part_name in ["ArmyPlate","CounterBorder","RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth","DamageScars","ReadinessPip","EchelonBars","SupplyStripe","SupplyTrack"]:
+		var part:=marker.get_node_or_null(part_name) as Node3D
+		if part and inspect_figures:part.visible=false
+		elif part and part_name in ["ArmyPlate","CounterBorder","ReadinessPip","EchelonBars","DamageScars"]:part.visible=true
+	if label and not inspect_figures:label.position=Vector3(0,7.6 if view.has("troops") else 7.0,-4.8)
+	if label and inspect_figures:
+		label.position=marker.global_basis.inverse()*(camera.global_basis.y*camera.size*.18)
 	var strength_label:=marker.get_node_or_null("StrengthLabel") as Label3D
 	if strength_label:
 		strength_label.scale=Vector3.ONE/marker_scale
@@ -13261,6 +13292,27 @@ func _settlement_plot_lens_report(plot:Dictionary)->String:
 	var cause:=String(plot.get("growth_cause",plot.get("construction_recipe",""))).replace("_"," ")
 	if cause!="": report+="\n[color=#c4aa70]Why it exists[/color]\n%s\n" % cause.capitalize()
 	return report
+
+func _city_from_screen(point:Vector2)->Dictionary:
+	if camera==null:return {}
+	var origin:=camera.project_ray_origin(point);var direction:=camera.project_ray_normal(point)
+	for id in contact_encounter_markers:
+		var marker:Node3D=contact_encounter_markers[id]
+		if not is_instance_valid(marker) or not marker.visible:continue
+		for mesh:MeshInstance3D in marker.find_children("*","MeshInstance3D",true,false):
+			if mesh.name not in ["PitchedRoofs","WallsAndTimber","EarthAndLanes"]:continue
+			var inverse:=mesh.global_transform.affine_inverse()
+			var local_origin:Vector3=inverse*origin;var local_direction:Vector3=inverse.basis*direction
+			if mesh.get_aabb().intersects_ray(local_origin,local_direction)==null:continue
+			var arrays:=mesh.mesh.surface_get_arrays(0)
+			var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+			var indices:PackedInt32Array=arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
+			var count:=indices.size() if not indices.is_empty() else vertices.size()
+			for i in range(0,count-2,3):
+				var a:=indices[i] if not indices.is_empty() else i;var b:=indices[i+1] if not indices.is_empty() else i+1;var c:=indices[i+2] if not indices.is_empty() else i+2
+				if Geometry3D.ray_intersects_triangle(local_origin,local_direction,vertices[a],vertices[b],vertices[c])!=null:
+					return CivilizationSystem.city_intelligence.known("player",String(id))
+	return {}
 
 func _contact_encounter_at(position:Vector3,radius_km:float=5.0)->Dictionary:
 	var ground:=Vector2(position.x,position.z)
@@ -17812,8 +17864,11 @@ func _build_population_history_page(page:VBoxContainer,kind:String)->void:
 func _population_history_records(kind:String)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	if kind=="demographic":
+		var grouped:=preload("res://scripts/hud/content/dock_detail_population_ledger.gd").grouped_deaths(GameState.demographic_ledger)
+		for row:Dictionary in grouped:result.append({"kind":"death","compact":true,"title":String(row.name),"description":String(row.sub),"count_label":String(row.value),"detail":String(row.tip)})
 		for record_variant in GameState.demographic_ledger:
-			result.append((record_variant as Dictionary).duplicate(true))
+			if String(record_variant.get("kind",""))!="death":result.append(record_variant.duplicate(true))
+
 	else:
 		for event_variant in GameState.simulation_events:
 			var event:Dictionary=event_variant
@@ -17831,7 +17886,7 @@ func _refresh_population_history_page(body:VBoxContainer,page_label:Label,previo
 		body.remove_child(child)
 		child.queue_free()
 	var records:=_population_history_records(kind)
-	var page_size:=3 if kind=="demographic" else 5
+	var page_size:=8 if kind=="demographic" else 5
 	var page_count:=maxi(1,ceili(float(records.size())/float(page_size)))
 	var page:=clampi(int(body.get_meta("history_page",0)),0,page_count-1)
 	body.set_meta("history_page",page)
@@ -17854,6 +17909,8 @@ func _refresh_population_history_page(body:VBoxContainer,page_label:Label,previo
 
 
 func _add_population_demographic_record(parent:VBoxContainer,record:Dictionary)->void:
+	if bool(record.get("compact",false)):
+		var row:=Label.new();row.text="%s · %s · %s" % [String(record.count_label),String(record.title),String(record.description)];row.tooltip_text=String(record.detail);row.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.add_theme_font_size_override("font_size",14);parent.add_child(row);return
 	var record_kind:=String(record.get("kind","death"))
 	var count:=int(record.get("count",1))
 	var start_day:=int(record.get("start_day",record.get("day",0)))+1
@@ -19506,13 +19563,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		# Double-click the settlement fabric to inspect the city even near counters.
-		if event.double_click:
-			var city_hit:Dictionary=_terrain_hit(event.position)
-			if city_hit.get("position") is Vector3:
-				var selected_city:=_contact_encounter_at(city_hit.position,0.15)
-				if selected_city.has("city_id"):
-					CivilizationSystem.city_intelligence.open(String(selected_city.city_id));get_viewport().set_input_as_handled();return
+		for marker:Node3D in player_field_army_markers.values():
+			if is_instance_valid(marker) and marker.visible and event.position.distance_to(camera.unproject_position(marker.global_position))<=10.0:
+				_select_field_army_from_screen(event.position);get_viewport().set_input_as_handled();return
+		# Pick the actual rendered city geometry, independent of scout counter hit radii.
+		var clicked_city:=_city_from_screen(event.position)
+		if not clicked_city.is_empty():
+			CivilizationSystem.city_intelligence.open(String(clicked_city.city_id));get_viewport().set_input_as_handled();return
 		# Target counters win hit-testing when formations overlap. Otherwise the
 		# player can see a scout or enemy but can only select their own army under
 		# it — precisely the opposite of the action they are trying to take.
@@ -19777,7 +19834,7 @@ func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
 			if not overlaps: break
 			world.x+=0.25
 		occupied.append(world)
-		world.y=_height_at(world.x,world.z)
+		world.y=_close_surface_height_at(world.x,world.z)
 		var destination:Dictionary=army.get("destination_position",{})
 		var direction:=Vector2(float(destination.get("x",world.x))-world.x,float(destination.get("z",world.z))-world.z)
 		var facing:=atan2(direction.x,direction.y) if direction.length()>0.001 else 0.0
@@ -19787,11 +19844,16 @@ func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
 		var had_ground:=figures.has_meta("ground_signature")
 		if needs_ground: figures.position=world
 		figures.rotation.y=facing
+		var garrison_label:=figures.get_node_or_null("GarrisonLabel") as Label3D
+		if bool(army.get("garrison_visual",false)) and garrison_label==null:
+			garrison_label=Label3D.new();garrison_label.name="GarrisonLabel";garrison_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;garrison_label.fixed_size=true;garrison_label.no_depth_test=true;garrison_label.font_size=9;figures.add_child(garrison_label);garrison_label.scale=Vector3.ONE/SETTLEMENT_DETAIL_SCALE;garrison_label.position.y=4
+		if garrison_label:garrison_label.text="YOUR GARRISON · %d SOLDIERS" % int(army.troops)
+
 		figures.configure(candidate.counts,Color(WarfareMapPresentation.PLAYER_SELECTED_COLOR if bool(candidate.selected) else WarfareMapPresentation.PLAYER_COLOR))
 		figures.set_animation("walk" if String(army.get("status",""))=="moving" else "idle")
 		figures.animation_speed=1.0 if game_speed>0.0 else 0.0
 		if needs_ground:
-			figures.fit_to_ground(Callable(self,"_height_at")); figures.set_meta("ground_signature",ground_signature)
+			figures.fit_to_ground(Callable(self,"_close_surface_height_at")); figures.set_meta("ground_signature",ground_signature)
 			# Smooth between authoritative route samples; simulation positions and
 			# arrival times remain unchanged. Bound tweens to one per visible army.
 			var previous_tween:Tween=figures.get_meta("movement_tween") if figures.has_meta("movement_tween") else null

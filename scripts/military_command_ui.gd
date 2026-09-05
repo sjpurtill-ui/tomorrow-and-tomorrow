@@ -348,7 +348,8 @@ func _open_battle_graphics(army_id:int=0)->void:
 	battle_graphics.inspected_army_id=army_id
 	layer.add_child(battle_graphics)
 	modal.hide()
-	battle_graphics.tree_exited.connect(func(): modal.show(); _refresh())
+	battle_graphics.tree_exited.connect(func():
+		if is_inside_tree() and is_instance_valid(modal) and modal.is_inside_tree():modal.show();_refresh())
 
 
 func _counter(parent:HBoxContainer,minimum:int,maximum:int,value:int)->SpinBox:
@@ -862,7 +863,7 @@ func _refresh_field_army_dialog()->void:
 	var previous_destination:=""
 	if field_army_destination.selected>=0 and field_army_destination.selected<field_army_destination.item_count: previous_destination=String(field_army_destination.get_item_metadata(field_army_destination.selected))
 	field_army_choice.clear()
-	var armies:Array=state.get("armies",[])
+	var armies:Array=(state.get("armies",[]) as Array).filter(func(force:Dictionary)->bool:return int(force.get("troops",0))>0)
 	var army_selection:=0
 	for index in armies.size():
 		var army:Dictionary=armies[index]
