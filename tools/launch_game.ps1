@@ -40,5 +40,7 @@ if ($Editor) {
 }
 
 $process = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $arguments -WorkingDirectory $projectRoot -PassThru
+$buildCommit = & git -C $projectRoot rev-parse --short HEAD
+if ($LASTEXITCODE -ne 0) { $buildCommit = 'unknown' }
 $launchKind = if ($Editor) { 'canonical editor' } else { 'current game' }
-Write-Output "Launched $launchKind from $projectRoot (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"
+Write-Output "Launched $launchKind from $projectRoot, build $buildCommit (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"

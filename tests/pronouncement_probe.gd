@@ -396,6 +396,7 @@ func _reset_simulation(seed:int)->void:
 	ConsequenceEngine.initialize()
 
 func _test_restart_cancels_deferred_result()->void:
+	GameState.civic_api_enabled=false
 	stale_result_received=false
 	PronouncementInterpreter.interpretation_completed.connect(_capture_stale_interpretation)
 	PronouncementInterpreter.interpret("Ration food.",{})
@@ -408,6 +409,7 @@ func _capture_stale_interpretation(_request_id:String,_result:Dictionary)->void:
 	stale_result_received=true
 
 func _test_async_ripple()->void:
+	GameState.civic_api_enabled=false
 	async_result={}
 	PronouncementInterpreter.interpretation_completed.connect(_capture_interpretation)
 	PronouncementInterpreter.interpret("Ration food and protect the land.",{})

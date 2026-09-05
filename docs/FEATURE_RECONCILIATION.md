@@ -103,3 +103,8 @@ Existing Godot shutdown texture/RID/ObjectDB leak diagnostics remain on several 
 Review and cherry-pick this branch's task commits in order. Shared hunks include civilization_system.gd, military_campaign.gd, local_terrain.gd, dock_blocks.gd and save_load_probe.gd. Preserve newer integrator civic work when resolving. Do not copy whole systems from the consolidated/archived branch. Before announcing shipment, verify the main report component exposes both tabs, five asset paths exist, the actual return handler opens that component, and the canonical combined tests pass.
 
 User requested visible Godot editor and game with supported built-in external-script reload / live scene synchronization after integration. Preserve any unsaved current session; ask before replacing it if necessary. Worker did not launch a preview as the player game.
+
+
+## Combined checkpoint: century, battle, conversation and scout returns
+
+The authoritative main now includes `69bc384` (century choices), `3485f1b` (battle terrain/contact and persistent veteran injuries), `2dff85c` (leader dialogue continuity), `cf3a058` (noninterrupting scout returns) and `4bc66f4` (first-page recruitment outcomes/HUD cleanup). Earlier eight-turn civic context is expanded to 24 messages plus recent decisions. See INTEGRATION_STATUS.md for validation and explicit held prototypes; no folder overwrite or blanket old-branch merge was used. Player saves and live campaign were preserved.

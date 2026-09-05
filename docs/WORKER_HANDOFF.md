@@ -33,13 +33,17 @@ Godot documents the external reload and unsaved-conflict behavior in
 Integration records belong in `FEATURE_RECONCILIATION.md`; state the canonical
 commit and tested behavior before saying a feature is in the player's build.
 
+## Integration status
+
+Check `docs/INTEGRATION_STATUS.md` before assigning work. Keep unfinished prototypes listed separately from committed player features. A handoff is not delivery: only the integrator can mark a change integrated. The launcher prints the canonical commit so the build can be identified. A running process keeps its loaded scripts/state; save and restart after a structural integration. Never silently restart a live player session.
+
 ## Copy-ready worker prompt
 
 ```text
 Work on Tomorrow and Tomorrow. The authoritative game is:
 C:\Users\sjpur\TomorrowandTomorrow
 
-Read its AGENTS.md and docs/WORKER_HANDOFF.md first. The OneDrive copy is archived; do not develop there or copy its systems wholesale.
+Read its AGENTS.md, docs/WORKER_HANDOFF.md and docs/INTEGRATION_STATUS.md first. The OneDrive copy is archived; do not develop there or copy its systems wholesale.
 
 Your task: [DESCRIBE TASK]
 Your owned files/systems: [ASSIGN OWNERSHIP]
