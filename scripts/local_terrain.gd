@@ -12602,7 +12602,8 @@ func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->vo
 
 
 func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
-	var marker_scale:=maxf(0.001,float(view.get("scale",1.0)))
+	# Match the presentation floor: a second, larger clamp bloats close counters.
+	var marker_scale:=maxf(0.0005,float(view.get("scale",1.0)))
 	marker.scale=Vector3.ONE*marker_scale
 	marker.rotation.y=0.0
 	var color:=Color(String(view.get("color",WarfareMapPresentation.FOREIGN_COLOR)))

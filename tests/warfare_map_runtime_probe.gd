@@ -93,6 +93,16 @@ func _ready()->void:
 	terrain.add_child(foreign_counter)
 	var foreign_view:Dictionary=PRESENTATION.foreign_marker({"id":"foreign_probe","civilization":"Cedar League","identified":true,"hostile":true,"strength_estimate_low":900,"strength_estimate_high":1500,"readiness_estimate_low":0.42,"readiness_estimate_high":0.66,"formation_role":"armored","formation_era":3,"damage_estimate":0.36,"position":{"x":origin.x+8.0,"z":origin.z+8.0}},320.0)
 	terrain._apply_warfare_formation_view(foreign_counter,foreign_view)
+	for zoom in [0.035,0.05,0.10,8.0]:
+		for counter in [marker,foreign_counter]:
+			var scaled_view:Dictionary=PRESENTATION.player_marker(army,zoom) if counter==marker else foreign_view.duplicate(true)
+			scaled_view.scale=PRESENTATION.marker_scale(zoom)
+			terrain._apply_warfare_formation_view(counter,scaled_view)
+			_expect(is_equal_approx(counter.scale.x,PRESENTATION.marker_scale(zoom)),"renderer enlarges the calculated counter scale at %s km" % zoom)
+			var count_label:Label3D=counter.get_node("StrengthLabel")
+			_expect(count_label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"closest zoom distorts compact count text")
+	terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
+	terrain._apply_warfare_formation_view(foreign_counter,foreign_view)
 	for counter in [marker,foreign_counter]:
 		for part in counter.get_children():
 			if part is Label3D:
