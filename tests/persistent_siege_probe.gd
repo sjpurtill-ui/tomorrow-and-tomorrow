@@ -33,13 +33,20 @@ func _ready()->void:
 	await get_tree().process_frame;await get_tree().process_frame
 	var persistent:CanvasLayer=get_tree().root.get_meta("persistent_siege_view")
 	persistent._siege_order("assault")
+	for frame in 4:await get_tree().process_frame
 	assert(not MilitaryCampaign.active_engagement.is_empty())
+	assert(is_instance_valid(MilitaryCommandUI.battle_graphics))
+	var battle:BattleGraphicsScreen=MilitaryCommandUI.battle_graphics
 	for turn in 16:
 		if MilitaryCampaign.active_engagement.is_empty():break
-		persistent._battle_order("push")
+		if battle.phase=="result":battle._continue()
+		battle._hold_all();battle._resolve();battle._skip()
 	assert(MilitaryCampaign.active_engagement.is_empty())
-	assert(is_instance_valid(persistent))
-	assert(not persistent.last_snapshot.active)
+	battle._close();await get_tree().process_frame;await get_tree().process_frame
+	preload("res://scripts/hud/siege_screen.gd").open(identity)
+	await get_tree().process_frame;await get_tree().process_frame
+	persistent=get_tree().root.get_meta("persistent_siege_view")
+	assert(is_instance_valid(persistent));assert(not persistent.last_snapshot.active)
 	if DisplayServer.get_name()!="headless":
 		for population in [200,1000000000]:
 			var sample:Dictionary=persistent.last_snapshot.duplicate(true);sample.population=population
