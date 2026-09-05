@@ -37,8 +37,6 @@ survival rules: poor is occupied; physical damage removes roof sectors.
   retains its positions across the LOD boundary. Existing label/claim overlays
   still change there; a separate claim-opacity transition pass is planned.
 
-## Limitations
-
 ## Follow-up: live ownership fade
 
 The claim wash previously jumped to 30% of its strategic opacity immediately
@@ -48,6 +46,18 @@ quantized network geometry rebuilds. Ownership geometry and values are unchanged
 72 architecture tests passed including the new monotonic, near-threshold and
 same-material regression. Inspected city-claim-smooth.png at 2.41 km. Label offset
 and plot LOD changes at that boundary remain separate from this tint fix.
+
+## Follow-up: regional coverage integration
+
+At 20 km zoom, a million-person metropolis lost all roof detail before its
+300 m blocks became sub-pixel. The shader now blends unresolved roofs into mean
+coverage and keeps block-scale detail longer before yielding to regional cover.
+Fine color/roof-plane variation is integrated at the same time to avoid sampling
+unresolved speckles. Inspected metropolis-regional.png versus
+metropolis-integrated-roofs.png; the latter retains a visible urban pattern.
+73 architecture/material tests passed. No geometry or draw calls added.
+Existing main-river gaps in both images were reported to the integrator and are
+not changed by this pass.
 
 ## Remaining limitations
 
