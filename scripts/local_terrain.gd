@@ -7201,7 +7201,7 @@ func _settlement_plot_color(plot: Dictionary) -> Color:
 	elif land_use in ["workshop", "dirty_industry", "storage"]:
 		color = Color("#665e4c")
 	elif land_use == "water":
-		color = Color("#586f6b")
+		color = Color("#756d54") if String(plot.get("form",""))=="carried_water_point" else Color("#586f6b")
 	elif land_use == "waste":
 		color = Color("#5f5943")
 	elif land_use == "field":
@@ -8981,6 +8981,9 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			# change; rows and inherited boundaries provide its internal hierarchy.
 			_append_textured_plot_polygon(field_ground_surface,plot,center,field_ground_color,0.0021,Vector2i(-1,-1),0.24)
 			field_ground_count+=1
+		elif land_use in ["water","waste"]:
+			# Service parcels are worn ground, not hard-edged map tokens.
+			_append_textured_plot_polygon(ground_surface,plot,center,plot_color,0.0018,Vector2i(-1,-1),0.08)
 		elif land_use not in ["water","waste","vacant","pasture"] and status!="reclaimed":
 			_append_textured_plot_polygon(ground_surface,plot,center,plot_color,0.0018,_ground_atlas_cell(plot),0.68)
 		else:
@@ -9010,10 +9013,13 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 				# a permanent map icon or a settlement-sized glowing dot.
 				_append_ground_disc(feature_surface,feature_world,0.00062,Color(0.78,0.37,0.10,0.76),0.0037)
 		if lod==0 and land_use=="water":
-			_append_ground_disc(feature_surface,feature_world,0.0027,Color(0.16,0.28,0.27,0.76),0.0030)
+			if form=="carried_water_point":
+				_append_textured_ground_patch(feature_surface,feature_world,0.0012,Color(0.23,0.29,0.25,0.55),0.0030,Vector2i(-1,-1),int(plot.get("seed",1))^0x213f)
+			else:
+				_append_ground_disc(feature_surface,feature_world,0.0027,Color(0.16,0.28,0.27,0.76),0.0030)
 			feature_count+=1
 		elif lod==0 and land_use=="waste":
-			_append_ground_disc(feature_surface,feature_world,0.0022,Color(0.23,0.20,0.13,0.60),0.0030)
+			_append_textured_ground_patch(feature_surface,feature_world,0.0022,Color(0.23,0.20,0.13,0.60),0.0030,Vector2i(-1,-1),int(plot.get("seed",1))^0x371b)
 			feature_count+=1
 		if lod<=1 and plot_has_detail and land_use=="field" and status not in ["ruin","reclaimed"]:
 			_append_field_rows(field_surface,plot,center)

@@ -1285,6 +1285,35 @@ func test_field_beds_and_cross_dividers_face_daylight()->void:
 				assert_float(normal.y).is_greater(0.0)
 
 
+func test_early_service_ground_is_feathered_not_a_pond_token()->void:
+	for land_use in ["water","waste"]:
+		var plots:Array[Dictionary]=[{
+			"id":1,"seed":19,"centroid":Vector2.ZERO,"area_ha":0.04,
+			"polygon":PackedVector2Array([Vector2(-0.01,-0.01),Vector2(0.01,-0.01),Vector2(0.01,0.01),Vector2(-0.01,0.01)]),
+			"land_use":land_use,"form":"carried_water_point" if land_use=="water" else "refuse_and_latrine_ground",
+			"condition":0.8,"prosperity":0.4,"status":"active"
+		}]
+		var parent:Node3D=auto_free(Node3D.new())
+		renderer._create_plot_fabric(Vector3.ZERO,plots,0,parent)
+		for node_name in ["PersistentPlotGround","PersistentGroundFeatures"]:
+			var instance:=parent.get_node_or_null(node_name) as MeshInstance3D
+			assert_object(instance).is_not_null()
+			if instance==null: return
+			var colors:PackedColorArray=instance.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+			var minimum:=1.0
+			var maximum:=0.0
+			for color in colors:
+				minimum=minf(minimum,color.a)
+				maximum=maxf(maximum,color.a)
+			assert_float(maximum).is_greater(0.0)
+			assert_float(minimum).is_less(maximum*0.1)
+			if node_name=="PersistentGroundFeatures":
+				assert_int(colors.size()).is_between(27,42)
+		if land_use=="water":
+			var color:Color=renderer._settlement_plot_color(plots[0])
+			assert_float(color.r).is_greater(color.g)
+
+
 func test_roof_opacity_is_not_baked_at_the_old_camera_threshold()->void:
 	var test_camera:Camera3D=auto_free(Camera3D.new())
 	renderer.camera=test_camera
