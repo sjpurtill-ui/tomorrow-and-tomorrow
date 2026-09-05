@@ -126,21 +126,7 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 			"tip":"Review personnel, provisions, risk, and target before anything departs",
 		})
 	blocks.append({"type":"actions","items":duration_items})
-	var landmarks:Array=CivilizationSystem.landmarks_snapshot()
-	if not landmarks.is_empty():
-		var landmark_items:Array=[]
-		for landmark_index in range(mini(5,landmarks.size())):
-			var landmark:Dictionary=landmarks[landmarks.size()-1-landmark_index]
-			var position:Dictionary=landmark.get("position",{})
-			var distance:=roundi(CivilizationSystem.player_world_origin.distance_to(Vector2(float(position.get("x",0.0)),float(position.get("z",0.0)))))
-			landmark_items.append({
-				"name":String(landmark.get("name","Landmark")),
-				"sub":"%d km out · named day %d" % [distance,int(landmark.get("discovered_day",0))],
-				"value":"","accent":Tokens.GOLD,
-				"tip":String(landmark.get("description","A named waymark on the chart.")),
-			})
-		blocks.append({"type":"rows","heading":"NAMED LANDMARKS","note":"%d waymarks · range ×%.2f" % [landmarks.size(),CivilizationSystem.scout_range_factor()],"items":landmark_items})
-	blocks.append({"type":"text","text":"Nothing is revealed while a party is away. Personnel and provisions leave at departure; interception can erase an entire report. Up to %d parties can range at once, and every named landmark extends how far they reach." % int(exploration.get("capacity",1))})
+	blocks.append({"type":"text","text":"Nothing is revealed while a party is away. Personnel and provisions leave at departure; interception can erase an entire report. Up to %d parties can range at once; logistics, travel knowledge, and mounts determine their range." % int(exploration.get("capacity",1))})
 	return blocks
 
 func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:

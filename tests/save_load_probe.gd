@@ -27,7 +27,6 @@ func _ready()->void:
 	GameState.register_population_arrivals(30,"probe arrivals")
 	if "food_drying" not in GameState.known_discoveries: GameState.known_discoveries.append("food_drying")
 	GameState.resource_stockpiles["Food"]=333.0
-	CivilizationSystem.landmarks.append({"id":"landmark_probe","name":"The Probe Stones","kind":"plain","feature_id":"sun_stone_row","myth":"Probe myth.","position":{"x":10.0,"z":10.0},"discovered_day":100,"description":"Probe."})
 	var civic_order:={
 		"id":"order_persistence_probe","type":"pronouncement","settlement_id":"player_settlement_1",
 		"leader_person_id":77,"addressed_to":"Mara Vale","leader_title":"Hearth Speaker",
@@ -78,10 +77,6 @@ func _ready()->void:
 	_expect(not GameState.civic_api_enabled,"civic API master switch not restored")
 	_expect("food_drying" in GameState.known_discoveries,"known discovery not restored")
 	_expect(absf(float(GameState.resource_stockpiles.get("Food",0.0))-333.0)<0.01,"food stockpile not restored")
-	var landmark_found:=false
-	for landmark in CivilizationSystem.landmarks:
-		if String((landmark as Dictionary).get("name",""))=="The Probe Stones": landmark_found=true
-	_expect(landmark_found,"landmark not restored")
 	_expect(GameState.founding_focus=="provision","founding focus not restored (%s)" % GameState.founding_focus)
 	var restored_civic_order:Dictionary={}
 	for order_variant in GameState.sovereign_orders:
