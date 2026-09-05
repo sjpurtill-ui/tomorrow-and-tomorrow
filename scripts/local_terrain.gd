@@ -3179,31 +3179,28 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 	detail_surface_center=Vector2(center.x,center.z)
 	var resolution := 112
 	var span := 0.42
-	var vertex_cache:Dictionary={}
-	var surface := SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for z in resolution - 1:
-		for x in resolution - 1:
-			for corner in [Vector2i(x,z), Vector2i(x + 1,z), Vector2i(x + 1,z + 1), Vector2i(x,z), Vector2i(x + 1,z + 1), Vector2i(x,z + 1)]:
-				# Each grid point belongs to up to six triangle corners. Sample its
-				# position, biome color and normal once for this immutable build.
-				if not vertex_cache.has(corner):
-					var world_x := center.x + (float(corner.x) / (resolution - 1) - 0.5) * span
-					var world_z := center.z + (float(corner.y) / (resolution - 1) - 0.5) * span
-					var height := _close_surface_height_at(world_x, world_z) + 0.00045
-					# Match regional relief shading instead of lighting the micro-skin separately.
-					var normal_step:=0.02
-					var dx:=(_height_at(world_x+normal_step,world_z)-_height_at(world_x-normal_step,world_z))/(normal_step*2.0)
-					var dz:=(_height_at(world_x,world_z+normal_step)-_height_at(world_x,world_z-normal_step))/(normal_step*2.0)
-					vertex_cache[corner]={"position":Vector3(world_x,height,world_z),"normal":Vector3(-dx,1.0,-dz).normalized(),"color":_terrain_color_at(world_x,world_z,height)}
-				var sample:Dictionary=vertex_cache[corner]
-				surface.set_normal(sample.normal)
-				surface.set_color(sample.color)
-				surface.add_vertex(sample.position)
-	surface.index()
+	var vertices:=PackedVector3Array()
+	var normals:=PackedVector3Array()
+	var colors:=PackedColorArray()
+	vertices.resize(resolution*resolution)
+	normals.resize(vertices.size())
+	colors.resize(vertices.size())
+	for z in resolution:
+		for x in resolution:
+			var world_x:=center.x+(float(x)/(resolution-1)-0.5)*span
+			var world_z:=center.z+(float(z)/(resolution-1)-0.5)*span
+			var height:=_close_surface_height_at(world_x,world_z)+0.00045
+			var normal_step:=0.02
+			var dx:=(_height_at(world_x+normal_step,world_z)-_height_at(world_x-normal_step,world_z))/(normal_step*2.0)
+			var dz:=(_height_at(world_x,world_z+normal_step)-_height_at(world_x,world_z-normal_step))/(normal_step*2.0)
+			var index:=z*resolution+x
+			vertices[index]=Vector3(world_x,height,world_z)
+			normals[index]=Vector3(-dx,1.0,-dz).normalized()
+			colors[index]=_terrain_color_at(world_x,world_z,height)
+	var mesh:=preload("res://scripts/close_terrain_mesh.gd").build(resolution,vertices,normals,colors)
 	detail_terrain_patch = MeshInstance3D.new()
 	detail_terrain_patch.name = "SettlementGroundDetail"
-	detail_terrain_patch.mesh = surface.commit()
+	detail_terrain_patch.mesh = mesh
 	detail_terrain_patch.material_override = _create_terrain_material()
 	detail_terrain_patch.visible = false
 	add_child(detail_terrain_patch)

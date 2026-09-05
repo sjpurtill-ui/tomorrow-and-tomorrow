@@ -186,7 +186,12 @@ func _ready()->void:
 			terrain._build_detail_terrain_patch(terrain.camera_target)
 			detail_times.append(Time.get_ticks_usec()-detail_started)
 			var detail_arrays:Array=terrain.detail_terrain_patch.mesh.surface_get_arrays(0)
-			var fingerprint:=hash(var_to_bytes(detail_arrays))
+			var expanded:Array=[]
+			for attribute in [Mesh.ARRAY_VERTEX,Mesh.ARRAY_NORMAL,Mesh.ARRAY_COLOR]:
+				var values:Array=[]
+				for vertex_index in detail_arrays[Mesh.ARRAY_INDEX]: values.append(detail_arrays[attribute][vertex_index])
+				expanded.append(values)
+			var fingerprint:=hash(var_to_bytes(expanded))
 			if trial>0: assert(fingerprint==mesh_fingerprint,"Repeated detail builds must preserve mesh attributes")
 			mesh_fingerprint=fingerprint
 			terrain.detail_terrain_patch.visible=true
