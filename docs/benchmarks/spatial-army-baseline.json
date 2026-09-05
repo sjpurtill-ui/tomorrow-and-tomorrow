@@ -1,0 +1,29 @@
+[
+	{
+		"actually_moved": true,
+		"armies": 1,
+		"max_ms": 0.039,
+		"note": "Actual current continuous strategic movement and supply update only; no building obstacles or battle.",
+		"p50_ms": 0.01,
+		"p95_ms": 0.014,
+		"p99_ms": 0.031
+	},
+	{
+		"actually_moved": true,
+		"armies": 4,
+		"max_ms": 0.094,
+		"note": "Actual current continuous strategic movement and supply update only; no building obstacles or battle.",
+		"p50_ms": 0.049,
+		"p95_ms": 0.056,
+		"p99_ms": 0.083
+	},
+	{
+		"actually_moved": true,
+		"armies": 12,
+		"max_ms": 0.223,
+		"note": "Actual current continuous strategic movement and supply update only; no building obstacles or battle.",
+		"p50_ms": 0.077,
+		"p95_ms": 0.178,
+		"p99_ms": 0.205
+	}
+]
