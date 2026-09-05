@@ -11,3 +11,8 @@ The header reconciles fighting, out-of-action, casualties, deaths, wounded, scat
 Validation: 9 injury/geometry cases; 24 existing military training/development cases; actual save/load probe; GPU battle graphics probe (including cursor camera anchors, combat invariance, casualty idempotence and 192 representative cap); inspected GPU capture. Pre-existing shutdown resource leak warnings remain.
 
 Unfinished Blender authoring experiment remains unstaged in the worker. Its source blend dependencies are absent. It is not required by the runtime and must not be claimed as delivered animation assets.
+
+
+Planted-contact follow-up (base 3f6e307): remove reciprocal root translation/lean after approach, vary pair periods/phase, retain guard longer than attack, replay a continuous guarded weapon stroke from existing VAT attack frames. Restrained hit reaction bends only vertices above the waist by at most 3.5cm. Ranged, walking and death playback keep their existing paths. No new animation assets or combat rules.
+
+Temporal GPU verification samples 100 frames over five simulation seconds: zero root displacement after approach, 1,709 attack samples versus 5,291 guard samples, 74 contact beats. Multiple rendered times were inspected for distinct weapon poses; the existing GPU battle probe passes (including combat invariance and casualty behavior). The reproducible capture probe is tests/battle_contact_temporal_probe.tscn; captures stay in artifacts/contact-motion.

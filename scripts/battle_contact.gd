@@ -29,6 +29,15 @@ func configure(view:Node3D)->void:
 			var center:=Vector2((slot%columns-(columns-1)*.5)*(4.6 if mounted else 2.6)+(28 if mounted else 0),floorf(float(slot)/columns)*4.4-5)
 			pairs.append({"a":a,"b":b,"center":center,"gap":gap,"slot":slot,"mounted":mounted})
 
+static func attack_state(clock:float,slot:int,side:int)->Dictionary:
+	var period:=4.3+fposmod(float(slot)*.317,1.1)
+	var duration:=1.05+fposmod(float(slot)*.137,.25)
+	var start:=.12 if side==0 else period*.53
+	var elapsed:=fposmod(clock+float(slot)*.731,period)-start
+	var progress:=clampf(elapsed/duration,0,1)
+	var striking:=elapsed>=0 and elapsed<duration
+	return {"striking":striking,"progress":progress,"impact":exp(-pow((progress-.48)/.065,2)) if striking else 0.0,"beat":floori((clock+float(slot)*.731)/period)}
+
 func advance(view:Node3D)->void:
 	var active:bool=not view.record.is_empty() and view.outcome in ["","continued","inconclusive"]
 	# Non-contact ranks/ranged equipment remain on their proper ground too.
@@ -45,29 +54,30 @@ func advance(view:Node3D)->void:
 	for pair in pairs:
 		var a:Dictionary=pair.a; var b:Dictionary=pair.b
 		var connected:bool=not a.group.dead[a.index] and not b.group.dead[b.index]
-		var beat:float=view.clock/3.5+float(pair.slot%7)*.087
 		for side in 2:
 			var entry:Dictionary=a if side==0 else b
 			var group:Dictionary=entry.group; var index:int=entry.index
 			if group.dead[index] or view._routed(side): continue
-			var cycle:=fposmod(beat,1.0)
-			var striking:=cycle<.5 if side==0 else cycle>=.5
-			var progress:=fposmod(cycle*2,1.0)
-			var contact:=exp(-pow((progress-.47)/.09,2)) if connected and active else 0.0
+			var action:=attack_state(view.clock,int(pair.slot),side)
+			var opponent:=attack_state(view.clock-.06,int(pair.slot),1-side)
+			var striking:bool=bool(action.striking)
+			var progress:float=action.progress
+			var contact:float=action.impact if connected and active else 0.0
+			var reaction:float=opponent.impact if connected and active else 0.0
 			var sign:=1.0 if side==0 else -1.0
-			var lunge:=contact*.28 if striking else -contact*.16
-			var destination:=Vector3(pair.center.x+sin(pair.slot*1.9)*.12,0,pair.center.y-sign*float(pair.gap)*.5+sign*lunge)
+			# Roots stay planted after approach. Existing weapon/arm VAT poses carry
+			# the strike; no reciprocal whole-body translation or leaning.
+			var destination:=Vector3(pair.center.x+sin(pair.slot*1.9)*.12,0,pair.center.y-sign*float(pair.gap)*.5)
 			var start:Vector3=view.armies[side].to_global(group.poses[index].origin)
 			var world:Vector3=start.lerp(destination,smoothstep(0,2.5,view.clock))
 			world.y=view.landscape.height_at(Vector2(world.x,world.z))
 			var pose:=Transform3D(Basis.IDENTITY,view.armies[side].to_local(world))
-			if not striking and active and connected: pose.basis=Basis(Vector3.RIGHT,-contact*.14)
 			group.batch.multimesh.set_instance_transform(index,pose)
-			var state:=1.0 if striking and active and connected else (2.0 if view.clock<2.5 else (3.0 if active and connected else 0.0))
-			group.batch.multimesh.set_instance_custom_data(index,Color(progress,0,0,state))
+			var state:=4.0 if striking and active and connected else (2.0 if view.clock<2.5 else (3.0 if active and connected else 0.0))
+			group.batch.multimesh.set_instance_custom_data(index,Color(progress,reaction,0,state))
 			if striking and contact>.7:
 				var key:="%s/%d/%d" % [group.role,pair.slot,side]
-				var number:=floori(beat*2)
+				var number:=int(action.beat)
 				if int(last_beats.get(key,-999))!=number:
 					last_beats[key]=number; strike_count+=1
 					view.contact_flash(Vector3(world.x,world.y+1.25,pair.center.y),pair.slot)
