@@ -40,3 +40,7 @@ Focused suites: 49/49 passed (13 city intelligence, 12 siege progression, 13 sie
 GPU probe `tests/city_intelligence_ui_probe.tscn`: passed on RTX 4090/OpenGL; three independent terrain hit targets and selector records, controls inside a 1000x820 viewport, automatic exit. Screenshot: `artifacts/city-intelligence-ui.png`. The final probe also compiles current terrain and city UI.
 
 Civilization regression fixtures now provide explicit reconnaissance instead of treating a country-wide intelligence percentage as knowledge of all cities. Century, aggregate population, victory, save-size, trade/war and existing campaign checks run in `artifacts/city-complete.log`.
+
+Final full run: 117/118 passed, zero runtime errors, in 4m45s. Both 36,500-day simulations (normal and billion-person populations), bounded save size, and state validation passed. The sole failure exposed a missing founding-focus intelligence gate in the public-profile refactor. The follow-up restores the existing 0.58 gate; the failed case plus all 13 city-intelligence tests then passed (14/14, `artifacts/city-founding-gate-final.log`). The lengthy unchanged scale checks were not repeated after this one-line presentation fix.
+
+Integrator confirmed the initial implementation integrated as `efbff12`, with 113 combined canonical tests and the canonical city UI probe passing. The founding-focus gate follow-up must also be integrated. No worker player-game restart was performed.
