@@ -91,11 +91,19 @@ func _ready()->void:
 		var base:float=terrain._biome_at(terrain.camera_target.x,terrain.camera_target.z).woodland
 		assert(absf(terrain._woodland_density_at(terrain.camera_target.x,terrain.camera_target.z)-base*retained)<0.001,"Inspection must reflect saved harvest depletion")
 		print("CUTTING_AUDIT retained=",retained," current_cover=",terrain._woodland_density_at(terrain.camera_target.x,terrain.camera_target.z))
+	if "--harvest-close-surface" in OS.get_cmdline_user_args():
+		if terrain.detail_terrain_patch: terrain.detail_terrain_patch.queue_free()
+		terrain._build_detail_terrain_patch(terrain.camera_target)
+		terrain.detail_terrain_patch.visible=true
 	if "--harvest-detail" in OS.get_cmdline_user_args():
 		CivilizationSystem.record_player_travel(Vector2(terrain.camera_target.x,terrain.camera_target.z))
 		terrain._refresh_woodland_harvest_detail(true)
 		assert(terrain.woodland_harvest_detail.multimesh!=null and terrain.woodland_harvest_detail.multimesh.instance_count>0,"Cut woodland must have visible stump representatives")
-		print("HARVEST_DETAIL_AUDIT instances=",terrain.woodland_harvest_detail.multimesh.instance_count)
+		for stump_index in terrain.woodland_harvest_detail.multimesh.instance_count:
+			var stump_transform:Transform3D=terrain.woodland_harvest_detail.multimesh.get_instance_transform(stump_index)
+			var stump_ground:float=terrain._harvest_ground_height_at(Vector2(stump_transform.origin.x,stump_transform.origin.z))
+			assert(absf(stump_transform.origin.y-0.00023-stump_ground)<0.000001,"Stump bases must follow the rendered triangle surface")
+		print("HARVEST_DETAIL_AUDIT grounded instances=",terrain.woodland_harvest_detail.multimesh.instance_count)
 	if "--outcrop" in OS.get_cmdline_user_args():
 		CivilizationSystem.record_player_travel(Vector2(terrain.camera_target.x,terrain.camera_target.z))
 		var crop:MeshInstance3D=terrain._resource_ground_indication({"resource":_arg("--rock=","Limestone"),"visual_stage":"surveyed","position":terrain.camera_target})

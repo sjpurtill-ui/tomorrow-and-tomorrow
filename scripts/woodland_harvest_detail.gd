@@ -59,4 +59,4 @@ ALPHA_HASH_SCALE=1.0;
 	multimesh.instance_count=points.size()
 	for index in points.size():
 		var point:=points[index]
-		multimesh.set_instance_transform(index,Transform3D(Basis.IDENTITY,Vector3(point.x,float(height.call(point))+0.0007,point.y)))
+		multimesh.set_instance_transform(index,Transform3D(Basis.IDENTITY,Vector3(point.x,float(height.call(point))+0.00023,point.y)))
