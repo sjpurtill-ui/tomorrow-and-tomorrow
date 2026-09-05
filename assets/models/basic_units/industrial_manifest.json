@@ -1,0 +1,33 @@
+{
+  "units": [
+    {
+      "id": "rifle_infantry",
+      "label": "RIFLE INFANTRY",
+      "file": "rifle_infantry.glb",
+      "triangles": 1718,
+      "bones": 10
+    },
+    {
+      "id": "machine_gun_company",
+      "label": "MACHINE-GUN COMPANY",
+      "file": "machine_gun_company.glb",
+      "triangles": 1914,
+      "bones": 10
+    },
+    {
+      "id": "motorized_infantry",
+      "label": "MOTORIZED INFANTRY",
+      "file": "motorized_infantry.glb",
+      "triangles": 3378,
+      "bones": 15
+    }
+  ],
+  "fps": 24,
+  "clips": {
+    "idle": 2.0,
+    "walk": 1.0,
+    "attack": 1.75,
+    "death": 2.5
+  },
+  "forward_axis_godot": "+Z"
+}

@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/community_network_probe.gd" id="1"]
+[node name="CommunityNetworkProbe" type="Node"]
+script = ExtResource("1")

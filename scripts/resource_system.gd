@@ -11,6 +11,7 @@ func display_name(resource_name:String)->String:
 	return "Plant Fiber" if resource_name=="Fiber Plants" else resource_name
 
 func plain_language_description(resource_name:String)->String:
+	if resource_name=="Stone": return "Loose surface stone can be gathered across rocky ground. Heavy blocks and deeper deposits still require better tools and access; gathered stone does not regrow."
 	if resource_name=="Timber": return "Trees grow across woodland. Local cutting areas share extraction labor; tools, carrying distance and regrowth limit delivered timber."
 	if resource_name=="Fiber Plants":
 		return "Workable reeds, grasses, bark fibers, and flax- or hemp-like plants used for cordage, baskets, mats, and thatch."
@@ -372,31 +373,35 @@ func _access_blockers(deposit: Dictionary, definition: Dictionary, context: Dict
 	return blockers
 
 func _ensure_woodland_supply(context:Dictionary)->void:
-	# One bounded local catchment uses observed terrain, not a lucky deposit roll.
-	# Its stock and harvest history persist; recalculating access never refills it.
-	var field:Dictionary=context.get("woodland_catchment",{})
+	_ensure_surface_supply("Timber",context.get("woodland_catchment",{}),context,"woodland_catchment",600.0)
+
+func _ensure_surface_material_supplies(context:Dictionary)->void:
+	var fields:Dictionary=context.get("surface_material_catchments",{})
+	_ensure_surface_supply("Stone",fields.get("Stone",{}),context,"surface_stone_catchment",1000.0)
+	_ensure_surface_supply("Fiber Plants",fields.get("Fiber Plants",{}),context,"plant_fiber_catchment",180.0)
+
+func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,source:String,stock_per_km2:float)->void:
+	# Surface cover is directly usable. Survey refines knowledge; it does not
+	# make familiar trees, loose stone or fibrous vegetation appear from nothing.
 	if field.is_empty() or not bool(context.get("settled",false)): return
 	var density:=clampf(float(field.get("density",0.0)),0.0,1.0)
-	if density<0.08: return
+	var minimum_density:=0.03 if resource=="Stone" else 0.08
+	if density<minimum_density: return
+	for deposit in GameState.resource_deposits:
+		if String(deposit.get("landscape_source",""))==source: return
+	var position:Vector3=field.get("position",context.get("origin",GameState.settlement_founded_at))
 	var supply:Dictionary={}
 	for deposit in GameState.resource_deposits:
-		if String(deposit.get("landscape_source",""))=="woodland_catchment":
-			supply=deposit
-			break
-	if not supply.is_empty(): return
-	var position:Vector3=field.get("position",context.get("origin",GameState.settlement_founded_at))
-	# Adopt an existing nearby timber record so older saves retain inventory,
-	# shipments and depleted stock instead of receiving a duplicate source.
-	for deposit in GameState.resource_deposits:
-		if String(deposit.get("resource",""))=="Timber" and (deposit.position as Vector3).distance_to(position)<=2.5:
+		if String(deposit.get("resource",""))==resource and (deposit.position as Vector3).distance_to(position)<=2.5:
 			supply=deposit
 			break
 	if supply.is_empty():
-		supply=_deposit("Timber",position,0.45+density*0.65,maxf(1.0,float(field.get("area_km2",9.0)))*density*600.0,GameState.resource_deposits.size(),"local_woodland",density)
+		supply=_deposit(resource,position,0.45+density*0.65,maxf(1.0,float(field.get("area_km2",9.0)))*density*stock_per_km2,GameState.resource_deposits.size(),"local_surface",density)
 		GameState.resource_deposits.append(supply)
-	supply["landscape_source"]="woodland_catchment"
+	supply["landscape_source"]=source
 	supply["area_km2"]=float(field.get("area_km2",9.0))
-	supply["woodland_density"]=density
+	supply["surface_density"]=density
+	if resource=="Timber": supply["woodland_density"]=density
 	supply["stage"]="accessible" if String(supply.stage)!="developed" else "developed"
 	supply["clues"]=1.0
 	supply["access"]=1.0
@@ -404,6 +409,7 @@ func _ensure_woodland_supply(context:Dictionary)->void:
 
 func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	_ensure_woodland_supply(context)
+	_ensure_surface_material_supplies(context)
 	var events:Array[Dictionary]=[]
 	var material_deposits:Array[Dictionary]=[]
 	var origin:Vector3=context.get("origin",GameState.settlement_founded_at)
@@ -419,10 +425,10 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var labor_eff:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
 	var total_weight:=0.0
 	for deposit in material_deposits:
-		total_weight+=_deposit_priority(deposit)
+		total_weight+=_deposit_priority(deposit) if float(deposit.remaining)>0.0 else 0.0
 	var extracted_total:=0.0
 	for deposit in material_deposits:
-		var share:=_deposit_priority(deposit)/maxf(0.001,total_weight)
+		var share:=_deposit_priority(deposit)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
 		var assigned:=extractors*share
 		deposit.workers=roundi(assigned)
 		var profile:=_material_profile(String(deposit.resource))
@@ -439,12 +445,13 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		if extracted>0.0:
 			deposit.stage="developed"
 			_gain_practice(String(deposit.resource),"extraction",extracted/maxf(1.0,assigned)*0.010)
-		if String(deposit.get("landscape_source",""))=="woodland_catchment":
+		if String(deposit.get("landscape_source","")) in ["woodland_catchment","plant_fiber_catchment"]:
 			# Standing growth returns slowly even when cutting is paused. It stays
 			# at the source until labor harvests and hauls it, and cannot exceed the
 			# original carrying capacity of this local woodland.
 			var capacity:=float(deposit.initial_amount)
-			deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*0.00003)
+			var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else 0.00003
+			deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*recovery)
 		elif bool(catalog[String(deposit.resource)].renewable):
 			deposit.remaining=float(deposit.remaining)+minf(extracted*0.35,2.0)
 	# Deliver shipments whose real travel time has elapsed.

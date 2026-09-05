@@ -79,6 +79,7 @@ var field_army_return_button:Button
 var field_army_disband_button:Button
 var field_army_feedback_override:=""
 var field_army_feedback_override_error:=false
+var battle_graphics:Control
 
 
 func _ready()->void:
@@ -187,6 +188,8 @@ func _build_interface()->void:
 
 	var armies_top_row:=HBoxContainer.new(); armies_top_row.add_theme_constant_override("separation",8); armies_tab.add_child(armies_top_row)
 	var armies_button:=Button.new(); armies_button.text="FORM OR MOVE FIELD ARMIES"; armies_button.tooltip_text="Assemble trained formations into bounded maneuver armies, inspect them, and issue movement orders"; armies_button.pressed.connect(_open_field_armies); armies_top_row.add_child(armies_button)
+	_action_button(armies_top_row,"INSPECT IN 3D",func(): _open_battle_graphics())
+	_action_button(armies_top_row,"PEOPLE & LEGACIES",func(): HistoricalFigures.open_chronicle())
 	settlement_defense_label=Label.new(); settlement_defense_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL; settlement_defense_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT; settlement_defense_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; settlement_defense_label.max_lines_visible=2; settlement_defense_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; settlement_defense_label.add_theme_font_size_override("font_size",10); settlement_defense_label.add_theme_color_override("font_color",BLUE); armies_top_row.add_child(settlement_defense_label)
 	settlement_defense_button=Button.new(); settlement_defense_button.custom_minimum_size=Vector2(190,36); settlement_defense_button.pressed.connect(_start_settlement_defense_upgrade); armies_top_row.add_child(settlement_defense_button)
 	var army_columns:=HBoxContainer.new(); army_columns.size_flags_vertical=Control.SIZE_EXPAND_FILL; armies_tab.add_child(army_columns)
@@ -247,6 +250,7 @@ func _build_interface()->void:
 	_action_button(engagement_row,"HOLD THIS ROUND",func(): _report(MilitaryCampaign.advance_engagement("hold")))
 	_action_button(engagement_row,"PRESS THE ATTACK",func(): _report(MilitaryCampaign.advance_engagement("push")))
 	_action_button(engagement_row,"ORDER RETREAT",func(): _report(MilitaryCampaign.advance_engagement("retreat")))
+	_action_button(engagement_row,"VIEW BATTLE",func(): _open_battle_graphics())
 
 	aftermath_row=HBoxContainer.new(); aftermath_row.add_theme_constant_override("separation",8); orders_tab.add_child(aftermath_row)
 	aftermath_label=Label.new(); aftermath_label.text="BATTLE DECISION"; aftermath_label.add_theme_color_override("font_color",GOLD); aftermath_row.add_child(aftermath_label)
@@ -305,6 +309,9 @@ func _build_field_army_dialog()->void:
 	field_army_form_button=_action_button(create_row,"FORM MANEUVER ARMY",_create_field_army)
 	var select_row:=HBoxContainer.new(); select_row.add_theme_constant_override("separation",6); outer.add_child(select_row)
 	field_army_choice=OptionButton.new(); field_army_choice.fit_to_longest_item=false; field_army_choice.custom_minimum_size.x=350; field_army_choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL; field_army_choice.item_selected.connect(func(_index:int): field_army_feedback_override=""; _refresh_field_army_detail()); select_row.add_child(field_army_choice)
+	_action_button(select_row,"3D VIEW",func():
+		var army_id:=_selected_field_army_id()
+		field_army_dialog.hide(); _open_battle_graphics(army_id))
 	field_army_destination=OptionButton.new(); field_army_destination.fit_to_longest_item=false; field_army_destination.custom_minimum_size.x=350; field_army_destination.size_flags_horizontal=Control.SIZE_EXPAND_FILL; select_row.add_child(field_army_destination)
 	field_army_destination.item_selected.connect(func(_index:int): field_army_feedback_override=""; _refresh_field_army_dialog())
 	field_army_detail=RichTextLabel.new(); field_army_detail.bbcode_enabled=true; field_army_detail.fit_content=false; field_army_detail.scroll_active=false; field_army_detail.size_flags_vertical=Control.SIZE_EXPAND_FILL; field_army_detail.custom_minimum_size.y=300; outer.add_child(field_army_detail)
@@ -333,6 +340,15 @@ func _overview_status_card(parent:HBoxContainer,title_text:String,color:Color)->
 
 func _body_label(parent:VBoxContainer)->Label:
 	var label:=Label.new(); label.custom_minimum_size.x=200; label.size_flags_vertical=Control.SIZE_EXPAND_FILL; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.max_lines_visible=9; label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; label.add_theme_color_override("font_color",INK); parent.add_child(label); return label
+
+
+func _open_battle_graphics(army_id:int=0)->void:
+	if is_instance_valid(battle_graphics): return
+	battle_graphics=preload("res://scripts/battle_graphics_screen.gd").new()
+	battle_graphics.inspected_army_id=army_id
+	layer.add_child(battle_graphics)
+	modal.hide()
+	battle_graphics.tree_exited.connect(func(): modal.show(); _refresh())
 
 
 func _counter(parent:HBoxContainer,minimum:int,maximum:int,value:int)->SpinBox:

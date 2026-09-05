@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Tomorrow and Tomorrow"
+config/version="2026.09.04-integrated"
 run/main_scene="res://local_terrain.tscn"
 config/features=PackedStringArray("4.7")
 
@@ -25,6 +26,11 @@ ResourceSystem="*res://scripts/resource_system.gd"
 EconomySystem="*res://scripts/economy_system.gd"
 SettlementModel="*res://scripts/settlement_model.gd"
 GovernmentPeopleSystem="*res://scripts/government_people_system.gd"
+HistoricalFigures="*res://scripts/historical_figures.gd"
+PeopleDirection="*res://scripts/people_direction.gd"
+CommunityNetwork="*res://scripts/community_network.gd"
+ForeignDiplomacy="*res://scripts/foreign_diplomacy.gd"
+ForeignDialogue="*res://scripts/foreign_dialogue.gd"
 WorldFacts="*res://scripts/world_fact_database.gd"
 AdvisorSystem="*res://scripts/advisor_system.gd"
 FoodSystem="*res://scripts/food_system.gd"

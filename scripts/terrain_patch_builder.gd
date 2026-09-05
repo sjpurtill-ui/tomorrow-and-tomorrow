@@ -5,6 +5,7 @@ var resolution:int
 var span:float
 var center:Vector2
 var vertices:=PackedVector3Array()
+var heights:=PackedFloat32Array()
 var normals:=PackedVector3Array()
 var colors:=PackedColorArray()
 var indices:=PackedInt32Array()
@@ -17,6 +18,7 @@ var max_slice_usec:=0
 func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable)->void:
 	resolution=grid_resolution; span=patch_span; center=patch_center
 	sample_height=height_fn; sample_color=color_fn
+	heights.resize(resolution*resolution)
 	vertices.resize(resolution*resolution); normals.resize(vertices.size()); colors.resize(vertices.size())
 	indices.resize((resolution-1)*(resolution-1)*6)
 
@@ -32,6 +34,7 @@ func advance(budget_usec:int=2500)->bool:
 			var z:=center.y+(float(z_index)/float(resolution-1)-0.5)*span
 			var height:float=sample_height.call(x,z)+0.0006
 			vertices[cursor]=Vector3(x,height,z)
+			heights[cursor]=height
 			colors[cursor]=sample_color.call(x,z,height)
 		else:
 			var left:=maxi(0,x_index-1); var right:=mini(resolution-1,x_index+1)

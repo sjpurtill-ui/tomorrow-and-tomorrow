@@ -1,0 +1,34 @@
+{
+  "units": [
+    {
+      "id": "levy",
+      "label": "LEVY",
+      "file": "levy.glb",
+      "triangles": 1996,
+      "bones": 16
+    },
+    {
+      "id": "line_infantry",
+      "label": "SPEAR INFANTRY",
+      "file": "line_infantry.glb",
+      "triangles": 2274,
+      "bones": 16
+    },
+    {
+      "id": "skirmisher",
+      "label": "BOW SKIRMISHER",
+      "file": "skirmisher.glb",
+      "triangles": 2422,
+      "bones": 18
+    }
+  ],
+  "fps": 24,
+  "forward_axis_godot": "+Z",
+  "height_metres": 1.82,
+  "clips": {
+    "idle": 2.0,
+    "walk": 1.0,
+    "attack": 1.75,
+    "death": 2.5
+  }
+}

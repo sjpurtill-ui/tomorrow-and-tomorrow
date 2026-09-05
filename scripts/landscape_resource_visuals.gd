@@ -43,10 +43,10 @@ static func retained_at(point:Vector2,areas:PackedVector4Array)->float:
 static func surface_style(resource:String)->Dictionary:
 	match resource:
 		"Clay", "Refractory Clay": return {"soil":Color("#94664c"),"rock":Color("#a4795c"),"outcrops":false}
-		"Limestone", "Fine Sand", "Salt": return {"soil":Color("#b1a58a"),"rock":Color("#c2bba4"),"outcrops":resource=="Limestone"}
+		"Limestone", "Fine Sand", "Salt": return {"soil":Color("#b1a58a"),"rock":Color("#c2bba4"),"outcrops":resource=="Limestone","layered":true}
 		"Iron Ore": return {"soil":Color("#865741"),"rock":Color("#775043"),"outcrops":true}
 		"Copper Ore": return {"soil":Color("#6c7960"),"rock":Color("#66776a"),"outcrops":true}
-		"Coal", "Graphite": return {"soil":Color("#4c4b43"),"rock":Color("#41443e"),"outcrops":true}
+		"Coal", "Graphite": return {"soil":Color("#4c4b43"),"rock":Color("#41443e"),"outcrops":true,"layered":true}
 		"Peat", "Bitumen": return {"soil":Color("#534c37"),"rock":Color("#554d3f"),"outcrops":false}
 		"Medicinal Plants", "Fiber Plants", "Game", "Fertile Soil": return {"soil":Color("#637946"),"rock":Color("#778361"),"outcrops":false}
 		_: return {"soil":Color("#8c8974"),"rock":Color("#949486"),"outcrops":resource in ["Stone","Flint","Tin Ore","Lead Ore","Phosphate Rock","Sulfur"]}

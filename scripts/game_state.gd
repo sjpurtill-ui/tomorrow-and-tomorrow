@@ -392,6 +392,11 @@ var lifetime_maternal_deaths := 0
 var lifetime_neonatal_deaths := 0
 
 func reset_for_new_world(new_seed:int)->void:
+	for system_name in ["HistoricalFigures","PeopleDirection","CommunityNetwork"]:
+		var system:=get_node_or_null("/root/"+system_name)
+		if system: system.reset_for_new_world()
+	var foreign:=get_node_or_null("/root/ForeignDiplomacy")
+	if foreign: foreign.reset_for_new_world()
 	resource_settlement_id=""
 	city_trade_shipments=[]
 	city_trade_history=[]
@@ -579,6 +584,7 @@ func founding_focus_catalog()->Array[Dictionary]:
 
 
 func founding_focus_definition(focus_id:String=founding_focus)->Dictionary:
+	if focus_id=="collective_ambition": return {"name":String(PeopleDirection.AMBITIONS.get(PeopleDirection.ambition,{}).get("name","Collective ambition")),"effects":{},"description":"Our people are pursuing a shared direction."}
 	return (FOUNDING_FOCUSES.get(focus_id,{}) as Dictionary).duplicate(true)
 
 

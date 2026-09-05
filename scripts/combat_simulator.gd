@@ -117,6 +117,7 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		armor_total += count * float(weapon.armor)
 		penetration_total += count * float(weapon.penetration)
 		normalized.append({"id":int(formation.get("id",-1)),"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"ammunition":ammunition,"ammunition_required":ammunition_required,"training":training,"experience":experience,"personnel_condition":clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0),"readiness":clampf(float(formation.get("readiness",readiness)),0.0,1.5),"prototype":bool(formation.get("prototype",false)),"wear_accumulator":float(formation.get("wear_accumulator",0.0))})
+		normalized[-1]["visual_model"] = String(formation.get("visual_model", ""))
 	var divisor := maxf(1.0, float(troops))
 	return {
 		"name": name,
@@ -718,6 +719,7 @@ func _force_result(force: Dictionary, initial: int, remaining: int, morale: floa
 	return {
 		"name": String(force.name),
 		"initial_troops": initial,
+		"commander":force.get("commander",{}).duplicate(true),
 		"remaining_troops": remaining,
 		"casualties": initial - remaining,
 		"morale": morale,

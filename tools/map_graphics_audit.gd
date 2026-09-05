@@ -97,9 +97,90 @@ func _ready()->void:
 		assert(terrain.lens_panel!=null and terrain.lens_panel.visible,"Ground inspection must open its visible report")
 		assert("tree cover" in terrain.lens_body.text or "RIVER CHANNEL" in terrain.lens_body.text,"Ground inspection must describe woodland independently of deposits")
 		print("LAND_RESOURCE_AUDIT no icons; biome density matches terrain; catchment=",terrain._woodland_catchment(terrain.camera_target))
+	if "--surface-supplies" in OS.get_cmdline_user_args():
+		var fields:Dictionary=terrain._surface_material_catchments(terrain.camera_target)
+		GameState.resource_deposits=[]
+		ResourceSystem._ensure_surface_material_supplies({"settled":true,"origin":terrain.camera_target,"surface_material_catchments":fields})
+		for resource in ["Stone","Fiber Plants"]:
+			if float(fields[resource].density)<(0.03 if resource=="Stone" else 0.08): continue
+			var found:=false
+			for deposit in GameState.resource_deposits:
+				if String(deposit.resource)==resource: found=true
+			assert(found,"Surface terrain must produce the matching local source")
+		print("SURFACE_SUPPLY_AUDIT fields=",fields," sources=",GameState.resource_deposits.size())
+	if "--river-cpu-drape" in OS.get_cmdline_user_args():
+		var height_field:Image=terrain.river_terrain_height_texture.get_image()
+		var height_grid:Vector4=terrain.river_terrain_grid
+		for river in terrain.river_overlays:
+			var arrays:Array=river.mesh.surface_get_arrays(0)
+			var positions:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+			for index in positions.size():
+				var point:=positions[index]
+				if maxf(absf(point.x-height_grid.x),absf(point.z-height_grid.y))<height_grid.z*0.49:
+					point.y=_grid_height(height_field,height_grid,point)+(0.0037 if river.name=="RiverWater" else 0.0021)
+					positions[index]=point
+			arrays[Mesh.ARRAY_VERTEX]=positions
+			var mesh:=ArrayMesh.new()
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+			river.mesh=mesh
+			var material:ShaderMaterial=river.material_override
+			material.shader.code=material.shader.code.replace("if(terrain_grid.z>0.0", "if(false && terrain_grid.z>0.0")
+	if "--river-samples" in OS.get_cmdline_user_args():
+		var field:Image=terrain.river_terrain_height_texture.get_image()
+		var grid:Vector4=terrain.river_terrain_grid
+		var water:MeshInstance3D=terrain.get_node("RiverWater")
+		var mesh_points:PackedVector3Array=water.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		var maximum_gap:=0.0
+		for index in range(0,6080*6,3):
+			var a:=mesh_points[index]
+			var b:=mesh_points[index+1]
+			var c:=mesh_points[index+2]
+			if Vector2(a.x,a.z).distance_to(Vector2(terrain.camera_target.x,terrain.camera_target.z))>3.0: continue
+			var triangle_center:Vector3=(a+b+c)/3.0
+			var corner_height:=(_grid_height(field,grid,a)+_grid_height(field,grid,b)+_grid_height(field,grid,c))/3.0
+			maximum_gap=maxf(maximum_gap,_grid_height(field,grid,triangle_center)-corner_height)
+		print("RIVER_SURFACE_GAP ",maximum_gap," near=",terrain.camera.near," far=",terrain.camera.far)
+	if "--river-lift" in OS.get_cmdline_user_args():
+		for river in terrain.river_overlays:
+			var material:ShaderMaterial=river.material_override
+			material.shader.code=material.shader.code.replace("(river_water?0.0037:0.0021)","0.05")
+		print("RIVER_GRID ",terrain.river_terrain_grid," height range center=",terrain.river_terrain_height_texture.get_image().get_pixel(int(terrain.river_terrain_grid.w)/2,int(terrain.river_terrain_grid.w)/2))
+	if "--river-depth" in OS.get_cmdline_user_args():
+		for river in terrain.river_overlays:
+			var material:ShaderMaterial=river.material_override
+			material.shader.code=material.shader.code.replace(", depth_test_disabled", "")
+	if "--hide-rivers" in OS.get_cmdline_user_args():
+		for river in terrain.river_overlays: river.visible=false
+	if "--no-terrain-shadows" in OS.get_cmdline_user_args():
+		terrain.regional_terrain_patch.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		terrain.province_terrain_mesh.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if "--hide-ocean" in OS.get_cmdline_user_args():
+		for child in terrain.get_children():
+			if child is MeshInstance3D and child.mesh is PlaneMesh and child.mesh.size.x>1000.0:
+				print("HIDDEN_PLANE ",child.name," y=",child.position.y)
+				child.visible=false
+	if "--flat-terrain" in OS.get_cmdline_user_args():
+		var plain:=StandardMaterial3D.new()
+		plain.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+		plain.albedo_color=Color(0.5,0.6,0.4)
+		terrain.regional_terrain_patch.material_override=plain
 	for frame in 24: await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var output:=ProjectSettings.globalize_path(_arg("--output=","res://map_aerial_audit.png"))
 	get_viewport().get_texture().get_image().save_png(output)
 	print("MAP_AUDIT camera=",terrain.camera.position," target=",terrain.camera_target," span=",terrain.camera.size," image=",output)
 	get_tree().quit()
+
+func _grid_height(field:Image,grid:Vector4,point:Vector3)->float:
+	var coord:Vector2=(Vector2(point.x,point.z)-Vector2(grid.x,grid.y))/grid.z+Vector2(0.5,0.5)
+	coord*=grid.w-1.0
+	var x:=clampi(floori(coord.x),0,int(grid.w)-2)
+	var y:=clampi(floori(coord.y),0,int(grid.w)-2)
+	var f:=coord-Vector2(x,y)
+	var a:=field.get_pixel(x,y).r
+	var b:=field.get_pixel(x+1,y).r
+	var c:=field.get_pixel(x+1,y+1).r
+	var d:=field.get_pixel(x,y+1).r
+	if (x+y)%2==0:
+		return a+(b-a)*f.x+(c-b)*f.y if f.x>=f.y else a+(c-d)*f.x+(d-a)*f.y
+	return a+(b-a)*f.x+(d-a)*f.y if f.x+f.y<=1.0 else c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y)

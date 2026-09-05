@@ -61,3 +61,66 @@ func test_idle_woodland_regrows_at_source_with_a_capacity_limit()->void:
 	source.remaining=source.initial_amount
 	ResourceSystem._process_material_flow(_context(0.7))
 	assert_float(float(source.remaining)).is_equal(float(source.initial_amount))
+
+func _surface_context()->Dictionary:
+	return {"settled":true,"origin":Vector3.ZERO,"surface_material_catchments":{"Stone":{"density":0.5,"position":Vector3.ZERO,"area_km2":9.0},"Fiber Plants":{"density":0.6,"position":Vector3(1,0,0),"area_km2":9.0}}}
+
+func test_stone_and_fiber_do_not_need_random_deposits()->void:
+	ResourceSystem._ensure_surface_material_supplies(_surface_context())
+	assert_int(GameState.resource_deposits.size()).is_equal(2)
+	for source in GameState.resource_deposits:
+		assert_str(String(source.stage)).is_equal("accessible")
+		assert_float(float(source.remaining)).is_greater(0.0)
+	ResourceSystem._ensure_surface_material_supplies(_surface_context())
+	assert_int(GameState.resource_deposits.size()).is_equal(2)
+
+func test_surface_source_adoption_preserves_depletion_and_shipments()->void:
+	var old:=ResourceSystem._deposit("Stone",Vector3.ZERO,0.7,10.0,0)
+	old.remaining=0.0
+	old.stock_at_source=4.0
+	old.shipments=[{"quantity":2.0,"arrival_day":5}]
+	GameState.resource_deposits.append(old)
+	ResourceSystem._ensure_surface_material_supplies(_surface_context())
+	assert_float(float(old.remaining)).is_equal(0.0)
+	assert_float(float(old.stock_at_source)).is_equal(4.0)
+	assert_int(old.shipments.size()).is_equal(1)
+	assert_int(GameState.resource_deposits.size()).is_equal(2)
+
+func test_only_fiber_regrows_and_empty_stone_receives_no_cutting_labor()->void:
+	ResourceSystem._ensure_surface_material_supplies(_surface_context())
+	var stone:Dictionary=GameState.resource_deposits[0]
+	var fiber:Dictionary=GameState.resource_deposits[1]
+	stone.remaining=0.0
+	fiber.remaining=1.0
+	GameState.population_allocations["Extraction"]=6
+	GameState.population_allocations["Logistics"]=0
+	ResourceSystem._process_material_flow(_surface_context())
+	assert_float(float(stone.remaining)).is_equal(0.0)
+	assert_int(int(stone.workers)).is_equal(0)
+	assert_int(int(fiber.workers)).is_equal(6)
+	GameState.population_allocations["Extraction"]=0
+	fiber.remaining=0.0
+	ResourceSystem._process_material_flow(_surface_context())
+	assert_float(float(fiber.remaining)).is_greater(0.0)
+
+func test_barren_and_unfounded_ground_add_no_surface_stocks()->void:
+	var context:=_surface_context()
+	context.surface_material_catchments.Stone.density=0.01
+	context.surface_material_catchments["Fiber Plants"].density=0.0
+	ResourceSystem._ensure_surface_material_supplies(context)
+	assert_array(GameState.resource_deposits).is_empty()
+	context=_surface_context()
+	context.settled=false
+	ResourceSystem._ensure_surface_material_supplies(context)
+	assert_array(GameState.resource_deposits).is_empty()
+
+func test_sparse_surface_stone_is_available_without_a_point_occurrence()->void:
+	var context:=_surface_context()
+	context.surface_material_catchments.Stone.density=0.05
+	ResourceSystem._ensure_surface_material_supplies(context)
+	var found:=false
+	for deposit in GameState.resource_deposits:
+		if String(deposit.resource)=="Stone":
+			found=true
+			assert_float(float(deposit.remaining)).is_greater(0.0)
+	assert_bool(found).is_true()

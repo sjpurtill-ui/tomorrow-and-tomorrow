@@ -1,0 +1,60 @@
+{
+  "units": [
+    {
+      "id": "pike_phalanx",
+      "label": "PIKE PHALANX",
+      "file": "pike_phalanx.glb",
+      "triangles": 1510,
+      "bones": 12,
+      "domain": "land"
+    },
+    {
+      "id": "legionary_infantry",
+      "label": "LEGIONARY INFANTRY",
+      "file": "legionary_infantry.glb",
+      "triangles": 1846,
+      "bones": 12,
+      "domain": "land"
+    },
+    {
+      "id": "war_elephant",
+      "label": "WAR ELEPHANT",
+      "file": "war_elephant.glb",
+      "triangles": 2862,
+      "bones": 23,
+      "domain": "land"
+    },
+    {
+      "id": "battering_ram",
+      "label": "BATTERING RAM",
+      "file": "battering_ram.glb",
+      "triangles": 3148,
+      "bones": 17,
+      "domain": "land"
+    },
+    {
+      "id": "siege_tower",
+      "label": "SIEGE TOWER",
+      "file": "siege_tower.glb",
+      "triangles": 4356,
+      "bones": 18,
+      "domain": "land"
+    },
+    {
+      "id": "trireme",
+      "label": "TRIREME",
+      "file": "trireme.glb",
+      "triangles": 9922,
+      "bones": 100,
+      "domain": "naval"
+    }
+  ],
+  "fps": 24,
+  "clips": {
+    "idle": 2.0,
+    "walk": 1.0,
+    "attack": 1.75,
+    "death": 2.5
+  },
+  "status": "visual prototypes; gameplay integration pending"
+}

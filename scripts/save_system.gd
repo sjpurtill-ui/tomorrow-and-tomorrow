@@ -10,7 +10,7 @@ const SAVE_DIR:="user://saves"
 const SAVE_VERSION:=1
 const DEFAULT_SLOT:="quicksave"
 
-const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem"]
+const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy"]
 const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSystem","EconomySystem","SettlementModel","GovernmentPeopleSystem","WorldFacts","AdvisorSystem","FoodSystem","ConsequenceEngine","PronouncementInterpreter"]
 # Deterministic caches that rebuild from the seed; persisting them would bloat
 # saves and freeze stale copies of static content.
@@ -89,6 +89,7 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	_apply_reflected(DiscoverySystem.society_model,payload.get("reflected_society_model",{}))
 	var errors:Array[String]=[]
 	for system_name in CURATED_SYSTEMS:
+		if system_name=="ForeignDiplomacy" and not payload.has("curated_ForeignDiplomacy"): continue
 		var result:Variant=get_node("/root/"+system_name).import_state(payload.get("curated_%s" % system_name,{}))
 		if result is Dictionary and (result as Dictionary).has("error"): errors.append("%s: %s" % [system_name,String((result as Dictionary).error)])
 	if not errors.is_empty(): return {"error":"  ".join(errors)}

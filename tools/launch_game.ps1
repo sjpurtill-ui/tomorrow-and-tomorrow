@@ -4,6 +4,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
+$canonicalRoot = 'C:\Users\sjpur\TomorrowandTomorrow'
+if ([IO.Path]::GetFullPath($projectRoot).TrimEnd('\') -ine $canonicalRoot) {
+    throw "This launcher is outside the current game. Run $canonicalRoot\tools\launch_game.ps1 instead."
+}
 $godotPackageRoot = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe'
 $godotExecutable = Get-ChildItem -LiteralPath $godotPackageRoot -Filter 'Godot_v*-stable_win64.exe' -File |
     Sort-Object Name -Descending |
@@ -27,10 +31,10 @@ if (-not [string]::IsNullOrWhiteSpace($leviathanKey)) {
 $configuredModel = [Environment]::GetEnvironmentVariable('LEVIATHAN_AI_MODEL', 'User')
 $env:LEVIATHAN_AI_MODEL = if ([string]::IsNullOrWhiteSpace($configuredModel)) { 'gpt-5.6-terra' } else { $configuredModel }
 
-$arguments = @('--path', $projectRoot)
+$arguments = @('--path', ('"' + $projectRoot + '"'))
 if ($Fullscreen) {
     $arguments += '--fullscreen'
 }
 
 $process = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $arguments -WorkingDirectory $projectRoot -PassThru
-Write-Output "Launched Tomorrow and Tomorrow (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"
+Write-Output "Launched current game from $projectRoot (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"

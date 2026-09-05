@@ -1,5 +1,9 @@
 extends Node3D
 
+const ArmyFigureFormationScript:=preload("res://scripts/army_figure_formation.gd")
+const MAX_CLOSE_ARMY_FORMATIONS:=6
+var close_army_figures:Dictionary={}
+
 const FIT_CONTENT_PANEL:=preload("res://scripts/viewport_fit_panel.gd")
 const FoodSystemScript := preload("res://scripts/food_system.gd")
 const SettlementModelScript:=preload("res://scripts/settlement_model.gd")
@@ -147,6 +151,8 @@ var travel_status_label: Label
 var route_mesh: MeshInstance3D
 var river_course := PackedFloat32Array()
 var world_tributary_courses: Array[Array] = []
+var river_terrain_height_texture:ImageTexture
+var river_terrain_grid:=Vector4.ZERO
 var river_overlays: Array[MeshInstance3D] = []
 var lens_panel: PanelContainer
 var lens_body: RichTextLabel
@@ -1223,7 +1229,8 @@ func _discovery_context() -> Dictionary:
 		var origin_2d:=Vector2(origin.x,origin.z)
 		var environment_profile:=PlanetEnvironment.profile_at(origin_2d,_survey_ground_at(origin_2d))
 		context["environment_profile"]=environment_profile
-		context["woodland_catchment"]=_woodland_catchment(origin)
+		context["surface_material_catchments"]=_surface_material_catchments(origin)
+		context["woodland_catchment"]=context.surface_material_catchments.Timber
 		context["biome"]=String(environment_profile.get("biome","unknown"))
 		context["temperature"]=float(environment_profile.get("temperature",0.5))
 		context["precipitation"]=float(environment_profile.get("precipitation",0.5))
@@ -1628,6 +1635,10 @@ func _advance_terrain_patch()->void:
 	regional_patch_center=terrain_patch_job.center
 	regional_patch_span=terrain_patch_job.span
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
+	var height_image:=Image.create_from_data(terrain_patch_job.resolution,terrain_patch_job.resolution,false,Image.FORMAT_RF,terrain_patch_job.heights.to_byte_array())
+	river_terrain_height_texture=ImageTexture.create_from_image(height_image)
+	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(terrain_patch_job.resolution))
+	for river in river_overlays: _bind_river_terrain(river.material_override)
 	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
 	terrain_patch_job=null
 	if previous:
@@ -2150,6 +2161,10 @@ func _build_water() -> void:
 	var water := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(world_width * 4.0, world_depth * 4.0)
+	# Planet-spanning triangles lose depth precision over inland valleys in GL.
+	# Bounded sections keep water at sea level across regional camera ranges.
+	plane.subdivide_width = 255
+	plane.subdivide_depth = 255
 	water.mesh = plane
 	water.position.y = SEA_LEVEL+0.012 if SEAMLESS_WORLD else -5.28
 	var shader:=Shader.new()
@@ -2223,6 +2238,12 @@ func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: floa
 		var after := points[mini(points.size()-1,i+2)]
 		var tangent_a := Vector2(b.x-before.x,b.z-before.z).normalized()
 		var tangent_b := Vector2(after.x-a.x,after.z-a.z).normalized()
+		# Signed local curvature places pale sediment on the inside of bends.
+		var incoming:=Vector2(a.x-before.x,a.z-before.z).normalized()
+		var outgoing:=Vector2(b.x-a.x,b.z-a.z).normalized()
+		var following:=Vector2(after.x-b.x,after.z-b.z).normalized()
+		var bend_a:=clampf(incoming.cross(outgoing)/maxf(a.distance_to(before),0.001)*8.0,-1.0,1.0)
+		var bend_b:=clampf(outgoing.cross(following)/maxf(b.distance_to(a),0.001)*8.0,-1.0,1.0)
 		var width_a:=width*_river_width_factor(a)
 		var width_b:=width*_river_width_factor(b)
 		var side_a := Vector3(-tangent_a.y,0.0,tangent_a.x)*width_a
@@ -2232,6 +2253,7 @@ func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: floa
 		for corner_index in corners.size():
 			var point:=corners[corner_index]
 			surface.set_uv(Vector2([0.0,0.0,1.0,0.0,1.0,1.0][corner_index],point.z))
+			surface.set_uv2(Vector2(bend_a if corner_index in [0,3,5] else bend_b,width))
 			var seamless_lift := 0.0037 if width < 0.15 else 0.0021
 			point.y=_height_at(point.x,point.z)+(seamless_lift if SEAMLESS_WORLD else (0.105 if width<0.8 else 0.072))
 			surface.set_color(Color(color.r*reach_tint,color.g*reach_tint,color.b*reach_tint,color.a))
@@ -2262,6 +2284,11 @@ func _seeded_world_tributaries() -> Array[Array]:
 		tributaries.append(points)
 	return tributaries
 
+func _bind_river_terrain(material:ShaderMaterial)->void:
+	if river_terrain_height_texture==null: return
+	material.set_shader_parameter("terrain_heights",river_terrain_height_texture)
+	material.set_shader_parameter("terrain_grid",river_terrain_grid)
+
 func _build_river_network() -> void:
 	var banks := SurfaceTool.new()
 	var water_surface := SurfaceTool.new()
@@ -2286,7 +2313,8 @@ func _build_river_network() -> void:
 	if SEAMLESS_WORLD:
 		world_tributary_courses = _seeded_world_tributaries()
 		for tributary in world_tributary_courses:
-			var tributary_points: Array[Vector3] = tributary
+			var original_course:Array[Vector3]=tributary
+			var tributary_points:=preload("res://scripts/river_geometry.gd").drape_course(original_course,_height_at)
 			_add_river_ribbon(banks, tributary_points, 0.072, Color(0.14,0.20,0.17,0.58))
 			_add_river_ribbon(water_surface, tributary_points, 0.029, Color(0.052,0.155,0.185,0.86))
 	banks.generate_normals()
@@ -2301,14 +2329,37 @@ func _build_river_network() -> void:
 		var river_shader:=Shader.new()
 		river_shader.code="""
 shader_type spatial;
-render_mode unshaded, specular_disabled, blend_mix, cull_disabled, depth_test_disabled, depth_draw_never;
+render_mode unshaded, specular_disabled, blend_mix, cull_disabled, depth_draw_never;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size=vec2(40075.0,20004.0);
 uniform vec2 fog_current_origin=vec2(0.0);
 uniform float resource_emphasis=0.0;
 uniform bool river_water=false;
+uniform sampler2D terrain_heights : filter_nearest, repeat_disable;
+uniform vec4 terrain_grid=vec4(0.0);
+float visible_ground(vec2 point) {
+	vec2 grid=(point-terrain_grid.xy)/terrain_grid.z+vec2(0.5);
+	vec2 cell=clamp(grid*(terrain_grid.w-1.0),vec2(0.0),vec2(terrain_grid.w-1.001));
+	vec2 base=floor(cell), f=fract(cell);
+	ivec2 texel=ivec2(base);
+	float a=texelFetch(terrain_heights,texel,0).r;
+	float b=texelFetch(terrain_heights,texel+ivec2(1,0),0).r;
+	float c=texelFetch(terrain_heights,texel+ivec2(1,1),0).r;
+	float d=texelFetch(terrain_heights,texel+ivec2(0,1),0).r;
+	// Match the visible mesh's alternating diagonals, rather than bilinear relief.
+	if(mod(base.x+base.y,2.0)<1.0) {
+		return f.x>=f.y ? a+(b-a)*f.x+(c-b)*f.y : a+(c-d)*f.x+(d-a)*f.y;
+	}
+	return f.x+f.y<=1.0 ? a+(b-a)*f.x+(d-a)*f.y : c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y);
+}
 varying vec3 world_position;
-void vertex(){ world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+void vertex(){
+	world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
+	if(terrain_grid.z>0.0 && max(abs(world_position.x-terrain_grid.x),abs(world_position.z-terrain_grid.y))<terrain_grid.z*0.49){
+		VERTEX.y=visible_ground(world_position.xz)+(river_water?0.0037:0.0021);
+		world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
+	}
+}
 float river_noise(vec2 p){
 	vec2 i=floor(p),f=fract(p);
 	f=f*f*(3.0-2.0*f);
@@ -2323,18 +2374,30 @@ void fragment(){
 	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float discovered=smoothstep(0.08,0.58,max(texture(discovery_mask,uv).r,current_visibility));
 	float edge=min(UV.x,1.0-UV.x)*2.0;
-	float shore_variation=(river_noise(world_position.xz*95.0)-0.5)*0.055;
-	float coverage=smoothstep(0.01,river_water?0.13:0.65,edge+shore_variation);
-	float shallows=1.0-smoothstep(0.05,0.50,edge);
+	float footprint=max(length(dFdx(world_position.xz)),length(dFdy(world_position.xz)));
+	float bank_detail=1.0-smoothstep(0.015,0.090,footprint);
+	float bank_mass=river_noise(world_position.xz*5.5);
+	float bank_grain=river_noise(world_position.xz*110.0);
+	float shore_variation=((bank_mass-0.5)*0.38+(bank_grain-0.5)*0.055)*bank_detail;
+	float coverage=smoothstep(0.01,river_water?0.16:0.65,edge+shore_variation);
+	// Positive curvature turns toward +side (UV.x=1); bars belong there.
+	float inside_bend=max(0.0,(UV.x*2.0-1.0)*UV2.x);
+	float shoal_width=0.45+inside_bend*0.55;
+	float shallows=1.0-smoothstep(0.03,shoal_width,edge+shore_variation);
 	float ripple=(river_noise(world_position.xz*24.0)-0.5)*0.008;
-	vec3 water=mix(vec3(0.075,0.155,0.17),vec3(0.16,0.205,0.17),shallows*0.65)+vec3(ripple);
-	ALBEDO=mix(river_water?water:COLOR.rgb,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
+	vec3 water=mix(vec3(0.075,0.155,0.17),vec3(0.24,0.255,0.19),shallows*0.72)+vec3(ripple);
+	float exposed_bar=inside_bend*(1.0-smoothstep(0.04,0.28,edge))*bank_detail;
+	water=mix(water,vec3(0.38,0.345,0.245)*(0.94+bank_grain*0.12),exposed_bar*0.85);
+	float bank_margin=smoothstep(0.30,0.50,edge)*(1.0-smoothstep(0.68,0.96,edge));
+	vec3 bank=mix(COLOR.rgb,vec3(0.30,0.285,0.205),bank_margin*(0.35+inside_bend*0.50)*bank_detail);
+	ALBEDO=mix(river_water?water:bank,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
 	ALPHA=COLOR.a*discovered*coverage;
 	ROUGHNESS=0.72;
 }
 """
 		var material:=ShaderMaterial.new()
 		material.shader=river_shader
+		_bind_river_terrain(material)
 		material.set_shader_parameter("river_water",entry.name=="RiverWater")
 		material.render_priority=-6 if entry.name=="RiverBanks" else -5
 		_fog_shader_parameters(material)
@@ -9341,12 +9404,12 @@ func _update_settlement_progress_text() -> void:
 	if choice_status == null:
 		return
 	if not GameState.settlement_site_committed:
-		choice_status.text = "NOMADIC ERA\nChoose START SETTLEMENT before lasting work can emerge."
+		choice_status.text = "MOBILE COMMUNITIES\nChoose START SETTLEMENT before lasting work can emerge."
 		return
 	var project := _current_settlement_project()
 	if project.is_empty():
 		if GameState.settlement_completed.is_empty():
-			choice_status.text = "NOMADIC ERA\nNo lasting work can emerge from the present allocation."
+			choice_status.text = "MOBILE COMMUNITIES\nNo lasting work can emerge from the present allocation."
 		else:
 			choice_status.text = "THE CAMP ENDURES\nNew forms will emerge as knowledge, labor, and materials change."
 		return
@@ -10898,7 +10961,7 @@ func _build_interface() -> void:
 	choice_status = Label.new()
 	choice_status.position = choice_panel.position + Vector2(22, 500)
 	choice_status.size = Vector2(314, 54)
-	choice_status.text = "NOMADIC ERA\nNo permanent works have emerged."
+	choice_status.text = "MOBILE COMMUNITIES\nNo permanent works have emerged."
 	choice_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	choice_status.add_theme_font_size_override("font_size", 13)
 	choice_status.add_theme_color_override("font_color", Color("#aaa99f"))
@@ -11487,18 +11550,45 @@ func _add_resource_outcrops(parent:Node3D,center:Vector3,style:Dictionary)->void
 	var random:=RandomNumberGenerator.new()
 	random.seed=GameState.world_seed^int(center.x*1000.0)^int(center.z*1700.0)
 	var vertex_count:=0
+	var strike:=random.randf()*TAU
+	var along:=Vector2.from_angle(strike)
+	var across:=Vector2(-along.y,along.x)
+	var layered:=bool(style.get("layered",false))
 	for rock in 14:
-		var point:=Vector2(center.x,center.z)+Vector2(random.randf_range(-0.075,0.075),random.randf_range(-0.075,0.075))
+		var ledge:=layered and rock<8
+		var offset:=along*(float(rock)-3.5)*0.020+across*random.randf_range(-0.015,0.015) if ledge else Vector2(random.randf_range(-0.075,0.075),random.randf_range(-0.075,0.075))
+		var point:=Vector2(center.x,center.z)+offset
 		if not _world_position_is_revealed(Vector3(point.x,0.0,point.y)): continue
-		var radius:=random.randf_range(0.004,0.012)
-		var angle:=random.randf()*TAU
-		var top:=Vector3(point.x,_height_at(point.x,point.y)+radius*0.65,point.y)
-		for side in 7:
-			var a:=point+Vector2.from_angle(angle+float(side)*TAU/7.0)*radius
-			var b:=point+Vector2.from_angle(angle+float(side+1)*TAU/7.0)*radius
-			var shade:Color=(style.rock as Color).darkened(random.randf_range(0.0,0.22))
-			for vertex in [top,Vector3(b.x,_height_at(b.x,b.y)+0.001,b.y),Vector3(a.x,_height_at(a.x,a.y)+0.001,a.y)]:
-				surface.set_color(shade)
+		var radius:=random.randf_range(0.006,0.013) if ledge else random.randf_range(0.002,0.007)
+		var angle:=strike+random.randf_range(-0.13,0.13) if ledge else random.randf()*TAU
+		var elongation:=Vector2(random.randf_range(1.6,2.2),random.randf_range(0.48,0.72)) if ledge else Vector2(random.randf_range(0.8,1.3),random.randf_range(0.65,1.0))
+		var rise:=radius*(0.28 if ledge else 0.68)
+		var rings:Array[Array]=[]
+		var radial_variation:Array[float]=[]
+		for side in 12: radial_variation.append(random.randf_range(0.82,1.15))
+		for level in 3:
+			var ring:Array[Vector3]=[]
+			var scale:float=[1.0,0.96,0.90][level]
+			var height:float=[0.0003,rise*0.35,rise][level]
+			for side in 12:
+				var radial:=Vector2.from_angle(float(side)*TAU/12.0)
+				if ledge: radial/=pow(pow(absf(radial.x),4.0)+pow(absf(radial.y),4.0),0.25)
+				radial*=elongation*radius*scale*radial_variation[side]
+				var corner:=point+radial.rotated(angle)+across*float(level)*radius*0.06
+				ring.append(Vector3(corner.x,_height_at(corner.x,corner.y)+height,corner.y))
+			rings.append(ring)
+		for level in 2:
+			for side in 12:
+				var next:=(side+1)%12
+				var shade:Color=(style.rock as Color).darkened(random.randf_range(0.02,0.13)+(0.05 if level==0 else 0.0))
+				for vertex in [rings[level][side],rings[level+1][side],rings[level+1][next],rings[level][side],rings[level+1][next],rings[level][next]]:
+					surface.set_color(shade)
+					surface.add_vertex(vertex)
+					vertex_count+=1
+		var top:=Vector3(point.x,_height_at(point.x,point.y)+rise,point.y)
+		for side in 12:
+			for vertex in [top,rings[2][(side+1)%12],rings[2][side]]:
+				surface.set_color((style.rock as Color).darkened(random.randf_range(0.0,0.06)))
 				surface.add_vertex(vertex)
 				vertex_count+=1
 	if vertex_count==0: return
@@ -11537,20 +11627,40 @@ func _surface_resource_report(position:Vector3)->String:
 	if String(biome.id)=="water": return ""
 	var cover:=_woodland_density_at(position.x,position.z)
 	var wood:="Dense woodland" if cover>=0.60 else ("Open woodland" if cover>=0.25 else ("Scattered trees" if cover>=0.08 else "Little usable tree cover"))
-	return "[color=#b8ca98][font_size=18]%s[/font_size][/color]\n%s; approximately %d%% tree cover. These trees can supply timber. Cutting and delivery depend on workers, tools, distance and remaining growth.\n\nSurface stone: %s. Soil productivity: %s. Plant forage: %s.\n\n" % [String(biome.label).to_upper(),wood,roundi(cover*100.0),"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","plentiful" if float(biome.forage)>0.6 else "limited"]
+	return "[color=#b8ca98][font_size=18]%s[/font_size][/color]\n%s; approximately %d%% tree cover. These trees can supply timber. Cutting and delivery depend on workers, tools, distance and remaining growth.\n\nSurface stone: %s. Soil productivity: %s. Plant fiber: %s.\n\n" % [String(biome.label).to_upper(),wood,roundi(cover*100.0),"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","plentiful" if _surface_material_density(biome,"Fiber Plants")>0.4 else "scattered" if _surface_material_density(biome,"Fiber Plants")>=0.08 else "limited"]
 
-func _woodland_catchment(origin:Vector3)->Dictionary:
-	var density:=0.0
-	var weighted:=Vector2.ZERO
+func _surface_material_density(biome:Dictionary,resource:String)->float:
+	if String(biome.id)=="water": return 0.0
+	match resource:
+		"Timber": return float(biome.woodland)
+		"Stone": return clampf(float(biome.stone),0.0,1.0)
+		"Fiber Plants": return clampf(float(biome.forage)*0.55+float(biome.woodland)*0.35+(0.25 if String(biome.id)=="wetland" else 0.0),0.0,1.0)
+	return 0.0
+
+func _surface_material_catchments(origin:Vector3)->Dictionary:
+	var totals:={"Timber":0.0,"Stone":0.0,"Fiber Plants":0.0}
+	var positions:={"Timber":Vector2.ZERO,"Stone":Vector2.ZERO,"Fiber Plants":Vector2.ZERO}
 	for z in [-1.0,0.0,1.0]:
 		for x in [-1.0,0.0,1.0]:
 			var point:=Vector2(origin.x+x,origin.z+z)
-			var value:=float(_biome_at(point.x,point.y).woodland)
-			density+=value
-			weighted+=point*value
-	if density<=0.001: return {"density":0.0}
-	var center:=weighted/density
-	return {"density":density/9.0,"area_km2":9.0,"position":Vector3(center.x,_height_at(center.x,center.y),center.y)}
+			var biome:=_biome_at(point.x,point.y)
+			for resource in totals:
+				var value:=_surface_material_density(biome,resource)
+				totals[resource]+=value
+				positions[resource]+=point*value
+	var result:Dictionary={}
+	for resource in totals:
+		var density:=float(totals[resource])
+		if density<=0.001:
+			result[resource]={"density":0.0}
+			continue
+		var center:Vector2=positions[resource]/density
+		result[resource]={"density":density/9.0,"area_km2":9.0,"position":Vector3(center.x,_height_at(center.x,center.y),center.y)}
+	return result
+
+func _woodland_catchment(origin:Vector3)->Dictionary:
+	return _surface_material_catchments(origin).Timber
+
 
 func _resource_label_conflicts_with_settlement(position:Vector3)->bool:
 	if camera==null: return false
@@ -11581,7 +11691,7 @@ func _bounded_resource_overlay_selection(deposits:Array,view_center:Vector2,zoom
 	for deposit_variant in deposits:
 		var deposit:Dictionary=deposit_variant
 		var resource_name:=String(deposit.get("resource","Resource"))
-		if resource_name=="Freshwater": continue
+		if resource_name=="Freshwater" or String(deposit.get("landscape_source","")).ends_with("_catchment"): continue
 		var stage:=String(deposit.get("stage","recognized"))
 		var strategic:=stage in ["accessible","developed"]
 		if zoom>240.0 and not strategic: continue
@@ -11777,6 +11887,7 @@ func _refresh_player_field_army_markers()->void:
 		if stale_path and is_instance_valid(stale_path): stale_path.queue_free()
 		player_field_army_paths.erase(army_id)
 	_refresh_warfare_front_markers(presentation.get("fronts",[]))
+	_refresh_close_army_figures(state.get("armies",[]),selected_army_id)
 
 
 var landmark_markers:Dictionary={}
@@ -16543,6 +16654,11 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 	actions.add_theme_constant_override("h_separation",6)
 	actions.add_theme_constant_override("v_separation",6)
 	civilization_detail_root.add_child(actions)
+	var audience_button:=Button.new()
+	audience_button.text="SPEAK WITH THEIR LEADER"
+	audience_button.custom_minimum_size.y=38
+	audience_button.pressed.connect(func(): ForeignDiplomacy.open(String(profile.id)))
+	actions.add_child(audience_button)
 	var action_descriptions:={"open_trade":"Send a trade proposal. It can begin only after envoys reach them and carry acceptance home.","non_aggression":"Send a non-aggression proposal. No compact exists until the physical round trip is complete.","send_aid":"Send envoys carrying physical food aid; both travel rations and aid leave your reserve at departure.","contain":"End the current compact and adopt a hostile peacetime containment posture.","seek_peace":"Send peace envoys. Any response remains unknown until the delegation returns.","declare_war":"Send a physical declaration. War begins only when the message reaches them.","launch_raid":"Strike a known region for portable stores without attempting occupation; this sharply raises hostility and may begin a war.","launch_campaign":"Commit the existing aggregate field formation against this rival's simulated garrison.","reinforce_occupation":"Move trained field personnel into the selected occupation force. Coverage suppresses rebellion and supports integration.","evacuate_occupation":"Withdraw the selected occupation force into the recruit reserve, returning its issued equipment but leaving control exposed to uprising or recapture."}
 	var action_recoveries:={"open_trade":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","non_aggression":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","send_aid":"Locate their settlement, restore the required physical Food, and finish any active diplomatic mission.","contain":"Resolve the current war or incompatible treaty state, then choose containment again.","seek_peace":"Enter a war, then send peace envoys after locating the opponent's settlement.","declare_war":"Locate their settlement, choose a war objective, and finish any active diplomatic mission before sending the declaration.","launch_raid":"Select a known region, move a field army there, and ensure no truce or non-aggression compact is active.","launch_campaign":"Raise and train personnel, form a maneuver army, move it to this selected objective, and resolve any active battle.","reinforce_occupation":"Train unassigned home personnel, then select a region you already control.","evacuate_occupation":"Select a controlled region with an occupation force still stationed there."}
 	var action_consequences:={"open_trade":"No trade begins until acceptance physically returns.","non_aggression":"No compact begins until acceptance physically returns.","send_aid":"Travel rations and the aid cargo leave physical stores at departure.","contain":"Trade and diplomatic access end immediately and tension rises.","seek_peace":"The war continues until an accepted response returns.","declare_war":"War begins when the declaration reaches them, not when it departs.","launch_raid":"The stationed army fights and may take portable stores, but cannot capture territory; reprisals become more likely.","launch_campaign":"The stationed army fights; military and civilian losses, damage, and control changes enter permanent history.","reinforce_occupation":"Field personnel leave the reserve to suppress resistance and support integration.","evacuate_occupation":"Personnel and equipment return, but resistance or recapture may end control."}
@@ -18093,7 +18209,7 @@ func _open_progression_panel(selected_domain:="demography")->void:
 		var summary:=ProgressionSystem.domain_summary(domain)
 		var domain_button:=Button.new()
 		domain_button.name="Development_%s" % domain
-		domain_button.text="%s\n%s  •  %d ESTABLISHED" % [domain.to_upper(),String(summary.era),int(summary.known_count)]
+		domain_button.text="%s\n%s  •  %d ESTABLISHED" % [domain.to_upper(),String(summary.name),int(summary.known_count)]
 		domain_button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		domain_button.custom_minimum_size=Vector2(230,43)
 		domain_button.toggle_mode=true
@@ -18119,7 +18235,7 @@ func _open_progression_panel(selected_domain:="demography")->void:
 	domain_title.add_theme_color_override("font_color",_dynamic_accent(selected_domain).lightened(0.24))
 	domain_heading.add_child(domain_title)
 	var domain_purpose:=Label.new()
-	domain_purpose.text="%s\nCurrent coordinated scale: %s • %s" % [String(selected_summary.purpose),String(selected_summary.name),String(selected_summary.era)]
+	domain_purpose.text="%s\nCurrent capability: %s" % [String(selected_summary.purpose),String(selected_summary.name)]
 	domain_purpose.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	domain_purpose.add_theme_font_size_override("font_size",10)
 	domain_purpose.add_theme_color_override("font_color",Color("#96a19c"))
@@ -18273,7 +18389,7 @@ func _make_progression_node_card(parent:Container,status:Dictionary,current_tier
 	content.add_theme_constant_override("separation",3)
 	card.add_child(content)
 	var eyebrow:=Label.new()
-	eyebrow.text="%02d  •  %s  •  %s" % [tier+1,String(status.era),"CURRENT" if is_current else ("ESTABLISHED" if unlocked else ("NEXT" if is_next else "LOCKED"))]
+	eyebrow.text="CURRENT" if is_current else ("ESTABLISHED" if unlocked else ("NEXT" if is_next else "LOCKED"))
 	eyebrow.add_theme_font_size_override("font_size",8)
 	eyebrow.add_theme_color_override("font_color",border.lightened(0.22))
 	content.add_child(eyebrow)
@@ -18351,7 +18467,7 @@ func _make_dynamic_card(parent:Container,dynamic_id:String)->void:
 	content.add_child(definition)
 	var progression:=ProgressionSystem.domain_summary(dynamic_id)
 	var progression_label:=Label.new()
-	progression_label.text="%s  •  %s" % [String(progression.era),String(progression.name).to_upper()]
+	progression_label.text=String(progression.name).to_upper()
 	progression_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	progression_label.add_theme_font_size_override("font_size",8)
 	progression_label.add_theme_color_override("font_color",accent.lightened(0.16))
@@ -18505,89 +18621,18 @@ func _subcategory_definition(dynamic_id:String,subcategory:String)->String:
 
 
 func _open_founding_focus_panel()->void:
-	if GameState.founding_focus!="" or (founding_focus_panel and is_instance_valid(founding_focus_panel)): return
+	if GameState.founding_focus!="" or is_instance_valid(founding_focus_panel): return
 	game_speed=0.0
 	if map_help_panel: map_help_panel.visible=false
 	if map_help_button: map_help_button.visible=false
-	founding_focus_selection=""
-	founding_focus_buttons.clear()
-	founding_focus_panel=Control.new()
-	founding_focus_panel.name="FoundingFocusSetup"
-	founding_focus_panel.size=get_viewport().get_visible_rect().size
-	founding_focus_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(founding_focus_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=founding_focus_panel.size
-	dimmer.color=Color(0.003,0.006,0.008,0.95)
-	founding_focus_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.name="FoundingFocusModal"
-	modal.size=Vector2(minf(1160.0,founding_focus_panel.size.x-64.0),minf(660.0,founding_focus_panel.size.y-40.0))
-	modal.position=(founding_focus_panel.size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#091113"),Color("#9b8555"),1,5,20))
-	founding_focus_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",7)
-	modal.add_child(root)
-	var eyebrow:=Label.new()
-	eyebrow.text="NEW CIVILIZATION  •  ONE PERMANENT FOUNDING CHOICE"
-	eyebrow.add_theme_font_size_override("font_size",11)
-	eyebrow.add_theme_color_override("font_color",Color("#c7ae70"))
-	root.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="CHOOSE A FOUNDING FOCUS"
-	title.add_theme_font_size_override("font_size",26)
-	title.add_theme_color_override("font_color",Color("#f2e5cb"))
-	root.add_child(title)
-	var introduction:=Label.new()
-	introduction.text="This is not a scripted objective. It establishes your civilization's initial labor pattern and durable comparative advantages. Every rival civilization chooses automatically under the same rules; its focus remains unknown until you gather enough intelligence."
-	introduction.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	introduction.add_theme_font_size_override("font_size",12)
-	introduction.add_theme_color_override("font_color",Color("#aeb6b0"))
-	root.add_child(introduction)
-	root.add_child(HSeparator.new())
-	var grid:=GridContainer.new()
-	grid.name="FoundingFocusChoices"
-	grid.columns=3
-	grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation",8)
-	grid.add_theme_constant_override("v_separation",8)
-	root.add_child(grid)
-	for definition_variant in GameState.founding_focus_catalog():
-		var definition:Dictionary=definition_variant
-		var focus_id:=String(definition.id)
-		var card:=Button.new()
-		card.name="Focus_%s" % focus_id
-		card.custom_minimum_size=Vector2(360,104)
-		card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		card.alignment=HORIZONTAL_ALIGNMENT_LEFT
-		card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		card.text="%s\n%s\nCOST  •  %s" % [String(definition.name),String(definition.strengths),String(definition.tradeoff)]
-		card.tooltip_text="%s\n\n%s" % [String(definition.creed),String(definition.description)]
-		card.add_theme_font_size_override("font_size",11)
-		card.pressed.connect(_select_founding_focus_card.bind(focus_id))
-		grid.add_child(card)
-		founding_focus_buttons[focus_id]=card
-	var detail_panel:=PanelContainer.new()
-	detail_panel.custom_minimum_size=Vector2(0,106)
-	detail_panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#0c1518"),Color("#44575a"),1,3,12))
-	root.add_child(detail_panel)
-	founding_focus_detail=Label.new()
-	founding_focus_detail.name="FoundingFocusDetail"
-	founding_focus_detail.text="Select a focus to see exactly what it changes. You may inspect every option before committing."
-	founding_focus_detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	founding_focus_detail.add_theme_font_size_override("font_size",12)
-	founding_focus_detail.add_theme_color_override("font_color",Color("#c7cfca"))
-	detail_panel.add_child(founding_focus_detail)
-	founding_focus_confirm=Button.new()
-	founding_focus_confirm.name="ConfirmFoundingFocus"
-	founding_focus_confirm.text="SELECT A FOCUS ABOVE"
-	founding_focus_confirm.disabled=true
-	founding_focus_confirm.custom_minimum_size=Vector2(0,44)
-	founding_focus_confirm.add_theme_font_size_override("font_size",14)
-	founding_focus_confirm.pressed.connect(_confirm_founding_focus)
-	root.add_child(founding_focus_confirm)
-	_refresh_founding_focus_cards()
+	if not is_instance_valid(PeopleDirection.panel): PeopleDirection.open_direction()
+	founding_focus_panel=PeopleDirection.panel
+	founding_focus_panel.tree_exited.connect(func():
+		founding_focus_panel=null
+		if GameState.founding_focus!="":
+			if convoy_banner_sprite: convoy_banner_sprite.texture=_founding_banner_texture(GameState.founding_banner_index)
+			_set_game_speed(1.0)
+			_sync_map_help_overlay_visibility())
 
 
 func _select_founding_focus_card(focus_id:String)->void:
@@ -19206,7 +19251,8 @@ func _process_other_city_resources()->void:
 		_initialize_city_resource_sites(city_id)
 		var point:Vector2=city.position
 		var context:={"origin":Vector3(point.x,0.0,point.y),"traveling":false,"settled":true,"surface_water_distance_km":_river_distance_at(point.x,point.y)*KM_PER_WORLD_UNIT,"tools":ConsequenceEngine.tools_factor()}
-		context["woodland_catchment"]=_woodland_catchment(Vector3(point.x,0.0,point.y))
+		context["surface_material_catchments"]=_surface_material_catchments(Vector3(point.x,0.0,point.y))
+		context["woodland_catchment"]=context.surface_material_catchments.Timber
 		_settlement_model().process_city_resources(city_id,context,_process_settlement_day)
 	_settlement_model().process_city_trade(_city_trade_route_assessment)
 
@@ -19238,3 +19284,78 @@ func _select_city(settlement_id:String)->void:
 		hud.close_detail()
 		if hud.dock and hud.dock.visible: hud.dock.rebuild()
 	_refresh_discovered_resource_overlays()
+
+func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
+	# Strategic counters disappear below size 8. Ground figures use the same
+	# kilometre coordinates and building-detail scale as the city inspection view.
+	var candidates:Array[Dictionary]=[]
+	if camera and camera.size<8.0:
+		for army:Dictionary in armies:
+			var point:Dictionary=army.get("position",{})
+			if not point.has("x") or not point.has("z"): continue
+			var world:=Vector3(float(point.x),0.0,float(point.z))
+			var distance:=Vector2(world.x-camera_target.x,world.z-camera_target.z).length()
+			if distance>camera.size*1.4+0.25 or not _world_position_is_revealed(world): continue
+			var counts:Dictionary=ArmyFigureFormationScript.composition(army)
+			var supported:=0
+			for count in counts.values(): supported+=int(count)
+			if supported<=0: continue
+			candidates.append({"army":army,"counts":counts,"world":world,"distance":distance,"selected":int(army.get("army_id",0))==selected_army_id})
+	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if bool(a.selected)!=bool(b.selected): return bool(a.selected)
+		return float(a.distance)<float(b.distance))
+	if candidates.size()>MAX_CLOSE_ARMY_FORMATIONS: candidates.resize(MAX_CLOSE_ARMY_FORMATIONS)
+	var keep:Dictionary={}
+	var occupied:Array[Vector3]=[]
+	for candidate:Dictionary in candidates:
+		var army:Dictionary=candidate.army
+		var id:=str(int(army.get("army_id",0))); keep[id]=true
+		var figures:Node3D=close_army_figures.get(id,null)
+		if figures==null:
+			figures=ArmyFigureFormationScript.new(); figures.name="CloseArmy_"+id
+			add_child(figures); close_army_figures[id]=figures
+			figures.scale=Vector3.ONE*SETTLEMENT_DETAIL_SCALE
+			var label:=Label3D.new(); label.name="Strength"; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+			label.fixed_size=true; label.font_size=12; label.outline_size=4; label.no_depth_test=true
+			label.scale=Vector3.ONE/SETTLEMENT_DETAIL_SCALE; figures.add_child(label)
+		var world:Vector3=candidate.world
+		# Multiple hosts can share one simulation location. Separate the bounded
+		# visual blocks without changing their authoritative army coordinates.
+		for attempt in MAX_CLOSE_ARMY_FORMATIONS:
+			var overlaps:=false
+			for other:Vector3 in occupied:
+				if Vector2(world.x-other.x,world.z-other.z).length()<0.24: overlaps=true
+			if not overlaps: break
+			world.x+=0.25
+		occupied.append(world)
+		world.y=_height_at(world.x,world.z)
+		var destination:Dictionary=army.get("destination_position",{})
+		var direction:=Vector2(float(destination.get("x",world.x))-world.x,float(destination.get("z",world.z))-world.z)
+		var facing:=atan2(direction.x,direction.y) if direction.length()>0.001 else 0.0
+		var ground_signature:="%s/%s/%s/%s" % [candidate.counts,world,facing,bool(candidate.selected)]
+		var needs_ground:=String(figures.get_meta("ground_signature",""))!=ground_signature
+		var previous_visual_position:Vector3=figures.position
+		var had_ground:=figures.has_meta("ground_signature")
+		if needs_ground: figures.position=world
+		figures.rotation.y=facing
+		figures.configure(candidate.counts,Color(WarfareMapPresentation.PLAYER_SELECTED_COLOR if bool(candidate.selected) else WarfareMapPresentation.PLAYER_COLOR))
+		figures.set_animation("walk" if String(army.get("status",""))=="moving" else "idle")
+		figures.animation_speed=1.0 if game_speed>0.0 else 0.0
+		if needs_ground:
+			figures.fit_to_ground(Callable(self,"_height_at")); figures.set_meta("ground_signature",ground_signature)
+			# Smooth between authoritative route samples; simulation positions and
+			# arrival times remain unchanged. Bound tweens to one per visible army.
+			var previous_tween:Tween=figures.get_meta("movement_tween") if figures.has_meta("movement_tween") else null
+			if previous_tween!=null and previous_tween.is_valid(): previous_tween.kill()
+			if had_ground and game_speed>0.0 and String(army.get("status",""))=="moving" and previous_visual_position.distance_to(world)>0.00001:
+				figures.position=previous_visual_position
+				var movement:=figures.create_tween()
+				movement.tween_property(figures,"position",world,0.35).set_trans(Tween.TRANS_SINE)
+				figures.set_meta("movement_tween",movement)
+		var strength:=figures.get_node("Strength") as Label3D
+		strength.position=Vector3(0,3.6,0)
+		strength.text="%s • %s\n%d representative figures" % [String(army.get("name","FIELD ARMY")),WarfareMapPresentation.compact_count(int(army.get("troops",0))),int(figures.figure_count)]
+	for id in close_army_figures.keys():
+		if keep.has(id): continue
+		var stale:Node3D=close_army_figures[id]
+		remove_child(stale); stale.queue_free(); close_army_figures.erase(id)

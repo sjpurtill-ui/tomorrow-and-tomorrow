@@ -115,6 +115,10 @@ func initialize() -> void:
 
 func process_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
+	HistoricalFigures.advance(int(GameState.elapsed_days))
+	PeopleDirection.advance(int(GameState.elapsed_days))
+	CommunityNetwork.advance(int(GameState.elapsed_days))
+	ForeignDiplomacy.advance(int(GameState.elapsed_days))
 	var effective_context:=context.duplicate(true)
 	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("military_inquiry_context"):
@@ -149,6 +153,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		GameState.discovery_progress[discovery_id]=clampf(progress,0.0,1.0)
 		if progress>=1.0:
 			GameState.known_discoveries.append(discovery.id)
+			HistoricalFigures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
 			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_effect_summary(discovery.get("effects",{})),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
 			GameState.discovery_log.push_front(event)
@@ -702,7 +707,7 @@ func _leader_factor(direction: String) -> float:
 		"security":["Marshal",["Defense","Administration"]],"culture":["Envoy",["Diplomacy","Knowledge"]]
 	}
 	var assignment: Array = mapping.get(direction,["Scholar",["Knowledge"]])
-	return AdvisorSystem.execution_modifier(assignment[0],assignment[1])
+	return AdvisorSystem.execution_modifier(assignment[0],assignment[1])*ForeignDiplomacy.multiplier(direction)*HistoricalFigures.multiplier(direction)*PeopleDirection.research_multiplier(direction)*CommunityNetwork.multiplier(direction)
 
 func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
 	return int((GameState.research_subcategory_allocations.get(dynamic_id,{}) as Dictionary).get(subcategory,0))

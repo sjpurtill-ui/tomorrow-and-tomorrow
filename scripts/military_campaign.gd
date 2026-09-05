@@ -21,7 +21,7 @@ const FORTIFIED_STORES_MAX_PROTECTION:=0.60
 const EQUIPMENT_DELIVERY_LOAD:Dictionary={"improvised":0.80,"spear":1.00,"bow":0.80,"sword_shield":1.80,"lance":1.60,"siege_kit":6.00,"field_gun":10.00,"service_rifle":1.15,"machine_gun":8.0,"motorized_kit":12.0,"armored_vehicle":28.0,"modern_field_gun":18.0}
 const AMMUNITION_DELIVERY_LOAD:Dictionary={"arrows":0.08,"artillery_rounds":0.65,"small_arms_ammunition":0.04,"heavy_shells":0.90}
 # Unit identity, gating, lineage, and fielding data live in the archetype
-# catalog (design bible §17–18); these constants are parse-time views kept for
+# catalog (design bible Â§17â€“18); these constants are parse-time views kept for
 # the many existing call sites.
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 const EQUIPMENT_KNOWLEDGE:Dictionary=UnitCatalog.EQUIPMENT_GATES
@@ -237,7 +237,7 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	aggregate_recruits-=accepted
 	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"required_days":training_days,"injury_accumulator":0.0,"prototype":prototype})
 	if prototype:
-		return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"prototype":true,"message":"An experimental cohort of %d begins learning %s from first principles — %.0f days at exceptional cost. The practice is understood, not yet established." % [accepted,unit.replace("_"," "),training_days]}
+		return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"prototype":true,"message":"An experimental cohort of %d begins learning %s from first principles â€” %.0f days at exceptional cost. The practice is understood, not yet established." % [accepted,unit.replace("_"," "),training_days]}
 	return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"message":"Training begun for %d %s with %s; baseline %.0f days, with %d/%d training places now committed." % [accepted,unit.replace("_"," "),weapon.replace("_"," "),training_days,_queued_trainees(),training_capacity()]}
 
 
@@ -363,7 +363,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	if amount<=0: return {"error":"Production amount must be positive."}
 	var experimental:=false
 	if not bool(gate.unlocked):
-		# §18.1 prototype path: an UNDERSTOOD item can be produced as a small
+		# Â§18.1 prototype path: an UNDERSTOOD item can be produced as a small
 		# experimental workshop batch (slow, bounded) before it is adopted
 		# practice. Tier-gated industry has no such shortcut.
 		var item_discovery:=String(EQUIPMENT_KNOWLEDGE.get(item,""))
@@ -387,7 +387,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
 	equipment_queue.append({"id":job_id,"job_type":"production","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount,"reserved_materials":reserved,"allocation":1.0,"efficiency":0.20,"experimental":experimental})
 	if experimental:
-		return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"experimental":true,"message":"Queued %d experimental %s — understood but unpracticed, at double workshop time. At most 12 can exist before the practice is established." % [amount,item.replace("_"," ")]}
+		return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"experimental":true,"message":"Queued %d experimental %s â€” understood but unpracticed, at double workshop time. At most 12 can exist before the practice is established." % [amount,item.replace("_"," ")]}
 	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
@@ -613,7 +613,7 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 	var committed:=0
 	for formation in detached: committed+=int(formation.get("count",0))
 	if committed<=0: return {"error":"No surviving field personnel were available to hold the captured region.","troops":0,"required":required}
-	var force:Dictionary=simulator.create_formation_force("OCCUPATION • %s" % String(region.get("name","STRATEGIC REGION")),detached,clampf(float(home_army.get("morale",0.55))*0.92,0.20,1.0),clampf(float(home_army.get("readiness",0.45))*0.90,0.15,1.0))
+	var force:Dictionary=simulator.create_formation_force("OCCUPATION â€¢ %s" % String(region.get("name","STRATEGIC REGION")),detached,clampf(float(home_army.get("morale",0.55))*0.92,0.20,1.0),clampf(float(home_army.get("readiness",0.45))*0.90,0.15,1.0))
 	force["civ_id"]=civ_id
 	force["region_id"]=region_id
 	force["region_name"]=String(region.get("name","STRATEGIC REGION"))
@@ -753,6 +753,40 @@ func field_armies_snapshot()->Dictionary:
 	return {"armies":field_armies.duplicate(true),"active":field_armies.size(),"capacity":field_army_capacity(),"live_reports":_live_army_reporting(),"runner_messages_in_flight":runner_messages.size(),"destinations":CivilizationSystem.military_movement_destinations() if CivilizationSystem!=null and CivilizationSystem.has_method("military_movement_destinations") else []}
 
 
+func set_formation_visual(army_id:int,formation_id:int,model_id:String)->Dictionary:
+	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before changing appearance."}
+	var force:Dictionary=home_army
+	if army_id!=0:
+		var index:=_field_army_index(army_id)
+		if index<0: return {"error":"Field army was not found."}
+		force=field_armies[index]
+	for formation:Dictionary in force.get("formations",[]):
+		if int(formation.get("id",-1))!=formation_id: continue
+		var options:Array=UnitVisualCatalog.VARIANTS.get(String(formation.get("unit","")),[])
+		if model_id!="" and not model_id in options: return {"error":"That appearance is not available for this formation."}
+		formation["visual_model"]=model_id
+		army_changed.emit(home_army.duplicate(true))
+		return {"message":"Appearance updated. Equipment, strength, and combat role are unchanged."}
+	return {"error":"Formation was not found."}
+
+
+func set_army_visual_theme(army_id:int,theme:String)->Dictionary:
+	if not theme in UnitVisualCatalog.THEMES: return {"error":"Unknown appearance."}
+	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before changing appearance."}
+	var force:Dictionary=home_army
+	if army_id!=0:
+		var index:=_field_army_index(army_id)
+		if index<0: return {"error":"Field army was not found."}
+		force=field_armies[index]
+	force["visual_theme"]=theme
+	var formations:Array=force.get("formations",[])
+	for i in formations.size():
+		formations[i].erase("visual_model")
+		formations[i]["visual_model"]=UnitVisualCatalog.model(formations[i],theme,i)
+	army_changed.emit(home_army.duplicate(true))
+	return {"message":"Army appearance updated. No equipment or combat statistics changed."}
+
+
 func front_force_snapshot(civ_id:String,region_id:String)->Dictionary:
 	# Front consumers need assignment totals, not formation arrays. Keep this one
 	# bounded record per maneuver army and never infer that the home reserve is at
@@ -834,7 +868,8 @@ func _assemble_field_army(detached:Array[Dictionary],custom_name:String="")->Dic
 	force["departure_day"]=-1
 	force["arrival_day"]=-1
 	force["supply_level"]=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
-	force["commander"]=(home_army.get("commander",_marshal_commander()) as Dictionary).duplicate(true)
+	force["commander"]=HistoricalFigures.commander(_acting_field_commander(false),"army_%d" % army_id)
+	force["visual_theme"]=String(home_army.get("visual_theme","equipment"))
 	# Runners carry the army's reports home; without them (and before signal-era
 	# development) the government would know nothing of a distant force.
 	force["exercise_readiness_bonus"]=float(home_army.get("exercise_readiness_bonus",0.0))
@@ -960,7 +995,7 @@ func order_field_army_intercept(army_id:int,formation_id:String)->Dictionary:
 	if bool(availability.get("can_engage",false)): return launch_map_engagement(army_id,formation_id)
 	var sighting:Dictionary=availability.sighting
 	var position:Dictionary=sighting.get("position",{})
-	var label:="INTERCEPT · %s" % String(sighting.get("label","FOREIGN FORMATION"))
+	var label:="INTERCEPT Â· %s" % String(sighting.get("label","FOREIGN FORMATION"))
 	var result:=move_field_army_to_position(army_id,float(position.get("x",0.0)),float(position.get("z",0.0)),label)
 	if not bool(result.get("ok",false)): return result
 	var index:=_field_army_index(army_id)
@@ -969,7 +1004,7 @@ func order_field_army_intercept(army_id:int,formation_id:String)->Dictionary:
 		field_armies[index]["order_kind"]="intercept"
 		result["army"]=field_armies[index].duplicate(true)
 	result["underway"]=true
-	result["message"]="INTERCEPT ORDER UNDERWAY — %s is tracking %s. If contact holds, battle begins automatically at close range." % [String((result.get("army",{}) as Dictionary).get("name","The army")),String(sighting.get("label","the foreign formation"))]
+	result["message"]="INTERCEPT ORDER UNDERWAY â€” %s is tracking %s. If contact holds, battle begins automatically at close range." % [String((result.get("army",{}) as Dictionary).get("name","The army")),String(sighting.get("label","the foreign formation"))]
 	return result
 
 
@@ -989,7 +1024,7 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 		field_armies[index].erase("target_formation_id")
 		field_armies[index].erase("order_kind")
 	var engagement:=begin_threat_engagement()
-	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"CONTACT — %s has engaged %s. Open WAR PLANNING to order HOLD, PUSH, or RETREAT." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
+	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"CONTACT â€” %s has engaged %s. Open WAR PLANNING to order HOLD, PUSH, or RETREAT." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
 
 
 func return_field_army(army_id:int)->Dictionary:
@@ -1121,7 +1156,7 @@ func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)-
 	template["entries"]=entries
 	army_templates[index]=template
 	var result:Dictionary={"ok":true,"template":template.duplicate(true)}
-	if applied<delta: result["message"]="Added %d of %d — the build is now at the mobilization capacity of %d." % [applied,delta,recruitment_capacity()]
+	if applied<delta: result["message"]="Added %d of %d â€” the build is now at the mobilization capacity of %d." % [applied,delta,recruitment_capacity()]
 	return result
 
 
@@ -1151,7 +1186,7 @@ func queue_template_training(template_id:int)->Dictionary:
 		var shortfall:Dictionary=shortfall_variant
 		var take:=mini(int(shortfall.missing),aggregate_recruits)
 		if take<=0:
-			messages.append("%s ×%d waits for recruits" % [String(shortfall.unit),int(shortfall.missing)])
+			messages.append("%s Ã—%d waits for recruits" % [String(shortfall.unit),int(shortfall.missing)])
 			continue
 		var order:=start_training(String(shortfall.unit),String(shortfall.weapon),take)
 		if order.has("error"):
@@ -1285,7 +1320,7 @@ func _process_field_army_movement_day()->void:
 			army["destination_position"]=tracked_position.duplicate(true)
 			army["distance_total_km"]=tracked_distance
 			army["distance_remaining_km"]=tracked_distance
-			army["destination_name"]="INTERCEPT · %s" % String(tracked.get("label","FOREIGN FORMATION"))
+			army["destination_name"]="INTERCEPT Â· %s" % String(tracked.get("label","FOREIGN FORMATION"))
 		var remaining:=maxf(0.0,float(army.get("distance_remaining_km",0.0)))
 		var speed:=_field_army_speed(army)
 		var traveled:=minf(remaining,speed)
@@ -1503,6 +1538,7 @@ func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dict
 
 
 func _commit_campaign_battle(result:Dictionary)->Dictionary:
+	HistoricalFigures.record_battle(result)
 	var home_side:=String(result.get("home_side","attacker"))
 	var home_result:Dictionary=result.get(home_side,result.get("attacker",{}))
 	var home_force_kind:=String(result.get("home_force_kind","field"))
@@ -1751,7 +1787,9 @@ func advance_engagement(order:String="hold")->Dictionary:
 	var record:Dictionary=(result.rounds[0] as Dictionary).duplicate(true); record["round"]=next_round; record["order"]=command
 	(active_engagement.rounds as Array).append(record)
 	active_engagement["round"]=next_round; active_engagement["attacker"]=_force_from_round_result(active_engagement.attacker,result.attacker); active_engagement["defender"]=_force_from_round_result(active_engagement.defender,result.defender); active_engagement["last_order"]=command; active_engagement["last_result"]=result.duplicate(true)
-	if String(result.get("outcome","continued"))!="continued" or next_round>=CombatSimulator.MAX_ROUNDS:
+	# The resolver calls an undecided round "inconclusive"; it is still an active
+	# engagement. Do not prematurely finish every battle after its first round.
+	if String(result.get("outcome","inconclusive")) not in ["continued","inconclusive"] or next_round>=CombatSimulator.MAX_ROUNDS:
 		return _finish_active_engagement(false,result)
 	army_changed.emit(home_army.duplicate(true))
 	return {"active":true,"engagement":engagement_snapshot(),"round":record}
@@ -2118,6 +2156,7 @@ func resolve_held_general(index:int,policy:String)->Dictionary:
 	if normalized not in ["release","ransom","execute"]: return {"error":"Unknown held-general policy: %s" % policy}
 	if index<0 or index>=held_generals.size(): return {"error":"Held general %d was not found." % index}
 	var general:Dictionary=held_generals.pop_at(index)
+	HistoricalFigures.resolve_captive(String(general.get("figure_id","")),normalized)
 	var outcome:Dictionary={"general":general.duplicate(true),"general_policy":normalized}
 	if normalized=="ransom":
 		outcome["war_wealth_receipt"]=_receive_war_wealth(50.0,"state treasury","Ransom for held commander")
@@ -2168,6 +2207,8 @@ func export_state()->Dictionary:
 	return {
 		"version":SAVE_VERSION,
 		"world_seed":GameState.world_seed,
+		"historical_figures":HistoricalFigures.export_state(),
+		"people_direction":PeopleDirection.export_state(),
 		"last_processed_day":last_processed_day,
 		"home_army":home_army.duplicate(true),
 		"battle_history":battle_history.duplicate(true),
@@ -2218,10 +2259,20 @@ func import_state(payload:Dictionary)->Dictionary:
 	elif incoming_version!=SAVE_VERSION: return {"error":"Unsupported military save version."}
 	if int(incoming.get("world_seed",GameState.world_seed))!=GameState.world_seed: return {"error":"Military save belongs to a different world."}
 	var previous:=export_state()
+	if incoming.has("historical_figures"):
+		var figure_result:=HistoricalFigures.import_state(incoming.historical_figures)
+		if figure_result.has("error"): return figure_result
+	if incoming.has("people_direction"):
+		var direction_result:=PeopleDirection.import_state(incoming.people_direction)
+		if direction_result.has("error"):
+			HistoricalFigures.import_state(previous.historical_figures)
+			return direction_result
 	_apply_imported_state(incoming)
 	var errors:=validate_state()
 	if not errors.is_empty():
 		_apply_imported_state(previous)
+		HistoricalFigures.import_state(previous.historical_figures)
+		PeopleDirection.import_state(previous.people_direction)
 		return {"error":"Invalid military save state.","details":errors}
 	last_world_seed=GameState.world_seed
 	return {"ok":true,"version":SAVE_VERSION}
@@ -2593,12 +2644,12 @@ const PROTOTYPE_COHORT_LIMIT:=8
 const PROTOTYPE_TRAINING_MULTIPLIER:=2.5
 
 
-## §18.1 capability ladder. Knowledge reveals a capability; this ladder says
-## how far the society has actually carried it: unobserved → observed (the
-## problem or foreign solution is visible) → understood (the principle is
-## established knowledge) → established (adopted practice; normal fielding) →
-## scalable (production and spread support reproduction) → mature (fielded
-## formations carry real experience). Legacy is future work — nothing
+## Â§18.1 capability ladder. Knowledge reveals a capability; this ladder says
+## how far the society has actually carried it: unobserved â†’ observed (the
+## problem or foreign solution is visible) â†’ understood (the principle is
+## established knowledge) â†’ established (adopted practice; normal fielding) â†’
+## scalable (production and spread support reproduction) â†’ mature (fielded
+## formations carry real experience). Legacy is future work â€” nothing
 ## obsolesces yet.
 func unit_capability_state(unit:String)->Dictionary:
 	var gate_id:=UnitCatalog.gate_for(unit)
@@ -2644,7 +2695,7 @@ func _training_gate(unit:String,weapon:String)->Dictionary:
 	var unit_gate:=_knowledge_gate(UnitCatalog.gate_for(unit),0.10)
 	var weapon_gate:=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE.get(weapon,"")),0.10)
 	if bool(unit_gate.unlocked) and bool(weapon_gate.unlocked): return {}
-	# §18.1 prototype path: with the principle UNDERSTOOD (known, not yet
+	# Â§18.1 prototype path: with the principle UNDERSTOOD (known, not yet
 	# adopted practice), one small experimental cohort can be raised at
 	# exceptional cost and risk. Understanding is required for both the unit
 	# and its equipment; observation alone fields nothing.
@@ -2688,7 +2739,7 @@ func _marshal_commander()->Dictionary:
 	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
 	var security:=float(GameState.society_capacities.get("security",0.38))
 	var logistics:=float(GameState.society_capacities.get("logistics",0.16))
-	if marshal.is_empty(): return _acting_field_commander(false)
+	if marshal.is_empty(): return HistoricalFigures.commander(_acting_field_commander(false),"home")
 	# Field command now derives from the same visible aptitudes used by every
 	# other appointment. Compatibility composites keep older commanders valid.
 	var command:=clampf(GovernmentPeopleSystem.skill_value(marshal,"Strategy",50.0)/100.0*0.68+security*0.32,0.0,1.0)
@@ -2713,7 +2764,7 @@ func _apply_home_commander_fate(termination:Dictionary)->void:
 	var fate:=String(termination.get("commander_fate","escaped"))
 	if fate not in ["killed","captured"]: return
 	var former:Dictionary=home_army.get("commander",{})
-	var successor:=_acting_field_commander(false)
+	var successor:=HistoricalFigures.commander(_acting_field_commander(false),"home")
 	home_army["commander"]=successor
 	var command_effect:="was destroyed" if fate=="killed" else "was captured"
 	GameState.council_inbox.push_front({"id":"command_succession_%d" % int(GameState.elapsed_days),"advisor":String(successor.get("name","ACTING FIELD STAFF")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":"%s %s. %s has assumed field coordination with reduced effectiveness." % [String(former.get("name","The field command element")),command_effect,String(successor.get("name","The acting field staff"))],"urgency":0.98,"day":int(GameState.elapsed_days),"status":"unread"})
@@ -2756,7 +2807,7 @@ func _acting_field_commander(assign_office:bool)->Dictionary:
 func _synchronize_field_commander()->void:
 	if home_army.is_empty(): return
 	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
-	home_army["commander"]=_marshal_commander() if not marshal.is_empty() else _acting_field_commander(false)
+	home_army["commander"]=_marshal_commander()
 	for force in field_armies+occupation_forces:
 		var commander:Dictionary=force.get("commander",{}).duplicate(true)
 		if commander.is_empty(): commander=home_army["commander"].duplicate(true)
@@ -3388,7 +3439,7 @@ func _process_training_program_day()->void:
 		return
 	var required_food:=float(participants)*float(definition.food_per_participant)
 	var available_food:=FoodSystem.total_stored()
-	var food_taken:=FoodSystem.issue_for_obligation(minf(required_food,available_food),"military_training","%s • %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
+	var food_taken:=FoodSystem.issue_for_obligation(minf(required_food,available_food),"military_training","%s â€¢ %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
 	var ration_coverage:=clampf(food_taken/maxf(0.001,required_food),0.0,1.0) if required_food>0.0 else 1.0
 	var supply_coverage:=field_provision_delivery_ratio() if String(definition.scope)=="army" else clampf(0.45+float(GameState.society_capacities.get("institutions",0.25))*0.30+float(GameState.society_capacities.get("logistics",0.16))*0.25,0.0,1.0)
 	var commander:Dictionary=home_army.get("commander",_marshal_commander())
@@ -3878,6 +3929,7 @@ func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:D
 		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
 		_adjust_war_reputation(0.0,0.06,0.09)
 		outcome["general_executed"]=true
+	HistoricalFigures.resolve_captive(String(general.get("figure_id","")),policy.to_lower())
 	outcome["general_policy"]=policy
 
 

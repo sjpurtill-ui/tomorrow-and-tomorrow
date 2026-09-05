@@ -1,0 +1,60 @@
+{
+  "units": [
+    {
+      "id": "armored_foot",
+      "label": "ARMORED FOOT SOLDIER",
+      "file": "armored_foot.glb",
+      "triangles": 1725,
+      "bones": 12,
+      "domain": "land"
+    },
+    {
+      "id": "pavise_crossbowman",
+      "label": "PAVISE CROSSBOWMAN",
+      "file": "pavise_crossbowman.glb",
+      "triangles": 1594,
+      "bones": 15,
+      "domain": "land"
+    },
+    {
+      "id": "longbowman",
+      "label": "LONGBOWMAN",
+      "file": "longbowman.glb",
+      "triangles": 1446,
+      "bones": 14,
+      "domain": "land"
+    },
+    {
+      "id": "counterweight_trebuchet",
+      "label": "COUNTERWEIGHT TREBUCHET",
+      "file": "counterweight_trebuchet.glb",
+      "triangles": 3196,
+      "bones": 21,
+      "domain": "land"
+    },
+    {
+      "id": "hand_cannon_team",
+      "label": "HAND-CANNON TEAM",
+      "file": "hand_cannon_team.glb",
+      "triangles": 1484,
+      "bones": 14,
+      "domain": "land"
+    },
+    {
+      "id": "bombard",
+      "label": "BOMBARD",
+      "file": "bombard.glb",
+      "triangles": 2140,
+      "bones": 15,
+      "domain": "land"
+    }
+  ],
+  "fps": 24,
+  "clips": {
+    "idle": 2.0,
+    "walk": 1.0,
+    "attack": 1.75,
+    "death": 2.5
+  },
+  "status": "visual prototypes; gameplay integration pending"
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "unit": "levy",
+    "clip": "attack",
+    "min_z": -7.000140556101542e-08,
+    "frame": 22,
+    "bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "levy",
+    "clip": "death",
+    "min_z": -1.352373573126897e-07,
+    "frame": 6,
+    "bones": [
+      "foot.L"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "clip": "attack",
+    "min_z": -7.925714839984721e-08,
+    "frame": 4,
+    "bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "clip": "death",
+    "min_z": -7.182359951229955e-08,
+    "frame": 5,
+    "bones": [
+      "foot.L"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "clip": "attack",
+    "min_z": -1.6970298943874695e-08,
+    "frame": 0,
+    "bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "clip": "death",
+    "min_z": -7.552560532531061e-08,
+    "frame": 2,
+    "bones": [
+      "foot.R"
+    ]
+  }
+]

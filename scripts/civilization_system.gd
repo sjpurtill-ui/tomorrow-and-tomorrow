@@ -43,8 +43,9 @@ const REVEALED_TRAIL_POINT_LIMIT:=128
 const SCOUT_LAND_SAMPLE_KM:=8.0
 const SCOUT_ROUTE_GRID_LIMIT:=96
 const DIPLOMATIC_HISTORY_LIMIT:=24
-const CARRIED_DIPLOMATIC_ACTIONS:=["open_trade","non_aggression","send_aid","seek_peace","declare_war"]
+const CARRIED_DIPLOMATIC_ACTIONS:=["open_trade","non_aggression","send_aid","seek_peace","declare_war","leader_parley"]
 const DIPLOMATIC_PURPOSE_LABELS:={
+	"leader_parley":"NEGOTIATE WITH LEADER",
 	"goodwill":"GOODWILL MISSION","open_trade":"PROPOSE TRADE","non_aggression":"PROPOSE NON-AGGRESSION",
 	"send_aid":"DELIVER FOOD AID","seek_peace":"SEEK PEACE","declare_war":"CARRY DECLARATION OF WAR"
 }
@@ -3687,6 +3688,8 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 	var relation:Dictionary=civ.player_relation
 	var normalized:=action.strip_edges().to_lower().replace(" ","_")
 	if int(relation.get("contact_level",0))<2: return {"error":"No direct contact exists with this foreign polity."}
+	if normalized=="leader_parley":
+		return {"ok":true,"action":normalized}
 	if normalized in CARRIED_DIPLOMATIC_ACTIONS and not bool(relation.get("home_location_known",false)):
 		return {"error":"Their settlement is unlocated. A returned scout report must establish a physical destination before this message can be sent.","requires_location":true}
 	var opinion:=float(relation.get("opinion",0.0))
@@ -3724,6 +3727,9 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 
 
 func conduct_player_action(civ_id:String,action:String,arrived_via_envoy:bool=false)->Dictionary:
+	if action=="leader_parley":
+		if not arrived_via_envoy: return {"error":"Send these terms by envoy first."}
+		return ForeignDiplomacy.resolve(civ_id)
 	var availability:=player_action_availability(civ_id,action)
 	if availability.has("error"): return availability
 	var index:=_civilization_index(civ_id)
