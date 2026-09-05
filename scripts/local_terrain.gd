@@ -8745,7 +8745,9 @@ func _append_yard_variation(surface:SurfaceTool,plot:Dictionary,center:Vector3)-
 		if use=="dirty_industry": ground_cells=[Vector2i(0,0),Vector2i(3,2),Vector2i(2,3)]
 		elif use=="storage": ground_cells=[Vector2i(1,0),Vector2i(3,2),Vector2i(0,0)]
 		elif use in ["civic","sacred"]: ground_cells=[Vector2i(3,2),Vector2i(1,0),Vector2i(3,3)]
-		var atlas_cell:Vector2i=ground_cells[(absi(int(plot.get("seed",1)))+patch_index*3)%ground_cells.size()]
+		# A stride of three freezes a three-cell palette on the same material.
+		var material_stride:=1 if ground_cells.size()==3 else 3
+		var atlas_cell:Vector2i=ground_cells[(absi(int(plot.get("seed",1)))+patch_index*material_stride)%ground_cells.size()]
 		var color:=Color.WHITE.lerp(Color("#7d765f"),rng.randf_range(0.04,0.18))
 		if use=="dirty_industry": color=color.lerp(Color("#353631"),0.48)
 		elif use in ["civic","sacred"]: color=color.lerp(Color("#b3aa96"),0.22)
