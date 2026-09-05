@@ -2255,19 +2255,31 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var fate:=_resolve_party_fate(mission,day)
 	var windfalls:=_resolve_scout_windfalls(mission,route,day)
 	if String(fate.line)!="": windfalls.append(String(fate.line))
-	windfalls.append_array(_resolve_route_military_sightings(mission,route,day))
+	var military_accounts:=_resolve_route_military_sightings(mission,route,day)
+	windfalls.append_array(military_accounts)
+	for account in military_accounts:
+		(mission.discoveries as Array).push_front({"kind":"intelligence","title":"Armed strangers on the road","description":account,"consequence":"A dated sighting has been added to the map. The force may have moved since it was seen."})
 	var landmark_line:=_resolve_scout_landmark(mission,route,day)
 	if landmark_line!="": windfalls.append(landmark_line)
 	var rumor_line:=_resolve_scout_rumors(day,recruits)
-	if rumor_line!="": windfalls.append(rumor_line)
+	if rumor_line!="":
+		windfalls.append(rumor_line)
+		(mission.discoveries as Array).append({"kind":"hearsay","title":"A name beyond the horizon","description":rumor_line,"consequence":"A lead for a future expedition, not confirmed contact or a known homeland."})
 	# A recruitment mission receives its own concrete encounter account below;
 	# adding the generic nomad line would tell the same story twice.
 	var nomad_line:="" if not recruitment_account.is_empty() else _resolve_nomad_sighting(mission,route,day,recruits)
-	if nomad_line!="": windfalls.append(nomad_line)
+	if nomad_line!="":
+		windfalls.append(nomad_line)
+		(mission.discoveries as Array).append({"kind":"encounter","title":"Lives beyond our own","description":nomad_line,"consequence":"The encounter site is marked. These people remain independent; no newcomers were added by this sighting."})
 	var teaching_line:=_resolve_taught_knowledge(day,recruits,contacts)
-	if teaching_line!="": windfalls.append(teaching_line)
+	if teaching_line!="":
+		windfalls.append(teaching_line)
+		(mission.discoveries as Array).push_front({"kind":"knowledge","title":"What strangers taught us","description":teaching_line,"consequence":"Progress was added to the named active investigation. The discovery still completes through ordinary study."})
 	var return_route:=_reverse_scout_route(route)
 	var report:Dictionary={"mission_id":int(mission.get("mission_id",0)),"day":day,"duration_days":int(mission.duration_days),"personnel":int(mission.personnel),"distance_km":roundi(_scout_route_distance(route)*2.0),"mission_kind":String(mission.get("target_kind","explore")),"target_id":String(mission.get("target_id","open_world")),"target_label":String(mission.get("target_label","OPEN EXPLORATION")),"target_finding":targeted_finding,"recruitment_account":recruitment_account,"contacts":contacts,"contact_records":contact_records,"route":route.duplicate(true),"return_route":return_route,"travel_mode":String(mission.get("travel_mode","land")),"route_status":String(mission.get("route_status","returned")),"turnback_reason":String(mission.get("turnback_reason","")),"new_contact_count":contacts.size(),"recruits":recruits,"returned_personnel":int(fate.returned),"lost_personnel":int(fate.lost),"stayed_personnel":int(fate.stayed),"journal":_compose_scout_journal(mission,route),"windfalls":windfalls.duplicate()}
+	report["discoveries"]=(mission.get("discoveries",[]) as Array).duplicate(true)
+	report["actual_days"]=maxi(1,day-int(mission.get("start_day",day-int(mission.duration_days))))
+	report["start_day"]=int(mission.get("start_day",day-int(mission.duration_days)))
 	scout_reports.push_front(report)
 	if scout_reports.size()>SCOUT_REPORT_LIMIT: scout_reports.resize(SCOUT_REPORT_LIMIT)
 	var finding:=String(recruitment_account.get("summary","")) if not recruitment_account.is_empty() else ("No organized foreign polity was encountered." if contacts.is_empty() else ("Direct contact was established with %s." % ", ".join(contacts)))
@@ -2643,7 +2655,7 @@ func _resolve_scout_landmark(mission:Dictionary,route:Array,day:int)->String:
 	var duration:=maxi(1,int(mission.get("duration_days",30)))
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=last_world_seed^day*217645199^int(mission.get("mission_id",0))*373587883^duration*10007
-	if rng.randf()>=clampf(0.30+float(duration)/365.0*0.35,0.0,0.65): return ""
+	if duration<180 and rng.randf()>=clampf(0.30+float(duration)/365.0*0.35,0.0,0.65): return ""
 	var waypoint:Dictionary=route[rng.randi_range(route.size()/2,route.size()-1)]
 	var position:=Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0)))
 	for landmark_variant in landmarks:
@@ -2657,6 +2669,7 @@ func _resolve_scout_landmark(mission:Dictionary,route:Array,day:int)->String:
 	var feature:Dictionary={}
 	if ground_survey_authority.is_valid():
 		feature=LandmarkFeatureCatalog.pick(ground_survey_authority.call(position),rng,adjective,taken_names)
+		if feature.is_empty(): return ""
 	if feature.is_empty():
 		# No survey authority (headless probes, old saves mid-mission): fall back
 		# to the legacy invented kinds rather than losing the windfall.
@@ -2667,6 +2680,9 @@ func _resolve_scout_landmark(mission:Dictionary,route:Array,day:int)->String:
 	var landmark:Dictionary={"id":"landmark_%d" % next_landmark_id,"name":landmark_name,"kind":String(feature.get("class","")),"feature_id":String(feature.get("feature_id","")),"myth":String(feature.get("myth","")),"position":{"x":position.x,"z":position.y},"discovered_day":day,"description":String(feature.description)}
 	next_landmark_id+=1
 	landmarks.append(landmark)
+	var discoveries:Array=mission.get("discoveries",[])
+	discoveries.push_front({"kind":"landmark","title":landmark_name,"description":String(feature.description),"myth":String(feature.get("myth","")),"consequence":"A named waymark on the world map. Your scouts can use the growing network of landmarks to range farther.","position":landmark.position.duplicate(true),"distance_km":roundi(player_world_origin.distance_to(position)),"landmark_id":String(landmark.id),"feature_id":String(landmark.feature_id)})
+	mission["discoveries"]=discoveries
 	_record_world_event("Landmark named",'The returning party names "%s", %d km from home. %s' % [landmark_name,roundi(player_world_origin.distance_to(position)),String(feature.description)],"diplomacy",day)
 	return 'They name "%s" along the route — one more waymark extending how far future parties can safely range.' % landmark_name
 
@@ -2724,41 +2740,43 @@ func _resolve_scout_windfalls(mission:Dictionary,route:Array,day:int)->Array[Str
 	## running investigations, and salvage carried back.
 	var windfalls:Array[String]=[]
 	var duration:=maxi(1,int(mission.get("duration_days",30)))
+	mission["discoveries"]=[]
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=last_world_seed^day*179424673^duration*15485867^int(mission.get("mission_id",0))*982451653
 	# 1) Recognized deposits: the party marks workable occurrences on its chart.
 	# What they find is what the rendered ground actually is there — timber in
 	# visible woodland, stone on bare high ground, fertile soil by the river.
 	if route.size()>=4:
+		var found_resources:Dictionary={}
 		var find_count:=0
 		var find_chance:=clampf(0.35+float(duration)/365.0*0.40,0.0,0.80)
 		if rng.randf()<find_chance: find_count+=1
 		if duration>=180 and rng.randf()<0.45: find_count+=1
+		if duration>=180: find_count=maxi(1,find_count)
 		for find_index in find_count:
 			var waypoint_index:=rng.randi_range(route.size()/3,route.size()-1)
 			var waypoint:Dictionary=route[waypoint_index]
 			var position:=Vector3(float(waypoint.get("x",0.0))+rng.randf_range(-6.0,6.0),0.0,float(waypoint.get("z",0.0))+rng.randf_range(-6.0,6.0))
-			var resource_name:=SCOUT_FIND_RESOURCES[rng.randi_range(0,SCOUT_FIND_RESOURCES.size()-1)]
+			var resource_name:=""
 			var ground_note:=""
+			var surveyed_ground:Dictionary={}
 			if ground_survey_authority.is_valid():
 				var ground:Dictionary=ground_survey_authority.call(Vector2(position.x,position.z))
+				surveyed_ground=ground
 				var ground_label:=String(ground.get("label","the ground"))
-				match String(ground.get("biome","")):
-					"woodland": resource_name="Timber" if rng.randf()<0.65 else "Game"
-					"floodplain": resource_name="Fertile Soil"
-					"wetland": resource_name="Fiber Plants" if rng.randf()<0.6 else "Game"
-					"grassland": resource_name="Fertile Soil" if rng.randf()<0.55 else "Game"
-					"steppe": resource_name="Fiber Plants" if rng.randf()<0.5 else "Stone"
-					"upland","tundra": resource_name="Stone"
-					_: resource_name=SCOUT_FIND_RESOURCES[rng.randi_range(0,SCOUT_FIND_RESOURCES.size()-1)]
 				ground_note=" on the %s there" % ground_label
+			resource_name=ExpeditionFindings.resource_for(surveyed_ground,day,rng,duration>=180)
+			if resource_name.is_empty() or found_resources.has(resource_name): continue
+			found_resources[resource_name]=true
 			var deposit:Dictionary=ResourceSystem._deposit(resource_name,position,rng.randf_range(0.55,0.95),rng.randf_range(600.0,2400.0),GameState.resource_deposits.size())
 			deposit["stage"]="recognized"
 			deposit["clues"]=1.0
 			deposit["survey"]=0.55
 			GameState.resource_deposits.append(deposit)
 			var origin_distance:=roundi(player_world_origin.distance_to(Vector2(position.x,position.z)))
-			windfalls.append("They mark a workable %s occurrence about %d km out%s; it now appears on the resource layer." % [resource_name.to_lower(),origin_distance,ground_note])
+			var discovery:=ExpeditionFindings.deposit_card(deposit,origin_distance)
+			(mission.discoveries as Array).append(discovery)
+			windfalls.append("%s — %s %d km from home%s. %s" % [String(discovery.title),String(discovery.description),origin_distance,ground_note,String(discovery.consequence)])
 	# 2) Field evidence: the returned charts and accounts circulate through the
 	# collective mind, raising the evidence signals that ongoing inquiry lines
 	# actually feed on (the same pathway as daily activity) — not a flat bonus
@@ -2778,13 +2796,14 @@ func _resolve_scout_windfalls(mission:Dictionary,route:Array,day:int)->Array[Str
 			observed_signals["administration"]=strength*0.6
 			signal_summary="defensive works, construction, and organizational"
 	GameState.register_field_observations(observed_signals,day+circulation_days)
+	(mission.discoveries as Array).append({"kind":"knowledge","title":"A wider world, carried home","description":"Their route sketches and field observations become material for your people's ongoing investigations.","consequence":"Field evidence for exploration, travel, surveying and nature circulates for %d days." % circulation_days,"duration_days":circulation_days})
 	windfalls.append("Their charts and accounts circulate for ~%d days, enriching %s evidence for every inquiry that feeds on it." % [circulation_days,signal_summary])
 	# 3) Salvage: hides, cordage fiber, seasoned wood carried home.
 	if rng.randf()<0.45:
 		var salvage_resource:="Fiber Plants" if rng.randf()<0.5 else "Timber"
 		var salvage_amount:=float(3+duration/30)
 		GameState.resource_stockpiles[salvage_resource]=float(GameState.resource_stockpiles.get(salvage_resource,0.0))+salvage_amount
-		windfalls.append("The party hauls back %.0f bulk of %s gathered on the route." % [salvage_amount,salvage_resource.to_lower()])
+		windfalls.append("Supplies brought home: %.0f bulk of %s. These are the party's remaining gathered materials, not the value of the country they charted." % [salvage_amount,ResourceSystem.display_name(salvage_resource).to_lower()])
 	return windfalls
 
 

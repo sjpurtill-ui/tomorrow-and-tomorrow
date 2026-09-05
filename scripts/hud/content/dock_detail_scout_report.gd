@@ -10,10 +10,13 @@ func _init(terrain_node:Node,hud_node:Control,report_record:Dictionary={})->void
 	report=report_record
 
 func meta()->Dictionary:
+	var title:="Beyond the familiar world" if String(report.get("mission_kind","explore"))=="explore" else String(report.get("target_label","Scout Expedition")).capitalize()
+	for finding in report.get("discoveries",[]):
+		if String(finding.get("kind",""))=="landmark": title=String(finding.title); break
 	return {
-		"eyebrow":"EXPEDITION RECORD · RETURNED DAY %d" % int(report.get("day",0)),
-		"title":String(report.get("target_label","Scout Expedition")).capitalize(),
-		"subtabs":["THE REPORT"],
+		"eyebrow":"THE EXPEDITION CHRONICLES · DAY %d" % int(report.get("day",0)),
+		"title":title,
+		"subtabs":["DISCOVERIES","JOURNEY & ACCOUNTS"],
 	}
 
 func tab(_sub:int)->Dictionary:
@@ -27,8 +30,8 @@ func tab(_sub:int)->Dictionary:
 	var contacts:Array=report.get("contacts",[])
 	var kpis:Array=[
 		{"label":"RETURNED","value":"%d of %d" % [returned,personnel],"delta":"%d lost · %d stayed" % [lost,stayed] if lost+stayed>0 else "all came home","delta_color":Tokens.RED if lost>0 else (Tokens.AMBER if stayed>0 else Tokens.GREEN),"accent":Tokens.RED if lost>0 else Tokens.GREEN,"tip":"The party that left against the party that came home"},
-		{"label":"DAYS OUT","value":str(int(report.get("duration_days",0))),"delta":"planned","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Planned mission length; the road decides the real one"},
-		{"label":"CHARTED","value":"%d km" % int(report.get("distance_km",0)),"delta":"land travel","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Ground physically walked and now on the map"},
+		{"label":"DAYS AWAY","value":str(int(report.get("actual_days",report.get("duration_days",0)))),"delta":"actual" if report.has("actual_days") else "planned · older record","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Elapsed days from departure to return, when recorded"},
+		{"label":"JOURNEY","value":"%d km" % int(report.get("distance_km",0)),"delta":"out & back","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Total route distance, including the journey home"},
 		{"label":"NEWCOMERS","value":"+%d" % recruits if recruits>0 else "0","delta":"joined","delta_color":Tokens.GREEN if recruits>0 else Tokens.MUTED,"accent":Tokens.GREEN,"tip":"Wanderers who threw in their lot with the settlement"},
 	]
 	var brief:Dictionary
@@ -45,8 +48,41 @@ func tab(_sub:int)->Dictionary:
 	elif recruits>=10:
 		brief={"tone":"info","title":"The gamble paid out","why":"The whole party came home, and %d newcomers walked in with them." % recruits}
 	else:
-		brief={"tone":"info","title":"The party has returned","why":"Every observation it carried is now the settlement's knowledge."}
+		brief={"tone":"info","title":"They brought the horizon home","why":"%d travelers returned with a route through the unknown. Here is what they found—and what it could mean for your people." % returned}
 	var blocks:Array=[]
+	if _sub==0:
+		var discoveries:Array=report.get("discoveries",[])
+		blocks.append({"type":"image","path":"res://assets/textures/expeditions/chronicle-dawn.png","height":225,"cover":true,"tip":"Expedition chronicle cover illustration. The returned route chart is in Journey & Accounts."})
+		if not contacts.is_empty():
+			blocks.append({"type":"discovery","kind":"encounter","title":"Other people, beyond our horizon","description":"Direct contact with %s." % ", ".join(PackedStringArray(contacts)),"consequence":"Their encounter sites are marked on the returned route. Contact is a beginning; it does not reveal their homeland."})
+		for finding in discoveries:
+			var card:Dictionary=finding.duplicate(true)
+			card["type"]="discovery"
+			if String(card.get("kind",""))=="landmark" and is_instance_valid(terrain):
+				var landmark_id:=String(card.get("landmark_id",""))
+				for landmark in CivilizationSystem.landmarks:
+					if String(landmark.get("id",""))==landmark_id:
+						card["on_press"]=func()->void: terrain._open_landmark_detail(landmark)
+						break
+			blocks.append(card)
+		if discoveries.is_empty():
+			# Old saves retain their real outcomes; a new design must not invent rewards.
+			var roadside_notes:=false
+			for finding in report.get("windfalls",[]):
+				var account:=String(finding)
+				var normalized:=account.to_lower()
+				if ("occurrence" in normalized and ("fiber plants" in normalized or "stone" in normalized or "timber" in normalized)) or "party hauls back" in normalized:
+					roadside_notes=true
+					continue
+				if "charts and accounts circulate" in normalized:
+					blocks.append({"type":"discovery","kind":"knowledge","title":"Routes worth remembering","description":"The party's charts and observations are being studied at home.","consequence":account})
+				else: blocks.append({"type":"discovery","kind":"field note","title":"From the returning party","description":account})
+			if roadside_notes:
+				blocks.append({"type":"discovery","kind":"roadside supplies","title":"What sustained the journey","description":"The party recorded ordinary materials along the road and any supplies it carried home.","consequence":"These are useful local resupply notes, not distant treasure. The original locations and quantities are preserved in Journey & Accounts."})
+			if report.get("windfalls",[]).is_empty(): blocks.append({"type":"text","text":"The route is the discovery. No additional finds were recorded on this journey."})
+		blocks.append({"type":"text","text":"Read Journey & Accounts for the road, encounters and supplies. The world remains paused; choose a speed when you are ready."})
+		return {"kpis":kpis,"brief":brief,"blocks":blocks}
+	blocks.append({"type":"expedition_chart","route":report.get("route",[]),"discoveries":report.get("discoveries",[])})
 	if is_recruitment:
 		blocks.append({"type":"text","heading":"RECRUITMENT OUTCOME","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
 		var encountered:=int(recruitment.get("encountered",0))
