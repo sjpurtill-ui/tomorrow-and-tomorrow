@@ -1156,6 +1156,23 @@ func test_close_zoom_never_replaces_continuous_city_with_photo_tile_clipmap()->v
 	assert_bool(terrain_source.contains("float aggregate_floor=fabric_kind==5 ? 0.78 : 0.16;")).is_true()
 
 
+func test_field_detail_and_land_cover_use_separate_continuous_lod_materials()->void:
+	var plot:={"polygon":PackedVector2Array([Vector2(-0.04,-0.03),Vector2(0.04,-0.03),Vector2(0.04,0.03),Vector2(-0.04,0.03)]),"centroid":Vector2.ZERO,"seed":13,"id":1,"land_use":"field","crop_cover":0.8,"status":"active","area_ha":0.48}
+	var plots:Array[Dictionary]=[plot]
+	var ground_colors:=PackedColorArray()
+	for lod in [0,1]:
+		var parent:Node3D=auto_free(Node3D.new())
+		renderer._create_plot_fabric(Vector3.ZERO,plots,lod,parent)
+		var ground:=parent.get_node("PersistentFieldGround") as MeshInstance3D
+		var rows:=parent.get_node("PersistentCultivationRows") as MeshInstance3D
+		assert_bool(ground.material_override.get_shader_parameter("cultivation_rows")).is_false()
+		assert_bool(rows.material_override.get_shader_parameter("cultivation_rows")).is_true()
+		var colors:PackedColorArray=ground.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		if ground_colors.is_empty(): ground_colors=colors
+		else: assert_bool(colors==ground_colors).is_true()
+		assert_str(rows.material_override.shader.code).contains("smoothstep(0.00035,0.0015,field_pixel_span)")
+
+
 func test_field_beds_and_cross_dividers_face_daylight()->void:
 	for pattern in ["irrigated_beds","smallholder_mosaic","dryland_patchwork"]:
 		for bearing in [0.0,0.7,2.2]:
