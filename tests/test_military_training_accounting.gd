@@ -121,3 +121,20 @@ func test_advanced_exercises_still_require_knowledge()->void:
 	_home(20)
 	assert_bool(MilitaryCampaign.start_training_program("war_games").has("error")).is_true()
 	assert_bool(MilitaryCampaign.start_training_program("staff_exercise").has("error")).is_true()
+
+func test_training_estimate_matches_real_instruction_increment_and_missing_legacy_start()->void:
+	MilitaryCampaign.training_queue=[{"id":7,"unit":"levy","weapon":"improvised","count":12,"initial_count":12,"progress_days":0.0,"required_days":100.0}]
+	var estimate:Dictionary=MilitaryCampaign.training_progress_snapshot()[7]
+	assert_int(int(estimate.elapsed_days)).is_equal(-1)
+	assert_float(float(estimate.rate)).is_greater(0.0)
+	MilitaryCampaign._process_training_day()
+	assert_float(float(MilitaryCampaign.training_queue[0].progress_days)).is_equal_approx(float(estimate.rate),.00001)
+
+func test_deployment_availability_is_read_only_and_matches_rejection()->void:
+	_home(15)
+	MilitaryCampaign.army_templates=[{"template_id":1,"name":"Test","entries":[{"unit":"levy","weapon":"improvised","count":20}]}]
+	var before:=MilitaryCampaign.export_state()
+	var availability:=MilitaryCampaign.template_deployment_availability(1)
+	assert_bool(availability.has("error")).is_true()
+	assert_str(JSON.stringify(MilitaryCampaign.export_state())).is_equal(JSON.stringify(before))
+	assert_str(String(MilitaryCampaign.deploy_army_from_template(1).error)).is_equal(String(availability.error))

@@ -240,7 +240,7 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	var training_days:=maxf(3.0,base_training_days*(PROTOTYPE_TRAINING_MULTIPLIER if prototype else 1.0))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	aggregate_recruits-=accepted
-	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"required_days":training_days,"injury_accumulator":0.0,"prototype":prototype})
+	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"start_day":int(GameState.elapsed_days),"required_days":training_days,"injury_accumulator":0.0,"prototype":prototype})
 	if prototype:
 		return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"prototype":true,"message":"An experimental cohort of %d begins learning %s from first principles â€” %.0f days at exceptional cost. The practice is understood, not yet established." % [accepted,unit.replace("_"," "),training_days]}
 	return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"message":"Training begun for %d %s with %s; baseline %.0f days, with %d/%d training places now committed." % [accepted,unit.replace("_"," "),weapon.replace("_"," "),training_days,_queued_trainees(),training_capacity()]}
@@ -318,7 +318,7 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	var required_days:=maxf(3.0,base_days*0.58)
 	aggregate_recruits-=accepted
-	training_queue.append({"id":order_id,"mode":"reinforce","target_formation_id":formation_id,"unit":String(formation.unit),"weapon":String(formation.weapon),"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
+	training_queue.append({"id":order_id,"mode":"reinforce","target_formation_id":formation_id,"unit":String(formation.unit),"weapon":String(formation.weapon),"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"start_day":int(GameState.elapsed_days),"required_days":required_days,"injury_accumulator":0.0})
 	return {"id":order_id,"accepted":accepted,"target_formation_id":formation_id,"required_days":required_days,"message":"%d replacements entered training for %s; baseline %.0f days before they rejoin formation %d." % [accepted,String(formation.unit).replace("_"," "),required_days,formation_id]}
 
 
@@ -343,7 +343,7 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(unit,21))
 	var required_days:=maxf(3.0,base_days*(0.72-retained_experience*0.24))
 	var order_id:=next_training_order_id; next_training_order_id+=1
-	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":personnel_count,"experience":retained_experience,"progress_days":0.0,"required_days":required_days,"injury_accumulator":0.0})
+	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":personnel_count,"experience":retained_experience,"progress_days":0.0,"start_day":int(GameState.elapsed_days),"required_days":required_days,"injury_accumulator":0.0})
 	_refresh_readiness()
 	return {"id":order_id,"accepted":personnel_count,"returned_equipment":returned_gear,"returned_ammunition":returned_ammunition,"required_days":required_days,"message":"%d experienced personnel left the field to retrain as %s with %s; baseline %.0f days." % [personnel_count,unit.replace("_"," "),weapon.replace("_"," "),required_days]}
 
@@ -1267,7 +1267,7 @@ func _detach_matching_formations(entries:Array)->Array[Dictionary]:
 	return detached
 
 
-func deploy_army_from_template(template_id:int,custom_name:String="")->Dictionary:
+func template_deployment_availability(template_id:int)->Dictionary:
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
 	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d field armies." % [field_armies.size(),field_army_capacity()]}
 	var index:=_template_index(template_id)
@@ -1281,6 +1281,14 @@ func deploy_army_from_template(template_id:int,custom_name:String="")->Dictionar
 		var weapon:=String(entry.get("weapon","improvised"))
 		if _matching_home_count(unit,weapon)<int(entry.get("count",0)):
 			return {"error":"%s needs %d trained %s (%s); only %d are ready at home. Queue the build's training first." % [String(template.get("name","The build")),int(entry.get("count",0)),unit.replace("_"," "),weapon.replace("_"," "),_matching_home_count(unit,weapon)]}
+	return {"ok":true,"message":"Form the army at home, then choose its destination on the map."}
+
+
+func deploy_army_from_template(template_id:int,custom_name:String="")->Dictionary:
+	var available:=template_deployment_availability(template_id)
+	if available.has("error"): return available
+	var template:Dictionary=army_templates[_template_index(template_id)]
+	var entries:Array=template.get("entries",[])
 	var detached:=_detach_matching_formations(entries)
 	var label:=custom_name.strip_edges()
 	if label=="": label="%s Army" % _ordinal_army_name(next_field_army_id)
@@ -4314,3 +4322,27 @@ func receive_siege_relief(siege_id:String,receipt_id:String)->Dictionary:
 
 func _return_siege_relief(camp:Dictionary)->void:
 	if ForeignDiplomacy.has_method("complete_siege_relief"): ForeignDiplomacy.call("complete_siege_relief",String(camp.receipt_id),int(camp.troops),float(camp.food))
+
+
+func training_progress_snapshot()->Dictionary:
+	var result:Dictionary={}
+	var budget:=military_inventory.duplicate(true)
+	var trainees:=_queued_trainees()
+	var capacity:=training_capacity()
+	var base_rate:=_effective_training_rate(trainees)
+	for index in range(training_queue.size()-1,-1,-1):
+		var order:Dictionary=training_queue[index]
+		var weapon:=String(order.get("weapon","improvised"))
+		var needed:=_equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))
+		var examples:=mini(maxi(1,needed),maxi(0,int(budget.get(weapon,0))))
+		budget[weapon]=maxi(0,int(budget.get(weapon,0))-examples)
+		var access:=clampf(float(examples)/maxf(1,needed),0,1)
+		var floor_access:=.55 if weapon=="improvised" else .25
+		var rate:=base_rate*(floor_access+(1-floor_access)*access)
+		var progress:=float(order.get("progress_days",0)); var required:=maxf(1,float(order.get("required_days",1)))
+		var reasons:Array[String]=[]
+		if trainees>capacity: reasons.append("Crowded classes: %d trainees / %d places" % [trainees,capacity])
+		if access<.999: reasons.append("Limited practice equipment: %d of %d" % [examples,needed])
+		if reasons.is_empty(): reasons.append("Normal instruction pace")
+		result[int(order.id)]={"id":int(order.id),"count":int(order.count),"unit":String(order.unit),"weapon":weapon,"progress":progress,"required":required,"percent":roundi(clampf(progress/required,0,1)*100),"rate":rate,"estimated_days":ceili(maxf(0,required-progress)/rate) if rate>0 else -1,"elapsed_days":maxi(0,int(GameState.elapsed_days)-int(order.start_day)) if order.has("start_day") else -1,"reason":" · ".join(reasons),"injured":maxi(0,int(order.get("initial_count",order.count))-int(order.count))}
+	return result

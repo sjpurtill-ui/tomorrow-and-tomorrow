@@ -181,11 +181,14 @@ func _rebuild_kpis(kpis:Array)->void:
 		var value_row:=HBoxContainer.new()
 		value_row.add_theme_constant_override("separation",6)
 		column.add_child(value_row)
-		value_row.add_child(Tokens.make_label(String(kpi.get("value","")),18,Tokens.INK))
+		var value_label:=Tokens.make_label(String(kpi.get("value","")),18,Tokens.INK)
+		value_row.add_child(value_label)
+		preload("res://scripts/hud/live_value_binding.gd").attach(value_label,"text",kpi.get("live_value"))
 		if String(kpi.get("delta",""))!="":
 			var delta:=Tokens.make_label(String(kpi.delta),10,kpi.get("delta_color",Tokens.MUTED))
 			delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 			value_row.add_child(delta)
+			preload("res://scripts/hud/live_value_binding.gd").attach(delta,"text",kpi.get("live_delta"))
 
 
 func _rebuild_brief(brief:Dictionary)->void:

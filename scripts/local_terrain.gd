@@ -11376,12 +11376,17 @@ func _open_war_planning(_tab:int=0)->void:
 func _select_army_and_focus(army_id:int)->void:
 	## Dock row click: select the army and center the camera on where the
 	## government believes it is (its last runner report when info lags).
-	selected_army_id=army_id
 	var snapshot:Dictionary=MilitaryCampaign.field_armies_snapshot()
 	var live_reports:=bool(snapshot.get("live_reports",true))
 	for army_variant in (snapshot.get("armies",[]) as Array):
 		var army:Dictionary=army_variant
 		if int(army.get("army_id",0))!=army_id: continue
+		selected_army_id=army_id
+		if hud:
+			hud.close_detail()
+			hud.close_dock()
+		zoom_target_size=-1.0
+		camera.size=18.0
 		var report:Dictionary=army.get("last_report",{})
 		var position_data:Dictionary=army.get("position",{})
 		var at_home:=String(army.get("status","stationed"))=="stationed" and String(army.get("location_id",""))=="player_home"
@@ -11390,6 +11395,7 @@ func _select_army_and_focus(army_id:int)->void:
 		var world_position:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0)))
 		world_position.y=_height_at(world_position.x,world_position.z)
 		_set_camera_target(world_position)
+		_refresh_player_field_army_markers()
 		if travel_status_label:
 			travel_status_label.text="%s SELECTED  •  RIGHT-CLICK CHARTED LAND TO MARCH  •  ESC TO DESELECT" % String(army.get("name","FIELD ARMY")).to_upper()
 		break
@@ -12194,7 +12200,9 @@ func _refresh_player_field_army_markers()->void:
 			add_child(marker); player_field_army_markers[army_id]=marker
 		marker.position=world_position
 		_apply_warfare_formation_view(marker,view)
-		marker.visible=bool(view.get("visible",false)) and _world_position_is_revealed(marker.global_position)
+		# Own armies are known reports; marker visibility must not depend on
+		# unsurveyed ground beneath a cosmetic stack offset.
+		marker.visible=bool(view.get("visible",false))
 		_refresh_player_field_army_path(view)
 	for army_id in player_field_army_markers.keys():
 		if visible_ids.has(String(army_id)): continue
