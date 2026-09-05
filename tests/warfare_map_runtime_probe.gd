@@ -27,6 +27,20 @@ func _ready()->void:
 	_expect(marker!=null and marker.visible,"regional player army marker is absent")
 	if marker:
 		var label:=marker.get_node("ArmyLabel") as Label3D
+		var arrow:=marker.get_node("HeadingChevron") as MeshInstance3D
+		var arrow_arrays:=arrow.mesh.surface_get_arrays(0)
+		_expect((arrow_arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()==24,"direction arrow exceeds triangular prism vertex budget")
+		var arrow_normals:PackedVector3Array=arrow_arrays[Mesh.ARRAY_NORMAL]
+		_expect(arrow_normals[0].y>0.99 and arrow_normals[3].y< -0.99,"direction arrow cap winding is inverted: %s / %s" % [arrow_normals[0],arrow_normals[3]])
+		for direction in [Vector2.RIGHT,Vector2.LEFT,Vector2.UP,Vector2.DOWN]:
+			var moving_army:=army.duplicate(true)
+			moving_army.status="moving"
+			moving_army.position={"x":0.0,"z":0.0}
+			moving_army.destination_position={"x":direction.x,"z":direction.y}
+			terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(moving_army,320.0,true))
+			var tip_direction:=arrow.basis*Vector3.FORWARD
+			_expect(tip_direction.dot(Vector3(direction.x,0,direction.y))>0.999,"moving arrow points away from its destination")
+		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
 		_expect("YOU" in label.text and "8.0K" in label.text and "FORMING" in label.text,"player marker omits owner, aggregate strength, or readiness")
 		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
 		_expect((marker.get_node("SelectedRing") as MeshInstance3D).visible,"selected army has no distinct selection halo")
@@ -117,6 +131,11 @@ func _ready()->void:
 	var front_marker:Node3D=terrain.warfare_front_markers.get("front_probe",null)
 	_expect(front_marker!=null and front_marker.visible,"active engagement/front marker is absent at regional scale")
 	if front_marker:
+		for wing_name in ["AttackerWing","DefenderWing"]:
+			var wing:=front_marker.get_node(wing_name) as MeshInstance3D
+			_expect((wing.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()==24,"battle wing is not an explicit triangular arrow")
+			var direction:=wing.basis*Vector3.RIGHT
+			_expect(direction.x>0.99 if wing_name=="AttackerWing" else direction.x< -0.99,"battle arrows do not point toward contact")
 		terrain._configure_warfare_overlay_layers(front_marker)
 		for part in front_marker.get_children():
 			if part is Label3D:
