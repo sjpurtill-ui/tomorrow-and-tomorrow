@@ -17,6 +17,8 @@ var feedback:Label
 var march:Button
 var attack:Button
 var siege:Button
+var garrison_button:Button
+var aftermath_button:Button
 var cards:Dictionary={}
 var timer:=0.0
 
@@ -71,15 +73,29 @@ func _ready()->void:
 	_label(military,"Approach this settlement",20,T.INK)
 	army_choice=OptionButton.new();army_choice.fit_to_longest_item=false;army_choice.custom_minimum_size.y=34;military.add_child(army_choice)
 	for force:Dictionary in MilitaryCampaign.field_armies:
+		if int(force.get("troops",0))<=0:continue
 		army_choice.add_item(String(force.name));army_choice.set_item_metadata(army_choice.item_count-1,int(force.army_id))
-	march=_button(military,"MOVE ARMY TO THIS CITY",_march)
-	_label(military,"Arrival at the named city is required. Nearby ground or a scout counter is a different target.",13,T.TEXT_SOFT)
+	var terrain_scene:=get_tree().current_scene
+	if terrain_scene and "selected_army_id" in terrain_scene:
+		for i in army_choice.item_count:
+			if int(army_choice.get_item_metadata(i))==int(terrain_scene.selected_army_id):army_choice.select(i)
+	army_choice.item_selected.connect(func(_i:int):refresh())
+	march=_button(military,"MOVE ONLY",_march)
+	march.visible=false
+	_label(military,"Attack or besiege with one order. Your army approaches automatically if needed.",13,T.TEXT_SOFT)
 	military_note=_label(military,"",14,T.AMBER)
 	var combat_row:=HBoxContainer.new();military.add_child(combat_row)
 	attack=_button(combat_row,"ATTACK",func():_operate(false));attack.size_flags_horizontal=SIZE_EXPAND_FILL
 	siege=_button(combat_row,"BESIEGE",func():_operate(true));siege.size_flags_horizontal=SIZE_EXPAND_FILL
 	_button(military,"DIPLOMACY",_diplomacy)
-	if army_choice.item_count>0:tabs.current_tab=1
+	garrison_button=_button(military,"MANAGE GARRISON",func():
+		for force:Dictionary in MilitaryCampaign.occupation_forces:
+			if String(force.get("region_id",""))==city_id:_close();preload("res://scripts/hud/occupation_view.gd").open(String(force.civ_id),city_id);return)
+	aftermath_button=_button(military,"REVIEW BATTLE AFTERMATH",func():
+		var scene:=get_tree().current_scene
+		if scene and scene.has_method("_open_war_planning"):_close();scene._open_war_planning())
+
+	if army_choice.item_count>0 or not MilitaryCampaign.pending_aftermath.is_empty():tabs.current_tab=1
 	feedback=_label(root,"Estimates describe returned observations. Conditions may have changed.",13,T.TEXT_SOFT)
 	refresh()
 func _close()->void:get_parent().queue_free()
@@ -103,8 +119,10 @@ func _diplomacy()->void:
 func _operate(besiege:bool)->void:
 	var city:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
 	var owner:=String(city.get("controller",""));if owner=="":owner=String(city.get("civ_id",""))
-	var result:=MilitaryCampaign.start_offensive_siege(owner,city_id) if besiege else MilitaryCampaign.launch_offensive(owner,city_id)
+	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
+	var result:=MilitaryCampaign.order_city_operation(chosen,owner,city_id,besiege)
 	if result.has("error"):feedback.text=String(result.error);refresh();return
+	if bool(result.get("queued",false)):feedback.text=String(result.message);refresh();return
 	var scene:=get_tree().current_scene
 	_close()
 	if besiege:preload("res://scripts/hud/siege_screen.gd").open()
@@ -139,12 +157,22 @@ func refresh()->void:
 	if owner_index>=0:
 		var relation:Dictionary=CivilizationSystem.civilizations[owner_index].player_relation
 		control_label.text+="  /  "+("AT WAR" if bool(relation.get("at_war",false)) else "AT PEACE · attacking starts a war")
-	var availability:=MilitaryCampaign.offensive_campaign_availability(owner,city_id)
-	attack.disabled=availability.has("error");siege.disabled=MilitaryCampaign.offensive_siege_availability(owner,city_id).has("error")
-	march.disabled=army_choice.item_count==0 or MilitaryCampaign._movement_destination(city_id).is_empty()
-	military_note.text=String(availability.get("error","A field army is stationed here. Attack or besiege to begin hostilities. At peace, either action starts a war."))
-	if military_note.text.begins_with("Move a field army"):
-		military_note.text="Choose Move Army to This City to assign the settlement as its objective, even if it is already nearby."
+	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
+	var availability:=MilitaryCampaign.city_operation_quote(chosen,owner,city_id)
+	attack.disabled=availability.has("error");siege.disabled=attack.disabled
+	garrison_button.visible=false
+	for force:Dictionary in MilitaryCampaign.occupation_forces:
+		if String(force.get("region_id",""))==city_id and int(force.get("troops",0))>0:garrison_button.visible=true
+	aftermath_button.visible=not MilitaryCampaign.pending_aftermath.is_empty()
+	attack.visible=not garrison_button.visible;siege.visible=not garrison_button.visible
+
+	var here:=bool(availability.get("at_target",false))
+	attack.text="ATTACK NOW" if here else "MARCH & ATTACK"
+	siege.text="BESIEGE NOW" if here else "MARCH & BESIEGE"
+	military_note.text=String(availability.get("error","Army is at this city. Your order starts hostilities immediately." if here else "Approach takes about %d days. Hostilities begin on arrival." % int(availability.get("days",0))))
+
+	if garrison_button.visible:military_note.text=MilitaryCampaign.city_force_summary(city_id)
+
 func _process(delta:float)->void:
 	timer+=delta
 	if timer>=5:timer=0;refresh()

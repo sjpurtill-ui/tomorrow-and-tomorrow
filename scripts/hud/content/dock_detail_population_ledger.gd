@@ -36,10 +36,7 @@ func tab(_sub:int)->Dictionary:
 		Charts.population("civilization"),
 		{"type":"tiles","heading":"MATERNITY & INFANCY","items":maternity_items},
 	]
-	var records:Array=[]
-	for record in GameState.demographic_ledger:
-		if String(record.get("kind",""))!="death": continue
-		records.append({"name":String(record.get("title","Deaths")),"value":str(int(record.get("count",0))),"sub":"Day %d · %s" % [int(record.get("day",0)),String(record.get("cause","Unknown cause"))],"detail":"%s %s Population afterward: %d." % [String(record.get("target_label","")),String(record.get("description","")),int(record.get("population_after",0))],"accent":Tokens.RED})
+	var records:=grouped_deaths(GameState.demographic_ledger)
 	blocks.append({"type":"rows","heading":"RECORDED DEATHS","items":records} if not records.is_empty() else {"type":"text","heading":"RECORDED DEATHS","text":"No deaths have been recorded."})
 	if not mortality_items.is_empty():
 		blocks.append({"type":"bars","heading":"CURRENT MORTALITY RISK","note":"annual pressure now · not historical totals","items":mortality_items})
@@ -56,3 +53,17 @@ func tab(_sub:int)->Dictionary:
 
 func signature()->Array:
 	return [GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]
+
+static func grouped_deaths(ledger:Array)->Array:
+	var groups:Dictionary={}
+	for record:Dictionary in ledger:
+		if String(record.get("kind",""))!="death":continue
+		var day:=int(record.get("day",0));var cause:=String(record.get("cause","Unknown cause"))
+		var place:=String(record.get("location",record.get("target_label","Location unrecorded"))).trim_suffix(" in The Known World")
+		var key:="%s/%s/%s/%d" % [String(record.get("target_id",place)),place,cause,day/30]
+		if not groups.has(key):groups[key]={"place":place,"cause":cause,"first":day,"last":day,"count":0,"records":0}
+		var group:Dictionary=groups[key];group.first=mini(int(group.first),day);group.last=maxi(int(group.last),day);group.count+=int(record.get("count",0));group.records+=1
+	var result:Array=[]
+	for group:Dictionary in groups.values():
+		result.append({"name":group.place,"value":"%d deaths" % int(group.count),"sub":"%s · %s" % [String(group.cause),"Day %d" % int(group.first) if group.first==group.last else "Days %d–%d" % [int(group.first),int(group.last)]],"tip":"%d original records retained; grouped within 30-day periods." % int(group.records),"accent":Tokens.RED})
+	return result

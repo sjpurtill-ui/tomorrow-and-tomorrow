@@ -23,6 +23,7 @@ var figure_limit := MAX_FIGURES
 
 static func figure_budget(troops: int) -> int:
 	if troops <= 0: return 0
+	if troops <= 16: return troops
 	# More ranks, not bigger people. 100 -> 16, 1K -> 40, 10K -> 100.
 	return mini(troops, clampi(roundi(16.0 * pow(float(troops) / 100.0, 0.4)), 1, MAX_FIGURES))
 
