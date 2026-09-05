@@ -65,5 +65,5 @@ static func grouped_deaths(ledger:Array)->Array:
 		var group:Dictionary=groups[key];group.first=mini(int(group.first),day);group.last=maxi(int(group.last),day);group.count+=int(record.get("count",0));group.records+=1
 	var result:Array=[]
 	for group:Dictionary in groups.values():
-		result.append({"name":group.place,"value":"%d deaths" % int(group.count),"sub":"%s · %s" % [String(group.cause),"Day %d" % int(group.first) if group.first==group.last else "Days %d–%d" % [int(group.first),int(group.last)]],"tip":"%d original records retained; grouped within 30-day periods." % int(group.records),"accent":Tokens.RED})
+		result.append({"name":group.place,"value":"%d death%s" % [int(group.count),"" if int(group.count)==1 else "s"],"sub":"%s · %s" % [String(group.cause),"Day %d" % int(group.first) if group.first==group.last else "Days %d–%d" % [int(group.first),int(group.last)]],"tip":"%d original records retained; grouped within 30-day periods." % int(group.records),"accent":Tokens.RED})
 	return result

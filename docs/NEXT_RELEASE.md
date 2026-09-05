@@ -1,4 +1,6 @@
-# Next coherent release
+Current release: **2026.09.05.4**. See `RELEASE_2026_09_05_4.md` and `INTEGRATION_STATUS.md`. The completed checklist below records earlier consolidation.
+
+# Release checklist history
 
 One final versioned release and one final player relaunch, only after this checklist is complete. Authorized September 5. The earlier80a2fc4 player has exited; preserve its latest quicksave before the final launch. Do not force-close unsaved play. Authoritative checkout C:/Users/sjpur/TomorrowandTomorrow, main. Worker previews are not releases.
 

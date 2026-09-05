@@ -3,7 +3,9 @@
 Canonical player checkout: `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`.
 The OneDrive project is archived. Use `tools/launch_game.ps1` or the existing **Play Tomorrow and Tomorrow** desktop shortcut. The launcher prints the commit it starts. F5 runs the game; F6 may run a preview scene.
 
-Release **2026.09.05.1** is running from canonical main, source `9509dc7` (gameplay through `c337a0f`; spatial report `a9dddbb`). Final launch September5 12:45:27, PID58360; window title and `artifacts/player-20260905-124527.log` verify the release and saved SeanTown campaign. Later documentation-only commit records verification and requires no restart. The newest quicksave is September 5 11:15:04, SeanTown, day6176.3846, population307, seed1792400273. Read-only fresh-process/terrain verification passes; no save overwritten.
+Release **2026.09.05.4** is integrated on canonical main (gameplay `3657301`, worker `1d71971`). It includes all prior releases plus direct city orders, visible battle starts, occupation figures, retained scattered-personnel records and compact death summaries. Canonical combined validation: **118 tests passed**. Real GPU mouse probes pass. See `docs/RELEASE_2026_09_05_4.md` for the final launch record. A worker branch alone never updates the running player.
+
+Current saved campaign: September 5 13:45:30, SeanTown, day9432, population405, seed1792400273. The day9049 battle left four occupation soldiers and two scattered, zero killed; pending aftermath is preserved. Previous .1/.2/.3 launch records below are historical, not the current build.
 
 Military readability `cc5ffc5`, rumors `1672447`, Inquiry/Materials/scouting `aba8c73`, occupation `5c39a0f`/`81c38d2`, recovery `d8bf575`, final guards/version `c337a0f`, and isolated spatial report `a9dddbb` are integrated. See docs/RELEASE_2026_09_05_1.md for behavior-specific validation and limits. Canonical combined suite:125 cases pass. Outposts, unrelated economy, sliced vegetation and unfinished Blender authoring remain HELD.
 

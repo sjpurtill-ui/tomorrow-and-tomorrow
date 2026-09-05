@@ -44,6 +44,9 @@ func _ready()->void:
 	terrain.hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(terrain,terrain.hud))
 	for frame in 15:await get_tree().process_frame
 	await RenderingServer.frame_post_draw
+	terrain.hud.detail_dock.body_scroll.scroll_vertical=760
+	for frame in 5:await get_tree().process_frame
+	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("res://artifacts/current-death-ledger.png")
 	print("CURRENT_AFTERMATH_INPUT_PASS 0 active marker removed;4 garrison figures;2 scattered preserved; report aftermath clicked; no resolution or population change")
 	get_tree().quit()
