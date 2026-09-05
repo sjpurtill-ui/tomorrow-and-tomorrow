@@ -3,6 +3,15 @@ extends GdUnitTestSuite
 const PRESENTATION:=preload("res://scripts/warfare_map_presentation.gd")
 
 
+func test_map_label_requires_viewport_and_hud_clearance()->void:
+	var viewport:=Rect2(0,0,1440,900)
+	var pill:=Rect2(500,10,400,50)
+	assert_bool(PRESENTATION.label_rect_is_clear(Rect2(600,320,240,40),viewport,[pill])).is_true()
+	assert_bool(PRESENTATION.label_rect_is_clear(Rect2(600,20,240,40),viewport,[pill])).is_false()
+	assert_bool(PRESENTATION.label_rect_is_clear(Rect2(-20,320,240,40),viewport,[])).is_false()
+	assert_bool(PRESENTATION.label_rect_is_clear(Rect2(600,880,240,40),viewport,[])).is_false()
+
+
 func test_player_marker_communicates_owner_strength_readiness_supply_and_selection()->void:
 	var marker:=PRESENTATION.player_marker(_army(7,12_500),48.0,true)
 	assert_bool(bool(marker.visible)).is_true()
