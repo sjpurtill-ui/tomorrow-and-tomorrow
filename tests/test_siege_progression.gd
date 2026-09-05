@@ -65,8 +65,8 @@ func test_enemy_supply_public_view_uses_returned_observations_only()->void:
 	assert_str(JSON.stringify(public)).not_contains("123.456")
 	CivilizationSystem.diplomatic_history=[{"civ_id":civ.id,"returned_day":2,"observations":["Visible food reserves appear precarious"]}]
 	public=MilitaryCampaign.siege_public_snapshot()
-	assert_int(int(public.enemy_supply_report_day)).is_equal(2)
-	assert_str(String(public.enemy_supply_assessment)).contains("precarious")
+	assert_int(int(public.enemy_supply_report_day)).is_equal(-1)
+	assert_str(String(public.enemy_supply_assessment)).contains("No reliable")
 
 func test_siege_save_json_roundtrip_and_bad_state_rollback()->void:
 	_begin_home()
@@ -121,6 +121,7 @@ func _offensive_fixture()->Dictionary:
 	MilitaryCampaign.create_field_army(200)
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
 	var region:Dictionary=civ.strategic_regions[CivilizationSystem._frontline_region_index(civ)]
+	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(region.id),.8,0,"army arrival","test"),0)
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	army["location_id"]=String(region.id)
 	army["position"]={"x":120.0,"z":75.0}

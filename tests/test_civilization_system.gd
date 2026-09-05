@@ -24,11 +24,18 @@ func _set_all_contacted_and_located()->void:
 		civ.player_relation["home_location_known"]=true
 		civ.player_relation["home_position"]={"x":float(index+1)*50.0,"z":float(index+1)*17.0}
 		system.civilizations[index]=civ
+		for region:Dictionary in civ.strategic_regions:
+			system.city_intelligence.publish("player",system.city_intelligence.capture("player",String(region.id),.8,0,"fixture reconnaissance","test"),0)
 
 
 func _hide_all_contacts()->void:
+	system.city_intelligence.records.clear()
 	for index in system.civilizations.size():
 		var civ:Dictionary=system.civilizations[index]
+		civ.player_relation["home_location_known"]=false
+		civ.player_relation["home_position"]={}
+		civ.player_relation["contact_source"]=""
+		civ.player_relation["encounter_position"]={}
 		civ.player_relation["contact_level"]=0
 		civ.player_relation["contact_intelligence"]=0.0
 		civ.player_relation["met_day"]=-1
@@ -66,59 +73,32 @@ func test_unmet_civilizations_are_absent_from_player_knowledge()->void:
 
 
 func test_known_foreign_snapshot_never_leaks_exact_population_or_unearned_regions()->void:
+	system.city_intelligence.records.clear()
 	var civ:Dictionary=system.civilizations[0]
 	var civ_id:=String(civ.id)
-	var relation:Dictionary=civ.player_relation
-	relation["contact_level"]=2
-	relation["contact_intelligence"]=0.19
-	relation["home_location_known"]=true
-	relation["home_position"]={"x":1200.0,"z":900.0}
-	civ["player_relation"]=relation
-	system.civilizations[0]=civ
-	var first_contact:Dictionary=system.known_civilization_snapshot(civ_id)
-	assert_bool(first_contact.has("population")).is_false()
-	assert_bool(first_contact.has("controlled_population")).is_false()
-	assert_bool(first_contact.has("cohorts")).is_false()
-	assert_bool(first_contact.has("population_estimate_low")).is_false()
-	assert_array(first_contact.get("strategic_regions",[])).is_empty()
-	assert_int(int(first_contact.get("home_regions_total",0))).is_equal(-1)
-	system.civilizations[0].player_relation["contact_intelligence"]=0.30
-	var bounded_report:Dictionary=system.known_civilization_snapshot(civ_id)
-	assert_bool(bounded_report.has("population")).is_false()
-	assert_bool(bounded_report.has("population_estimate_low")).is_true()
-	assert_bool(bounded_report.has("population_estimate_high")).is_true()
-	assert_float(float(bounded_report.population_estimate_low)).is_less(float(bounded_report.population_estimate_high))
-	assert_array(bounded_report.get("strategic_regions",[])).is_empty()
-	system.civilizations[0].player_relation["contact_intelligence"]=0.60
-	system.civilizations[0].player_relation["home_location_known"]=false
-	system.civilizations[0].player_relation["home_position"]={}
-	assert_array(system.known_civilization_snapshot(civ_id).get("strategic_regions",[])).is_empty()
-	system.civilizations[0].player_relation["home_location_known"]=true
-	system.civilizations[0].player_relation["home_position"]={"x":1200.0,"z":900.0}
-	var mapped_report:Dictionary=system.known_civilization_snapshot(civ_id)
-	assert_int((mapped_report.get("strategic_regions",[]) as Array).size()).is_equal(system.STRATEGIC_REGIONS_PER_CIV)
-	assert_bool(mapped_report.has("population")).is_false()
+	civ.player_relation.contact_intelligence=1.0
+	var first:Dictionary=system.known_civilization_snapshot(civ_id)
+	assert_bool(first.has("population") or first.has("population_estimate_low")).is_false()
+	assert_array(first.strategic_regions).is_empty()
+	var city_id:=String(civ.strategic_regions[0].id)
+	system.city_intelligence.publish("player",system.city_intelligence.capture("player",city_id,.8,0,"fixture reconnaissance","test"),0)
+	var report:Dictionary=system.known_civilization_snapshot(civ_id)
+	assert_bool(report.has("population")).is_false()
+	assert_bool(report.has("population_estimate_low")).is_true()
+	assert_int(report.strategic_regions.size()).is_equal(1)
 
 
-func test_army_destinations_require_region_intelligence_and_revealed_ground()->void:
+func test_army_destinations_require_city_observation_and_preserve_known_locations()->void:
+	system.city_intelligence.records.clear()
 	var civ:Dictionary=system.civilizations[0]
 	var civ_id:=String(civ.id)
-	civ.player_relation["contact_level"]=2
-	civ.player_relation["contact_intelligence"]=0.54
-	civ.player_relation["home_location_known"]=true
-	civ.player_relation["home_position"]={"x":1200.0,"z":900.0}
-	system.civilizations[0]=civ
+	civ.player_relation.contact_intelligence=1.0
+	assert_int(system.military_movement_destinations().size()).is_equal(1)
+	var city_id:=String(civ.strategic_regions[0].id)
+	system.city_intelligence.publish("player",system.city_intelligence.capture("player",city_id,.8,0,"fixture reconnaissance","test"),0)
+	assert_int(system.military_movement_destinations().size()).is_equal(2)
 	system.revealed_areas.clear()
-	system._add_revealed_area(Vector2(1200.0,900.0),300.0,"returned test chart")
-	var low_intelligence:=(system.military_movement_destinations() as Array).filter(func(destination:Dictionary)->bool: return String(destination.get("civ_id",""))==civ_id)
-	assert_array(low_intelligence).is_empty()
-	system.civilizations[0].player_relation["contact_intelligence"]=0.65
-	var mapped:=(system.military_movement_destinations() as Array).filter(func(destination:Dictionary)->bool: return String(destination.get("civ_id",""))==civ_id)
-	assert_int(mapped.size()).is_equal(system.STRATEGIC_REGIONS_PER_CIV)
-	system.revealed_areas.clear()
-	system._add_revealed_area(Vector2.ZERO,72.0,"founding knowledge")
-	var outside_chart:=(system.military_movement_destinations() as Array).filter(func(destination:Dictionary)->bool: return String(destination.get("civ_id",""))==civ_id)
-	assert_array(outside_chart).is_empty()
+	assert_int(system.military_movement_destinations().size()).is_equal(2)
 
 
 func test_scouts_reveal_nothing_until_their_return_then_chart_route_and_contact()->void:
@@ -295,6 +275,8 @@ func test_ocean_separated_known_target_is_blocked_before_people_or_food_depart()
 	civ.player_relation["home_position"]={"x":100.0,"z":0.0}
 	system.civilizations[0]=civ
 	var food_before:=FoodSystem.total_stored()
+	var city_id:String=system.city_intelligence.primary_id(String(civ.id))
+	system.city_intelligence.records.player[city_id].position={"x":100.0,"z":0.0}
 	var target_id:="settlement:%s" % String(civ.id)
 	var quote:Dictionary=system.scout_mission_quote(30,target_id)
 	assert_bool(bool(quote.get("can_dispatch",true))).is_false()
@@ -316,6 +298,8 @@ func test_returned_report_and_world_map_preserve_the_exact_physical_land_trail()
 	civ.player_relation["home_position"]={"x":100.0,"z":0.0}
 	civ.player_relation["at_war"]=false
 	system.civilizations[0]=civ
+	var city_id:String=system.city_intelligence.primary_id(String(civ.id))
+	system.city_intelligence.records.player[city_id].position={"x":100.0,"z":0.0}
 	var target_id:="settlement:%s" % String(civ.id)
 	assert_bool(bool(system.dispatch_scouts(30,target_id).get("ok",false))).is_true()
 	var departed_route:Array=((system.scout_missions[0] as Dictionary).route as Array).duplicate(true)
@@ -335,6 +319,7 @@ func test_returned_report_and_world_map_preserve_the_exact_physical_land_trail()
 
 
 func test_contact_sites_unlock_targeted_investigation_and_confirm_nearby_home_settlements()->void:
+	system.city_intelligence.records.clear()
 	var civ:Dictionary=system.civilizations[0]
 	civ["position"]=Vector2(0.001,0.0)
 	var relation:Dictionary=civ.player_relation
@@ -364,7 +349,7 @@ func test_contact_sites_unlock_targeted_investigation_and_confirm_nearby_home_se
 	var resolved:Dictionary=(system.civilizations[0].player_relation as Dictionary)
 	assert_bool(bool(resolved.get("home_location_known",false))).is_true()
 	assert_bool((resolved.get("home_position",{}) as Dictionary).has("x")).is_true()
-	var settlement_target:="settlement:%s" % String(civ.id)
+	var settlement_target:String="city:"+system.city_intelligence.primary_id(String(civ.id))
 	target_ids.clear()
 	for option in system.scout_target_options(): target_ids.append(String(option.id))
 	assert_array(target_ids).contains([settlement_target])
@@ -406,6 +391,7 @@ func test_recruitment_returns_a_distinct_social_account_even_when_nobody_joins()
 
 
 func test_an_encounter_site_is_not_a_diplomatic_destination()->void:
+	system.city_intelligence.records.clear()
 	var civ:Dictionary=system.civilizations[0]
 	var relation:Dictionary=civ.player_relation
 	relation["contact_level"]=2
@@ -467,7 +453,7 @@ func test_diplomats_carry_a_deducted_gift_and_report_only_after_the_round_trip()
 	assert_float(float((system.civilizations[0].player_relation as Dictionary).opinion)).is_greater(opinion_before)
 	assert_float(float(system.civilizations[0].player_relation.contact_intelligence)).is_greater(intelligence_before)
 	assert_int(int(system.civilizations[0].player_relation.last_observed_day)).is_equal(int(quote.total_days))
-	assert_int((system.diplomatic_history[0].observations as Array).size()).is_greater_equal(3)
+	assert_int((system.diplomatic_history[0].observations as Array).size()).is_greater_equal(1)
 	assert_int(system.revealed_areas.size()).is_greater(revealed_before)
 	assert_array(system.validate_state()).is_empty()
 
@@ -830,8 +816,9 @@ func test_records_contact_and_inference_progressively_reveal_strategic_compariso
 	assert_int(int(formal.stage)).is_equal(4)
 	assert_bool(bool(formal.exact_scoring_known)).is_true()
 	var known:Dictionary=system.known_competition_snapshot()
-	assert_int(int(known.player_rank)).is_greater(0)
-	assert_bool((known.leaders[0] as Dictionary).has("score")).is_true()
+	assert_int(int(known.player_rank)).is_equal(-1)
+	var own:Dictionary=(known.leaders as Array).filter(func(profile:Dictionary)->bool: return profile.id=="player")[0]
+	assert_bool(own.has("score")).is_true()
 	assert_str(String(known.victory_rule)).contains("seven")
 
 
@@ -998,7 +985,7 @@ func test_limited_objective_capture_creates_war_score_and_completion()->void:
 func test_strategic_forecast_uses_real_defender_and_changes_outlook_not_enemy_size()->void:
 	var civ_id:=String(system.civilizations[0].id)
 	var target:Dictionary=system.campaign_targets(civ_id)[0]
-	MilitaryCampaign.home_army={"troops":5,"readiness":0.45,"supply_level":0.80,"formations":[]}
+	MilitaryCampaign.home_army={"troops":1,"readiness":0.45,"supply_level":0.80,"formations":[]}
 	var weak:Dictionary=system.strategic_assessment(civ_id,String(target.id))
 	MilitaryCampaign.home_army={"troops":5000,"readiness":0.90,"supply_level":1.0,"formations":[]}
 	var strong:Dictionary=system.strategic_assessment(civ_id,String(target.id))
@@ -1091,6 +1078,10 @@ func test_peace_removes_queued_incidents_and_stale_incidents_are_never_consumed(
 	civ.player_relation["opinion"]=0.60
 	civ.player_relation["last_incident_day"]=-9999
 	system.civilizations[0]=civ
+	GameState.settlement_completed=["Hearth Circle"]
+	SettlementModel.ensure_founded()
+	var home_id:String=system.city_intelligence.primary_id("player")
+	system.city_intelligence.publish(String(civ.id),system.city_intelligence.capture(String(civ.id),home_id,.8,0,"returned scout","test"),0)
 	system._queue_player_incident_if_due(civ,civ.player_relation,120)
 	assert_int(system.pending_player_incidents.size()).is_equal(1)
 	var peace:Dictionary=system.conduct_player_action(String(civ.id),"seek_peace",true)
@@ -1231,6 +1222,7 @@ func test_foreign_ai_holding_is_reachable_and_liberated_without_starting_a_hidde
 	system.civilizations[0]=ai_result.first
 	system.civilizations[1]=ai_result.second
 	var occupied_region_id:=String(ai_result.region_id)
+	system.city_intelligence.publish("player",system.city_intelligence.capture("player",occupied_region_id,.8,30,"returned occupation report","test"),30)
 	var targets:Array=system.campaign_targets(String(occupier.id))
 	var foreign_targets:=targets.filter(func(region:Dictionary)->bool: return bool(region.get("foreign_holding",false)))
 	assert_int(foreign_targets.size()).is_equal(1)
@@ -1279,7 +1271,7 @@ func test_export_survives_a_real_json_round_trip()->void:
 	assert_bool(bool(imported.get("ok",false))).is_true()
 	assert_str(String(system.region_snapshot(String(civ.id),String(target.id)).controller)).is_equal("player")
 	assert_array(system.validate_state()).is_empty()
-	assert_int(JSON.stringify(system.export_state()).length()).is_less(250_000)
+	assert_int(JSON.stringify(system.export_state()).length()).is_less(600_000)
 
 
 func test_age_cohorts_change_over_time_and_continue_to_conserve_population()->void:

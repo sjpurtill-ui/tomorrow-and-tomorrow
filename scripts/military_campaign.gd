@@ -1388,7 +1388,12 @@ func _live_army_reporting()->bool:
 
 
 func _army_report_snapshot(army:Dictionary)->Dictionary:
+	var carried:Dictionary={}
+	var position:Dictionary=army.get("position",{})
+	if int(army.get("troops",0))>0 and CivilizationSystem.city_intelligence.valid_point(position):
+		CivilizationSystem.city_intelligence.stage(carried,"player",CivilizationSystem.city_intelligence.vector(position),.65,int(GameState.elapsed_days),"army:%s" % str(army.get("army_id",0)))
 	return {
+		"city_observations":carried.get("city_observations",{}),
 		"day":int(GameState.elapsed_days),
 		"position":(army.get("position",{}) as Dictionary).duplicate(true),
 		"status":String(army.get("status","stationed")),
@@ -1429,6 +1434,7 @@ func _process_army_runners_day()->void:
 			# At home (or with signal-era communications) the government simply
 			# knows; runners are only the early-game information carrier.
 			army["last_report"]=_army_report_snapshot(army)
+			CivilizationSystem.city_intelligence.deliver(army.last_report,"player",day)
 			field_armies[index]=army
 			continue
 		if day-int(army.get("last_runner_departure_day",day))>=RUNNER_INTERVAL_DAYS:
@@ -1441,6 +1447,7 @@ func _process_army_runners_day()->void:
 		if day<int(message.get("arrival_day",day)):
 			remaining_messages.append(message)
 			continue
+		CivilizationSystem.city_intelligence.deliver(message.get("snapshot",{}),"player",day)
 		var army_index:=_field_army_index(int(message.get("army_id",-1)))
 		if army_index>=0:
 			var army:Dictionary=field_armies[army_index]
@@ -2284,6 +2291,9 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if not payload.get("runner_messages",[]) is Array: return {"error":"Invalid runner messages."}
+	for message in payload.get("runner_messages",[]):
+		if not message is Dictionary or not message.get("snapshot",{}) is Dictionary or not CivilizationSystem.city_intelligence.valid_carried(message.get("snapshot",{})): return {"error":"Invalid carried city observation."}
 	var siege_error:=SiegeModel.validate(payload.get("active_siege",{}))
 	if not siege_error.is_empty(): return {"error":siege_error}
 	if not payload.get("siege_history",[]) is Array or payload.get("siege_history",[]).size()>SiegeModel.HISTORY_LIMIT: return {"error":"Invalid siege history."}
@@ -4161,14 +4171,12 @@ func siege_public_snapshot(siege_id:String="")->Dictionary:
 	result["enemy_supply_assessment"]="No reliable count of enemy stores."
 	result["enemy_supply_report_day"]=-1
 	var rival:=String(active_siege.defender_id if offensive else active_siege.attacker_id)
-	for report:Dictionary in CivilizationSystem.diplomatic_history:
-		if String(report.get("civ_id",""))!=rival or not report.has("returned_day"): continue
-		for observation in report.get("observations",[]):
-			if "food reserves" in String(observation).to_lower():
-				result["enemy_supply_assessment"]=String(observation).substr(0,240)
-				result["enemy_supply_report_day"]=int(report.returned_day)
-				break
-		if int(result.enemy_supply_report_day)>=0: break
+	if offensive:
+		var city:Dictionary=CivilizationSystem.city_intelligence.known("player",String(active_siege.region_id))
+		var supply:Dictionary=city.get("fields",{}).get("supply",{})
+		if not supply.is_empty():
+			result["enemy_supply_assessment"]="Regional reserve outlook observed at this city: %d–%d days; %s." % [roundi(float(supply.low)),roundi(float(supply.high)),"stale" if bool(supply.stale) else "dated estimate"]
+			result["enemy_supply_report_day"]=int(supply.observed_day)
 	result["civilian_hardship"]=("Critical: people lack reliable food access." if float(active_siege.hardship)>.6 else "Strained: approaches and outside work are restricted.") if not offensive else "Civilian access is restricted; exact stores and hunger inside are unconfirmed."
 	result["besieger_endurance"]=("Exhausted" if float(active_siege.fatigue)>.7 else ("Strained" if float(active_siege.fatigue)>.35 else "Holding")) if offensive else "Enemy endurance is not directly known."
 	result["relief_camps"]=(active_siege.get("relief",[]) as Array).size()
