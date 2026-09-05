@@ -1509,7 +1509,7 @@ func _foreign_scout_speed_km_per_day(civ:Dictionary)->float:
 	var logistics:=clampf(float(civ.get("logistics",0.10)),0.0,1.0)
 	var knowledge:=clampf(float(civ.get("knowledge",0.10)),0.0,1.0)
 	var reach:=clampf(float(civ.get("world_reach",0.0)),0.0,1.0)
-	return lerpf(9.0,52.0,clampf(logistics*0.46+knowledge*0.24+reach*0.30,0.0,1.0))
+	return lerpf(16.0,32.0,clampf(logistics*0.46+knowledge*0.24+reach*0.30,0.0,1.0))
 
 
 func _foreign_scout_exploration_target(civ:Dictionary,sequence:int,max_range:float)->Vector2:
@@ -1624,6 +1624,7 @@ func _foreign_scout_is_active(formation:Dictionary,day:int)->bool:
 
 func _foreign_scout_detected(formation:Dictionary,position:Vector2,day:int,radius:float)->bool:
 	if not _foreign_scout_is_active(formation,day) or day<int(formation.get("evaded_until_day",0)): return false
+	if _nearby_player_army(position,12.0): return true
 	var distance:=position.distance_to(player_world_origin)
 	# Concealment helps a scout cross watched country; it cannot hide a physical
 	# encounter with the settlement's inhabitants and routine local traffic.
@@ -1638,6 +1639,14 @@ func _foreign_scout_detected(formation:Dictionary,position:Vector2,day:int,radiu
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=last_world_seed^day*32452843^String(formation.get("id","")).hash()
 	return rng.randf()<detection_chance
+
+
+func _nearby_player_army(position:Vector2,radius:float)->bool:
+	for army in MilitaryCampaign.field_armies:
+		if int(army.get("troops",0))<=0: continue
+		var point:Dictionary=army.get("position",{})
+		if position.distance_to(Vector2(float(point.get("x",0.0)),float(point.get("z",0.0))))<=radius: return true
+	return false
 
 
 func _foreign_scout_interception_chances(formation:Dictionary,position:Vector2)->Dictionary:
@@ -1736,7 +1745,7 @@ func _process_local_observation(day:int,force:bool=false)->void:
 		if day<int(formation.get("disabled_until_day",0)): continue
 		var position:=_foreign_formation_position(formation,float(day))
 		var distance:=position.distance_to(player_world_origin)
-		if distance>radius: continue
+		if distance>radius and not _nearby_player_army(position,12.0): continue
 		var is_scout:=String(formation.get("kind",""))=="scout"
 		if is_scout and not _foreign_scout_detected(formation,position,day,radius): continue
 		var formation_id:=String(formation.id); var civ_id:=String(formation.civ_id)
@@ -1982,7 +1991,7 @@ func _remove_foreign_scout_population(civ:Dictionary,count:int,remove_total_popu
 	return civ
 
 
-func resolve_foreign_scout_interception(formation_id:String,action:String,roll_override:float=-1.0)->Dictionary:
+func resolve_foreign_scout_interception(formation_id:String,action:String,roll_override:float=-1.0,army_id:int=-1)->Dictionary:
 	initialize()
 	var normalized:=action.to_lower()
 	if normalized not in ["capture","destroy"]: return {"error":"Choose capture or destroy for the interception."}
@@ -1996,11 +2005,22 @@ func resolve_foreign_scout_interception(formation_id:String,action:String,roll_o
 	if day-int(formation.get("last_interception_day",-9999))<7: return {"error":"No second interception can be organized before the scouts clear the pursuit area."}
 	var chances:=_foreign_scout_interception_chances(formation,position)
 	var chance:=float(chances.get(normalized,0.0))
+	if army_id>=0:
+		var army_index:=MilitaryCampaign._field_army_index(army_id)
+		if army_index<0: return {"error":"The pursuing army is no longer available."}
+		var pursuer:Dictionary=MilitaryCampaign.field_armies[army_index]
+		var point:Dictionary=pursuer.get("position",{})
+		if position.distance_to(Vector2(float(point.get("x",0.0)),float(point.get("z",0.0))))>MilitaryCampaign.MAP_ENGAGEMENT_RANGE_KM:
+			return {"error":"The army must reach the scouts before attempting capture."}
+		if int(pursuer.get("troops",0))<=0: return {"error":"The pursuing army has no personnel."}
+		var scout_pace:=Vector2(formation.get("point_a",Vector2.ZERO)).distance_to(Vector2(formation.get("point_b",Vector2.ZERO)))/maxf(1.0,float(formation.get("leg_days",30.0)))
+		var advantage:=MilitaryCampaign._field_army_speed(pursuer)/maxf(8.0,scout_pace)
+		chance=clampf(0.30+0.30*(advantage-1.0)+0.20*float(pursuer.get("readiness",0.5))-0.12*float(formation.get("evasion",0.8)),0.08,0.90)
 	var rng:=RandomNumberGenerator.new(); rng.seed=last_world_seed^day*49979687^formation_id.hash()^normalized.hash()
 	var roll:=roll_override if roll_override>=0.0 else rng.randf()
 	formation["last_interception_day"]=day
 	if roll>=chance:
-		formation["evaded_until_day"]=day+maxi(7,roundi(float(formation.get("leg_days",30.0))*0.20))
+		formation["evaded_until_day"]=day+7
 		foreign_formations[formation_index]=formation
 		_set_sighting_visibility(formation_id,false)
 		observation_revision+=1
