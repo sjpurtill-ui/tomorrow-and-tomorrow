@@ -12885,7 +12885,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	# A few forward-pointing pennants make the order legible even when the route
 	# curves around water or rough terrain. They communicate direction, not scouts.
 	var pennant_count:=5 if band=="local" else (4 if band=="regional" else 3)
-	var pennant_mesh:=CylinderMesh.new(); pennant_mesh.top_radius=0.14; pennant_mesh.bottom_radius=0.92; pennant_mesh.height=0.12; pennant_mesh.radial_segments=3
+	var pennant_mesh:=_warfare_arrowhead_mesh(0.92,0.12,Vector2.UP)
 	var pennants:=MultiMesh.new(); pennants.transform_format=MultiMesh.TRANSFORM_3D; pennants.instance_count=pennant_count; pennants.mesh=pennant_mesh
 	for pennant_index in pennant_count:
 		var progress:=(float(pennant_index)+1.0)/float(pennant_count+1)
@@ -12929,11 +12929,7 @@ func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:
 	# Fixed-count march chevrons make direction readable even when the thin dashed
 	# path crosses mottled terrain. The count depends only on zoom band, never troops.
 	var chevron_count:=5 if band=="local" else (4 if band=="regional" else 3)
-	var chevron_mesh:=CylinderMesh.new()
-	chevron_mesh.top_radius=0.78
-	chevron_mesh.bottom_radius=0.78
-	chevron_mesh.height=0.13
-	chevron_mesh.radial_segments=3
+	var chevron_mesh:=_warfare_arrowhead_mesh(0.78,0.13,Vector2.UP)
 	var chevrons:=MultiMesh.new()
 	chevrons.transform_format=MultiMesh.TRANSFORM_3D
 	chevrons.instance_count=chevron_count

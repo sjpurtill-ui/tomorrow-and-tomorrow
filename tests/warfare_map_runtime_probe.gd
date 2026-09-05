@@ -155,6 +155,24 @@ func _ready()->void:
 		var objective_label:=path.get_node("MovementObjective/ObjectiveLabel") as Label3D
 		_expect(objective_label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"movement objective label inherits the objective marker scale")
 	var front:={"id":"front_probe","war_name":"War of North Crossing","opponent":"Cedar League","target_region_id":"probe_objective","target":"North Crossing","objective":"Take North Crossing","progress":0.36,"field_personnel":8000,"inbound_personnel":0,"occupation_personnel":0,"readiness":0.62,"supply":0.58}
+	for direction in [Vector2.UP,Vector2.RIGHT,Vector2.DOWN,Vector2.LEFT]:
+		var target:Vector3=origin+Vector3(direction.x,0,direction.y)*20.0
+		var route:Array=[{"x":origin.x,"z":origin.z},{"x":target.x,"z":target.z}]
+		var army_route:Node3D=terrain._create_player_field_army_path({"id":"direction_probe","scale":0.32},origin,target,"local")
+		var scout_route:Node3D=terrain._create_player_scout_route_marker({"mission_id":"direction_probe"},route,"local")
+		terrain.add_child(army_route)
+		terrain.add_child(scout_route)
+		for arrows:MultiMeshInstance3D in [army_route.get_node("MarchChevrons"),scout_route.get_node("ScoutDirectionPennants")]:
+			var vertices:PackedVector3Array=arrows.multimesh.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+			_expect(vertices.size()==24,"route direction marker is not a triangular prism")
+			_expect(arrows.multimesh.instance_count==5,"local route exceeded its fixed five arrow budget")
+			# The dummy renderer returns identity for MultiMesh transforms. Verify
+			# stored directions in the hidden graphical run, not against dummy data.
+			if DisplayServer.get_name()!="headless":
+				var tip:Vector3=arrows.multimesh.get_instance_transform(0).basis*vertices[1]
+				_expect(Vector2(tip.x,tip.z).normalized().dot(direction)>0.999,"%s route arrow points against %s" % [arrows.name,direction])
+		army_route.free()
+		scout_route.free()
 	var destination:={"position":{"x":origin.x,"z":origin.z}}
 	terrain._refresh_warfare_front_markers([PRESENTATION.front_marker(front,destination,320.0,true)])
 	var front_marker:Node3D=terrain.warfare_front_markers.get("front_probe",null)
