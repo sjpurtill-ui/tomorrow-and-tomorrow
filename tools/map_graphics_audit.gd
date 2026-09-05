@@ -177,6 +177,24 @@ func _ready()->void:
 			material.shader.code=material.shader.code.replace(", depth_test_disabled", "")
 	if "--hide-rivers" in OS.get_cmdline_user_args():
 		for river in terrain.river_overlays: river.visible=false
+	if "--terrain-unshaded" in OS.get_cmdline_user_args():
+		var terrain_shader:Shader=terrain.regional_terrain_patch.material_override.shader
+		terrain_shader.code=terrain_shader.code.replace("render_mode diffuse_burley, specular_disabled;","render_mode unshaded;")
+	if "--terrain-up-normals" in OS.get_cmdline_user_args():
+		var normal_shader:Shader=terrain.regional_terrain_patch.material_override.shader
+		normal_shader.code=normal_shader.code.replace("normalize(world_normal)","vec3(0.0,1.0,0.0)")
+	if "--disable-sun-shadows" in OS.get_cmdline_user_args():
+		for light in terrain.find_children("*","DirectionalLight3D",true,false): light.shadow_enabled=false
+	if "--terrain-normal-audit" in OS.get_cmdline_user_args():
+		for surface_mesh in [terrain.regional_terrain_patch,terrain.detail_terrain_patch]:
+			if surface_mesh==null: continue
+			var surface_normals:PackedVector3Array=surface_mesh.mesh.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+			var downward:=0
+			for normal in surface_normals:
+				if normal.y<0.0: downward+=1
+			print("TERRAIN_NORMAL_AUDIT ",surface_mesh.name," downward=",downward," total=",surface_normals.size())
+	if "--hide-detail-surface" in OS.get_cmdline_user_args() and terrain.detail_terrain_patch:
+		terrain.detail_terrain_patch.visible=false
 	if "--no-terrain-shadows" in OS.get_cmdline_user_args():
 		terrain.regional_terrain_patch.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		terrain.province_terrain_mesh.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
