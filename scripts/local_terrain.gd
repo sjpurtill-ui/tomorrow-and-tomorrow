@@ -6986,10 +6986,10 @@ func _settlement_plot_has_detail(plot:Dictionary,plot_index:int,total_plots:int,
 	return absi(int(plot.get("id",plot_index+1)))%stride==0
 
 func _settlement_plot_has_aggregate_density(plot:Dictionary,plot_index:int,total_plots:int,lod:int)->bool:
-	if lod<1: return false
+	if lod<0: return false
 	if String(plot.get("status","active")) not in ["active","stressed","damaged","under_construction"]: return false
 	if String(plot.get("land_use","")) in ["field","pasture","water","waste","temporary_encampment","vacant","ruin"]: return false
-	var budget:=384 if lod==1 else SETTLEMENT_AGGREGATE_DENSITY_BUDGET
+	var budget:=384 if lod<=1 else SETTLEMENT_AGGREGATE_DENSITY_BUDGET
 	if total_plots<=budget: return true
 	var stride:=maxi(1,ceili(float(total_plots)/float(budget)))
 	# Persistent plot ids make this thinning deterministic across rebuilds and camera
@@ -7875,6 +7875,12 @@ void fragment() {
 	fabric=mix(fabric,fabric*vec3(1.10,1.035,0.86),dry*0.14*grain_strength);
 	ALBEDO=fabric;
 	float material_alpha=COLOR.a;
+	if (fabric_kind==4) {
+		// Joined courts and worn ground connect inhabited plots at village altitude.
+		// Retire continuously before the player resolves individual yard surfaces.
+		float ground_pixel_span=max(length(dFdx(world_position.xz)),length(dFdy(world_position.xz)));
+		material_alpha*=smoothstep(0.00012,0.00060,ground_pixel_span);
+	}
 	if (fabric_kind==1) {
 		// Metre-scale beds must integrate into crop cover instead of flickering as
 		// isolated subpixel scratches. The broad parcel retains its crop palette.

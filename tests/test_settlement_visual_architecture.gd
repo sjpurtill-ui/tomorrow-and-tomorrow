@@ -635,6 +635,21 @@ func test_distant_urban_density_is_deterministic_and_strictly_bounded()->void:
 	assert_int(first.size()).is_less_equal(renderer.SETTLEMENT_AGGREGATE_DENSITY_BUDGET)
 
 
+func test_close_aerial_ground_connects_only_inhabited_plots_with_a_fixed_budget()->void:
+	var eligible:=0
+	for index in 4096:
+		var plot:={"id":index+1,"status":"active","land_use":"residential_compound"}
+		if renderer._settlement_plot_has_aggregate_density(plot,index,4096,0): eligible+=1
+	assert_int(eligible).is_greater(0)
+	assert_int(eligible).is_less_equal(384)
+	for land_use in ["field","pasture","water","waste","temporary_encampment","vacant","ruin"]:
+		assert_bool(renderer._settlement_plot_has_aggregate_density({"id":1,"status":"active","land_use":land_use},0,1,0)).is_false()
+	for status in ["reclaimed","vacant","ruin"]:
+		assert_bool(renderer._settlement_plot_has_aggregate_density({"id":1,"status":status,"land_use":"residential_compound"},0,1,0)).is_false()
+	var material:ShaderMaterial=renderer._settlement_fabric_material(4,0.48)
+	assert_str(material.shader.code).contains("smoothstep(0.00012,0.00060,ground_pixel_span)")
+
+
 func test_persistent_density_tone_distinguishes_old_core_new_expansion_and_war_damage()->void:
 	var old_core:Dictionary={"fabric_generation":10,"created_day":GameState.elapsed_days-365.0*150.0,"status":"active"}
 	var new_edge:Dictionary={"fabric_generation":6,"created_day":GameState.elapsed_days-365.0,"status":"active"}
