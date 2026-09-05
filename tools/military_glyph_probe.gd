@@ -8,9 +8,10 @@ func capture()->void:
 	root.add_child(scene)
 	var renderer:Node3D=load("res://scripts/local_terrain.gd").new()
 	var camera:=Camera3D.new()
-	camera.projection=Camera3D.PROJECTION_ORTHOGONAL
+	camera.projection=Camera3D.PROJECTION_PERSPECTIVE
+	camera.fov=35.0
 	camera.size=42.0
-	camera.position=Vector3(0,70,0)
+	camera.position=Vector3(0,42.0/(2.0*tan(deg_to_rad(35.0)*0.5)),0)
 	scene.add_child(camera)
 	camera.look_at(Vector3.ZERO,Vector3.FORWARD)
 	renderer.camera=camera
@@ -36,14 +37,19 @@ func capture()->void:
 		renderer._apply_warfare_formation_view(marker,view)
 		var label:=Label3D.new()
 		label.text=String(units[index]).replace("_"," ").to_upper()
-		label.font_size=8
+		label.font_size=32
+		label.pixel_size=0.0003125
+		label.outline_size=6
 		label.fixed_size=true
 		label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-		label.position=center+Vector3(0,0.1,5.0)
+		label.position=center+Vector3(0,0.1,6.0)
 		scene.add_child(label)
 	for frame in 8: await process_frame
 	await RenderingServer.frame_post_draw
-	var path:=ProjectSettings.globalize_path("res://artifacts/military-glyphs.png")
+	var filename:="military-glyphs.png"
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--output="): filename=argument.trim_prefix("--output=").get_file()
+	var path:=ProjectSettings.globalize_path("res://artifacts/"+filename)
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var result:=root.get_texture().get_image().save_png(path)
 	renderer.free()
