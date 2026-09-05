@@ -8778,7 +8778,9 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 		var divider_finish:=field_center+right*offset+forward*(float(intersections.back())-0.0007)
 		var half_width:=0.00017
 		var corners:=[divider_start-right*half_width,divider_finish-right*half_width,divider_finish+right*half_width,divider_start+right*half_width]
-		for corner_index in [0,1,2,0,2,3]:
+		# Dividers run across the beds, so their lateral basis has opposite winding.
+		# Keep their daylight-facing normals consistent with the crop courses.
+		for corner_index in [0,2,1,0,3,2]:
 			var point_2d:Vector2=corners[corner_index]
 			var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
 			world_point.y=_close_surface_height_at(world_point.x,world_point.z)+0.0029

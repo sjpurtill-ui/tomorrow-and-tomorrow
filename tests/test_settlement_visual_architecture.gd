@@ -1156,6 +1156,24 @@ func test_close_zoom_never_replaces_continuous_city_with_photo_tile_clipmap()->v
 	assert_bool(terrain_source.contains("float aggregate_floor=fabric_kind==5 ? 0.78 : 0.16;")).is_true()
 
 
+func test_field_beds_and_cross_dividers_face_daylight()->void:
+	for pattern in ["irrigated_beds","smallholder_mosaic","dryland_patchwork"]:
+		for bearing in [0.0,0.7,2.2]:
+			var polygon:=PackedVector2Array()
+			for point in [Vector2(-0.04,-0.03),Vector2(0.04,-0.03),Vector2(0.04,0.03),Vector2(-0.04,0.03)]:
+				polygon.append(point.rotated(bearing))
+			var plot:={"polygon":polygon,"centroid":Vector2.ZERO,"seed":13,"land_use":"field","crop_cover":0.8,"field_pattern":pattern}
+			var surface:=SurfaceTool.new()
+			surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+			renderer._append_field_rows(surface,plot,Vector3.ZERO)
+			surface.generate_normals()
+			var mesh:=surface.commit()
+			var normals:PackedVector3Array=mesh.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+			assert_int(normals.size()).is_greater(0)
+			for normal in normals:
+				assert_float(normal.y).is_greater(0.0)
+
+
 func test_roof_opacity_is_not_baked_at_the_old_camera_threshold()->void:
 	var test_camera:Camera3D=auto_free(Camera3D.new())
 	renderer.camera=test_camera
