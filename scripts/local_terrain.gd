@@ -12630,10 +12630,11 @@ func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->vo
 		"cavalry","mobile":
 			primary.mesh=_warfare_horse_head_mesh(); primary.visible=true
 		"siege_engineer":
-			primary.mesh=bar.call(1.75,0.90); primary.visible=true
-			secondary.mesh=bar.call(2.45,0.20); secondary.rotation.y=PI*0.5; secondary.visible=true
-			tertiary.mesh=wheel.call(0.42); tertiary.position.x=-1.30; tertiary.visible=true
-			fourth.mesh=wheel.call(0.42); fourth.position.x=-0.15; fourth.visible=true
+			# Engineers build and breach works; distinguish their tools from cannon.
+			primary.mesh=bar.call(2.20,0.17); primary.rotation.y=0.72; primary.visible=true
+			secondary.mesh=bar.call(1.08,0.42); secondary.position=Vector3(-0.04,0.43,-0.59); secondary.rotation.y=0.72+PI*0.5; secondary.visible=true
+			tertiary.mesh=bar.call(2.20,0.17); tertiary.rotation.y=-0.72; tertiary.visible=true
+			fourth.mesh=_warfare_arrowhead_mesh(0.50,0.22,Vector2(-0.75,-0.66)); fourth.position=Vector3(-1.40,0.43,-0.59); fourth.visible=true
 		"field_artillery","modern_artillery","artillery":
 			primary.mesh=bar.call(2.55,0.22); primary.rotation.y=PI*0.5; primary.visible=true
 			secondary.mesh=disc.call(0.48,10); secondary.visible=true
