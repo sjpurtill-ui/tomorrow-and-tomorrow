@@ -9,6 +9,7 @@ func test_player_marker_communicates_owner_strength_readiness_supply_and_selecti
 	assert_bool(bool(marker.selected)).is_true()
 	assert_str(String(marker.owner_label)).is_equal("YOU")
 	assert_str(String(marker.label)).contains("12.5K")
+	assert_str(String(marker.label)).contains("SOLDIERS")
 	assert_str(String(marker.label)).contains("READY 78%")
 	assert_str(String(marker.label)).contains("SUPPLY 64%")
 	assert_str(String(marker.color)).is_equal(PRESENTATION.PLAYER_COLOR)
@@ -77,6 +78,7 @@ func test_counter_role_and_era_follow_real_aggregate_composition()->void:
 	]
 	var view:=PRESENTATION.player_marker(artillery_army,48.0,false)
 	assert_str(String(view.formation_role)).is_equal("artillery")
+	assert_str(String(view.formation_unit)).is_equal("rifle_infantry")
 	assert_int(int(view.formation_era)).is_equal(3)
 	var levy_army:=_army(3,12_000)
 	levy_army.formations=[{"unit":"levy","count":12_000}]
@@ -113,17 +115,28 @@ func test_readiness_changes_formation_order_without_adding_map_elements()->void:
 	assert_int(int(broken_state.element_budget)).is_equal(int(ready_state.element_budget))
 
 
-func test_local_formation_report_stays_in_three_compact_lines()->void:
+func test_local_formation_report_stays_in_two_compact_lines()->void:
 	var army:=_army(1,12_500)
 	army.status="moving"
 	army.destination_name="North Road"
 	army.destination_position={"x":20.0,"z":10.0}
 	army.arrival_day=84
 	var view:=PRESENTATION.player_marker(army,48.0,true)
-	assert_int(String(view.label).split("\n").size()).is_equal(3)
+	assert_int(String(view.label).split("\n").size()).is_equal(2)
 	assert_str(String(view.label)).contains("READY 78%")
 	assert_str(String(view.label)).contains("SUPPLY 64%")
 	assert_float(absf(float(view.heading))).is_greater(0.01)
+
+
+func test_visible_scout_label_tells_the_player_how_to_act()->void:
+	var scout:=_foreign()
+	scout["identified"]=false
+	scout["civilization"]=""
+	scout["carries_report"]=true
+	var view:=PRESENTATION.foreign_marker(scout,48.0)
+	assert_str(String(view.label)).contains("FOREIGN SCOUTS")
+	assert_str(String(view.label)).contains("CLICK TO INTERCEPT")
+	assert_int(String(view.label).split("\n").size()).is_equal(2)
 
 
 func test_unknown_objectives_do_not_receive_invented_map_coordinates()->void:
@@ -250,11 +263,13 @@ func test_world_fronts_are_clustered_and_label_budget_is_bounded()->void:
 	assert_str(String(visible_labels[0].label)).contains("8 ACTIVE WARS")
 
 
-func test_ground_scale_hides_all_warfare_tokens_and_labels()->void:
+func test_ground_scale_keeps_units_visible_and_correctly_scaled()->void:
 	var snapshot:=PRESENTATION.build_snapshot(7.99,[_army(1,1000)],[_foreign()],[_front()],[_home(),_objective()],{},1)
-	assert_bool(bool(snapshot.player[0].visible)).is_false()
-	assert_bool(bool(snapshot.player[0].show_label)).is_false()
-	assert_bool(bool(snapshot.foreign[0].visible)).is_false()
+	assert_bool(bool(snapshot.player[0].visible)).is_true()
+	assert_bool(bool(snapshot.player[0].show_label)).is_true()
+	assert_bool(bool(snapshot.foreign[0].visible)).is_true()
+	assert_float(float(snapshot.player[0].scale)).is_equal_approx(7.99*0.016,0.001)
+	assert_str(String(snapshot.player[0].label)).contains("SOLDIERS")
 	assert_bool(bool(snapshot.fronts[0].visible)).is_false()
 	assert_bool(bool(snapshot.fronts[0].show_label)).is_false()
 

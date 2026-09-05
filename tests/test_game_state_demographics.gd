@@ -137,6 +137,50 @@ func test_numeric_deaths_conserve_population_and_report_cohorts() -> void:
 	assert_float(_cohort_sum(state)).is_equal_approx(state.population_exact, 0.01)
 
 
+func test_rolling_vital_balance_uses_only_the_trailing_year() -> void:
+	state.elapsed_days = 100.0
+	state._record_vital_statistics(10, 3)
+	state.elapsed_days = 200.0
+	state._record_vital_statistics(5, 7)
+	state.elapsed_days = 500.0
+	state._record_vital_statistics(20, 1)
+	var balance: Dictionary = state.rolling_vital_balance(365)
+	assert_int(int(balance.births)).is_equal(25)
+	assert_int(int(balance.deaths)).is_equal(8)
+	assert_int(int(balance.net)).is_equal(17)
+
+
+func test_rolling_vital_balance_recovers_older_save_ledger_history() -> void:
+	state.elapsed_days = 500.0
+	state.demographic_ledger.clear()
+	state.demographic_ledger.append({
+		"kind": "birth", "count": 101, "start_day": 100, "end_day": 200
+	})
+	var balance: Dictionary = state.rolling_vital_balance(365)
+	# The 65 represented days from day 136 through day 200 are in the window.
+	assert_int(int(balance.births)).is_equal(65)
+	assert_int(int(balance.deaths)).is_equal(0)
+	assert_int(int(balance.net)).is_equal(65)
+
+
+func test_health_history_distinguishes_discovery_and_condition_changes() -> void:
+	state.record_health_history(true)
+	state.elapsed_days = 30.0
+	state.population_health = 0.35
+	state.discovery_log.append({"day": 30, "name": "Clean Water Practice", "effects": {"water_safety": 0.1}})
+	state.record_health_history()
+	var history: Array[Dictionary] = state.health_history_snapshot()
+	assert_int(history.size()).is_equal(2)
+	assert_str(String(history[-1].marker_type)).is_equal("discovery")
+	assert_str(String(history[-1].marker_label)).contains("Clean Water Practice")
+	state.elapsed_days = 60.0
+	state.population_health = 0.95
+	state.record_health_history()
+	history = state.health_history_snapshot()
+	assert_int(history.size()).is_equal(3)
+	assert_str(String(history[-1].marker_type)).is_equal("conditions")
+
+
 func test_mortality_cause_changes_aggregate_age_pattern() -> void:
 	var exposure_state: Node = auto_free(GAME_STATE_SCRIPT.new())
 	exposure_state.reset_for_new_world(TEST_SEED)
@@ -160,6 +204,21 @@ func test_age_profile_accounts_for_the_entire_population() -> void:
 		total += int(band.count)
 	assert_int(total).is_equal(state.population_total)
 	assert_int(int(profile.working_age) + int(profile.dependents)).is_equal(state.population_total)
+	assert_array((profile.bands as Array).map(func(band:Dictionary)->String: return String(band.range))).is_equal(["0–13","14–24","25–34","35–44","45–59","60+"])
+	assert_float(float(profile.median_age)).is_greater(0.0)
+
+
+func test_natural_mortality_uses_the_same_age_gradient_as_the_life_table()->void:
+	state.population_exact=1_000_000.0
+	state.population_cohorts={"children":700_000.0,"youth":100_000.0,"early_adults":80_000.0,"established_adults":60_000.0,"mature_adults":40_000.0,"elders":20_000.0}
+	state._normalize_population_cohorts()
+	var young_rate:float=state.current_natural_mortality_rate(1.0)
+	state.population_cohorts={"children":100_000.0,"youth":100_000.0,"early_adults":100_000.0,"established_adults":100_000.0,"mature_adults":150_000.0,"elders":450_000.0}
+	state._normalize_population_cohorts()
+	var old_rate:float=state.current_natural_mortality_rate(1.0)
+	assert_float(old_rate).is_greater(young_rate*3.0)
+	var deaths:Dictionary=state.register_population_deaths(10_000,"Natural causes")
+	assert_float(float(deaths.affected_cohorts.elders)/450_000.0).is_greater(float(deaths.affected_cohorts.children)/100_000.0)
 
 
 func test_population_function_profile_conserves_roles_and_removes_real_absences()->void:

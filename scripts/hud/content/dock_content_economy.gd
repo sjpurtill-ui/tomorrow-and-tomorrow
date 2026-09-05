@@ -5,11 +5,16 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 func meta()->Dictionary:
 	return {
 		"eyebrow":"ECONOMY · PROVISIONS & MATERIALS",
-		"title":"Provisions",
+		"title":"%s · Provisions" % String(SettlementModel.selected_settlement().get("name","Settlement")),
 		"subtabs":["FOOD & WATER","MATERIALS","WHO EATS"],
 	}
 
 func tab(sub:int)->Dictionary:
+	var data:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary: return SettlementModel.with_local_population(func()->Dictionary: return _local_tab(sub)))
+	(data.blocks as Array).append(_trade_block())
+	return data
+
+func _local_tab(sub:int)->Dictionary:
 	var metrics:Dictionary=GameState.simulation_metrics
 	var water:Dictionary=GameState.water_metrics
 	var food_days:=float(metrics.get("food_days",0.0))
@@ -38,13 +43,14 @@ func tab(sub:int)->Dictionary:
 
 func _food_blocks(metrics:Dictionary)->Array:
 	var produced:=float(metrics.get("food_production",0.0))
+	var weather:=roundi(float(metrics.get("food_weather_factor",1.0))*100.0)
 	var eaten:=float(metrics.get("food_eaten",0.0))
 	var spoiled:=float(metrics.get("food_spoilage",0.0))
 	var issued:=FoodSystem.issued_on_day(int(GameState.elapsed_days))
 	var net:=float(metrics.get("food_net",0.0))
 	var top:=maxf(1.0,maxf(produced,maxf(eaten,spoiled)))
 	var flow_items:Array=[
-		{"name":"Produced","value":"%+.0f" % produced,"ratio":produced/top,"color":Tokens.GREEN,"tip":"Rations produced today"},
+		{"name":"Produced","value":"%+.0f" % produced,"ratio":produced/top,"color":Tokens.GREEN,"tip":"Rations produced today; current aggregate weather supports %d%% of ordinary yield" % weather},
 		{"name":"Eaten","value":"−%.0f" % eaten,"ratio":eaten/top,"color":Tokens.TEAL,"tip":"Rations eaten today"},
 		{"name":"Spoiled","value":"−%.0f" % spoiled,"ratio":spoiled/top,"color":Tokens.RED,"tip":"Rations lost to spoilage today"},
 		{"name":"Missions","value":"−%.0f" % issued if issued>0.0 else "0","ratio":issued/top,"color":Tokens.MUTED,"tip":"Rations issued to departing missions"},
@@ -80,7 +86,7 @@ func _food_blocks(metrics:Dictionary)->Array:
 			"accent":Tokens.GREEN if amount>0.05 else Color(0,0,0,0),
 			"tip":"Today's production and current access for this source",
 		})
-	var blocks:Array=[{"type":"bars","heading":"TODAY'S FLOW","note":"rations","items":flow_items}]
+	var blocks:Array=[{"type":"bars","heading":"TODAY'S FLOW","note":"rations · weather %d%%" % weather,"items":flow_items}]
 	if not stock_items.is_empty():
 		blocks.append({"type":"rows","heading":"STORES BY KIND","note":"stock · lost today","items":stock_items})
 	if not source_items.is_empty():
@@ -116,12 +122,12 @@ func _materials_blocks()->Array:
 		var entry:Dictionary=grouped[resource]
 		var accessible:=int(entry.accessible)
 		material_items.append({
-			"name":String(resource),
+			"name":ResourceSystem.display_name(String(resource)),
 			"sub":"%d site%s · %s" % [int(entry.sites),"" if int(entry.sites)==1 else "s","reachable" if accessible>0 else String(entry.bottleneck).to_lower()],
 			"value":"%+.1f/day" % float(entry.delivered) if float(entry.delivered)>0.01 else "0",
 			"value_color":Tokens.GREEN if float(entry.delivered)>0.01 else Tokens.MUTED,
 			"accent":Tokens.GOLD if accessible>0 else Color(0,0,0,0),
-			"tip":"Recognized occurrences and today's delivered bulk",
+			"tip":ResourceSystem.plain_language_description(String(resource)) if ResourceSystem.plain_language_description(String(resource))!="" else "Recognized occurrences and today's delivered bulk",
 		})
 	if material_items.is_empty():
 		material_items.append({"name":"Nothing recognized yet","sub":"Survey parties create clues and recognize deposits","value":"","tip":""})
@@ -134,12 +140,26 @@ func _materials_blocks()->Array:
 		{"name":"Storage","value":"%d%%" % roundi(clampf(stored/capacity,0.0,1.0)*100.0),"ratio":clampf(stored/capacity,0.0,1.0),"color":Tokens.capacity_color(clampf(100.0-stored/capacity*100.0,0.0,100.0)),"tip":"Occupied share of aggregate bulk capacity"},
 		{"name":"Tool quality","value":"%d%%" % roundi(tool_quality*100.0),"ratio":tool_quality,"color":Tokens.capacity_color(tool_quality*100.0),"tip":"Effect of makers and discovered practice on tools"},
 	]
+	var stock_names:Array=GameState.resource_stockpiles.keys()
+	stock_names.sort_custom(func(a,b)->bool: return float(GameState.resource_stockpiles[b])<float(GameState.resource_stockpiles[a]))
+	var storage_items:Array=[]
+	for resource_name in stock_names:
+		var amount:=float(GameState.resource_stockpiles[resource_name])
+		if amount<0.05 or String(resource_name)=="Food": continue
+		storage_items.append({
+			"name":ResourceSystem.display_name(String(resource_name)),
+			"sub":"","value":"%.0f" % amount if amount>=10.0 else "%.1f" % amount,
+			"value_color":Tokens.INK,"accent":Tokens.TEAL,
+			"tip":ResourceSystem.plain_language_description(String(resource_name)) if ResourceSystem.plain_language_description(String(resource_name))!="" else "Bulk units of %s held in settlement storage" % String(resource_name).to_lower(),
+		})
+	var storage_block:Dictionary={"type":"rows","heading":"IN STORAGE","note":"%.0f of %.0f bulk used" % [stored,capacity],"items":storage_items} if not storage_items.is_empty() else {"type":"text","heading":"IN STORAGE","text":"Nothing is stockpiled. Extraction delivers materials into storage; food is tracked in FOOD & WATER."}
 	return [
+		storage_block,
 		{"type":"rows","heading":"RECOGNIZED MATERIALS","note":"sites · flow / day","items":material_items},
 		{"type":"bars","heading":"CONSTRAINTS","items":constraint_items},
 		{"type":"actions","items":[
 			{"label":"SHOW RESOURCE LAYER","sub":"recognized deposits only","on_press":func()->void: hud._on_layer_toggle("resources"),"tip":"Toggle the resource map layer"},
-			{"label":"+4 CARRIERS","sub":"raise hauling capacity","primary":true,"on_press":func()->void: terrain._change_population_allocation("Logistics",4),"tip":"Move four people into Logistics"},
+			{"label":"LOCAL LOGISTICS","sub":"direct this city’s carriers","primary":true,"on_press":func()->void: GovernmentPeopleSystem.set_settlement_focus(GameState.selected_player_settlement_id,"logistics"),"tip":"Ask this city’s leader to focus on logistics"},
 		]},
 	]
 
@@ -162,5 +182,27 @@ func _who_eats_blocks(metrics:Dictionary)->Array:
 	]
 
 func signature()->Array:
+	var result:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,_local_signature)
+	result.append_array([GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size()])
+	return result
+
+func _local_signature()->Array:
 	var metrics:Dictionary=GameState.simulation_metrics
 	return [snappedf(float(metrics.get("food_days",0.0)),0.1),snappedf(float(metrics.get("food_net",0.0)),0.1),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.water_metrics.get("days",0.0)),0.1)]
+
+func _trade_block()->Dictionary:
+	var city:=SettlementModel.selected_settlement()
+	var trade:=SettlementModel.city_trade_snapshot(String(city.get("id","")))
+	var lines:Array[String]=[]
+	if not bool(trade.capacity.ready): lines.append(String(trade.capacity.reason))
+	else: lines.append("City leaders arrange deliveries from surplus stores over known, usable routes. Range %.0f km; speed %.0f km/day." % [float(trade.capacity.range_km),float(trade.capacity.speed_km_per_day)])
+	for shipment in trade.shipments:
+		lines.append("%s → %s: %.1f %s · arrives day %d" % [String(shipment.source_name),String(shipment.destination_name),float(shipment.quantity),String(shipment.resource),ceili(float(shipment.arrival_day))])
+	var shown:=0
+	for entry in trade.history:
+		if String(entry.status)!="delivered": continue
+		lines.append("Delivered %.1f %s: %s → %s · day %d" % [float(entry.delivered),String(entry.resource),String(entry.source_name),String(entry.destination_name),int(entry.day)])
+		shown+=1
+		if shown>=5: break
+	if trade.shipments.is_empty(): lines.append("No deliveries in transit.")
+	return {"type":"text","heading":"INTERCITY TRADE","text":"\n".join(lines)}

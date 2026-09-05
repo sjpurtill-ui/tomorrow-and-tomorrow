@@ -440,7 +440,9 @@ func _populate_training_weapons()->void:
 
 
 func _training_program_tooltip(program:Dictionary)->String:
-	return "%s\n%.0f effective days • %s scope • %.3f extra ration/person/day\nFormation training +%d • experience +%d • readiness reserve +%d\n%s" % [String(program.get("description",program.get("reason",""))),float(program.get("duration_days",0.0)),String(program.get("scope","army")).capitalize(),float(program.get("food_per_participant",0.0)),roundi(float(program.get("training_gain",0.0))*100.0),roundi(float(program.get("experience_gain",0.0))*100.0),roundi(float(program.get("readiness_gain",0.0))*100.0),String(program.get("reason",""))]
+	var gains:Array[String]=[]
+	for skill in program.get("command_gain",{}): gains.append("%s +%.1f" % [String(skill).capitalize(),float(program.command_gain[skill])*100.0])
+	return "%s\n%d attending at home; %.0f effective days; %.3f extra ration/person/day.\nShared skills: %s. Formation training +%.1f points.\nReserve and assembled armies at home attend; marching and distant armies do not. Shared command skills benefit all unit types.\n%s" % [String(program.get("description","")),MilitaryCampaign._training_program_participants(program),float(program.get("duration_days",0.0)),float(program.get("food_per_participant",0.0)),", ".join(gains),float(program.get("training_gain",0.0))*100.0,String(program.get("reason",""))]
 
 
 func _update_training_program_choice()->void:
@@ -495,7 +497,7 @@ func _refresh()->void:
 	strategic_overview.tooltip_text="%s\nThis band is not a hand-authored technology unlock. It emerges from adopted security discoveries and is capped by supporting production, logistics, and institutions. %s" % [String(development.get("description","")),String(development.get("next_requirement",""))]
 	_refresh_front_controls(front_state)
 	if display_opponent.is_empty():
-		summary.text="DAY %d     %d FIELD PERSONNEL     ⚔ %.1f ATTACK     🛡 %.1f DEFENSE     %d / %d MOBILIZED" % [int(GameState.elapsed_days),int(combat.get("troops",troops)),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),MilitaryCampaign._mobilized_count(),capacity]
+		summary.text="DAY %d     %d HOME RESERVE     ⚔ %.1f ATTACK     🛡 %.1f DEFENSE     %d / %d MOBILIZED" % [int(GameState.elapsed_days),int(combat.get("troops",troops)),float(combat.get("attack_strength",0.0)),float(combat.get("defense_strength",0.0)),MilitaryCampaign._mobilized_count(),capacity]
 		condition.value=ready*100.0
 		condition.add_theme_stylebox_override("fill",_bar_style(Color("#5f9f73"))); condition.add_theme_stylebox_override("background",_bar_style(Color("#101820")))
 		condition.tooltip_text="Aggregate readiness %d%%: personnel condition, training, equipment, ammunition, supply, morale, and leadership." % roundi(ready*100.0)

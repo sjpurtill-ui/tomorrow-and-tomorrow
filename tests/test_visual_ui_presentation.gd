@@ -1,6 +1,18 @@
 extends GdUnitTestSuite
 
 const RENDERER:=preload("res://scripts/local_terrain.gd")
+const COMMAND_RAIL:=preload("res://scripts/hud/command_rail_hud.gd")
+const INQUIRY_CONTENT:=preload("res://scripts/hud/content/dock_content_inquiry.gd")
+const CIVILIZATION_CONTENT:=preload("res://scripts/hud/content/dock_content_civilization.gd")
+const SCOUT_REPORT_DETAIL:=preload("res://scripts/hud/content/dock_detail_scout_report.gd")
+const DOCK_BLOCKS:=preload("res://scripts/hud/dock_blocks.gd")
+
+class ImmediateRefreshSpy:
+	extends Control
+	var active_section:="civ"
+	var immediate_refreshes:=0
+	func request_immediate_dock_refresh()->void:
+		immediate_refreshes+=1
 
 var renderer:Node3D
 
@@ -33,6 +45,13 @@ func test_discovery_mask_paints_a_scout_corridor_without_filling_its_bounding_re
 	assert_float(image.get_pixel(30,80).r).is_equal(0.0)
 
 
+func test_compass_arrows_match_screen_direction()->void:
+	assert_str(renderer._screen_direction_arrow(Vector2(0.0,-10.0))).is_equal("↑")
+	assert_str(renderer._screen_direction_arrow(Vector2(10.0,0.0))).is_equal("→")
+	assert_str(renderer._screen_direction_arrow(Vector2(0.0,10.0))).is_equal("↓")
+	assert_str(renderer._screen_direction_arrow(Vector2(-10.0,0.0))).is_equal("←")
+
+
 func test_population_notice_is_transient_and_old_records_stay_hidden()->void:
 	var record:={"day":100,"end_day":100}
 	assert_bool(renderer._demographic_notice_is_current(record,100)).is_true()
@@ -49,6 +68,174 @@ func test_knowledge_header_stat_returns_the_live_value_label()->void:
 	value.text="3"
 	assert_str(value.text).is_equal("3")
 	assert_int(row.get_child_count()).is_equal(1)
+
+
+func test_research_actions_refresh_the_open_tab_without_navigation()->void:
+	var hud:Variant=auto_free(COMMAND_RAIL.new())
+	add_child(hud)
+	var provider:Variant=INQUIRY_CONTENT.new(renderer,hud)
+	hud.register_provider("inquiry",provider)
+	hud.open_dock("inquiry",2)
+	await get_tree().process_frame
+	var disclosure_signature:int=hud._dock_signature.hash()
+	provider._toggle_domain("knowledge")
+	await get_tree().process_frame
+	assert_int(hud._dock_signature.hash()).is_not_equal(disclosure_signature)
+	var allocation_signature:int=hud._dock_signature.hash()
+	renderer.hud=hud
+	renderer._change_research_domain_allocation("nutrition",1)
+	await get_tree().process_frame
+	assert_int(hud._dock_signature.hash()).is_not_equal(allocation_signature)
+	renderer.hud=null
+	hud.queue_free()
+	await get_tree().process_frame
+
+
+func test_civic_exchange_renders_as_wrapped_conversation_with_an_inline_reply()->void:
+	var root:=auto_free(VBoxContainer.new()) as VBoxContainer
+	DOCK_BLOCKS.render(root,[{
+		"type":"conversation","leader_name":"Enna Yarrow","leader_title":"Hearth Speaker",
+		"disposition":"plain-spoken","state":"NEEDS YOUR DECISION","state_color":Color("#d0b46f"),
+		"items":[
+			{"speaker":"player","name":"YOU","text":"Kill every woman over 60","day":65},
+			{"speaker":"leader","name":"Enna Yarrow","text":"I understand the words. Before anything happens, tell me whether you truly mean every named elder in that group.","day":65},
+		],
+		"status":"Enna is waiting for your answer. Nothing is underway.",
+		"on_submit":func(_field:LineEdit)->void: pass,
+		"placeholder":"Reply to Enna Yarrow…",
+	}])
+	var messages:=root.find_children("CivicMessageText","Label",true,false)
+	assert_int(messages.size()).is_equal(2)
+	assert_int(int((messages[1] as Label).autowrap_mode)).is_not_equal(TextServer.AUTOWRAP_OFF)
+	assert_str((messages[1] as Label).text).contains("Before anything happens")
+	assert_int(root.find_children("CivicConversationInput","LineEdit",true,false).size()).is_equal(1)
+	assert_int(root.find_children("CivicConversationSend","Button",true,false).size()).is_equal(1)
+	assert_int(root.find_children("*","ScrollContainer",true,false).size()).is_equal(0)
+
+
+func test_civics_discloses_actual_ai_or_offline_interpreter_mode()->void:
+	var hud:Variant=auto_free(COMMAND_RAIL.new())
+	var provider:Variant=CIVILIZATION_CONTENT.new(renderer,hud)
+	var online:Dictionary=provider._interpreter_status_block({
+		"configured":true,"structured_output":true,"model":"gpt-5.6-terra",
+		"endpoint_host":"api.openai.com","transport_security":"HTTPS","always_use_ai":true,
+	})
+	var online_item:Dictionary=(online.items as Array)[0]
+	assert_str(String(online_item.name)).is_equal("AI · TERRA")
+	assert_str(String(online_item.value)).is_equal("READY")
+	assert_str(String(online_item.tip)).contains("local fast replies")
+	assert_str(String(online_item.tip)).contains("bypassed")
+	assert_str(JSON.stringify(online)).not_contains("api_key")
+	var routing_item:Dictionary=(online.items as Array)[1]
+	assert_str(String(routing_item.name)).is_equal("ROUTING · ALWAYS ASK AI")
+	assert_str(String(routing_item.sub)).contains("local shortcuts")
+	GameState.civic_always_use_ai=false
+	provider._toggle_interpreter_routing()
+	assert_bool(GameState.civic_always_use_ai).is_true()
+	provider._toggle_interpreter_routing()
+	assert_bool(GameState.civic_always_use_ai).is_false()
+
+	var offline:Dictionary=provider._interpreter_status_block({
+		"configured":false,"structured_output":false,
+		"missing":["OPENAI_API_KEY"],"issues":[],
+	})
+	var offline_item:Dictionary=(offline.items as Array)[0]
+	assert_str(String(offline_item.name)).is_equal("LOCAL · OFFLINE")
+	assert_str(String(offline_item.value)).is_equal("OFFLINE")
+
+	var player_disabled:Dictionary=provider._interpreter_status_block({
+		"enabled":false,"configured":false,"structured_output":false,"missing":[],"issues":[],
+	})
+	var disabled_item:Dictionary=(player_disabled.items as Array)[0]
+	assert_str(String(disabled_item.name)).is_equal("LOCAL · AI OFF")
+	assert_str(String(disabled_item.value)).is_equal("OFF")
+	assert_str(String(disabled_item.tip)).contains("zero API requests")
+
+
+func test_recruitment_report_leads_with_people_choices_instead_of_generic_scout_copy()->void:
+	var hud:Variant=auto_free(COMMAND_RAIL.new())
+	var provider:Variant=SCOUT_REPORT_DETAIL.new(renderer,hud,{
+		"day":550,"mission_kind":"recruit_people","target_label":"seek willing recruits",
+		"personnel":8,"returned_personnel":8,"duration_days":90,"distance_km":46,"recruits":3,
+		"recruitment_account":{
+			"disposition":"some_joined","group":"two travelling households",
+			"encountered":9,"joined":3,"declined":6,
+			"summary":"Three younger adults accepted; six people chose to remain with their kin.",
+			"reasons":["Shelter made the offer credible.","Family ties kept most of the group together."],
+		},
+	})
+	var page:Dictionary=provider.tab(0)
+	assert_str(String(page.brief.title)).is_equal("3 people chose to join")
+	var serialized:=JSON.stringify(page)
+	assert_str(serialized).contains("RECRUITMENT OUTCOME")
+	assert_str(serialized).contains("WHO THEY MET")
+	assert_str(serialized).contains("WHY THEY DECIDED")
+	assert_str(serialized).contains("3 joined · 6 declined")
+	assert_str(serialized).not_contains("found only ground")
+
+
+func test_completed_civic_turn_bypasses_hover_guard_and_refreshes_immediately()->void:
+	var spy:ImmediateRefreshSpy=auto_free(ImmediateRefreshSpy.new()) as ImmediateRefreshSpy
+	add_child(spy)
+	renderer.hud=spy
+	renderer._refresh_council_dock()
+	assert_int(spy.immediate_refreshes).is_equal(1)
+	renderer.hud=null
+
+
+func test_pending_civic_request_never_retains_transient_ui_nodes()->void:
+	var transient_input:=LineEdit.new()
+	add_child(transient_input)
+	var order:=AdvisorSystem.begin_pronouncement("Support scholars.")
+	var record:Dictionary=renderer._pending_civic_request_record(
+		"Support scholars.",
+		order,
+		"settlement_test",
+		42
+	)
+	assert_bool(record.has("input")).is_false()
+	for value in record.values():
+		assert_bool(value is Object).is_false()
+	# Simulate a request submitted by the pre-fix UI, whose stored input was
+	# destroyed by the immediate dock rebuild before the API result arrived.
+	record["input"]=transient_input
+	renderer.pending_pronouncement_inputs["request_test"]=record
+	transient_input.queue_free()
+	await get_tree().process_frame
+	renderer._on_pronouncement_interpreted("request_test",{
+		"source":"generative API","summary":"I understand the request.",
+		"policies":[],"unresolved":"The settlement needs an appointed leader.",
+	})
+	assert_bool(renderer.pending_pronouncement_inputs.has("request_test")).is_false()
+	assert_str(String(order.get("status",""))).is_equal("leader_unavailable")
+
+
+func test_economy_badge_ignores_healthy_reserve_threshold_crossings()->void:
+	var hud:Variant=auto_free(COMMAND_RAIL.new())
+	GameState.consecutive_food_shortage_days=0.0
+	GameState.consecutive_water_shortage_days=0.0
+	var healthy_food:Dictionary={"food_days":6.8,"food_net":2.0,"food_intake_ratio":1.0}
+	var healthy_water:Dictionary={"days":0.8,"required_today":120.0,"intake_ratio":1.0}
+	assert_bool(hud._economy_danger_active(healthy_food,healthy_water)).is_false()
+	GameState.consecutive_water_shortage_days=2.0
+	var short_water:Dictionary={"days":0.0,"required_today":120.0,"intake_ratio":0.72}
+	assert_bool(hud._economy_danger_active(healthy_food,short_water)).is_true()
+	GameState.consecutive_water_shortage_days=0.0
+	var falling_food:Dictionary={"food_days":5.0,"food_net":-8.0,"food_intake_ratio":1.0}
+	assert_bool(hud._economy_danger_active(falling_food,healthy_water)).is_true()
+
+
+func test_food_weather_varies_across_years_without_escaping_bounded_yields()->void:
+	var profile:Dictionary={"rainfall_variability":0.86}
+	var minimum:=2.0
+	var maximum:=0.0
+	for day in range(0,365*16,5):
+		var factor:float=FoodSystem._weather_yield_factor(profile,float(day))
+		minimum=minf(minimum,factor)
+		maximum=maxf(maximum,factor)
+		assert_float(factor).is_between(0.52,1.24)
+	assert_float(minimum).is_less(0.82)
+	assert_float(maximum).is_greater(1.08)
 
 
 func test_resource_overlay_draw_list_has_a_fixed_world_scale_ceiling()->void:

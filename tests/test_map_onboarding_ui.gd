@@ -87,6 +87,22 @@ func test_blocked_scout_duration_is_visible_without_relying_on_a_tooltip()->void
 	assert_str(text).contains("Requires 132.0 Food")
 
 
+func test_early_shelter_accepts_historical_substitute_materials_and_explains_real_blocker()->void:
+	GameState.settlement_completed=["Hearth Circle"]
+	var shelter:Dictionary={}
+	for definition in renderer._settlement_definitions():
+		if String(definition.get("name",""))=="Lean-to Shelters": shelter=definition
+	GameState.resource_stockpiles={"Timber":25.0,"Fiber Plants":0.0,"Clay":0.0,"Stone":0.0}
+	var timber_plan:Dictionary=renderer._settlement_project_material_plan(shelter)
+	assert_float(float(timber_plan.get("Timber",0.0))).is_equal(25.0)
+	assert_bool(renderer._settlement_project_available(shelter)).is_true()
+	GameState.resource_stockpiles={"Timber":0.0,"Fiber Plants":0.0,"Clay":0.0,"Stone":0.0}
+	assert_bool(renderer._settlement_project_available(shelter)).is_false()
+	var status:String=renderer._shelter_work_status()
+	assert_str(status).contains("BLOCKED BY MATERIALS")
+	assert_str(status).contains("or substitutes")
+
+
 func test_temporary_selection_marker_keeps_a_fixed_screen_footprint()->void:
 	var site_radius:float=renderer._map_selection_radius(4.0,720.0)
 	var regional_radius:float=renderer._map_selection_radius(400.0,720.0)

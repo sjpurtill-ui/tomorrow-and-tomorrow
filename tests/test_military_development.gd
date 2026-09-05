@@ -216,6 +216,56 @@ func test_offensive_requires_a_formed_army_at_the_objective()->void:
 	assert_int(int((ready.incident as Dictionary).field_army_id)).is_equal(army_id)
 
 
+func test_visible_map_formation_requires_war_then_opens_battle_with_the_selected_army()->void:
+	var reserve:={"id":1,"unit":"line_infantry","weapon":"spear","count":120,"authorized_count":120,"equipment":120,"equipment_required":120,"ammunition":0,"ammunition_required":0,"training":0.72,"experience":0.18,"personnel_condition":0.86}
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Home reserve",[reserve],0.72,0.70)
+	MilitaryCampaign.home_army["supply_level"]=1.0
+	MilitaryCampaign.home_army["commander"]=MilitaryCampaign.simulator.create_commander("Field speaker",0.65,0.62,0.70,0.64)
+	MilitaryCampaign.next_formation_id=2
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.register_player_origin(Vector2.ZERO)
+	var formation_index:=CivilizationSystem.foreign_formations.find_custom(func(entry:Dictionary)->bool: return String(entry.get("kind",""))!="scout")
+	assert_int(formation_index).is_greater_equal(0)
+	var foreign:Dictionary=CivilizationSystem.foreign_formations[formation_index]
+	foreign["point_a"]=Vector2(4.0,0.0)
+	foreign["point_b"]=Vector2(4.0,0.0)
+	foreign["depart_day"]=0
+	foreign["leg_days"]=60.0
+	foreign["disabled_until_day"]=0
+	CivilizationSystem.foreign_formations[formation_index]=foreign
+	var civ_index:=CivilizationSystem._civilization_index(String(foreign.civ_id))
+	var civ:Dictionary=CivilizationSystem.civilizations[civ_index]
+	civ["military_population"]=120.0
+	civ.player_relation["contact_level"]=2
+	civ.player_relation["contact_intelligence"]=0.8
+	civ.player_relation["met_day"]=0
+	civ.player_relation["home_location_known"]=true
+	CivilizationSystem.civilizations[civ_index]=civ
+	GameState.elapsed_days=1.0
+	CivilizationSystem._process_local_observation(1,true)
+	var created:Dictionary=MilitaryCampaign.create_field_army(80,"First Pursuit")
+	var army_id:=int((created.get("army",{}) as Dictionary).get("army_id",0))
+	assert_int(army_id).is_greater(0)
+	var neutral:Dictionary=MilitaryCampaign.map_engagement_availability(army_id,String(foreign.id))
+	assert_bool(bool(neutral.get("can_order",true))).is_false()
+	assert_str(String(neutral.get("error",""))).contains("not an enemy")
+	civ=CivilizationSystem.civilizations[civ_index]
+	civ.player_relation["at_war"]=true
+	civ.player_relation["treaty"]="war"
+	CivilizationSystem.civilizations[civ_index]=civ
+	var ready:Dictionary=MilitaryCampaign.map_engagement_availability(army_id,String(foreign.id))
+	assert_bool(bool(ready.get("can_engage",false))).is_true()
+	var launched:Dictionary=MilitaryCampaign.launch_map_engagement(army_id,String(foreign.id))
+	assert_bool(bool(launched.get("engagement_started",false))).is_true()
+	assert_bool(MilitaryCampaign.threat_snapshot().is_empty()).is_true()
+	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
+	assert_bool(bool((engagement.get("threat",{}) as Dictionary).get("field_encounter",false))).is_true()
+	assert_int(int(engagement.get("home_force_id",0))).is_equal(army_id)
+	assert_str(String(engagement.get("home_force_kind",""))).is_equal("field_army")
+	assert_str(String((engagement.get("attacker",{}) as Dictionary).get("name",""))).is_equal("First Pursuit")
+	assert_array(MilitaryCampaign.validate_state()).is_empty()
+
+
 func test_field_army_captives_are_removed_from_the_force_that_lost_them()->void:
 	var reserve:={"id":1,"unit":"line_infantry","weapon":"spear","count":1000,"authorized_count":1000,"equipment":1000,"equipment_required":1000,"ammunition":0,"ammunition_required":0,"training":0.72,"experience":0.18,"personnel_condition":0.86}
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Home reserve",[reserve],0.72,0.70)
@@ -234,3 +284,38 @@ func test_field_army_captives_are_removed_from_the_force_that_lost_them()->void:
 	assert_int(int(MilitaryCampaign.field_armies[0].captured_pool)).is_equal(100)
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(1000)
 	assert_array(MilitaryCampaign.validate_state()).is_empty()
+
+
+func test_defense_allocation_immediately_mans_watch_and_automates_basic_training()->void:
+	GameState.population_exact=500.0
+	GameState.population_total=500
+	GameState.population_allocations["Defense"]=16
+	var defense:=MilitaryCampaign.settlement_defense_snapshot()
+	assert_int(int(defense.garrison_personnel)).is_equal(16)
+	assert_int(int(defense.garrison_trained)).is_equal(0)
+	assert_int(int(defense.garrison_militia)).is_equal(16)
+	MilitaryCampaign._ensure_automatic_basic_training()
+	assert_int(MilitaryCampaign._automatic_basic_trainees()).is_greater(0)
+	assert_bool(bool(MilitaryCampaign.training_queue[0].get("automated_basic",false))).is_true()
+
+
+func test_supplied_peacetime_home_garrison_does_not_inevitably_desert()->void:
+	var levy:={"id":1,"unit":"levy","weapon":"improvised","count":16,"authorized_count":16,"equipment":0,"equipment_required":16,"ammunition":0,"ammunition_required":0,"training":0.48,"experience":0.0,"personnel_condition":1.0}
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Home watch",[levy],1.0,0.5)
+	MilitaryCampaign.home_army["supply_level"]=1.0
+	MilitaryCampaign.home_army["recent_combat_days"]=0
+	MilitaryCampaign.home_army["service_strain"]=0.0
+	MilitaryCampaign.home_army["desertion_accumulator"]=0.0
+	for day in 1000:
+		MilitaryCampaign._process_aggregate_service_strain_day()
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(16)
+	assert_int(int(MilitaryCampaign.home_army.get("desertions_total",0))).is_equal(0)
+
+
+func test_untrained_local_watch_can_defend_home_before_basic_training_finishes()->void:
+	GameState.population_allocations["Defense"]=12
+	var enemy:Dictionary=MilitaryCampaign.simulator.create_formation_force("Raiders",[{"id":91,"unit":"levy","weapon":"improvised","count":8,"equipment":0}],0.55,0.35)
+	MilitaryCampaign.active_threat={"id":"raid_probe","source_civ_id":"","source_name":"Raiders","campaign_mode":"defensive","enemy_force":enemy,"estimated_strength":8,"terrain_defense":1.0,"seed":991}
+	var engagement:=MilitaryCampaign.begin_threat_engagement()
+	assert_bool(engagement.has("error")).is_false()
+	assert_int(int((engagement.get("defender",{}) as Dictionary).get("troops",0))).is_equal(12)

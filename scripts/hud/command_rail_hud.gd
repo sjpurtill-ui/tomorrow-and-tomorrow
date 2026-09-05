@@ -22,6 +22,8 @@ const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 da
 const SPEED_GLYPHS:Array[String]=["Ⅱ","1","2","3","4","5"]
 const MAX_QUEUE_CARDS:=3
 
+var city_selector:OptionButton
+var city_selector_signature:String=""
 var terrain:Node
 
 var active_section:String=""
@@ -44,7 +46,7 @@ var toolbar_action_buttons:Dictionary={}
 var toolbar_layer_buttons:Dictionary={}
 var scale_line:ColorRect
 var scale_label:Label
-var compass_label:Label
+var compass_label:Button
 
 var dock:PanelContainer
 var detail_dock:PanelContainer
@@ -305,7 +307,7 @@ const KPI_DEFS:Array[Dictionary]=[
 	{"id":"population","label":"POPULATION","accent":Tokens.GREEN,"section":"settlement","sub":0},
 	{"id":"food","label":"FOOD","accent":Tokens.AMBER,"section":"economy","sub":0},
 	{"id":"water","label":"WATER","accent":Tokens.TEAL,"section":"economy","sub":0},
-	{"id":"health","label":"HEALTH","accent":Tokens.TEAL,"section":"settlement","sub":0},
+	{"id":"health","label":"HEALTH","accent":Tokens.TEAL,"section":"health","sub":0},
 	{"id":"labor","label":"LABOR","accent":Tokens.BLUE,"section":"settlement","sub":0},
 ]
 
@@ -496,7 +498,16 @@ func _build_toolbar()->void:
 	add_child(toolbar)
 	var row:=HBoxContainer.new()
 	row.add_theme_constant_override("separation",6)
-	toolbar.add_child(row)
+	var column:=VBoxContainer.new()
+	toolbar.add_child(column)
+	city_selector=OptionButton.new()
+	city_selector.name="CitySelector"
+	city_selector.custom_minimum_size=Vector2(240,32)
+	city_selector.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
+	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
+	column.add_child(city_selector)
+	column.add_child(row)
 	for action in [["settle","FOUND SETTLEMENT",true],["scouts","SEND SCOUTS",false],["diplomat","SEND DIPLOMAT",false],["convoy","FOCUS CONVOY",false]]:
 		var button:=Button.new()
 		button.name="Toolbar"+String(action[0]).capitalize()
@@ -512,8 +523,10 @@ func _build_toolbar()->void:
 		button.pressed.connect(_on_toolbar_action.bind(String(action[0])))
 		row.add_child(button)
 		toolbar_action_buttons[String(action[0])]=button
-	row.add_child(_toolbar_divider())
-	for layer in [["resources","RESOURCES","Recognized deposits only"],["borders","BORDERS","Settlement claim"],["charted","CHARTED","Fog of observation"]]:
+	var actions_divider:=_toolbar_divider()
+	actions_divider.name="ToolbarActionsDivider"
+	row.add_child(actions_divider)
+	for layer in [["resources","RESOURCES","Land resources: green woodland supplies timber; pale exposed ground indicates stone; warm open ground shows productive soil. Click charted ground for details. Hidden deposits stay hidden."],["borders","BORDERS","Settlement claim"],["charted","CHARTED","Fog of observation"]]:
 		var toggle:=Button.new()
 		toggle.name="Layer"+String(layer[0]).capitalize()
 		toggle.custom_minimum_size=Vector2(0,34)
@@ -537,8 +550,21 @@ func _build_toolbar()->void:
 	scale_box.add_child(scale_row)
 	scale_label=Tokens.make_label("",10,Tokens.MUTED)
 	scale_row.add_child(scale_label)
-	compass_label=Tokens.make_label("N ↑",10,Tokens.MUTED)
+	compass_label=Button.new()
+	compass_label.text="NORTH ↑"
+	compass_label.add_theme_font_size_override("font_size",12)
+	compass_label.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
+	compass_label.pressed.connect(func()->void: terrain._reset_camera_north())
+	compass_label.tooltip_text="Click to reset north-up (N). Rotate with Q/E or Shift + middle-drag; drag vertically to tilt."
 	scale_row.add_child(compass_label)
+	var aerial_button:=Button.new()
+	aerial_button.name="AerialAltitudeButton"
+	aerial_button.text="10,000 FT"
+	aerial_button.tooltip_text="Descend to 10,000 feet above the land under the camera. F7. Scroll to continue zooming."
+	aerial_button.add_theme_font_size_override("font_size",10)
+	aerial_button.pressed.connect(func()->void: terrain._inspect_aerial_altitude())
+	scale_row.add_child(aerial_button)
+
 	_refresh_layer_toggles()
 
 func _toolbar_divider()->ColorRect:
@@ -589,7 +615,7 @@ func update_scale(pixel_width:float,distance_text:String,band:String,north:Strin
 	_scale_signature=signature
 	scale_line.custom_minimum_size=Vector2(clampf(pixel_width,72.0,174.0),2)
 	scale_label.text="%s · %s" % [band,distance_text]
-	compass_label.text="N %s" % north
+	compass_label.text="NORTH %s" % north
 	toolbar.reset_size()
 	_position_toolbar()
 
@@ -660,6 +686,20 @@ func live_refresh_dock()->void:
 			_detail_signature=detail_signature
 			detail_dock.rebuild_body()
 
+
+func request_immediate_dock_refresh()->void:
+	## Player actions are different from background simulation refreshes. The
+	## background path waits until the pointer leaves the dock so controls never
+	## move underneath a click; an action that has already completed must redraw
+	## immediately. Defer one frame so the emitting button/row can finish safely.
+	call_deferred("_refresh_active_dock_after_action")
+
+
+func _refresh_active_dock_after_action()->void:
+	if dock==null or not dock.visible or dock.provider==null: return
+	_dock_signature=(dock.provider as Object).signature()+[dock.sub]
+	dock.rebuild_body()
+
 # --- Refresh ----------------------------------------------------------------
 
 func _unhandled_key_input(event:InputEvent)->void:
@@ -702,10 +742,12 @@ func _temperature_text()->String:
 	var trend:="→"
 	if today-yesterday>0.3: trend="↑"
 	elif today-yesterday<-0.3: trend="↓"
-	return "%d°C %s" % [roundi(today),trend]
+	# The climate model works in °C; the display speaks Fahrenheit.
+	return "%d°F %s" % [roundi(today*1.8+32.0),trend]
 
 func refresh()->void:
 	if terrain==null: return
+	_refresh_city_selector()
 	_refresh_time()
 	_refresh_kpis()
 	_refresh_badges()
@@ -730,13 +772,19 @@ func _refresh_time()->void:
 	_layout()
 
 func _refresh_kpis()->void:
+	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: SettlementModel.with_local_population(_refresh_local_kpis))
+
+func _refresh_local_kpis()->void:
 	var metrics:Dictionary=GameState.simulation_metrics
 	var water:Dictionary=GameState.water_metrics
 	var population:=GameState.population_total
 	var health:=roundi(GameState.population_health*100.0)
 	var food_days:=float(metrics.get("food_days",0.0))
 	var food_balance:=float(metrics.get("food_balance",0.0))
-	var births:=roundi(float(metrics.get("births_expected_next_year",0.0)))
+	var vital_balance:Dictionary=GameState.rolling_vital_balance(365)
+	var births:=int(vital_balance.get("births",0))
+	var deaths:=int(vital_balance.get("deaths",0))
+	var vital_net:=int(vital_balance.get("net",births-deaths))
 	var efficiency:=roundi(float(metrics.get("labor_efficiency",0.0))*100.0)
 	var able:=int(terrain._able_population())
 	var assigned:=0
@@ -745,16 +793,18 @@ func _refresh_kpis()->void:
 	var idle:=maxi(0,able-assigned)
 	var water_days:=float(water.get("days",0.0))
 	var water_intake:=roundi(float(water.get("intake_ratio",1.0))*100.0)
-	var signature:="%d|%d|%.1f|%.1f|%d|%d|%d|%.1f|%d" % [population,health,food_days,food_balance,births,efficiency,idle,water_days,water_intake]
+	var signature:="%d|%d|%.1f|%.1f|%d|%d|%d|%d|%.1f|%d" % [population,health,food_days,food_balance,births,deaths,efficiency,idle,water_days,water_intake]
 	if signature==_kpi_signature: return
 	_kpi_signature=signature
-	_update_kpi("population",str(population),"+%d /yr" % births if births>0 else "—",Tokens.GREEN if births>0 else Tokens.MUTED,"Population %d · health %d%%. Click for people and labor." % [population,health])
+	var vital_text:="B %d − D %d = %+d · 12M" % [births,deaths,vital_net]
+	var vital_color:=Tokens.GREEN if vital_net>0 else (Tokens.RED if vital_net<0 else Tokens.MUTED)
+	_update_kpi("population",str(population),vital_text,vital_color,"Population %d · trailing 12 months: %d births − %d deaths = %+d natural change. Click for people and labor." % [population,births,deaths,vital_net])
 	var projected:=float(metrics.get("food_projected_days",food_days))
 	if food_balance<0.0:
 		_update_kpi("food","%.1f d" % food_days,"▼ shortage %dd" % roundi(projected),Tokens.RED,"Days of adult-equivalent rations in store. Net %.1f/day." % food_balance)
 	else:
 		_update_kpi("food","%.1f d" % food_days,"▲",Tokens.GREEN,"Days of adult-equivalent rations in store. Net %+.1f/day." % food_balance)
-	_update_kpi("water","%.1f d" % water_days,"%d%%" % water_intake,Tokens.GREEN if water_intake>=100 else Tokens.RED,"Stored drinking water and today's intake share.")
+	_update_kpi("water","%.1f d" % water_days,"NEED %d%%" % water_intake,Tokens.GREEN if water_intake>=100 else Tokens.RED,"%.1f reserve days remain after today's use. NEED %d%% is the share of today's drinking requirement that was actually met; it is not storage fullness." % [water_days,water_intake])
 	_update_kpi("health","%d%%" % health,"—",Tokens.MUTED,"Physical condition and freedom from preventable harm.")
 	_update_kpi("labor","%d · %d%%" % [assigned,efficiency],"%d idle" % idle if idle>0 else "",Tokens.AMBER,"Assigned workers · effective work per assigned person. %d idle." % idle)
 	kpi_strip.reset_size()
@@ -765,13 +815,29 @@ func _refresh_badges()->void:
 	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
 	var visible_foreign:=int(observation.get("visible_count",0))
 	var metrics:Dictionary=GameState.simulation_metrics
-	var danger:=float(metrics.get("food_days",30.0))<15.0 or float(GameState.water_metrics.get("days",4.0))<2.0
+	var danger:=_economy_danger_active(metrics,GameState.water_metrics)
 	var signature:="%d|%d|%s" % [decisions,visible_foreign,danger]
 	if signature==_badge_signature: return
 	_badge_signature=signature
 	_set_badge("civ",str(decisions) if decisions>0 else "",Tokens.RED)
 	_set_badge("world",str(visible_foreign) if visible_foreign>0 else "",Tokens.AMBER)
 	_set_badge("economy","!" if danger else "",Tokens.RED)
+
+
+func _economy_danger_active(metrics:Dictionary,water:Dictionary)->bool:
+	## A rail badge is an interruption, not a live gauge. Reserve size naturally
+	## crosses round-number thresholds during collection and consumption, which
+	## made the icon flash at high speed even while everybody ate and drank.
+	## Only an actual sustained shortfall, or a critically low reserve still
+	## falling, earns the red interruption badge; forecasts remain in the dock.
+	var food_intake:=clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.0)
+	var food_days:=maxf(0.0,float(metrics.get("food_days",30.0)))
+	var food_net:=float(metrics.get("food_net",0.0))
+	var food_danger:=GameState.consecutive_food_shortage_days>=2.0 or food_intake<0.90 or (food_days<7.0 and food_net<0.0)
+	var water_required:=maxf(0.0,float(water.get("required_today",0.0)))
+	var water_intake:=clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)
+	var water_danger:=water_required>0.0 and GameState.consecutive_water_shortage_days>=2.0 and water_intake<0.95
+	return food_danger or water_danger
 
 func _refresh_queue()->void:
 	# Only unread decisions interrupt at the bottom right; answered history,
@@ -819,22 +885,46 @@ func _refresh_toolbar()->void:
 	else:
 		settle_text="FOUND NEW SETTLEMENT"
 		settle_tooltip="Enter temporary destination-selection mode. Route and cost are reviewed before anything is committed."
-	var signature:="%s|%s|%s|%s|%s" % [settle_text,String(scout_presentation.label),String(diplomat_presentation.label),convoy_active,settle_disabled]
+	# An action that can neither be taken nor report anything does not earn a
+	# toolbar slot; it appears when it becomes possible. Away-mission states
+	# stay visible because their countdown IS the information.
+	var settle_visible:=not settle_disabled
+	var scouts_visible:=not bool(scout_presentation.disabled) or bool(exploration.get("active",false))
+	var diplomat_visible:=not bool(diplomat_presentation.disabled) or bool(diplomatic_status.get("active",false))
+	var signature:="%s|%s|%s|%s|%s|%s|%s" % [settle_text,String(scout_presentation.label),String(diplomat_presentation.label),convoy_active,settle_visible,scouts_visible,diplomat_visible]
 	if signature==_toolbar_signature: return
 	_toolbar_signature=signature
 	settle.text=settle_text
 	settle.tooltip_text=settle_tooltip
 	settle.disabled=settle_disabled
-	if bool(exploration.get("can_begin",true)):
-		scouts.text="SEND SCOUTS" if not bool(exploration.get("active",false)) else "SEND SCOUTS · %d AWAY" % int(exploration.get("active_count",1))
-	else:
-		scouts.text="SCOUTS AWAY · %dD" % int(exploration.get("days_remaining",0))
+	settle.visible=settle_visible
+	# The presentation is the single authority on the label — it carries the
+	# soonest return countdown (or OVERDUE) whenever any party is out.
+	scouts.text=String(scout_presentation.label)
 	scouts.disabled=bool(scout_presentation.disabled)
 	scouts.tooltip_text=String(scout_presentation.tooltip)
+	scouts.visible=scouts_visible
 	diplomat.text="SEND DIPLOMAT" if not bool(diplomatic_status.get("active",false)) else "ENVOYS AWAY · %dD" % int(diplomatic_status.get("days_remaining",0))
 	diplomat.disabled=bool(diplomat_presentation.disabled)
 	diplomat.tooltip_text=String(diplomat_presentation.tooltip)
+	diplomat.visible=diplomat_visible
 	convoy.visible=convoy_active
 	convoy.tooltip_text="Center the camera on the traveling settlement convoy."
+	var actions_divider:=toolbar.find_child("ToolbarActionsDivider",true,false)
+	if actions_divider: actions_divider.visible=settle_visible or scouts_visible or diplomat_visible or convoy_active
 	toolbar.reset_size()
 	_position_toolbar()
+
+func _refresh_city_selector()->void:
+	if city_selector==null: return
+	var settlements:=GameState.player_settlements
+	var signature:=GameState.selected_player_settlement_id+str(GameState.settlement_network_revision)+str(settlements.size())
+	if signature==city_selector_signature: return
+	city_selector_signature=signature
+	city_selector.clear()
+	city_selector.visible=not settlements.is_empty()
+	for city in settlements:
+		city_selector.add_item(String(city.get("name","Settlement")))
+		var index:=city_selector.item_count-1
+		city_selector.set_item_metadata(index,String(city.id))
+		if String(city.id)==GameState.selected_player_settlement_id: city_selector.select(index)

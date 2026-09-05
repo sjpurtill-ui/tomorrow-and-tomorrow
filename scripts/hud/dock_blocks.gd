@@ -4,6 +4,7 @@ class_name DockBlocks
 ## "on_submit"). Block shape reference: design handoff Dock Panel.dc.html.
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
+const HealthHistoryChart:=preload("res://scripts/hud/health_history_chart.gd")
 
 
 static func render(container:VBoxContainer,blocks:Array)->void:
@@ -23,6 +24,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"line_chart": _render_line_chart(section,block)
 			"segments": _render_segments(section,block)
 			"alloc": _render_alloc(section,block)
 			"bars": _render_bars(section,block)
@@ -30,9 +32,22 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"rows": _render_rows(section,block)
 			"caps": _render_caps(section,block)
 			"actions": _render_actions(section,block)
+			"conversation": _render_conversation(section,block)
 			"order": _render_order(section,block)
 			"image": _render_image(section,block)
 			_: _render_text(section,block)
+
+
+static func _render_line_chart(parent:VBoxContainer,block:Dictionary)->void:
+	var chart:=HealthHistoryChart.new()
+	chart.set_points(block.get("items",[]) as Array)
+	chart.tooltip_text=String(block.get("tip","Hover the line to inspect a recorded month."))
+	parent.add_child(chart)
+	var legend:=HBoxContainer.new()
+	legend.add_theme_constant_override("separation",14)
+	parent.add_child(legend)
+	legend.add_child(Tokens.make_label("◆ health discovery",10,Tokens.GOLD))
+	legend.add_child(Tokens.make_label("● conditions changed",10,Tokens.MUTED))
 
 
 static func _render_segments(parent:VBoxContainer,block:Dictionary)->void:
@@ -125,10 +140,27 @@ static func _step_button(glyph:String,action:Variant,tip:String)->Button:
 	button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.BUTTON_BG,Tokens.GOLD,1,3))
 	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	if action is Callable:
-		button.pressed.connect(action)
+		# An explicit press must show its result immediately. The passive
+		# live-refresh guard skips rebuilds while the pointer hovers the dock,
+		# so without this the changed value stays stale until the mouse leaves
+		# — which reads as the click not registering.
+		button.pressed.connect(func()->void:
+			(action as Callable).call()
+			_request_rebuild(button))
 	else:
 		button.disabled=true
 	return button
+
+
+static func _request_rebuild(from:Node)->void:
+	## Deferred so the pressed button finishes its own handler before the body
+	## it lives in is torn down and rebuilt. The action itself may have already
+	## rebuilt or closed the dock, freeing the button.
+	if not is_instance_valid(from): return
+	var ancestor:Node=from
+	while ancestor!=null and not ancestor.has_method("rebuild_body"):
+		ancestor=ancestor.get_parent()
+	if ancestor!=null: ancestor.call_deferred("rebuild_body")
 
 
 static func _render_bars(parent:VBoxContainer,block:Dictionary)->void:
@@ -313,7 +345,185 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 			column.add_child(sub_label)
 		var action:Variant=item.get("on_press")
 		if action is Callable and not disabled:
-			button.pressed.connect(action)
+			button.pressed.connect(func()->void:
+				(action as Callable).call()
+				_request_rebuild(button))
+
+
+static func _render_conversation(parent:VBoxContainer,block:Dictionary)->void:
+	## A civic exchange is a conversation, not a ledger. Keep the leader, the
+	## current commitment state, the recent turns, and the reply field together.
+	var shell:=PanelContainer.new()
+	shell.name="CivicConversation"
+	shell.add_theme_stylebox_override("panel",Tokens.flat(Tokens.FIELD_BG,Tokens.BORDER_2,1,5,12.0))
+	parent.add_child(shell)
+	var stack:=VBoxContainer.new()
+	stack.add_theme_constant_override("separation",10)
+	shell.add_child(stack)
+	var header:=HBoxContainer.new()
+	header.add_theme_constant_override("separation",9)
+	stack.add_child(header)
+	var leader_name:=String(block.get("leader_name","Settlement leader"))
+	var avatar:=PanelContainer.new()
+	avatar.custom_minimum_size=Vector2(34,34)
+	avatar.add_theme_stylebox_override("panel",Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,1,17))
+	header.add_child(avatar)
+	var initials:=Tokens.make_label(_conversation_initials(leader_name),11,Tokens.GOLD_BRIGHT,0.05)
+	initials.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	initials.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	avatar.add_child(initials)
+	var identity:=VBoxContainer.new()
+	identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	identity.add_theme_constant_override("separation",0)
+	header.add_child(identity)
+	identity.add_child(Tokens.make_label(leader_name,13,Tokens.INK))
+	var role:=String(block.get("leader_title","Local leader"))
+	var temperament:=String(block.get("disposition",""))
+	identity.add_child(Tokens.make_label("%s%s" % [role," · "+temperament if temperament!="" else ""],10,Tokens.MUTED))
+	var state:=String(block.get("state",""))
+	if state!="":
+		var state_plate:=PanelContainer.new()
+		state_plate.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		var state_color:Color=block.get("state_color",Tokens.MUTED)
+		var state_bg:=Color(state_color.r,state_color.g,state_color.b,0.10)
+		var state_style:=Tokens.flat(state_bg,state_color,1,11)
+		state_style.content_margin_left=9.0
+		state_style.content_margin_right=9.0
+		state_style.content_margin_top=4.0
+		state_style.content_margin_bottom=4.0
+		state_plate.add_theme_stylebox_override("panel",state_style)
+		header.add_child(state_plate)
+		state_plate.add_child(Tokens.make_label(state,9,state_color,0.04))
+	var rule:=ColorRect.new()
+	rule.color=Tokens.BORDER_SOFT
+	rule.custom_minimum_size=Vector2(0,1)
+	stack.add_child(rule)
+	var messages:=VBoxContainer.new()
+	messages.name="CivicConversationMessages"
+	messages.add_theme_constant_override("separation",7)
+	stack.add_child(messages)
+	var turns:Array=block.get("items",[])
+	if turns.is_empty():
+		var opening:=Tokens.make_label(String(block.get("empty_text","Tell the leader what you want done.")),12,Tokens.TEXT_SOFT)
+		opening.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		messages.add_child(opening)
+	else:
+		for turn_variant in turns:
+			_render_conversation_turn(messages,turn_variant as Dictionary)
+	var status_text:=String(block.get("status",""))
+	if status_text!="":
+		var status:=Tokens.make_label(status_text,10,block.get("state_color",Tokens.MUTED))
+		status.name="CivicConversationStatus"
+		status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		stack.add_child(status)
+	var compact_actions:Array=block.get("actions",[])
+	if not compact_actions.is_empty():
+		var action_row:=HBoxContainer.new()
+		action_row.name="CivicConversationLeadershipActions"
+		action_row.add_theme_constant_override("separation",6)
+		stack.add_child(action_row)
+		for action_variant in compact_actions:
+			var action:Dictionary=action_variant
+			var button:=Button.new()
+			button.text=String(action.get("label","ACTION"))
+			button.custom_minimum_size=Vector2(0,27)
+			button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			button.tooltip_text=String(action.get("tip",""))
+			button.add_theme_font_size_override("font_size",9)
+			button.add_theme_color_override("font_color",action.get("color",Tokens.BODY_2))
+			button.add_theme_stylebox_override("normal",Tokens.flat(Tokens.BUTTON_BG,Tokens.BORDER_2,1,3))
+			button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,action.get("color",Tokens.GOLD),1,3))
+			button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+			action_row.add_child(button)
+			var callback:Variant=action.get("on_press")
+			if callback is Callable:
+				button.pressed.connect(func()->void:
+					(callback as Callable).call()
+					_request_rebuild(button))
+	_render_conversation_composer(stack,block)
+
+
+static func _render_conversation_turn(parent:VBoxContainer,turn:Dictionary)->void:
+	var is_player:=String(turn.get("speaker","leader"))=="player"
+	var row:=HBoxContainer.new()
+	row.add_theme_constant_override("separation",8)
+	parent.add_child(row)
+	var spacer:=Control.new()
+	spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	spacer.size_flags_stretch_ratio=0.16
+	var bubble:=PanelContainer.new()
+	bubble.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	bubble.size_flags_stretch_ratio=0.84
+	var accent:=Tokens.BLUE if is_player else Tokens.GOLD
+	var background:=Tokens.ACTIVE_BG if is_player else Tokens.ROW_BG
+	var style:=Tokens.flat(background,accent,1,5)
+	style.content_margin_left=11.0
+	style.content_margin_right=11.0
+	style.content_margin_top=8.0
+	style.content_margin_bottom=8.0
+	bubble.add_theme_stylebox_override("panel",style)
+	if is_player:
+		row.add_child(spacer)
+		row.add_child(bubble)
+	else:
+		row.add_child(bubble)
+		row.add_child(spacer)
+	var column:=VBoxContainer.new()
+	column.add_theme_constant_override("separation",3)
+	bubble.add_child(column)
+	var speaker_row:=HBoxContainer.new()
+	column.add_child(speaker_row)
+	var speaker:=Tokens.make_label(String(turn.get("name","You" if is_player else "Leader")),9,accent,0.04)
+	speaker.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	speaker_row.add_child(speaker)
+	if turn.has("day"):
+		speaker_row.add_child(Tokens.make_label("day %d" % int(turn.get("day",0)),9,Tokens.DISABLED))
+	var body:=Tokens.make_label(String(turn.get("text","")),12,Tokens.BODY)
+	body.name="CivicMessageText"
+	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	column.add_child(body)
+
+
+static func _render_conversation_composer(parent:VBoxContainer,block:Dictionary)->void:
+	var submit:Variant=block.get("on_submit")
+	if not (submit is Callable): return
+	var row:=HBoxContainer.new()
+	row.add_theme_constant_override("separation",7)
+	parent.add_child(row)
+	var field:=LineEdit.new()
+	field.name="CivicConversationInput"
+	field.placeholder_text=String(block.get("placeholder","Reply to the leader…"))
+	field.custom_minimum_size=Vector2(0,38)
+	field.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	field.editable=not bool(block.get("disabled",false))
+	field.add_theme_font_size_override("font_size",12)
+	field.add_theme_color_override("font_color",Tokens.BODY)
+	field.add_theme_color_override("font_placeholder_color",Tokens.DISABLED)
+	field.add_theme_stylebox_override("normal",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER_2,1,4,8.0))
+	field.add_theme_stylebox_override("focus",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.GOLD,1,4,8.0))
+	row.add_child(field)
+	var send:=Button.new()
+	send.name="CivicConversationSend"
+	send.text="SEND"
+	send.custom_minimum_size=Vector2(62,38)
+	send.disabled=not field.editable
+	send.add_theme_font_size_override("font_size",10)
+	send.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
+	send.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	send.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
+	send.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	row.add_child(send)
+	send.pressed.connect(func()->void: (submit as Callable).call(field))
+	field.text_submitted.connect(func(_text:String)->void: (submit as Callable).call(field))
+
+
+static func _conversation_initials(name:String)->String:
+	var parts:=name.strip_edges().split(" ",false)
+	if parts.is_empty(): return "?"
+	var result:=String(parts[0]).substr(0,1)
+	if parts.size()>1: result+=String(parts[parts.size()-1]).substr(0,1)
+	return result.to_upper()
 
 
 static func _render_image(parent:VBoxContainer,block:Dictionary)->void:

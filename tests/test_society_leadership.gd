@@ -70,6 +70,16 @@ func test_directive_doctrine_erodes_council_culture()->void:
 	GameState.leadership_positions={"Steward":_institution("directive")}
 	assert_float(model.leadership_effect("culture")).is_less(0.0)
 
+func test_named_person_aptitude_changes_capacity_under_the_same_doctrine()->void:
+	var weak:Dictionary={"person_id":1,"name":"Weak Scholar","doctrine":"measured","skills":{"Administration":50,"Provisioning":50,"Construction":50,"Logistics":50,"Knowledge":20,"Defense":50,"Diplomacy":50},"personality":{"openness":0.5,"discipline":0.5,"empathy":0.5,"assertiveness":0.5,"risk_tolerance":0.5}}
+	var strong:=weak.duplicate(true)
+	strong.person_id=2
+	strong.name="Strong Scholar"
+	strong.skills.Knowledge=90
+	var weak_effect:float=float(model.leadership_effect_for_holder("Scholar",weak,"knowledge"))
+	var strong_effect:float=float(model.leadership_effect_for_holder("Scholar",strong,"knowledge"))
+	assert_float(strong_effect).is_greater(weak_effect+0.05)
+
 func test_catalog_validation_rejects_dependency_cycles()->void:
 	var cyclic_catalog:Array[Dictionary]=[
 		{"id":"watch","requires":["drill"],"effects":{"warfare_readiness":0.01}},

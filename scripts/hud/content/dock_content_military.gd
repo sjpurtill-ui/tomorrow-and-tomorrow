@@ -2,8 +2,11 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## MILITARY section: Formations / Army Builds / Supply.
 ## Army builds work like division templates: compose a build from unlocked
 ## unit types, train it as one order, deploy it as a field army, then command
-## the army on the map (left-click select, right-click march). Deep war
-## decisions (fronts, threats, engagements, aftermath) open in War Planning.
+## the army on the map (left-click select, right-click march, then click an
+## observed enemy to intercept). Deep war decisions (fronts, threats,
+## engagements, aftermath) open in War Planning.
+
+const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 
 const UNIT_COLORS:Dictionary={
 	"levy":Color("#8fa26a"),"line_infantry":Color("#79a8a0"),"skirmisher":Color("#a9946e"),
@@ -16,7 +19,7 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"MILITARY COMMAND",
 		"title":"Watch & Field",
-		"subtabs":["FORMATIONS","ARMY BUILDS","SUPPLY"],
+		"subtabs":["FORCES","RECRUIT & DEPLOY","TRAINING","SUPPLY"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -28,16 +31,18 @@ func tab(sub:int)->Dictionary:
 	var mobilization_cap:=int(capabilities.get("recruitment_capacity",0))
 	var organization:=clampf(float(army.get("organization",0.0)),0.0,1.0)
 	var upkeep:=float(army.get("provisions_required_today",0.0))
+	var ledger:=MilitaryCampaign.personnel_ledger()
 	var kpis:Array=[
-		{"label":"HOME FORCE","value":str(troops),"delta":"%d watch" % watch,"delta_color":Tokens.MUTED,"accent":Tokens.RED,"tip":"Trained personnel at home, ready to deploy"},
-		{"label":"FIELD ARMIES","value":str(MilitaryCampaign.field_armies.size()),"delta":"of %d" % MilitaryCampaign.field_army_capacity(),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Deployed maneuver armies vs command capacity"},
+		{"label":"TOTAL PERSONNEL","value":str(ledger.total),"delta":"%d training" % int(ledger.training),"delta_color":Tokens.MUTED,"accent":Tokens.RED,"tip":"Everyone in military service, including reserves, trainees, deployed soldiers, and recovery pools. Deployment does not change this total."},
+		{"label":"FIELD SOLDIERS","value":str(ledger.field),"delta":"%d armies" % MilitaryCampaign.field_armies.size(),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Deployed maneuver armies vs command capacity"},
 		{"label":"READINESS","value":"%d%%" % roundi(organization*100.0),"delta":"","accent":Tokens.AMBER,"tip":"Organization and condition of the home force"},
 		{"label":"UPKEEP","value":"%.1f" % upkeep,"delta":"rations/day","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Daily provision cost of everyone under arms"},
 	]
 	var brief:Dictionary=_command_brief()
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_builds_blocks(capabilities)}
-		2: return {"kpis":kpis,"brief":brief,"blocks":_supply_blocks(army,capabilities)}
+		2: return {"kpis":kpis,"brief":brief,"blocks":_training_blocks()}
+		3: return {"kpis":kpis,"brief":brief,"blocks":_supply_blocks(army,capabilities)}
 	return {"kpis":kpis,"brief":brief,"blocks":_formation_blocks(army)}
 
 func _command_brief()->Dictionary:
@@ -45,7 +50,7 @@ func _command_brief()->Dictionary:
 		return {"tone":"danger","title":"A war decision awaits","why":"A threat, battle, or aftermath needs your order.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
 	if MilitaryCampaign.field_armies.is_empty() and int(MilitaryCampaign.campaign_army_snapshot().get("troops",0))<=0:
 		return {"tone":"info","title":"No field force exists","why":"Compose an army build, train it as one order, then deploy it. Every soldier is absent from food and construction."}
-	return {"tone":"info","title":"Forces are standing by","why":"Select an army on the map and right-click charted land to march it. Runners carry each army's reports home.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
+	return {"tone":"info","title":"How to engage from the map","why":"SCOUTS: click their counter and choose CAPTURE or ATTACK. ENEMY ARMIES: select your field army, click the red enemy counter, then choose MOVE TO INTERCEPT. Battle opens automatically at contact.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
 
 func _unit_label(unit:String)->String:
 	return unit.replace("_"," ").capitalize()
@@ -53,7 +58,7 @@ func _unit_label(unit:String)->String:
 # --- FORMATIONS -------------------------------------------------------------
 
 func _formation_blocks(army:Dictionary)->Array:
-	var blocks:Array=[]
+	var blocks:Array=[_personnel_block()]
 	var snapshot:Dictionary=MilitaryCampaign.field_armies_snapshot()
 	var live_reports:=bool(snapshot.get("live_reports",true))
 	var army_items:Array=[]
@@ -80,12 +85,12 @@ func _formation_blocks(army:Dictionary)->Array:
 			"value":str(shown_troops),"value_color":Tokens.GOLD if selected else Tokens.BODY_2,
 			"accent":Tokens.GOLD if selected else Tokens.BLUE,
 			"on_click":func()->void: terrain._select_army_and_focus(army_id),
-			"tip":"Click to select this army on the map; right-click charted land to march it. Reports travel home by runner until signal-era development.",
+			"tip":"Click to select this army on the map. Right-click charted land for a normal march; click a red enemy counter to order an intercept. Reports travel home by runner until signal-era development.",
 		})
 	if army_items.is_empty():
 		blocks.append({"type":"text","heading":"FIELD ARMIES","text":"No army is deployed. Compose and train a build in ARMY BUILDS, then deploy it."})
 	else:
-		blocks.append({"type":"rows","heading":"FIELD ARMIES","note":"click to select on map","items":army_items})
+		blocks.append({"type":"rows","heading":"FIELD ARMIES","note":"select army → click red enemy → intercept","items":army_items})
 		var selected_active:bool=int(terrain.selected_army_id)!=-1
 		blocks.append({"type":"actions","items":[
 			{"label":"RETURN SELECTED","sub":"march it home","disabled":not selected_active,
@@ -99,9 +104,10 @@ func _formation_blocks(army:Dictionary)->Array:
 	for formation_variant in (army.get("formations",[]) as Array):
 		var formation:Dictionary=formation_variant
 		var unit:=String(formation.get("unit","levy"))
+		var band:=UnitCatalog.readiness_band(formation)
 		formation_items.append({
-			"name":"%s · %s" % [_unit_label(unit),String(formation.get("weapon","improvised")).replace("_"," ")],
-			"sub":"training %d%% · condition %d%%" % [roundi(float(formation.get("training",0.0))*100.0),roundi(float(formation.get("personnel_condition",1.0))*100.0)],
+			"name":"%s%s · %s" % ["PROTOTYPE " if bool(formation.get("prototype",false)) else "",_unit_label(unit),String(formation.get("weapon","improvised")).replace("_"," ")],
+			"sub":"%s · training %d%% · condition %d%%" % [band,roundi(float(formation.get("training",0.0))*100.0),roundi(float(formation.get("personnel_condition",1.0))*100.0)],
 			"value":"%d/%d" % [int(formation.get("count",0)),int(formation.get("authorized_count",0))],
 			"value_color":Tokens.BODY_2,
 			"accent":UNIT_COLORS.get(unit,Tokens.MUTED),
@@ -125,7 +131,7 @@ func _formation_blocks(army:Dictionary)->Array:
 	blocks.append({"type":"tiles","heading":"SETTLEMENT DEFENSE","items":[
 		{"label":"WORKS","value":String(defense.get("short","Open ground")),"note":"integrity %d%%" % roundi(float(defense.get("integrity",0.0))*100.0),"note_color":Tokens.RED if float(defense.get("integrity",0.0))<0.4 else Tokens.MUTED,"tip":String(defense.get("description",""))},
 		{"label":"LOOKOUT","value":"%.0f km" % float(defense.get("observation_radius_km",0.0)),"note":"observation reach","note_color":Tokens.MUTED,"tip":"How far approaching forces are seen"},
-		{"label":"GARRISON","value":"%d/%d" % [int(defense.get("garrison_personnel",0)),int(defense.get("garrison_required",0))],"note":"coverage %d%%" % roundi(float(defense.get("garrison_coverage",0.0))*100.0),"note_color":Tokens.GREEN if float(defense.get("garrison_coverage",0.0))>=1.0 else Tokens.AMBER,"tip":"Home troops against the required garrison"},
+		{"label":"GARRISON","value":"%d/%d" % [int(defense.get("garrison_personnel",0)),int(defense.get("garrison_required",0))],"note":"%d trained · %d militia" % [int(defense.get("garrison_trained",0)),int(defense.get("garrison_militia",0))],"note_color":Tokens.GREEN if float(defense.get("garrison_coverage",0.0))>=1.0 else Tokens.AMBER,"tip":"The local Defense allocation always mans the watch and receives automatic basic training. Advanced formations and exercises remain under your control."},
 		{"label":"STORES","value":"%d%%" % roundi(float(MilitaryCampaign.store_protection().get("total",MilitaryCampaign.store_protection().get("protection",0.0)))*100.0),"note":"protected share","note_color":Tokens.MUTED,"tip":"Share of the food reserve protected from raids"},
 	]})
 	return blocks
@@ -135,7 +141,7 @@ func _formation_blocks(army:Dictionary)->Array:
 func _builds_blocks(capabilities:Dictionary)->Array:
 	var blocks:Array=[]
 	var snapshot:Dictionary=MilitaryCampaign.army_template_snapshot()
-	blocks.append({"type":"text","text":"A build is a reusable army design. Add cohorts, TRAIN the build as one order (recruits are raised automatically), then DEPLOY it as a field army. Recruit reserve: %d · mobilization %d of %d capacity." % [int(snapshot.get("recruit_reserve",0)),MilitaryCampaign._mobilized_count(),int(capabilities.get("recruitment_capacity",0))]})
+	blocks.append({"type":"text","text":"1. Set the number of soldiers. 2. RECRUIT & TRAIN fills missing places. 3. DEPLOY transfers exactly that many to a field army. Builds draw from the same reserve; they do not each own copies of the soldiers. To improve existing troops, use TRAINING. Recruit reserve: %d · mobilization %d of %d capacity." % [int(snapshot.get("recruit_reserve",0)),MilitaryCampaign._mobilized_count(),int(capabilities.get("recruitment_capacity",0))]})
 	var units:Dictionary=capabilities.get("units",{})
 	var unit_equipment:Dictionary=capabilities.get("unit_equipment",{})
 	for template_variant in (snapshot.get("templates",[]) as Array):
@@ -149,7 +155,7 @@ func _builds_blocks(capabilities:Dictionary)->Array:
 			entry_items.append({
 				"name":"%s · %s" % [_unit_label(unit),weapon.replace("_"," ")],
 				"count":int(entry.get("count",0)),
-				"pct":"%d ready" % int(entry.get("ready",0)),
+				"pct":"%d/%d ready" % [int(entry.get("ready",0)),int(entry.get("count",0))],
 				"color":UNIT_COLORS.get(unit,Tokens.MUTED),
 				"tip":"%d ready at home · %d in training · target %d" % [int(entry.get("ready",0)),int(entry.get("in_training",0)),int(entry.get("count",0))],
 				"on_minus":func()->void: terrain._report_military_action(MilitaryCampaign.adjust_template_entry(template_id,unit,weapon,-10)),
@@ -163,16 +169,31 @@ func _builds_blocks(capabilities:Dictionary)->Array:
 		else:
 			blocks.append({"type":"alloc","heading":"BUILD · %s" % String(template.get("name","BUILD")),"note":ready_note,"items":entry_items})
 		var command_items:Array=[
-			{"label":"TRAIN BUILD","sub":"raise + queue what's missing","primary":not deployable and int(template.get("required_total",0))>0,
+			{"label":"RECRUIT & TRAIN","sub":"fill missing places","primary":not deployable and int(template.get("required_total",0))>0,
 			"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.queue_template_training(template_id)),
 			"tip":"One order: raise the missing recruits and queue typed training for every under-strength cohort"},
-			{"label":"DEPLOY ARMY","sub":"lift trained cohorts into the field","primary":deployable,"disabled":not deployable,
-			"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.deploy_army_from_template(template_id)),
-			"tip":"Deploy this build as a field army" if deployable else "Every cohort must read ready before the build can deploy"},
+			{"label":"DEPLOY %d SOLDIERS" % int(template.get("required_total",0)),"sub":"%d remain in reserve" % maxi(0,int(MilitaryCampaign.home_army.get("troops",0))-int(template.get("required_total",0))),"primary":deployable,"disabled":not deployable,
+			"on_press":func()->void: _deploy_build(template_id),
+			"tip":"Transfer exactly the build target from the shared home reserve." if deployable else "Complete this build and ensure a field army command slot is free."},
 			{"label":"DELETE BUILD","sub":"remove the design",
 			"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.delete_army_template(template_id)),
 			"tip":"Delete this build (armies already deployed keep their troops)"},
 		]
+		# §18.1: an UNDERSTOOD unit offers one experimental cohort — exceptional
+		# cost, bounded size — before the practice is established.
+		for unit_variant in units:
+			var proto_unit:=String(unit_variant)
+			var proto_gate:Dictionary=units[proto_unit] if units[proto_unit] is Dictionary else {}
+			var capability:Dictionary=proto_gate.get("capability",{})
+			if not bool(capability.get("can_prototype",false)): continue
+			var proto_weapons:Array=unit_equipment.get(proto_unit,["improvised"])
+			var proto_weapon:=String(proto_weapons[0]) if not proto_weapons.is_empty() else "improvised"
+			command_items.append({
+				"label":"PROTOTYPE %s" % _unit_label(proto_unit).to_upper(),"sub":"experimental cohort of 8",
+				"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.start_training(proto_unit,proto_weapon,8)),
+				"tip":"The principle is understood but not yet established practice. Raise one experimental cohort at %.1f× training time; its service spreads the practice." % MilitaryCampaign.PROTOTYPE_TRAINING_MULTIPLIER,
+			})
+			break
 		var added:=0
 		for unit_variant in units:
 			if added>=3: break
@@ -202,10 +223,10 @@ func _builds_blocks(capabilities:Dictionary)->Array:
 		var order:Dictionary=order_variant
 		queue_items.append({
 			"name":"%s · %s ×%d" % [_unit_label(String(order.get("unit","levy"))),String(order.get("weapon","improvised")).replace("_"," "),int(order.get("count",0))],
-			"sub":"%d of %d days" % [int(order.get("progress_days",0)),int(order.get("required_days",1))],
+			"sub":"%d/%d instruction days · %d left training through injury" % [int(order.get("progress_days",0)),int(order.get("required_days",1)),maxi(0,int(order.get("initial_count",order.get("count",0)))-int(order.get("count",0)))],
 			"value":"%d%%" % roundi(float(order.get("progress_days",0))/maxf(1.0,float(order.get("required_days",1)))*100.0),
 			"value_color":Tokens.AMBER,"accent":Tokens.AMBER,
-			"tip":"Trainees become a typed formation when training completes",
+			"tip":"Surviving trainees join the home reserve. Injured trainees enter recovery, then return to the recruit reserve. Instruction days can take longer with crowded classes or missing equipment.",
 		})
 	if not queue_items.is_empty():
 		blocks.append({"type":"rows","heading":"IN TRAINING","items":queue_items})
@@ -265,4 +286,38 @@ func signature()->Array:
 	for template_variant in MilitaryCampaign.army_templates:
 		var template:Dictionary=template_variant
 		template_state.append([int(template.get("template_id",0)),(template.get("entries",[]) as Array).duplicate(true)])
-	return [int(army.get("troops",0)),int(army.get("recruits",0)),MilitaryCampaign.field_armies.size(),(army.get("training_queue",[]) as Array).size(),template_state,terrain.selected_army_id,MilitaryCampaign._mobilized_count()]
+	return [int(army.get("troops",0)),int(army.get("recruits",0)),MilitaryCampaign.field_armies.size(),(army.get("training_queue",[]) as Array).size(),template_state,terrain.selected_army_id,MilitaryCampaign._mobilized_count(),MilitaryCampaign.training_program.duplicate(true),MilitaryCampaign.training_queue.duplicate(true),MilitaryCampaign.command_development.duplicate(true),int(GameState.elapsed_days)]
+
+func _deploy_build(template_id:int)->void:
+	var result:=MilitaryCampaign.deploy_army_from_template(template_id)
+	terrain._report_military_action(result)
+	if result.has("ok"):
+		terrain._select_army_and_focus(int(result.army.army_id))
+	hud.request_immediate_dock_refresh()
+
+func _personnel_block()->Dictionary:
+	var ledger:=MilitaryCampaign.personnel_ledger()
+	return {"type":"text","heading":"WHERE YOUR SOLDIERS ARE","text":"%d total = %d home reserve + %d in field armies + %d occupation + %d recruits + %d in training + %d recovering + %d missing or captured.\nDefense workers are a labor allocation, not additional soldiers." % [ledger.total,ledger.home,ledger.field,ledger.occupation,ledger.recruits,ledger.training,ledger.recovering,ledger.missing]}
+
+func _training_blocks()->Array:
+	var state:=MilitaryCampaign.training_program_snapshot()
+	var active:Dictionary=state.active
+	var participants:=MilitaryCampaign.exercise_personnel()
+	var blocks:Array=[_personnel_block(),{"type":"text","heading":"IMPROVE EXISTING SOLDIERS","text":"%d trained soldiers can exercise here: home reserves and field armies stationed at home. Marching and distant armies do not attend. Exercises improve skills; they do not recruit more people. Command practice is shared across unit types and future formations." % participants}]
+	var skills:Array=[]
+	var descriptions:Dictionary={"command":"coordination and orders","tactics":"combat decisions","logistics":"supply and recovery","resolve":"holding morale under pressure"}
+	for skill in descriptions:
+		skills.append({"name":String(skill).capitalize(),"sub":descriptions[skill],"value":"+%.1f / 30" % (float(state.command_development.get(skill,0.0))*100.0),"accent":Tokens.TEAL})
+	blocks.append({"type":"rows","heading":"SHARED COMMAND SKILLS","items":skills})
+	if not active.is_empty():
+		blocks.append({"type":"text","heading":String(active.label),"text":"%d attending · %.1f / %.0f effective days · %.1f extra rations used. %s" % [int(active.participants),float(active.progress_days),float(active.duration_days),float(active.food_consumed_total),String(active.paused_reason)]})
+		blocks.append({"type":"actions","items":[{"label":"CANCEL EXERCISE","on_press":func()->void: terrain._report_military_action(MilitaryCampaign.cancel_training_program())}]})
+	for id in state.catalog:
+		var program:Dictionary=state.catalog[id]
+		var gains:Array[String]=[]
+		for skill in program.command_gain: gains.append("%s +%.1f" % [String(skill).capitalize(),float(program.command_gain[skill])*100.0])
+		var attendees:=MilitaryCampaign._training_program_participants(program)
+		blocks.append({"type":"text","heading":String(program.label),"text":"%s\n%s · formation training +%.1f points.\n%d attending · %.0f effective days · %.2f extra rations/day · fatigue and equipment wear apply.%s" % [program.description,", ".join(gains),float(program.training_gain)*100.0,attendees,float(program.duration_days),attendees*float(program.food_per_participant),"" if bool(program.unlocked) else "\n"+String(program.reason)]})
+		var program_id:=String(id)
+		blocks.append({"type":"actions","items":[{"label":"START "+String(program.label),"disabled":not active.is_empty() or not bool(program.unlocked),"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.start_training_program(program_id))}]})
+	return blocks

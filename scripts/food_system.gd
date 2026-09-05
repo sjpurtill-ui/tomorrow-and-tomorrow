@@ -5,6 +5,7 @@ extends Node
 # labor, pregnancy, lactation, travel, military, and climate cohorts.
 
 const KCAL_PER_RATION := 2400.0
+const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
 const FOOD_TYPES := ["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"]
 const FOOD_ISSUE_HISTORY_LIMIT:=96
 const SPOILAGE := {
@@ -16,9 +17,13 @@ const SPOILAGE := {
 }
 
 var initialized := false
+var _environment_cache_key:=""
+var _environment_cache:Dictionary={}
 
 func reset_for_new_world()->void:
 	initialized=false
+	_environment_cache_key=""
+	_environment_cache={}
 
 func initialize() -> void:
 	if initialized and not GameState.food_stocks.is_empty():
@@ -37,12 +42,15 @@ func initialize() -> void:
 	_sync_total()
 
 func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> Dictionary:
+	return SettlementModel.with_local_population(func()->Dictionary: return _process_local_day(context,labor_efficiency,ecology))
+
+func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: float) -> Dictionary:
 	initialize()
 	var traveling:=bool(context.get("traveling",GameState.convoy_traveling))
 	var workers:=float(GameState.population_allocations.get("Food",0))
 	var logistics:=float(GameState.population_allocations.get("Logistics",0))
 	var makers:=float(GameState.population_allocations.get("Crafting",0))
-	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	var military_campaign:Node=get_node_or_null("/root/MilitaryCampaign") if GameState.resource_settlement_id=="" else null
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var demand_breakdown:=_calculate_demand(traveling)
@@ -86,6 +94,7 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 	var sources:=_source_report(harvest,workers,traveling)
 	var forecast_30:=_forecast(30,harvest,demand_breakdown,traveling,provision_delivery_ratio)
 	var forecast_90:=_forecast(90,harvest,demand_breakdown,traveling,provision_delivery_ratio)
+	var weather_factor:=_weather_yield_factor(_environment_mix(),GameState.elapsed_days)
 	var result:={
 		"food_days":food_days,
 		"food_production":production_total,
@@ -100,6 +109,7 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 		"food_forecast_30":forecast_30,
 		"food_forecast_90":forecast_90,
 		"food_diet_quality":diet_quality,
+		"food_weather_factor":weather_factor,
 		"nutrition_reserve":GameState.nutrition_reserve,
 		"malnutrition_burden":GameState.malnutrition_burden,
 		"food_stocks":GameState.food_stocks.duplicate(true),
@@ -137,7 +147,7 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 	# this the settlement pays for them twice.
 	var civilization_system:=get_node_or_null("/root/CivilizationSystem")
 	var away_adults:=0.0
-	if civilization_system!=null and civilization_system.has_method("mission_absent_personnel"):
+	if GameState.resource_settlement_id=="" and civilization_system!=null and civilization_system.has_method("mission_absent_personnel"):
 		away_adults=clampf(float(civilization_system.mission_absent_personnel()),0.0,adults)
 	adults-=away_adults
 	# Children are a full 0–13 cohort, including infancy; its weighted average
@@ -155,20 +165,24 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 	labor*=1.0-clampf(away_adults/maxf(1.0,float(GameState.able_population())),0.0,0.45)
 	var pregnancy:=float(GameState.estimated_active_pregnancies())*0.12
 	var lactation:=total*0.012*0.21
-	var season_wave:=sin(fmod(GameState.elapsed_days,365.0)/365.0*TAU)
-	var climate:=base*maxf(0.0,-season_wave)*0.06
+	var environment:=_environment_mix()
+	var season_wave:=PlanetEnvironment.season_wave(environment,GameState.elapsed_days)
+	var ambient_temperature:=float(environment.get("mean_temperature_c",11.0))+season_wave*float(environment.get("seasonality_c",12.0))
+	var cold_load:=clampf((12.0-ambient_temperature)/28.0,0.0,1.0)
+	var heat_load:=clampf((ambient_temperature-31.0)/17.0,0.0,1.0)
+	var climate:=base*(cold_load*0.075+heat_load*0.045)
 	var travel:=base*0.12 if traveling else 0.0
 	var prisoners:=0.0
 	var army_field:=0.0
 	var occupation_relief:=0.0
-	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	var military_campaign:Node=get_node_or_null("/root/MilitaryCampaign") if GameState.resource_settlement_id=="" else null
 	if military_campaign!=null:
 		if military_campaign.has_method("prisoner_food_demand"): prisoners=maxf(0.0,float(military_campaign.prisoner_food_demand()))
 		var field_personnel:=maxi(0,int(military_campaign.home_army.get("troops",0)))
 		if military_campaign.has_method("field_army_active_personnel"): field_personnel+=maxi(0,int(military_campaign.field_army_active_personnel()))
 		if military_campaign.has_method("occupation_active_personnel"): field_personnel+=maxi(0,int(military_campaign.occupation_active_personnel()))
 		army_field=float(field_personnel)*(1.12+(0.12 if traveling else 0.0)+maxf(0.0,-season_wave)*0.06)
-	if civilization_system!=null and civilization_system.has_method("player_effects"):
+	if GameState.resource_settlement_id=="" and civilization_system!=null and civilization_system.has_method("player_effects"):
 		occupation_relief=maxf(0.0,float(civilization_system.player_effects().get("occupation_relief_demand",0.0)))
 	var ration_factor:=1.0+_policy_effect("food_demand")
 	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoners
@@ -189,18 +203,21 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var result:={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}
 	var occupation_transfer:=0.0
 	var civilization_system:=get_node_or_null("/root/CivilizationSystem")
-	if civilization_system!=null and civilization_system.has_method("player_effects") and not traveling:
+	if GameState.resource_settlement_id=="" and civilization_system!=null and civilization_system.has_method("player_effects") and not traveling:
 		occupation_transfer=maxf(0.0,float(civilization_system.player_effects().get("occupation_food_transfer",0.0)))
 	if workers<=0.0:
 		result["Dry staples"]=occupation_transfer
 		return result
 	var access:=_food_resource_access()
 	var coastal:=_coastal_food_profile(traveling)
+	var environment:=_environment_mix()
+	var weather_factor:=_weather_yield_factor(environment,GameState.elapsed_days)
+	var environmental_water:=clampf(float(environment.get("water_access",0.0)),0.0,1.0)
 	var coastal_fishing_weight:=float(coastal.shoreline_access)*0.07+float(coastal.marine_opportunity)*0.05
-	var fishing_weight:=maxf(0.16 if float(access.freshwater)>0.0 else 0.0,coastal_fishing_weight)
+	var fishing_weight:=maxf(0.16*maxf(float(access.freshwater),environmental_water),coastal_fishing_weight)
 	var cultivation_weight:=0.0
 	if "seed_selection" in GameState.known_discoveries and GameState.settlement_site_committed:
-		cultivation_weight=(0.34+float(access.fertile)*0.10)*maxf(0.05,DiscoverySystem.adoption("seed_selection"))
+		cultivation_weight=(0.22+float(environment.get("fertility",0.0))*0.20+float(access.fertile)*0.08)*maxf(0.05,DiscoverySystem.adoption("seed_selection"))
 	var remaining:=maxf(0.0,1.0-fishing_weight-cultivation_weight)
 	var hunting_weight:=remaining*(0.31+float(access.game)*0.09)
 	var gathering_weight:=maxf(0.0,remaining-hunting_weight)
@@ -208,9 +225,8 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var game_season:=_season_factor("Fresh meat",GameState.elapsed_days)
 	var fish_season:=_season_factor("Fish",GameState.elapsed_days)
 	var crop_season:=_season_factor("Dry staples",GameState.elapsed_days)
-	var terrain:=String(GameState.province_terrain)
-	var terrain_gather:=float({"Plains":1.04,"Forest":1.12,"Hills":0.91,"Mountains":0.68,"Marsh":0.96}.get(terrain,0.90))
-	var terrain_hunt:=float({"Plains":0.96,"Forest":1.12,"Hills":1.02,"Mountains":0.78,"Marsh":0.82}.get(terrain,0.90))
+	var terrain_gather:=lerpf(0.54,1.34,clampf(float(environment.get("forage",0.45)),0.0,1.0))
+	var terrain_hunt:=lerpf(0.52,1.38,clampf(float(environment.get("game",0.40)),0.0,1.0))
 	var efficiency:=lerpf(0.76,1.08,clampf(labor_efficiency,0.0,1.0))
 	var ecological:=lerpf(0.58,1.04,clampf(ecology,0.0,1.0))
 	var practice:=1.0
@@ -223,12 +239,12 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	rng.seed=GameState.world_seed^int(GameState.elapsed_days+1.0)*7919
 	var variation:=rng.randf_range(0.93,1.07)
 	var route_factor:=0.48+clampf(float(GameState.population_allocations.get("Logistics",0))/maxf(1.0,GameState.population_exact*0.08),0.0,1.0)*0.08 if traveling else 1.0
-	result["Fresh plants"]=workers*gathering_weight*4.55*terrain_gather*plant_season*efficiency*ecological*float(GameState.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor*(1.0+float(coastal.foraging_bonus))
-	result["Fresh meat"]=workers*hunting_weight*4.85*terrain_hunt*game_season*efficiency*ecological*float(GameState.food_source_health.get("Hunting",0.9))*(1.0+float(access.game)*0.18)*(1.0+DiscoverySystem.effect("hunting_yield"))*practice*variation*route_factor
+	result["Fresh plants"]=workers*gathering_weight*4.55*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_gather*plant_season*efficiency*ecological*float(GameState.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor*(1.0+float(coastal.foraging_bonus))*_food_type_weather_multiplier("Fresh plants",weather_factor)
+	result["Fresh meat"]=workers*hunting_weight*4.85*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_hunt*game_season*efficiency*ecological*float(GameState.food_source_health.get("Hunting",0.9))*(1.0+float(access.game)*0.18)*(1.0+DiscoverySystem.effect("hunting_yield"))*practice*variation*route_factor*_food_type_weather_multiplier("Fresh meat",weather_factor)
 	var fishing_access:=maxf(float(access.freshwater),float(coastal.marine_opportunity)*0.90)
-	result["Fish"]=workers*fishing_weight*5.00*fish_season*efficiency*float(GameState.food_source_health.get("Fishing",0.9))*(0.82+fishing_access*0.28)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))
+	result["Fish"]=workers*fishing_weight*5.00*BASE_SUBSISTENCE_YIELD_CALIBRATION*fish_season*efficiency*float(GameState.food_source_health.get("Fishing",0.9))*(0.76+fishing_access*0.34)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))*_food_type_weather_multiplier("Fish",weather_factor)
 	if cultivation_weight>0.0 and not traveling:
-		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(GameState.food_source_health.get("Cultivation",0.9))*(0.82+float(access.fertile)*0.30)*(1.0+DiscoverySystem.effect("soil_productivity")+DiscoverySystem.effect("cultivation_yield"))*variation
+		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(GameState.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+DiscoverySystem.effect("soil_productivity")+DiscoverySystem.effect("cultivation_yield"))*variation*_food_type_weather_multiplier("Dry staples",weather_factor)
 	result["Dry staples"]+=occupation_transfer
 	return result
 
@@ -238,9 +254,22 @@ func _coastal_food_profile(traveling:bool)->Dictionary:
 	if traveling or not GameState.settlement_site_committed: return empty
 	for settlement_variant in GameState.player_settlements:
 		var settlement:Dictionary=settlement_variant
-		if bool(settlement.get("primary",false)):
+		if (String(settlement.get("id",""))==GameState.resource_settlement_id if GameState.resource_settlement_id!="" else bool(settlement.get("primary",false))):
 			return SettlementModel.coastal_site_profile(settlement)
 	return empty
+
+
+func _environment_mix()->Dictionary:
+	for settlement in GameState.player_settlements:
+		var local_match:=String(settlement.get("id",""))==GameState.resource_settlement_id if GameState.resource_settlement_id!="" else bool(settlement.get("primary",false))
+		if not local_match: continue
+		var profile:Dictionary=settlement.get("environment_profile",{})
+		return profile if not profile.is_empty() else PlanetEnvironment.profile_at(SettlementModel._record_position(settlement))
+	return PlanetEnvironment.profile_at(Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z))
+
+
+func current_environment_profile()->Dictionary:
+	return _environment_mix().duplicate(true)
 
 func _food_resource_access() -> Dictionary:
 	var result:={"game":0.0,"freshwater":0.0,"fertile":0.0}
@@ -360,6 +389,8 @@ func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array
 func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictionary,traveling: bool,provision_delivery_ratio:=1.0) -> Dictionary:
 	var projected_stocks:Dictionary=GameState.food_stocks.duplicate(true)
 	var current_day:=GameState.elapsed_days
+	var environment:=_environment_mix()
+	var current_weather:=_weather_yield_factor(environment,current_day)
 	var pre_ration_current:=float(demand_breakdown.get("total",0.0))+float(demand_breakdown.get("rationing",0.0))
 	var non_climate:=maxf(0.0,pre_ration_current-float(demand_breakdown.get("climate",0.0)))
 	var ration_factor:=1.0+_policy_effect("food_demand")
@@ -373,7 +404,9 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		for food_type in ["Fresh plants","Fresh meat","Fish","Dry staples"]:
 			var current_season:=maxf(0.05,_season_factor(food_type,current_day))
 			var future_season:=_season_factor(food_type,future_day)
-			var future_yield:=float(current_harvest.get(food_type,0.0))*future_season/current_season
+			var current_weather_type:=maxf(0.05,_food_type_weather_multiplier(food_type,current_weather))
+			var future_weather_type:=_food_type_weather_multiplier(food_type,_weather_yield_factor(environment,future_day))
+			var future_yield:=float(current_harvest.get(food_type,0.0))*future_season/current_season*future_weather_type/current_weather_type
 			projected_stocks[food_type]=float(projected_stocks.get(food_type,0.0))+future_yield
 			total_produced+=future_yield
 		var season_wave:=sin(fmod(future_day,365.0)/365.0*TAU)
@@ -409,13 +442,42 @@ func _consume_projection(stocks: Dictionary,required: float) -> float:
 	return required-remaining
 
 func _season_factor(food_type: String,day: float) -> float:
-	var day_of_year:=fmod(day,365.0)
-	var wave:=sin(day_of_year/365.0*TAU)
+	return PlanetEnvironment.food_season_factor(food_type,_environment_mix(),day)
+
+
+func _weather_yield_factor(profile:Dictionary,day:float)->float:
+	## Weather is a smooth, deterministic aggregate—not one entity per storm.
+	## Ordinary spells move yields modestly; climates with unreliable rainfall
+	## can suffer a broad bad season or enjoy a favorable one. This prevents an
+	## automatic steward from turning food into a perfectly flat solved number.
+	var variability:=clampf(float(profile.get("rainfall_variability",0.35)),0.0,1.0)
+	var phase_a:=float(absi(GameState.world_seed*31)%997)
+	var phase_b:=float(absi(GameState.world_seed*73)%991)
+	var rolling:=sin((day+phase_a)/53.0)*0.62+sin((day+phase_b)/127.0)*0.38
+	var factor:=1.0+rolling*(0.035+variability*0.105)
+	var year:=floori(maxf(0.0,day)/365.0)
+	var day_of_year:=fmod(maxf(0.0,day),365.0)
+	var annual_rng:=RandomNumberGenerator.new()
+	annual_rng.seed=GameState.world_seed^(year+17)*86028121^roundi(variability*1000.0)*32452843
+	var annual_roll:=annual_rng.randf()
+	var center:=annual_rng.randf_range(65.0,300.0)
+	var half_width:=annual_rng.randf_range(28.0,78.0)
+	var pulse:=maxf(0.0,1.0-absf(day_of_year-center)/half_width)
+	var drought_chance:=0.08+variability*0.34
+	if annual_roll<drought_chance:
+		var severity:=annual_rng.randf_range(0.12,0.18+variability*0.32)
+		factor*=1.0-severity*pulse
+	elif annual_roll>0.88:
+		factor*=1.0+annual_rng.randf_range(0.08,0.18)*pulse
+	return clampf(factor,0.52,1.24)
+
+
+func _food_type_weather_multiplier(food_type:String,weather_factor:float)->float:
 	match food_type:
-		"Fresh plants": return clampf(0.92+wave*0.48,0.36,1.42)
-		"Fresh meat": return clampf(0.96-wave*0.12,0.74,1.14)
-		"Fish": return clampf(0.94+sin(day_of_year/365.0*TAU+0.8)*0.20,0.68,1.18)
-		"Dry staples": return clampf(0.72+wave*0.68,0.05,1.48)
+		"Fresh plants": return weather_factor
+		"Dry staples": return clampf(pow(weather_factor,1.25),0.46,1.30)
+		"Fresh meat": return lerpf(1.0,weather_factor,0.38)
+		"Fish": return lerpf(1.0,weather_factor,0.28)
 	return 1.0
 
 func _stock_total() -> float:

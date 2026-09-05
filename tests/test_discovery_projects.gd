@@ -25,7 +25,7 @@ func test_active_project_explains_question_method_unlock_and_bottleneck()->void:
 	var matches:=records.filter(func(record:Dictionary)->bool: return String(record.id)==String(discovery.id))
 	assert_int(matches.size()).is_equal(1)
 	var project:Dictionary=matches[0]
-	assert_str(String(project.name)).is_not_equal(String(discovery.name))
+	assert_str(String(project.name)).is_equal(String(discovery.name))
 	assert_str(String(project.discovery_name)).is_equal(String(discovery.name))
 	assert_str(String(project.project_goal)).is_not_equal("")
 	assert_str(String(project.project_method)).is_not_equal("")
@@ -98,12 +98,16 @@ func test_research_priority_divides_the_aggregate_workforce_and_shapes_throughpu
 	assert_int(int(summary.emphasis_total)).is_equal(4)
 
 
-func test_thousands_of_hidden_routes_yield_concrete_named_discoveries_through_modern_maturity()->void:
+func test_thousands_of_hidden_routes_resolve_into_concrete_non_repetitive_milestones()->void:
 	var frontier:Array=(DiscoverySystem.catalog as Array).filter(func(discovery:Dictionary)->bool: return bool(discovery.get("frontier",false)))
 	assert_int(frontier.size()).is_equal(4_608)
 	var names:Dictionary={}
 	var mechanisms:Dictionary={}
 	var observations:Dictionary={}
+	var milestones:Dictionary={}
+	var threads:Dictionary={}
+	var routes:Dictionary={}
+	var discoveries_per_thread:Dictionary={}
 	var modern_count:=0
 	for discovery_variant in frontier:
 		var discovery:Dictionary=discovery_variant
@@ -111,21 +115,56 @@ func test_thousands_of_hidden_routes_yield_concrete_named_discoveries_through_mo
 		names[name]=true
 		mechanisms[String(discovery.get("mechanism_signature",""))]=true
 		observations[String(discovery.get("observation",""))]=true
+		var milestone_key:=String(discovery.get("milestone_key",""))
+		milestones[milestone_key]=true
+		var thread_key:=String(discovery.get("thread_key",""))
+		threads[thread_key]=true
+		routes[String(discovery.get("route_key",""))]=true
+		discoveries_per_thread[thread_key]=int(discoveries_per_thread.get(thread_key,0))+1
 		assert_str(name).is_not_empty()
+		for forbidden_prefix in ["Mapped ","Compared ","Repeated ","Standardized ","Measured ","Validated "]:
+			assert_bool(name.begins_with(forbidden_prefix)).is_false()
 		assert_str(String(discovery.get("observation",""))).contains("The established practice is")
 		assert_str(String(discovery.get("observation",""))).contains("Core finding:")
 		assert_str(String(discovery.get("observation",""))).contains("New operating capability:")
 		assert_str(String(discovery.get("observation",""))).contains("Social consequence:")
 		assert_str(String(discovery.get("social_consequence",""))).is_not_empty()
-		assert_str(String(discovery.get("ability_reason",""))).contains("can now be taught and repeated")
-		assert_str(String(discovery.get("line_name",""))).contains("inquiry")
+		assert_str(String(discovery.get("ability_reason",""))).starts_with("Because ")
+		assert_str(String(discovery.get("line_name",""))).is_not_empty()
 		if int(discovery.get("maturity",0))==12:
 			modern_count+=1
-			assert_bool(name.begins_with("Integrated")).is_true()
+			assert_bool(name.ends_with("Integrated Science")).is_true()
 	assert_int(names.size()).is_equal(4_608)
 	assert_int(mechanisms.size()).is_equal(4_608)
 	assert_int(observations.size()).is_equal(4_608)
+	assert_int(milestones.size()).is_equal(4_608)
+	assert_int(threads.size()).is_equal(48)
+	assert_int(routes.size()).is_equal(384)
+	for discovery_count in discoveries_per_thread.values(): assert_int(int(discovery_count)).is_equal(96)
 	assert_int(modern_count).is_equal(384)
+
+
+func test_established_library_consolidates_legacy_permutation_spam_into_one_knowledge_line()->void:
+	var selected:Array=[]
+	for discovery_variant in DiscoverySystem.catalog:
+		var discovery:Dictionary=discovery_variant
+		if not bool(discovery.get("frontier",false)): continue
+		if String(discovery.get("dynamic",""))!="culture" or String(discovery.get("subcategory",""))!="Collective memory": continue
+		if int(discovery.get("lens_index",-1))!=7: continue
+		if int(discovery.get("maturity",0))>6: continue
+		selected.append(discovery)
+	selected.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.maturity)<int(b.maturity))
+	for discovery_variant in selected:
+		var discovery:Dictionary=discovery_variant
+		GameState.known_discoveries.append(String(discovery.id))
+		GameState.discovery_log.push_front({"id":discovery.id,"day":int(discovery.day),"name":"Compared Regional Dated Oral History Recitations","description":"legacy procedural wording"})
+	var threads:=DiscoverySystem.established_knowledge_threads()
+	assert_int(threads.size()).is_equal(1)
+	var thread:Dictionary=threads[0]
+	assert_str(String(thread.name)).is_equal("Dated Oral History Recitations")
+	assert_int(int(thread.breakthrough_count)).is_equal(6)
+	assert_str(String(thread.latest_breakthrough)).not_contains("Compared Regional")
+	assert_str(String(thread.record_summary)).contains("6 historical refinements")
 
 
 func test_emphasis_selects_the_live_frontier_without_exposing_hidden_catalog()->void:

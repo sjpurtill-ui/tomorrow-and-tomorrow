@@ -5,6 +5,17 @@ var initialized := false
 
 const FOUNDING_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber Plants"]
 
+# Keep the simulation/save key stable while giving players a name that describes
+# the usable material rather than an unexplained class of plants.
+func display_name(resource_name:String)->String:
+	return "Plant Fiber" if resource_name=="Fiber Plants" else resource_name
+
+func plain_language_description(resource_name:String)->String:
+	if resource_name=="Timber": return "Trees grow across woodland. Local cutting areas share extraction labor; tools, carrying distance and regrowth limit delivered timber."
+	if resource_name=="Fiber Plants":
+		return "Workable reeds, grasses, bark fibers, and flax- or hemp-like plants used for cordage, baskets, mats, and thatch."
+	return ""
+
 func reset_for_new_world()->void:
 	initialized=false
 	rng=RandomNumberGenerator.new()
@@ -54,17 +65,32 @@ func initialize() -> void:
 		# permanent water supply.  Continued survival requires a reachable source.
 		GameState.resource_stockpiles = {"Food":GameState.population_exact*food_days, "Freshwater":GameState.population_exact*3.0, "Timber":12.0*material_ratio, "Stone":0.0, "Clay":0.0, "Fiber Plants":10.0*material_ratio}
 
-func register_local_occurrences(sites: Array[Dictionary], terrain: String) -> void:
+func register_local_occurrences(sites: Array[Dictionary], terrain: String, environment_profile:Dictionary={}) -> void:
 	initialize()
-	if not GameState.resource_deposits.is_empty():
-		return
+	var has_unscoped_saved_deposits:=false
+	for existing_variant in GameState.resource_deposits:
+		var existing_scope:=String((existing_variant as Dictionary).get("origin_scope",""))
+		if existing_scope=="founding_region": return
+		if existing_scope=="": has_unscoped_saved_deposits=true
+	# Older saves predate geographic provenance. Their non-empty deposit ledger is
+	# authoritative; never duplicate it merely because it lacks the new scope field.
+	if has_unscoped_saved_deposits: return
+	var profile:=environment_profile
+	if profile.is_empty():
+		var position:=Vector2.ZERO
+		if not sites.is_empty():
+			var first_position:Vector3=sites[0].get("position",Vector3.ZERO)
+			position=Vector2(first_position.x,first_position.z)
+		profile=PlanetEnvironment.profile_at(position)
+	var potentials:Dictionary=profile.get("resource_potentials",{})
 	for i in sites.size():
 		var site := sites[i]
 		var resource_name: String = site.type
 		if resource_name == "Fertile": resource_name = "Fertile Soil"
-		var quality := rng.randf_range(0.55, 1.35)
-		var amount := rng.randf_range(600.0, 4000.0)
-		var deposit:=_deposit(resource_name,site.position,quality,amount,i)
+		var potential:=clampf(float(site.get("potential",potentials.get(resource_name,0.50))),0.0,1.0)
+		var quality := clampf(0.42+potential*0.86+rng.randf_range(-0.12,0.12),0.25,1.50)
+		var amount := rng.randf_range(520.0,2400.0)*(0.50+potential*1.35)
+		var deposit:=_deposit(resource_name,site.position,quality,amount,GameState.resource_deposits.size(),"founding_region",potential,String(profile.get("signature","")))
 		# Founders do not arrive unable to identify trees, exposed stone, game, or
 		# usable soil.  A feature inside their actually charted starting ground is
 		# recognized by kind; survey is still required to learn quality, extent,
@@ -72,16 +98,59 @@ func register_local_occurrences(sites: Array[Dictionary], terrain: String) -> vo
 		if bool(site.get("initially_observed",false)):
 			_seed_founding_surface_recognition(deposit)
 		GameState.resource_deposits.append(deposit)
-	var possible := _terrain_occurrences(terrain)
-	for resource_name in possible:
-		if rng.randf() < 0.48:
-			var position := Vector3(rng.randf_range(-38, 38), 0, rng.randf_range(-24, 24))
-			GameState.resource_deposits.append(_deposit(resource_name, position, rng.randf_range(0.45, 1.5), rng.randf_range(800, 12000), GameState.resource_deposits.size()))
+	# Buried and less obvious occurrences follow geology and climate rather than a
+	# universal province label. They remain unknown until the civilization can
+	# recognize their signals.
+	for resource_variant in catalog.keys():
+		var resource_name:=String(resource_variant)
+		if resource_name in FOUNDING_SURFACE_RESOURCES or resource_name=="Freshwater": continue
+		var potential:=clampf(float(potentials.get(resource_name,0.0)),0.0,1.0)
+		if potential<0.14 or rng.randf()>0.08+potential*0.58: continue
+		var anchor:Vector3=sites[rng.randi_range(0,sites.size()-1)].get("position",Vector3.ZERO) if not sites.is_empty() else Vector3.ZERO
+		var position:=anchor+Vector3(rng.randf_range(-5.0,5.0),0.0,rng.randf_range(-5.0,5.0))
+		GameState.resource_deposits.append(_deposit(resource_name,position,rng.randf_range(0.38,0.82)+potential*0.58,rng.randf_range(700.0,8500.0)*(0.45+potential),GameState.resource_deposits.size(),"founding_region",potential,String(profile.get("signature",""))))
 
-func _deposit(resource_name: String, position: Vector3, quality: float, amount: float, index: int) -> Dictionary:
+
+func register_settlement_occurrences(settlement_id:String,sites:Array[Dictionary],environment_profile:Dictionary)->void:
+	initialize()
+	# Older saves kept satellite occurrences in the primary ledger. Terrain moves
+	# those physical records into their owner before new generation is permitted.
+	var city:=SettlementModel.settlement_record(settlement_id)
+	if not city.is_empty() and not bool(city.get("primary",false)):
+		for deposit in GameState.resource_deposits:
+			if String(deposit.get("source_settlement_id",""))==settlement_id: return
+	SettlementModel.with_city_resources(settlement_id,func()->void: _register_local_occurrences(settlement_id,sites,environment_profile))
+
+func _register_local_occurrences(settlement_id:String,sites:Array[Dictionary],environment_profile:Dictionary)->void:
+	initialize()
+	if settlement_id=="": return
+	for existing_variant in GameState.resource_deposits:
+		if String((existing_variant as Dictionary).get("source_settlement_id",""))==settlement_id: return
+	var potentials:Dictionary=environment_profile.get("resource_potentials",{})
+	var local_rng:=RandomNumberGenerator.new()
+	local_rng.seed=hash("%d:%s:deposits" % [GameState.world_seed,settlement_id])
+	var added:=0
+	for site_variant in sites:
+		var site:Dictionary=site_variant
+		var resource_name:=String(site.get("type",""))
+		if resource_name=="" or resource_name=="Freshwater" or not catalog.has(resource_name): continue
+		var potential:=clampf(float(site.get("potential",potentials.get(resource_name,0.0))),0.0,1.0)
+		var surface:=resource_name in FOUNDING_SURFACE_RESOURCES
+		var chance:=(0.20 if surface else 0.06)+potential*(0.66 if surface else 0.58)
+		if potential<0.16 or local_rng.randf()>chance: continue
+		var quality:=clampf(0.34+potential*0.92+local_rng.randf_range(-0.10,0.12),0.22,1.50)
+		var amount:=local_rng.randf_range(520.0,7600.0)*(0.42+potential)
+		var deposit:=_deposit(resource_name,site.get("position",Vector3.ZERO),quality,amount,GameState.resource_deposits.size(),settlement_id,potential,String(environment_profile.get("signature","")))
+		deposit["source_settlement_id"]=settlement_id
+		if bool(site.get("initially_observed",false)) and surface: _seed_founding_surface_recognition(deposit)
+		GameState.resource_deposits.append(deposit)
+		added+=1
+		if added>=12: break
+
+func _deposit(resource_name: String, position: Vector3, quality: float, amount: float, index: int,origin_scope:String="",environment_potential:float=0.5,environment_signature:String="") -> Dictionary:
 	# Exposed surface water is directly observable; a deep aquifer remains hidden.
 	var initial_stage:="surveyed" if resource_name=="Freshwater" else "unknown"
-	return {"id":"%s_%d" % [resource_name.to_snake_case(), index], "resource":resource_name, "position":position, "quality":quality, "remaining":amount, "initial_amount":amount, "stage":initial_stage, "clues":1.0 if initial_stage=="surveyed" else 0.0, "survey":1.0 if initial_stage=="surveyed" else 0.0, "access":0.0, "blockers":[], "development":0.0, "route":0.0, "workers":0,"daily_yield":0.0,"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Access not organized","last_reported_bottleneck":""}
+	return {"id":"%s_%d" % [resource_name.to_snake_case(), index], "resource":resource_name, "position":position, "quality":quality, "remaining":amount, "initial_amount":amount, "stage":initial_stage, "clues":1.0 if initial_stage=="surveyed" else 0.0, "survey":1.0 if initial_stage=="surveyed" else 0.0, "access":0.0, "blockers":[], "development":0.0, "route":0.0, "workers":0,"daily_yield":0.0,"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Access not organized","last_reported_bottleneck":"","origin_scope":origin_scope,"environment_potential":environment_potential,"environment_signature":environment_signature,"source_settlement_id":""}
 
 
 func _seed_founding_surface_recognition(deposit:Dictionary)->void:
@@ -103,6 +172,9 @@ func _terrain_occurrences(terrain: String) -> Array[String]:
 	return common
 
 func process_day(context: Dictionary) -> Array[Dictionary]:
+	return SettlementModel.with_local_population(func()->Array[Dictionary]: return _process_local_day(context))
+
+func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
 	var events: Array[Dictionary] = []
 	var year := int(GameState.elapsed_days / 365.0)
@@ -179,16 +251,23 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 		source_origin="mapped_hydrology"
 	var carriers:=float(GameState.population_allocations.get("Logistics",0))
 	var food_workers:=float(GameState.population_allocations.get("Food",0))
-	# Water fetching is basic subsistence work. Food workers cover an emergency
-	# collection floor; Logistics controls the organized surplus. This prevents a
-	# society from ignoring a river and dying solely because the player did not yet
-	# understand that water was hidden under a different allocation label.
+	# Water fetching is basic household subsistence, not a specialist occupation
+	# that vanishes when the player changes a labor slider. People beside exposed
+	# surface water can meet their immediate drinking need themselves; assigned
+	# Food and Logistics workers create the organized surplus and carry from more
+	# distant sources. Sanitation, irrigation, storage and dense urban distribution
+	# still depend on knowledge and infrastructure elsewhere in the simulation.
 	var collection_workers:=carriers+food_workers*0.22
 	var distance_factor:=1.0/maxf(1.0,1.0+nearest_source_km*0.16) if nearest_source_km<INF else 0.0
-	var collection_capacity:=collection_workers*28.0*clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*distance_factor
+	var household_access_ratio:=_household_surface_water_access_ratio(nearest_source_km) if accessible_quality>0.0 else 0.0
+	var household_collection:=required*household_access_ratio
+	var organized_collection:=collection_workers*28.0*clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*distance_factor*(1.0+clampf(DiscoverySystem.effect("haul_capacity"),-0.4,1.5))
+	organized_collection*=1.0+maxf(0.0,ConsequenceEngine.policy_effect("water_collection"))
+	var collection_capacity:=household_collection+organized_collection
 	var flow_factor:=clampf(0.75+accessible_quality*0.25,0.0,1.08)
 	var collected:=minf(required*1.35,collection_capacity)*flow_factor if accessible_quality>0.0 else 0.0
 	var portable_days:=float(GameState.founding_manifest.get("water_vessel_days",3.0))
+	portable_days+=maxf(0.0,ConsequenceEngine.policy_effect("water_storage"))
 	if "Storage Pits" in GameState.settlement_completed: portable_days+=2.0
 	if "Open Work Area" in GameState.settlement_completed: portable_days+=1.0+DiscoverySystem.effect("container_capacity")*2.0
 	var capacity:=population*portable_days
@@ -198,12 +277,22 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var stored:=maxf(0.0,available-consumed)
 	GameState.resource_stockpiles["Freshwater"]=stored
 	var intake:=clampf(consumed/maxf(0.01,required),0.0,1.0)
-	GameState.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"required_today":required,"consumed_today":consumed,"intake_ratio":intake,"days":stored/maxf(0.01,required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
-	GameState.water_history.append({"day":int(GameState.elapsed_days),"stored":stored,"collected":collected,"required":required,"consumed":consumed,"intake_ratio":intake,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_id":source_id,"source_origin":source_origin})
+	GameState.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":required,"consumed_today":consumed,"intake_ratio":intake,"days":stored/maxf(0.01,required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
+	GameState.water_history.append({"day":int(GameState.elapsed_days),"stored":stored,"collected":collected,"household_collected":minf(collected,household_collection*flow_factor),"required":required,"consumed":consumed,"intake_ratio":intake,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_id":source_id,"source_origin":source_origin})
 	if GameState.water_history.size()>370: GameState.water_history.pop_front()
 	if intake<0.98:
-		events.append(_event("Water Shortfall","Only %d%% of today's drinking-water requirement was met. Assign carriers and secure an accessible freshwater source." % roundi(intake*100.0),"Freshwater"))
+		var remedy:="The source is present; shorten the carry or increase organized collection and distribution." if accessible_quality>0.0 else "Secure a recognized freshwater source."
+		events.append(_event("Water Shortfall","Only %d%% of today's drinking-water requirement was met. %s" % [roundi(intake*100.0),remedy],"Freshwater"))
 	return events
+
+
+func _household_surface_water_access_ratio(distance_km:float)->float:
+	## Immediate drinking water is self-provisioned at household scale. Adjacent
+	## riverbanks provide a modest refill surplus; the floor falls away with the
+	## physical carry so a six-kilometre source still needs organized labor.
+	if distance_km<0.0 or distance_km==INF or distance_km>6.0: return 0.0
+	if distance_km<=1.0: return 1.18
+	return lerpf(1.18,0.38,clampf((distance_km-1.0)/5.0,0.0,1.0))
 
 
 # Hydrology is a geographic source, not a fabricated point deposit. This fixed-
@@ -282,7 +371,39 @@ func _access_blockers(deposit: Dictionary, definition: Dictionary, context: Dict
 			blockers.append("deep lifting machinery is unavailable")
 	return blockers
 
+func _ensure_woodland_supply(context:Dictionary)->void:
+	# One bounded local catchment uses observed terrain, not a lucky deposit roll.
+	# Its stock and harvest history persist; recalculating access never refills it.
+	var field:Dictionary=context.get("woodland_catchment",{})
+	if field.is_empty() or not bool(context.get("settled",false)): return
+	var density:=clampf(float(field.get("density",0.0)),0.0,1.0)
+	if density<0.08: return
+	var supply:Dictionary={}
+	for deposit in GameState.resource_deposits:
+		if String(deposit.get("landscape_source",""))=="woodland_catchment":
+			supply=deposit
+			break
+	if not supply.is_empty(): return
+	var position:Vector3=field.get("position",context.get("origin",GameState.settlement_founded_at))
+	# Adopt an existing nearby timber record so older saves retain inventory,
+	# shipments and depleted stock instead of receiving a duplicate source.
+	for deposit in GameState.resource_deposits:
+		if String(deposit.get("resource",""))=="Timber" and (deposit.position as Vector3).distance_to(position)<=2.5:
+			supply=deposit
+			break
+	if supply.is_empty():
+		supply=_deposit("Timber",position,0.45+density*0.65,maxf(1.0,float(field.get("area_km2",9.0)))*density*600.0,GameState.resource_deposits.size(),"local_woodland",density)
+		GameState.resource_deposits.append(supply)
+	supply["landscape_source"]="woodland_catchment"
+	supply["area_km2"]=float(field.get("area_km2",9.0))
+	supply["woodland_density"]=density
+	supply["stage"]="accessible" if String(supply.stage)!="developed" else "developed"
+	supply["clues"]=1.0
+	supply["access"]=1.0
+	supply["blockers"]=[]
+
 func _process_material_flow(context:Dictionary)->Array[Dictionary]:
+	_ensure_woodland_supply(context)
 	var events:Array[Dictionary]=[]
 	var material_deposits:Array[Dictionary]=[]
 	var origin:Vector3=context.get("origin",GameState.settlement_founded_at)
@@ -318,7 +439,13 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		if extracted>0.0:
 			deposit.stage="developed"
 			_gain_practice(String(deposit.resource),"extraction",extracted/maxf(1.0,assigned)*0.010)
-		if bool(catalog[String(deposit.resource)].renewable):
+		if String(deposit.get("landscape_source",""))=="woodland_catchment":
+			# Standing growth returns slowly even when cutting is paused. It stays
+			# at the source until labor harvests and hauls it, and cannot exceed the
+			# original carrying capacity of this local woodland.
+			var capacity:=float(deposit.initial_amount)
+			deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*0.00003)
+		elif bool(catalog[String(deposit.resource)].renewable):
 			deposit.remaining=float(deposit.remaining)+minf(extracted*0.35,2.0)
 	# Deliver shipments whose real travel time has elapsed.
 	var delivered_total:=0.0
@@ -428,8 +555,13 @@ func in_transit_for(deposit:Dictionary)->float:
 	return total
 
 func _deposit_priority(deposit:Dictionary)->float:
-	var named:=float(GameState.resource_priorities.get(String(deposit.resource),1.0))
-	var stored:=float(GameState.resource_stockpiles.get(String(deposit.resource),0.0))
+	var resource_name:=String(deposit.resource)
+	var named:=float(GameState.resource_priorities.get(resource_name,1.0))
+	if resource_name=="Stone":
+		# A civic stone drive redirects existing extractors and carriers; it does
+		# not create workers, reveal deposits, or produce stone from nothing.
+		named*=1.0+maxf(0.0,ConsequenceEngine.policy_effect("stone_priority"))*3.0
+	var stored:=float(GameState.resource_stockpiles.get(resource_name,0.0))
 	var scarcity:=1.0+1.0/(1.0+stored/20.0)
 	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.distance_km)/45.0))
 

@@ -1,9 +1,10 @@
 extends RefCounted
 
 # Invisible possibility field: 12 dynamics × 4 real subconditions × eight
-# modes of learning × twelve levels of maturity = 4,608 situated discoveries.
-# The first eight levels form the initial 200-year phase. Later levels keep the
-# same lived lines of inquiry meaningful across centuries and millennia.
+# evidence traditions × twelve levels of maturity = 4,608 situated discoveries.
+# The traditions have different methods and provenance, but the library rolls
+# their maturation history into a stable body of knowledge instead of printing
+# every internal step as another near-identical card.
 const STAGES:Array[Dictionary]=[
 	{"name":"Field Survey","day":30,"chance":0.0120,"verb":"record and compare recurring differences in"},
 	{"name":"Comparative Study","day":180,"chance":0.0100,"verb":"compare independent accounts concerning"},
@@ -53,6 +54,21 @@ const EFFECTS:Dictionary={
 	"ecology":["ecology_recovery","ecological_pressure"],"institutions":["state_capacity","legitimacy"],
 	"security":["security_efficiency","warfare_readiness"],"culture":["cohesion","adoption_rate"]
 }
+
+# Investigation display names draw from a varied pool so a page of active
+# lines reads like distinct undertakings, not one sentence repeated.
+const LINE_NAME_TEMPLATES:Array[String]=[
+	"The question of {subject}",
+	"What {lens} reveals about {subject}",
+	"Reading {subject} through {lens}",
+	"Turning {subject} into teachable method",
+	"The {subject} trials",
+	"Where {subject} keeps breaking expectation",
+	"A working account of {subject}",
+	"Testing the limits of {subject}",
+	"The patient case for {subject}",
+	"What the records say about {subject}",
+]
 
 const DYNAMIC_SIGNALS:Dictionary={
 	"demography":"population","nutrition":"food","health":"health","labor":"construction","knowledge":"research","production":"crafting",
@@ -129,8 +145,25 @@ const CONCRETE_LINES:Dictionary={
 	"Collective memory":{"subject":"dated oral-history recitations","finding":"fixed public recitation, correction, and dated anchors preserve events more reliably across generations"}
 }
 
-const STAGE_ACTIONS:Array[String]=["Mapped","Compared","Repeated","Standardized","Measured","Validated","Specialist","Predictive","Civic","Scholarly","Formal","Integrated"]
-const LENS_QUALIFIERS:Array[String]=["Household","Seasonal","Material","Workshop","Case-Recorded","Environmental","Institutional","Regional"]
+const STAGE_BREAKTHROUGHS:Array[String]=[
+	"Field Pattern","Causal Mechanism","Reproducible Method","Working Protocol",
+	"Quantified Thresholds","Failure Bounds","Specialist Practice","Predictive Model",
+	"Public Service","Critical Tradition","Formal Discipline","Integrated Science"
+]
+
+# These describe genuinely different routes to a result. They are kept out of
+# the stable knowledge-thread title and are shown only as provenance when the
+# player asks how a breakthrough was reached.
+const ROUTE_TITLE_TEMPLATES:Array[String]=[
+	"{subject} in household practice",
+	"seasonal evidence for {subject}",
+	"material trials of {subject}",
+	"work protocols for {subject}",
+	"case registers of {subject}",
+	"environmental limits of {subject}",
+	"public provision of {subject}",
+	"cross-settlement evidence for {subject}"
+]
 # Each investigative tradition changes what counts as evidence. These are not
 # cosmetic prefixes: the method can expose a different cause even when two
 # civilizations are asking about the same practical condition.
@@ -204,15 +237,25 @@ static func entries()->Array[Dictionary]:
 					var secondary:=0.0018+float(stage_index)*0.00045
 					if String(effect_names[1]) in ["disease_exposure","ecological_pressure"]: secondary=-secondary
 					var concrete:Dictionary=CONCRETE_LINES.get(subcategory,{"subject":subcategory.to_lower(),"finding":"repeated comparison identifies a dependable practice that changes this condition"})
-					var discovery_name:="%s %s %s" % [STAGE_ACTIONS[stage_index],LENS_QUALIFIERS[lens_index],String(concrete.subject).capitalize()]
-					var line_name:="%s inquiry through %s" % [subcategory,String(lens.name).to_lower()]
+					var thread_name:=String(concrete.subject).capitalize()
+					var route_name:=String(ROUTE_TITLE_TEMPLATES[lens_index]).format({"subject":String(concrete.subject)})
+					var breakthrough_name:=STAGE_BREAKTHROUGHS[stage_index]
+					var discovery_name:="%s — %s" % [route_name.capitalize(),breakthrough_name]
+					var line_name:=String(LINE_NAME_TEMPLATES[absi(hash("%s:%d:line" % [path_key,stage_index]))%LINE_NAME_TEMPLATES.size()]).format({"subject":subcategory.to_lower(),"lens":String(lens.name).to_lower()})
 					var ability_result:=String(ABILITY_RESULTS.get(dynamic_id,"the civilization gains a repeatable practical capacity"))
 					var lens_method:=LENS_METHODS[lens_index]
 					var stage_application:=STAGE_APPLICATIONS[stage_index]
 					var social_result:=String(SOCIAL_RESULTS.get(dynamic_id,"Collective expectations change as the practice spreads"))
 					var mechanism_signature:="%s::%s::%s" % [String(concrete.subject),lens_method,stage_application]
+					var thread_key:="%s::%s" % [dynamic_id,subcategory]
+					var milestone_key:="%s::%02d" % [path_key,stage_index+1]
+					var previous_milestone_key:="" if stage_index==0 else "%s::%02d" % [path_key,stage_index]
 					result.append({
 						"id":id,"name":discovery_name,"line_name":line_name,
+						"thread_key":thread_key,"thread_name":thread_name,
+						"route_key":path_key,
+						"milestone_key":milestone_key,"previous_milestone_key":previous_milestone_key,
+						"breakthrough_name":breakthrough_name,"route_name":route_name.capitalize(),
 						"dynamic":String(dynamic_id),"subcategory":subcategory,"direction":String(dynamic_id),
 						"chance":float(stage.chance),"day":roundi(float(stage.day)*gate_spread)+lens_index*29+subcategory_index*11,
 						"requires":requirements,"resource_requirements":resource_requirements,
@@ -220,7 +263,7 @@ static func entries()->Array[Dictionary]:
 						"question":"Which repeatable relationships within %s can be established through %s?" % [subcategory.to_lower(),String(lens.name).to_lower()],
 						"method":"Assigned observers %s %s through %s; progress comes from staffed attention, relevant activity, material access, and capable leadership." % [String(stage.verb),subcategory.to_lower(),String(lens.name).to_lower()],
 						"observation":"The established practice is %s. Core finding: %s. Method: %s. New operating capability: %s. Because this mechanism can now be taught, tested, and extended, %s. Social consequence: %s." % [discovery_name,String(concrete.finding),lens_method,stage_application,ability_result,social_result],
-						"ability_reason":"Because %s can now be taught and repeated, %s." % [discovery_name,ability_result],
+						"ability_reason":"Because %s, %s." % [stage_application.trim_prefix("Known ").to_lower(),ability_result],
 						"social_consequence":social_result,
 						"mechanism_signature":mechanism_signature,
 						"causal_mechanism":String(concrete.finding),"evidence_method":lens_method,"operating_capability":stage_application,

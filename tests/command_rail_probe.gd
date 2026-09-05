@@ -83,6 +83,11 @@ func _ready()->void:
 	_expect(stale_cards==0,"dismissing every decision left %d stale cards rendered" % stale_cards)
 
 	# A deferred food condition merges silently instead of resurfacing…
+	# Named appointment candidates require a founded settlement in the current government model.
+	GameState.settlement_site_committed=true
+	if "Hearth Circle" not in GameState.settlement_completed: GameState.settlement_completed.append("Hearth Circle")
+	SettlementModel.ensure_founded()
+	GovernmentPeopleSystem.initialize()
 	terrain._generate_leader_candidates("Steward")
 	AdvisorSystem.appoint(String(terrain.leader_candidates[0].name),"Steward")
 	var food_item:Dictionary=AdvisorSystem.generate_consequence_item({"condition_id":"probe_food_shortage","title":"Shortage Forecast","description":"Stores fail soon.","domain":"food","severity":"warning"})
@@ -110,16 +115,22 @@ func _ready()->void:
 		hud.set_active_section("")
 		_expect(open_x>closed_x,"toolbar did not shift right for the open dock")
 
-	# Council dock: real order input wired to the pronouncement pipeline.
+	# Council dock: a conversational reply field is wired to the pronouncement
+	# pipeline and the answer appears without leaving and reopening the tab.
 	terrain._on_hud_section_requested("civ",2)
 	await get_tree().process_frame
-	var order_input:=hud.find_child("SovereignOrderInput",true,false) as LineEdit
-	_expect(order_input!=null,"council dock did not expose the sovereign order input")
+	var order_input:=hud.find_child("CivicConversationInput",true,false) as LineEdit
+	_expect(order_input!=null,"council dock did not expose the conversation reply input")
 	if order_input:
 		var orders_before:int=GameState.sovereign_orders.size()
 		order_input.text="Ration the stores for the cold season"
 		terrain._issue_freeform_order(order_input)
 		_expect(GameState.sovereign_orders.size()==orders_before+1,"dock order input did not record a pronouncement")
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var visible_turns:=hud.find_children("CivicMessageText","Label",true,false)
+		_expect(visible_turns.size()>=2,"leader response did not appear live in the open conversation")
 	terrain._on_hud_section_requested("",0)
 	await get_tree().process_frame
 
@@ -127,8 +138,17 @@ func _ready()->void:
 	terrain._on_hud_section_requested("inquiry",0)
 	await get_tree().process_frame
 	var nutrition_before:int=int(GameState.research_allocations.get("nutrition",0))
+	var inquiry_signature_before:int=hud._dock_signature.hash()
 	terrain._change_research_domain_allocation("nutrition",1)
 	_expect(int(GameState.research_allocations.get("nutrition",0))==nutrition_before+1,"inquiry attention step did not change the allocation")
+	await get_tree().process_frame
+	_expect(hud._dock_signature.hash()!=inquiry_signature_before,"inquiry attention changed state but left the visible dock stale")
+	var inquiry_provider:Object=hud.providers.get("inquiry")
+	var expansion_signature_before:int=hud._dock_signature.hash()
+	if inquiry_provider:
+		inquiry_provider._toggle_domain("knowledge")
+		await get_tree().process_frame
+		_expect(hud._dock_signature.hash()!=expansion_signature_before,"research disclosure changed state but did not redraw the current tab")
 	terrain._change_research_domain_allocation("nutrition",-1)
 	terrain._on_hud_section_requested("",0)
 	await get_tree().process_frame
@@ -168,6 +188,15 @@ func _ready()->void:
 		adjusted_total+=int((entry_variant as Dictionary).get("count",0))
 	_expect(adjusted_total==capacity,"build target %d was not clamped to mobilization capacity %d" % [adjusted_total,capacity])
 	terrain._on_hud_section_requested("",0)
+	await get_tree().process_frame
+
+	# Scout report: a returning party pauses the world and opens its full report.
+	terrain._set_game_speed(1.0)
+	terrain._on_scout_report_returned({"day":12,"duration_days":30,"personnel":6,"returned_personnel":5,"lost_personnel":1,"stayed_personnel":0,"distance_km":140,"target_label":"OPEN EXPLORATION","target_id":"open_world","contacts":["The Kalveth"],"recruits":3,"windfalls":["They mark a workable timber occurrence about 60 km out."]})
+	await get_tree().process_frame
+	_expect(terrain.hud.detail_dock.visible,"scout report detail dock did not open")
+	_expect(terrain.game_speed==0.0,"scout report did not pause the world")
+	_expect(terrain.hud.handle_escape(),"escape did not consume with scout report open")
 	await get_tree().process_frame
 
 	# Landmark detail: opening a charted landmark's record shows the detail dock

@@ -61,19 +61,28 @@ func _ready()->void:
 	_expect(not terrain.map_help_panel.visible,"first-use helper could not be dismissed")
 	terrain._toggle_map_help()
 	_expect(terrain.map_help_panel.visible,"MAP HELP could not reopen the dismissed guide")
-	# A report owns the interaction layer. Foreign observations wait below it, then
-	# appear as a bounded alert only after the player returns to the map.
+	# Routine unit sightings stay on the map/World indicator and never interrupt.
+	# First contact remains historically important: if a report owns the interaction
+	# layer, it waits below it and appears only after the player returns to the map.
 	terrain.foreign_alert_queue.clear()
 	terrain.active_foreign_alert={}
 	terrain.foreign_alert_panel.visible=false
+	terrain._on_diplomatic_event({
+		"kind":"unit_sighting","formation_id":"routine_probe","day":2,
+		"title":"Foreign movement","description":"A distant formation crossed the known horizon."
+	})
+	_expect(terrain.foreign_alert_queue.is_empty() and terrain.active_foreign_alert.is_empty(),"routine foreign sighting created an interrupting alert")
+	terrain.event_report_button.visible=true
+	terrain._refresh_event_report()
+	_expect(not terrain.event_report_button.visible,"routine birth/death report remained visible on the left side")
 	var report_blocker:=Control.new()
 	report_blocker.name="ProbeOpenReport"
 	report_blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	terrain.interface_layer.add_child(report_blocker)
 	terrain.provisions_panel=report_blocker
 	terrain._on_diplomatic_event({
-		"kind":"unit_sighting","formation_id":"probe_formation","day":2,
-		"title":"Foreign movement","description":"A distant formation crossed the known horizon."
+		"kind":"first_contact","formation_id":"probe_formation","civ_id":"probe_civ","day":2,
+		"title":"First contact","description":"A foreign party met the settlement directly."
 	})
 	_expect(terrain.active_foreign_alert.is_empty() and terrain.foreign_alert_queue.size()==1,"foreign alert did not defer while a report owned the interaction layer")
 	_expect(not terrain.foreign_alert_panel.visible and not terrain.foreign_alert_panel.is_visible_in_tree(),"foreign alert remained visible or interactive above an open report")

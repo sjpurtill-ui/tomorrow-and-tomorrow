@@ -30,12 +30,12 @@ func tab(_sub:int)->Dictionary:
 	for cause in mortality:
 		var amount:=float(mortality[cause])
 		if amount<=0.0: continue
-		mortality_items.append({"name":String(cause).capitalize().replace("_"," "),"value":"%.2f" % amount,"ratio":amount/top,"color":Tokens.RED,"tip":"Contribution to the current annual death rate"})
+		mortality_items.append({"name":String(cause).capitalize().replace("_"," "),"value":"%.2f%% / yr" % (amount*100.0),"ratio":amount/top,"color":Tokens.RED,"tip":"Modeled contribution to mortality under current conditions; this is not a lifetime death count"})
 	var blocks:Array=[
 		{"type":"tiles","heading":"MATERNITY & INFANCY","items":maternity_items},
 	]
 	if not mortality_items.is_empty():
-		blocks.append({"type":"bars","heading":"CAUSES OF DEATH","note":"current pressure","items":mortality_items})
+		blocks.append({"type":"bars","heading":"CURRENT MORTALITY RISK","note":"annual pressure now · not historical totals","items":mortality_items})
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
 	blocks.append({"type":"tiles","heading":"WHERE EVERYONE IS","items":[
 		{"label":"PRODUCTIVE","value":str(int(profile.get("productive",0))),"note":"direct work","note_color":Tokens.GREEN,"tip":"People in direct productive roles"},
@@ -46,4 +46,4 @@ func tab(_sub:int)->Dictionary:
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:
-	return [GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0))]
+	return [GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]

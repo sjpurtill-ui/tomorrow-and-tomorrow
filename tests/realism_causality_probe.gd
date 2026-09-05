@@ -9,6 +9,9 @@ func _ready()->void:
 	_test_foreign_trade_requires_contract()
 	_test_water_is_consumed()
 	_test_visible_surface_water_sustains_founders()
+	_test_riverbank_water_scales_with_the_settlement()
+	_test_minor_water_shortfall_is_not_mass_dehydration()
+	_test_published_housing_matches_exposure_mortality()
 	_test_storage_has_physical_source()
 	if not failures.is_empty():
 		for failure in failures: push_error("Realism causality: "+failure)
@@ -105,6 +108,45 @@ func _test_visible_surface_water_sustains_founders()->void:
 	_check(bool(access.recognized) and String(access.source_origin)=="mapped_hydrology","visible hydrology was not exposed as a recognized geographic source")
 	_check(String(access.source_id)=="local_surface_hydrology","river access depended on an arbitrary point deposit")
 	_check(bool(access.supports_drinking) and bool(access.supports_food_gathering),"recognized river access did not propagate into survival and food capabilities")
+
+func _test_riverbank_water_scales_with_the_settlement()->void:
+	_base_state()
+	GameState.population_exact=786.0
+	GameState.population_total=786
+	GameState.population_cohorts={}
+	GameState.initialize_population_model()
+	GameState.resource_deposits=[]
+	GameState.resource_stockpiles["Freshwater"]=0.0
+	# No specialist water assignment is required to avoid dying while literally
+	# living on the bank. Organized labor remains useful for storage and distance.
+	GameState.population_allocations["Food"]=0
+	GameState.population_allocations["Logistics"]=0
+	ResourceSystem.process_day({"origin":Vector3.ZERO,"surface_water_distance_km":0.2})
+	_check(float(GameState.water_metrics.intake_ratio)>=0.999,"a 786-person riverbank settlement could not meet immediate drinking needs")
+	_check(String(GameState.water_metrics.source_origin)=="mapped_hydrology","riverbank supply was replaced by a fabricated deposit")
+	_check(float(GameState.water_metrics.household_collected_today)>=786.0,"household river collection did not scale with the people using it")
+
+func _test_minor_water_shortfall_is_not_mass_dehydration()->void:
+	var mild:=ConsequenceEngine._dehydration_mortality_rate(0.97,120.0)
+	var severe:=ConsequenceEngine._dehydration_mortality_rate(0.50,120.0)
+	var none:=ConsequenceEngine._dehydration_mortality_rate(0.0,10.0)
+	_check(mild<0.001,"a three-percent drinking-water miss still produced mass mortality")
+	_check(severe>mild*100.0,"dehydration risk did not respond strongly to severe scarcity")
+	_check(none>5.0,"complete sustained water loss stopped being rapidly lethal")
+
+func _test_published_housing_matches_exposure_mortality()->void:
+	_base_state()
+	GameState.resource_stockpiles["Food"]=GameState.population_exact*40.0
+	GameState.housing_capacity=60
+	GameState.elapsed_days=20.0
+	ConsequenceEngine.process_day({"traveling":false})
+	_check(is_equal_approx(float(GameState.simulation_metrics.housing_ratio),0.5),"the player-facing housing metric did not match the ratio used by mortality")
+	_check(float((GameState.simulation_metrics.mortality_components as Dictionary).get("Exposure",0.0))>0.0,"real shelter shortage produced no exposure pressure")
+	GameState.housing_capacity=ceili(GameState.population_exact)
+	GameState.elapsed_days=21.0
+	ConsequenceEngine.process_day({"traveling":false})
+	_check(float(GameState.simulation_metrics.housing_ratio)>=1.0,"full housing was not published to the player-facing metric")
+	_check(is_zero_approx(float((GameState.simulation_metrics.mortality_components as Dictionary).get("Exposure",-1.0))),"fully housed people still received exposure mortality")
 
 func _test_storage_has_physical_source()->void:
 	_base_state()

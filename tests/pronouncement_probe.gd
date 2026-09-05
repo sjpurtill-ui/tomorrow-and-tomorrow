@@ -69,7 +69,8 @@ func _test_policy_catalog_integrity()->void:
 	_expect(errors.is_empty(),"government policy catalog is invalid: %s" % "; ".join(errors))
 	for policy_id in GovernmentPolicyCatalog.POLICIES:
 		var definition:Dictionary=GovernmentPolicyCatalog.definition(String(policy_id))
-		_expect(not (definition.get("effects",{}) as Dictionary).is_empty(),"%s has no deterministic variable effects" % policy_id)
+		var contract:=GovernmentPolicyCatalog.directive_contract(String(policy_id))
+		_expect(not (definition.get("effects",{}) as Dictionary).is_empty() or not String(contract.get("operation","")).is_empty(),"%s has neither deterministic variable effects nor a bounded operation" % policy_id)
 	var public_contract:Dictionary=GovernmentPolicyCatalog.public_contract()
 	_expect(not (public_contract.rationing as Dictionary).has("effects"),"raw numeric effects leaked into the generative prompt contract")
 	var prompt:=PronouncementInterpreter._prompt("Ration food.",{"active_policies":[{"id":"expanded_watch","remaining_days":12}]})
@@ -219,11 +220,13 @@ func _test_execution_and_repeal()->void:
 		if String(active_policy.id)=="expanded_watch": watch_count+=1
 	_expect(watch_count==1 and ConsequenceEngine.modifier_strength("expanded_watch")<=first_strength,"repeated pronouncements stacked instead of superseding")
 	_expect(String(vacant_order.status)=="superseded" and String(replacement_order.status)=="active","supersession did not reconcile sovereign order states")
-	GameState.leadership_positions["Marshal"]={"name":"Ilya","skills":{"Strategy":100,"Public Order":100},"relationships":{"sovereign":{"trust":1.0,"respect":1.0}}}
+	# At founding scale the Steward is the real generalist executor; a Marshal
+	# office does not exist yet merely because a test dictionary names one.
+	GameState.leadership_positions["Steward"]={"name":"Ilya","skills":{"Defense":100,"Administration":100},"relationships":{"sovereign":{"trust":1.0,"respect":1.0}}}
 	var staffed_order:Dictionary=AdvisorSystem.execute_pronouncement("Put Ilya in charge of the watch.",enact)
 	var staffed_policy:Dictionary=staffed_order.parameters.interpretation.policies[0]
 	_expect(float(staffed_policy.execution_factor)>float(vacant_policy.execution_factor),"staffing the responsible office did not improve execution")
-	_expect(String(staffed_policy.executor)=="Ilya","the responsible office holder was not recorded as executor")
+	_expect(String(staffed_policy.executor)=="Ilya acting for Marshal","the responsible founding office holder was not recorded as acting executor")
 	var repeal:=PronouncementInterpreter._local_interpretation("End the watch.")
 	var repeal_order:Dictionary=AdvisorSystem.execute_pronouncement("End the watch.",repeal)
 	_expect(ConsequenceEngine.modifier_strength("expanded_watch")==0.0,"repeal did not end the active policy")

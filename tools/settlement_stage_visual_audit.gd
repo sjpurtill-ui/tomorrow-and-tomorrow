@@ -126,6 +126,7 @@ func _render_stage()->void:
 	var default_technology_tier:int=int({"founding camp":0,"hamlet":1,"village":2,"town":3,"city":4,"metropolis":6,"megalopolis":8}.get(stage,4))
 	var technology_tier:=clampi(int(_argument("--technology-tier=",str(default_technology_tier))),0,8)
 	var coastal_audit:=_argument("--coastal=","0")=="1"
+	var surface_filter:=_argument("--surface-filter=","").strip_edges()
 
 	GameState.reset_for_new_world(741991)
 	GameState.select_founding_focus(focus)
@@ -229,6 +230,9 @@ func _render_stage()->void:
 		renderer._create_persistent_settlement_routes(center,GameState.settlement_routes,physical)
 		renderer._create_plot_fabric(center,GameState.settlement_plots,fabric_lod,physical,fabric_lod==0)
 	renderer._create_settlement_stage_landscape(center,profile,GameState.settlement_plots,fabric_lod,physical,defense)
+	if not surface_filter.is_empty():
+		for child in physical.get_children():
+			child.visible=String(child.name)==surface_filter
 	# This harness audits the strategic aerial representation directly. In gameplay
 	# the same shader crossfades away during plot-level inspection.
 	for child in physical.get_children():
@@ -260,15 +264,19 @@ func _render_stage()->void:
 		var multimesh_audit:=_multimesh_audit(physical)
 		var coastal_profile:Dictionary=renderer._settlement_coastal_visual_profile(Vector2(center.x,center.z))
 		var vertex_total:=0
+		var surface_vertices:Dictionary={}
 		for child in physical.get_children():
 			if child is MeshInstance3D and (child as MeshInstance3D).mesh:
 				var child_mesh:Mesh=(child as MeshInstance3D).mesh
-				for surface_index in child_mesh.get_surface_count(): vertex_total+=child_mesh.surface_get_array_len(surface_index)
+				var child_vertices:=0
+				for surface_index in child_mesh.get_surface_count(): child_vertices+=child_mesh.surface_get_array_len(surface_index)
+				vertex_total+=child_vertices
+				surface_vertices[String(child.name)]=child_vertices
 		print("SETTLEMENT VISUAL AUDIT ",JSON.stringify({
 			"stage":stage,"population":population,"radius_km":layout.radius,
 			"damage":damage,"defense":defense_stage,"route_tier":route_tier,"technology_tier":technology_tier,"coastal":coastal_audit,
 			"engineered_routes":engineered_routes,"include_plots":include_plots,"agriculture":audit_agriculture,
-			"fabric_lod":fabric_lod,"aerial_lod":audit_aerial_lod,"view":"oblique" if oblique_view else "aerial","plots":GameState.settlement_plots.size(),"vertices":vertex_total,
+			"fabric_lod":fabric_lod,"aerial_lod":audit_aerial_lod,"view":"oblique" if oblique_view else "aerial","plots":GameState.settlement_plots.size(),"vertices":vertex_total,"surface_vertices":surface_vertices,
 			"shoreline_access":coastal_profile.get("shoreline_access",0.0),"open_water_km":coastal_profile.get("nearest_open_water_km",INF),"maritime_visual_ready":coastal_profile.get("maritime_visual_ready",false),
 			"multimesh_instances":multimesh_audit.instances,"multimesh_batches":multimesh_audit.batches,"multimesh_template_vertices":multimesh_audit.template_vertices,
 			"surfaces":physical.get_child_count(),"output":ProjectSettings.globalize_path(output_path)

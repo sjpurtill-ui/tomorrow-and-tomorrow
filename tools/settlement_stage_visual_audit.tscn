@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource path="res://tools/settlement_stage_visual_audit.gd" type="Script" id="1_audit"]
+[ext_resource path="res://tools/settlement_stage_visual_audit.gd" type="Script" id="1"]
 
 [node name="SettlementStageVisualAudit" type="Node"]
-script = ExtResource("1_audit")
+script = ExtResource("1")

@@ -191,7 +191,7 @@ func _build_player_discovery_profile()->Dictionary:
 		if domain not in Catalog.DOMAINS: continue
 		var record:Dictionary=profile[domain]
 		record["count"]=int(record.count)+1
-		record["maturity"]=maxi(int(record.maturity),int(definition.get("maturity",1)))
+		record["maturity"]=maxi(int(record.maturity),int(definition.get("maturity",1)) if bool(definition.get("frontier",false)) else DiscoverySystem.technology_depth(discovery_id))
 		var subcategory:=String(definition.get("subcategory","General practice"))
 		var lens:=String(definition.get("lens","Lived practice"))
 		(subcategories[domain] as Dictionary)[subcategory]=true
@@ -203,6 +203,7 @@ func _build_player_discovery_profile()->Dictionary:
 		record["breadth"]=(subcategories[domain] as Dictionary).size()
 		record["lens_count"]=(lenses[domain] as Dictionary).size()
 		record["adoption"]=float(adoption_sums[domain])/maxf(1.0,float(record.count))
+		record.merge(DiscoverySystem.domain_technology_limits(String(domain)),true)
 		record["subcategories"]=(subcategories[domain] as Dictionary).keys()
 		record["lenses"]=(lenses[domain] as Dictionary).keys()
 		profile[domain]=record
@@ -243,12 +244,13 @@ func initial_rival_discovery_profile(civ_id:String,founding_focus:String,strateg
 		var lens:=String(FrontierCatalog.LENSES[posmod(hash("%s:%s:lens" % [seed_value,domain]),FrontierCatalog.LENSES.size())].name)
 		domain_records[domain]={"count":0,"maturity":0,"breadth":0,"lens_count":0,"adoption":0.0,"specialty":specialty,"tradition":lens}
 		momentum[domain]=0.0
-	return {"seed":seed_value,"cycle":0,"domains":domain_records,"momentum":momentum,"emphasis":emphasis,"research_workforce":0.0,"research_capacity":0.0,"research_slots":2}
+	return {"technologies":[],"seed":seed_value,"cycle":0,"domains":domain_records,"momentum":momentum,"emphasis":emphasis,"research_workforce":0.0,"research_capacity":0.0,"research_slots":2}
 
 
 func _advance_rival_discoveries(civ:Dictionary)->Dictionary:
 	var profile:Dictionary=civ.get("discovery_profile",{})
 	if profile.is_empty(): profile=initial_rival_discovery_profile(String(civ.get("id","rival")),String(civ.get("founding_focus","provision")),String(civ.get("strategy","sustenance")))
+	civ["discovery_profile"]=profile
 	var cycle:=int(profile.get("cycle",0))+1
 	profile["cycle"]=cycle
 	var domains_profile:Dictionary=profile.get("domains",{})
@@ -271,14 +273,30 @@ func _advance_rival_discoveries(civ:Dictionary)->Dictionary:
 	for slot in research_slots:
 		var domain:=_weighted_domain(seed_value,cycle,slot,emphasis)
 		momentum[domain]=float(momentum.get(domain,0.0))+points*(1.0 if slot==0 else 0.62)
-		if float(momentum[domain])<1.0: continue
-		momentum[domain]=float(momentum[domain])-1.0
+		var candidates:=DiscoverySystem.rival_research_candidates(civ,domain)
+		if candidates.is_empty():
+			momentum[domain]=minf(float(momentum[domain]),1.0)
+			continue
+		var technology:Dictionary=candidates[0]
+		var research_cost:=clampf(1.0/maxf(0.001,float(technology.get("chance",0.001))*50.0),2.0,40.0)*DiscoverySystem.research_difficulty(technology,seed_value)
+		if float(momentum[domain])<research_cost: continue
+		momentum[domain]=float(momentum[domain])-research_cost
+		var known:Array=profile.get("technologies",[])
+		known.append(String(technology.id))
+		profile["technologies"]=known
+		profile["latest_technology"]=String(technology.name)
+		civ["discovery_profile"]=profile
 		var record:Dictionary=domains_profile.get(domain,{})
 		var count:=mini(384,int(record.get("count",0))+1)
 		record["count"]=count
-		record["maturity"]=mini(12,1+floori(float(count)/12.0))
-		record["breadth"]=mini(4,1+floori(float(count)/8.0))
-		record["lens_count"]=mini(8,1+floori(float(count)/18.0))
+		record["maturity"]=maxi(int(record.get("maturity",0)),DiscoverySystem.technology_depth(String(technology.id)))
+		record.merge(DiscoverySystem.domain_technology_limits(domain),true)
+		var learned_conditions:Dictionary={}
+		for learned_id in known:
+			var learned:=DiscoverySystem.discovery_definition(String(learned_id))
+			if String(learned.get("dynamic",""))==domain: learned_conditions[String(learned.get("subcategory",""))]=true
+		record["breadth"]=maxi(int(record.get("breadth",0)),learned_conditions.size())
+		record["lens_count"]=maxi(1,int(record.get("lens_count",0)))
 		var capacity:=float((_rival_capacities(civ) as Dictionary).get(domain,0.0))
 		record["adoption"]=clampf(float(record.get("adoption",0.0))*0.96+(float(civ.get("knowledge",0.1))*0.55+capacity*0.45)*0.04,0.02,1.0)
 		domains_profile[domain]=record
@@ -311,6 +329,24 @@ func _rival_emphasis(civ:Dictionary)->Dictionary:
 	for index in focus_domains.size():
 		var domain:=String(focus_domains[index])
 		weights[domain]=float(weights[domain])+1.30-float(index)*0.22
+	# Geography changes which questions repeatedly pay off. It biases inquiry but
+	# never grants a discovery: population, researchers, prior capacities, adoption,
+	# and the ordinary progression gates must still do the work.
+	var environment:Dictionary=civ.get("environment_profile",{})
+	var hazards:Dictionary=environment.get("hazards",{})
+	var resources:Dictionary=environment.get("resource_potentials",{})
+	var drought:=clampf(float(hazards.get("drought",0.0)),0.0,1.0)
+	var disease:=clampf(float(hazards.get("disease",0.0)),0.0,1.0)
+	var cold:=clampf(float(hazards.get("cold",0.0)),0.0,1.0)
+	var relief:=clampf(float(environment.get("relief",0.0)),0.0,1.0)
+	var mineral:=maxf(float(resources.get("Copper Ore",0.0)),maxf(float(resources.get("Iron Ore",0.0)),float(resources.get("Coal",0.0))))
+	weights["nutrition"]=float(weights.nutrition)+drought*0.72+float(environment.get("fertility",0.0))*0.20
+	weights["health"]=float(weights.health)+disease*0.72+cold*0.38
+	weights["infrastructure"]=float(weights.infrastructure)+cold*0.46+relief*0.30+drought*0.22
+	weights["ecology"]=float(weights.ecology)+drought*0.42+float(environment.get("woodland",0.0))*0.32
+	weights["production"]=float(weights.production)+mineral*0.70+float(environment.get("construction_potential",0.0))*0.30
+	weights["logistics"]=float(weights.logistics)+float(environment.get("route_potential",0.0))*0.46+(0.38 if bool(environment.get("coastal",false)) else 0.0)
+	weights["security"]=float(weights.security)+relief*0.20+mineral*0.12
 	return weights
 
 
@@ -380,24 +416,28 @@ func _scale_status(definition:Dictionary,context:Dictionary,levels:Dictionary)->
 	var breadth:=int(profile.get("breadth",0))
 	var lens_count:=int(profile.get("lens_count",0))
 	var adoption:=float(profile.get("adoption",0.0))
+	var required_count:=mini(Catalog.DISCOVERY_COUNT_FLOORS[tier],maxi(1,ceili(float(profile.get("available_count",Catalog.DISCOVERY_COUNT_FLOORS[tier]))*float(tier)/8.0))) if profile.has("available_count") else Catalog.DISCOVERY_COUNT_FLOORS[tier]
+	var required_maturity:=mini(Catalog.MATURITY_FLOORS[tier],maxi(1,ceili(float(profile.get("available_maturity",Catalog.MATURITY_FLOORS[tier]))*float(tier)/8.0))) if profile.has("available_maturity") else Catalog.MATURITY_FLOORS[tier]
+	var required_breadth:=mini(Catalog.BREADTH_FLOORS[tier],int(profile.get("available_breadth",Catalog.BREADTH_FLOORS[tier])))
+	var required_lenses:=mini(Catalog.LENS_FLOORS[tier],int(profile.get("available_lens_count",Catalog.LENS_FLOORS[tier])))
 	var reach:=float(context.reach)
 	if population<Catalog.POPULATION_FLOORS[tier]: blockers.append("Population scale is not yet sufficient")
 	if settlements<Catalog.SETTLEMENT_FLOORS[tier]: blockers.append("Settlement network is not yet sufficient")
 	if capacity<Catalog.CAPACITY_FLOORS[tier]: blockers.append("Real %s capacity remains too low" % domain)
-	if count<Catalog.DISCOVERY_COUNT_FLOORS[tier]: blockers.append("Too little established %s knowledge" % domain)
-	if maturity<Catalog.MATURITY_FLOORS[tier]: blockers.append("No investigative tradition has matured far enough")
-	if breadth<Catalog.BREADTH_FLOORS[tier]: blockers.append("Knowledge is too narrow across lived conditions")
-	if lens_count<Catalog.LENS_FLOORS[tier]: blockers.append("Too few independent investigative traditions")
+	if count<required_count: blockers.append("Too little established %s knowledge" % domain)
+	if maturity<required_maturity: blockers.append("No investigative tradition has matured far enough")
+	if breadth<required_breadth: blockers.append("Knowledge is too narrow across lived conditions")
+	if lens_count<required_lenses: blockers.append("Too few independent investigative traditions")
 	if adoption<Catalog.ADOPTION_FLOORS[tier]: blockers.append("Established findings are not broadly adopted")
 	if reach<Catalog.REACH_FLOORS[tier]: blockers.append("Observed and connected world reach remains too limited")
 	var ratios:Array[float]=[1.0]
 	if Catalog.POPULATION_FLOORS[tier]>1.0: ratios.append(population/Catalog.POPULATION_FLOORS[tier])
 	if Catalog.SETTLEMENT_FLOORS[tier]>0: ratios.append(float(settlements)/Catalog.SETTLEMENT_FLOORS[tier])
 	if Catalog.CAPACITY_FLOORS[tier]>0.0: ratios.append(capacity/Catalog.CAPACITY_FLOORS[tier])
-	if Catalog.DISCOVERY_COUNT_FLOORS[tier]>0: ratios.append(float(count)/Catalog.DISCOVERY_COUNT_FLOORS[tier])
-	if Catalog.MATURITY_FLOORS[tier]>0: ratios.append(float(maturity)/Catalog.MATURITY_FLOORS[tier])
-	if Catalog.BREADTH_FLOORS[tier]>0: ratios.append(float(breadth)/Catalog.BREADTH_FLOORS[tier])
-	if Catalog.LENS_FLOORS[tier]>0: ratios.append(float(lens_count)/Catalog.LENS_FLOORS[tier])
+	if required_count>0: ratios.append(float(count)/required_count)
+	if required_maturity>0: ratios.append(float(maturity)/required_maturity)
+	if required_breadth>0: ratios.append(float(breadth)/required_breadth)
+	if required_lenses>0: ratios.append(float(lens_count)/required_lenses)
 	if Catalog.ADOPTION_FLOORS[tier]>0.0: ratios.append(adoption/Catalog.ADOPTION_FLOORS[tier])
 	if Catalog.REACH_FLOORS[tier]>0.0: ratios.append(reach/Catalog.REACH_FLOORS[tier])
 	var progress:=1.0

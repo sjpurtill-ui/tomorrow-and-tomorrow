@@ -303,9 +303,24 @@ func _doctrine_dynamic_effect(office:String,advisor:Dictionary,dynamic_id:String
 		if not profile.has(dynamic_id): return 0.0
 		return (float(profile[dynamic_id])-0.5)*0.18
 	var effect_total:=0.0
-	if dynamic_id in OFFICE_DYNAMICS.get(office,[]): effect_total+=doctrine_execution_strength(doctrine)
+	if dynamic_id in OFFICE_DYNAMICS.get(office,[]):
+		# Structure determines how authority travels; the appointed person's visible
+		# aptitude determines how well they use it. Neither can substitute entirely
+		# for the other, and a weak appointment can squander a strong structure.
+		effect_total+=doctrine_execution_strength(doctrine)*0.55
+		var skills:Dictionary=advisor.get("skills",{})
+		var has_named_person_skills:=int(advisor.get("person_id",0))>0
+		if not has_named_person_skills:
+			for skill in GovernmentPeopleSystem.SKILL_KEYS:
+				if skills.has(skill): has_named_person_skills=true; break
+		if has_named_person_skills:
+			effect_total+=(GovernmentPeopleSystem.dynamic_competency(advisor,dynamic_id)-0.50)*0.13
 	effect_total+=_doctrine_side_effect(doctrine,dynamic_id)
 	return effect_total
+
+
+func leadership_effect_for_holder(office:String,advisor:Dictionary,dynamic_id:String)->float:
+	return clampf(_doctrine_dynamic_effect(office,advisor,dynamic_id),-0.12,0.14)
 
 func doctrine_execution_strength(doctrine:String)->float:
 	var legitimacy:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)

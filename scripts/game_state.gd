@@ -11,6 +11,10 @@ const POPULATION_COHORT_DURATIONS_DAYS := {
 	"children":5110.0,"youth":4015.0,"early_adults":3650.0,
 	"established_adults":3650.0,"mature_adults":5475.0,"elders":6205.0
 }
+const POPULATION_COHORT_AGE_RANGES := {
+	"children":Vector2(0.0,14.0),"youth":Vector2(14.0,25.0),"early_adults":Vector2(25.0,35.0),
+	"established_adults":Vector2(35.0,45.0),"mature_adults":Vector2(45.0,60.0),"elders":Vector2(60.0,85.0)
+}
 const FOUNDING_FOCUS_ORDER := ["provision","generations","inquiry","industry","defense","exchange"]
 const FOUNDING_FOCUSES := {
 	"provision":{
@@ -77,6 +81,20 @@ var leadership_positions: Dictionary = {}
 var advisor_roster: Array[Dictionary] = []
 var council_inbox: Array[Dictionary] = []
 var sovereign_orders: Array[Dictionary] = []
+## Bounded, persistent exchanges between the player and named settlement
+## leaders. The API may interpret the player's language, but only deterministic
+## government and consequence code can add a commitment or change simulation
+## state. Keys are settlement ids; values are newest-last dialogue records.
+var civic_dialogues: Dictionary = {}
+## Player-facing interpreter routing preference. When true, CIVICS bypasses
+## both the deterministic fast reply and semantic cache whenever an API route
+## is configured. The simulation's deterministic feasibility gate still owns
+## every actual consequence.
+var civic_always_use_ai := false
+## Master player switch for paid civic interpretation. This is distinct from
+## SMART / ALWAYS ASK AI routing: when false, no civic API request may leave
+## the game even if credentials are present.
+var civic_api_enabled := true
 var research_allocations := {"demography":0,"nutrition":1,"health":1,"labor":0,"knowledge":1,"production":0,"infrastructure":0,"logistics":0,"ecology":1,"institutions":0,"security":0,"culture":0}
 var research_subcategory_allocations:Dictionary={
 	"demography":{"Fertility conditions":0,"Maternal safety":0,"Child survival":0,"Shelter capacity":0},
@@ -104,6 +122,7 @@ var societal_values:Dictionary=SOCIETAL_VALUES_MODEL.initial_state("",world_seed
 var combined_intelligence:=0.18
 var discovery_log: Array[Dictionary] = []
 var active_observations: Array[String] = []
+var research_targets:Dictionary={}
 var active_investigations:Dictionary={}
 var discovery_progress:Dictionary={}
 var population_allocations := {"Food": 30, "Survey": 6, "Extraction": 8, "Construction": 8, "Crafting": 5, "Logistics": 5, "Knowledge": 4, "Administration": 3, "Defense": 3}
@@ -126,12 +145,26 @@ var settlement_nuclei:Array[Dictionary]=[]
 var settlement_routes:Array[Dictionary]=[]
 var settlement_morphology:Dictionary={}
 var settlement_plot_history:Array[Dictionary]=[]
+## Permanent, append-only architectural record. Unlike settlement_plot_history,
+## this is player history rather than bounded rendering telemetry: one row is a
+## meaningful construction/lifecycle event, never a daily simulation sample.
+var building_ledger:Array[Dictionary]=[]
+var next_building_record_id:=1
 var next_settlement_plot_id:=1
 var next_settlement_nucleus_id:=1
 ## A bounded aggregate settlement network. One record represents an entire
 ## settlement regardless of population; no resident entities are created.
 var player_settlements:Array[Dictionary]=[]
 var next_player_settlement_id:=1
+## The settlement currently addressed by the map and settlement dock. This is
+## an id, never a scene node, so selecting one of hundreds of places remains
+## constant-size state and survives saving/loading.
+var resource_settlement_id:String=""
+var city_trade_shipments:Array[Dictionary]=[]
+var city_trade_history:Array[Dictionary]=[]
+var last_city_trade_day:int=-1
+var next_city_trade_id:int=1
+var selected_player_settlement_id:=""
 var settlement_convoy:Dictionary={}
 var settlement_network_revision:=0
 var morphology_revision:=0
@@ -243,9 +276,103 @@ func active_field_observation_signals(day:int)->Dictionary:
 			continue
 		active[signal_name]=float(record.get("strength",0.0))
 	return active
+
+
+func record_building_event(event:Dictionary)->Dictionary:
+	## Preserve what people actually built and consumed across the complete run.
+	## Callers provide plot/work facts; this normalizes them into a stable schema.
+	var row:Dictionary=event.duplicate(true)
+	row["id"]=next_building_record_id
+	next_building_record_id+=1
+	row["day"]=int(row.get("day",floori(elapsed_days)))
+	row["settlement_id"]=String(row.get("settlement_id",selected_player_settlement_id))
+	if String(row.settlement_id)=="" and not player_settlements.is_empty():
+		for settlement in player_settlements:
+			if bool((settlement as Dictionary).get("primary",false)):
+				row["settlement_id"]=String((settlement as Dictionary).get("id",""))
+				break
+	row["settlement_name"]=String(row.get("settlement_name",settlement_name if settlement_name!="" else "The founding settlement"))
+	row["event"]=String(row.get("event","recorded"))
+	row["kind"]=String(row.get("kind",row.get("form",row.get("land_use","Building"))))
+	row["form"]=String(row.get("form",row.kind))
+	row["land_use"]=String(row.get("land_use",""))
+	row["roof_plan"]=String(row.get("roof_plan",""))
+	row["material_family"]=String(row.get("material_family",""))
+	row["materials"]=(row.get("materials",{}) as Dictionary).duplicate(true)
+	row["counts_materials"]=bool(row.get("counts_materials",false))
+	building_ledger.append(row)
+	return row
+
+
+func ensure_building_ledger()->void:
+	## Old saves predate the permanent ledger. Reconstruct honest surviving facts
+	## once, explicitly marking quantities that the old save never retained.
+	if not building_ledger.is_empty() or (settlement_completed.is_empty() and settlement_plots.is_empty()): return
+	for work_name in settlement_completed:
+		record_building_event({
+			"day":settlement_founded_day,
+			"event":"legacy_completed",
+			"kind":String(work_name),
+			"form":"communal_work",
+			"materials":{},
+			"counts_materials":false,
+			"note":"Completed before detailed material records began; quantities are unknown.",
+			"reconstructed":true,
+		})
+	for plot in settlement_plots:
+		var p:Dictionary=plot
+		var materials:Dictionary={}
+		for material_name in (p.get("supply_provenance",{}) as Dictionary):
+			var amount:Variant=(p.get("supply_provenance",{}) as Dictionary)[material_name]
+			if amount is int or amount is float: materials[String(material_name)]=float(amount)
+		record_building_event({
+			"day":int(p.get("created_day",settlement_founded_day)),
+			"event":"legacy_surviving_fabric",
+			"plot_id":int(p.get("id",-1)),
+			"kind":String(p.get("form",p.get("land_use","Building"))),
+			"form":String(p.get("form","")),
+			"land_use":String(p.get("land_use","")),
+			"roof_plan":String(p.get("roof_plan","")),
+			"material_family":String(p.get("material_family","")),
+			"materials":materials,
+			"counts_materials":not materials.is_empty(),
+			"condition":float(p.get("condition",1.0)),
+			"status":String(p.get("status","active")),
+			"note":"Surviving fabric reconstructed from an older save.",
+			"reconstructed":true,
+		})
+
+
+func building_ledger_summary(settlement_id:String="")->Dictionary:
+	ensure_building_ledger()
+	var materials:Dictionary={}
+	var kinds:Dictionary={}
+	var events:Dictionary={}
+	var records:Array[Dictionary]=[]
+	for row_variant in building_ledger:
+		var row:Dictionary=row_variant
+		if settlement_id!="" and String(row.get("settlement_id","")) not in ["",settlement_id]: continue
+		records.append(row)
+		var kind:=String(row.get("kind","Building")).replace("_"," ").capitalize()
+		if String(row.get("event","")) in ["founded","started","infilled","rebuilt","legacy_completed","legacy_surviving_fabric"] or (String(row.get("event",""))=="completed" and int(row.get("plot_id",-1))<0):
+			kinds[kind]=int(kinds.get(kind,0))+1
+		var event_name:=String(row.get("event","recorded"))
+		events[event_name]=int(events.get(event_name,0))+1
+		if bool(row.get("counts_materials",false)):
+			for material_name in (row.get("materials",{}) as Dictionary):
+				materials[String(material_name)]=float(materials.get(String(material_name),0.0))+float((row.get("materials",{}) as Dictionary)[material_name])
+	return {"records":records,"materials":materials,"kinds":kinds,"events":events}
 var demographic_ledger: Array[Dictionary] = []
 var lifetime_births := 0
 var lifetime_deaths := 0
+## Exact daily vital counts retained for rolling population statistics. Older
+## saves fall back to their demographic ledger until new tracking begins.
+var vital_statistics_history: Array[Dictionary] = []
+var vital_statistics_tracking_start_day := -1
+## Monthly life-expectancy observations. Meaningful changes carry either the
+## health discovery that occurred in the interval or an explicit conditions
+## marker, so the chart never implies that every change came from research.
+var health_history: Array[Dictionary] = []
 var death_progress := 0.0
 var consecutive_food_shortage_days := 0.0
 var consecutive_water_shortage_days := 0.0
@@ -265,6 +392,11 @@ var lifetime_maternal_deaths := 0
 var lifetime_neonatal_deaths := 0
 
 func reset_for_new_world(new_seed:int)->void:
+	resource_settlement_id=""
+	city_trade_shipments=[]
+	city_trade_history=[]
+	last_city_trade_day=-1
+	next_city_trade_id=1
 	world_seed=new_seed
 	founding_banner_index=-1
 	founding_focus=""
@@ -279,6 +411,9 @@ func reset_for_new_world(new_seed:int)->void:
 	advisor_roster=[]
 	council_inbox=[]
 	sovereign_orders=[]
+	civic_dialogues={}
+	civic_always_use_ai=false
+	civic_api_enabled=true
 	research_allocations={"demography":0,"nutrition":1,"health":1,"labor":0,"knowledge":1,"production":0,"infrastructure":0,"logistics":0,"ecology":1,"institutions":0,"security":0,"culture":0}
 	research_subcategory_allocations={
 		"demography":{"Fertility conditions":0,"Maternal safety":0,"Child survival":0,"Shelter capacity":0},"nutrition":{"Daily supply":1,"Diet quality":0,"Stored reserve":0,"Land productivity":0},
@@ -297,6 +432,7 @@ func reset_for_new_world(new_seed:int)->void:
 	combined_intelligence=0.18
 	discovery_log=[]
 	active_observations=[]
+	research_targets={}
 	active_investigations={}
 	discovery_progress={}
 	population_allocations={"Food":30,"Survey":6,"Extraction":8,"Construction":8,"Crafting":5,"Logistics":5,"Knowledge":4,"Administration":3,"Defense":3}
@@ -319,10 +455,13 @@ func reset_for_new_world(new_seed:int)->void:
 	settlement_routes=[]
 	settlement_morphology={}
 	settlement_plot_history=[]
+	building_ledger=[]
+	next_building_record_id=1
 	next_settlement_plot_id=1
 	next_settlement_nucleus_id=1
 	player_settlements=[]
 	next_player_settlement_id=1
+	selected_player_settlement_id=""
 	settlement_convoy={}
 	settlement_network_revision=0
 	morphology_revision=0
@@ -390,6 +529,9 @@ func reset_for_new_world(new_seed:int)->void:
 	demographic_ledger=[]
 	lifetime_births=0
 	lifetime_deaths=0
+	vital_statistics_history=[]
+	vital_statistics_tracking_start_day=-1
+	health_history=[]
 	lifetime_departures=0
 	death_progress=0.0
 	consecutive_food_shortage_days=0.0
@@ -530,8 +672,21 @@ func _refresh_population_summary() -> void:
 	for key in ["youth","early_adults","established_adults","mature_adults"]:
 		working+=float(population_cohorts.get(key,0.0))
 	population_cohorts["working_age"]=working
-	population_cohorts["female"]=population_exact*0.495
-	population_cohorts["male"]=population_exact-float(population_cohorts.female)
+	# Preserve demographic imbalance caused by targeted migration, war, or policy.
+	# Older saves have no durable sex totals, so only those saves receive the
+	# founding estimate. Ordinary normalization then keeps both totals conserved.
+	var female:=maxf(0.0,float(population_cohorts.get("female",0.0)))
+	var male:=maxf(0.0,float(population_cohorts.get("male",0.0)))
+	var sex_total:=female+male
+	if sex_total<=0.000001:
+		female=population_exact*0.495
+		male=population_exact-female
+	else:
+		var sex_scale:=population_exact/sex_total
+		female*=sex_scale
+		male*=sex_scale
+	population_cohorts["female"]=female
+	population_cohorts["male"]=male
 	population_total=maxi(1,roundi(population_exact))
 
 func _integer_age_cohorts() -> Dictionary:
@@ -611,6 +766,11 @@ func _accumulate_demographic_count(key:String,amount:float) -> int:
 
 func _mortality_weights_for(cause:String) -> Dictionary:
 	match cause:
+		# These are proportional age-specific hazards, paired with
+		# current_natural_mortality_rate(). Previously the total was nearly flat
+		# and this ratio was too shallow, allowing the 60+ cohort to accumulate
+		# while projected life expectancy remained low.
+		"Natural causes": return {"children":1.0,"youth":0.36,"early_adults":0.50,"established_adults":0.75,"mature_adults":2.20,"elders":10.0}
 		"Hunger": return {"children":2.2,"youth":0.8,"early_adults":0.7,"established_adults":0.8,"mature_adults":1.2,"elders":2.0}
 		"Illness","Dehydration","Exposure": return {"children":1.8,"youth":0.7,"early_adults":0.7,"established_adults":0.9,"mature_adults":1.4,"elders":2.6}
 		"Travel exhaustion": return {"children":1.3,"youth":1.1,"early_adults":1.2,"established_adults":1.2,"mature_adults":1.5,"elders":2.1}
@@ -619,12 +779,12 @@ func _mortality_weights_for(cause:String) -> Dictionary:
 		"Neonatal complications": return {"children":1.0,"youth":0.0,"early_adults":0.0,"established_adults":0.0,"mature_adults":0.0,"elders":0.0}
 		_: return {"children":0.8,"youth":0.25,"early_adults":0.32,"established_adults":0.55,"mature_adults":1.25,"elders":3.2}
 
-func _remove_population_exact(amount:float,cause:String) -> float:
+func _remove_population_exact(amount:float,cause:String,weight_override:Dictionary={}) -> float:
 	initialize_population_model()
 	var actual:=clampf(amount,0.0,maxf(0.0,population_exact-1.0))
 	last_population_removal_by_cohort={}
 	if actual<=0.0: return 0.0
-	var weights:=_mortality_weights_for(cause)
+	var weights:=weight_override.duplicate(true) if not weight_override.is_empty() else _mortality_weights_for(cause)
 	var remaining:=actual
 	var midpoints:={"children":7.0,"youth":19.0,"early_adults":29.5,"established_adults":39.5,"mature_adults":52.0,"elders":68.5}
 	# Redistribute capped shares across the six fixed cohorts. This remains O(1)
@@ -679,16 +839,143 @@ func register_population_deaths(count:int,cause:String) -> Dictionary:
 	var emitted:=roundi(removed)
 	var affected_cohorts:=last_population_removal_by_cohort.duplicate(true)
 	lifetime_deaths+=emitted
+	_record_vital_statistics(0,emitted)
 	synchronize_population_allocations()
 	return {"count":emitted,"cause":cause,"affected_cohorts":affected_cohorts,"population_after":population_total}
 
-func register_directive_population_deaths(count:int,directive_id:String,description:String)->Dictionary:
+func _record_vital_statistics(births:int,deaths:int)->void:
+	var safe_births:=maxi(0,births)
+	var safe_deaths:=maxi(0,deaths)
+	if safe_births==0 and safe_deaths==0: return
+	var day:=floori(elapsed_days)
+	if vital_statistics_tracking_start_day<0: vital_statistics_tracking_start_day=day
+	if not vital_statistics_history.is_empty() and int(vital_statistics_history[-1].get("day",-1))==day:
+		vital_statistics_history[-1]["births"]=int(vital_statistics_history[-1].get("births",0))+safe_births
+		vital_statistics_history[-1]["deaths"]=int(vital_statistics_history[-1].get("deaths",0))+safe_deaths
+	else:
+		vital_statistics_history.append({"day":day,"births":safe_births,"deaths":safe_deaths})
+	# Two years of daily bins are enough for a true trailing-year display while
+	# keeping long-running saves compact.
+	var retention_cutoff:=day-730
+	while not vital_statistics_history.is_empty() and int(vital_statistics_history[0].get("day",day))<retention_cutoff:
+		vital_statistics_history.pop_front()
+
+func rolling_vital_balance(days:int=365)->Dictionary:
+	## Actual births and deaths during the trailing window. For an older save,
+	## pre-tracker history is reconstructed from its aggregate demographic
+	## episodes, prorating only an episode that crosses the window boundary.
+	var window_days:=maxi(1,days)
+	var today:=floori(elapsed_days)
+	var cutoff:=today-window_days+1
+	var births_exact:=0.0
+	var deaths_exact:=0.0
+	for row_variant in vital_statistics_history:
+		var row:Dictionary=row_variant
+		var row_day:=int(row.get("day",-1))
+		if row_day<cutoff or row_day>today: continue
+		births_exact+=float(row.get("births",0))
+		deaths_exact+=float(row.get("deaths",0))
+	var legacy_last_day:=today if vital_statistics_tracking_start_day<0 else vital_statistics_tracking_start_day-1
+	if legacy_last_day>=cutoff:
+		for record_variant in demographic_ledger:
+			var record:Dictionary=record_variant
+			var kind:=String(record.get("kind",""))
+			if kind not in ["birth","death"]: continue
+			var start_day:=int(record.get("start_day",record.get("day",today)))
+			var end_day:=int(record.get("end_day",record.get("day",start_day)))
+			var overlap_start:=maxi(cutoff,start_day)
+			var overlap_end:=mini(legacy_last_day,end_day)
+			if overlap_end<overlap_start: continue
+			var episode_days:=maxi(1,end_day-start_day+1)
+			var overlap_days:=overlap_end-overlap_start+1
+			var represented:=float(record.get("count",0))*float(overlap_days)/float(episode_days)
+			if kind=="birth": births_exact+=represented
+			else: deaths_exact+=represented
+	var births:=roundi(births_exact)
+	var deaths:=roundi(deaths_exact)
+	return {"births":births,"deaths":deaths,"net":births-deaths,"days":window_days}
+
+func record_health_history(force:bool=false)->void:
+	var day:=floori(elapsed_days)
+	var life_expectancy:=projected_life_expectancy()
+	var last_day:=-1
+	var previous_expectancy:=life_expectancy
+	if not health_history.is_empty():
+		last_day=int(health_history[-1].get("day",day))
+		previous_expectancy=float(health_history[-1].get("life_expectancy",life_expectancy))
+		if not force and day-last_day<30: return
+		if day==last_day:
+			health_history[-1]["life_expectancy"]=life_expectancy
+			health_history[-1]["health"]=population_health
+			return
+	var discovery_names:Array[String]=[]
+	var health_effects:=["health_protection","disease_exposure","sanitation","water_safety","maternal_safety","neonatal_survival","injury_risk","health_risk"]
+	for event_variant in discovery_log:
+		var event:Dictionary=event_variant
+		var event_day:=int(event.get("day",-1))
+		if event_day<=last_day or event_day>day: continue
+		var effects:Dictionary=event.get("effects",{})
+		var affects_health:=false
+		for effect_id in health_effects:
+			if effects.has(effect_id):
+				affects_health=true
+				break
+		if affects_health:
+			var discovery_name:=String(event.get("name",event.get("title","Health discovery")))
+			if discovery_name!="" and discovery_name not in discovery_names: discovery_names.append(discovery_name)
+	var delta:=life_expectancy-previous_expectancy
+	var marker_type:=""
+	var marker_label:=""
+	if not discovery_names.is_empty():
+		marker_type="discovery"
+		marker_label=", ".join(PackedStringArray(discovery_names))
+	elif last_day>=0 and absf(delta)>=0.5:
+		marker_type="conditions"
+		marker_label="Living conditions changed"
+	health_history.append({
+		"day":day,"life_expectancy":life_expectancy,"health":population_health,
+		"delta":delta,"marker_type":marker_type,"marker_label":marker_label
+	})
+	if health_history.size()>480: health_history.pop_front()
+
+func health_history_snapshot()->Array[Dictionary]:
+	if health_history.is_empty():
+		return [{"day":floori(elapsed_days),"life_expectancy":projected_life_expectancy(),"health":population_health,"delta":0.0,"marker_type":"","marker_label":"Tracking begins"}]
+	return health_history.duplicate(true)
+
+func register_directive_population_deaths(count:int,directive_id:String,description:String,target:Dictionary={})->Dictionary:
 	# Directives operate on one numeric population, never generated people. This
 	# authoritative entry point preserves the same cohort conservation used by
 	# illness, hunger, travel, and war, and leaves at least one living person.
 	var safe_id:=directive_id.strip_edges().to_lower().replace(" ","_").substr(0,80)
 	var cause:="Directive: %s" % safe_id.replace("_"," ").capitalize()
-	var result:=register_population_deaths(count,cause)
+	var prior_female:=float(population_cohorts.get("female",population_exact*0.495))
+	var prior_male:=float(population_cohorts.get("male",population_exact-prior_female))
+	var age_weights:Dictionary={}
+	var selected_cohorts:Array=target.get("age_cohorts",[])
+	if not selected_cohorts.is_empty():
+		for key in POPULATION_AGE_COHORTS: age_weights[key]=1.0 if selected_cohorts.has(key) else 0.0
+	var eligible:=population_exact-1.0
+	if not selected_cohorts.is_empty():
+		eligible=0.0
+		for key_variant in selected_cohorts: eligible+=maxf(0.0,float(population_cohorts.get(String(key_variant),0.0)))
+	var target_sex:=String(target.get("sex",""))
+	if target_sex=="female": eligible=minf(eligible,prior_female)
+	elif target_sex=="male": eligible=minf(eligible,prior_male)
+	var actual_request:=mini(maxi(0,count),maxi(0,floori(eligible)))
+	var removed:=_remove_population_exact(float(actual_request),cause,age_weights)
+	var emitted:=roundi(removed)
+	if target_sex=="female":
+		population_cohorts["female"]=maxf(0.0,prior_female-removed)
+		population_cohorts["male"]=prior_male
+	elif target_sex=="male":
+		population_cohorts["female"]=prior_female
+		population_cohorts["male"]=maxf(0.0,prior_male-removed)
+	_refresh_population_summary()
+	lifetime_deaths+=emitted
+	_record_vital_statistics(0,emitted)
+	synchronize_population_allocations()
+	var result:Dictionary={"count":emitted,"cause":cause,"affected_cohorts":last_population_removal_by_cohort.duplicate(true),"population_after":population_total}
 	var actual:=int(result.get("count",0))
 	if actual<=0: return result
 	var day:=int(elapsed_days)
@@ -697,7 +984,7 @@ func register_directive_population_deaths(count:int,directive_id:String,descript
 		"title":"%d deaths during %s" % [actual,safe_id.replace("_"," ")],"description":description.substr(0,320),
 		"domain":"population","severity":"demographic","kind":"death","count":actual,"cause":cause,
 		"location":"Civilization under directive","population_after":population_total,
-		"affected_cohorts":(result.get("affected_cohorts",{}) as Dictionary).duplicate(true),"aggregate":true
+		"affected_cohorts":(result.get("affected_cohorts",{}) as Dictionary).duplicate(true),"demographic_target":target.duplicate(true),"target_label":String(target.get("label","")),"aggregate":true
 	}
 	demographic_ledger.push_front(record)
 	if demographic_ledger.size()>120: demographic_ledger.resize(120)
@@ -780,6 +1067,7 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	lifetime_maternal_deaths+=maternal_count
 	lifetime_neonatal_deaths+=neonatal_count
 	lifetime_deaths+=maternal_count+neonatal_count
+	_record_vital_statistics(births_count,maternal_count+neonatal_count)
 	synchronize_population_allocations()
 	return {
 		"births_count":births_count,
@@ -801,7 +1089,8 @@ func age_distribution(bucket_years:=5,max_age:=85) -> Array[Dictionary]:
 	var buckets:Array[Dictionary]=[]
 	for start_age in range(0,max_age,bucket_years):
 		buckets.append({"start":start_age,"end":start_age+bucket_years-1,"count":0})
-	var ranges:={"children":Vector2(0,14),"youth":Vector2(14,25),"early_adults":Vector2(25,35),"established_adults":Vector2(35,45),"mature_adults":Vector2(45,60),"elders":Vector2(60,max_age)}
+	var ranges:=POPULATION_COHORT_AGE_RANGES.duplicate()
+	ranges["elders"]=Vector2(60,max_age)
 	for key in POPULATION_AGE_COHORTS:
 		var cohort_range:Vector2=ranges[key]
 		var cohort_count:=float(population_cohorts.get(key,0.0))
@@ -824,8 +1113,18 @@ func population_age_profile() -> Dictionary:
 		bands.append({"label":labels[index],"range":ranges[index],"count":count,"share":float(count)/maxf(1.0,float(population_total))})
 	var working:=int(counts.youth)+int(counts.early_adults)+int(counts.established_adults)+int(counts.mature_adults)
 	var dependents:=population_total-working
+	var median_target:=float(population_total)*0.5
+	var cumulative:=0.0
+	var median_age:=0.0
+	for key in POPULATION_AGE_COHORTS:
+		var count:=float(counts.get(key,0))
+		var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
+		if cumulative+count>=median_target and count>0.0:
+			median_age=lerpf(age_range.x,age_range.y,clampf((median_target-cumulative)/count,0.0,1.0))
+			break
+		cumulative+=count
 	var observed_age:=-1.0 if lifetime_deaths<=0 else observed_death_age_sum/maxf(1.0,float(lifetime_deaths))
-	return {"bands":bands,"total":population_total,"median_age":29.0,"working_age":working,"dependents":dependents,"dependents_per_100_workers":100.0*float(dependents)/maxf(1.0,float(working)),"projected_life_expectancy":projected_life_expectancy(),"observed_age_at_death":observed_age,"recorded_deaths":lifetime_deaths}
+	return {"bands":bands,"total":population_total,"median_age":median_age,"working_age":working,"dependents":dependents,"dependents_per_100_workers":100.0*float(dependents)/maxf(1.0,float(working)),"projected_life_expectancy":projected_life_expectancy(),"observed_age_at_death":observed_age,"recorded_deaths":lifetime_deaths}
 
 
 # One conserved, aggregate answer to "what is the population doing?". Missions
@@ -921,29 +1220,58 @@ func proportional_population_commitment(requested_count:int) -> Dictionary:
 		assigned+=1
 	return result
 
-func projected_life_expectancy() -> float:
+func _mortality_condition_factor(housing_ratio:float=-1.0)->float:
 	var health_factor:=lerpf(1.90,0.64,clampf(population_health,0.0,1.0))
 	var food_factor:=lerpf(2.40,0.78,clampf(food_security,0.0,1.0))
-	var housing_ratio:=clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15)
-	var shelter_factor:=lerpf(1.65,0.88,clampf(housing_ratio,0.0,1.0))
-	var condition_factor:=health_factor*food_factor*shelter_factor
-	var current_total_rate:=float(simulation_metrics.get("annual_death_rate",0.01))
-	var exceptional_hazard:=maxf(0.0,current_total_rate-0.014)
+	var resolved_housing:=clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15) if housing_ratio<0.0 else clampf(housing_ratio,0.0,1.15)
+	var shelter_factor:=lerpf(1.65,0.88,clampf(resolved_housing,0.0,1.0))
+	return health_factor*food_factor*shelter_factor
+
+func _baseline_mortality_hazard_at_age(age:int)->float:
+	if age==0: return 0.090
+	if age<5: return 0.025
+	if age<15: return 0.004
+	if age<25: return 0.006
+	if age<35: return 0.008
+	if age<45: return 0.012
+	if age<55: return 0.025
+	if age<65: return 0.055
+	if age<75: return 0.120
+	if age<85: return 0.230
+	return 0.380
+
+func current_natural_mortality_rate(housing_ratio:float=-1.0)->float:
+	initialize_population_model()
+	var condition_factor:=_mortality_condition_factor(housing_ratio)
+	var deaths_per_year:=0.0
+	# Average the same life-table hazards used by projected life expectancy over
+	# each fixed age band. This stays O(1) at every population scale.
+	for key in POPULATION_AGE_COHORTS:
+		var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
+		var hazard_sum:=0.0
+		var years:=maxi(1,roundi(age_range.y-age_range.x))
+		for age in range(roundi(age_range.x),roundi(age_range.y)):
+			hazard_sum+=_baseline_mortality_hazard_at_age(age)
+		var average_hazard:=hazard_sum/float(years)
+		deaths_per_year+=float(population_cohorts.get(key,0.0))*clampf(average_hazard*condition_factor,0.0001,0.98)
+	return deaths_per_year/maxf(1.0,population_exact)
+
+func _current_exceptional_mortality_rate()->float:
+	var components:Dictionary=simulation_metrics.get("mortality_components",{})
+	if not components.is_empty():
+		var exceptional:=0.0
+		for cause in components:
+			if String(cause)!="Natural causes": exceptional+=maxf(0.0,float(components[cause]))
+		return exceptional
+	return maxf(0.0,float(simulation_metrics.get("annual_death_rate",0.0))-current_natural_mortality_rate())
+
+func projected_life_expectancy() -> float:
+	var condition_factor:=_mortality_condition_factor()
+	var exceptional_hazard:=_current_exceptional_mortality_rate()
 	var survival:=1.0
 	var expected_years:=0.0
 	for age in 110:
-		var baseline_hazard:=0.004
-		if age==0: baseline_hazard=0.090
-		elif age<5: baseline_hazard=0.025
-		elif age<15: baseline_hazard=0.004
-		elif age<25: baseline_hazard=0.006
-		elif age<35: baseline_hazard=0.008
-		elif age<45: baseline_hazard=0.012
-		elif age<55: baseline_hazard=0.025
-		elif age<65: baseline_hazard=0.055
-		elif age<75: baseline_hazard=0.120
-		elif age<85: baseline_hazard=0.230
-		else: baseline_hazard=0.380
+		var baseline_hazard:=_baseline_mortality_hazard_at_age(age)
 		var annual_hazard:=clampf(baseline_hazard*condition_factor+exceptional_hazard,0.0001,0.98)
 		expected_years+=survival
 		survival*=1.0-annual_hazard

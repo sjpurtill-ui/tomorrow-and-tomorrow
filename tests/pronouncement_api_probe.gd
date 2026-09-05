@@ -31,10 +31,10 @@ func _ready()->void:
 	var api_scholar:={"name":"Nima","background":"Keeper of Records","skills":{"Research":84,"Education":80},"goals":["preserve_knowledge"],"relationships":{"sovereign":{"trust":0.5,"respect":0.5,"fear":0.0,"resentment":0.0,"obligation":0.4}},"memories":[]}
 	GameState.advisor_roster=[api_scholar]
 	GameState.leadership_positions={"Scholar":api_scholar}
-	var pending_order:Dictionary=AdvisorSystem.begin_pronouncement("Support scholars and improve routes.")
+	var pending_order:Dictionary=AdvisorSystem.begin_pronouncement("API interpretation: Support scholars and improve routes.")
 	_expect(String(pending_order.status)=="interpreting" and GameState.sovereign_orders.size()==1,"HTTP pronouncement was not recorded before dispatch")
 	PronouncementInterpreter.interpretation_completed.connect(_capture_result)
-	PronouncementInterpreter.interpret("Support scholars and improve routes.",{"population":120,"day":0})
+	PronouncementInterpreter.interpret("API interpretation: Support scholars and improve routes.",{"population":120,"day":0})
 	for frame in 300:
 		if not api_result.is_empty(): break
 		await get_tree().process_frame
@@ -56,7 +56,7 @@ func _ready()->void:
 			_expect(is_equal_approx(float(by_id.route_priority.magnitude),0.16),"API response gained authority over catalog strength")
 			_expect(is_equal_approx(float(by_id.route_priority.days),240.0),"API response gained authority over catalog duration")
 			_expect(String(by_id.route_priority.parameter_basis)=="catalog defaults","API policy omitted deterministic parameter provenance")
-		var order:Dictionary=AdvisorSystem.execute_pronouncement("Support scholars and improve routes.",api_result,pending_order)
+		var order:Dictionary=AdvisorSystem.execute_pronouncement("API interpretation: Support scholars and improve routes.",api_result,pending_order)
 		_expect(GameState.sovereign_orders.size()==1 and String(order.id)==String(pending_order.id),"HTTP response duplicated instead of resolving the pending order")
 		_expect(String(order.parameters.interpretation.source)=="generative API","order lost API provenance")
 		_expect(ConsequenceEngine.modifier_strength("directed_inquiry")>0.0,"API inquiry policy did not reach game modifiers")
@@ -84,9 +84,7 @@ func _capture_result(_request_id:String,result:Dictionary)->void:
 	api_result=result
 
 func _test_transient_retry()->void:
-	GameState.reset_for_new_world(141421)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(141421)
 	PronouncementInterpreter.reset_for_new_world()
 	retry_result={}
 	retry_completion_count=0
@@ -122,9 +120,7 @@ func _capture_retry_progress(_request_id:String,status:Dictionary)->void:
 	retry_progress.append(status.duplicate(true))
 
 func _test_structured_output_downgrade()->void:
-	GameState.reset_for_new_world(223607)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(223607)
 	PronouncementInterpreter.reset_for_new_world()
 	downgrade_result={}
 	downgrade_completion_count=0
@@ -148,9 +144,7 @@ func _capture_downgrade_result(_request_id:String,result:Dictionary)->void:
 	downgrade_result=result
 
 func _test_terminal_api_fallback_progress()->void:
-	GameState.reset_for_new_world(244949)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(244949)
 	PronouncementInterpreter.reset_for_new_world()
 	fallback_result={}
 	fallback_progress.clear()
@@ -177,9 +171,7 @@ func _capture_fallback_progress(_request_id:String,status:Dictionary)->void:
 	fallback_progress.append(status.duplicate(true))
 
 func _test_malformed_contract_fallback()->void:
-	GameState.reset_for_new_world(256019)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(256019)
 	PronouncementInterpreter.reset_for_new_world()
 	malformed_contract_result={}
 	var pending_order:=AdvisorSystem.begin_pronouncement("Malformed contract interpretation: expand the watch.")
@@ -198,9 +190,7 @@ func _capture_malformed_contract_result(_request_id:String,result:Dictionary)->v
 	malformed_contract_result=result
 
 func _test_redirect_refusal()->void:
-	GameState.reset_for_new_world(264575)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(264575)
 	PronouncementInterpreter.reset_for_new_world()
 	redirect_result={}
 	var pending_order:=AdvisorSystem.begin_pronouncement("Redirect interpretation: expand the watch.")
@@ -219,9 +209,7 @@ func _capture_redirect_result(_request_id:String,result:Dictionary)->void:
 	redirect_result=result
 
 func _test_oversized_response_refusal()->void:
-	GameState.reset_for_new_world(282843)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(282843)
 	PronouncementInterpreter.reset_for_new_world()
 	oversize_result={}
 	var pending_order:=AdvisorSystem.begin_pronouncement("Oversize interpretation: expand the watch.")
@@ -259,9 +247,7 @@ func _test_retry_backoff_cancellation()->void:
 	_expect(PronouncementInterpreter.pending_request_count()==0,"backoff cancellation remained pending")
 
 func _test_ungrounded_allowed_policy_rejection()->void:
-	GameState.reset_for_new_world(173205)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(173205)
 	PronouncementInterpreter.reset_for_new_world()
 	grounding_result={}
 	var pending_order:=AdvisorSystem.begin_pronouncement("Grounding rejection: ration food.")
@@ -271,20 +257,19 @@ func _test_ungrounded_allowed_policy_rejection()->void:
 		if not grounding_result.is_empty(): break
 		await get_tree().process_frame
 	PronouncementInterpreter.interpretation_completed.disconnect(_capture_grounding_result)
-	_expect(not grounding_result.is_empty() and String(grounding_result.get("source",""))=="generative API","grounding rejection fixture did not return an API interpretation")
-	_expect((grounding_result.get("policies",[]) as Array).is_empty(),"API applied allowed policy IDs unsupported by the typed pronouncement")
-	_expect(int(grounding_result.get("grounding_rejections",0))==2 and "withheld" in String(grounding_result.get("unresolved","")),"grounding rejection was not auditable")
+	_expect(not grounding_result.is_empty() and String(grounding_result.get("source","")).begins_with("generative API"),"grounding rejection fixture did not return an API interpretation")
+	var grounded_policies:Array=grounding_result.get("policies",[])
+	_expect(grounded_policies.size()==1 and String((grounded_policies[0] as Dictionary).get("id",""))=="rationing","unsupported API mappings were not rejected or exact local grounding was lost")
+	_expect(int(grounding_result.get("grounding_rejections",0))==2 and int(grounding_result.get("grounding_recovery_count",0))==1,"grounding rejection and deterministic recovery were not auditable")
 	var resolved:=AdvisorSystem.execute_pronouncement("Grounding rejection: ration food.",grounding_result,pending_order)
-	_expect(String(resolved.status)=="recorded_unresolved","ungrounded API result did not settle as an unresolved order")
-	_expect(ConsequenceEngine.active_policies().is_empty(),"ungrounded API result changed standing game variables")
+	_expect(String(resolved.status)=="active","the exact player-grounded policy did not survive unsupported API suggestions")
+	_expect(ConsequenceEngine.active_policies().size()==1 and String(ConsequenceEngine.active_policies()[0].id)=="rationing","API suggestions changed which grounded policy reached the simulation")
 
 func _capture_grounding_result(_request_id:String,result:Dictionary)->void:
 	grounding_result=result
 
 func _test_concurrent_http_ordering()->void:
-	GameState.reset_for_new_world(161803)
-	ConsequenceEngine.reset_for_new_world()
-	AdvisorSystem.reset_for_new_world()
+	_reset_execution_world(161803)
 	PronouncementInterpreter.reset_for_new_world()
 	concurrent_orders.clear()
 	PronouncementInterpreter.interpretation_completed.connect(_resolve_concurrent_result)
@@ -333,6 +318,22 @@ func _capture_cancelled_result(_request_id:String,_result:Dictionary)->void:
 
 func _capture_cancel_progress(_request_id:String,status:Dictionary)->void:
 	cancel_progress.append(status.duplicate(true))
+
+
+func _reset_execution_world(seed:int)->void:
+	GameState.reset_for_new_world(seed)
+	ConsequenceEngine.reset_for_new_world()
+	AdvisorSystem.reset_for_new_world()
+	ConsequenceEngine.initialize()
+	GameState.society_capacities["institutions"]=0.85
+	GameState.society_capacities["security"]=0.80
+	GameState.simulation_metrics["security"]=0.80
+	GameState.food_stocks={"Dry staples":20_000.0}
+	GameState.resource_stockpiles["Food"]=20_000.0
+	GameState.resource_stockpiles["Timber"]=2_000.0
+	GameState.resource_stockpiles["Stone"]=2_000.0
+	FoodSystem.reset_for_new_world()
+	FoodSystem.initialize()
 
 func _expect(condition:bool,message:String)->void:
 	if not condition: failures.append(message)

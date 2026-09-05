@@ -8,10 +8,14 @@ var society_model = SocietyModelScript.new()
 
 var rng := RandomNumberGenerator.new()
 var initialized := false
+var technology_catalog:Array[Dictionary]=[]
+var technology_limits:Dictionary={}
 var catalog_by_id:Dictionary={}
 var catalog_by_channel:Dictionary={}
 var latest_context:Dictionary={}
-const BASE_DISCOVERY_COUNT:=24
+var established_threads_cache:Array[Dictionary]=[]
+var established_threads_signature:=""
+const BASE_DISCOVERY_COUNT:=31
 const FRONTIER_PATH_AVAILABILITY:=7200
 const EFFECT_DISPLAY_NAMES:Dictionary={
 	"conception_support":"safe conception support","maternal_safety":"maternal safety","food_output":"usable food output","nutrition_quality":"diet quality",
@@ -25,9 +29,13 @@ const EFFECT_DISPLAY_NAMES:Dictionary={
 func reset_for_new_world()->void:
 	initialized=false
 	catalog.resize(BASE_DISCOVERY_COUNT)
+	technology_catalog.clear()
+	technology_limits.clear()
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
 	latest_context.clear()
+	established_threads_cache.clear()
+	established_threads_signature=""
 	society_model=SocietyModelScript.new()
 	rng=RandomNumberGenerator.new()
 
@@ -57,7 +65,19 @@ var catalog: Array[Dictionary] = [
 	{"id":"public_stores","name":"Public Stores","direction":"Society","chance":0.003,"day":80,"requires":["tallies","labor_rotations"],"signals":["storage","administration"],"observation":"Shared reserves can support projects no household could sustain alone."},
 	{"id":"watch_rotation","name":"Organized Watch","direction":"Warfare","chance":0.007,"day":6,"requires":[],"signals":["defense","danger"],"observation":"Scheduled sentries detect threats earlier and reduce exhaustion."},
 	{"id":"formation_drill","name":"Formation Drill","direction":"Warfare","chance":0.003,"day":60,"requires":["watch_rotation","labor_rotations"],"signals":["defense","training"],"observation":"Groups moving under repeated commands retain cohesion under pressure."},
-	{"id":"supply_groups","name":"Organized Supply Parties","direction":"Warfare","chance":0.003,"day":75,"requires":["tallies","route_memory"],"signals":["logistics","travel"],"observation":"Separating carriers from scouts allows groups to travel farther."}
+	{"id":"supply_groups","name":"Organized Supply Parties","direction":"Warfare","chance":0.003,"day":75,"requires":["tallies","route_memory"],"signals":["logistics","travel"],"observation":"Separating carriers from scouts allows groups to travel farther."},
+	# — Domestication line. The physical mount population the military's
+	# cavalry gate has always demanded, and the transformative stride for
+	# scouting range.
+	{"id":"animal_taming","name":"Animal Taming","dynamic":"ecology","subcategory":"Resource sustainability","direction":"ecology","chance":0.005,"day":90,"requires":["seasonal_patterns"],"signals":["foraging","exploration"],"observation":"Orphaned young of herd animals raised beside the settlement stay, breed, and follow.","effects":{"food_output":0.004}},
+	{"id":"pack_animals","name":"Pack Animal Husbandry","dynamic":"logistics","subcategory":"Carrying capacity","direction":"logistics","chance":0.004,"day":220,"requires":["animal_taming"],"signals":["logistics","travel"],"observation":"Tamed beasts under saddle-frames carry loads no human team matches, day after day.","effects":{"haul_capacity":0.008,"route_speed":0.004}},
+	{"id":"domesticated_mounts","name":"Domesticated Mounts","dynamic":"logistics","subcategory":"Route quality","direction":"logistics","chance":0.003,"day":400,"requires":["pack_animals"],"signals":["travel","defense"],"observation":"Selected bloodlines accept riders. A mounted person moves like weather, not like walking.","effects":{"route_speed":0.010}},
+	{"id":"mounted_scouts","name":"Mounted Scouting","dynamic":"logistics","subcategory":"Route quality","direction":"logistics","chance":0.004,"day":460,"requires":["domesticated_mounts"],"signals":["exploration","travel"],"observation":"Riders range in days across country that costs walkers weeks, and return fresh enough to tell it.","effects":{"route_speed":0.012}},
+	# — Watercraft line. From river floats to coastal passage; open water stops
+	# being an absolute wall for scout parties.
+	{"id":"hide_floats","name":"Hide Floats","dynamic":"logistics","subcategory":"Route quality","direction":"logistics","chance":0.005,"day":140,"requires":["cordage"],"signals":["freshwater","travel"],"observation":"Inflated hides lashed into rafts carry people and bundles across still water."},
+	{"id":"river_craft","name":"River Craft","dynamic":"logistics","subcategory":"Carrying capacity","direction":"logistics","chance":0.004,"day":320,"requires":["hide_floats","basketry"],"signals":["freshwater","logistics"],"observation":"Framed hulls with paddles run the river both ways; the current becomes a road.","effects":{"haul_capacity":0.006,"route_speed":0.006}},
+	{"id":"coastal_watercraft","name":"Coastal Watercraft","dynamic":"logistics","subcategory":"Trade reach","direction":"logistics","chance":0.003,"day":600,"requires":["river_craft","joinery"],"signals":["travel","exploration"],"observation":"Sewn-plank hulls hold a heading along the coast and cross the mouths of bays.","effects":{"route_speed":0.008}}
 ]
 
 func initialize() -> void:
@@ -68,12 +88,15 @@ func initialize() -> void:
 	rng.seed = GameState.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
 	catalog.append_array(SocietyKnowledgeCatalog.entries())
+	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
 		catalog[i]=society_model.normalize_discovery(catalog[i])
 		var discovery:Dictionary=catalog[i]
 		catalog_by_id[String(discovery.get("id",""))]=discovery
+		if not bool(discovery.get("frontier",false)): technology_catalog.append(discovery)
+		if bool(discovery.get("frontier",false)): continue
 		var channel:=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
 		if not catalog_by_channel.has(channel): catalog_by_channel[channel]=[]
 		(catalog_by_channel[channel] as Array).append(discovery)
@@ -119,7 +142,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		# Catalog chances describe relative discoverability. The global time scale keeps
 		# knowledge unfolding across generations instead of exhausting an era in months.
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-		var probability: float = discovery.chance * attention * activity * material_evidence * leader_factor*ConsequenceEngine.discovery_multiplier()*(1.0+ProgressionSystem.effect("knowledge_rate"))*0.12
+		var probability: float = discovery.chance / research_difficulty(discovery,GameState.world_seed) * attention * activity * material_evidence * leader_factor*ConsequenceEngine.discovery_multiplier()*(1.0+ProgressionSystem.effect("knowledge_rate"))*0.12
 		var progress:=float(GameState.discovery_progress.get(discovery_id,0.0))
 		progress+=probability*rng.randf_range(0.72,1.28)
 		if rng.randf()<probability*0.10: progress+=rng.randf_range(0.025,0.085)
@@ -127,7 +150,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		if progress>=1.0:
 			GameState.known_discoveries.append(discovery.id)
 			society_model.register_discovery(discovery,catalog)
-			var event := {"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_effect_summary(discovery.get("effects",{})),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))}
+			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_effect_summary(discovery.get("effects",{})),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
 			GameState.discovery_log.push_front(event)
 			if GameState.discovery_log.size()>512: GameState.discovery_log.resize(512)
 			GameState.active_investigations.erase(channel)
@@ -202,9 +225,9 @@ func active_investigation_records()->Array[Dictionary]:
 		var leader_factor:=_leader_factor(String(discovery.get("dynamic","")))
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
 		var research_capacity:=research_capacity_for(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
-		var baseline_momentum:=float(discovery.get("chance",0.001))*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*ConsequenceEngine.discovery_multiplier()*(1.0+ProgressionSystem.effect("knowledge_rate"))*0.12
+		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,GameState.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*ConsequenceEngine.discovery_multiplier()*(1.0+ProgressionSystem.effect("knowledge_rate"))*0.12
 		discovery["discovery_name"]=String(discovery.get("name","Undetermined discovery"))
-		discovery["name"]=String(discovery.get("line_name","Inquiry into %s through practical evidence" % String(discovery.get("subcategory","an unresolved condition")).to_lower()))
+		discovery["name"]=String(discovery.get("name","Investigation"))
 		discovery["progress"]=progress
 		discovery["observer_allocation"]=allocation
 		discovery["research_workforce"]=float(research_capacity.get("researchers",0.0))
@@ -214,11 +237,20 @@ func active_investigation_records()->Array[Dictionary]:
 		discovery["material_evidence"]=material_evidence
 		discovery["project_goal"]=_project_goal(discovery)
 		discovery["project_method"]=_project_method(discovery)
-		discovery["unlock_summary"]=String(discovery.get("outcome_scope","A concrete practice will be named only after this line produces a repeatable result."))
+		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_effect_summary(discovery.get("effects",{}))
 		discovery["bottleneck"]=_investigation_bottleneck(discovery,allocation,leader_factor,material_evidence,progress,research_capacity)
 		discovery["estimated_days"]=ceili((1.0-progress)/maxf(0.000001,baseline_momentum))
 		records.append(discovery)
 	return records
+
+
+func _default_line_name(discovery:Dictionary)->String:
+	## Base-catalog discoveries carry no authored line name; draw a varied one
+	## deterministically so the investigations page never reads as one
+	## sentence repeated with the noun swapped.
+	var templates:Array=DiscoveryFrontierCatalog.LINE_NAME_TEMPLATES
+	var index:=absi(hash("%s:%s:line" % [GameState.world_seed,String(discovery.get("id",""))]))%templates.size()
+	return String(templates[index]).format({"subject":String(discovery.get("subcategory","an unresolved condition")).to_lower(),"lens":"practical evidence"})
 
 
 func _project_goal(discovery:Dictionary) -> String:
@@ -374,6 +406,7 @@ func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
 		var discovery:Dictionary=discovery_variant
 		if not _discovery_is_eligible(discovery,current_day): continue
 		var score:=_candidate_score(discovery)
+		if String(GameState.research_targets.get(channel,""))==String(discovery.id): score+=100000.0
 		if score>best_score:
 			best_score=score
 			best=discovery
@@ -384,6 +417,12 @@ func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
 # Availability is decided per entire investigative tradition, not per person or
 # per day, so it is reproducible, save-free, and constant-time at population scale.
 func _path_is_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
+	# Old generated maturity/lens entries remain readable for saved bonuses and
+	# history, but are retired from both player and rival research pools.
+	if bool(discovery.get("frontier",false)): return false
+	return true
+
+func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 	if not bool(discovery.get("frontier",false)): return true
 	var seed_value:=GameState.world_seed if civilization_seed==0 else civilization_seed
 	var path_key:=String(discovery.get("path_key",discovery.get("id","")))
@@ -399,7 +438,7 @@ func _path_is_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 
 func _candidate_score(discovery:Dictionary)->float:
 	var id:=String(discovery.get("id",""))
-	var score:=float(posmod(hash("%s:%s:affinity" % [GameState.world_seed,id]),10_000))/100.0
+	var score:=research_affinity(discovery,GameState.world_seed,FoodSystem.current_environment_profile())
 	var dynamic_id:=String(discovery.get("dynamic",""))
 	var subcategory:=String(discovery.get("subcategory",""))
 	var allocation:=_subcategory_allocation(dynamic_id,subcategory)
@@ -430,6 +469,89 @@ func _founding_lens_affinity(lens:String)->float:
 	return 1.0-float(index)*0.22 if index>=0 else 0.0
 
 
+# Saved discovery events are historical facts, but old saves may contain the
+# former adjective-permutation titles and prose. Always resolve authored fields
+# from the current definition so the repaired knowledge record takes effect
+# without deleting a player's campaign.
+func player_facing_discovery_event(source:Dictionary)->Dictionary:
+	initialize()
+	var event:=source.duplicate(true)
+	var discovery_id:=String(event.get("id",""))
+	var definition:Dictionary=catalog_by_id.get(discovery_id,{})
+	if definition.is_empty(): return event
+	for field in ["name","thread_key","thread_name","milestone_key","breakthrough_name","route_name","causal_mechanism","evidence_method","operating_capability","ability_reason","social_consequence","maturity","lens"]:
+		if definition.has(field): event[field]=definition[field]
+	event["dynamic"]=String(definition.get("dynamic",event.get("dynamic",event.get("direction","knowledge"))))
+	event["direction"]=event["dynamic"]
+	event["subcategory"]=String(definition.get("subcategory",event.get("subcategory","Established practice")))
+	event["description"]=String(definition.get("causal_mechanism",definition.get("observation",event.get("description",""))))
+	event["effects"]=(definition.get("effects",event.get("effects",{})) as Dictionary).duplicate(true)
+	event["effect_summary"]=_effect_summary(event["effects"])
+	return event
+
+
+# The library is organized around concrete bodies of knowledge rather than an
+# archaeological dump of every survey/measurement/validation step. Each row is
+# one practical thread; its details retain the actual breakthroughs, route,
+# evidence, date, adoption, and cumulative consequences.
+func established_knowledge_threads()->Array[Dictionary]:
+	initialize()
+	var log_signature:="%d:%d" % [GameState.discovery_log.size(),hash(GameState.discovery_log)]
+	if log_signature==established_threads_signature:
+		return established_threads_cache.duplicate(true)
+	var by_thread:Dictionary={}
+	var thread_order:Array[String]=[]
+	for event_variant in GameState.discovery_log:
+		if not event_variant is Dictionary: continue
+		var event:=player_facing_discovery_event(event_variant)
+		var definition:Dictionary=catalog_by_id.get(String(event.get("id","")),{})
+		var dynamic_id:=String(event.get("dynamic",event.get("direction","knowledge")))
+		var subcategory:=String(event.get("subcategory","Established practice"))
+		var thread_key:=String(event.get("thread_key","%s::%s" % [dynamic_id,subcategory])) if bool(definition.get("frontier",false)) else String(event.get("id","%s::%s" % [dynamic_id,subcategory]))
+		if not by_thread.has(thread_key):
+			var thread:=event.duplicate(true)
+			thread["thread_key"]=thread_key
+			thread["name"]=String(event.get("thread_name",event.get("name",subcategory))) if bool(definition.get("frontier",false)) else String(event.get("name",subcategory))
+			thread["legacy_refinement"]=bool(definition.get("frontier",false))
+			thread["latest_breakthrough"]=String(event.get("name","Established practice"))
+			thread["latest_stage_name"]=String(event.get("breakthrough_name","Established practice"))
+			thread["breakthrough_count"]=0
+			thread["raw_event_count"]=0
+			thread["effects"]={}
+			thread["history"]=[]
+			thread["_milestones"]={}
+			by_thread[thread_key]=thread
+			thread_order.append(thread_key)
+		var current:Dictionary=by_thread[thread_key]
+		current["raw_event_count"]=int(current.get("raw_event_count",0))+1
+		var history:Array=current.get("history",[])
+		if history.size()<12: history.append(event)
+		current["history"]=history
+		var milestone_token:=String(event.get("milestone_key",event.get("id","")))
+		var milestones:Dictionary=current.get("_milestones",{})
+		if milestone_token=="" or not milestones.has(milestone_token):
+			if milestone_token!="": milestones[milestone_token]=true
+			current["breakthrough_count"]=int(current.get("breakthrough_count",0))+1
+			var cumulative_effects:Dictionary=current.get("effects",{})
+			for effect_id in (event.get("effects",{}) as Dictionary):
+				cumulative_effects[effect_id]=float(cumulative_effects.get(effect_id,0.0))+float((event.effects as Dictionary)[effect_id])
+			current["effects"]=cumulative_effects
+		current["_milestones"]=milestones
+		by_thread[thread_key]=current
+	var result:Array[Dictionary]=[]
+	for thread_key in thread_order:
+		var thread:Dictionary=by_thread[thread_key]
+		thread.erase("_milestones")
+		var count:=int(thread.get("breakthrough_count",1))
+		thread["description"]="Latest breakthrough: %s\n%s" % [String(thread.get("latest_breakthrough","Established practice")),String(thread.get("description",""))]
+		thread["effect_summary"]=_effect_summary(thread.get("effects",{}))
+		thread["record_summary"]="Archived practice · %d historical refinements · no further repeat research" % count if bool(thread.get("legacy_refinement",false)) else "Discovered once · day %d" % int(thread.get("day",0))
+		result.append(thread)
+	established_threads_signature=log_signature
+	established_threads_cache=result.duplicate(true)
+	return result
+
+
 # Player-facing summaries intentionally describe only knowledge the civilization
 # has established and the shape of its current frontier. Hidden candidate names,
 # total route counts, and future order never leave this API.
@@ -449,7 +571,7 @@ func frontier_snapshot(dynamic_id:String)->Dictionary:
 		lenses[lens]=int(lenses.get(lens,0))+1
 		var subcategory:=String(definition.get("subcategory","General practice"))
 		subcategories[subcategory]=int(subcategories.get(subcategory,0))+1
-	for event_variant in GameState.discovery_log:
+	for event_variant in established_knowledge_threads():
 		var event:Dictionary=event_variant
 		if String(event.get("dynamic",event.get("direction","")))==dynamic_id:
 			recent.append(event.duplicate(true))
@@ -568,15 +690,18 @@ func discovery_definition(discovery_id:String)->Dictionary:
 	return catalog_by_id.get(discovery_id,{})
 
 func _leader_factor(direction: String) -> float:
+	# The named-person government has seven canonical aptitudes. Specific fields
+	# of inquiry still differ, but they are composed from those visible skills so
+	# an excellent Scholar or Steward actually changes research throughput.
 	var mapping := {
-		"demography":["Steward",["Medicine","Empathy"]],"nutrition":["Quartermaster",["Agriculture","Logistics"]],
-		"health":["Steward",["Medicine","Administration"]],"labor":["Steward",["Delegation","Discipline"]],
-		"knowledge":["Scholar",["Research","Education"]],"production":["Quartermaster",["Manufacturing","Engineering"]],
-		"infrastructure":["Steward",["Construction","Engineering"]],"logistics":["Quartermaster",["Logistics","Trade"]],
-		"ecology":["Scholar",["Natural Science","Research"]],"institutions":["Steward",["Administration","Law"]],
-		"security":["Marshal",["Strategy","Tactics"]],"culture":["Envoy",["Oratory","Diplomacy"]]
+		"demography":["Steward",["Provisioning","Diplomacy"]],"nutrition":["Quartermaster",["Provisioning","Logistics"]],
+		"health":["Steward",["Provisioning","Knowledge"]],"labor":["Steward",["Administration","Construction"]],
+		"knowledge":["Scholar",["Knowledge","Administration"]],"production":["Quartermaster",["Construction","Logistics"]],
+		"infrastructure":["Steward",["Construction","Administration"]],"logistics":["Quartermaster",["Logistics","Administration"]],
+		"ecology":["Scholar",["Knowledge","Provisioning"]],"institutions":["Steward",["Administration","Diplomacy"]],
+		"security":["Marshal",["Defense","Administration"]],"culture":["Envoy",["Diplomacy","Knowledge"]]
 	}
-	var assignment: Array = mapping.get(direction,["Scholar",["Research"]])
+	var assignment: Array = mapping.get(direction,["Scholar",["Knowledge"]])
 	return AdvisorSystem.execution_modifier(assignment[0],assignment[1])
 
 func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
@@ -676,3 +801,127 @@ func _classify_discovery(source:Dictionary)->Dictionary:
 	discovery["direction"]=dynamic_id
 	discovery["social_consequence"]=String(DiscoveryFrontierCatalog.SOCIAL_RESULTS.get(dynamic_id,"Collective expectations change as the practice spreads"))
 	return discovery
+
+## Concrete authored technologies are the live tree. Historical generated entries
+## stay in the catalog solely so existing discoveries retain their effects.
+func technology_tree(dynamic_id:String="")->Array[Dictionary]:
+	initialize()
+	var rows:Array[Dictionary]=[]
+	var children:Dictionary={}
+	for entry in technology_catalog:
+		if bool(entry.get("frontier",false)): continue
+		for requirement in entry.get("requires",[]):
+			if not children.has(String(requirement)): children[String(requirement)]=[]
+			(children[String(requirement)] as Array).append(String(entry.name))
+	for entry in technology_catalog:
+		if bool(entry.get("frontier",false)): continue
+		if dynamic_id!="" and String(entry.dynamic)!=dynamic_id: continue
+		var id:=String(entry.id)
+		var row:=entry.duplicate(true)
+		var missing:Array[String]=[]
+		for requirement in entry.get("requires",[]):
+			if String(requirement) not in GameState.known_discoveries: missing.append(String(catalog_by_id.get(String(requirement),{}).get("name",requirement)))
+		if int(GameState.elapsed_days)<int(entry.get("day",0)): missing.append("earliest day %d" % int(entry.day))
+		if not _resource_requirements_met(entry.get("resource_requirements",[])):
+			for requirement in entry.get("resource_requirements",[]): missing.append("%s: %s access" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized"))])
+		var known:=id in GameState.known_discoveries
+		row["ready"]=not known and missing.is_empty()
+		row["missing"]=missing
+		row["leads_to"]=children.get(id,[])
+		row["progress"]=float(GameState.discovery_progress.get(id,0.0))
+		row["research_difficulty"]=research_difficulty(entry,GameState.world_seed)
+		var channel:=_channel_key(String(entry.dynamic),String(entry.subcategory))
+		row["status"]="DISCOVERED" if known else ("RESEARCHING" if String(GameState.active_investigations.get(channel,""))==id else ("AVAILABLE" if missing.is_empty() else "LOCKED"))
+		rows.append(row)
+	return rows
+
+func select_research_target(discovery_id:String)->Dictionary:
+	initialize()
+	var discovery:Dictionary=catalog_by_id.get(discovery_id,{})
+	if discovery.is_empty() or not _discovery_is_eligible(discovery,int(GameState.elapsed_days)): return {"ok":false,"reason":"This technology is not currently researchable."}
+	var domain:=String(discovery.dynamic)
+	var subcategory:=String(discovery.subcategory)
+	var channel:=_channel_key(domain,subcategory)
+	var allocations:Dictionary=GameState.research_subcategory_allocations.get(domain,{})
+	if int(allocations.get(subcategory,0))<=0:
+		for other in allocations:
+			if int(allocations[other])>0:
+				allocations[other]=int(allocations[other])-1
+				break
+		allocations[subcategory]=1
+	GameState.research_subcategory_allocations[domain]=allocations
+	GameState.research_targets[channel]=discovery_id
+	GameState.active_investigations[channel]=discovery_id
+	_rebuild_research_domain_totals()
+	return {"ok":true}
+
+## A stable seeded draw: saves/reloads never reroll the same technology.
+## Bounded variance changes pace without bypassing any causal eligibility gate.
+func research_difficulty(discovery:Dictionary,civilization_seed:int)->float:
+	return 0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30
+
+func research_affinity(discovery:Dictionary,civilization_seed:int,environment:Dictionary)->float:
+	var score:=_research_draw(String(discovery.id),civilization_seed,"affinity")*100.0
+	var domain:=String(discovery.get("dynamic",""))
+	var hazards:Dictionary=environment.get("hazards",{})
+	if domain=="nutrition": score+=float(hazards.get("drought",0.0))*25.0+float(environment.get("fertility",0.0))*20.0
+	if domain=="health": score+=float(hazards.get("disease",0.0))*30.0
+	if domain=="logistics": score+=float(environment.get("route_potential",0.0))*25.0
+	if domain=="infrastructure": score+=float(environment.get("relief",0.0))*20.0+float(hazards.get("cold",0.0))*20.0
+	for requirement in discovery.get("resource_requirements",[]): score+=float((environment.get("resource_potentials",{}) as Dictionary).get(String(requirement.get("resource","")),0.0))*15.0
+	return score
+
+func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
+	initialize()
+	var profile:Dictionary=civ.get("discovery_profile",{})
+	var known:Array=profile.get("technologies",[])
+	var environment:Dictionary=civ.get("environment_profile",{})
+	var resources:Dictionary=environment.get("resource_potentials",{})
+	var candidates:Array[Dictionary]=[]
+	for entry in technology_catalog:
+		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
+		if int(GameState.elapsed_days)<int(entry.get("day",0)): continue
+		var viable:=true
+		for requirement in entry.get("requires",[]):
+			if String(requirement) not in known: viable=false; break
+		if not viable: continue
+		for requirement in entry.get("resource_requirements",[]):
+			if float(resources.get(String(requirement.get("resource","")),0.0))<0.16: viable=false; break
+			var access:=String(requirement.get("stage","recognized"))
+			var capacity_floor:=0.12 if access=="recognized" else (0.20 if access=="surveyed" else (0.35 if access=="accessible" else 0.55))
+			if minf(float(civ.get("production",0.0)),float(civ.get("logistics",0.0)))<capacity_floor: viable=false; break
+		if viable: candidates.append(entry)
+	var seed_value:=int(profile.get("seed",GameState.world_seed))
+	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return research_affinity(a,seed_value,environment)>research_affinity(b,seed_value,environment))
+	return candidates
+
+func technology_depth(id:String,visiting:Dictionary={})->int:
+	if visiting.has(id): return 0
+	var entry:Dictionary=catalog_by_id.get(id,{})
+	if entry.has("causal_depth"): return int(entry.causal_depth)
+	var path:=visiting.duplicate()
+	path[id]=true
+	var depth:=1
+	for parent in entry.get("requires",[]): depth=maxi(depth,1+technology_depth(String(parent),path))
+	entry["causal_depth"]=depth
+	return depth
+
+func domain_technology_limits(domain:String)->Dictionary:
+	initialize()
+	if technology_limits.has(domain): return technology_limits[domain]
+	var total:=0
+	var depth:=1
+	var conditions:Dictionary={}
+	for entry in technology_catalog:
+		if String(entry.dynamic)!=domain: continue
+		total+=1
+		depth=maxi(depth,technology_depth(String(entry.id)))
+		conditions[String(entry.subcategory)]=true
+	var limits:={"available_count":total,"available_maturity":depth,"available_breadth":conditions.size(),"available_lens_count":1}
+	technology_limits[domain]=limits
+	return limits
+
+func _research_draw(id:String,seed_value:int,purpose:String)->float:
+	var random:=RandomNumberGenerator.new()
+	random.seed=hash(id+":"+purpose)^(seed_value*0x45d9f3b)
+	return random.randf()

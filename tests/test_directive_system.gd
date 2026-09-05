@@ -13,6 +13,7 @@ func test_offline_interpreter_recognizes_broad_directive_domains()->void:
 		["Impose a wealth levy and tax the rich.","wealth_levy","economic"],
 		["Deregulate markets and remove price controls.","market_deregulation","economic"],
 		["Censor the press and suppress information.","information_control","social"],
+		["Secure drinking water and organize water storage.","water_security","economic"],
 		["Execute the sick.","mass_repression","military"]
 	]
 	for case in cases:
@@ -21,6 +22,277 @@ func test_offline_interpreter_recognizes_broad_directive_domains()->void:
 		var policy:Dictionary=(interpreted.policies as Array)[0]
 		assert_str(String(policy.get("id",""))).is_equal(String(case[1]))
 		assert_str(String(GovernmentPolicyCatalog.directive_contract(String(policy.id)).get("domain",""))).is_equal(String(case[2]))
+
+
+func test_terra_request_uses_supported_sampling_defaults()->void:
+	var payload:=PronouncementInterpreter._build_api_payload(
+		"Support scholars.",
+		{},
+		{"model":"gpt-5.6-terra","structured_output":true}
+	)
+	assert_str(String(payload.get("model",""))).is_equal("gpt-5.6-terra")
+	assert_bool(payload.has("response_format")).is_true()
+	assert_bool(payload.has("temperature")).is_false()
+	assert_int(int(payload.get("max_completion_tokens",0))).is_equal(PronouncementInterpreter.API_MAX_COMPLETION_TOKENS)
+	assert_str(String((payload.messages as Array)[0].content)).contains("do not refuse to classify")
+	var prompt:=String((payload.messages as Array)[1].content)
+	assert_bool("default_magnitude" not in prompt and "default_days" not in prompt).is_true()
+	assert_bool(JSON.stringify(GovernmentPolicyCatalog.interpretation_contract()).length()<2200).is_true()
+	var conversation:Array=[]
+	for index in 12: conversation.append({"speaker":"leader" if index%2 else "player","status":"discussion","text":"x".repeat(1000)})
+	var active:Array=[]
+	for policy_id in GovernmentPolicyCatalog.POLICIES: active.append({"id":String(policy_id),"remaining_days":730})
+	var offices:Array=[]
+	for index in 24: offices.append("Extremely Long Government Office Title %d" % index)
+	var maximal_context:={
+		"day":10_000_000,"population":1_000_000_000,"food_days":3650.0,"water_days":3650.0,
+		"health":1.0,"housing":1.0,"security":1.0,"cohesion":1.0,"institutions":1.0,
+		"settlement":{"id":"s".repeat(200),"name":"n".repeat(500),"population":1_000_000_000,"classification":"c".repeat(200)},
+		"leader":{"name":"l".repeat(500),"title":"t".repeat(500),"background":"b".repeat(500),"traits":["a".repeat(100),"b".repeat(100),"c".repeat(100),"d".repeat(100)]},
+		"conversation":conversation,"known_offices":offices,"active_policies":active,
+	}
+	var safe_context:=PronouncementInterpreter._sanitize_public_context(maximal_context)
+	assert_int((safe_context.conversation as Array).size()).is_equal(3)
+	assert_int(String((safe_context.conversation as Array)[0].text).length()).is_less_equal(160)
+	assert_int((safe_context.known_offices as Array).size()).is_less_equal(8)
+	assert_int((safe_context.active_policies as Array).size()).is_less_equal(8)
+	var bounded_prompt:=PronouncementInterpreter._prompt("A".repeat(500),maximal_context)
+	assert_int(bounded_prompt.to_utf8_buffer().size()).is_less_equal(PronouncementInterpreter.API_MAX_PROMPT_UTF8_BYTES)
+
+
+func test_player_api_master_switch_blocks_all_remote_configuration()->void:
+	GameState.civic_api_enabled=true
+	PronouncementInterpreter.set_api_enabled(false)
+	assert_bool(GameState.civic_api_enabled).is_false()
+	assert_dict(PronouncementInterpreter._api_config()).is_empty()
+	var status:Dictionary=PronouncementInterpreter.configuration_status()
+	assert_bool(bool(status.get("enabled",true))).is_false()
+	assert_bool(bool(status.get("configured",true))).is_false()
+	assert_array(status.get("missing",[])).is_empty()
+	PronouncementInterpreter.set_api_enabled(true)
+	assert_bool(GameState.civic_api_enabled).is_true()
+
+
+func test_clear_orders_skip_api_but_partly_unknown_orders_do_not()->void:
+	var clear_text:="All women over 60 must be killed now."
+	var clear:=PronouncementInterpreter._local_interpretation(clear_text)
+	assert_bool(PronouncementInterpreter._local_fast_path_eligible(clear_text,clear,{})).is_true()
+	var compound_text:="Support scholars and improve routes."
+	var compound:=PronouncementInterpreter._local_interpretation(compound_text)
+	assert_bool(PronouncementInterpreter._local_fast_path_eligible(compound_text,compound,{})).is_true()
+	var mixed_text:="Ration food and crown my horse as magistrate."
+	var mixed:=PronouncementInterpreter._local_interpretation(mixed_text)
+	assert_bool(PronouncementInterpreter._local_fast_path_eligible(mixed_text,mixed,{})).is_false()
+	var continuation_context:={"conversation":[{"speaker":"leader","status":"ethical_deliberation","text":"State the order plainly."}]}
+	var answer:="Yes. Every woman older than sixty is included."
+	assert_bool(PronouncementInterpreter._local_fast_path_eligible(answer,PronouncementInterpreter._local_interpretation(answer),continuation_context)).is_true()
+
+
+func test_preventive_or_negated_language_cannot_become_a_new_repression_order()->void:
+	for wording in ["Do not kill the dissidents.","Prevent the killing of the sick.","Forbid executions of prisoners.","Avoid killing the opposition.","No more executions."]:
+		var result:=PronouncementInterpreter._local_interpretation(String(wording),{"active_policies":[]})
+		assert_int((result.get("policies",[]) as Array).size()).is_equal(1)
+		assert_str(String((result.policies[0] as Dictionary).get("id",""))).is_equal("mass_repression")
+		assert_str(String((result.policies[0] as Dictionary).get("action",""))).is_equal("repeal")
+
+
+func test_discussing_or_questioning_a_policy_can_never_issue_it()->void:
+	var examples:=[
+		"Why are we rationing food?",
+		"The water supply is full.",
+		"Would killing dissidents help?",
+		"Tell me why we need more guards.",
+		"Can you explain why we are rationing food?",
+		"The scout reported that we should expand the watch.",
+		"Rationing food might help.",
+		"\"Kill the dissidents,\" the prisoner said.",
+	]
+	for wording in examples:
+		var local:=PronouncementInterpreter._local_interpretation(String(wording))
+		assert_array(local.get("policies",[])).is_empty()
+		assert_bool(bool(local.get("non_directive",false))).is_true()
+		assert_bool(PronouncementInterpreter._local_fast_path_eligible(String(wording),local,{})).is_true()
+	# Defense in depth: a provider suggestion cannot override the speech act.
+	var provider_claim:={"summary":"Proposed repression","policies":[{"id":"mass_repression","basis":"killing","confidence":0.99}],"unresolved":""}
+	var guarded:=PronouncementInterpreter._validate(provider_claim,"Would killing dissidents help?")
+	assert_array(guarded.get("policies",[])).is_empty()
+	assert_bool(bool(guarded.get("non_directive",false))).is_true()
+	# A factual preface must not swallow a later actual command, and the factual
+	# clause must not become a second policy merely because it names one.
+	var compound:=PronouncementInterpreter._local_interpretation("The watch is adequate; ration food.")
+	assert_int((compound.get("policies",[]) as Array).size()).is_equal(1)
+	assert_str(String((compound.policies[0] as Dictionary).get("id",""))).is_equal("rationing")
+
+
+func test_plain_commands_and_polite_requests_remain_actionable()->void:
+	var examples:=[
+		["Secure drinking water.","water_security"],
+		["Can you secure drinking water?","water_security"],
+		["We need to expand the watch.","expanded_watch"],
+		["All women over 60 must be killed now.","mass_repression"],
+		["Prevent killing the sick.","mass_repression"],
+	]
+	for example in examples:
+		var result:=PronouncementInterpreter._local_interpretation(String(example[0]))
+		assert_bool(not bool(result.get("non_directive",false))).is_true()
+		assert_int((result.get("policies",[]) as Array).size()).is_greater(0)
+		assert_str(String((result.policies[0] as Dictionary).get("id",""))).is_equal(String(example[1]))
+
+
+func test_everyday_orders_use_the_free_local_path()->void:
+	var examples:=[
+		["Cut rations so our food lasts.","rationing"],
+		["Send gatherers to search for food.","foraging_drive"],
+		["Post guards around the settlement.","expanded_watch"],
+		["Raise shelters for the families.","emergency_building"],
+		["Assign researchers to seek knowledge.","directed_inquiry"],
+		["Put artisans to work making tools.","craft_mobilization"],
+		["Repair roads and organize haulers.","route_priority"],
+		["Help parents and care for children.","family_support"],
+		["Convince more women to have children","family_support"],
+		["Can you convince women to have children?","family_support"],
+		["Raise recruits and call up fighters.","conscription_drive"],
+		["Let's put together a recruiting expedition that tries to bring people into our village.","recruitment_expedition"],
+		["Tarin, I would like you to prepare an expedition for the purposes of recruiting people to our village.","recruitment_expedition"],
+	]
+	for example in examples:
+		var wording:=String(example[0])
+		var result:=PronouncementInterpreter._local_interpretation(wording)
+		assert_bool(PronouncementInterpreter._local_fast_path_eligible(wording,result,{})).is_true()
+		assert_str(String((result.policies[0] as Dictionary).get("id",""))).is_equal(String(example[1]))
+
+
+func test_negated_repeal_keeps_the_policy_in_force()->void:
+	for wording in ["Do not stop rationing food.","Never end the expanded watch.","Don't repeal the military draft."]:
+		var result:=PronouncementInterpreter._local_interpretation(String(wording))
+		assert_int((result.get("policies",[]) as Array).size()).is_equal(1)
+		assert_str(String((result.policies[0] as Dictionary).get("action",""))).is_equal("enact")
+
+
+func test_save_capture_excludes_live_api_requests_and_authorization_headers()->void:
+	var skip:Array=SaveSystem.REFLECT_SKIP.get("PronouncementInterpreter",[])
+	assert_array(skip).contains(["_requests","_request_serial","_semantic_cache","_semantic_cache_order","_routing_stats"])
+	var captured:=SaveSystem._capture_reflected(PronouncementInterpreter,skip)
+	assert_bool(not captured.has("_requests")).is_true()
+	assert_bool(not captured.has("_semantic_cache")).is_true()
+
+
+func test_semantic_cache_is_bounded_and_never_reuses_conversation_dependent_replies()->void:
+	var standalone_context:={"active_policies":[{"id":"rationing"}],"conversation":[]}
+	var key:=PronouncementInterpreter._semantic_cache_key("Ration food while the moon is high.",standalone_context)
+	assert_str(key).is_not_empty()
+	PronouncementInterpreter._remember_semantic_result(key,{"summary":"validated","policies":[],"unresolved":"moon is not a simulated condition","source":"generative API","provider_request_id":"private-request-id"})
+	var cached:=PronouncementInterpreter._semantic_cache_lookup(key)
+	assert_str(String(cached.get("summary",""))).is_equal("validated")
+	assert_bool(not cached.has("provider_request_id")).is_true()
+	var pending_context:={"conversation":[{"speaker":"leader","status":"ethical_deliberation","text":"Confirm the exact meaning."}]}
+	assert_str(PronouncementInterpreter._semantic_cache_key("Ration food while the moon is high.",pending_context)).is_empty()
+	assert_str(PronouncementInterpreter._semantic_cache_key("Do it again.",{})).is_empty()
+	for index in range(PronouncementInterpreter.SEMANTIC_CACHE_CAPACITY+7):
+		PronouncementInterpreter._remember_semantic_result("bounded_%d" % index,{"summary":"%d" % index,"policies":[],"unresolved":""})
+	assert_int(PronouncementInterpreter._semantic_cache.size()).is_equal(PronouncementInterpreter.SEMANTIC_CACHE_CAPACITY)
+
+
+func test_interrupted_civic_request_unlocks_as_a_conversation_not_a_permanent_spinner()->void:
+	var leader:={"person_id":42,"name":"Hana Morrow","title":"Hearth Speaker"}
+	var order:=AdvisorSystem.begin_civic_directive("Support scholars.","settlement_test",leader)
+	assert_str(String(order.get("status",""))).is_equal("interpreting")
+	assert_int(AdvisorSystem.recover_interrupted_civic_directives()).is_equal(1)
+	assert_str(String(order.get("status",""))).is_equal("awaiting_clarification")
+	assert_str(String(order.get("leader_reply",""))).contains("Repeat or revise")
+	assert_str(String(order.get("leader_reply",""))).contains("STATE · NEEDS YOUR DECISION")
+	assert_int(AdvisorSystem.recover_interrupted_civic_directives()).is_equal(0)
+	assert_int(AdvisorSystem.civic_dialogue_history("settlement_test",8).size()).is_equal(2)
+
+
+func test_player_example_directives_map_to_concrete_bounded_programs()->void:
+	var cases:=[
+		["Gather rocks so we can make rock homes.",["stone_gathering_drive","stone_housing_program"]],
+		["Start a rumor that a great plague will fall upon us if we don't increase research.",["information_control","directed_inquiry"]],
+		["Gather up a special scouting party to find new people to join us.",["recruitment_expedition"]],
+		["Tell parents with single children that they are failing the tribe and will be killed if they are not pregnant within 6 months.",["coercive_pronatalism"]]
+	]
+	for case in cases:
+		var interpreted:Dictionary=PronouncementInterpreter._local_interpretation(String(case[0]))
+		var ids:Array[String]=[]
+		for policy_variant in interpreted.get("policies",[]): ids.append(String((policy_variant as Dictionary).get("id","")))
+		for expected_id in case[1]: assert_bool(String(expected_id) in ids).is_true()
+
+
+func test_water_directive_improves_real_collection_without_creating_a_source()->void:
+	GameState.settlement_founded_at=Vector3.ZERO
+	GameState.resource_deposits=[{"id":"test_river","resource":"Freshwater","stage":"surveyed","quality":1.0,"position":Vector3(6.0,0.0,0.0)}]
+	GameState.population_allocations["Food"]=20
+	GameState.population_allocations["Logistics"]=20
+	GameState.resource_stockpiles["Freshwater"]=0.0
+	var context:={"origin":Vector3.ZERO}
+	ResourceSystem.process_day(context)
+	var before:=float(GameState.water_metrics.get("collected_today",0.0))
+	GameState.resource_stockpiles["Freshwater"]=0.0
+	var text:="Secure drinking water and organize water storage."
+	var interpretation:=PronouncementInterpreter._local_interpretation(text)
+	var order:=AdvisorSystem.execute_pronouncement(text,interpretation)
+	assert_bool(bool((order.parameters.interpretation.policies[0] as Dictionary).get("applied",false))).is_true()
+	ResourceSystem.process_day(context)
+	var after:=float(GameState.water_metrics.get("collected_today",0.0))
+	assert_float(after).is_greater(before)
+	assert_float(float(GameState.water_metrics.get("capacity",0.0))).is_greater(float(GameState.population_total)*3.0)
+	# Without geography, the same policy still cannot fabricate drinking water.
+	GameState.resource_deposits.clear()
+	GameState.resource_stockpiles["Freshwater"]=0.0
+	ResourceSystem.process_day(context)
+	assert_float(float(GameState.water_metrics.get("collected_today",-1.0))).is_equal(0.0)
+
+
+func test_historical_sexual_coercion_is_classified_without_giving_provider_a_veto()->void:
+	var text:="I would like all unpregnant women to have sex with the most fertile man in camp every night until they are pregnant."
+	var local:=PronouncementInterpreter._local_interpretation(text)
+	assert_int((local.get("policies",[]) as Array).size()).is_equal(1)
+	assert_str(String(local.policies[0].id)).is_equal("coercive_pronatalism")
+	assert_str(String(local.policies[0].directive_parameters.coercion_method)).is_equal("compulsory sexual pairing until pregnancy")
+	assert_str(String(local.policies[0].directive_parameters.demographic_target.label)).contains("not pregnant")
+	var provider_refusal:={"summary":"Provider declined classification.","policies":[],"unresolved":"Provider safety refusal.","source":"generative API"}
+	var restored:=PronouncementInterpreter._restore_deterministic_grounding(provider_refusal,local)
+	assert_str(String(restored.get("source",""))).is_equal("generative API + deterministic grounding")
+	assert_str(String(restored.policies[0].id)).is_equal("coercive_pronatalism")
+	assert_str(String(restored.get("unresolved","refusal leaked"))).is_empty()
+
+
+func test_lethal_target_is_demographically_scoped_and_audited()->void:
+	var interpreted:=PronouncementInterpreter._local_interpretation("Kill all women over 60 as soon as possible.")
+	var policy:Dictionary=interpreted.policies[0]
+	var parameters:Dictionary=policy.get("directive_parameters",{})
+	var target:Dictionary=parameters.get("demographic_target",{})
+	assert_str(String(target.get("sex",""))).is_equal("female")
+	assert_array(target.get("age_cohorts",[])).contains(["elders"])
+	assert_str(String(target.get("scope",""))).is_equal("all")
+	assert_str(String(parameters.get("ethical_severity",""))).is_equal("grave")
+	var directive:=AdvisorSystem.execute_pronouncement("Kill all women over 60 as soon as possible.",interpreted)
+	var applied_policy:Dictionary=directive.parameters.interpretation.policies[0]
+	assert_bool(bool(applied_policy.get("applied",false))).is_true()
+	assert_dict(GameState.demographic_ledger[0].get("demographic_target",{})).contains_keys(["sex","age_cohorts","label"])
+	assert_str(String(GameState.demographic_ledger[0].demographic_target.sex)).is_equal("female")
+
+
+func test_pronatalist_threat_waits_for_deadline_then_uses_real_enforcement_capacity()->void:
+	var text:="Tell parents with single children that they are failing the tribe and will be killed if they are not pregnant within 6 months."
+	var interpreted:=PronouncementInterpreter._local_interpretation(text)
+	var directive:=AdvisorSystem.execute_pronouncement(text,interpreted)
+	var policy:Dictionary=directive.parameters.interpretation.policies[0]
+	assert_bool(bool(policy.get("applied",false))).is_true()
+	assert_int(GameState.demographic_ledger.size()).is_equal(0)
+	var active:Dictionary={}
+	for modifier_variant in GameState.active_modifiers:
+		var modifier:Dictionary=modifier_variant
+		if String(modifier.get("id",""))=="coercive_pronatalism": active=modifier; break
+	assert_dict(active).is_not_empty()
+	assert_str(String(active.get("deadline_enforcement",""))).is_equal("pregnancy_threat")
+	GameState.elapsed_days=float(active.until_day)+1.0
+	ConsequenceEngine.refresh_policy_lifecycle()
+	assert_bool(bool(active.get("deadline_resolved",false))).is_true()
+	assert_dict(active.get("deadline_result",{})).contains_keys(["target_households","new_conceptions","deaths","departures"])
+	assert_int(int(active.deadline_result.target_households)).is_greater(0)
+	assert_int(int(active.deadline_result.new_conceptions)).is_equal(0)
 
 
 func test_grim_population_directive_is_executable_but_bounded_and_audited()->void:

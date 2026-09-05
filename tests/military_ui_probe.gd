@@ -15,7 +15,7 @@ func _ready()->void:
 	if MilitaryCommandUI.unit_choice.item_count<6: failures.append("Unit catalog is incomplete.")
 	if MilitaryCommandUI.weapon_choice.item_count!=2: failures.append("Levy training should expose exactly its two compatible weapon families.")
 	if MilitaryCommandUI.equipment_choice.item_count<10: failures.append("Production catalog is incomplete.")
-	if MilitaryCommandUI.training_program_choice.item_count!=4: failures.append("Army and command exercise choices are incomplete.")
+	if MilitaryCommandUI.training_program_choice.item_count!=8: failures.append("Army and command exercise choices are incomplete.")
 	if MilitaryCommandUI.training_program_button.text!="START PROGRAM": failures.append("Training-program order is not exposed in military command.")
 	if "BLOCKED" not in MilitaryCommandUI.begin_training_button.tooltip_text or "NEXT" not in MilitaryCommandUI.begin_training_button.tooltip_text: failures.append("Training does not explain its initial blocker and exact recovery action.")
 	if MilitaryCommandUI.settlement_defense_button.disabled and ("BLOCKED" not in MilitaryCommandUI.settlement_defense_button.tooltip_text or "NEXT" not in MilitaryCommandUI.settlement_defense_button.tooltip_text): failures.append("Settlement defense does not explain its blocker and recovery action.")

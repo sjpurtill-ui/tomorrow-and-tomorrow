@@ -5,10 +5,19 @@ const SETTLEMENT_MODEL_SCRIPT:=preload("res://scripts/settlement_model.gd")
 const TEST_SEED:=772241
 
 var model:Node
+var civilization_was_processing:bool
 
 func before_test()->void:
+	civilization_was_processing=CivilizationSystem.is_processing()
+	CivilizationSystem.set_process(false)
 	model=auto_free(SETTLEMENT_MODEL_SCRIPT.new())
 	_reset_fixture(TEST_SEED)
+
+func after_test()->void:
+	# Century jumps here exercise settlement fabric, not the real-time rival AI.
+	# Keep the autoload from simulating centuries between test assertions.
+	GameState.elapsed_days=19.0
+	CivilizationSystem.set_process(civilization_was_processing)
 
 func _reset_fixture(seed:int)->void:
 	GameState.reset_for_new_world(seed)
@@ -216,9 +225,10 @@ func test_paid_aggregate_convoy_seeds_a_second_settlement_without_creating_peopl
 	assert_int(quoted_sources).is_equal(int(quote.population))
 	var food_before:=float(GameState.resource_stockpiles.Food)
 	var timber_before:=float(GameState.resource_stockpiles.Timber)
-	var started:Dictionary=model.begin_settlement_convoy(destination,1.0)
+	var started:Dictionary=model.begin_settlement_convoy(destination,1.0,"Rivermeet")
 	assert_bool(bool(started.ok)).is_true()
 	assert_bool(bool(GameState.settlement_convoy.active)).is_true()
+	assert_str(String(GameState.settlement_convoy.settlement_name)).is_equal("Rivermeet")
 	assert_dict(GameState.settlement_convoy.population_sources).is_equal(quote.population_sources)
 	var convoy_profile:=GameState.population_function_profile({"total_absent":int(quote.population),"by_function":quote.population_sources})
 	assert_int(int(convoy_profile.absent)).is_equal(int(quote.population))
@@ -235,10 +245,37 @@ func test_paid_aggregate_convoy_seeds_a_second_settlement_without_creating_peopl
 	var network:Dictionary=model.settlement_network_snapshot()
 	assert_int(int(network.count)).is_equal(2)
 	assert_int(int(network.runtime_people_entities)).is_equal(0)
+	assert_str(String(network.settlements[1].name)).is_equal("Rivermeet")
+	assert_bool(bool(model.select_settlement(String(network.settlements[1].id)).ok)).is_true()
+	assert_str(String(model.selected_settlement_snapshot().name)).is_equal("Rivermeet")
+	assert_bool(bool(model.rename_settlement(String(network.settlements[1].id),"Riverwatch").ok)).is_true()
+	assert_str(String(model.selected_settlement_snapshot().name)).is_equal("Riverwatch")
 	var represented:=0
 	for settlement in network.settlements: represented+=int(settlement.population)
 	assert_int(represented).is_equal(GameState.population_total)
 	assert_array(model.validate_settlement_network()).is_empty()
+
+func test_expansion_convoy_uses_substitutable_founding_supplies_instead_of_hard_gating_plant_fiber()->void:
+	GameState.ensure_population_total(1000)
+	GameState.resource_stockpiles={"Food":100000.0,"Timber":0.0,"Fiber Plants":0.0,"Clay":20.0,"Stone":20.0}
+	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
+	var quote:Dictionary=model.settlement_convoy_quote(destination,1.0)
+	assert_bool(bool(quote.ok)).is_true()
+	assert_float(float(quote.get("fiber",-1.0))).is_equal(0.0)
+	assert_float(float((quote.materials as Dictionary).get("Clay",0.0))).is_greater(0.0)
+	assert_str(String(quote.reason)).is_equal("Ready")
+
+func test_expansion_convoy_names_the_general_supply_shortage_not_one_arbitrary_resource()->void:
+	GameState.ensure_population_total(1000)
+	GameState.resource_stockpiles={"Food":100000.0,"Timber":1.0,"Fiber Plants":0.0,"Clay":0.0,"Stone":0.0}
+	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
+	var quote:Dictionary=model.settlement_convoy_quote(destination,1.0)
+	assert_bool(bool(quote.ok)).is_false()
+	assert_str(String(quote.reason)).contains("founding supplies")
+	assert_str(String(quote.reason)).contains("any mix")
+	assert_str(String(quote.reason)).not_contains("more Fiber Plants")
+	assert_str(ResourceSystem.display_name("Fiber Plants")).is_equal("Plant Fiber")
+	assert_str(ResourceSystem.plain_language_description("Fiber Plants")).contains("reeds")
 
 func test_convoy_cannot_arrive_early_or_found_anywhere_except_its_approved_site()->void:
 	GameState.ensure_population_total(1000)

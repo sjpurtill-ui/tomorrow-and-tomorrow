@@ -31,9 +31,17 @@ func _ready()->void:
 		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
 		_expect((marker.get_node("SelectedRing") as MeshInstance3D).visible,"selected army has no distinct selection halo")
 		_expect(label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"army label inherits the regional marker scale")
-		_expect(_render_element_count(marker)<=13,"one aggregate player counter exceeds the fixed render-element budget")
-		_expect(marker.get_node_or_null("RoleGlyphPrimary")!=null and marker.get_node_or_null("RoleGlyphSecondary")!=null,"aggregate counter is missing its reusable role glyphs")
+		_expect(_render_element_count(marker)<=16,"one aggregate player icon exceeds the fixed render-element budget")
+		_expect(marker.get_node_or_null("RoleGlyphPrimary")!=null and marker.get_node_or_null("RoleGlyphFourth")!=null,"aggregate icon is missing its reusable silhouette parts")
+		_expect((marker.get_node("StrengthLabel") as Label3D).text.contains("SOLDIERS"),"army icon has no explicit soldier count")
 		_expect(marker.get_node_or_null("RoleInfantryA")==null and marker.get_node_or_null("RoleArmoredHull")==null,"aggregate counter still retains dormant role-specific branches")
+		for historical_unit in ["levy","line_infantry","skirmisher","cavalry","siege_engineer","field_artillery","rifle_infantry","machine_gun_company","motorized_infantry","armored_formation","modern_artillery"]:
+			terrain._configure_warfare_role_glyph(marker,"infantry",historical_unit)
+			_expect(String(marker.get_meta("formation_icon",""))==historical_unit,"%s has no distinct military icon mapping" % historical_unit)
+			var visible_icon_parts:=0
+			for glyph_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
+				if (marker.get_node(glyph_name) as MeshInstance3D).visible: visible_icon_parts+=1
+			_expect(visible_icon_parts>=1,"%s icon has no visible silhouette" % historical_unit)
 		var damaged_army:=army.duplicate(true)
 		damaged_army["readiness"]=0.18
 		damaged_army["wounded_pool"]=8000
@@ -48,7 +56,7 @@ func _ready()->void:
 	terrain.add_child(foreign_counter)
 	var foreign_view:Dictionary=PRESENTATION.foreign_marker({"id":"foreign_probe","civilization":"Cedar League","identified":true,"hostile":true,"strength_estimate_low":900,"strength_estimate_high":1500,"readiness_estimate_low":0.42,"readiness_estimate_high":0.66,"formation_role":"armored","formation_era":3,"damage_estimate":0.36,"position":{"x":origin.x+8.0,"z":origin.z+8.0}},320.0)
 	terrain._apply_warfare_formation_view(foreign_counter,foreign_view)
-	_expect(_render_element_count(foreign_counter)<=14,"one observed foreign counter exceeds the fixed render-element budget")
+	_expect(_render_element_count(foreign_counter)<=17,"one observed foreign icon exceeds the fixed render-element budget")
 	_expect((foreign_counter.get_node("RoleGlyphSecondary") as MeshInstance3D).visible,"identified foreign composition does not reach the aggregate role glyph")
 	foreign_counter.queue_free()
 	army["status"]="moving"
@@ -95,8 +103,10 @@ func _ready()->void:
 	_expect(stacked_labels==1,"co-located regional armies did not collapse to one aggregate label")
 	terrain.camera.size=7.99
 	terrain._refresh_player_field_army_markers()
-	for hidden_marker_variant in terrain.player_field_army_markers.values():
-		_expect(not (hidden_marker_variant as Node3D).visible,"ground-scale view still renders a strategic army token")
+	for close_marker_variant in terrain.player_field_army_markers.values():
+		var close_marker:=close_marker_variant as Node3D
+		_expect(close_marker.visible,"army icon disappears at close zoom")
+		_expect(close_marker.scale.x<0.20,"close-zoom army icon retains an oversized minimum scale")
 	if not failures.is_empty():
 		for failure in failures: push_error(failure)
 		get_tree().quit(1)

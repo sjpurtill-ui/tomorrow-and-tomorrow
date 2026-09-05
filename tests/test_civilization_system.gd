@@ -38,6 +38,23 @@ func _hide_all_contacts()->void:
 		system.civilizations[index]=civ
 
 
+func test_scout_lateness_scales_with_expedition_and_does_not_bunch_at_twenty_days()->void:
+	var long_late_values:Dictionary={}
+	var saw_early:=false
+	for mission_id in range(1,128):
+		var variance:int=system._scout_timing_variance(365,mission_id,1000+mission_id*3)
+		assert_int(variance).is_less_equal(ceili(365.0*0.32))
+		assert_int(variance).is_greater_equal(-ceili(365.0*0.12))
+		if variance>0: long_late_values[variance]=true
+		if variance<0: saw_early=true
+	assert_bool(saw_early).is_true()
+	assert_int(long_late_values.size()).is_greater_equal(12)
+	var maximum_lateness:=0
+	for value in long_late_values: maximum_lateness=maxi(maximum_lateness,int(value))
+	assert_int(maximum_lateness).is_greater(21)
+	assert_int(system._scout_timing_variance(180,17,2400)).is_equal(system._scout_timing_variance(180,17,2400))
+
+
 func test_unmet_civilizations_are_absent_from_player_knowledge()->void:
 	_hide_all_contacts()
 	var known:Dictionary=system.known_competition_snapshot()
@@ -148,11 +165,12 @@ func test_scouts_reveal_nothing_until_their_return_then_chart_route_and_contact(
 	assert_bool(bool(in_transit_map.active_scout_party)).is_true()
 	assert_int((in_transit_map.returned_reports as Array).size()).is_equal(0)
 	assert_bool(in_transit_map.has("active_route")).is_false()
-	system.advance_to_day(364)
+	var actual_return_day:int=int((system.scout_missions[0] as Dictionary).get("actual_return_day",365))
+	system.advance_to_day(actual_return_day-1)
 	assert_bool(bool(system.exploration_status().active)).is_true()
 	assert_int((system.fog_snapshot().areas as Array).size()).is_equal(original_areas)
 	assert_int(int(system.known_competition_snapshot().contacted_count)).is_equal(0)
-	system.advance_to_day(365)
+	system.advance_to_day(actual_return_day)
 	assert_bool(bool(system.exploration_status().active)).is_false()
 	assert_float(float(system.player_effects().get("scout_labor_absence",0.0))).is_equal(0.0)
 	assert_int(int(system.player_population_commitments().total_absent)).is_equal(0)
@@ -224,6 +242,23 @@ func test_scout_route_planner_keeps_every_segment_on_authoritative_land()->void:
 	assert_float(float(plan.get("distance_km",0.0))).is_equal_approx(Vector2(180.0,75.0).length(),0.01)
 
 
+func test_ordered_scout_heading_stays_in_ordered_sector_and_applies_to_recruitment()->void:
+	for target_id in ["open_world","recruit_people"]:
+		var quote:Dictionary=system.scout_mission_quote(30,target_id,"north")
+		assert_bool(bool(quote.get("can_dispatch",false))).is_true()
+		assert_str(String(quote.get("ordered_heading",""))).is_equal("north")
+		var sent:Dictionary=system.dispatch_scouts(30,target_id,"north")
+		assert_bool(bool(sent.get("ok",false))).is_true()
+		var mission:Dictionary=system.scout_missions[system.scout_missions.size()-1]
+		assert_str(String(mission.get("ordered_heading",""))).is_equal("north")
+		assert_str(String(mission.get("planned_heading",""))).is_equal("north")
+		var route:Array=mission.get("route",[])
+		var endpoint_data:Dictionary=route[route.size()-1]
+		var endpoint:=Vector2(float(endpoint_data.get("x",0.0)),float(endpoint_data.get("z",0.0)))
+		assert_str(system._compass_phrase(system.player_world_origin,endpoint)).is_equal("north")
+		system.scout_missions.clear()
+
+
 func test_unknown_geography_is_not_silently_treated_as_land()->void:
 	system.set_scout_geography_authority(Callable())
 	var quote:Dictionary=system.scout_mission_quote(30,"open_world")
@@ -263,7 +298,7 @@ func test_ocean_separated_known_target_is_blocked_before_people_or_food_depart()
 	var target_id:="settlement:%s" % String(civ.id)
 	var quote:Dictionary=system.scout_mission_quote(30,target_id)
 	assert_bool(bool(quote.get("can_dispatch",true))).is_false()
-	assert_str(String(quote.get("blocker",""))).contains("land-only route")
+	assert_str(String(quote.get("blocker",""))).contains("continuous land route")
 	var dispatch:Dictionary=system.dispatch_scouts(30,target_id)
 	assert_bool(dispatch.has("error")).is_true()
 	assert_float(FoodSystem.total_stored()).is_equal_approx(food_before,0.001)
@@ -349,6 +384,25 @@ func test_returning_scouts_can_recruit_a_small_aggregate_wandering_group()->void
 	assert_int(recruited).is_between(2,12)
 	assert_int(GameState.population_total).is_equal(population_before+recruited)
 	assert_float(float(GameState.population_cohorts.get("working_age",0.0))).is_greater(0.0)
+
+
+func test_recruitment_returns_a_distinct_social_account_even_when_nobody_joins()->void:
+	var mission:Dictionary={"mission_id":771,"duration_days":90,"target_id":"recruit_people","target_kind":"recruit_people"}
+	var empty_account:Dictionary=system._recruitment_return_account(mission,550,0)
+	assert_dict(empty_account).is_not_empty()
+	assert_str(String(empty_account.get("summary",""))).is_not_empty()
+	assert_array(empty_account.get("reasons",[])).is_not_empty()
+	assert_bool(String(empty_account.get("disposition","")) in ["none_found","all_declined"]).is_true()
+	var successful_account:Dictionary=system._recruitment_return_account(mission,551,7)
+	assert_int(int(successful_account.get("joined",0))).is_equal(7)
+	assert_int(int(successful_account.get("encountered",0))).is_greater_equal(7)
+	assert_str(String(successful_account.get("summary",""))).contains("7")
+	var distinct_returns:Dictionary={}
+	for expedition_number in range(8):
+		mission["mission_id"]=800+expedition_number
+		var varied_account:Dictionary=system._recruitment_return_account(mission,600+expedition_number*17,0)
+		distinct_returns[String(varied_account.get("summary",""))]=true
+	assert_int(distinct_returns.size()).is_greater(2)
 
 
 func test_an_encounter_site_is_not_a_diplomatic_destination()->void:
@@ -601,6 +655,90 @@ func test_foreign_scouts_report_only_after_homecoming_and_can_be_captured()->voi
 	assert_int(int(MilitaryCampaign.prisoner_custody_snapshot().prisoners)).is_greater(0)
 	system._process_foreign_scout_reports(41)
 	assert_float(float(system.civilizations[civ_index].player_relation.rival_player_intelligence)).is_equal(0.0)
+	assert_array(system.validate_state()).is_empty()
+
+
+func test_foreign_scout_homecoming_replaces_the_route_and_uses_current_world_reach()->void:
+	_hide_all_contacts()
+	system.register_player_origin(Vector2.ZERO)
+	var scout_index:int=system.foreign_formations.find_custom(func(entry:Dictionary)->bool: return String(entry.get("kind",""))=="scout")
+	assert_int(scout_index).is_greater_equal(0)
+	var scout:Dictionary=system.foreign_formations[scout_index]
+	var civ_index:int=system._civilization_index(String(scout.civ_id))
+	var civ:Dictionary=system.civilizations[civ_index]
+	civ["world_reach"]=0.52
+	civ["logistics"]=0.42
+	civ["knowledge"]=0.38
+	system.civilizations[civ_index]=civ
+	var home:Vector2=system._civilization_world_position(civ)
+	scout["point_a"]=home
+	scout["point_b"]=home+Vector2(100.0,0.0)
+	scout["depart_day"]=0
+	scout["leg_days"]=10.0
+	scout["last_report_cycle"]=0
+	var sequence_before:=int(scout.search_sequence)
+	system.foreign_formations[scout_index]=scout
+	system._process_foreign_scout_reports(20)
+	var next_scout:Dictionary=system.foreign_formations[scout_index]
+	assert_int(int(next_scout.search_sequence)).is_equal(sequence_before+1)
+	assert_float(Vector2(next_scout.point_a).distance_to(home)).is_less(0.01)
+	assert_float(Vector2(next_scout.point_a).distance_to(Vector2(next_scout.point_b))).is_greater(1000.0)
+	assert_int(int(next_scout.depart_day)).is_equal(20)
+	assert_array(system.validate_state()).is_empty()
+
+
+func test_distant_foreign_rumors_require_reachable_information_and_do_not_create_contact()->void:
+	_hide_all_contacts()
+	system.register_player_origin(Vector2.ZERO)
+	var civ:Dictionary=system.civilizations[0]
+	civ["position"]=Vector2(0.20,0.0)
+	civ["world_reach"]=0.0
+	civ["logistics"]=0.12
+	civ["institutions"]=0.12
+	system.civilizations[0]=civ
+	system._process_foreign_player_rumors(30)
+	assert_float(float(system.civilizations[0].player_relation.get("rival_player_trace_confidence",0.0))).is_equal(0.0)
+	civ=system.civilizations[0]
+	civ["world_reach"]=0.62
+	civ["logistics"]=0.58
+	civ["institutions"]=0.52
+	civ["diplomacy"]=0.55
+	system.civilizations[0]=civ
+	for day in range(60,12001,30):
+		system._process_foreign_player_rumors(day)
+		if float(system.civilizations[0].player_relation.get("rival_player_trace_confidence",0.0))>0.0: break
+	var relation:Dictionary=system.civilizations[0].player_relation
+	assert_float(float(relation.get("rival_player_trace_confidence",0.0))).is_greater(0.0)
+	assert_float(float(relation.get("rival_player_trace_radius_km",0.0))).is_greater(100.0)
+	assert_int(int(relation.get("rival_contact_level",0))).is_equal(1)
+	assert_int(int(relation.get("rival_met_day",-1))).is_equal(-1)
+	assert_int(int(relation.get("contact_level",0))).is_equal(0)
+
+
+func test_foreign_scouts_carry_indirect_settlement_traces_home_before_investigating()->void:
+	_hide_all_contacts()
+	system.register_player_origin(Vector2.ZERO)
+	GameState.population_exact=10_000.0
+	var scout_index:int=system.foreign_formations.find_custom(func(entry:Dictionary)->bool: return String(entry.get("kind",""))=="scout")
+	var scout:Dictionary=system.foreign_formations[scout_index]
+	var civ_index:int=system._civilization_index(String(scout.civ_id))
+	var signal_radius:float=system._player_settlement_signal_radius(20)
+	var direct_radius:float=system._foreign_scout_direct_contact_radius(20)
+	var trace_distance:float=(signal_radius+direct_radius)*0.5
+	scout["point_a"]=Vector2(-120.0,trace_distance)
+	scout["point_b"]=Vector2(120.0,trace_distance)
+	scout["depart_day"]=0
+	scout["leg_days"]=10.0
+	scout["last_report_cycle"]=0
+	system.foreign_formations[scout_index]=scout
+	system._process_foreign_scout_reports(19)
+	assert_float(float(system.civilizations[civ_index].player_relation.get("rival_player_trace_confidence",0.0))).is_equal(0.0)
+	system._process_foreign_scout_reports(20)
+	var relation:Dictionary=system.civilizations[civ_index].player_relation
+	assert_float(float(relation.get("rival_player_trace_confidence",0.0))).is_greater(0.0)
+	assert_int(int(relation.get("rival_contact_level",0))).is_equal(1)
+	assert_int(int(relation.get("rival_met_day",-1))).is_equal(-1)
+	assert_int(int(system.foreign_formations[scout_index].depart_day)).is_equal(20)
 	assert_array(system.validate_state()).is_empty()
 
 

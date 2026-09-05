@@ -6,6 +6,11 @@ const SettlementModelScript:=preload("res://scripts/settlement_model.gd")
 const SocietalValuesModel:=preload("res://scripts/societal_values_model.gd")
 const WorldDiscoveryMapScript:=preload("res://scripts/world_discovery_map.gd")
 const WarfareMapPresentation:=preload("res://scripts/warfare_map_presentation.gd")
+const SCORE_TRACKS:=[
+	preload("res://assets/audio/Tomorrow.mp3"),
+	preload("res://assets/audio/War.mp3"),
+]
+var score_track_index:=0
 
 func _settlement_model() -> Node:
 	return get_node("/root/SettlementModel")
@@ -72,6 +77,14 @@ var camera_target := Vector3.ZERO
 var camera_yaw := -0.72
 var camera_pitch := -0.98
 var camera_distance := 92.0
+var zoom_target_size:float=-1.0
+var zoom_pointer:=Vector2.ZERO
+var north_reset_active:=false
+var camera_input_msec:int=0
+var terrain_patch_job:RefCounted
+var terrain_patch_last_slice_usec:int=0
+var terrain_patch_last_commit_usec:int=0
+const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
 var dragging := false
 var rotating_camera := false
 var grid_x := 80
@@ -184,6 +197,7 @@ var settlement_convoy_instruction_label:Label
 var settlement_convoy_confirm_panel:Control
 var settlement_convoy_confirm_status:Label
 var settlement_convoy_confirm_button:Button
+var settlement_convoy_name_input:LineEdit
 var settlement_convoy_pending_destination:=Vector3.ZERO
 var settlement_convoy_pending_route:Dictionary={}
 var settlement_convoy_pending_quote:Dictionary={}
@@ -223,6 +237,7 @@ var settlement_naming_panel: Control
 var settlement_name_input: LineEdit
 var settlement_name_confirm: Button
 var naming_previous_speed := 0.0
+var settlement_naming_target_id:=""
 var suppress_naming_prompt := false
 var scale_bar_root: Control
 var scale_bar_line: ColorRect
@@ -253,6 +268,7 @@ var scout_dispatch_panel:Control
 var scout_dispatch_status:Label
 var scout_dispatch_previous_speed:=0.0
 var pending_scout_target_id:="open_world"
+var pending_scout_heading:=""
 var diplomat_dispatch_panel:Control
 var diplomat_dispatch_status:Label
 var diplomat_dispatch_previous_speed:=0.0
@@ -287,6 +303,10 @@ var civilization_feedback_text:=""
 var world_competition_button:Button
 var capture_render_active:=false
 var discovery_mask_texture:ImageTexture
+const LANDSCAPE_VISUALS:=preload("res://scripts/landscape_resource_visuals.gd")
+var woodland_visual_areas:=PackedVector4Array()
+var woodland_visual_key:=""
+var woodland_visual_materials:Array[WeakRef]=[]
 var terrain_fog_materials:Array[ShaderMaterial]=[]
 var rendered_fog_revision:=-1
 var foreign_formation_markers:Dictionary={}
@@ -297,6 +317,9 @@ var player_field_army_markers:Dictionary={}
 ## charted land to order the march). -1 = nothing selected.
 var selected_army_id:=-1
 var player_field_army_paths:Dictionary={}
+## Planned corridors for currently deployed scout parties. These show the
+## player's order, not supernatural live tracking or discoveries in the fog.
+var player_scout_route_markers:Dictionary={}
 var warfare_front_markers:Dictionary={}
 var rendered_observation_revision:=-1
 const LIVE_REPORT_REFRESH_INTERVAL_SECONDS:=0.75
@@ -310,7 +333,13 @@ var active_progression_domain:="demography"
 # aggregate neighborhood conditions from authoritative civilization/settlement state.
 var district_condition_visual_override:=-1
 
+var military_attention_dialog:ConfirmationDialog
+var military_attention_seen:Dictionary={}
+
 func _ready() -> void:
+	if not MilitaryCampaign.threat_changed.is_connected(_on_military_threat_attention): MilitaryCampaign.threat_changed.connect(_on_military_threat_attention)
+	if not MilitaryCampaign.battle_resolved.is_connected(_on_battle_attention): MilitaryCampaign.battle_resolved.connect(_on_battle_attention)
+	_restore_military_attention.call_deferred()
 	_trace_load("ready")
 	var requested_founding_focus:=""
 	for argument in OS.get_cmdline_user_args():
@@ -331,6 +360,11 @@ func _ready() -> void:
 	DiscoverySystem.initialize()
 	ProgressionSystem.process_day(last_discovery_day)
 	ConsequenceEngine.initialize()
+	# Network requests do not survive a process/scene restart. Recover any saved
+	# in-flight civic turn as an explicit interrupted conversation instead of
+	# leaving the composer permanently locked on INTERPRETING.
+	PronouncementInterpreter.reset_for_new_world()
+	AdvisorSystem.recover_interrupted_civic_directives()
 	if not CivilizationSystem.diplomatic_event.is_connected(_on_diplomatic_event):
 		CivilizationSystem.diplomatic_event.connect(_on_diplomatic_event)
 	_configure_shape()
@@ -338,7 +372,14 @@ func _ready() -> void:
 	_prepare_river_course()
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_scout_land_at"))
 	CivilizationSystem.set_ground_survey_authority(Callable(self,"_survey_ground_at"))
+	if not CivilizationSystem.scout_report_returned.is_connected(_on_scout_report_returned):
+		CivilizationSystem.scout_report_returned.connect(_on_scout_report_returned)
 	world_start_position = _find_camp_position()
+	# province_terrain is retained for legacy reports, but in the seamless world it
+	# now describes the actual founding ground instead of declaring every planet to
+	# be Plains. Simulation systems consume the richer environment profile directly.
+	var founding_biome:=_biome_at(world_start_position.x,world_start_position.z,world_start_position.y)
+	GameState.province_terrain=String(founding_biome.get("label","unknown terrain")).capitalize()
 	CivilizationSystem.register_player_origin(Vector2(world_start_position.x,world_start_position.z))
 	_refresh_discovery_mask(true)
 	_trace_load("world configured start=%s river_x=%.1f height=%.2f" % [world_start_position,_world_river_x(world_start_position.z),world_start_position.y])
@@ -531,6 +572,7 @@ func _capture_preview_if_requested() -> void:
 			EconomySystem.process_day(daily_context)
 			_evaluate_travel_survival()
 			_process_settlement_day()
+			_process_other_city_resources()
 			_refresh_discovered_resource_overlays()
 			_update_time_interface()
 			if capture_travel and not travel_active:
@@ -815,13 +857,17 @@ func _configure_preview_province() -> void:
 
 func _process(delta: float) -> void:
 	_refresh_discovery_mask()
+	_refresh_woodland_visuals()
 	_process_camera_navigation(delta)
+	_process_smooth_camera(delta)
 	_update_world_streaming()
+	_advance_terrain_patch()
 	_update_scale_lod()
 	_update_convoy_marker_animation()
 	_refresh_contact_encounter_markers()
 	_refresh_foreign_formation_markers()
 	_refresh_player_field_army_markers()
+	_refresh_player_scout_route_markers()
 	_refresh_landmark_markers()
 	_refresh_nomad_sighting_markers()
 	_refresh_settlement_network()
@@ -837,7 +883,7 @@ func _process(delta: float) -> void:
 	var days_advanced := delta * _speed_hours_per_second()/24.0
 	GameState.elapsed_days += days_advanced
 	var current_discovery_day := int(floor(GameState.elapsed_days))
-	while last_discovery_day < current_discovery_day:
+	while last_discovery_day < current_discovery_day and game_speed>0.0:
 		last_discovery_day += 1
 		GameState.convoy_traveling=travel_active
 		CivilizationSystem.advance_to_day(last_discovery_day)
@@ -849,6 +895,7 @@ func _process(delta: float) -> void:
 		var simulation_events := _process_population_day(daily_context)
 		var economy_events := EconomySystem.process_day(daily_context)
 		simulation_events.append_array(economy_events)
+		simulation_events.append_array(GovernmentPeopleSystem.process_day(last_discovery_day))
 		_refresh_event_report()
 		for consequence in simulation_events:
 			if String(consequence.get("severity","")) in ["danger","critical","warning"]:
@@ -857,6 +904,7 @@ func _process(delta: float) -> void:
 			if String(resource_event.get("title","")) in ["Resource Flow Constrained","Material Losses","Resource Accessible"]:
 				AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
 		_process_settlement_day()
+		_process_other_city_resources()
 		_settlement_model().process_month(_settlement_spatial_context(daily_context))
 		var progression_events:=ProgressionSystem.process_day(last_discovery_day)
 		_refresh_discovered_resource_overlays()
@@ -1172,6 +1220,15 @@ func _discovery_context() -> Dictionary:
 	if settler_marker:
 		var origin:Vector3=GameState.settlement_founded_at if GameState.settlement_site_committed else settler_marker.position
 		context["origin"] = origin
+		var origin_2d:=Vector2(origin.x,origin.z)
+		var environment_profile:=PlanetEnvironment.profile_at(origin_2d,_survey_ground_at(origin_2d))
+		context["environment_profile"]=environment_profile
+		context["woodland_catchment"]=_woodland_catchment(origin)
+		context["biome"]=String(environment_profile.get("biome","unknown"))
+		context["temperature"]=float(environment_profile.get("temperature",0.5))
+		context["precipitation"]=float(environment_profile.get("precipitation",0.5))
+		context["fertility"]=float(environment_profile.get("fertility",0.0))
+		context["foraging"]=maxf(float(context.get("foraging",0.0)),float(environment_profile.get("forage",0.0)))
 		# The rendered drainage is authoritative geography. A settlement visibly on
 		# a riverbank must not depend on whether a separate random resource marker was
 		# successfully scattered elsewhere in the region.
@@ -1500,7 +1557,8 @@ func _build_environment() -> void:
 	add_child(sun)
 
 	camera = Camera3D.new()
-	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.projection = Camera3D.PROJECTION_PERSPECTIVE if SEAMLESS_WORLD else Camera3D.PROJECTION_ORTHOGONAL
+	camera.fov = 35.0
 	camera.size = 190.0 if SEAMLESS_WORLD else 108.0
 	camera.near = 0.05
 	camera.far = 100000.0
@@ -1546,51 +1604,35 @@ func _build_terrain() -> void:
 		if terrain_body:
 			terrain_body.name = "TerrainBody"
 
-func _rebuild_regional_terrain_patch(center: Vector2,span: float) -> void:
-	if not SEAMLESS_WORLD:
-		return
-	# Stream the same procedural planet down to settlement scale. The previous
-	# 80 km floor left only one terrain vertex per ~500 m when the player was
-	# looking at a village, producing a flat, blurred plate beneath detailed plots.
-	span=clampf(span,0.9,920.0)
+func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
+	if not SEAMLESS_WORLD or terrain_patch_job!=null: return
+	# Stable geometric buckets avoid rebuilding for each interpolated zoom frame.
+	span=clampf(pow(1.5,ceil(log(maxf(0.9,span))/log(1.5))),0.9,920.0)
 	var snap_step:=maxf(0.04,span/12.0)
 	var snapped:=Vector2(round(center.x/snap_step)*snap_step,round(center.y/snap_step)*snap_step)
-	if regional_terrain_patch and regional_patch_center.distance_to(snapped)<snap_step*0.72 and absf(regional_patch_span-span)<maxf(14.0,span*0.12):
-		return
-	regional_patch_center=snapped
-	regional_patch_span=span
-	if regional_terrain_patch:
-		regional_terrain_patch.queue_free()
-	# Settlement and country views need enough samples that ridges read as landforms,
-	# not a triangulated strategy-game board. Keep the continental patch bounded,
-	# then spend vertices only as the streamed footprint contracts around the camera.
+	if regional_terrain_patch and regional_patch_center.distance_to(snapped)<snap_step*0.72 and is_equal_approx(regional_patch_span,span): return
 	var resolution:=385 if span<=14.0 else (257 if span<=32.0 else (201 if span<=110.0 else 161))
-	var surface:=SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for z_index in resolution:
-		for x_index in resolution:
-			var x:=snapped.x+(float(x_index)/(resolution-1)-0.5)*span
-			var z:=snapped.y+(float(z_index)/(resolution-1)-0.5)*span
-			var height:=_height_at(x,z)+0.0006
-			surface.set_color(_terrain_color_at(x,z,height))
-			surface.add_vertex(Vector3(x,height,z))
-	for z_index in resolution-1:
-		for x_index in resolution-1:
-			var a:=z_index*resolution+x_index
-			var b:=a+1
-			var d:=(z_index+1)*resolution+x_index
-			var c:=d+1
-			# Alternate the diagonal. A single global split direction produces long
-			# staircase bands across slopes even at otherwise adequate resolution.
-			var indices:=[a,b,c,a,c,d] if (x_index+z_index)%2==0 else [a,b,d,b,c,d]
-			for index in indices:
-				surface.add_index(index)
-	surface.generate_normals()
-	regional_terrain_patch=MeshInstance3D.new()
-	regional_terrain_patch.name="RegionalTerrainLOD"
-	regional_terrain_patch.mesh=surface.commit()
-	regional_terrain_patch.material_override=_create_terrain_material()
-	add_child(regional_terrain_patch)
+	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(resolution,span,snapped,_height_at,_terrain_color_at)
+
+func _advance_terrain_patch()->void:
+	if terrain_patch_job==null: return
+	if not terrain_patch_job.advance(2500): return
+	var started:=Time.get_ticks_usec()
+	var replacement:=MeshInstance3D.new()
+	replacement.name="RegionalTerrainLOD"
+	replacement.mesh=terrain_patch_job.commit()
+	replacement.material_override=regional_terrain_patch.material_override if regional_terrain_patch else _create_terrain_material()
+	add_child(replacement)
+	var previous:=regional_terrain_patch
+	regional_terrain_patch=replacement
+	regional_patch_center=terrain_patch_job.center
+	regional_patch_span=terrain_patch_job.span
+	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
+	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
+	terrain_patch_job=null
+	if previous:
+		previous.visible=false
+		previous.queue_free()
 
 
 func _discovery_mask_pixel(position:Vector2,width:int,height:int)->Vector2:
@@ -1684,6 +1726,8 @@ uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size = vec2(40075.0, 20004.0);
 uniform vec2 fog_current_origin = vec2(0.0);
 uniform float drainage_phase = 0.0;
+uniform float land_resources = 0.0;
+uniform bool woodland_channel = true;
 
 varying vec3 world_position;
 varying vec3 world_normal;
@@ -1795,15 +1839,14 @@ void fragment() {
 	ground_surface = mix(vec3(0.29, 0.30, 0.22), ground_surface, 0.79);
 	vec3 forest_surface = mix(vec3(forest_luma), forest_sample, 0.76);
 	forest_surface = mix(vec3(0.058, 0.108, 0.069), forest_surface, 0.77);
-	float green_bias = COLOR.g - max(COLOR.r, COLOR.b * 0.82);
-	float forest_mask = smoothstep(0.025, 0.105, green_bias) * (1.0 - smoothstep(0.30, 0.72, slope));
-	float woodland_mass = smoothstep(0.36, 0.76, biome_patch + (regional - 0.5) * 0.20);
-	// Procedural canopy mottling may only appear where the CPU biome field
-	// painted woodland-capable ground (green-biased vertex color) — the forest
-	// texture must never colonize steppe or open grassland on its own.
-	woodland_mass *= smoothstep(0.015, 0.060, green_bias);
-	forest_mask = max(forest_mask, woodland_mass * 0.46 * (1.0 - smoothstep(0.34, 0.76, slope)));
-	forest_mask *= 0.80 + broad * 0.28;
+	// Alpha carries woodland density from the same biome samples used by
+	// resource access and inspection. Green grass no longer implies forest.
+	float forest_mask=woodland_channel?clamp(COLOR.a,0.0,1.0):smoothstep(0.025,0.105,COLOR.g-max(COLOR.r,COLOR.b*0.82));
+	forest_mask*=1.0-smoothstep(0.30,0.72,slope);
+	float retained_woodland=woodland_retained(world_position.xz);
+	forest_mask*=retained_woodland;
+	float crown_shade=value_noise(world_position.xz*90.0);
+	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
 	// Seeded intermittent swales bridge the visual scale between a continental
@@ -1844,6 +1887,11 @@ void fragment() {
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
 	float rock_mask = smoothstep(0.16, 0.56, slope) * smoothstep(-0.8, 4.8, world_position.y);
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
+	// Resource mode reads as land cover, without floating pins or rings.
+	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
+	earth=mix(earth,vec3(0.43,0.405,0.35),land_resources*rock_mask*0.46);
+	float productive_open=(1.0-forest_mask)*(1.0-rock_mask)*smoothstep(0.0,0.04,COLOR.g-COLOR.r);
+	earth=mix(earth,earth*vec3(1.18,1.08,0.76),land_resources*productive_open*0.40);
 	float highland = smoothstep(5.8, 12.0, world_position.y) * (0.35 + slope * 0.65);
 	earth = mix(earth, vec3(0.40,0.39,0.36), highland * 0.36);
 	// A fixed north-west sun gives the orthographic world the same readable relief
@@ -1873,14 +1921,18 @@ void fragment() {
 	ROUGHNESS = 0.96;
 }
 """
+	shader.code=shader.code.replace("varying vec3 world_position;",LANDSCAPE_VISUALS.CUTTING_SHADER+"\nvarying vec3 world_position;")
 	var material := ShaderMaterial.new()
 	material.shader = shader
+	_register_woodland_material(material)
 	var ground_texture: Texture2D = load("res://assets/terrain/temperate_ground_albedo_v1.png")
 	var forest_texture: Texture2D = load("res://assets/terrain/temperate_forest_albedo_v1.png")
 	var regional_texture: Texture2D = load("res://assets/terrain/temperate_regional_satellite_v2.png")
 	material.set_shader_parameter("ground_albedo",ground_texture)
 	material.set_shader_parameter("forest_albedo",forest_texture)
 	material.set_shader_parameter("regional_albedo",regional_texture)
+	material.set_shader_parameter("land_resources",1.0 if resource_view_enabled else 0.0)
+	material.set_shader_parameter("woodland_channel",SEAMLESS_WORLD)
 	material.set_shader_parameter("drainage_phase",float(posmod(GameState.world_seed,10007))/10007.0)
 	_fog_shader_parameters(material)
 	return material
@@ -1946,6 +1998,7 @@ func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
 	# Woodland needs both warmth and rain (treeline and aridity limits).
 	var woodland:=clampf((precipitation-0.40)*2.6,0.0,1.0)*clampf((temperature-0.16)*3.4,0.0,1.0)
 	if height>3.2: woodland*=1.0-clampf((height-3.2)/5.2,0.0,0.74)
+	woodland*=0.22+0.78*smoothstep(-0.30,0.30,detail_noise.get_noise_2d(x*1.8+7.0,z*1.8-29.0))
 	var id:="grassland"
 	var label:="open grassland"
 	if temperature<0.16:
@@ -1987,7 +2040,10 @@ func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
 
 func _terrain_color_at(x: float, z: float, height: float) -> Color:
 	if SEAMLESS_WORLD:
-		return _biome_at(x,z,height).color
+		var biome:=_biome_at(x,z,height)
+		var color:Color=biome.color
+		color.a=float(biome.woodland)
+		return color
 	var moisture := detail_noise.get_noise_2d(x + 900.0, z - 700.0)
 	var dry_noise := terrain_noise.get_noise_2d(x - 640.0, z + 510.0)
 	var woodland_noise := terrain_noise.get_noise_2d(x * 1.35 + 1300.0, z * 1.35 - 800.0)
@@ -2155,6 +2211,10 @@ func _add_river_segment(surface: SurfaceTool, a: Vector3, b: Vector3, width: flo
 		surface.set_color(color)
 		surface.add_vertex(point)
 
+func _river_width_factor(point:Vector3)->float:
+	# World coordinates keep width stable when tessellation changes.
+	return clampf(0.90+sin(point.z*0.17+float(GameState.world_seed%211))*0.10+sin(point.z*1.7+point.x*0.3)*0.035,0.72,1.08)
+
 func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: float, color: Color) -> void:
 	for i in points.size() - 1:
 		var a := points[i]
@@ -2163,13 +2223,15 @@ func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: floa
 		var after := points[mini(points.size()-1,i+2)]
 		var tangent_a := Vector2(b.x-before.x,b.z-before.z).normalized()
 		var tangent_b := Vector2(after.x-a.x,after.z-a.z).normalized()
-		var width_a:=width*clampf(0.88+sin(float(i)*0.023+float(GameState.world_seed%211))*0.14+sin(float(i)*0.0061+1.7)*0.08,0.68,1.18)
-		var width_b:=width*clampf(0.88+sin(float(i+1)*0.023+float(GameState.world_seed%211))*0.14+sin(float(i+1)*0.0061+1.7)*0.08,0.68,1.18)
+		var width_a:=width*_river_width_factor(a)
+		var width_b:=width*_river_width_factor(b)
 		var side_a := Vector3(-tangent_a.y,0.0,tangent_a.x)*width_a
 		var side_b := Vector3(-tangent_b.y,0.0,tangent_b.x)*width_b
 		var corners: Array[Vector3] = [a-side_a,b-side_b,b+side_b,a-side_a,b+side_b,a+side_a]
-		var reach_tint:=0.91+sin(float(i)*0.017+2.4)*0.06
-		for point in corners:
+		var reach_tint:=0.97+sin(a.z*0.08+2.4)*0.025
+		for corner_index in corners.size():
+			var point:=corners[corner_index]
+			surface.set_uv(Vector2([0.0,0.0,1.0,0.0,1.0,1.0][corner_index],point.z))
 			var seamless_lift := 0.0037 if width < 0.15 else 0.0021
 			point.y=_height_at(point.x,point.z)+(seamless_lift if SEAMLESS_WORLD else (0.105 if width<0.8 else 0.072))
 			surface.set_color(Color(color.r*reach_tint,color.g*reach_tint,color.b*reach_tint,color.a))
@@ -2206,12 +2268,17 @@ func _build_river_network() -> void:
 	banks.begin(Mesh.PRIMITIVE_TRIANGLES)
 	water_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var points: Array[Vector3] = []
-	var river_samples:=3201 if SEAMLESS_WORLD else 196
-	for i in river_samples:
-		var v := lerpf(0.025, 0.975, float(i) / float(river_samples-1))
-		var current := _river_point(v, float(terrain_noise.seed % 19))
-		if current != Vector3.INF:
-			points.append(current)
+	if SEAMLESS_WORLD:
+		# Sample the authoritative river over its actual 1,520 km reach. Sampling
+		# the whole planet first reduced the visible curve to multi-km chords.
+		for i in 6081:
+			var z:=-760.0+float(i)*0.25
+			var x:=_world_river_x(z)
+			points.append(Vector3(x,_height_at(x,z),z))
+	else:
+		for i in 196:
+			var current:=_river_point(lerpf(0.025,0.975,float(i)/195.0))
+			if current!=Vector3.INF: points.append(current)
 	if points.size() >= 2:
 		_trace_load("river points=%d from=%s to=%s" % [points.size(),points.front(),points.back()])
 		_add_river_ribbon(banks,points,0.22 if SEAMLESS_WORLD else 1.12,Color(0.15,0.205,0.17,0.64))
@@ -2229,28 +2296,46 @@ func _build_river_network() -> void:
 			continue
 		var river := MeshInstance3D.new()
 		river.name = entry.name
+		river.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		river.mesh = entry.mesh
 		var river_shader:=Shader.new()
 		river_shader.code="""
 shader_type spatial;
-render_mode unshaded, specular_disabled, blend_mix, cull_disabled, depth_test_disabled;
+render_mode unshaded, specular_disabled, blend_mix, cull_disabled, depth_test_disabled, depth_draw_never;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size=vec2(40075.0,20004.0);
 uniform vec2 fog_current_origin=vec2(0.0);
 uniform float resource_emphasis=0.0;
+uniform bool river_water=false;
 varying vec3 world_position;
 void vertex(){ world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+float river_noise(vec2 p){
+	vec2 i=floor(p),f=fract(p);
+	f=f*f*(3.0-2.0*f);
+	float a=fract(sin(dot(i,vec2(127.1,311.7)))*43758.5453);
+	float b=fract(sin(dot(i+vec2(1.0,0.0),vec2(127.1,311.7)))*43758.5453);
+	float c=fract(sin(dot(i+vec2(0.0,1.0),vec2(127.1,311.7)))*43758.5453);
+	float d=fract(sin(dot(i+vec2(1.0,1.0),vec2(127.1,311.7)))*43758.5453);
+	return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);
+}
 void fragment(){
 	vec2 uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float discovered=smoothstep(0.08,0.58,max(texture(discovery_mask,uv).r,current_visibility));
-	ALBEDO=mix(COLOR.rgb,vec3(0.12,0.48,0.62),resource_emphasis*0.72);
-	ALPHA=COLOR.a*discovered;
+	float edge=min(UV.x,1.0-UV.x)*2.0;
+	float shore_variation=(river_noise(world_position.xz*95.0)-0.5)*0.055;
+	float coverage=smoothstep(0.01,river_water?0.13:0.65,edge+shore_variation);
+	float shallows=1.0-smoothstep(0.05,0.50,edge);
+	float ripple=(river_noise(world_position.xz*24.0)-0.5)*0.008;
+	vec3 water=mix(vec3(0.075,0.155,0.17),vec3(0.16,0.205,0.17),shallows*0.65)+vec3(ripple);
+	ALBEDO=mix(river_water?water:COLOR.rgb,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
+	ALPHA=COLOR.a*discovered*coverage;
 	ROUGHNESS=0.72;
 }
 """
 		var material:=ShaderMaterial.new()
 		material.shader=river_shader
+		material.set_shader_parameter("river_water",entry.name=="RiverWater")
 		material.render_priority=-6 if entry.name=="RiverBanks" else -5
 		_fog_shader_parameters(material)
 		material.set_shader_parameter("resource_emphasis",1.0 if resource_view_enabled and entry.name=="RiverWater" else 0.0)
@@ -2298,10 +2383,7 @@ func _scatter_landscape_vegetation() -> void:
 	var forest := MultiMeshInstance3D.new()
 	forest.name = "WoodlandCanopy"
 	forest.multimesh = multi
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	material.roughness = 1.0
-	forest.material_override = material
+	forest.material_override = _vegetation_surface_material(0)
 	add_child(forest)
 
 func _survey_ground_at(position:Vector2)->Dictionary:
@@ -2325,12 +2407,16 @@ func _survey_ground_at(position:Vector2)->Dictionary:
 			if _height_at(position.x+offset.x,position.y+offset.y)<SEA_LEVEL:
 				coastal=true
 				break
+	var actual_water_distance:=_river_distance_at(position.x,position.y)*KM_PER_WORLD_UNIT
 	return {
 		"biome":String(biome.id),
 		"label":String(biome.label),
 		"woodland":float(biome.woodland),
 		"fertility":float(biome.fertility),
-		"river_distance_km":float(biome.get("river_distance",INF)),
+		"forage":float(biome.get("forage",0.0)),
+		"game":float(biome.get("game",0.0)),
+		"stone":float(biome.get("stone",0.0)),
+		"river_distance_km":actual_water_distance,
 		"height":height,
 		"slope":steepest/sample_km,
 		"relief":height-neighbor_average,
@@ -2340,8 +2426,35 @@ func _survey_ground_at(position:Vector2)->Dictionary:
 	}
 
 
+func _register_woodland_material(material:ShaderMaterial)->void:
+	woodland_visual_materials.append(weakref(material))
+	material.set_shader_parameter("woodland_area_count",woodland_visual_areas.size())
+	var padded:=woodland_visual_areas.duplicate()
+	padded.resize(LANDSCAPE_VISUALS.MAX_AREAS)
+	material.set_shader_parameter("woodland_areas",padded)
+
+func _refresh_woodland_visuals(force:bool=false)->void:
+	var key:="%d:%d:%d" % [int(GameState.elapsed_days),floori(camera_target.x/8.0),floori(camera_target.z/8.0)]
+	if not force and key==woodland_visual_key: return
+	woodland_visual_key=key
+	var ledgers:Array=[GameState.resource_deposits]
+	for city in GameState.player_settlements:
+		if bool(city.get("primary",false)): continue
+		ledgers.append(city.get("local_resources",{}).get("resource_deposits",[]))
+	woodland_visual_areas=LANDSCAPE_VISUALS.areas_from_ledgers(ledgers,Vector2(camera_target.x,camera_target.z))
+	var padded:=woodland_visual_areas.duplicate()
+	padded.resize(LANDSCAPE_VISUALS.MAX_AREAS)
+	var living:Array[WeakRef]=[]
+	for reference in woodland_visual_materials:
+		var material:=reference.get_ref() as ShaderMaterial
+		if material==null: continue
+		living.append(reference)
+		material.set_shader_parameter("woodland_area_count",woodland_visual_areas.size())
+		material.set_shader_parameter("woodland_areas",padded)
+	woodland_visual_materials=living
+
 func _woodland_density_at(x:float,z:float)->float:
-	return float(_biome_at(x,z).woodland)
+	return float(_biome_at(x,z).woodland)*LANDSCAPE_VISUALS.retained_at(Vector2(x,z),woodland_visual_areas)
 
 
 func _best_site_for(type:String,rng:RandomNumberGenerator)->Vector3:
@@ -2354,7 +2467,7 @@ func _best_site_for(type:String,rng:RandomNumberGenerator)->Vector3:
 	var best_score:=-INF
 	for attempt in 30:
 		var candidate:Vector3
-		if type=="Fertile" and attempt<14:
+		if type in ["Fertile","Fiber Plants"] and attempt<14:
 			var offset:=Vector2(rng.randf_range(-16.0,16.0),rng.randf_range(-16.0,16.0))
 			candidate=Vector3(world_start_position.x+offset.x,0.0,world_start_position.z+offset.y)
 			candidate.y=_height_at(candidate.x,candidate.z)
@@ -2368,6 +2481,11 @@ func _best_site_for(type:String,rng:RandomNumberGenerator)->Vector3:
 			"Timber": score=float(biome.woodland)
 			"Game": score=float(biome.game)
 			"Stone": score=float(biome.stone)
+			"Fiber Plants":
+				# Plant fiber is not a rare strategic deposit. Reeds, tough grasses,
+				# nettles, and workable bark occur across most inhabited biomes;
+				# wet ground and productive vegetation merely improve the source.
+				score=float(biome.forage)+clampf(1.0-float(biome.river_distance)/18.0,0.0,1.0)*0.35
 			"Fertile":
 				score=float(biome.fertility)
 				# Prefer the closer of two equally good grounds.
@@ -2383,7 +2501,26 @@ func _scatter_trees() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = terrain_noise.seed ^ 0x27d4eb2d
 	resource_sites.clear()
-	var site_types := ["Timber", "Stone", "Fertile", "Freshwater", "Timber", "Stone"]
+	var start_2d:=Vector2(world_start_position.x,world_start_position.z)
+	var environment_profile:=PlanetEnvironment.profile_at(start_2d,_survey_ground_at(start_2d))
+	var potentials:Dictionary=environment_profile.get("resource_potentials",{})
+	# Founders see what is actually common in this watershed. Basic materials have
+	# substitutes, so a treeless plain, stony upland and wooded basin begin differently
+	# without creating an impossible no-expansion start.
+	var site_types:Array[String]=[]
+	if float(potentials.get("Timber",0.0))>=0.18: site_types.append("Timber")
+	if float(potentials.get("Timber",0.0))>=0.62: site_types.append("Timber")
+	if float(potentials.get("Stone",0.0))>=0.16: site_types.append("Stone")
+	if float(potentials.get("Stone",0.0))>=0.58: site_types.append("Stone")
+	if float(potentials.get("Fertile Soil",0.0))>=0.24: site_types.append("Fertile")
+	if float(potentials.get("Game",0.0))>=0.18: site_types.append("Game")
+	if float(potentials.get("Fiber Plants",0.0))>=0.14: site_types.append("Fiber Plants")
+	if float(environment_profile.get("river_distance_km",INF))<=72.0: site_types.append("Freshwater")
+	if not ("Timber" in site_types or "Stone" in site_types or "Fiber Plants" in site_types):
+		var substitute:="Timber"
+		if float(potentials.get("Stone",0.0))>float(potentials.get(substitute,0.0)): substitute="Stone"
+		if float(potentials.get("Fiber Plants",0.0))>float(potentials.get(substitute,0.0)): substitute="Fiber Plants"
+		site_types.append(substitute)
 	for type in site_types:
 		# Surface water is a continuous authored river system, not a random deposit.
 		# Keep one aggregate occurrence for simulation/progression gates, anchored on
@@ -2391,21 +2528,32 @@ func _scatter_trees() -> void:
 		var center := _surface_water_site_near(world_start_position) if type=="Freshwater" else _best_site_for(type,rng)
 		if center == Vector3.ZERO:
 			continue
-		resource_sites.append({"type":type,"position":center,"range":13.0,"initially_observed":_world_position_is_revealed(center)})
+		var canonical_name:="Fertile Soil" if type=="Fertile" else type
+		resource_sites.append({"type":type,"position":center,"range":13.0,"potential":float(potentials.get(canonical_name,0.5)),"initially_observed":_world_position_is_revealed(center)})
 		if type == "Timber":
 			_create_forest_patch(center, rng)
 		elif type == "Stone":
 			_create_stone_patch(center, rng)
 		elif type!="Freshwater":
 			_create_resource_marker(type, center)
-	ResourceSystem.register_local_occurrences(resource_sites, GameState.province_terrain)
+	ResourceSystem.register_local_occurrences(resource_sites, GameState.province_terrain,environment_profile)
 
 
 func _surface_water_site_near(origin:Vector3)->Vector3:
-	var river_z:=clampf(origin.z,-755.0,755.0)
-	var river_x:=_world_river_x(river_z)
-	if river_x==INF: return Vector3.ZERO
-	return Vector3(river_x,_height_at(river_x,river_z)+0.004,river_z)
+	var origin_2d:=Vector2(origin.x,origin.z)
+	if _river_distance_at(origin.x,origin.z)<=0.14:
+		return Vector3(origin.x,_height_at(origin.x,origin.z)+0.004,origin.z)
+	# Search outward in physical distance order. The first hit may be a main river,
+	# tributary, or intermittent drainage; all are authored by _river_distance_at and
+	# therefore agree with water collection and the rendered blue line.
+	for ring in 145:
+		var radius:=0.5+float(ring)*0.5
+		for spoke in 40:
+			var point:=origin_2d+Vector2.from_angle(TAU*float(spoke)/40.0)*radius
+			if _height_at(point.x,point.y)<=SEA_LEVEL: continue
+			if _river_distance_at(point.x,point.y)<=0.14:
+				return Vector3(point.x,_height_at(point.x,point.y)+0.004,point.y)
+	return Vector3.ZERO
 
 func _random_valid_site(rng: RandomNumberGenerator) -> Vector3:
 	for attempt in 80:
@@ -2437,10 +2585,9 @@ func _create_forest_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
 		var scale := rng.randf_range(0.72, 1.45)
 		tree.scale = Vector3(scale * rng.randf_range(0.78, 1.08), scale * rng.randf_range(1.35, 2.0), scale)
 		tree.position = Vector3(x, y + 0.014 * scale, z)
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color("#304535").lerp(Color("#586044"), rng.randf_range(0.0, 0.44))
-		material.roughness = 1.0
-		tree.material_override = material
+		var material:=_vegetation_surface_material(0)
+		material.set_shader_parameter("canopy_tint",Color("#304535").lerp(Color("#586044"),rng.randf_range(0.0,0.44)))
+		tree.material_override=material
 		add_child(tree)
 	_create_resource_marker("Timber", center)
 
@@ -2683,7 +2830,7 @@ func _update_scale_lod() -> void:
 				settlement_map_label.position=Vector3(label_ground.x,_height_at(label_ground.x,label_ground.y)+0.13,label_ground.y)
 
 	var detail_visible:=camera.size<=1.8
-	if detail_visible and detail_terrain_patch==null and settler_marker:
+	if detail_visible and detail_terrain_patch==null and settler_marker and not _camera_in_motion():
 		_build_detail_terrain_patch(settler_marker.position)
 	if detail_terrain_patch:
 		detail_terrain_patch.visible = detail_visible
@@ -2724,8 +2871,21 @@ func _update_scale_lod() -> void:
 		map_selection_marker.scale=Vector3.ONE*selection_radius
 	_update_resource_overlay_lod()
 	_update_scale_bar()
-	if settler_marker and "Hearth Circle" in GameState.settlement_completed:
+	if settler_marker and "Hearth Circle" in GameState.settlement_completed and not _camera_in_motion():
 		_refresh_settlement_footprint()
+
+	_normalize_aerial_labels()
+
+func _normalize_aerial_labels()->void:
+	if camera==null or camera.projection!=Camera3D.PROJECTION_PERSPECTIVE: return
+	for node in find_children("*","Label3D",true,false):
+		var label:=node as Label3D
+		if not label.fixed_size or String(label.name) in ["ArmyLabel","FormationLabel","StrengthLabel"]: continue
+		if not label.has_meta("aerial_font_size"):
+			label.set_meta("aerial_font_size",label.font_size)
+			label.set_meta("aerial_pixel_size",label.pixel_size)
+		label.font_size=int(label.get_meta("aerial_font_size"))*4
+		label.pixel_size=float(label.get_meta("aerial_pixel_size"))/16.0
 
 func _settlement_map_label_text(zoom:float)->String:
 	var name:=_settlement_display_name().to_upper()
@@ -2739,7 +2899,7 @@ func _update_resource_overlay_lod()->void:
 		resource_overlay_root.visible=resource_view_enabled
 	if not resource_view_enabled or camera==null: return
 	var view_key:=_resource_overlay_view_key()
-	if view_key!=rendered_resource_overlay_zoom_key:
+	if view_key!=rendered_resource_overlay_zoom_key and not _camera_in_motion():
 		_refresh_discovered_resource_overlays()
 
 
@@ -2767,11 +2927,25 @@ func _update_settlement_surface_lod_materials()->void:
 	var aerial_lod:=smoothstep(0.72,3.20,camera.size)
 	if absf(aerial_lod-rendered_settlement_aerial_lod)<0.012: return
 	rendered_settlement_aerial_lod=aerial_lod
-	for child in settlement_land_use_root.get_children():
-		if not child is MeshInstance3D: continue
-		var instance:=child as MeshInstance3D
-		if instance.material_override is ShaderMaterial:
-			(instance.material_override as ShaderMaterial).set_shader_parameter("aerial_lod",aerial_lod)
+	var detail_lod_alpha:=1.0-smoothstep(1.62,SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM,camera.size)
+	_update_settlement_lod_shader_node(settlement_land_use_root,aerial_lod,detail_lod_alpha)
+
+
+func _update_settlement_lod_shader_node(node:Node,aerial_lod:float,detail_lod_alpha:float)->void:
+	# District atlases live one level below the stage root, while aggregate land-cover
+	# meshes live directly on it. Walking the small, fixed renderer tree lets both sides
+	# of the Google-Earth crossover respond continuously without rebuilding geometry.
+	if node is GeometryInstance3D:
+		var geometry:=node as GeometryInstance3D
+		if geometry.material_override is ShaderMaterial:
+			var shader_material:=geometry.material_override as ShaderMaterial
+			var shader_code:=shader_material.shader.code if shader_material.shader else ""
+			if "uniform float aerial_lod" in shader_code:
+				shader_material.set_shader_parameter("aerial_lod",aerial_lod)
+			if "uniform float detail_lod_alpha" in shader_code:
+				shader_material.set_shader_parameter("detail_lod_alpha",detail_lod_alpha)
+	for child in node.get_children():
+		_update_settlement_lod_shader_node(child,aerial_lod,detail_lod_alpha)
 
 func _founding_banner_texture(index: int) -> Texture2D:
 	var sheet_texture:=load("res://assets/ui/founding_convoy_banners.png") as Texture2D
@@ -2830,6 +3004,14 @@ func _update_world_streaming() -> void:
 func _process_camera_navigation(delta: float) -> void:
 	if not SEAMLESS_WORLD or camera==null:
 		return
+	var focus:=get_viewport().gui_get_focus_owner()
+	if focus is LineEdit or focus is TextEdit: return
+	var turn:=(1.0 if Input.is_physical_key_pressed(KEY_Q) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_E) else 0.0)
+	if turn!=0.0:
+		north_reset_active=false
+		camera_input_msec=Time.get_ticks_msec()
+		camera_yaw=wrapf(camera_yaw+turn*1.8*delta,-PI,PI)
+		_update_camera()
 	var input:=Input.get_vector("ui_left","ui_right","ui_up","ui_down")
 	# Godot's built-in UI actions reliably cover the arrow keys. Add physical
 	# WASD here so the map also follows the strategy-game convention without
@@ -2997,6 +3179,7 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 		var woodland_chance := 0.002
 		if woodland_field > 0.015:
 			woodland_chance = clampf((woodland_field - 0.015) * 1.08, 0.012, 0.54)
+		woodland_chance*=clampf(float(_biome_at(world_x,world_z).woodland)*2.0,0.0,1.0)
 		var is_canopy := rng.randf() < woodland_chance
 		var scrub_chance := clampf(0.07 + maxf(0.0, woodland_field) * 0.26, 0.05, 0.24)
 		if not is_canopy and rng.randf() > scrub_chance:
@@ -3124,9 +3307,11 @@ func _vegetation_surface_material(kind:int,atlas_variant:=-1)->ShaderMaterial:
 shader_type spatial;
 render_mode blend_mix, depth_prepass_alpha, cull_disabled, diffuse_burley, specular_disabled;
 uniform int vegetation_kind = 0;
+uniform vec4 canopy_tint : source_color = vec4(1.0);
 uniform int atlas_variant = -1;
 uniform float lod_fade = 1.0;
 uniform sampler2D canopy_atlas : source_color, filter_linear_mipmap, repeat_disable;
+varying float tree_keep;
 varying vec3 world_position;
 float vh(vec2 p) {
 	p=fract(p*vec2(123.34,456.21));
@@ -3137,12 +3322,13 @@ float vn(vec2 p) {
 	vec2 i=floor(p); vec2 f=fract(p); f=f*f*(3.0-2.0*f);
 	return mix(mix(vh(i),vh(i+vec2(1,0)),f.x),mix(vh(i+vec2(0,1)),vh(i+vec2(1,1)),f.x),f.y);
 }
-void vertex() { world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+void vertex() { world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
 void fragment() {
+	if(vegetation_kind==0 && tree_keep<0.5) discard;
 	float crown=vn(world_position.xz*410.0+vec2(17.0,-31.0));
 	float leaf=vn(world_position.xz*1350.0+vec2(-73.0,29.0));
 	float gap=smoothstep(0.68,0.92,vn(world_position.xz*780.0+vec2(91.0,7.0)));
-	vec3 base=COLOR.rgb*(0.70+crown*0.38+(leaf-0.5)*0.15);
+	vec3 base=COLOR.rgb*canopy_tint.rgb*(0.70+crown*0.38+(leaf-0.5)*0.15);
 	if (vegetation_kind==0) {
 		if (atlas_variant>=0) {
 			vec2 cell=vec2(float(atlas_variant%4),float(atlas_variant/4));
@@ -3167,7 +3353,9 @@ void fragment() {
 }
 """
 	var material:=ShaderMaterial.new()
+	vegetation_surface_shader.code=vegetation_surface_shader.code if "woodland_area_count" in vegetation_surface_shader.code else vegetation_surface_shader.code.replace("varying vec3 world_position;",LANDSCAPE_VISUALS.CUTTING_SHADER+"\nvarying vec3 world_position;")
 	material.shader=vegetation_surface_shader
+	_register_woodland_material(material)
 	material.set_shader_parameter("vegetation_kind",kind)
 	material.set_shader_parameter("atlas_variant",atlas_variant)
 	var canopy_texture:=load("res://assets/textures/vegetation_canopy_atlas.png")
@@ -3205,6 +3393,7 @@ func _able_population() -> int:
 func _process_population_day(context := {}) -> Array[Dictionary]:
 	GameState.synchronize_population_allocations()
 	var events := ConsequenceEngine.process_day(context)
+	events.append_array(CivicImplementationSystem.process_day(int(GameState.elapsed_days)))
 	AdvisorSystem.refresh_pronouncement_statuses()
 	if "Lean-to Shelters" in GameState.settlement_completed and GameState.population_total > int(GameState.housing_capacity * 0.80):
 		var builders := float(GameState.population_allocations.get("Construction", 0))
@@ -3436,12 +3625,48 @@ func _sync_settlement_territory_contexts()->void:
 		var water_distance:=_river_distance_at(center.x,center.y)*KM_PER_WORLD_UNIT
 		var water_access:=clampf(1.0-water_distance/12.0,0.0,1.0) if water_distance<INF else 0.0
 		var coastal_context:=_settlement_coastal_context(center,terrain_permeability)
+		var observed_environment:=_survey_ground_at(center)
+		observed_environment.merge(coastal_context,true)
+		observed_environment["coastal"]=float(coastal_context.get("shoreline_access",0.0))>0.05
+		var environment_profile:Dictionary=PlanetEnvironment.profile_at(center,observed_environment)
 		var axes:Array[Dictionary]=[]
 		if water_access>0.0:
 			axes.append({"kind":"river","direction":_drainage_tangent_at(center.x,center.y),"influence":water_access})
 		var territory_context:={"terrain_permeability":terrain_permeability,"water_access":water_access,"travel_access":clampf(float(GameState.simulation_metrics.get("logistics",0.16)),0.0,1.0),"access_axes":axes}
 		territory_context.merge(coastal_context,true)
 		_settlement_model().set_settlement_territory_context(settlement_id,territory_context)
+		_settlement_model().set_settlement_environment_profile(settlement_id,environment_profile)
+		if not bool(settlement.get("primary",false)):
+			ResourceSystem.register_settlement_occurrences(settlement_id,_environment_resource_candidates(center,environment_profile,settlement_id),environment_profile)
+
+
+func _environment_resource_candidates(center:Vector2,environment_profile:Dictionary,settlement_id:String)->Array[Dictionary]:
+	## Generate bounded candidate sites from the actual local ground. ResourceSystem
+	## decides which potentials become deposits; this layer only guarantees that any
+	## resulting position is land and fits the same biome the player can inspect.
+	var result:Array[Dictionary]=[]
+	var potentials:Dictionary=environment_profile.get("resource_potentials",{})
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d:%s:environment" % [GameState.world_seed,settlement_id])
+	for resource_variant in potentials.keys():
+		var resource_name:=String(resource_variant)
+		if resource_name=="Freshwater" or float(potentials.get(resource_name,0.0))<0.16: continue
+		var best_position:=Vector3.ZERO
+		var best_potential:=-1.0
+		for attempt in 16:
+			var angle:=rng.randf_range(-PI,PI)
+			var distance:=lerpf(2.0,46.0,sqrt(rng.randf()))
+			var point:=center+Vector2.from_angle(angle)*distance
+			var height:=_height_at(point.x,point.y)
+			if height<=SEA_LEVEL+0.015: continue
+			var local_profile:=PlanetEnvironment.profile_at(point,_survey_ground_at(point))
+			var potential:=float((local_profile.get("resource_potentials",{}) as Dictionary).get(resource_name,0.0))
+			if potential>best_potential:
+				best_potential=potential
+				best_position=Vector3(point.x,height,point.y)
+		if best_potential>=0.0:
+			result.append({"type":resource_name,"position":best_position,"potential":best_potential,"initially_observed":_world_position_is_revealed(best_position)})
+	return result
 
 
 func _settlement_coastal_context(center:Vector2,terrain_permeability:float)->Dictionary:
@@ -3607,7 +3832,7 @@ func _settlement_expansion_visual_profile(settlement:Dictionary)->Dictionary:
 	elif "town" in classification: stage=3
 	elif "village" in classification: stage=2
 	elif "hamlet" in classification: stage=1
-	elif "camp" in classification or "outpost" in classification: stage=0
+	elif "camp" in classification or "outpost" in classification or "founding settlement" in classification: stage=0
 	# Population is only a fallback for legacy/foreign records that genuinely have no
 	# functional classification. A crowded expedition does not become a town graphic
 	# before it has built the permanent functions that make a town.
@@ -3817,7 +4042,7 @@ func _append_settlement_stage_patch(surface:SurfaceTool,world_center:Vector3,rad
 	return appended
 
 
-func _settlement_strategic_density_at(local_point:Vector2,radius:float,cores:Array[Vector2],satellites:Array[Vector2],layout_seed:int)->float:
+func _settlement_strategic_density_at(local_point:Vector2,radius:float,cores:Array[Vector2],satellites:Array[Vector2],layout_seed:int,stage:=4)->float:
 	var radial_t:=local_point.length()/maxf(0.001,radius)
 	if radial_t>=1.04: return 0.0
 	# The broad radial term is inherited continuous urban land. Polycentric nuclei and
@@ -3826,7 +4051,17 @@ func _settlement_strategic_density_at(local_point:Vector2,radius:float,cores:Arr
 	# A megalopolis is a linked system of urban centres, not a uniformly inhabited
 	# circle. The inherited central field fills only the inner region; outer growth
 	# must be earned by actual satellite nuclei and their connecting corridors.
-	var density:=pow(maxf(0.0,1.0-radial_t/0.72),1.58)*0.44
+	# `radius` is already derived from population at the stage's aggregate density.
+	# Occupying only its innermost quarter made a five-million-person metropolis look
+	# like a few glowing streets in wilderness.  A broad inherited field now carries
+	# the continuously inhabited city; low-frequency erosion and satellite centres
+	# still keep its fringe irregular and its late form polycentric.
+	# City land is broadly continuous. Metropolitan growth becomes progressively
+	# polycentric: the inherited city remains, while new population enlarges named
+	# nuclei and the inhabited corridors between them instead of filling a perfect disc.
+	var radial_reach:float=0.90 if stage<=4 else (0.84 if stage==5 else 0.74)
+	var radial_weight:float=0.68 if stage<=4 else (0.57 if stage==5 else 0.39)
+	var density:=pow(maxf(0.0,1.0-radial_t/radial_reach),1.42)*radial_weight
 	for core in cores:
 		density=maxf(density,1.0-clampf(local_point.distance_to(core)/maxf(0.08,radius*0.25),0.0,1.0))
 	for satellite_index in satellites.size():
@@ -3905,7 +4140,7 @@ func _append_settlement_strategic_density_field(surface:SurfaceTool,center:Vecto
 			var maximum_density:=0.0
 			for local_corner in local_corners:
 				var world_corner:=Vector2(center.x+local_corner.x,center.z+local_corner.y)
-				var value:=_settlement_strategic_density_at(local_corner,radius,cores,satellites,layout_seed)
+				var value:=_settlement_strategic_density_at(local_corner,radius,cores,satellites,layout_seed,stage)
 				# Ridges stay legible as less-developed corridors without punching polygonal
 				# holes through the mesh. Actual water is carried by the shoreline mask below.
 				var slope_pressure:=smoothstep(0.50,1.28,_terrain_slope_at(world_corner.x,world_corner.y,0.22))
@@ -3937,10 +4172,13 @@ func _append_settlement_strategic_density_field(surface:SurfaceTool,center:Vecto
 					var zoning:=0.5+0.28*sin(normalized_corner.x*8.7+zoning_phase)*sin(normalized_corner.y*6.3-zoning_phase*0.61)
 					zoning+=0.14*sin((normalized_corner.x-normalized_corner.y)*14.0+zoning_phase*1.37)
 					zoning=clampf(zoning,0.0,1.0)
-					var terrain_edge:=Color(palette.periphery).lerp(Color("#596044"),0.34)
-					var inhabited:=Color(palette.base).lerp(Color("#6b6251"),0.24)
+					# Real built land at regional scale is a lower-saturation interruption in
+					# vegetation, not a pale translucent glow.  Keep the civilization's material
+					# history, but compress it into roof/yard values before terrain blending.
+					var terrain_edge:=Color(palette.periphery).lerp(Color("#4f5541"),0.38).darkened(0.10)
+					var inhabited:=Color(palette.base).lerp(Color("#5a554b"),0.28).darkened(0.07)
 					var urban_color:=terrain_edge.lerp(inhabited,smoothstep(0.10,0.58,density))
-					urban_color=urban_color.lerp(Color(palette.dense),smoothstep(0.64,0.97,density)*0.72)
+					urban_color=urban_color.lerp(Color(palette.dense).darkened(0.055),smoothstep(0.64,0.97,density)*0.68)
 					urban_color=urban_color.lerp(Color("#536048"),smoothstep(0.60,0.92,zoning)*(1.0-density)*0.34)
 					urban_color=urban_color.lerp(Color(palette.industrial),smoothstep(0.0,0.22,0.28-zoning)*smoothstep(0.34,0.78,density)*0.20)
 					urban_color=urban_color.lerp(Color("#423e3a"),damage_ratio*0.58)
@@ -3960,12 +4198,23 @@ func _append_settlement_strategic_density_field(surface:SurfaceTool,center:Vecto
 					var world_x:=center.x+local_corner.x
 					var world_z:=center.z+local_corner.y
 					var terrain_color:=_terrain_color_at(world_x,world_z,_height_at(world_x,world_z))
-					urban_color=terrain_color.lerp(urban_color,clampf(0.38+density*0.38,0.38,0.76))
+					# Regional settlement cover must remain unmistakable without becoming a
+					# strategy-game tint. Dense land now carries enough built-surface contrast
+					# to survive aerial haze; the fringe still inherits most of the real terrain.
+					urban_color=terrain_color.lerp(urban_color,clampf(0.62+density*0.32,0.62,0.94))
+					# Spatial shader output is linear while these authored aerial palette values
+					# are chosen by eye.  Without an explicit exposure compression the regional
+					# mesh displayed as luminous white mist over the terrain.  Built surfaces
+					# should be a darker, lower-chroma land-cover interruption at this altitude.
+					var aerial_exposure:=lerpf(0.90,0.82,smoothstep(0.18,0.90,density))
+					urban_color.r*=aerial_exposure
+					urban_color.g*=aerial_exposure
+					urban_color.b*=aerial_exposure
 					# The outer city should alter the terrain rather than replace it. Dense
 					# cores become unmistakably urban; the fringe still exposes vegetation,
 					# fields and relief through one non-overlapping bounded surface.
-					var occupied_coverage:=smoothstep(0.018,0.20,density)
-					urban_color.a=occupied_coverage*lerpf(0.36,0.91,smoothstep(0.14,0.84,density))*surface_masks[index]
+					var occupied_coverage:=smoothstep(0.035,0.22,density)
+					urban_color.a=occupied_coverage*lerpf(0.72,0.995,smoothstep(0.14,0.84,density))*surface_masks[index]
 					var world_point:=Vector3(center.x+local_corner.x,0.0,center.z+local_corner.y)
 					world_point.y=_close_surface_height_at(world_point.x,world_point.z)+0.00220
 					surface.set_color(urban_color)
@@ -4564,7 +4813,13 @@ func _settlement_district_clipmap_candidates(center:Vector3,layout:Dictionary,st
 		for x_step in range(-half_steps,half_steps+1):
 			var cell:=base_cell+Vector2i(x_step,z_step)
 			var seed:=absi(hash("%d:%d:%d:district_clipmap" % [GameState.world_seed,cell.x,cell.y]))
-			var jitter:=Vector2(float((seed>>4)%1000)/999.0-0.5,float((seed>>15)%1000)/999.0-0.5)*cell_size*0.10
+			# A mature neighborhood belongs to a shared street lattice. Large per-cell
+			# jitter made even excellent atlas plans read as photographs scattered on
+			# grass, because their edges could not meet the streets between them. Early
+			# compounds retain organic placement; town-and-later grids move only enough
+			# to follow less formal, terrain-conforming practice without losing frontage.
+			var jitter_scale:=0.10 if stage<=2 else (0.012+terrain_conformity*0.018+permeability*0.008)
+			var jitter:=Vector2(float((seed>>4)%1000)/999.0-0.5,float((seed>>15)%1000)/999.0-0.5)*cell_size*jitter_scale
 			var world_point:=Vector2((float(cell.x)+0.5)*cell_size,(float(cell.y)+0.5)*cell_size)+jitter
 			var local_point:=world_point-Vector2(center.x,center.z)
 			if local_point.distance_to(local_target)>view_radius*1.42: continue
@@ -4637,6 +4892,39 @@ func _settlement_district_clipmap_candidates(center:Vector3,layout:Dictionary,st
 			# deterministic footprints inside that shared grid creates dozens of visible
 			# combinations once proportions, roof material and age tone are applied.
 			candidates.append({"cell":cell,"point":world_point,"angle":alignment,"half_width":half_width,"half_depth":half_depth,"cell_size":cell_size,"seed":seed,"distance":local_point.distance_to(local_target),"radial_t":radial_t,"centre_influence":centre_influence,"corridor_influence":corridor_influence,"land_use":land_use,"shape_variant":seed%8})
+	# Town growth must not erase the settlement the player watched become a village.
+	# Preserve one authored historical centre and let the new street lattice grow around
+	# it. This remains one aggregate atlas instance; it is not a building simulation.
+	if stage in [3,4] and not candidates.is_empty() and local_target.length()<=view_radius*1.48:
+		var historic_index:=-1
+		var historic_distance:=INF
+		for candidate_index in candidates.size():
+			var candidate_distance:=Vector2(candidates[candidate_index].point).distance_to(Vector2(center.x,center.z))
+			if candidate_distance<historic_distance:
+				historic_distance=candidate_distance
+				historic_index=candidate_index
+		if historic_index>=0:
+			var historic_candidate:Dictionary=candidates[historic_index]
+			# The old centre occupies several later aggregate blocks. Letting it shrink to
+			# one town cell made the inherited place look marooned inside a green crater.
+			var historic_size:=maxf(0.44,cell_size*2.80)
+			var historic_seed:=absi(hash("%d:%d:%d:inherited_historic_core" % [GameState.world_seed,roundi(center.x*1000.0),roundi(center.z*1000.0)]))
+			var early_options:Array=_settlement_district_tile_options(false,2,0,architecture)
+			var early_tile:=int(early_options[posmod(historic_seed,early_options.size())]) if not early_options.is_empty() else 8
+			historic_candidate["point"]=Vector2(center.x,center.z)
+			historic_candidate["angle"]=axis
+			historic_candidate["distance"]=local_target.length()
+			historic_candidate["radial_t"]=0.0
+			historic_candidate["centre_influence"]=1.0
+			historic_candidate["land_use"]=0
+			historic_candidate["historic_core"]=true
+			historic_candidate["historic_footprint_size"]=historic_size
+			historic_candidate["historic_tile"]=48+early_tile
+			# Do not excavate a square vacancy around the inherited plan. The later grid
+			# remains beneath its irregular transparent edge, exactly as a real old town
+			# is enclosed and absorbed by later neighborhoods. The slightly higher core
+			# drape owns the visible overlap without another node or draw call.
+			candidates[historic_index]=historic_candidate
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		# Early settlements are one stable place, not a camera-local cloud of camp
 		# tokens. Keep their oldest central footprints first. Mature metropolitan
@@ -4644,6 +4932,9 @@ func _settlement_district_clipmap_candidates(center:Vector3,layout:Dictionary,st
 		if stage<=2:
 			if not is_equal_approx(float(a.radial_t),float(b.radial_t)): return float(a.radial_t)<float(b.radial_t)
 			return int(a.seed)<int(b.seed)
+		var a_historic:=bool(a.get("historic_core",false))
+		var b_historic:=bool(b.get("historic_core",false))
+		if a_historic!=b_historic: return a_historic
 		var a_distance_bucket:=floori(float(a.distance)/maxf(0.001,cell_size*1.5))
 		var b_distance_bucket:=floori(float(b.distance)/maxf(0.001,cell_size*1.5))
 		if a_distance_bucket!=b_distance_bucket: return a_distance_bucket<b_distance_bucket
@@ -4654,11 +4945,22 @@ func _settlement_district_clipmap_candidates(center:Vector3,layout:Dictionary,st
 		# authoritative settlement coordinate. A world lattice is useful only once
 		# one city contains many neighborhood plates.
 		candidates[0]["point"]=Vector2(center.x,center.z)
+		candidates[0]["angle"]=axis
 		candidates[0]["radial_t"]=0.0
 	# One early atlas plate is already a complete settlement. It changes plan and
 	# expands physically through camp, hamlet and village instead of multiplying
 	# into a swarm of unrelated icons. Towns introduce the 25–50-neighborhood kit.
-	var stage_budget:int=[1,1,1,36,48,52,52][clampi(stage,0,6)]
+	# The clipmap is one MultiMesh, so its cost is a bounded number of aggregate
+	# neighborhoods rather than a node per building or resident.  The old 36-52 cell
+	# cap was too small to cover the viewport near the strategic crossover: zooming out
+	# exposed an artificial grass moat, then the regional field suddenly replaced it
+	# with a full city.  Budget enough cells for the current orthographic footprint and
+	# cap by stage.  Later stages use physically larger cells, so they need fewer
+	# instances to cover the same screen while still representing vastly more people.
+	var stage_floor:int=[1,1,1,54,64,56,48][clampi(stage,0,6)]
+	var stage_cap:int=[1,1,1,384,256,144,96][clampi(stage,0,6)]
+	var visible_cell_budget:=ceili(pow(camera.size/maxf(0.001,cell_size),2.0)*1.70)
+	var stage_budget:=clampi(visible_cell_budget,stage_floor,stage_cap)
 	if candidates.size()>stage_budget: candidates.resize(stage_budget)
 	return candidates
 
@@ -4900,7 +5202,7 @@ func _settlement_district_surface_basis(point:Vector2,angle:float,footprint_size
 	return Basis(x_axis*footprint_size,surface_normal,z_axis*footprint_size)
 
 
-func _settlement_district_atlas_material(atlas:Texture2D,stage:int,modern:bool,companion_atlas:Texture2D=null,vernacular_atlas:Texture2D=null)->ShaderMaterial:
+func _settlement_district_atlas_material(atlas:Texture2D,stage:int,modern:bool,companion_atlas:Texture2D=null,vernacular_atlas:Texture2D=null,palette:Dictionary={},site_ground_color:=Color("#48563e"),inherited_early_atlas:Texture2D=null)->ShaderMaterial:
 	var material:=ShaderMaterial.new()
 	var shader:=Shader.new()
 	shader.code="""
@@ -4909,12 +5211,15 @@ render_mode blend_mix, depth_prepass_alpha, cull_disabled, unshaded;
 uniform sampler2D atlas_texture : source_color, filter_linear_mipmap_anisotropic;
 uniform sampler2D companion_atlas_texture : source_color, filter_linear_mipmap_anisotropic;
 uniform sampler2D vernacular_atlas_texture : source_color, filter_linear_mipmap_anisotropic;
+uniform sampler2D inherited_early_atlas_texture : source_color, filter_linear_mipmap_anisotropic;
 uniform float occupied_ground_alpha = 0.22;
 uniform vec3 occupied_ground_color = vec3(0.48,0.44,0.34);
 uniform float aerial_atlas_exposure = 0.84;
 uniform float aerial_atlas_saturation = 0.66;
 uniform bool preserve_atlas_open_ground = false;
 uniform float atlas_safe_inset = 0.018;
+uniform vec3 site_ground_color = vec3(0.28,0.34,0.24);
+uniform float detail_lod_alpha = 1.0;
 varying flat vec4 district_data;
 
 void vertex(){
@@ -4937,15 +5242,16 @@ float value_noise(vec2 point){
 }
 
 void fragment(){
-	float tile=floor(district_data.r*47.0+0.5);
+	float tile=floor(district_data.r*63.0+0.5);
 	float local_tile=mod(tile,16.0);
 	vec2 atlas_cell=vec2(mod(local_tile,4.0),floor(local_tile/4.0));
 	// Keep filtering and mip footprints inside the selected atlas cell. Sampling the
 	// exact border pulled slivers from an adjacent settlement into open terrain.
 	vec2 safe_uv=mix(vec2(atlas_safe_inset),vec2(1.0-atlas_safe_inset),UV);
 	vec4 sample_color=texture(atlas_texture,(safe_uv+atlas_cell)/4.0);
-	if(tile>=16.0) sample_color=texture(companion_atlas_texture,(safe_uv+atlas_cell)/4.0);
-	if(tile>=32.0) sample_color=texture(vernacular_atlas_texture,(safe_uv+atlas_cell)/4.0);
+	if(tile>=48.0) sample_color=texture(inherited_early_atlas_texture,(safe_uv+atlas_cell)/4.0);
+	else if(tile>=32.0) sample_color=texture(vernacular_atlas_texture,(safe_uv+atlas_cell)/4.0);
+	else if(tile>=16.0) sample_color=texture(companion_atlas_texture,(safe_uv+atlas_cell)/4.0);
 	float source_luma=dot(sample_color.rgb,vec3(0.2126,0.7152,0.0722));
 	float condition=floor(district_data.g*7.0+0.5);
 	float wear=condition/7.0;
@@ -5000,8 +5306,15 @@ void fragment(){
 			if(boundary>0.45+edge_noise) discard;
 			float distress=condition/6.0;
 			float yard_noise=value_noise(UV*8.0+identity*0.061);
+			// This is a terrain-blended neighborhood floor, not a square decal: worn
+			// courts, lanes, gardens and service yards visually join the roof plans to
+			// the shared roads while retaining fine, non-uniform ground variation.
+			float court_noise=value_noise(UV*17.0+identity*0.037);
+			float garden_patch=smoothstep(0.67,0.88,value_noise(UV*9.0+identity*0.093));
 			vec3 maintained_yard=mix(occupied_ground_color,occupied_ground_color*0.72,distress);
-			vec3 yard_tone=mix(maintained_yard,vec3(0.26,0.31,0.23),distress*yard_noise*0.46);
+			vec3 yard_tone=mix(maintained_yard,maintained_yard*vec3(0.82,0.88,0.72),garden_patch*(0.18+0.18*(1.0-distress)));
+			yard_tone*=0.91+court_noise*0.17;
+			yard_tone=mix(yard_tone,vec3(0.26,0.31,0.23),distress*yard_noise*0.38);
 			ALBEDO=max(yard_tone,vec3(0.12));
 			ROUGHNESS=1.0;
 			ALPHA=mix(occupied_ground_alpha,occupied_ground_alpha*0.58,distress)*(0.84+yard_noise*0.16);
@@ -5047,7 +5360,7 @@ void fragment(){
 		// stronger source contrast than the older landmark sheet. Lift only their crushed
 		// shadows and compress their chroma so they sit inside the landscape instead of
 		// reading as black stickers pasted on top of it.
-		if(tile>=16.0){
+		if(tile>=16.0 && tile<48.0){
 			float companion_luma=dot(final_tone,vec3(0.299,0.587,0.114));
 			final_tone+=vec3(0.88,0.84,0.73)*max(0.0,0.30-companion_luma)*0.62;
 			float companion_balanced_luma=dot(final_tone,vec3(0.299,0.587,0.114));
@@ -5066,24 +5379,42 @@ void fragment(){
 		ALPHA=final_alpha;
 		}
 	}
-	// The atlas source is a neighborhood plan, not a square decal. A narrow edge
-	// feather removes photographic card boundaries while the shared street grid
-	// preserves the exact parcel extent and geographic identity of every district.
+	// The atlas source is a neighborhood plan, not a square decal. Early complete-
+	// settlement plans inherit the local terrain atmosphere at their irregular edge;
+	// mature cells use the shared road reserve and occupied-ground field instead.
 	float tile_edge=min(min(UV.x,1.0-UV.x),min(UV.y,1.0-UV.y));
-	ALPHA*=smoothstep(0.008,0.035,tile_edge);
+	if(preserve_atlas_open_ground || tile>=48.0){
+		// A complete early settlement includes a trampled clearing, but the clearing
+		// must inherit the actual site instead of ending as a pale photographic island.
+		// The centre preserves the authored historical plan; the broad outer third picks
+		// up local soil/vegetation colour and dissolves gradually into generated terrain.
+		float edge_context=smoothstep(0.045,0.34,tile_edge);
+		float source_value=clamp(dot(ALBEDO,vec3(0.2126,0.7152,0.0722))/0.43,0.72,1.20);
+		vec3 inherited_site=site_ground_color*source_value;
+		ALBEDO=mix(inherited_site,ALBEDO,0.24+edge_context*0.76);
+		ALPHA*=smoothstep(0.010,0.13,tile_edge);
+	}else{
+		ALPHA*=smoothstep(0.008,0.035,tile_edge);
+	}
+	ALPHA*=detail_lod_alpha;
 }
 """
 	material.shader=shader
 	material.set_shader_parameter("atlas_texture",atlas)
 	material.set_shader_parameter("companion_atlas_texture",companion_atlas if companion_atlas!=null else atlas)
 	material.set_shader_parameter("vernacular_atlas_texture",vernacular_atlas if vernacular_atlas!=null else (companion_atlas if companion_atlas!=null else atlas))
+	material.set_shader_parameter("inherited_early_atlas_texture",inherited_early_atlas if inherited_early_atlas!=null else atlas)
 	# At settlement scale the ground around compounds stays mostly vegetated. Towns
 	# and cities have continuous courts, yards and hard-packed block interiors, which
 	# must remain visible after the roofs collapse into aerial texture.
-	material.set_shader_parameter("occupied_ground_alpha",0.18 if stage<=2 else (0.22 if stage==3 else (0.24 if modern else 0.23)))
-	material.set_shader_parameter("occupied_ground_color",Color("#555750") if modern else Color("#7a704f"))
+	material.set_shader_parameter("occupied_ground_alpha",0.18 if stage<=2 else (0.70 if stage==3 else (0.62 if modern else 0.66)))
+	var inherited_ground:=Color(palette.get("periphery",Color("#6f694f"))).lerp(Color(palette.get("base",Color("#736a52"))),0.42).darkened(0.10)
+	if modern: inherited_ground=inherited_ground.lerp(Color("#555750"),0.46)
+	material.set_shader_parameter("occupied_ground_color",inherited_ground)
 	material.set_shader_parameter("aerial_atlas_exposure",0.90 if stage<=2 else (0.78 if modern else 0.84))
 	material.set_shader_parameter("aerial_atlas_saturation",0.76 if stage<=2 else (0.56 if modern else 0.67))
+	material.set_shader_parameter("site_ground_color",site_ground_color)
+	material.set_shader_parameter("detail_lod_alpha",1.0-smoothstep(1.62,SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM,camera.size) if camera!=null and stage>=3 else 1.0)
 	# Generated early plates reach closer to their 256px cell boundaries. A 7.7px
 	# sampling gutter prevents an adjacent row's settlement fragments entering the
 	# selected village under mip filtering; mature atlases need only the smaller inset.
@@ -5091,7 +5422,11 @@ void fragment(){
 	# Transparent atlas space is the real terrain between aggregate footprints. The
 	# generated plate already contains its own streets, courts and trees; filling its
 	# bounding square produced the dark pasted-on cards seen in close city views.
-	material.set_shader_parameter("preserve_atlas_open_ground",true)
+	# A camp is one irregular object in the landscape, so its transparent exterior is
+	# real terrain. Mature atlas cells are aggregate neighborhoods: their transparent
+	# areas are the courts, gardens and work yards that make adjacent plans read as one
+	# continuous town. The shader feathers that occupied floor before the road reserve.
+	material.set_shader_parameter("preserve_atlas_open_ground",stage<=2)
 	return material
 
 
@@ -5486,6 +5821,7 @@ func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],dama
 	var companion_path:="res://assets/textures/settlement_district_atlas_modern_v2.png" if modern else "res://assets/textures/settlement_district_atlas_mature_v2.png"
 	var companion_atlas:Texture2D=load(companion_path) if stage>=3 else null
 	var vernacular_atlas:Texture2D=load("res://assets/textures/settlement_district_atlas_vernacular_v1.png") if stage>=3 and not modern else null
+	var inherited_early_atlas:Texture2D=load("res://assets/textures/settlement_district_atlas_early_v2.png") if stage>=3 else null
 	var multi:=MultiMesh.new()
 	multi.transform_format=MultiMesh.TRANSFORM_3D
 	multi.use_custom_data=true
@@ -5499,8 +5835,9 @@ func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],dama
 		var seed:=int(candidate.seed)
 		var land_use:=clampi(int(candidate.get("land_use",0)),0,2)
 		var is_waterfront:=index==waterfront_index
-		var tile_index:=_settlement_district_tile_index(modern,stage,land_use,architecture,seed,is_waterfront,palette)
-		if not is_waterfront:
+		var is_historic_core:=bool(candidate.get("historic_core",false))
+		var tile_index:=int(candidate.get("historic_tile",-1)) if is_historic_core else _settlement_district_tile_index(modern,stage,land_use,architecture,seed,is_waterfront,palette)
+		if not is_waterfront and not is_historic_core:
 			var balanced_options:=_settlement_district_balanced_tile_options(modern,stage,land_use,architecture,seed,palette)
 			tile_index=_settlement_district_balanced_tile_index(tile_index,balanced_options,tile_usage,seed)
 		tile_usage[tile_index]=int(tile_usage.get(tile_index,0))+1
@@ -5512,8 +5849,9 @@ func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],dama
 		# Mature plates nearly meet their cell edges; the transparent gutter and actual
 		# street ribbons provide separation. A smaller fill left a green moat around every
 		# authored district and made the city look like scattered cards.
-		var footprint_fill:float=lerpf(0.86,0.95,float((seed>>11)%1000)/999.0) if stage<=2 else lerpf(1.02,1.08,float((seed>>11)%1000)/999.0)
+		var footprint_fill:float=lerpf(0.86,0.95,float((seed>>11)%1000)/999.0) if stage<=2 else lerpf(0.955,0.985,float((seed>>11)%1000)/999.0)
 		var footprint_size:=float(candidate.get("cell_size",0.20))*footprint_fill
+		if is_historic_core: footprint_size=float(candidate.get("historic_footprint_size",footprint_size))
 		if stage<=2:
 			# The early plate is the entire settlement, not one neighborhood. Its
 			# physical footprint grows continuously with aggregate occupied radius,
@@ -5521,7 +5859,7 @@ func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],dama
 			footprint_size=minf(maxf(footprint_size,radius*0.48),float(candidate.get("cell_size",0.20))*2.0)
 		footprint_size*=condition_scale
 		var atlas_angle:=float(candidate.angle)
-		if stage>=3:
+		if stage>=3 and not is_historic_core:
 			# Neighborhood art occupies square grid cells. Arbitrary rotation made those
 			# squares overlap as diamonds while the streets remained on the grid, creating
 			# clipped card corners and dead road wedges. Quarter-turn variation preserves
@@ -5537,11 +5875,12 @@ func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],dama
 			var basis:=_settlement_district_surface_basis(point,atlas_angle,footprint_size)
 			var origin:=Vector3(point.x,_close_surface_height_at(point.x,point.y)+0.0036+footprint_size*0.006,point.y)
 			multi.set_instance_transform(index,Transform3D(basis,origin))
-		multi.set_instance_custom_data(index,Color(float(tile_index)/47.0,float(condition)/7.0,float((seed>>17)%1000)/999.0,float(land_use)/2.0))
+		multi.set_instance_custom_data(index,Color(float(tile_index)/63.0,float(condition)/7.0,float((seed>>17)%1000)/999.0,float(land_use)/2.0))
 	var instance:=MultiMeshInstance3D.new()
 	instance.name="AggregateNeighborhoodFootprints"
 	instance.multimesh=multi
-	instance.material_override=_settlement_district_atlas_material(atlas,stage,modern,companion_atlas,vernacular_atlas)
+	var site_ground_color:=_terrain_color_at(center.x,center.z,_height_at(center.x,center.z))
+	instance.material_override=_settlement_district_atlas_material(atlas,stage,modern,companion_atlas,vernacular_atlas,palette,site_ground_color,inherited_early_atlas)
 	parent.add_child(instance)
 	return true
 
@@ -5605,14 +5944,20 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 		# connections, and battle damage breaks the remaining corridors into sections.
 		# The atlas plates already contain their internal streets. This surface is only
 		# the sparse inherited network between districts, not a border around every tile.
-		var stage_road_factor:float=[0.0,0.20,0.36,0.62,0.70,0.76,0.82][clampi(stage,0,6)]
+		var stage_road_factor:float=[0.0,0.20,0.36,0.95,1.0,1.0,1.0][clampi(stage,0,6)]
 		var road_keep_percent:int=clampi(roundi(float([100,92,84,74,68,56,38,22][road_condition])*stage_road_factor*float(road_grammar.keep_scale)*float(road_grammar.crosslink_scale)),4,98)
+		if stage>=3 and road_condition<=3:
+			# Maintained towns and cities need a legible connected network. Cultural
+			# permeability still changes lanes and hierarchy, but cannot turn healthy
+			# neighborhoods back into isolated atlas stamps.
+			road_keep_percent=maxi(road_keep_percent,74 if stage==3 else 80)
 		var stage_road_width:float=[0.38,0.48,0.68,0.86,1.0,1.0,1.0][clampi(stage,0,6)]
-		var road_width_factor:float=float([0.028,0.027,0.026,0.025,0.022,0.019,0.015,0.010][road_condition])*stage_road_width*float(road_grammar.width_scale)
+		var road_width_factor:float=float([0.034,0.033,0.032,0.030,0.026,0.022,0.016,0.010][road_condition])*stage_road_width*float(road_grammar.width_scale)
 		# Broad through-streets recur every third aggregate row/column; the hashed
 		# remainder supplies smaller irregular connections. This makes the atlas cells
 		# read as neighborhoods joined by roads instead of unrelated stickers.
-		var draw_east:=lane_seed%100<road_keep_percent or (road_condition<=5 and posmod(road_cell.y,through_interval)==0)
+		var east_collector:=road_condition<=5 and posmod(road_cell.y,through_interval)==0
+		var draw_east:=lane_seed%100<road_keep_percent or east_collector
 		if occupied_cells.has(east_key) and draw_east and not (road_condition>=6 and lane_seed%3==0):
 			var east_x:=float(road_cell.x+1)*road_cell_size
 			var east_start:=Vector2(east_x,float(road_cell.y)*road_cell_size)-Vector2(center.x,center.z)
@@ -5625,9 +5970,11 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 				east_start=east_full_start.lerp(east_full_finish,clampf(east_mid-east_kept*0.5,0.04,0.90))
 				east_finish=east_full_start.lerp(east_full_finish,clampf(east_mid+east_kept*0.5,0.10,0.96))
 			var east_path:=PackedVector2Array([east_start,east_finish])
-			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,east_path,road_cell_size*road_width_factor,road_tone,0.00274,1)
+			var east_tone:=road_tone.lightened(0.055) if east_collector else road_tone
+			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,east_path,road_cell_size*road_width_factor*(1.58 if east_collector else 1.0),east_tone,0.00274,1)
 		var south_key:="%d:%d" % [road_cell.x,road_cell.y+1]
-		var draw_south:=(lane_seed>>8)%100<road_keep_percent or (road_condition<=5 and posmod(road_cell.x,through_interval)==0)
+		var south_collector:=road_condition<=5 and posmod(road_cell.x,through_interval)==0
+		var draw_south:=(lane_seed>>8)%100<road_keep_percent or south_collector
 		if occupied_cells.has(south_key) and draw_south and not (road_condition>=6 and lane_seed%4==0):
 			var south_z:=float(road_cell.y+1)*road_cell_size
 			var south_start:=Vector2(float(road_cell.x)*road_cell_size,south_z)-Vector2(center.x,center.z)
@@ -5640,15 +5987,26 @@ func _create_settlement_district_clipmap(center:Vector3,layout:Dictionary,stage:
 				south_start=south_full_start.lerp(south_full_finish,clampf(south_mid-south_kept*0.5,0.04,0.90))
 				south_finish=south_full_start.lerp(south_full_finish,clampf(south_mid+south_kept*0.5,0.10,0.96))
 			var south_path:=PackedVector2Array([south_start,south_finish])
-			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,south_path,road_cell_size*road_width_factor,road_tone,0.00274,1)
+			var south_tone:=road_tone.lightened(0.055) if south_collector else road_tone
+			road_segment_count+=_append_settlement_system_ribbon(road_surface,center,south_path,road_cell_size*road_width_factor*(1.58 if south_collector else 1.0),south_tone,0.00274,1)
 	if road_segment_count>0:
 		var road_mesh_instance:=MeshInstance3D.new()
 		road_mesh_instance.name="DistrictRoadGrid"
 		road_mesh_instance.mesh=road_surface.commit()
-		var road_material:=StandardMaterial3D.new()
-		road_material.vertex_color_use_as_albedo=true
-		road_material.roughness=1.0
-		road_material.cull_mode=BaseMaterial3D.CULL_DISABLED
+		var road_material:=ShaderMaterial.new()
+		var road_shader:=Shader.new()
+		road_shader.code="""
+shader_type spatial;
+render_mode blend_mix, depth_prepass_alpha, cull_disabled, unshaded;
+uniform float detail_lod_alpha = 1.0;
+void fragment(){
+	ALBEDO=COLOR.rgb;
+	ROUGHNESS=1.0;
+	ALPHA=COLOR.a*detail_lod_alpha;
+}
+"""
+		road_material.shader=road_shader
+		road_material.set_shader_parameter("detail_lod_alpha",1.0-smoothstep(1.62,SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM,camera.size) if camera!=null else 1.0)
 		road_mesh_instance.material_override=road_material
 		clipmap_root.add_child(road_mesh_instance)
 	if uses_atlas: return
@@ -5774,7 +6132,10 @@ func _create_settlement_stage_landscape(center:Vector3,profile:Dictionary,plots:
 	# A town is already a coherent area of occupied land at map scale. Keeping stage 3
 	# on the legacy overlapping-patch path made it a pile of translucent polygons while
 	# cities used the scalable Google-Earth density field.
-	var use_unified_density_field:=lod>0 and stage>=3
+	# Mature close inspection and strategic zoom overlap through one bounded crossfade:
+	# the atlas neighborhoods fade out while this terrain-draped field fades in. Keeping
+	# both geometries through the transition removes the hard 2.4 km identity swap.
+	var use_unified_density_field:=stage>=3
 	var late_urban_maturity:=float(stage)/6.0
 	# Built land is generally darker and less saturated than surrounding vegetation at
 	# aerial scale. Neutral mid-grey overdraw looked like smoke; a material-tinted,
@@ -6168,7 +6529,10 @@ func _create_settlement_stage_landscape(center:Vector3,profile:Dictionary,plots:
 	if mass_count>0 and lod>0: _commit_settlement_surface(mass_surface,"PersistentUrbanMassing",parent,false)
 	if defense_flat_count>0: _commit_settlement_surface(defense_flat_surface,"PersistentSettlementDefenseGround",parent,true)
 	if defense_mass_count>0: _commit_settlement_surface(defense_mass_surface,"PersistentSettlementDefenseMassing",parent,false)
-	if lod==0: _create_settlement_district_clipmap(center,layout,stage,architecture,damage_ratio,palette,parent,plots,coastal_visual_profile)
+	# Do not replace the continuous aerial settlement with authored photo tiles at
+	# close zoom.  The atlas clipmap produced a conspicuous ring of rectangular,
+	# historically incompatible neighbourhood photographs.  The strategic density
+	# field now remains the source of truth through the closest settlement view.
 
 func _settlement_claim_fill_alpha(base_alpha:float)->float:
 	if camera==null: return base_alpha
@@ -7086,8 +7450,11 @@ void fragment() {
 		float infill=value_noise(world_position.xz*96.0+vec2(-73.0,41.0));
 		float metropolitan_grain=value_noise(world_position.xz*0.72+vec2(-13.0,7.0));
 		float regional_grain=value_noise(world_position.xz*0.18+vec2(29.0,-41.0));
-		vec3 close_fabric=COLOR.rgb*(0.71+block*0.22+infill*0.10);
-		vec3 strategic_fabric=COLOR.rgb*(0.70+metropolitan_grain*0.17+regional_grain*0.09);
+		// Built land should interrupt green terrain as roofs, paving and worked yards,
+		// not sit above it as pale atmospheric haze. Keep the close crossover readable,
+		// then compress exposure harder as blocks merge into regional land cover.
+		vec3 close_fabric=COLOR.rgb*(0.56+block*0.18+infill*0.08);
+		vec3 strategic_fabric=COLOR.rgb*(0.43+metropolitan_grain*0.14+regional_grain*0.07);
 		fabric=mix(strategic_fabric,close_fabric,micro_visibility);
 		fabric=mix(fabric,fabric*vec3(1.05,1.00,0.91),0.14);
 		// A bounded world-space block grain survives zoom without spawning roads or
@@ -7112,6 +7479,14 @@ void fragment() {
 		bool maritime_district=encoded_family>=4.0 && encoded_family<8.0;
 		float district_family=maritime_district ? encoded_family-4.0 : encoded_family;
 		float district_seed=packed_strategic_field ? fract(packed_state) : fract(UV2.y);
+		float road_survival=1.0;
+		if(district_condition>0.5) road_survival=0.97;
+		if(district_condition>1.5) road_survival=0.94;
+		if(district_condition>2.5) road_survival=0.90;
+		if(district_condition>3.5) road_survival=0.78;
+		if(district_condition>4.5) road_survival=0.57;
+		if(district_condition>5.5) road_survival=0.35;
+		if(district_condition>6.5) road_survival=0.18;
 		// The eight neighborhood conditions remain legible after individual roofs
 		// collapse into aerial land cover. Great-to-normal is maintenance and canopy;
 		// bad/poor is inhabited weathering; only damaged/destroyed receives scars.
@@ -7155,24 +7530,27 @@ void fragment() {
 			fabric=mix(fabric,scar_tone,ruin_level*(0.22+scar_field*0.28));
 			fabric=mix(fabric,vec3(0.48,0.43,0.36),foundation_trace*ruin_level*(district_condition<7.0 ? 0.08 : 0.12));
 		}
-		// Quarter-kilometre neighborhood footprints preserve the exact close-atlas
-		// scale through the plot-to-city crossover. They fade into the larger regional
-		// district cells below before either pattern becomes sub-pixel noise.
+		// Close settlement texture is generated from the same continuous field as the
+		// distant city.  These are aggregate blocks and courtyards, not individual
+		// buildings and never pasted aerial photographs.
 		vec2 neighborhood_point=urban_point*vec2(3.55,3.18);
 		vec2 neighborhood_local=fract(neighborhood_point);
 		vec2 neighborhood_cell=floor(neighborhood_point);
-		neighborhood_local=vary_strategic_district_uv(neighborhood_local,neighborhood_cell,district_seed);
-		float neighborhood_roll=hash21(neighborhood_cell+vec2(district_seed*89.0,district_seed*47.0));
-		float neighborhood_tile=strategic_district_tile(neighborhood_roll,district_family);
-		if(maritime_district) neighborhood_tile=strategic_district_modern>0 ? 14.0 : 5.0;
-		vec4 neighborhood_sample=sample_strategic_district(neighborhood_tile,neighborhood_local);
-		float neighborhood_luma=dot(neighborhood_sample.rgb,vec3(0.299,0.587,0.114));
-		bool neighborhood_fringe=(neighborhood_sample.r>0.76 && neighborhood_sample.g<0.24 && neighborhood_sample.b<0.20) || (neighborhood_sample.r>0.82 && neighborhood_sample.g>0.58 && neighborhood_sample.g<0.84 && neighborhood_sample.b<0.16);
-		float neighborhood_built=(neighborhood_sample.a>0.10 && !neighborhood_fringe) ? smoothstep(0.08,0.48,neighborhood_sample.a) : 0.0;
-		neighborhood_built*=strategic_structure_survival(district_condition,neighborhood_local,neighborhood_cell);
-		vec3 neighborhood_detail=COLOR.rgb*clamp(neighborhood_luma/0.48,0.54,1.42);
-		neighborhood_detail=mix(neighborhood_detail,neighborhood_sample.rgb,0.20);
-		fabric=mix(fabric,neighborhood_detail,neighborhood_built*neighborhood_visibility*0.54);
+		vec2 neighborhood_edge=min(neighborhood_local,vec2(1.0)-neighborhood_local);
+		float neighborhood_break=value_noise(neighborhood_cell*0.73+vec2(district_seed*53.0,19.0));
+		float local_lane=1.0-smoothstep(0.018,0.050,min(neighborhood_edge.x,neighborhood_edge.y));
+		float occupied_block=step(0.20+neighborhood_break*0.28,hash21(neighborhood_cell+vec2(31.0,district_seed*67.0)));
+		float neighborhood_survival=strategic_structure_survival(district_condition,neighborhood_local,neighborhood_cell);
+		float block_tone=0.72+neighborhood_break*0.30;
+		vec3 neighborhood_detail=COLOR.rgb*block_tone;
+		fabric=mix(fabric,neighborhood_detail,occupied_block*neighborhood_survival*neighborhood_visibility*0.46);
+		fabric=mix(fabric,COLOR.rgb*0.34,local_lane*neighborhood_visibility*road_survival*0.24);
+		// Sparse warm concentrations suggest fires, busy yards and denser inhabited
+		// centres at Google-Earth scale. They are deliberately aggregate bright spots.
+		vec2 activity_delta=neighborhood_local-vec2(0.5);
+		float activity_seed=hash21(neighborhood_cell+vec2(109.0,district_seed*137.0));
+		float activity_spot=(1.0-smoothstep(0.035,0.16,length(activity_delta)))*step(0.965,activity_seed)*occupied_block;
+		fabric=mix(fabric,vec3(0.80,0.60,0.28),activity_spot*neighborhood_visibility*0.48);
 		vec2 regional_point=urban_point*vec2(0.40,0.34);
 		vec2 regional_local=fract(regional_point);
 		vec2 regional_edge=min(regional_local,vec2(1.0)-regional_local);
@@ -7183,30 +7561,14 @@ void fragment() {
 		float district_age=value_noise(regional_cell*0.31+vec2(71.0,-31.0));
 		float district_void=step(0.34,hash21(regional_cell+vec2(-9.0,83.0)));
 		fabric*=mix(0.92,1.065,district_age);
-		// One screen-scale cell is an aggregate neighborhood footprint. Select a
-		// bounded aerial design from the atlas so a metropolis becomes roughly
-		// 25-50 recognizable district fabrics rather than thousands of buildings or
-		// one procedural checkerboard. The port tile is excluded from this generic
-		// inland pass; actual coastal systems place maritime fabric deliberately.
+		// Large irregular districts remain visible as the city expands. Their muted
+		// material families and voids make many shapes without imposing a modern plan.
 		float district_roll=hash21(regional_cell+vec2(district_seed*97.0,district_seed*53.0));
-		float district_tile=strategic_district_tile(district_roll,district_family);
-		if(maritime_district) district_tile=strategic_district_modern>0 ? 14.0 : 5.0;
-		vec4 district_sample=sample_strategic_district(district_tile,regional_local);
-		float district_sample_luma=dot(district_sample.rgb,vec3(0.299,0.587,0.114));
-		bool district_fringe=(district_sample.r>0.76 && district_sample.g<0.24 && district_sample.b<0.20) || (district_sample.r>0.82 && district_sample.g>0.58 && district_sample.g<0.84 && district_sample.b<0.16);
-		float district_built=(district_sample.a>0.10 && !district_fringe) ? smoothstep(0.08,0.48,district_sample.a) : 0.0;
-		district_built*=strategic_structure_survival(district_condition,regional_local,regional_cell);
-		vec3 district_detail=COLOR.rgb*clamp(district_sample_luma/0.48,0.56,1.38);
-		district_detail=mix(district_detail,district_sample.rgb,0.18);
-		fabric=mix(fabric,district_detail,district_built*regional_visibility*0.40);
-		float road_survival=1.0;
-		if(district_condition>0.5) road_survival=0.97;
-		if(district_condition>1.5) road_survival=0.94;
-		if(district_condition>2.5) road_survival=0.90;
-		if(district_condition>3.5) road_survival=0.78;
-		if(district_condition>4.5) road_survival=0.57;
-		if(district_condition>5.5) road_survival=0.35;
-		if(district_condition>6.5) road_survival=0.18;
+		float district_built=step(0.18,district_roll)*strategic_structure_survival(district_condition,regional_local,regional_cell);
+		float district_mottle=value_noise(regional_point*2.7+vec2(district_seed*29.0,-43.0));
+		vec3 district_detail=COLOR.rgb*(0.67+district_mottle*0.31);
+		if(maritime_district) district_detail=mix(district_detail,vec3(0.43,0.46,0.39),0.18);
+		fabric=mix(fabric,district_detail,district_built*regional_visibility*0.34);
 		fabric=mix(fabric,COLOR.rgb*0.38,avenue*district_void*0.20*regional_visibility*road_survival);
 		// At regional/continental altitude, many neighborhood cells combine into one
 		// urban zone. Re-sample the same bounded design language at a coarser physical
@@ -7217,16 +7579,11 @@ void fragment() {
 		vec2 macro_local=fract(macro_point);
 		vec2 macro_cell=floor(macro_point);
 		macro_local=vary_strategic_district_uv(macro_local,macro_cell,district_seed+0.67);
-		float macro_tile=strategic_district_tile(hash21(macro_cell+vec2(district_seed*131.0,district_seed*79.0)),district_family);
-		if(maritime_district) macro_tile=strategic_district_modern>0 ? 14.0 : 5.0;
-		vec4 macro_sample=sample_strategic_district(macro_tile,macro_local);
-		float macro_luma=dot(macro_sample.rgb,vec3(0.299,0.587,0.114));
-		bool macro_fringe=(macro_sample.r>0.76 && macro_sample.g<0.24 && macro_sample.b<0.20) || (macro_sample.r>0.82 && macro_sample.g>0.58 && macro_sample.g<0.84 && macro_sample.b<0.16);
-		float macro_built=(macro_sample.a>0.10 && !macro_fringe) ? smoothstep(0.07,0.44,macro_sample.a) : 0.0;
+		float macro_built=step(0.14,hash21(macro_cell+vec2(district_seed*131.0,district_seed*79.0)));
 		macro_built*=strategic_structure_survival(district_condition,macro_local,macro_cell);
-		vec3 macro_detail=COLOR.rgb*clamp(macro_luma/0.48,0.58,1.32);
-		macro_detail=mix(macro_detail,macro_sample.rgb,0.12);
-		fabric=mix(fabric,macro_detail,macro_built*macro_visibility*0.29);
+		float macro_value=value_noise(macro_point*3.1+vec2(-17.0,district_seed*41.0));
+		vec3 macro_detail=COLOR.rgb*(0.72+macro_value*0.25);
+		fabric=mix(fabric,macro_detail,macro_built*macro_visibility*0.23);
 		// Continental altitude gets one final 100–120 km aggregate octave. It carries
 		// only luminance/material modulation—not pasted building imagery—so a planetary
 		// megalopolis retains internal structure without repeating thousands of tiles.
@@ -7235,15 +7592,11 @@ void fragment() {
 		vec2 continental_local=fract(continental_point);
 		vec2 continental_cell=floor(continental_point);
 		continental_local=vary_strategic_district_uv(continental_local,continental_cell,district_seed+0.83);
-		float continental_tile=strategic_district_tile(hash21(continental_cell+vec2(district_seed*181.0,district_seed*103.0)),district_family);
-		if(maritime_district) continental_tile=strategic_district_modern>0 ? 14.0 : 5.0;
-		vec4 continental_sample=sample_strategic_district(continental_tile,continental_local);
-		float continental_luma=dot(continental_sample.rgb,vec3(0.299,0.587,0.114));
-		bool continental_fringe=(continental_sample.r>0.76 && continental_sample.g<0.24 && continental_sample.b<0.20) || (continental_sample.r>0.82 && continental_sample.g>0.58 && continental_sample.g<0.84 && continental_sample.b<0.16);
-		float continental_built=(continental_sample.a>0.10 && !continental_fringe) ? smoothstep(0.07,0.44,continental_sample.a) : 0.0;
+		float continental_built=step(0.12,hash21(continental_cell+vec2(district_seed*181.0,district_seed*103.0)));
 		continental_built*=strategic_structure_survival(district_condition,continental_local,continental_cell);
-		vec3 continental_detail=COLOR.rgb*clamp(continental_luma/0.48,0.76,1.16);
-		fabric=mix(fabric,continental_detail,continental_built*continental_visibility*0.22);
+		float continental_value=value_noise(continental_point*3.4+vec2(23.0,district_seed*61.0));
+		vec3 continental_detail=COLOR.rgb*(0.78+continental_value*0.19);
+		fabric=mix(fabric,continental_detail,continental_built*continental_visibility*0.17);
 		// Street and roof grids belong to the fixed-kilometre close neighborhood kit.
 		// Reconstructing a second procedural checkerboard immediately after that kit
 		// retires made the city visibly change identity at the 2.4 km crossover. Regional
@@ -7322,8 +7675,9 @@ void fragment() {
 		// Camera-local bounded district masses now carry town-and-later physical
 		// presence at close zoom. Leave only a faint continuous substrate here so the
 		// strategic layer does not double-render as a gray veil beneath real roofs.
-		float aggregate_floor=fabric_kind==5 ? 0.10 : 0.16;
-		material_alpha*=mix(aggregate_floor,1.0,smoothstep(0.10,0.72,aerial_lod));
+		float aggregate_floor=fabric_kind==5 ? 0.78 : 0.16;
+		float aggregate_reveal=fabric_kind==5 ? smoothstep(0.34,0.74,aerial_lod) : smoothstep(0.10,0.72,aerial_lod);
+		material_alpha*=mix(aggregate_floor,1.0,aggregate_reveal);
 	}
 	if (fabric_kind==7) {
 		// Kilometer-scale transport ribbons are a strategic representation. Real saved
@@ -7343,7 +7697,7 @@ void fragment() {
 		float micro_wear=value_noise(world_position.xz*138.0+vec2(-27.0,83.0));
 		float macro_wear=value_noise(world_position.xz*0.55+vec2(43.0,-17.0));
 		float urban_wear=mix(macro_wear,micro_wear,alpha_micro_visibility);
-		material_alpha*=0.82+urban_wear*0.18;
+		material_alpha*=0.93+urban_wear*0.07;
 	} else if (fabric_kind==0 || fabric_kind==2 || fabric_kind==7) {
 		float wear=value_noise(world_position.xz*138.0+vec2(-27.0,83.0));
 		material_alpha*=0.70+wear*0.30;
@@ -8818,7 +9172,7 @@ func _refresh_age_distribution_meter() -> void:
 		var observed_note:=""
 		if int(profile.recorded_deaths)>0:
 			observed_note="\nObserved mean age at death: %.1f years across %d recorded deaths." % [float(profile.observed_age_at_death),int(profile.recorded_deaths)]
-		age_distribution_title.tooltip_text="Projected at birth under current health, nutrition, shelter, and mortality conditions.%s" % observed_note
+		age_distribution_title.tooltip_text="Projected average at birth under current age-specific health, nutrition, shelter, and mortality conditions—not a maximum attainable age.%s" % observed_note
 	var working_share:=100.0*float(profile.working_age)/maxf(1.0,float(profile.total))
 	age_distribution_summary.text="GREEN PRODUCTIVE-AGE %.0f%%   •   DEPENDENCY %d / 100" % [working_share,roundi(float(profile.dependents_per_100_workers))]
 	age_distribution_summary.tooltip_text="Green bands are productive-age cohorts (14–59). Warm and grey bands are dependents: children under 14 and elders 60 or older. Median age is %.1f." % float(profile.median_age)
@@ -8845,9 +9199,61 @@ func _settlement_project_available(project: Dictionary) -> bool:
 		return false
 	if bool(project.get("requires_water",false)) and not bool(GameState.water_metrics.get("source_accessible",false)):
 		return false
-	for resource_name in (project.get("materials",{}) as Dictionary):
-		if float(GameState.resource_stockpiles.get(resource_name,0.0))<float((project.materials as Dictionary)[resource_name]): return false
+	if _settlement_project_material_plan(project).is_empty(): return false
 	return true
+
+
+func _settlement_project_material_plan(project:Dictionary)->Dictionary:
+	var required:Dictionary=(project.get("materials",{}) as Dictionary).duplicate(true)
+	var options:Array[Dictionary]=[required]
+	if String(project.get("name",""))=="Lean-to Shelters":
+		# Early shelter must not be hard-locked behind one named plant deposit.
+		# Bark, brush, reeds, earth daub and dry stone are historically plausible
+		# substitutes, with heavier alternatives costing more bulk.
+		options=[
+			required,
+			{"Timber":25.0},
+			{"Timber":15.0,"Clay":10.0},
+			{"Timber":14.0,"Stone":14.0},
+		]
+	for option in options:
+		var affordable:=true
+		for resource_name in option:
+			if float(GameState.resource_stockpiles.get(resource_name,0.0))+0.0001<float(option[resource_name]):
+				affordable=false
+				break
+		if affordable: return option.duplicate(true)
+	return {}
+
+
+func _shelter_work_status()->String:
+	var population:=maxf(1.0,GameState.population_exact)
+	var coverage:=clampf(float(GameState.housing_capacity)/population,0.0,1.2)
+	if "Lean-to Shelters" not in GameState.settlement_completed:
+		if "Hearth Circle" not in GameState.settlement_completed:
+			return "BLOCKED · Establish the Hearth Circle before permanent shelter work can begin."
+		var shelter_project:Dictionary={}
+		for definition in _settlement_definitions():
+			if String(definition.get("name",""))=="Lean-to Shelters": shelter_project=definition; break
+		var plan:=_settlement_project_material_plan(shelter_project)
+		if plan.is_empty():
+			return "BLOCKED BY MATERIALS · Need 18 Timber + 12 Fiber, or substitutes: 25 Timber; 15 Timber + 10 Clay; or 14 Timber + 14 Stone. Shelter focus is assigning extraction and carrying labor, but it cannot build from empty stores."
+		var progress:=float(GameState.settlement_projects.get("Lean-to Shelters",0.0))
+		return "UNDERWAY · Lean-to Shelters %d%% · using %s." % [clampi(roundi(progress/9.0*100.0),0,100),_material_cost_text(plan)]
+	if coverage>=0.98:
+		return "CURRENT CAPACITY COVERS %d%% · builders continue ordinary maintenance and growth." % roundi(coverage*100.0)
+	var builders:=float(GameState.population_allocations.get("Construction",0))
+	var efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
+	var work_per_day:=builders/8.0*efficiency
+	var remaining:=maxf(0.0,28.0-float(GameState.housing_progress))
+	var days:=ceili(remaining/maxf(0.01,work_per_day))
+	return "UNDERWAY · %d builders · next shelter capacity in about %d day%s." % [roundi(builders),days,"" if days==1 else "s"]
+
+
+func _material_cost_text(cost:Dictionary)->String:
+	var parts:Array[String]=[]
+	for resource_name in cost: parts.append("%.0f %s" % [float(cost[resource_name]),String(resource_name)])
+	return " + ".join(parts)
 
 func _current_settlement_project() -> Dictionary:
 	var available: Array[Dictionary] = []
@@ -8872,6 +9278,9 @@ func _current_settlement_project() -> Dictionary:
 	return best
 
 func _process_settlement_day() -> void:
+	SettlementModel.with_local_population(_process_local_settlement_day)
+
+func _process_local_settlement_day() -> void:
 	if travel_active or not GameState.settlement_site_committed or settler_marker == null:
 		return
 	var project := _current_settlement_project()
@@ -8885,19 +9294,44 @@ func _process_settlement_day() -> void:
 	var daily_work := (builders / 8.0) * (0.82 + carriers / 30.0 + makers / 50.0)*float(GameState.simulation_metrics.get("labor_efficiency",0.72))*(1.0+DiscoverySystem.effect("construction_rate")+ProgressionSystem.effect("construction_rate"))
 	GameState.settlement_projects[project_name] = float(GameState.settlement_projects.get(project_name, 0.0)) + daily_work
 	if float(GameState.settlement_projects[project_name]) >= float(project.days):
-		for resource_name in (project.get("materials",{}) as Dictionary):
-			GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float((project.materials as Dictionary)[resource_name]))
+		var material_plan:=_settlement_project_material_plan(project)
+		if material_plan.is_empty():
+			_update_settlement_progress_text()
+			return
+		for resource_name in material_plan:
+			GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(material_plan[resource_name]))
 		GameState.settlement_completed.append(project_name)
+		if GameState.resource_settlement_id!="":
+			if project_name=="Lean-to Shelters": GameState.housing_capacity+=roundi(90.0*(1.0+DiscoverySystem.effect("housing_output")+ProgressionSystem.effect("housing_output")))
+			var city:=SettlementModel.settlement_record(GameState.resource_settlement_id)
+			GameState.record_building_event({"settlement_id":String(city.id),"settlement_name":String(city.name),"event":"completed","kind":project_name,"form":"communal_work","land_use":"communal","materials":material_plan.duplicate(true),"counts_materials":true,"condition":1.0,"status":"active"})
+			return
 		footprint_population = -1
 		if project_name == "Hearth Circle":
 			GameState.settlement_founded_at = settler_marker.position
 			GameState.settlement_founded_day=int(floor(GameState.elapsed_days))
 			hearth_established = true
 			_settlement_model().ensure_founded()
+			GovernmentPeopleSystem.initialize()
 			if settlement_visual_root:
 				settlement_visual_root.position = GameState.settlement_founded_at
 		elif project_name=="Lean-to Shelters":
 			GameState.housing_capacity+=roundi(90.0*(1.0+DiscoverySystem.effect("housing_output")+ProgressionSystem.effect("housing_output")))
+		var family:="stone" if material_plan.has("Stone") else ("earth" if material_plan.has("Clay") else "organic")
+		GameState.record_building_event({
+			"day":int(floor(GameState.elapsed_days)),
+			"settlement_name":_settlement_display_name(),
+			"event":"completed",
+			"kind":project_name,
+			"form":"communal_work",
+			"land_use":"communal",
+			"material_family":family,
+			"materials":material_plan.duplicate(true),
+			"counts_materials":true,
+			"condition":1.0,
+			"status":"active",
+			"note":String(project.get("effect","")),
+		})
 		_spawn_settlement_structure(project_name)
 		if travel_status_label:
 			travel_status_label.text = "%s EMERGED FROM THE PEOPLE'S WORK" % project_name.to_upper()
@@ -9293,15 +9727,19 @@ func _refresh_actions_menu()->void:
 
 
 func _scout_action_presentation(exploration:Dictionary,quote:Dictionary)->Dictionary:
+	var worst_overdue:=0
+	for party_variant in (exploration.get("parties",[]) as Array):
+		worst_overdue=maxi(worst_overdue,int((party_variant as Dictionary).get("overdue_days",0)))
+	var soonest_text:String="OVERDUE %dD" % worst_overdue if worst_overdue>0 else "~%dD" % int(exploration.get("days_remaining",0))
 	if bool(exploration.get("active",false)) and bool(exploration.get("can_begin",false)):
 		return {
-			"label":"SEND SCOUTS  •  %d AWAY" % int(exploration.get("active_count",1)),
+			"label":"SEND SCOUTS  •  %d AWAY  •  %s" % [int(exploration.get("active_count",1)),soonest_text],
 			"disabled":false,
-			"tooltip":"IN PROGRESS  %d of %d parties are away.\nACTION  The population can still organize another party.\nNEXT  Review targets, durations, and cost before it departs." % [int(exploration.get("active_count",1)),int(exploration.get("capacity",1))]
+			"tooltip":"IN PROGRESS  %d of %d parties are away; the soonest is %s.\nACTION  The population can still organize another party.\nNEXT  Review targets, durations, and cost before it departs." % [int(exploration.get("active_count",1)),int(exploration.get("capacity",1)),"overdue — the road decides the true return day" if worst_overdue>0 else "due in about %d days" % int(exploration.get("days_remaining",0))]
 		}
 	if bool(exploration.get("active",false)):
 		return {
-			"label":"REVIEW SCOUT PARTY  •  %d DAYS" % int(exploration.get("days_remaining",0)),
+			"label":"REVIEW SCOUT PARTY  •  %s" % soonest_text,
 			"disabled":false,
 			"tooltip":"IN PROGRESS  The party is away.\nWHY  Its observations remain physically with it.\nNEXT  Review personnel, issued provisions, risk, and return time."
 		}
@@ -9474,6 +9912,14 @@ func _begin_settlement_convoy(destination:Vector3)->void:
 	var quote:Dictionary=_settlement_model().settlement_convoy_quote(destination_2d,duration)
 	_open_settlement_convoy_confirmation(destination,route,quote)
 
+func _founding_material_summary(materials:Dictionary)->String:
+	var parts:Array[String]=[]
+	for resource_name in ["Timber","Fiber Plants","Clay","Stone"]:
+		var amount:=float(materials.get(resource_name,0.0))
+		if amount<=0.001: continue
+		parts.append("%.1f %s" % [amount,ResourceSystem.display_name(resource_name)])
+	return " + ".join(parts) if not parts.is_empty() else "none available"
+
 func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,quote:Dictionary)->void:
 	if settlement_convoy_confirm_panel and is_instance_valid(settlement_convoy_confirm_panel): return
 	var site_assessment:=_settlement_convoy_site_assessment(destination)
@@ -9495,7 +9941,7 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	dimmer.color=Color(0.006,0.010,0.011,0.90)
 	settlement_convoy_confirm_panel.add_child(dimmer)
 	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(650.0,settlement_convoy_confirm_panel.size.x-48.0),minf(470.0,settlement_convoy_confirm_panel.size.y-48.0))
+	modal.size=Vector2(minf(650.0,settlement_convoy_confirm_panel.size.x-48.0),minf(520.0,settlement_convoy_confirm_panel.size.y-48.0))
 	modal.position=(settlement_convoy_confirm_panel.size-modal.size)*0.5
 	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0a1213"),Color("#a58b55"),1,4,24))
 	settlement_convoy_confirm_panel.add_child(modal)
@@ -9519,12 +9965,22 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	explanation.add_theme_color_override("font_color",Color("#aeb4ae"))
 	explanation.custom_minimum_size=Vector2(0,42)
 	root.add_child(explanation)
+	settlement_convoy_name_input=LineEdit.new()
+	settlement_convoy_name_input.name="NewSettlementName"
+	settlement_convoy_name_input.max_length=32
+	settlement_convoy_name_input.placeholder_text="Name the new settlement"
+	settlement_convoy_name_input.text=String(quote.get("suggested_name",_settlement_model().suggested_settlement_name(Vector2(destination.x,destination.z),String(quote.get("origin_name","")))))
+	settlement_convoy_name_input.custom_minimum_size=Vector2(0,40)
+	settlement_convoy_name_input.tooltip_text="This is the permanent map and history name. It can be changed later from the selected settlement."
+	root.add_child(settlement_convoy_name_input)
 	root.add_child(HSeparator.new())
 	var origin_name:=String(quote.get("origin_name","NEAREST SETTLEMENT")).to_upper()
 	var distance_km:=float(route.get("distance_km",quote.get("distance_km",0.0)))
 	var duration_days:=float(quote.get("duration_days",0.0))
+	var founding_materials:Dictionary=quote.get("materials",{})
 	var details:=Label.new()
-	details.text="FROM  %s\nDESTINATION  CHARTED LAND • %.1f km away\nTRAVEL  %s\nFOUNDING PARTY  %s aggregate residents\nTRAVEL RATIONS  %s\nMATERIALS  %.1f Timber • %.1f Fiber Plants" % [origin_name,distance_km,_format_game_duration(duration_days),_compact_population(int(quote.get("population",0))),_compact_population(roundi(float(quote.get("food",0.0)))),float(quote.get("timber",0.0)),float(quote.get("fiber",0.0))]
+	details.text="FROM  %s\nDESTINATION  CHARTED LAND • %.1f km away\nTRAVEL  %s\nFOUNDING PARTY  %s aggregate residents\nTRAVEL RATIONS  %s\nFOUNDING SUPPLIES  %s" % [origin_name,distance_km,_format_game_duration(duration_days),_compact_population(int(quote.get("population",0))),_compact_population(roundi(float(quote.get("food",0.0)))),_founding_material_summary(founding_materials)]
+	details.tooltip_text="Founding supplies cover portable shelter, cordage, containers, and tools. Timber, plant fiber, clay, and stone can substitute; heavier materials require more carrying capacity."
 	details.add_theme_font_size_override("font_size",14)
 	details.add_theme_color_override("font_color",Color("#ded5c0"))
 	details.custom_minimum_size=Vector2(0,150)
@@ -9558,6 +10014,7 @@ func _dismiss_settlement_convoy_confirmation()->void:
 	settlement_convoy_confirm_panel=null
 	settlement_convoy_confirm_status=null
 	settlement_convoy_confirm_button=null
+	settlement_convoy_name_input=null
 	settlement_convoy_pending_route={}
 	settlement_convoy_pending_quote={}
 	_set_game_speed(settlement_convoy_confirmation_previous_speed)
@@ -9574,7 +10031,8 @@ func _confirm_settlement_convoy()->void:
 		if settlement_convoy_confirm_button: settlement_convoy_confirm_button.disabled=true
 		return
 	var quote:=settlement_convoy_pending_quote.duplicate(true)
-	var started:Dictionary=_settlement_model().begin_settlement_convoy(Vector2(destination.x,destination.z),float(quote.get("duration_days",0.5)))
+	var chosen_name:=settlement_convoy_name_input.text.strip_edges() if settlement_convoy_name_input else String(quote.get("suggested_name",""))
+	var started:Dictionary=_settlement_model().begin_settlement_convoy(Vector2(destination.x,destination.z),float(quote.get("duration_days",0.5)),chosen_name)
 	if not bool(started.get("ok",false)):
 		if settlement_convoy_confirm_status:
 			settlement_convoy_confirm_status.text="CANNOT SEND  •  %s" % String(started.get("reason","the available provisions changed"))
@@ -9595,7 +10053,7 @@ func _confirm_settlement_convoy()->void:
 	var event:={
 		"id":"settlement_convoy_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),
 		"title":"New Settlement Convoy Departed",
-		"description":"%s people left %s with %.0f travel rations, %.1f Timber, and %.1f Fiber Plants for a %.1f km journey. The population remains aggregate; one convoy record represents the entire mission." % [_compact_population(int(started.population)),String(started.origin_name),float(started.food),float(started.timber),float(started.fiber),float(started.distance_km)],
+		"description":"%s people left %s with %.0f travel rations and %s in founding supplies for a %.1f km journey. The population remains aggregate; one convoy record represents the entire mission." % [_compact_population(int(started.population)),String(started.origin_name),float(started.food),_founding_material_summary(started.get("materials",{})),float(started.distance_km)],
 		"domain":"settlement","severity":"major"
 	}
 	GameState.simulation_events.push_front(event)
@@ -9622,6 +10080,8 @@ func _process_settlement_convoy()->void:
 	_refresh_settlement_network(true)
 	if bool(completed.get("ok",false)):
 		var settlement:Dictionary=completed.settlement
+		_settlement_model().select_settlement(String(settlement.get("id","")))
+		GovernmentPeopleSystem.process_day(int(GameState.elapsed_days))
 		var event:={
 			"id":"settlement_founded_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),
 			"title":"New Settlement Seeded",
@@ -9631,6 +10091,7 @@ func _process_settlement_convoy()->void:
 		GameState.simulation_events.push_front(event)
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 		_set_camera_target(Vector3(destination.x,_height_at(destination.x,destination.y),destination.y))
+		if hud: _on_hud_section_requested("settlement",0)
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
@@ -9800,7 +10261,10 @@ func _issue_travel_council_report(stage: String,progress: float,reason:="") -> v
 	travel_council_notice_until_msec=Time.get_ticks_msec()+(13000 if urgency>0.7 else 8500)
 
 func _on_diplomatic_event(event:Dictionary)->void:
-	if String(event.get("kind","")) not in ["unit_sighting","first_contact"]: return
+	# Routine formations already have persistent map counters and a World badge.
+	# Only the historically meaningful first direct contact interrupts play;
+	# threats, war declarations, and battles use their own decision surfaces.
+	if String(event.get("kind",""))!="first_contact": return
 	var event_key:="%s::%s::%d" % [String(event.get("kind","")),String(event.get("formation_id",event.get("civ_id",""))),int(event.get("day",0))]
 	if String(active_foreign_alert.get("alert_key",""))==event_key: return
 	for queued in foreign_alert_queue:
@@ -10454,12 +10918,50 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.menu_requested.connect(_open_world_menu)
 	hud.escape_pressed.connect(_on_hud_escape)
 	hud.register_provider("settlement",preload("res://scripts/hud/content/dock_content_settlement.gd").new(self,hud))
+	hud.register_provider("health",preload("res://scripts/hud/content/dock_detail_health.gd").new(self,hud))
 	hud.register_provider("economy",preload("res://scripts/hud/content/dock_content_economy.gd").new(self,hud))
 	hud.register_provider("civ",preload("res://scripts/hud/content/dock_content_civilization.gd").new(self,hud))
 	hud.register_provider("inquiry",preload("res://scripts/hud/content/dock_content_inquiry.gd").new(self,hud))
 	hud.register_provider("world",preload("res://scripts/hud/content/dock_content_world.gd").new(self,hud))
 	hud.register_provider("military",preload("res://scripts/hud/content/dock_content_military.gd").new(self,hud))
 	_update_scale_bar()
+
+
+func _restore_military_attention()->void:
+	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat)
+	elif not MilitaryCampaign.active_engagement.is_empty(): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.")
+
+func _on_military_threat_attention(threat:Dictionary)->void:
+	if threat.is_empty(): return
+	if String(threat.get("campaign_mode","defensive"))=="offensive": return
+	var location:=String(threat.get("target_region_name",GameState.settlement_name))
+	if location.is_empty(): location=GameState.settlement_name
+	_pause_for_military_attention(String(threat.get("id","threat")),"ATTACK APPROACHING", "%s is approaching %s with roughly %d personnel. A response is due by day %d. Time is paused so you can review the threat before battle. If you resume without choosing a response, the garrison will defend or yield when the deadline passes." % [String(threat.get("source_name","An unidentified force")),location,int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",GameState.elapsed_days))])
+
+func _on_battle_attention(result:Dictionary)->void:
+	_pause_for_military_attention("battle_%s" % str(result.get("seed",GameState.elapsed_days)),"BATTLE REPORT",MilitaryCampaign.battle_report_text(result))
+
+func _pause_for_military_attention(event_id:String,title:String,body:String)->void:
+	if military_attention_seen.has(event_id): return
+	military_attention_seen[event_id]=true
+	if military_attention_seen.size()>64: military_attention_seen.erase(military_attention_seen.keys()[0])
+	game_speed=0.0
+	# Stop a fast-forward batch at this day, not after several hidden battles.
+	GameState.elapsed_days=minf(GameState.elapsed_days,float(last_discovery_day))
+	_update_time_interface()
+	_show_military_attention.call_deferred(title,body)
+
+func _show_military_attention(title:String,body:String)->void:
+	if military_attention_dialog and is_instance_valid(military_attention_dialog): military_attention_dialog.queue_free()
+	military_attention_dialog=ConfirmationDialog.new()
+	military_attention_dialog.title=title
+	military_attention_dialog.dialog_text=body
+	military_attention_dialog.min_size=Vector2i(650,260)
+	military_attention_dialog.ok_button_text="OPEN WAR PLANNING"
+	military_attention_dialog.cancel_button_text="STAY PAUSED"
+	add_child(military_attention_dialog)
+	military_attention_dialog.confirmed.connect(_open_war_planning)
+	military_attention_dialog.popup_centered()
 
 func _open_war_planning(_tab:int=0)->void:
 	## Deep military decisions — threats, engagements, aftermath, fronts —
@@ -10529,7 +11031,7 @@ func _build_scale_bar(layer: CanvasLayer) -> void:
 	scale_bar_root.position=Vector2(24,viewport_size.y-92)
 	scale_bar_root.size=Vector2(200,42)
 	scale_bar_root.mouse_filter=Control.MOUSE_FILTER_PASS
-	scale_bar_root.tooltip_text="Current map scale and the distance represented by the line. The north arrow rotates with the view so orientation remains explicit."
+	scale_bar_root.tooltip_text="Current map scale. F7 descends to 10,000 feet above the terrain. NORTH always means true geographic north; its arrow rotates when you rotate the map."
 	layer.add_child(scale_bar_root)
 	var backing:=ColorRect.new()
 	backing.size=Vector2(196,40)
@@ -10544,11 +11046,11 @@ func _build_scale_bar(layer: CanvasLayer) -> void:
 	scale_bar_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	scale_bar_root.add_child(scale_bar_label)
 	scale_compass_label=Label.new()
-	scale_compass_label.position=Vector2(148,2)
-	scale_compass_label.size=Vector2(40,18)
+	scale_compass_label.position=Vector2(112,1)
+	scale_compass_label.size=Vector2(76,20)
 	scale_compass_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	scale_compass_label.add_theme_font_size_override("font_size",11)
-	scale_compass_label.add_theme_color_override("font_color",Color("#d7d0bf"))
+	scale_compass_label.add_theme_font_size_override("font_size",12)
+	scale_compass_label.add_theme_color_override("font_color",Color("#e2c66f"))
 	scale_compass_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	scale_bar_root.add_child(scale_compass_label)
 	scale_bar_line=ColorRect.new()
@@ -10611,7 +11113,7 @@ func _build_map_help(layer:CanvasLayer)->void:
 	map_help_body.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	map_help_body.add_theme_font_size_override("font_size",11)
 	map_help_body.add_theme_color_override("font_color",Color("#c5cbc5"))
-	map_help_body.tooltip_text="Camera: pan with WASD or arrow keys; zoom with the mouse wheel; rotate with Shift + middle-drag."
+	map_help_body.tooltip_text="Camera: wheel to zoom; Shift + wheel for fast zoom; Q/E or Shift + middle-drag to rotate and tilt; N or click NORTH to reset north-up; WASD/arrows to pan."
 	root.add_child(map_help_body)
 	# The founding-focus screen is deferred until after the interface is built.  Do
 	# not flash map controls underneath that mandatory, mouse-stopping modal.
@@ -10702,12 +11204,13 @@ func _update_scale_bar() -> void:
 		distance_text="%d KM" % roundi(distance_km)
 	if hud:
 		hud.update_scale(pixel_width,distance_text,_camera_scale_band(),_north_screen_arrow())
+		if hud.scale_label: hud.scale_label.tooltip_text="%.0f feet above terrain. F7: inspect at 10,000 feet. Scale is measured at the center of this perspective view." % aerial_altitude_feet()
 	if scale_bar_root and scale_bar_line:
 		scale_bar_line.size.x=pixel_width
 		scale_bar_right_tick.position.x=10.0+pixel_width-2.0
 		scale_bar_label.text="%s  •  %s" % [_camera_scale_band(),distance_text]
 		if scale_compass_label:
-			scale_compass_label.text="N %s" % _north_screen_arrow()
+			scale_compass_label.text="NORTH %s" % _north_screen_arrow()
 
 func _camera_scale_band() -> String:
 	if camera==null: return "WORLD"
@@ -10745,21 +11248,36 @@ func _convoy_water_readout()->String:
 func _north_screen_arrow() -> String:
 	if camera==null: return "↑"
 	var center_screen:=camera.unproject_position(camera_target)
-	var north_point:=camera_target+Vector3(0.0,0.0,-maxf(1.0,camera.size*0.02))
-	north_point.y=_height_at(north_point.x,north_point.z)
+	# Compass orientation must not be distorted by the elevation of whatever hill
+	# happens to lie north of the camera target. Project two points on one plane.
+	var north_point:=camera_target+Vector3(0.0,0.0,-maxf(4.0,camera.size*0.25))
+	north_point.y=camera_target.y
 	var delta:=camera.unproject_position(north_point)-center_screen
+	return _screen_direction_arrow(delta)
+
+
+func _screen_direction_arrow(delta:Vector2)->String:
 	if delta.length_squared()<0.001: return "↑"
 	var angle:=atan2(delta.y,delta.x)
 	var arrows:=["→","↘","↓","↙","←","↖","↑","↗"]
 	return arrows[wrapi(roundi(angle/(PI/4.0)),0,8)]
 
-func _open_settlement_naming_panel() -> void:
+func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	if not GameState.settlement_site_committed:
 		if travel_status_label:
 			travel_status_label.text="Choose START SETTLEMENT before naming a permanent home"
 		return
 	if settlement_naming_panel:
 		return
+	var target:Dictionary=_settlement_model().settlement_by_id(settlement_id if settlement_id!="" else GameState.selected_player_settlement_id)
+	if target.is_empty(): target=_settlement_model().selected_settlement_snapshot()
+	# The first name is chosen before the Hearth Circle creates the permanent
+	# settlement record. Keep that founding flow available, then let every later
+	# settlement use its persistent record.
+	if target.is_empty() and "Hearth Circle" not in GameState.settlement_completed:
+		target={"id":"__founding__","name":GameState.settlement_name}
+	if target.is_empty(): return
+	settlement_naming_target_id=String(target.get("id",""))
 	naming_previous_speed=game_speed
 	_set_game_speed(0.0)
 	settlement_naming_panel=Control.new()
@@ -10784,15 +11302,12 @@ func _open_settlement_naming_panel() -> void:
 	root.add_theme_constant_override("separation",12)
 	modal.add_child(root)
 	var heading:=Label.new()
-	heading.text="NAME THE FIRST SETTLEMENT" if GameState.settlement_name=="" else "RENAME THE SETTLEMENT"
+	heading.text="NAME THIS SETTLEMENT" if settlement_naming_target_id=="__founding__" else "RENAME %s" % String(target.get("name","SETTLEMENT")).to_upper()
 	heading.add_theme_font_size_override("font_size",24)
 	heading.add_theme_color_override("font_color",Color("#ecdfc4"))
 	root.add_child(heading)
 	var context:=Label.new()
-	if "Hearth Circle" in GameState.settlement_completed:
-		context.text="The Hearth Circle has anchored a permanent home in %s. Give this place the name that will enter its history." % GameState.province_name
-	else:
-		context.text="The convoy has committed to permanent ground in %s. The Hearth Circle is still emerging from the people's work. Give this place the name that will enter its history." % GameState.province_name
+	context.text="This is an owned, governed place with its own population share, local leader, priorities, border, and history. Its name appears on the map and in reports."
 	context.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	context.custom_minimum_size=Vector2(0,52)
 	context.add_theme_font_size_override("font_size",15)
@@ -10801,14 +11316,14 @@ func _open_settlement_naming_panel() -> void:
 	settlement_name_input=LineEdit.new()
 	settlement_name_input.placeholder_text="Settlement name"
 	settlement_name_input.max_length=32
-	settlement_name_input.text=GameState.settlement_name
+	settlement_name_input.text=String(target.get("name",""))
 	settlement_name_input.custom_minimum_size=Vector2(0,48)
 	settlement_name_input.add_theme_font_size_override("font_size",18)
 	settlement_name_input.text_changed.connect(_on_settlement_name_changed)
 	settlement_name_input.text_submitted.connect(_on_settlement_name_submitted)
 	root.add_child(settlement_name_input)
 	var note:=Label.new()
-	note.text="The name can be changed later from the Population panel."
+	note.text="The name can be changed later from this settlement's actions."
 	note.add_theme_font_size_override("font_size",12)
 	note.add_theme_color_override("font_color",Color("#8f928d"))
 	root.add_child(note)
@@ -10842,13 +11357,21 @@ func _commit_settlement_name() -> void:
 	var chosen:=settlement_name_input.text.strip_edges()
 	if chosen=="":
 		return
-	GameState.settlement_name=chosen.substr(0,32)
-	GameState.settlement_network_revision+=1
-	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":"The first settlement is now known as %s." % GameState.settlement_name,"domain":"settlement","severity":"major"}
+	var result:Dictionary
+	if settlement_naming_target_id=="__founding__":
+		GameState.settlement_name=chosen.substr(0,32)
+		result={"ok":true,"name":GameState.settlement_name}
+	else:
+		result=_settlement_model().rename_settlement(settlement_naming_target_id,chosen)
+	if not bool(result.get("ok",false)):
+		if travel_status_label: travel_status_label.text=String(result.get("reason","SETTLEMENT COULD NOT BE RENAMED")).to_upper()
+		return
+	var final_name:=String(result.get("name",chosen))
+	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":"The selected settlement is now known as %s." % final_name,"domain":"settlement","severity":"major"}
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 	if travel_status_label:
-		travel_status_label.text="%s HAS BEEN NAMED" % GameState.settlement_name.to_upper()
+		travel_status_label.text="%s HAS BEEN NAMED" % final_name.to_upper()
 	_update_time_interface()
 	_dismiss_settlement_naming_panel()
 
@@ -10858,6 +11381,7 @@ func _dismiss_settlement_naming_panel() -> void:
 		settlement_naming_panel=null
 	settlement_name_input=null
 	settlement_name_confirm=null
+	settlement_naming_target_id=""
 	_set_game_speed(naming_previous_speed)
 
 func _toggle_resource_view()->void:
@@ -10867,6 +11391,9 @@ func _toggle_resource_view()->void:
 func _set_resource_view_enabled(enabled:bool)->void:
 	resource_view_enabled=enabled
 	if enabled: rendered_resource_overlay_zoom_key=""
+	for material in terrain_fog_materials:
+		if material.get_shader_parameter("land_resources")!=null:
+			material.set_shader_parameter("land_resources",1.0 if enabled else 0.0)
 	for river_overlay in river_overlays:
 		if not is_instance_valid(river_overlay) or String(river_overlay.name)!="RiverWater": continue
 		if river_overlay.material_override is ShaderMaterial:
@@ -10881,12 +11408,12 @@ func _update_resource_view_toggle()->void:
 	for deposit_variant in ResourceSystem.visible_deposits():
 		var deposit:Dictionary=deposit_variant
 		known_types[String(deposit.get("resource","RESOURCE"))]=true
-	resource_view_toggle.text="RESOURCES  •  %s" % ("ON" if resource_view_enabled else "OFF")
+	resource_view_toggle.text="LAND RESOURCES  •  %s" % ("ON" if resource_view_enabled else "OFF")
 	var water_note:=""
 	if settler_marker:
 		var water_distance:=_river_distance_at(settler_marker.position.x,settler_marker.position.z)*KM_PER_WORLD_UNIT
 		water_note="\nNearest visible river or drainage: %.1f km. Within 6 km it directly supports water collection." % water_distance if water_distance<INF else "\nNo recognized surface water is currently within the charted area."
-	resource_view_toggle.tooltip_text="Toggle recognized resource geography. Your civilization currently recognizes %d local resource types; unknown deposits remain invisible. Rivers are continuous water sources, not deposit dots; blue emphasis follows their actual channels.%s" % [known_types.size(),water_note]
+	resource_view_toggle.tooltip_text="Green canopy: woodland and timber. Pale exposed ground: stone. Warm open ground: productive soils. Click any charted ground to inspect it. Your civilization currently recognizes %d local resource types; unknown deposits remain invisible. Rivers are continuous water sources, not deposit dots; blue emphasis follows their actual channels.%s" % [known_types.size(),water_note]
 	var accent:=Color("#79a47c") if resource_view_enabled else Color("#65706b")
 	resource_view_toggle.add_theme_stylebox_override("normal",_hud_chip_style(accent))
 	resource_view_toggle.add_theme_stylebox_override("hover",_hud_chip_style(accent.lightened(0.12),true))
@@ -10894,6 +11421,9 @@ func _update_resource_view_toggle()->void:
 
 
 func _refresh_discovered_resource_overlays() -> void:
+	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,_refresh_local_resource_overlays)
+
+func _refresh_local_resource_overlays() -> void:
 	if camera==null: return
 	if not resource_view_enabled:
 		if resource_overlay_root and is_instance_valid(resource_overlay_root): resource_overlay_root.visible=false
@@ -10911,71 +11441,116 @@ func _refresh_discovered_resource_overlays() -> void:
 	resource_overlay_root.visible=resource_view_enabled
 	add_child(resource_overlay_root)
 	discovered_resource_overlays.clear()
-	var by_stage:Dictionary={"recognized":[],"surveyed":[],"active":[]}
-	for cluster_variant in clusters:
-		var cluster:Dictionary=cluster_variant
-		(by_stage[String(cluster.get("visual_stage","recognized"))] as Array).append(cluster)
-	for stage_variant in by_stage:
-		var stage:=String(stage_variant)
-		var stage_clusters:Array=by_stage[stage]
-		if stage_clusters.is_empty(): continue
-		var batch:=_create_resource_overlay_batch(stage,stage_clusters,camera.size)
-		resource_overlay_root.add_child(batch)
-		discovered_resource_overlays[stage]=batch
-	# Icons are bounded and sized in world units from the current zoom band, so
-	# the opening regional resource view can identify what each marker means
-	# without stacking text labels; names appear only at site scale.
-	if camera.size<=240.0:
-		var label_index:=0
-		for cluster_variant in clusters:
-			if label_index>=RESOURCE_OVERLAY_MAX_LABELS: break
-			var cluster:Dictionary=cluster_variant
-			var position:Vector3=cluster.position
-			# Settlement identity wins when a fixed-size resource marker would cover
-			# its symbol or classification. The resource ring remains visible and the
-			# marker returns naturally after the player pans or zooms closer.
-			if _resource_label_conflicts_with_settlement(position): continue
-			var resource_name:=String(cluster.get("resource","RESOURCE"))
-			var cluster_count:=int(cluster.get("count",1))
-			var marker_height:=_height_at(position.x,position.z)+camera.size*0.020
-			var icon:=Sprite3D.new()
-			icon.name="ResourceIcon_%02d" % label_index
-			icon.texture=ResourceIcons.texture_for(resource_name)
-			icon.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-			icon.shaded=false
-			icon.no_depth_test=true
-			icon.texture_filter=BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-			icon.pixel_size=camera.size*0.038/float(ResourceIcons.ICON_PX)
-			icon.position=Vector3(position.x,marker_height,position.z)
-			resource_overlay_root.add_child(icon)
-			if cluster_count>1:
-				var count_label:=Label3D.new()
-				count_label.text="×%d" % cluster_count
-				count_label.font_size=11
-				count_label.outline_size=5
-				count_label.modulate=Color("#ddd2b4")
-				count_label.outline_modulate=Color(0.025,0.034,0.036,0.96)
-				count_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-				count_label.fixed_size=true
-				count_label.no_depth_test=true
-				count_label.position=Vector3(position.x+camera.size*0.024,marker_height,position.z)
-				resource_overlay_root.add_child(count_label)
-			# At site scale there is room for the name under the icon; regional and
-			# planetary views stay icon-only.
-			if camera.size<=60.0:
-				var name_label:=Label3D.new()
-				name_label.text=resource_name.to_upper()
-				name_label.font_size=9
-				name_label.outline_size=4
-				name_label.modulate=Color("#c8bfa6")
-				name_label.outline_modulate=Color(0.025,0.034,0.036,0.96)
-				name_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-				name_label.fixed_size=true
-				name_label.no_depth_test=true
-				name_label.position=Vector3(position.x,_height_at(position.x,position.z)+camera.size*0.004,position.z)
-				resource_overlay_root.add_child(name_label)
-			label_index+=1
+	for cluster in clusters:
+		if String(cluster.resource) in ["Timber","Game","Fertile Soil","Fiber Plants"]: continue
+		var patch:=_resource_ground_indication(cluster)
+		resource_overlay_root.add_child(patch)
+		if resource_overlay_root.get_child_count()>=16: break
 	rendered_resource_overlay_zoom_key=_resource_overlay_view_key()
+
+func _resource_ground_indication(cluster:Dictionary)->MeshInstance3D:
+	# An indication is an approximate exposed-ground area, not a surveyed ore
+	# boundary. It only exists for already recognized local occurrences.
+	var center:Vector3=cluster.position
+	var style:=LANDSCAPE_VISUALS.surface_style(String(cluster.resource))
+	var radius:=0.35 if String(cluster.visual_stage)=="recognized" else 0.65
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for z in 12:
+		for x in 12:
+			for corner in [Vector2i(0,0),Vector2i(0,1),Vector2i(1,1),Vector2i(0,0),Vector2i(1,1),Vector2i(1,0)]:
+				var offset:=Vector2(float(x+corner.x)/12.0*2.0-1.0,float(z+corner.y)/12.0*2.0-1.0)*radius
+				var point:=Vector2(center.x,center.z)+offset
+				var mottling:=clampf(0.55+detail_noise.get_noise_2d(point.x*8.0,point.y*8.0),0.0,1.0)
+				var edge:=1.0-smoothstep(0.25,1.0,offset.length()/radius+mottling*0.20)
+				if not _world_position_is_revealed(Vector3(point.x,0.0,point.y)): edge=0.0
+				var soil:Color=style.soil
+				soil.a=edge*mottling*0.50
+				surface.set_color(soil)
+				surface.add_vertex(Vector3(point.x,_height_at(point.x,point.y)+0.002,point.y))
+	var patch:=MeshInstance3D.new()
+	patch.name="RecognizedGround_%s" % String(cluster.resource).replace(" ","")
+	patch.mesh=surface.commit()
+	patch.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var material:=StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo=true
+	material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.cull_mode=BaseMaterial3D.CULL_DISABLED
+	patch.material_override=material
+	if bool(style.outcrops): _add_resource_outcrops(patch,center,style)
+	return patch
+
+func _add_resource_outcrops(parent:Node3D,center:Vector3,style:Dictionary)->void:
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var random:=RandomNumberGenerator.new()
+	random.seed=GameState.world_seed^int(center.x*1000.0)^int(center.z*1700.0)
+	var vertex_count:=0
+	for rock in 14:
+		var point:=Vector2(center.x,center.z)+Vector2(random.randf_range(-0.075,0.075),random.randf_range(-0.075,0.075))
+		if not _world_position_is_revealed(Vector3(point.x,0.0,point.y)): continue
+		var radius:=random.randf_range(0.004,0.012)
+		var angle:=random.randf()*TAU
+		var top:=Vector3(point.x,_height_at(point.x,point.y)+radius*0.65,point.y)
+		for side in 7:
+			var a:=point+Vector2.from_angle(angle+float(side)*TAU/7.0)*radius
+			var b:=point+Vector2.from_angle(angle+float(side+1)*TAU/7.0)*radius
+			var shade:Color=(style.rock as Color).darkened(random.randf_range(0.0,0.22))
+			for vertex in [top,Vector3(b.x,_height_at(b.x,b.y)+0.001,b.y),Vector3(a.x,_height_at(a.x,a.y)+0.001,a.y)]:
+				surface.set_color(shade)
+				surface.add_vertex(vertex)
+				vertex_count+=1
+	if vertex_count==0: return
+	surface.generate_normals()
+	var rocks:=MeshInstance3D.new()
+	rocks.name="ExposedRockFaces"
+	rocks.mesh=surface.commit()
+	var shader:=Shader.new()
+	shader.code="""
+shader_type spatial;
+render_mode cull_disabled, diffuse_burley, specular_disabled;
+varying vec3 ground_position;
+float grain_hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float grain(vec2 p){
+	vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+	return mix(mix(grain_hash(i),grain_hash(i+vec2(1,0)),f.x),mix(grain_hash(i+vec2(0,1)),grain_hash(i+vec2(1,1)),f.x),f.y);
+}
+void vertex(){ ground_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+void fragment(){
+	float weathering=grain(ground_position.xz*620.0);
+	float mineral_grain=grain(ground_position.xz*2200.0);
+	float beds=sin(ground_position.y*2100.0+grain(ground_position.xz*160.0)*2.0);
+	ALBEDO=COLOR.rgb*(0.82+weathering*0.22+mineral_grain*0.08)*(0.97+beds*0.03);
+	ROUGHNESS=0.96;
+}
+"""
+	var material:=ShaderMaterial.new()
+	material.shader=shader
+	rocks.material_override=material
+	parent.add_child(rocks)
+
+func _surface_resource_report(position:Vector3)->String:
+	if _main_river_distance_at(position.x,position.z)<0.09:
+		return "[color=#a6c9d1][font_size=18]RIVER CHANNEL[/font_size][/color]\nSurface water follows this channel. Inspect dry ground beside it for woodland and soil. Drinking supply depends on access, collection, carrying and storage.\n\n"
+	var biome:=_biome_at(position.x,position.z)
+	if String(biome.id)=="water": return ""
+	var cover:=_woodland_density_at(position.x,position.z)
+	var wood:="Dense woodland" if cover>=0.60 else ("Open woodland" if cover>=0.25 else ("Scattered trees" if cover>=0.08 else "Little usable tree cover"))
+	return "[color=#b8ca98][font_size=18]%s[/font_size][/color]\n%s; approximately %d%% tree cover. These trees can supply timber. Cutting and delivery depend on workers, tools, distance and remaining growth.\n\nSurface stone: %s. Soil productivity: %s. Plant forage: %s.\n\n" % [String(biome.label).to_upper(),wood,roundi(cover*100.0),"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","plentiful" if float(biome.forage)>0.6 else "limited"]
+
+func _woodland_catchment(origin:Vector3)->Dictionary:
+	var density:=0.0
+	var weighted:=Vector2.ZERO
+	for z in [-1.0,0.0,1.0]:
+		for x in [-1.0,0.0,1.0]:
+			var point:=Vector2(origin.x+x,origin.z+z)
+			var value:=float(_biome_at(point.x,point.y).woodland)
+			density+=value
+			weighted+=point*value
+	if density<=0.001: return {"density":0.0}
+	var center:=weighted/density
+	return {"density":density/9.0,"area_km2":9.0,"position":Vector3(center.x,_height_at(center.x,center.y),center.y)}
 
 func _resource_label_conflicts_with_settlement(position:Vector3)->bool:
 	if camera==null: return false
@@ -11277,6 +11852,17 @@ func _refresh_landmark_markers()->void:
 		if stale and is_instance_valid(stale): stale.queue_free()
 		landmark_markers.erase(landmark_id)
 
+func _on_scout_report_returned(report:Dictionary)->void:
+	## A returned expedition is an event worth full attention: the world pauses
+	## and the complete report opens in the detail dock. Choosing any speed
+	## resumes time — the pause is an invitation to read, not a lock.
+	_set_game_speed(0.0)
+	if travel_status_label:
+		travel_status_label.text="A SCOUT PARTY HAS RETURNED — THE WORLD WAITS WHILE YOU READ ITS REPORT"
+	if hud:
+		hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(self,hud,report))
+
+
 func _open_landmark_from_screen(screen_position:Vector2)->bool:
 	## Clicking a charted landmark's map label opens its record — illustration
 	## plate, myth, and survey — in the detail dock.
@@ -11300,6 +11886,78 @@ func _open_landmark_from_screen(screen_position:Vector2)->bool:
 func _open_landmark_detail(landmark:Dictionary)->void:
 	if hud==null: return
 	hud.open_detail(preload("res://scripts/hud/content/dock_detail_landmark.gd").new(self,hud,landmark))
+
+
+func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
+	## Foreign counters are first-class map targets. Clicking one opens the
+	## complete next-action card; no report screen or hidden menu is required.
+	if camera==null: return false
+	var best:Dictionary={}
+	var best_distance:=42.0
+	for sighting_variant in CivilizationSystem.local_observation_snapshot().get("visible",[]):
+		var sighting:Dictionary=sighting_variant
+		var marker:Node3D=foreign_formation_markers.get(String(sighting.get("id","")),null)
+		if marker==null or not is_instance_valid(marker) or not marker.visible: continue
+		if camera.is_position_behind(marker.global_position): continue
+		var distance:=screen_position.distance_to(camera.unproject_position(marker.global_position))
+		if distance<best_distance:
+			best_distance=distance
+			best=sighting
+	if best.is_empty(): return false
+	if hud:
+		_on_hud_section_requested("military",0)
+		hud.open_detail(preload("res://scripts/hud/content/dock_detail_map_contact.gd").new(self,hud,String(best.get("id",""))))
+	if travel_status_label:
+		travel_status_label.text="MAP CONTACT SELECTED  •  choose the highlighted action in MILITARY"
+	return true
+
+
+func _resolve_map_scout_interception(formation_id:String,action:String)->Dictionary:
+	var result:Dictionary=CivilizationSystem.resolve_foreign_scout_interception(formation_id,action)
+	if travel_status_label:
+		travel_status_label.text=String(result.get("error",result.get("message","No interception occurred.")))
+	_refresh_foreign_formation_markers()
+	_update_time_interface()
+	return result
+
+
+func _select_nearest_field_army_to_sighting(formation_id:String)->Dictionary:
+	var sighting:Dictionary=CivilizationSystem.visible_formation_sighting(formation_id)
+	if sighting.is_empty(): return {"error":"Contact was lost before an army could be selected."}
+	var target_data:Dictionary=sighting.get("position",{})
+	var target:=Vector2(float(target_data.get("x",0.0)),float(target_data.get("z",0.0)))
+	var best_id:=-1
+	var best_name:=""
+	var best_distance:=INF
+	for army_variant in MilitaryCampaign.field_armies_snapshot().get("armies",[]):
+		var army:Dictionary=army_variant
+		if int(army.get("troops",0))<=0: continue
+		var position_data:Dictionary=army.get("position",{})
+		var position:=Vector2(float(position_data.get("x",0.0)),float(position_data.get("z",0.0)))
+		var distance:=position.distance_to(target)
+		if distance<best_distance:
+			best_distance=distance
+			best_id=int(army.get("army_id",0))
+			best_name=String(army.get("name","FIELD ARMY"))
+	if best_id<0: return {"error":"No deployed field army is available. Build, train, and deploy one in MILITARY."}
+	selected_army_id=best_id
+	_refresh_player_field_army_markers()
+	var message:="%s SELECTED — %.0f km from the target. Choose MOVE TO INTERCEPT." % [best_name,best_distance]
+	if travel_status_label: travel_status_label.text=message
+	return {"ok":true,"selected":true,"army_id":best_id,"distance_km":best_distance,"message":message}
+
+
+func _resolve_map_formation_engagement(formation_id:String,engage_now:bool=false)->Dictionary:
+	if selected_army_id<0: return {"error":"Select one field army first."}
+	var result:Dictionary=MilitaryCampaign.launch_map_engagement(selected_army_id,formation_id) if engage_now else MilitaryCampaign.order_field_army_intercept(selected_army_id,formation_id)
+	if travel_status_label:
+		travel_status_label.text=String(result.get("error",result.get("message","No engagement order was issued.")))
+	_refresh_player_field_army_markers()
+	_refresh_foreign_formation_markers()
+	_update_time_interface()
+	if bool(result.get("engagement_started",false)) and hud:
+		hud.open_detail(preload("res://scripts/hud/content/dock_detail_war_planning.gd").new(self,hud))
+	return result
 
 
 func _select_field_army_from_screen(screen_position:Vector2)->bool:
@@ -11363,13 +12021,13 @@ func _world_surface_is_land(position:Vector3)->bool:
 func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Node3D:
 	var marker:=Node3D.new()
 	marker.name=marker_name
-	# A formation is a filled military counter, not a target ring. Player counters are
-	# rectangular command plates; uncertain foreign observations remain diamonds.
+	# A formation is a map icon, not a spreadsheet cell. Owned forces use a compact
+	# hexagonal field badge; uncertain foreign observations remain diamonds.
 	var plate:=MeshInstance3D.new()
 	plate.name="ArmyPlate" if player_owned else "ObservationPlate"
 	if player_owned:
-		var plate_mesh:=BoxMesh.new()
-		plate_mesh.size=Vector3(5.8,0.26,3.7)
+		var plate_mesh:=CylinderMesh.new()
+		plate_mesh.top_radius=3.0; plate_mesh.bottom_radius=3.0; plate_mesh.height=0.26; plate_mesh.radial_segments=6
 		plate.mesh=plate_mesh
 		plate.position.y=0.13
 	else:
@@ -11393,8 +12051,8 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	var counter_border:=MeshInstance3D.new()
 	counter_border.name="CounterBorder"
 	if player_owned:
-		var border_mesh:=BoxMesh.new()
-		border_mesh.size=Vector3(6.30,0.11,4.20)
+		var border_mesh:=CylinderMesh.new()
+		border_mesh.top_radius=3.32; border_mesh.bottom_radius=3.32; border_mesh.height=0.11; border_mesh.radial_segments=6
 		counter_border.mesh=border_mesh
 	else:
 		var border_mesh:=CylinderMesh.new()
@@ -11416,10 +12074,10 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	command_spine.position=Vector3(0.0,0.27,0.0)
 	command_spine.material_override=_warfare_marker_material(owner_color.darkened(0.10))
 	marker.add_child(command_spine)
-	# Two reusable meshes form every NATO-like role glyph. Swapping their primitive
-	# resources when composition changes is cheaper than retaining six dormant role
-	# branches on every aggregate counter.
-	for glyph_name in ["RoleGlyphPrimary","RoleGlyphSecondary"]:
+	# Four reusable primitive slots form readable historical unit silhouettes. Meshes
+	# are swapped when composition changes; no dormant unit scenes or sprite atlases
+	# are retained per army.
+	for glyph_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
 		var role_glyph:=MeshInstance3D.new()
 		role_glyph.name=glyph_name
 		var role_mesh:=BoxMesh.new(); role_mesh.size=Vector3(1.64,0.18,0.24)
@@ -11428,6 +12086,7 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 		role_glyph.material_override=_warfare_marker_material(owner_color.lightened(0.12))
 		role_glyph.visible=false
 		marker.add_child(role_glyph)
+	var strength_label:=Label3D.new(); strength_label.name="StrengthLabel"; strength_label.font_size=10; strength_label.outline_size=4; strength_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; strength_label.fixed_size=true; strength_label.no_depth_test=true; strength_label.render_priority=8; strength_label.position=Vector3(1.25,1.0,0.45); strength_label.outline_modulate=Color(0.01,0.015,0.017,0.98); marker.add_child(strength_label)
 	# Four possible echelon bars share one MultiMesh. Personnel changes only its visible
 	# instance count and transforms, keeping one draw node from a squad through billions.
 	var echelon_bars:=MultiMeshInstance3D.new()
@@ -11514,19 +12173,19 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	for priority_record in [
 		{"name":"CommandSpine","priority":1},{"name":"SupplyTrack","priority":1},
 		{"name":"SupplyStripe","priority":2},{"name":"HeadingChevron","priority":4},
-		{"name":"RoleGlyphPrimary","priority":3},{"name":"RoleGlyphSecondary","priority":4},
+		{"name":"RoleGlyphPrimary","priority":3},{"name":"RoleGlyphSecondary","priority":4},{"name":"RoleGlyphTertiary","priority":4},{"name":"RoleGlyphFourth","priority":4},
 		{"name":"ReadinessPip","priority":5},{"name":"SelectedRing","priority":6}
 	]:
 		var priority_part:=marker.get_node_or_null(String(priority_record.name)) as MeshInstance3D
 		if priority_part and priority_part.material_override: priority_part.material_override.render_priority=int(priority_record.priority)
 	if echelon_bars.material_override: echelon_bars.material_override.render_priority=2
 	if damage_scars.material_override: damage_scars.material_override.render_priority=5
-	var label:=Label3D.new(); label.name="ArmyLabel" if player_owned else "FormationLabel"; label.font_size=9; label.outline_size=4; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,7.1 if player_owned else 6.7,-4.2); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
+	var label:=Label3D.new(); label.name="ArmyLabel" if player_owned else "FormationLabel"; label.font_size=8; label.outline_size=3; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,7.6 if player_owned else 7.0,-4.8); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
 	return marker
 
 
 func _warfare_marker_material(color:Color)->StandardMaterial3D:
-	var material:=StandardMaterial3D.new(); material.albedo_color=color; material.emission_enabled=true; material.emission=color.darkened(0.28); material.emission_energy_multiplier=0.78; material.roughness=0.70; material.no_depth_test=true
+	var material:=StandardMaterial3D.new(); material.albedo_color=color; material.emission_enabled=true; material.emission=color.darkened(0.28); material.emission_energy_multiplier=0.38; material.roughness=0.85; material.no_depth_test=true
 	if color.a<0.999: material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
 	return material
 
@@ -11538,35 +12197,69 @@ func _set_warfare_part_color(part:MeshInstance3D,color:Color)->void:
 	material.albedo_color=color; material.emission=color.darkened(0.24)
 
 
-func _configure_warfare_role_glyph(marker:Node3D,role:String)->void:
-	if String(marker.get_meta("formation_role",""))==role: return
-	marker.set_meta("formation_role",role)
+func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->void:
+	var icon_key:=unit if unit!="" else role
+	if String(marker.get_meta("formation_icon",""))==icon_key: return
+	marker.set_meta("formation_icon",icon_key)
 	var primary:=marker.get_node_or_null("RoleGlyphPrimary") as MeshInstance3D
 	var secondary:=marker.get_node_or_null("RoleGlyphSecondary") as MeshInstance3D
-	if primary==null or secondary==null: return
-	primary.visible=true; secondary.visible=true
-	primary.rotation=Vector3.ZERO; secondary.rotation=Vector3.ZERO
-	primary.position.y=0.36; secondary.position.y=0.36
-	match role:
-		"mobile":
-			var mobile_mesh:=CylinderMesh.new(); mobile_mesh.top_radius=0.78; mobile_mesh.bottom_radius=0.78; mobile_mesh.height=0.20; mobile_mesh.radial_segments=3
-			primary.mesh=mobile_mesh; primary.rotation.y=-PI*0.5; secondary.visible=false
-		"artillery":
-			var ring_mesh:=TorusMesh.new(); ring_mesh.inner_radius=0.46; ring_mesh.outer_radius=0.76; ring_mesh.rings=18; ring_mesh.ring_segments=5
-			var core_mesh:=CylinderMesh.new(); core_mesh.top_radius=0.20; core_mesh.bottom_radius=0.20; core_mesh.height=0.21; core_mesh.radial_segments=10
-			primary.mesh=ring_mesh; secondary.mesh=core_mesh; secondary.position.y=0.38
-		"armored":
-			var hull_mesh:=BoxMesh.new(); hull_mesh.size=Vector3(1.74,0.18,0.90)
-			var turret_mesh:=CylinderMesh.new(); turret_mesh.top_radius=0.42; turret_mesh.bottom_radius=0.42; turret_mesh.height=0.23; turret_mesh.radial_segments=8
-			primary.mesh=hull_mesh; secondary.mesh=turret_mesh; secondary.position.y=0.46
+	var tertiary:=marker.get_node_or_null("RoleGlyphTertiary") as MeshInstance3D
+	var fourth:=marker.get_node_or_null("RoleGlyphFourth") as MeshInstance3D
+	if primary==null or secondary==null or tertiary==null or fourth==null: return
+	var glyphs:Array[MeshInstance3D]=[primary,secondary,tertiary,fourth]
+	for glyph in glyphs:
+		glyph.visible=false; glyph.rotation=Vector3.ZERO; glyph.scale=Vector3.ONE; glyph.position=Vector3(-0.72,0.40,0.0)
+	var bar:=func(length:float,width:float)->BoxMesh:
+		var mesh:=BoxMesh.new(); mesh.size=Vector3(length,0.20,width); return mesh
+	var disc:=func(radius:float,sides:int=12)->CylinderMesh:
+		var mesh:=CylinderMesh.new(); mesh.top_radius=radius; mesh.bottom_radius=radius; mesh.height=0.22; mesh.radial_segments=sides; return mesh
+	var wheel:=func(radius:float)->TorusMesh:
+		var mesh:=TorusMesh.new(); mesh.inner_radius=radius*0.55; mesh.outer_radius=radius; mesh.rings=14; mesh.ring_segments=5; return mesh
+	match icon_key:
+		"line_infantry":
+			primary.mesh=bar.call(2.15,0.20); primary.rotation.y=PI*0.5; primary.visible=true
+			secondary.mesh=disc.call(0.48,3); secondary.position=Vector3(-0.72,0.42,-1.02); secondary.rotation.y=PI; secondary.visible=true
+		"skirmisher":
+			primary.mesh=bar.call(1.62,0.18); primary.rotation.y=0.76; primary.visible=true
+			secondary.mesh=bar.call(1.62,0.18); secondary.rotation.y=-0.76; secondary.visible=true
+			tertiary.mesh=bar.call(2.20,0.13); tertiary.rotation.y=PI*0.5; tertiary.visible=true
+		"cavalry","mobile":
+			primary.mesh=disc.call(0.76,4); primary.rotation.y=PI*0.25; primary.visible=true
+			secondary.mesh=disc.call(0.34,5); secondary.position=Vector3(-0.72,0.43,-0.90); secondary.visible=true
+			tertiary.mesh=bar.call(2.45,0.14); tertiary.position.x=-0.28; tertiary.rotation.y=PI*0.5; tertiary.visible=true
+		"siege_engineer":
+			primary.mesh=bar.call(1.75,0.90); primary.visible=true
+			secondary.mesh=bar.call(2.45,0.20); secondary.rotation.y=PI*0.5; secondary.visible=true
+			tertiary.mesh=wheel.call(0.42); tertiary.position.x=-1.30; tertiary.visible=true
+			fourth.mesh=wheel.call(0.42); fourth.position.x=-0.15; fourth.visible=true
+		"field_artillery","modern_artillery","artillery":
+			primary.mesh=bar.call(2.55,0.22); primary.rotation.y=PI*0.5; primary.visible=true
+			secondary.mesh=disc.call(0.48,10); secondary.visible=true
+			tertiary.mesh=wheel.call(0.52); tertiary.position.x=-1.36; tertiary.visible=true
+			fourth.mesh=wheel.call(0.52); fourth.position.x=-0.08; fourth.visible=true
+		"rifle_infantry":
+			primary.mesh=bar.call(2.35,0.16); primary.rotation.y=0.72; primary.visible=true
+			secondary.mesh=bar.call(0.74,0.34); secondary.position=Vector3(-1.36,0.41,0.55); secondary.rotation.y=0.72; secondary.visible=true
+		"machine_gun_company":
+			primary.mesh=bar.call(2.35,0.20); primary.rotation.y=PI*0.5; primary.visible=true
+			secondary.mesh=bar.call(1.38,0.15); secondary.position.z=0.58; secondary.rotation.y=0.68; secondary.visible=true
+			tertiary.mesh=bar.call(1.38,0.15); tertiary.position.z=0.58; tertiary.rotation.y=-0.68; tertiary.visible=true
+		"motorized_infantry":
+			primary.mesh=bar.call(1.90,1.02); primary.visible=true
+			secondary.mesh=wheel.call(0.38); secondary.position.x=-1.42; secondary.visible=true
+			tertiary.mesh=wheel.call(0.38); tertiary.position.x=-0.02; tertiary.visible=true
+			fourth.mesh=bar.call(0.74,0.16); fourth.position.z=-0.68; fourth.rotation.y=PI*0.5; fourth.visible=true
+		"armored_formation","armored":
+			primary.mesh=bar.call(2.12,1.08); primary.visible=true
+			secondary.mesh=disc.call(0.48,8); secondary.position.y=0.49; secondary.visible=true
+			tertiary.mesh=bar.call(1.42,0.16); tertiary.position=Vector3(-0.72,0.52,-0.82); tertiary.rotation.y=PI*0.5; tertiary.visible=true
+			fourth.mesh=bar.call(2.42,0.18); fourth.position.y=0.37; fourth.visible=true
 		"unknown":
-			var unknown_mesh:=CylinderMesh.new(); unknown_mesh.top_radius=0.68; unknown_mesh.bottom_radius=0.68; unknown_mesh.height=0.20; unknown_mesh.radial_segments=4
-			primary.mesh=unknown_mesh; primary.rotation.y=PI*0.25; secondary.visible=false
+			primary.mesh=disc.call(0.72,4); primary.rotation.y=PI*0.25; primary.visible=true
 		_:
-			var infantry_a:=BoxMesh.new(); infantry_a.size=Vector3(1.64,0.18,0.24)
-			var infantry_b:=BoxMesh.new(); infantry_b.size=Vector3(1.64,0.18,0.24)
-			primary.mesh=infantry_a; secondary.mesh=infantry_b
-			primary.rotation.y=0.72; secondary.rotation.y=-0.72
+			# Levy / generic infantry: crossed spear or staff silhouettes.
+			primary.mesh=bar.call(2.08,0.19); primary.rotation.y=0.72; primary.visible=true
+			secondary.mesh=bar.call(2.08,0.19); secondary.rotation.y=-0.72; secondary.visible=true
 
 
 func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
@@ -11579,15 +12272,16 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 	var order_state:=String(view.get("order_state","ordered"))
 	var missing_elements:=clampi(int(view.get("missing_elements",0)),0,3)
 	var role:=String(view.get("formation_role","infantry"))
-	_configure_warfare_role_glyph(marker,role)
-	for part_name in ["CommandSpine","HeadingChevron","ObservationRing","RoleGlyphPrimary","RoleGlyphSecondary"]:
+	var unit:=String(view.get("formation_unit",role))
+	_configure_warfare_role_glyph(marker,role,unit)
+	for part_name in ["CommandSpine","HeadingChevron","ObservationRing","RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
 		var part:=marker.get_node_or_null(part_name) as MeshInstance3D
 		if part: _set_warfare_part_color(part,color)
 	# Readiness displaces the complete branch symbol as one coherent staff mark. Ring
 	# and core, or hull and turret, never fly apart as if they were separate vehicles.
 	var role_offset:=Vector3(scatter*0.34,0.0,scatter*0.28)
 	if order_state=="broken": role_offset+=Vector3(-0.10,0.0,0.12)
-	for role_part_name in ["RoleGlyphPrimary","RoleGlyphSecondary"]:
+	for role_part_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
 		var role_part:=marker.get_node_or_null(String(role_part_name)) as MeshInstance3D
 		if role_part:
 			role_part.position.x=-1.85+role_offset.x
@@ -11667,7 +12361,22 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 		# Label3D.fixed_size does not cancel an inherited Node3D scale. Keep the
 		# glyphs at a stable screen size while the tactical marker grows with zoom.
 		label.scale=Vector3.ONE/marker_scale
+		if camera and camera.projection==Camera3D.PROJECTION_PERSPECTIVE:
+			label.font_size=32
+			label.outline_size=8
+			label.pixel_size=0.0003125
 		label.text=String(view.get("label","")); label.visible=bool(view.get("show_label",false)); label.modulate=color.lightened(0.28)
+	var strength_label:=marker.get_node_or_null("StrengthLabel") as Label3D
+	if strength_label:
+		strength_label.scale=Vector3.ONE/marker_scale
+		if camera and camera.projection==Camera3D.PROJECTION_PERSPECTIVE:
+			strength_label.font_size=40
+			strength_label.outline_size=8
+			strength_label.pixel_size=0.0003125
+		var exact_strength:=int(view.get("troops",view.get("strength_high",0)))
+		strength_label.text="%s\nSOLDIERS" % WarfareMapPresentation.compact_count(exact_strength)
+		strength_label.visible=bool(view.get("visible",true)) and not bool(view.get("show_label",false))
+		strength_label.modulate=color.lightened(0.34)
 
 
 func _refresh_player_field_army_path(view:Dictionary)->void:
@@ -11694,6 +12403,79 @@ func _refresh_player_field_army_path(view:Dictionary)->void:
 		objective.position=Vector3(destination.x,_height_at(destination.x,destination.z)+0.10,destination.z)
 		var objective_label:=objective.get_node_or_null("ObjectiveLabel") as Label3D
 		if objective_label: objective_label.scale=Vector3.ONE/objective_scale
+
+
+func _refresh_player_scout_route_markers()->void:
+	# These are issued plans, not omniscient unit trackers. The corridor stays
+	# visible while a party is away, but it never reveals the party's present
+	# position or anything it has observed beyond known ground.
+	var active_ids:Dictionary={}
+	for mission_variant in CivilizationSystem.scout_missions:
+		var mission:Dictionary=mission_variant
+		var mission_id:=str(mission.get("mission_id",""))
+		var route:Array=mission.get("route",[])
+		if mission_id=="" or route.size()<2: continue
+		active_ids[mission_id]=true
+		var band:=_camera_scale_band()
+		var signature:="%s:%s:%s:%d:%d" % [mission_id,band,String(mission.get("ordered_heading","")),route.size(),int(mission.get("return_day",0))]
+		var marker:Node3D=player_scout_route_markers.get(mission_id,null)
+		if marker==null or not is_instance_valid(marker) or String(marker.get_meta("signature",""))!=signature:
+			if marker and is_instance_valid(marker): marker.queue_free()
+			marker=_create_player_scout_route_marker(mission,route,band)
+			marker.set_meta("signature",signature)
+			add_child(marker)
+			player_scout_route_markers[mission_id]=marker
+		marker.visible=true
+	for mission_id in player_scout_route_markers.keys():
+		if active_ids.has(String(mission_id)): continue
+		var stale:Node3D=player_scout_route_markers[mission_id]
+		if stale and is_instance_valid(stale): stale.queue_free()
+		player_scout_route_markers.erase(mission_id)
+
+
+func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:String)->Node3D:
+	var root:=Node3D.new()
+	root.name="ScoutOrder_%s" % str(mission.get("mission_id",""))
+	var route_points:=PackedVector2Array()
+	for point_variant in route:
+		var point:Dictionary=point_variant
+		route_points.append(Vector2(float(point.get("x",0.0)),float(point.get("z",0.0))))
+	var route_width:=0.62 if band=="local" else (1.55 if band=="regional" else 4.2)
+	var amber:=Color("#e6bd58"); amber.a=0.92
+	var backing_surface:=SurfaceTool.new(); backing_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var backing_color:=Color(0.015,0.022,0.024,0.78)
+	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_width*1.9,backing_color,0.31,42)
+	var backing:=MeshInstance3D.new(); backing.name="ScoutCorridorBacking"; backing.mesh=backing_surface.commit()
+	var backing_material:=StandardMaterial3D.new(); backing_material.vertex_color_use_as_albedo=true; backing_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; backing_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; backing_material.no_depth_test=true; backing_material.render_priority=3; backing.material_override=backing_material; root.add_child(backing)
+	var path_surface:=SurfaceTool.new(); path_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_width*0.62,amber,0.35,42)
+	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=path_surface.commit()
+	var path_material:=StandardMaterial3D.new(); path_material.vertex_color_use_as_albedo=true; path_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; path_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; path_material.no_depth_test=true; path_material.render_priority=4; path.material_override=path_material; root.add_child(path)
+	# A few forward-pointing pennants make the order legible even when the route
+	# curves around water or rough terrain. They communicate direction, not scouts.
+	var pennant_count:=5 if band=="local" else (4 if band=="regional" else 3)
+	var pennant_mesh:=CylinderMesh.new(); pennant_mesh.top_radius=0.14; pennant_mesh.bottom_radius=0.92; pennant_mesh.height=0.12; pennant_mesh.radial_segments=3
+	var pennants:=MultiMesh.new(); pennants.transform_format=MultiMesh.TRANSFORM_3D; pennants.instance_count=pennant_count; pennants.mesh=pennant_mesh
+	for pennant_index in pennant_count:
+		var progress:=(float(pennant_index)+1.0)/float(pennant_count+1)
+		var sample_index:=clampi(floori(progress*float(route_points.size()-1)),0,route_points.size()-2)
+		var local_progress:=fposmod(progress*float(route_points.size()-1),1.0)
+		var a:=route_points[sample_index]; var b:=route_points[sample_index+1]
+		var point:=a.lerp(b,local_progress); var direction:=b-a
+		var heading:=-direction.angle()-PI*0.5 if direction.length_squared()>0.000001 else 0.0
+		var world_point:=Vector3(point.x,_height_at(point.x,point.y)+0.42,point.y)
+		var pennant_scale:=route_width*1.8
+		pennants.set_instance_transform(pennant_index,Transform3D(Basis(Vector3.UP,heading).scaled(Vector3(pennant_scale,1.0,pennant_scale)),world_point))
+	var pennant_instance:=MultiMeshInstance3D.new(); pennant_instance.name="ScoutDirectionPennants"; pennant_instance.multimesh=pennants; pennant_instance.material_override=_warfare_marker_material(amber.lightened(0.16)); root.add_child(pennant_instance)
+	var endpoint:=route_points[route_points.size()-1]
+	var label:=Label3D.new(); label.name="ScoutOrderLabel"
+	var ordered:=String(mission.get("ordered_heading","")).to_upper()
+	var planned:=String(mission.get("planned_heading","")).to_upper()
+	var first_line:="SCOUT ORDER · %s" % ordered if ordered!="" else "SCOUTS · PARTY CHOSE %s" % planned
+	label.text="%s\nPLANNED CORRIDOR · DUE DAY %d" % [first_line,int(mission.get("return_day",0))]
+	label.font_size=10; label.outline_size=5; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.render_priority=10; label.modulate=amber.lightened(0.22); label.outline_modulate=Color(0.01,0.015,0.017,0.98)
+	label.position=Vector3(endpoint.x,_height_at(endpoint.x,endpoint.y)+1.2,endpoint.y); root.add_child(label)
+	return root
 
 
 func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:Vector3,band:String)->Node3D:
@@ -11851,7 +12633,7 @@ func _build_lens(layer: CanvasLayer) -> void:
 	var lens_header:=HBoxContainer.new()
 	column.add_child(lens_header)
 	var title := Label.new()
-	title.text = "LENS"
+	title.text = "GROUND INSPECTION"
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	title.add_theme_font_size_override("font_size", 22)
 	title.add_theme_color_override("font_color", Color("#dfd0aa"))
@@ -11924,10 +12706,39 @@ func _settlement_plot_lens_report(plot:Dictionary)->String:
 	var workers:=int(plot.get("worker_count",0))
 	if residents>0: report+="Residents: [color=#ddd2b8]%d / %d[/color]\n" % [residents,int(plot.get("resident_capacity",0))]
 	if int(plot.get("worker_capacity",0))>0: report+="Workers: [color=#ddd2b8]%d / %d[/color]\n" % [workers,int(plot.get("worker_capacity",0))]
-	report+="Materials: [color=#ddd2b8]%s[/color]\n" % String(plot.get("material_family","unknown")).capitalize()
+	var material_family:=String(plot.get("material_family","unknown")).capitalize()
+	var material_mix:Dictionary=plot.get("material_mix",{})
+	var mix_parts:Array[String]=[]
+	for material_name in material_mix:
+		var share:=float(material_mix[material_name])
+		if share>=0.01: mix_parts.append("%s %d%%" % [String(material_name),roundi(share*100.0)])
+	var roof_plan:=String(plot.get("roof_plan","unspecified")).replace("_"," ").capitalize()
+	var recipe:=String(plot.get("construction_recipe","unknown method")).replace("_"," ").capitalize()
+	report+="Material system: [color=#ddd2b8]%s[/color]" % material_family
+	if not mix_parts.is_empty(): report+="  •  %s" % ", ".join(mix_parts)
+	report+="\nRoof / cover: [color=#ddd2b8]%s[/color]\n" % roof_plan
+	report+="Construction method: [color=#ddd2b8]%s[/color]\n" % recipe
+	GameState.ensure_building_ledger()
+	var consumed:Dictionary={}
+	var lifecycle_events:=0
+	for row_variant in GameState.building_ledger:
+		var row:Dictionary=row_variant
+		if int(row.get("plot_id",-2))!=int(plot.get("id",-1)): continue
+		lifecycle_events+=1
+		if not bool(row.get("counts_materials",false)): continue
+		for material_name in (row.get("materials",{}) as Dictionary):
+			consumed[String(material_name)]=float(consumed.get(String(material_name),0.0))+float((row.get("materials",{}) as Dictionary)[material_name])
+	if not consumed.is_empty():
+		var consumed_parts:Array[String]=[]
+		for material_name in consumed: consumed_parts.append("%.1f %s" % [float(consumed[material_name]),String(material_name)])
+		report+="Recorded inputs: [color=#ddd2b8]%s[/color]\n" % " + ".join(consumed_parts)
+	if lifecycle_events>0: report+="Architectural record: [color=#999b91]%d event%s[/color]\n" % [lifecycle_events,"" if lifecycle_events==1 else "s"]
 	if String(plot.get("status",""))=="under_construction": report+="Construction: [color=#d1a45f]%d%%[/color]\n" % roundi(float(plot.get("construction_progress",0.0))*100.0)
 	if String(plot.get("status",""))=="vacant": report+="Reclaimed by vegetation: [color=#8fb08a]%d%%[/color]\n" % roundi(float(plot.get("reclamation",0.0))*100.0)
 	report+="Established: [color=#999b91]YEAR %d • DAY %d[/color]\n" % [int(plot.get("created_day",0))/365+1,int(plot.get("created_day",0))%365+1]
+	if int(plot.get("converted_day",-1))>=0: report+="Last rebuilt: [color=#999b91]DAY %d[/color]\n" % int(plot.converted_day)
+	if int(plot.get("damaged_day",-1))>=0: report+="Last damaged: [color=#c27f6c]DAY %d[/color]\n" % int(plot.damaged_day)
+	if int(plot.get("abandoned_day",-1))>=0: report+="Vacated: [color=#c27f6c]DAY %d[/color]\n" % int(plot.abandoned_day)
 	var cause:=String(plot.get("growth_cause",plot.get("construction_recipe",""))).replace("_"," ")
 	if cause!="": report+="\n[color=#c4aa70]Why it exists[/color]\n%s\n" % cause.capitalize()
 	return report
@@ -12023,11 +12834,17 @@ func _map_inspection_summary(position:Vector3)->String:
 		var resource_name:=String(entry.get("resource",""))
 		if resource_name!="" and resource_name not in names: names.append(resource_name)
 		if names.size()>=3: break
-	var resource_note:="recognized nearby: %s" % ", ".join(names) if not names.is_empty() else "no resource recognized at this point"
+	var display_names:Array[String]=[]
+	for resource_name in names: display_names.append(ResourceSystem.display_name(resource_name))
+	var resource_note:="%s; click to inspect surface resources" % String(_biome_at(position.x,position.z).label)
 	return "CHARTED LAND SELECTED  •  %s  •  NEXT: ACTIONS → FOUND NEW SETTLEMENT" % resource_note
 
 
 func _inspect_location(position: Vector3) -> void:
+	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: _inspect_location_local(position))
+
+func _inspect_location_local(position: Vector3) -> void:
+	if lens_panel==null and interface_layer: _build_lens(interface_layer)
 	_show_map_selection(position)
 	if travel_status_label: travel_status_label.text=_map_inspection_summary(position)
 	if lens_panel == null or lens_body == null:
@@ -12082,16 +12899,18 @@ func _inspect_location(position: Vector3) -> void:
 			lens_body.text="[font_size=18][color=#bde0d7]RECORDED ENCOUNTER[/color][/font_size]\n\n[color=#e1d5b8]%s[/color] was first identified here in Year %d, Day %d.\n\n[color=#c4aa70]HOW CONTACT HAPPENED[/color]\n%s.\n\n[color=#c27f6c]Their homeland is not known from this encounter.[/color] This marker records where contact occurred—not permanent global tracking and not a guessed capital." % [String(contact_context.get("name","A foreign polity")),met_year,met_day_of_year,String(contact_context.get("source_description","The surviving record does not say"))]
 	elif entries.is_empty() and settlement_plot.is_empty():
 		if not settlement_context.is_empty() and bool(settlement_context.get("inside_border",false)):
-			lens_body.text="[font_size=18][color=#dfd0aa]CONTROLLED SETTLEMENT GROUND[/color][/font_size]\n\nWithin [color=#e1d5b8]%s[/color]'s present border. The boundary covers approximately [color=#ddd2b8]%.1f km²[/color] and supports an aggregate population of [color=#ddd2b8]%s[/color].\n\nBorders expand when population, occupied fabric, routes, survey work, administration, logistics, and defense can sustain a wider claim.\n\n[color=#c4aa70]No specific resource has yet been recognized at this point.[/color]" % [String(settlement_context.get("name","the settlement")),float(settlement_context.get("controlled_area_km2",0.0)),_compact_population(int(settlement_context.get("population",0)))]
+			lens_body.text="[font_size=18][color=#dfd0aa]CONTROLLED SETTLEMENT GROUND[/color][/font_size]\n\nWithin [color=#e1d5b8]%s[/color]'s present border. The boundary covers approximately [color=#ddd2b8]%.1f km²[/color] and supports an aggregate population of [color=#ddd2b8]%s[/color].\n\nBorders expand when population, occupied fabric, routes, survey work, administration, logistics, and defense can sustain a wider claim.\n\n[color=#c4aa70]Surface resources follow the land cover described above. No additional deposit has been identified here.[/color]" % [String(settlement_context.get("name","the settlement")),float(settlement_context.get("controlled_area_km2",0.0)),_compact_population(int(settlement_context.get("population",0)))]
 		else:
-			lens_body.text = "[color=#8f918a][font_size=16]Nothing has been recognized.[/font_size][/color]\n\nThe landscape may contain useful materials, but the population has not produced reliable knowledge of them.\n\n[color=#c4aa70]Assign people to Survey and direct inquiry toward Nature or Materials.[/color]"
+			lens_body.text = "[color=#c4aa70]SURVEY KNOWLEDGE[/color]\n\nVisible woodland, soil and exposed stone can be inspected directly. Survey work establishes quality, sustainable output, access routes and hidden deposits."
 	else:
 		var report := _settlement_plot_lens_report(settlement_plot) if not settlement_plot.is_empty() else ""
 		if not settlement_plot.is_empty() and not entries.is_empty(): report+="\n[color=#75694f]RECOGNIZED RESOURCES NEARBY[/color]\n\n"
 		for entry in entries:
 			var access_color := "#8fb08a" if entry.retrievable else "#c27f6c"
 			var access_title := "RETRIEVABLE" if entry.retrievable else "NOT RETRIEVABLE"
-			report += "[font_size=18][color=#e1d5b8]%s[/color][/font_size]\n" % String(entry.resource).to_upper()
+			report += "[font_size=18][color=#e1d5b8]%s[/color][/font_size]\n" % ResourceSystem.display_name(String(entry.resource)).to_upper()
+			var resource_explanation:=ResourceSystem.plain_language_description(String(entry.resource))
+			if resource_explanation!="": report += "[color=#aeb3aa]%s[/color]\n" % resource_explanation
 			report += "[color=#96988f]%s  •  %.1f KM[/color]\n" % [String(entry.knowledge).to_upper(), float(entry.distance_km)]
 			report += "Abundance: [color=#ddd2b8]%s[/color]\n" % String(entry.abundance).capitalize()
 			report += "Quality: [color=#ddd2b8]%s[/color]\n" % String(entry.quality).capitalize()
@@ -12100,24 +12919,7 @@ func _inspect_location(position: Vector3) -> void:
 				report += "  • %s\n" % String(blocker).capitalize()
 			report += "\n"
 		lens_body.text = report
-	if lens_ring == null:
-		lens_ring = MeshInstance3D.new()
-		lens_ring.name = "LensSelection"
-		var ring_mesh := TorusMesh.new()
-		ring_mesh.inner_radius = 0.055
-		ring_mesh.outer_radius = 0.072
-		ring_mesh.rings = 48
-		ring_mesh.ring_segments = 8
-		lens_ring.mesh = ring_mesh
-		var ring_material := StandardMaterial3D.new()
-		ring_material.albedo_color = Color(0.83, 0.73, 0.52, 0.82)
-		ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		ring_material.no_depth_test = true
-		lens_ring.material_override = ring_material
-		add_child(lens_ring)
-	lens_ring.visible=true
-	lens_ring.position = Vector3(position.x, _height_at(position.x, position.z) + 0.0035, position.z)
+	if revealed and contact_context.is_empty(): lens_body.text=_surface_resource_report(position)+lens_body.text
 
 
 func _retire_primary_screen(panel)->void:
@@ -12423,7 +13225,7 @@ func _add_material_flow_row(parent:Container,row_data:Dictionary)->void:
 	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#11191a"),accent.darkened(0.32),1,2,5))
 	parent.add_child(panel)
 	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",6); panel.add_child(row)
-	_add_material_flow_cell(row,String(row_data.get("material","Unknown")).to_upper(),145,Color("#d4cfbf"))
+	_add_material_flow_cell(row,ResourceSystem.display_name(String(row_data.get("material","Unknown"))).to_upper(),145,Color("#d4cfbf"))
 	_add_material_flow_cell(row,"%s  •  %s" % [status,String(row_data.get("status_detail",""))],170,accent)
 	var distance:=float(row_data.get("distance",0.0))
 	var reach_text:="LOCAL  •  %d reachable" % int(row_data.get("reachable",0)) if distance<0.05 else "%s km  •  %d reachable" % [_compact_population(roundi(distance)),int(row_data.get("reachable",0))]
@@ -12462,7 +13264,10 @@ func _open_materials_detail_overlay(rows:Array[Dictionary],water_access:Dictiona
 	if bool(water_access.get("recognized",false)): _add_compact_provision_text(detail,"CONTINUOUS SURFACE WATER","Mapped river/drainage access is tracked separately from deposits. %.1f collected / %.1f needed today." % [float(water_access.get("collected_today",0.0)),float(water_access.get("required_today",0.0))],Color("#8fb2b6"))
 	for row_data in rows:
 		var text:="%d known occurrences  •  %d reachable  •  %d developed\n%d workers  •  %.1f extracted  •  %.1f waiting  •  %.1f moving\n%s" % [int(row_data.occurrences),int(row_data.reachable),int(row_data.developed),int(row_data.workers),float(row_data.extracted),float(row_data.at_source),float(row_data.moving),String(row_data.status_detail)]
-		_add_compact_provision_text(detail,String(row_data.material).to_upper()+"  •  "+String(row_data.status),text,Color("#b8bab0"))
+		var material_name:=String(row_data.material)
+		var explanation:=ResourceSystem.plain_language_description(material_name)
+		if explanation!="": text=explanation+"\n"+text
+		_add_compact_provision_text(detail,ResourceSystem.display_name(material_name).to_upper()+"  •  "+String(row_data.status),text,Color("#b8bab0"))
 	detail.add_child(HSeparator.new())
 	_add_provision_section_title(detail,"STORAGE BY SYSTEM","Bulk capacity is aggregated across every player settlement.")
 	var capacities:=ResourceSystem.storage_capacities()
@@ -12862,6 +13667,9 @@ func _material_knowledge_text(deposit:Dictionary)->String:
 	return "Unknown"
 
 func _cycle_material_priority(resource_name:String)->void:
+	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: _cycle_material_priority_local(resource_name))
+
+func _cycle_material_priority_local(resource_name:String)->void:
 	var current:=float(GameState.resource_priorities.get(resource_name,1.0))
 	GameState.resource_priorities[resource_name]=1.0 if current>1.2 else (2.0 if current>=0.8 else 1.0)
 	if current>=0.8 and current<=1.2: GameState.resource_priorities[resource_name]=2.0
@@ -13330,7 +14138,7 @@ func _open_knowledge_panel() -> void:
 	var observers:=int(program_summary.get("researchers",0))
 	allocation_value_labels["__observers_stat"]=_make_knowledge_stat(header_stats,"RESEARCHERS",_knowledge_workforce_text(float(observers)),Color("#78a9b2"))
 	allocation_value_labels["__committed_stat"]=_make_knowledge_stat(header_stats,"ACTIVE LINES",str(int(program_summary.get("active_lines",0))),Color("#c8a862"))
-	allocation_value_labels["__established_stat"]=_make_knowledge_stat(header_stats,"ESTABLISHED",str(GameState.discovery_log.size()),Color("#7fa47c"))
+	allocation_value_labels["__established_stat"]=_make_knowledge_stat(header_stats,"KNOWLEDGE LINES",str(DiscoverySystem.established_knowledge_threads().size()),Color("#7fa47c"))
 	allocation_value_labels["__mind_stat"]=_make_knowledge_stat(header_stats,"RESEARCH SPEED","%.1f×" % float(program_summary.get("average_line_capacity",0.0)),Color("#9a82b8"))
 	root.add_child(HSeparator.new())
 	var body := HBoxContainer.new()
@@ -13557,6 +14365,14 @@ func _make_knowledge_stat(parent: Container,label_text: String,value_text: Strin
 	return value
 
 
+func _knowledge_horizon_phrase(estimated_days:int)->String:
+	## Discovery is chance and evidence, never a countdown. The UI speaks in
+	## pace bands; a precise day estimate both leaks the future and lies.
+	if estimated_days<90: return "RIPENING"
+	if estimated_days<365: return "SEASONS OF WORK"
+	if estimated_days<3650: return "YEARS OF WORK"
+	return "GENERATIONS OF WORK"
+
 func _knowledge_workforce_text(value:float)->String:
 	if value>=1_000_000_000.0: return "%.2fB" % (value/1_000_000_000.0)
 	if value>=1_000_000.0: return "%.2fM" % (value/1_000_000.0)
@@ -13652,9 +14468,7 @@ func _make_observation_card(parent: Container,investigation: Dictionary) -> void
 	controls.add_theme_constant_override("separation",6)
 	text_column.add_child(controls)
 	var bottleneck:=Label.new()
-	var estimated_days:=maxi(1,int(investigation.get("estimated_days",1)))
-	var horizon:="%d DAYS" % estimated_days if estimated_days<365 else ("%.1f YEARS" % (float(estimated_days)/365.0) if estimated_days<36500 else "MULTI-GENERATIONAL")
-	bottleneck.text="WAITING ON  •  %s  •  ESTIMATED HORIZON %s" % [String(investigation.get("bottleneck","EVIDENCE")),horizon]
+	bottleneck.text="WAITING ON  •  %s  •  %s" % [String(investigation.get("bottleneck","EVIDENCE")),_knowledge_horizon_phrase(maxi(1,int(investigation.get("estimated_days",1))))]
 	bottleneck.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	bottleneck.clip_text=true
 	bottleneck.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -13737,10 +14551,8 @@ func _open_knowledge_investigation_detail(investigation:Dictionary)->void:
 	var progress:=clampf(float(investigation.get("progress",0.0)),0.0,1.0)
 	var emphasis:=int(investigation.get("observer_allocation",0))
 	var research_workforce:=float(investigation.get("research_workforce",0.0))
-	var estimated_days:=maxi(1,int(investigation.get("estimated_days",1)))
-	var horizon:="%d days" % estimated_days if estimated_days<365 else ("%.1f years" % (float(estimated_days)/365.0) if estimated_days<36500 else "multi-generational")
 	var status:=Label.new()
-	status.text="EVIDENCE %d%%  •  WEIGHT %d  •  ~%s RESEARCHERS  •  %.1f× SPEED  •  WAITING ON %s  •  %s" % [roundi(progress*100.0),emphasis,_knowledge_workforce_text(research_workforce),float(investigation.get("research_capacity_multiplier",0.0)),String(investigation.get("bottleneck","EVIDENCE")),horizon.to_upper()]
+	status.text="EVIDENCE %d%%  •  WEIGHT %d  •  ~%s RESEARCHERS  •  %.1f× SPEED  •  WAITING ON %s  •  %s" % [roundi(progress*100.0),emphasis,_knowledge_workforce_text(research_workforce),float(investigation.get("research_capacity_multiplier",0.0)),String(investigation.get("bottleneck","EVIDENCE")),_knowledge_horizon_phrase(maxi(1,int(investigation.get("estimated_days",1))))]
 	status.add_theme_font_size_override("font_size",11)
 	status.add_theme_color_override("font_color",Color("#c4ad79"))
 	root.add_child(status)
@@ -13784,7 +14596,7 @@ func _knowledge_record_direction(record:Dictionary)->String:
 
 
 func _knowledge_records_for_mode(mode:String,category:String)->Array[Dictionary]:
-	var source:Array=DiscoverySystem.active_investigation_records() if mode=="active" else GameState.discovery_log
+	var source:Array=DiscoverySystem.active_investigation_records() if mode=="active" else DiscoverySystem.established_knowledge_threads()
 	var records:Array[Dictionary]=[]
 	for record_variant in source:
 		if not record_variant is Dictionary: continue
@@ -13797,7 +14609,7 @@ func _knowledge_records_for_mode(mode:String,category:String)->Array[Dictionary]
 func _populate_knowledge_category_selector()->void:
 	if knowledge_category_selector==null or not is_instance_valid(knowledge_category_selector): return
 	knowledge_category_selector.clear()
-	var source:Array=DiscoverySystem.active_investigation_records() if knowledge_record_mode=="active" else GameState.discovery_log
+	var source:Array=DiscoverySystem.active_investigation_records() if knowledge_record_mode=="active" else DiscoverySystem.established_knowledge_threads()
 	var counts:Dictionary={}
 	for record_variant in source:
 		if not record_variant is Dictionary: continue
@@ -13821,7 +14633,7 @@ func _update_knowledge_mode_buttons()->void:
 	if knowledge_mode_buttons.has("active") and is_instance_valid(knowledge_mode_buttons.active):
 		(knowledge_mode_buttons.active as Button).text=("●  " if knowledge_record_mode=="active" else "")+"ACTIVE  •  %d" % DiscoverySystem.active_investigation_records().size()
 	if knowledge_mode_buttons.has("discoveries") and is_instance_valid(knowledge_mode_buttons.discoveries):
-		(knowledge_mode_buttons.discoveries as Button).text=("●  " if knowledge_record_mode=="discoveries" else "")+"DISCOVERIES  •  %d" % GameState.discovery_log.size()
+		(knowledge_mode_buttons.discoveries as Button).text=("●  " if knowledge_record_mode=="discoveries" else "")+"KNOWLEDGE  •  %d LINES" % DiscoverySystem.established_knowledge_threads().size()
 
 
 func _set_knowledge_record_mode(mode:String)->void:
@@ -13954,7 +14766,8 @@ func _make_discovery_card(parent: Container,event: Dictionary) -> void:
 	var event_day:=int(event.get("day",0))+1
 	var year:=event_day/365+1
 	var day_of_year:=(event_day-1)%365+1
-	meta.text="%s  /  %s  •  YEAR %d, DAY %d" % [direction.to_upper(),String(event.get("subcategory","Established practice")).to_upper(),year,day_of_year]
+	var breakthrough_count:=maxi(1,int(event.get("breakthrough_count",1)))
+	meta.text="%s  /  %s  •  %d BREAKTHROUGH%s  •  LATEST YEAR %d, DAY %d" % [direction.to_upper(),String(event.get("subcategory","Established practice")).to_upper(),breakthrough_count,"" if breakthrough_count==1 else "S",year,day_of_year]
 	meta.add_theme_font_size_override("font_size",9)
 	meta.add_theme_color_override("font_color",accent.lightened(0.18))
 	content.add_child(meta)
@@ -14096,6 +14909,7 @@ func _change_research_domain_allocation(dynamic_id:String,change:int)->void:
 	DiscoverySystem.set_domain_research_priority(dynamic_id,current+change)
 	_refresh_research_allocations()
 	_refresh_knowledge_record()
+	if hud: hud.request_immediate_dock_refresh()
 
 func _change_research_allocation(dynamic_id:String,subcategory:String,change:int)->void:
 	# Legacy save/test adapter. The playable UI exposes only macro domains; changing a
@@ -14110,6 +14924,7 @@ func _change_research_allocation(dynamic_id:String,subcategory:String,change:int
 	DiscoverySystem.refresh_investigations()
 	_refresh_research_allocations()
 	_refresh_knowledge_record()
+	if hud: hud.request_immediate_dock_refresh()
 
 func _refresh_research_allocations() -> void:
 	var total:=_research_allocation_total()
@@ -14120,7 +14935,7 @@ func _refresh_research_allocations() -> void:
 	if allocation_value_labels.has("__committed_stat"):
 		(allocation_value_labels["__committed_stat"] as Label).text=str(int(program_summary.get("active_lines",0)))
 	if allocation_value_labels.has("__established_stat"):
-		(allocation_value_labels["__established_stat"] as Label).text=str(GameState.discovery_log.size())
+		(allocation_value_labels["__established_stat"] as Label).text=str(DiscoverySystem.established_knowledge_threads().size())
 	if allocation_value_labels.has("__mind_stat"):
 		(allocation_value_labels["__mind_stat"] as Label).text="%.1f×" % float(program_summary.get("average_line_capacity",0.0))
 	for dynamic_id in GameState.research_subcategory_allocations:
@@ -14416,31 +15231,121 @@ func _answer_council(item_id: String, response: String) -> void:
 	AdvisorSystem.respond_to_council_item(item_id,response)
 	_open_council_panel()
 
+func _civic_settlement()->Dictionary:
+	var settlement:Dictionary=_settlement_model().selected_settlement_snapshot()
+	if not settlement.is_empty(): return settlement
+	for settlement_variant in GameState.player_settlements:
+		var candidate:Dictionary=settlement_variant
+		if bool(candidate.get("primary",false)): return candidate
+	return GameState.player_settlements[0] if not GameState.player_settlements.is_empty() else {}
+
+
+func _perform_civic_leader_removal(settlement_id:String,action:String,player_text:String="")->Dictionary:
+	var former:=GovernmentPeopleSystem.settlement_leader(settlement_id)
+	if player_text.strip_edges().is_empty():
+		player_text="Arrest %s." % String(former.get("name","the settlement leader")) if action=="arrest" else "Dismiss %s." % String(former.get("name","the settlement leader"))
+	var result:=GovernmentPeopleSystem.remove_settlement_leader(settlement_id,action)
+	AdvisorSystem.record_civic_leadership_change(settlement_id,player_text,result)
+	var message:=String(result.get("message",result.get("reason","Leadership did not change.")))
+	if travel_status_label: travel_status_label.text="LEADERSHIP  •  "+message
+	if pronouncement_status_label:
+		pronouncement_status_label.text=message
+		pronouncement_status_label.add_theme_color_override("font_color",Color("#c98272") if action=="arrest" else Color("#c8ad72"))
+	if hud:
+		hud._queue_signature="__stale__"
+		hud.refresh()
+		hud.request_immediate_dock_refresh()
+	return result
+
+
 func _issue_freeform_order(input: LineEdit) -> void:
 	if not input.editable: return
 	var text := input.text.strip_edges()
 	if text.is_empty():
 		return
+	GovernmentPeopleSystem.initialize()
+	var settlement:Dictionary=_civic_settlement()
+	var settlement_id:=String(settlement.get("id",""))
+	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
+	if settlement.is_empty() or leader.is_empty():
+		if pronouncement_status_label:
+			pronouncement_status_label.text="NO APPOINTED LEADER • Open the settlement's Local Leadership view and appoint one person before issuing a civic directive."
+			pronouncement_status_label.add_theme_color_override("font_color",Color("#c98272"))
+		return
+	var leadership_action:=AdvisorSystem.civic_leadership_action(text,String(leader.get("name","")))
+	if not leadership_action.is_empty():
+		input.text=""
+		_perform_civic_leader_removal(settlement_id,leadership_action,text)
+		return
+	var conversation_action:=AdvisorSystem.civic_conversation_action(text,settlement_id,int(leader.get("person_id",0)))
+	if conversation_action=="withdraw":
+		input.text=""
+		var withdrawn:=AdvisorSystem.withdraw_pending_civic_directive(settlement_id,int(leader.get("person_id",0)),text)
+		var withdrawal_message:=String(withdrawn.get("message",withdrawn.get("reason","There is no unresolved directive to withdraw.")))
+		if travel_status_label: travel_status_label.text="CIVIC RESPONSE  •  "+withdrawal_message.split("\n")[0]
+		if pronouncement_status_label:
+			pronouncement_status_label.text=withdrawal_message
+			pronouncement_status_label.add_theme_color_override("font_color",Color("#9fa59d"))
+		if hud:
+			hud._queue_signature="__stale__"
+			hud.refresh()
+			hud.request_immediate_dock_refresh()
+		return
 	input.editable=false
 	var active_context:Array[Dictionary]=[]
 	for policy in ConsequenceEngine.active_policies(): active_context.append({"id":String(policy.get("id","")),"remaining_days":ceili(float(policy.get("remaining_days",0.0)))})
-	var context:={"day":int(GameState.elapsed_days),"population":GameState.population_total,"food_days":float(GameState.simulation_metrics.get("food_days",0.0)),"health":GameState.population_health,"known_offices":GameState.leadership_positions.keys(),"active_policies":active_context}
+	var context:={
+		"day":int(GameState.elapsed_days),"population":GameState.population_total,
+		"food_days":float(GameState.simulation_metrics.get("food_days",0.0)),"health":GameState.population_health,
+		"water_days":float(GameState.water_metrics.get("days",0.0)),"water_intake":float(GameState.water_metrics.get("intake_ratio",0.0)),
+		"housing":float(GameState.simulation_metrics.get("housing_ratio",1.0)),"labor_efficiency":float(GameState.simulation_metrics.get("labor_efficiency",0.0)),
+		"security":float(GameState.simulation_metrics.get("security",0.0)),"cohesion":float(GameState.simulation_metrics.get("cohesion",0.0)),
+		"institutions":float(GameState.society_capacities.get("institutions",0.0)),
+		"known_offices":GameState.leadership_positions.keys(),"active_policies":active_context,
+		"settlement":{"id":settlement_id,"name":String(settlement.get("name","the settlement")),"population":int(settlement.get("population",GameState.population_total)),"classification":String(settlement.get("classification","settlement"))},
+		"leader":{"name":String(leader.get("name","the appointed leader")),"title":String(leader.get("title","local leader")),"background":String(leader.get("background","")),"traits":(leader.get("traits",[]) as Array).duplicate()},
+		"conversation":AdvisorSystem.civic_dialogue_history(settlement_id,8),
+	}
+	var local_snapshot:=SettlementModel.city_resource_snapshot(settlement_id)
+	if not local_snapshot.is_empty():
+		var local_metrics:Dictionary=local_snapshot.metrics
+		var local_water:Dictionary=local_snapshot.water
+		context.population=int(local_snapshot.population)
+		context.food_days=float(local_metrics.get("food_days",0.0))
+		context.water_days=float(local_water.get("days",0.0))
+		context.water_intake=float(local_water.get("intake_ratio",0.0))
+		context.housing=float(local_metrics.get("housing_ratio",1.0))
+		context.labor_efficiency=float(local_metrics.get("labor_efficiency",0.72))
 	if not PronouncementInterpreter.interpretation_completed.is_connected(_on_pronouncement_interpreted): PronouncementInterpreter.interpretation_completed.connect(_on_pronouncement_interpreted)
 	if not PronouncementInterpreter.interpretation_progress.is_connected(_on_pronouncement_progress): PronouncementInterpreter.interpretation_progress.connect(_on_pronouncement_progress)
-	var pending_order:=AdvisorSystem.begin_pronouncement(text)
+	var pending_order:=AdvisorSystem.begin_civic_directive(text,settlement_id,leader)
 	var request_id:=PronouncementInterpreter.interpret(text,context)
 	pending_order["request_id"]=request_id
-	pending_pronouncement_inputs[request_id]={"input":input,"text":text,"submitted_day":int(GameState.elapsed_days),"order":pending_order}
+	# The dock is rebuilt immediately below, which destroys its LineEdit. Pending
+	# network state must therefore contain data only, never a transient UI node.
+	pending_pronouncement_inputs[request_id]=_pending_civic_request_record(text,pending_order,settlement_id,int(leader.get("person_id",0)))
 	if travel_status_label: travel_status_label.text="COUNCIL INTERPRETING PRONOUNCEMENT…"
-	if pronouncement_status_label: pronouncement_status_label.text="INTERPRETING • The council is translating language into bounded policy…"
+	if pronouncement_status_label: pronouncement_status_label.text="%s IS CONSIDERING YOUR DIRECTIVE…" % String(leader.get("name","The leader")).to_upper()
 	var initial_progress:=PronouncementInterpreter.request_progress(request_id)
 	if not initial_progress.is_empty(): _on_pronouncement_progress(request_id,initial_progress)
+	_refresh_council_dock()
+
+func _pending_civic_request_record(text:String,order:Dictionary,settlement_id:String,leader_person_id:int)->Dictionary:
+	return {
+		"text":text,
+		"submitted_day":int(GameState.elapsed_days),
+		"order":order,
+		"settlement_id":settlement_id,
+		"leader_person_id":leader_person_id,
+	}
 
 func _on_pronouncement_progress(request_id:String,status:Dictionary)->void:
 	if not pending_pronouncement_inputs.has(request_id): return
 	if not pronouncement_status_label or not is_instance_valid(pronouncement_status_label): return
 	var stage:=String(status.get("stage","interpreting"))
 	match stage:
+		"local": pronouncement_status_label.text="UNDERSTOOD LOCALLY  •  clear directive language; no API call needed"
+		"cached": pronouncement_status_label.text="UNDERSTOOD  •  reused a validated reading; no API call needed"
 		"requesting":
 			pronouncement_status_label.text="INTERPRETING POLICY  •  attempt %d of %d" % [int(status.get("attempt",1)),int(status.get("max_attempts",2))]
 		"retrying":
@@ -14450,29 +15355,28 @@ func _on_pronouncement_progress(request_id:String,status:Dictionary)->void:
 		"accepted": pronouncement_status_label.text="POLICY UNDERSTOOD  •  validating the bounded effects before they apply…"
 		"cancelled": pronouncement_status_label.text="CANCELLED • No standing policy was applied."
 		_: pronouncement_status_label.text="INTERPRETING • The council is translating language into bounded policy…"
-	pronouncement_status_label.add_theme_color_override("font_color",Color("#c8ad72") if stage in ["accepted","requesting"] else Color("#bca47d") if stage in ["retrying","fallback"] else Color("#9fa59d"))
+	pronouncement_status_label.add_theme_color_override("font_color",Color("#c8ad72") if stage in ["accepted","requesting","local","cached"] else Color("#bca47d") if stage in ["retrying","fallback"] else Color("#9fa59d"))
 
 func _on_pronouncement_interpreted(request_id:String,result:Dictionary)->void:
 	var pending:Dictionary=pending_pronouncement_inputs.get(request_id,{})
-	var input:LineEdit=pending.get("input")
 	pending_pronouncement_inputs.erase(request_id)
 	var text:=String(pending.get("text","Sovereign pronouncement"))
-	if input and is_instance_valid(input): input.text=""; input.editable=true
-	var order:=AdvisorSystem.execute_pronouncement(text,result,pending.get("order",{}))
+	var order:=AdvisorSystem.resolve_civic_directive(text,result,pending.get("order",{}),String(pending.get("settlement_id","")),int(pending.get("leader_person_id",0)))
 	order["submitted_day"]=int(pending.get("submitted_day",order.get("issued_day",GameState.elapsed_days)))
 	var interpretation:Dictionary=order.get("parameters",{}).get("interpretation",{})
 	var policies:Array=interpretation.get("policies",[])
 	var ripples:Array[String]=[]
 	for policy_variant in policies:
 		var policy:Dictionary=policy_variant
-		var execution_suffix:=" (execution %d%%)" % roundi(float(policy.get("execution_factor",1.0))*100.0) if String(policy.get("action","enact"))=="enact" else ""
-		ripples.append(String(policy.ripple)+execution_suffix)
-	var message:="  ".join(ripples)
+		ripples.append(String(policy.ripple))
+	var message:=String(order.get("leader_reply",""))
+	if message.is_empty(): message="  ".join(ripples)
 	if message.is_empty(): message=String(result.get("unresolved","The pronouncement was recorded without an executable simulation effect."))
-	if travel_status_label: travel_status_label.text="PRONOUNCEMENT INTERPRETED  •  %s" % message
+	if travel_status_label: travel_status_label.text="CIVIC RESPONSE  •  %s" % message
 	if pronouncement_status_label:
-		pronouncement_status_label.text="INTERPRETED VIA %s • %s" % [String(interpretation.get("source","interpreter")).to_upper(),message]
+		pronouncement_status_label.text="%s • INTERPRETED VIA %s • %s" % [String(order.get("addressed_to","LEADER")).to_upper(),String(interpretation.get("source","interpreter")).to_upper(),message]
 		pronouncement_status_label.add_theme_color_override("font_color",Color("#c8ad72"))
+	_refresh_council_dock.call_deferred()
 
 func _cancel_pending_pronouncement(order_id:String,request_id:String)->void:
 	if not PronouncementInterpreter.cancel(request_id):
@@ -14480,8 +15384,6 @@ func _cancel_pending_pronouncement(order_id:String,request_id:String)->void:
 		return
 	var pending:Dictionary=pending_pronouncement_inputs.get(request_id,{})
 	pending_pronouncement_inputs.erase(request_id)
-	var input:LineEdit=pending.get("input")
-	if input and is_instance_valid(input): input.editable=true
 	for order_variant in GameState.sovereign_orders:
 		var order:Dictionary=order_variant
 		if String(order.get("id",""))!=order_id: continue
@@ -14498,12 +15400,15 @@ func _refresh_council_dock()->void:
 	## Rebuilds the council view after a pronouncement state change when the
 	## dock is showing it.
 	if hud and hud.active_section=="civ":
-		hud.live_refresh_dock()
+		# An explicit conversational turn must redraw even while the pointer or
+		# keyboard focus remains inside the dock. Passive simulation refreshes keep
+		# their interaction guard; this action path deliberately bypasses it.
+		hud.request_immediate_dock_refresh()
 
 func _build_leader_selection(layer: CanvasLayer) -> void:
 	_generate_leader_candidates("Steward")
-	# Leadership is represented by institutions and delegations, not portraits or
-	# simulated office-holding individuals.
+	# Government is a bounded cast of actual people. Ordinary residents remain
+	# aggregate, but officeholders retain age, skills, traits, relationships and life.
 	leader_panel = Control.new()
 	leader_panel.size = get_viewport().get_visible_rect().size
 	leader_panel.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -14528,12 +15433,12 @@ func _build_leader_selection(layer: CanvasLayer) -> void:
 	root.add_theme_constant_override("separation", 10)
 	modal.add_child(root)
 	leader_heading = Label.new()
-	leader_heading.text = "SELECT AN INSTITUTIONAL SLATE"
+	leader_heading.text = "SELECT AN OFFICEHOLDER"
 	leader_heading.add_theme_font_size_override("font_size", 24)
 	leader_heading.add_theme_color_override("font_color", Color("#ede2cd"))
 	root.add_child(leader_heading)
 	leader_explanation = Label.new()
-	leader_explanation.text = "Five governing arrangements are available. Their influence is measured through the civilization's twelve real dynamics."
+	leader_explanation.text = "Choose a living person. Skill, temperament, experience, age, and the evolving form of government shape how the office is carried."
 	leader_explanation.add_theme_font_size_override("font_size", 14)
 	leader_explanation.add_theme_color_override("font_color", Color("#aaa99f"))
 	root.add_child(leader_explanation)
@@ -14573,7 +15478,7 @@ func _build_leader_selection(layer: CanvasLayer) -> void:
 	footer.add_child(close_button)
 	appoint_button = Button.new()
 	appoint_button.custom_minimum_size = Vector2(310, 44)
-	appoint_button.text = "COMMISSION THIS SLATE"
+	appoint_button.text = "APPOINT THIS PERSON"
 	appoint_button.add_theme_font_size_override("font_size", 15)
 	appoint_button.pressed.connect(_appoint_leader)
 	footer.add_child(appoint_button)
@@ -14600,8 +15505,9 @@ func _rebuild_leader_candidate_list() -> void:
 
 func _generate_leader_candidates(office:String) -> void:
 	leader_candidates.clear()
-	for slate in _institutional_slates_for_office(office):
-		leader_candidates.append(_candidate_from_institution(String(slate[0]),String(slate[1]),office,String(slate[2])))
+	GovernmentPeopleSystem.initialize()
+	for person in GovernmentPeopleSystem.candidates_for_office(office,"",6,false):
+		leader_candidates.append(person)
 	AdvisorSystem.register_advisors(leader_candidates)
 
 func _institutional_slates_for_office(office:String)->Array:
@@ -15038,36 +15944,9 @@ func _hud_chip_style(accent:Color,hover:=false)->StyleBoxFlat:
 	return style
 
 func _refresh_event_report() -> void:
-	if event_report_button==null:
-		return
-	if GameState.demographic_ledger.is_empty():
-		event_report_button.visible=false
-		return
-	var record:Dictionary=GameState.demographic_ledger[0]
-	var kind:=String(record.get("kind","death"))
-	var count:=int(record.get("count",1))
-	var raw_end_day:=int(record.get("end_day",record.get("day",0)))
-	if not _demographic_notice_is_current(record,int(floor(GameState.elapsed_days))):
-		event_report_button.visible=false
-		return
-	var start_day:=int(record.get("start_day",record.get("day",0)))+1
-	var end_day:=raw_end_day+1
-	var period:="DAY %d" % end_day if start_day==end_day else "DAYS %d–%d" % [start_day,end_day]
-	var noun:="BIRTH" if kind=="birth" else "DEATH"
-	var recorded_cause:=String(record.get("cause","Unknown"))
-	var cause_label:="SUPPORTED BY CURRENT CONDITIONS" if kind=="birth" and recorded_cause=="Births" else recorded_cause.to_upper()
-	var accent:=Color("#b8a36d") if kind=="birth" else Color("#a95f52")
-	var condition:=_demographic_notice_condition_text(record)
-	event_report_button.text="POPULATION  •  %s  •  %d %s%s\n%s  •  %s" % [period,count,noun,"" if count==1 else "S",cause_label,condition]
-	event_report_button.add_theme_stylebox_override("normal",_population_report_style(accent))
-	event_report_button.add_theme_stylebox_override("hover",_population_report_style(accent,true))
-	event_report_button.add_theme_stylebox_override("pressed",_population_report_style(accent,true))
-	event_report_button.tooltip_text=String(record.get("description","Open the population ledger."))
-	var signature:="%s:%d:%d:%d" % [kind,start_day,end_day,count]
-	if signature!=event_report_signature:
-		event_report_signature=signature
-		event_report_visible_until_msec=Time.get_ticks_msec()+_demographic_notice_duration_msec(kind)
-	event_report_button.visible=Time.get_ticks_msec()<=event_report_visible_until_msec
+	# Births and deaths remain in the population ledger and are summarized by
+	# the rolling B − D KPI. Routine demographic changes are not interruptions.
+	if event_report_button: event_report_button.visible=false
 
 func _demographic_notice_is_current(record:Dictionary,current_day:int)->bool:
 	var record_day:=int(record.get("end_day",record.get("day",0)))
@@ -15664,10 +16543,10 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 	actions.add_theme_constant_override("h_separation",6)
 	actions.add_theme_constant_override("v_separation",6)
 	civilization_detail_root.add_child(actions)
-	var action_descriptions:={"open_trade":"Send a trade proposal. It can begin only after envoys reach them and carry acceptance home.","non_aggression":"Send a non-aggression proposal. No compact exists until the physical round trip is complete.","send_aid":"Send envoys carrying physical food aid; both travel rations and aid leave your reserve at departure.","contain":"End the current compact and adopt a hostile peacetime containment posture.","seek_peace":"Send peace envoys. Any response remains unknown until the delegation returns.","declare_war":"Send a physical declaration. War begins only when the message reaches them.","launch_campaign":"Commit the existing aggregate field formation against this rival's simulated garrison.","reinforce_occupation":"Move trained field personnel into the selected occupation force. Coverage suppresses rebellion and supports integration.","evacuate_occupation":"Withdraw the selected occupation force into the recruit reserve, returning its issued equipment but leaving control exposed to uprising or recapture."}
-	var action_recoveries:={"open_trade":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","non_aggression":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","send_aid":"Locate their settlement, restore the required physical Food, and finish any active diplomatic mission.","contain":"Resolve the current war or incompatible treaty state, then choose containment again.","seek_peace":"Enter a war, then send peace envoys after locating the opponent's settlement.","declare_war":"Locate their settlement, choose a war objective, and finish any active diplomatic mission before sending the declaration.","launch_campaign":"Raise and train personnel, form a maneuver army, move it to this selected objective, and resolve any active battle.","reinforce_occupation":"Train unassigned home personnel, then select a region you already control.","evacuate_occupation":"Select a controlled region with an occupation force still stationed there."}
-	var action_consequences:={"open_trade":"No trade begins until acceptance physically returns.","non_aggression":"No compact begins until acceptance physically returns.","send_aid":"Travel rations and the aid cargo leave physical stores at departure.","contain":"Trade and diplomatic access end immediately and tension rises.","seek_peace":"The war continues until an accepted response returns.","declare_war":"War begins when the declaration reaches them, not when it departs.","launch_campaign":"The stationed army fights; military and civilian losses, damage, and control changes enter permanent history.","reinforce_occupation":"Field personnel leave the reserve to suppress resistance and support integration.","evacuate_occupation":"Personnel and equipment return, but resistance or recapture may end control."}
-	for action_entry in [["PROPOSE TRADE","open_trade"],["PROPOSE NON-AGGRESSION","non_aggression"],["SEND FOOD AID","send_aid"],["CONTAIN","contain"],["SEND PEACE ENVOYS","seek_peace"],["SEND WAR DECLARATION","declare_war"],["LAUNCH CAMPAIGN","launch_campaign"],["REINFORCE OCCUPATION","reinforce_occupation"],["EVACUATE OCCUPATION","evacuate_occupation"]]:
+	var action_descriptions:={"open_trade":"Send a trade proposal. It can begin only after envoys reach them and carry acceptance home.","non_aggression":"Send a non-aggression proposal. No compact exists until the physical round trip is complete.","send_aid":"Send envoys carrying physical food aid; both travel rations and aid leave your reserve at departure.","contain":"End the current compact and adopt a hostile peacetime containment posture.","seek_peace":"Send peace envoys. Any response remains unknown until the delegation returns.","declare_war":"Send a physical declaration. War begins only when the message reaches them.","launch_raid":"Strike a known region for portable stores without attempting occupation; this sharply raises hostility and may begin a war.","launch_campaign":"Commit the existing aggregate field formation against this rival's simulated garrison.","reinforce_occupation":"Move trained field personnel into the selected occupation force. Coverage suppresses rebellion and supports integration.","evacuate_occupation":"Withdraw the selected occupation force into the recruit reserve, returning its issued equipment but leaving control exposed to uprising or recapture."}
+	var action_recoveries:={"open_trade":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","non_aggression":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","send_aid":"Locate their settlement, restore the required physical Food, and finish any active diplomatic mission.","contain":"Resolve the current war or incompatible treaty state, then choose containment again.","seek_peace":"Enter a war, then send peace envoys after locating the opponent's settlement.","declare_war":"Locate their settlement, choose a war objective, and finish any active diplomatic mission before sending the declaration.","launch_raid":"Select a known region, move a field army there, and ensure no truce or non-aggression compact is active.","launch_campaign":"Raise and train personnel, form a maneuver army, move it to this selected objective, and resolve any active battle.","reinforce_occupation":"Train unassigned home personnel, then select a region you already control.","evacuate_occupation":"Select a controlled region with an occupation force still stationed there."}
+	var action_consequences:={"open_trade":"No trade begins until acceptance physically returns.","non_aggression":"No compact begins until acceptance physically returns.","send_aid":"Travel rations and the aid cargo leave physical stores at departure.","contain":"Trade and diplomatic access end immediately and tension rises.","seek_peace":"The war continues until an accepted response returns.","declare_war":"War begins when the declaration reaches them, not when it departs.","launch_raid":"The stationed army fights and may take portable stores, but cannot capture territory; reprisals become more likely.","launch_campaign":"The stationed army fights; military and civilian losses, damage, and control changes enter permanent history.","reinforce_occupation":"Field personnel leave the reserve to suppress resistance and support integration.","evacuate_occupation":"Personnel and equipment return, but resistance or recapture may end control."}
+	for action_entry in [["PROPOSE TRADE","open_trade"],["PROPOSE NON-AGGRESSION","non_aggression"],["SEND FOOD AID","send_aid"],["CONTAIN","contain"],["SEND PEACE ENVOYS","seek_peace"],["SEND WAR DECLARATION","declare_war"],["RAID REGION","launch_raid"],["LAUNCH CAMPAIGN","launch_campaign"],["REINFORCE OCCUPATION","reinforce_occupation"],["EVACUATE OCCUPATION","evacuate_occupation"]]:
 		var action_button:=Button.new()
 		action_button.text=String(action_entry[0])
 		action_button.custom_minimum_size=Vector2(0,36)
@@ -15676,6 +16555,7 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 		var action_id:=String(action_entry[1])
 		var availability:Dictionary
 		if action_id=="launch_campaign": availability=MilitaryCampaign.offensive_campaign_availability(String(profile.id),selected_civilization_region_id)
+		elif action_id=="launch_raid": availability=MilitaryCampaign.raid_campaign_availability(String(profile.id),selected_civilization_region_id)
 		elif action_id in ["reinforce_occupation","evacuate_occupation"]: availability=MilitaryCampaign.occupation_action_availability(String(profile.id),selected_civilization_region_id,action_id)
 		else: availability=CivilizationSystem.player_action_availability(String(profile.id),action_id)
 		if action_id in CivilizationSystem.CARRIED_DIPLOMATIC_ACTIONS and not bool(relation.get("home_location_known",false)):
@@ -15754,14 +16634,20 @@ func _open_scout_dispatch_panel()->void:
 	var modal:=PanelContainer.new(); modal.position=scout_dispatch_panel.size*0.5-Vector2(330,235); modal.size=Vector2(660,470); modal.add_theme_stylebox_override("panel",_population_report_style(Color("#7ca39d"))); scout_dispatch_panel.add_child(modal)
 	var root:=VBoxContainer.new(); root.add_theme_constant_override("separation",9); modal.add_child(root)
 	var heading:=Label.new(); heading.text="DISPATCH SCOUT PARTY"; heading.add_theme_font_size_override("font_size",22); heading.add_theme_color_override("font_color",Color("#d9c99e")); root.add_child(heading)
-	var explanation:=Label.new(); explanation.text="Choose how long one fast aggregate party may remain away. The route, terrain, sightings, and contacts remain physically with the scouts and reveal nothing until they return. On a planetary map, short missions are local reconnaissance—not automatic contact."; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
+	var explanation:=Label.new(); explanation.text="Choose how long one fast aggregate party may remain away. The route, terrain, sightings, and contacts remain physically with the scouts and reveal nothing until they return. On a planetary map, short missions are local reconnaissance—not automatic contact. Time is paused while this panel is open; the road decides the true return day, so parties run early or late." ; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
 	var exploration:=CivilizationSystem.exploration_status()
 	if bool(exploration.get("active",false)):
 		# Several parties can range at once; list each without blocking new ones.
 		var party_lines:Array[String]=[]
 		for party_variant in (exploration.get("parties",[]) as Array):
 			var party:Dictionary=party_variant
-			party_lines.append("%d PEOPLE  •  %s  •  RETURNS IN %d DAYS" % [int(party.get("personnel",0)),String(party.get("target_label","OPEN EXPLORATION")),int(party.get("days_remaining",0))])
+			var overdue_days:=int(party.get("overdue_days",0))
+			var ordered_heading:=String(party.get("ordered_heading","")).to_upper()
+			var direction_text:="  •  ORDERED %s" % ordered_heading if ordered_heading!="" else "  •  CORRIDOR %s" % String(party.get("planned_heading","UNKNOWN")).to_upper()
+			if overdue_days>0:
+				party_lines.append("%d PEOPLE  •  %s%s  •  OVERDUE %d DAY%s — STILL ON THE ROAD" % [int(party.get("personnel",0)),String(party.get("target_label","OPEN EXPLORATION")),direction_text,overdue_days,"" if overdue_days==1 else "S"])
+			else:
+				party_lines.append("%d PEOPLE  •  %s%s  •  RETURNS IN ~%d DAYS" % [int(party.get("personnel",0)),String(party.get("target_label","OPEN EXPLORATION")),direction_text,int(party.get("days_remaining",0))])
 		var active_status:=Label.new(); active_status.text="%d OF %d PARTIES AWAY\n%s" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1)),"\n".join(party_lines)]; active_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; active_status.add_theme_font_size_override("font_size",12); active_status.add_theme_color_override("font_color",Color("#d5bd82")); root.add_child(active_status)
 	if not bool(exploration.get("can_begin",true)):
 		var capacity_note:=Label.new(); capacity_note.text="Every party this population can organize is away. New parties become possible as the population grows or a party returns."; capacity_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; capacity_note.size_flags_vertical=Control.SIZE_EXPAND_FILL; capacity_note.add_theme_font_size_override("font_size",12); capacity_note.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(capacity_note)
@@ -15777,9 +16663,20 @@ func _open_scout_dispatch_panel()->void:
 			if String(target.id)==pending_scout_target_id: selected_target_index=target_index
 		target_selector.select(selected_target_index)
 		pending_scout_target_id=String(target_selector.get_item_metadata(selected_target_index))
+		var heading_selector:=OptionButton.new(); heading_selector.custom_minimum_size=Vector2(0,34); heading_selector.tooltip_text="Dictate the party's outward heading, or let it choose. Blocked ground still bends the route."; root.add_child(heading_selector)
+		heading_selector.add_item("HEADING · LET THE PARTY CHOOSE"); heading_selector.set_item_metadata(0,"")
+		var heading_index:=1
+		for heading_id in CivilizationSystem.SCOUT_HEADINGS:
+			heading_selector.add_item("HEADING · %s" % String(heading_id).to_upper()); heading_selector.set_item_metadata(heading_index,String(heading_id))
+			if String(heading_id)==pending_scout_heading: heading_selector.select(heading_index)
+			heading_index+=1
+		var directional_target:=pending_scout_target_id in ["open_world","recruit_people"]
+		heading_selector.disabled=not directional_target
+		if not directional_target: heading_selector.tooltip_text="This mission has a fixed known destination; its route follows the land to that place."
 		var duration_grid:=GridContainer.new(); duration_grid.columns=2; duration_grid.size_flags_vertical=Control.SIZE_EXPAND_FILL; duration_grid.add_theme_constant_override("h_separation",8); duration_grid.add_theme_constant_override("v_separation",8); root.add_child(duration_grid)
 		_populate_scout_duration_buttons(duration_grid,pending_scout_target_id)
-		target_selector.item_selected.connect(_select_scout_target.bind(target_selector,duration_grid))
+		heading_selector.item_selected.connect(_select_scout_heading.bind(heading_selector,duration_grid,target_selector))
+		target_selector.item_selected.connect(_select_scout_target.bind(target_selector,duration_grid,heading_selector))
 	scout_dispatch_status=Label.new(); scout_dispatch_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; scout_dispatch_status.add_theme_font_size_override("font_size",11); scout_dispatch_status.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(scout_dispatch_status)
 	var footer:=HBoxContainer.new(); footer.alignment=BoxContainer.ALIGNMENT_END; root.add_child(footer)
 	var close:=Button.new(); close.text="CLOSE"; close.custom_minimum_size=Vector2(140,38); close.pressed.connect(_close_scout_dispatch_panel); footer.add_child(close)
@@ -15792,24 +16689,36 @@ func _close_scout_dispatch_panel()->void:
 	_set_game_speed(scout_dispatch_previous_speed)
 
 
-func _select_scout_target(index:int,selector:OptionButton,duration_grid:GridContainer)->void:
+func _select_scout_target(index:int,selector:OptionButton,duration_grid:GridContainer,heading_selector:OptionButton)->void:
 	pending_scout_target_id=String(selector.get_item_metadata(index))
+	var directional_target:=pending_scout_target_id in ["open_world","recruit_people"]
+	heading_selector.disabled=not directional_target
+	heading_selector.tooltip_text="Dictate the outward search sector. The route may bend around terrain, but its endpoint remains in that sector." if directional_target else "This mission has a fixed known destination; its route follows the land to that place."
 	for child in duration_grid.get_children(): child.queue_free()
 	_populate_scout_duration_buttons(duration_grid,pending_scout_target_id)
 
 
+func _select_scout_heading(index:int,selector:OptionButton,duration_grid:GridContainer,target_selector:OptionButton)->void:
+	pending_scout_heading=String(selector.get_item_metadata(index))
+	for child in duration_grid.get_children(): child.queue_free()
+	_populate_scout_duration_buttons(duration_grid,String(target_selector.get_item_metadata(target_selector.selected)))
+
+
 func _populate_scout_duration_buttons(duration_grid:GridContainer,target_id:String)->void:
 	for duration in CivilizationSystem.SCOUT_DURATIONS:
-		var quote:=CivilizationSystem.scout_mission_quote(int(duration),target_id)
+		var directional_target:=target_id in ["open_world","recruit_people"]
+		var quote:=CivilizationSystem.scout_mission_quote(int(duration),target_id,pending_scout_heading if directional_target else "")
 		var mission:=Button.new(); mission.custom_minimum_size=Vector2(0,106); mission.size_flags_horizontal=Control.SIZE_EXPAND_FILL; mission.alignment=HORIZONTAL_ALIGNMENT_LEFT; mission.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; mission.add_theme_font_size_override("font_size",11)
 		mission.text=_scout_mission_card_text(int(duration),quote)
 		mission.disabled=not bool(quote.get("can_dispatch",false))
-		mission.tooltip_text=("BLOCKED  %s\nNEXT  Restore the listed people or food, finish the active party, then choose this duration again." % String(quote.get("blocker","This mission cannot depart."))) if mission.disabled else "ACTION  Dispatch %d fast scouts for %d days toward this target.\nCOST  %.1f Food and %d absent people are committed at departure.\nCONSEQUENCE  No terrain, contact, recruits, or sightings become known unless the party physically returns." % [int(quote.get("personnel",0)),int(duration),float(quote.get("provisions",0.0)),int(quote.get("personnel",0))]
+		var heading_note:=" toward %s" % pending_scout_heading.to_upper() if directional_target and pending_scout_heading!="" else ""
+		mission.tooltip_text=("BLOCKED  %s\nNEXT  Restore the listed people or food, finish the active party, or choose another heading." % String(quote.get("blocker","This mission cannot depart."))) if mission.disabled else "ACTION  Dispatch %d fast scouts for %d days%s.\nCOST  %.1f Food and %d absent people are committed at departure.\nMAP  The ordered search corridor remains visible while the party is away.\nCONSEQUENCE  No terrain, contact, recruits, or sightings become known unless the party physically returns." % [int(quote.get("personnel",0)),int(duration),heading_note,float(quote.get("provisions",0.0)),int(quote.get("personnel",0))]
 		mission.pressed.connect(_dispatch_scout_from_actions.bind(int(duration),target_id)); duration_grid.add_child(mission)
 
 
 func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
 	var text:="SEND FOR %d DAYS\n%d PEOPLE  •  %.1f FOOD\nREACH ~%s KM  •  RISK %s" % [duration,int(quote.get("personnel",0)),float(quote.get("provisions",0.0)),_compact_population(roundi(float(quote.get("one_way_range_km",0.0)))),String((quote.get("risk",{}) as Dictionary).get("label","UNKNOWN"))]
+	if String(quote.get("ordered_heading",""))!="": text+="\nORDERED %s" % String(quote.ordered_heading).to_upper()
 	if not bool(quote.get("can_dispatch",false)):
 		var blocker:=String(quote.get("blocker",quote.get("error","Mission unavailable."))).replace("\n"," ")
 		text+="\nBLOCKED  •  %s" % blocker.left(72)
@@ -15817,13 +16726,13 @@ func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
 
 
 func _dispatch_scout_from_actions(duration_days:int,target_id:String="open_world")->void:
-	var result:=CivilizationSystem.dispatch_scouts(duration_days,target_id)
+	var result:=CivilizationSystem.dispatch_scouts(duration_days,target_id,pending_scout_heading if target_id in ["open_world","recruit_people"] else "")
 	if result.has("error"):
 		if scout_dispatch_status:
 			scout_dispatch_status.text=String(result.error)
 			scout_dispatch_status.add_theme_color_override("font_color",Color("#d77a68"))
 		return
-	if travel_status_label: travel_status_label.text="SCOUT PARTY DEPARTED  •  %d DAYS  •  REPORT DUE ONLY ON RETURN" % duration_days
+	if travel_status_label: travel_status_label.text=String(result.get("message","SCOUT PARTY DEPARTED  •  REPORT DUE ONLY ON RETURN"))
 	_close_scout_dispatch_panel()
 	_update_time_interface()
 
@@ -16008,8 +16917,8 @@ func _select_war_goal(index:int,selector:OptionButton,civ_id:String)->void:
 
 
 func _conduct_civilization_action(civ_id:String,action:String)->void:
-	if action=="launch_campaign":
-		var campaign:Dictionary=MilitaryCampaign.launch_offensive(civ_id,selected_civilization_region_id)
+	if action in ["launch_campaign","launch_raid"]:
+		var campaign:Dictionary=MilitaryCampaign.launch_raid(civ_id,selected_civilization_region_id) if action=="launch_raid" else MilitaryCampaign.launch_offensive(civ_id,selected_civilization_region_id)
 		civilization_feedback_text=String(campaign.get("error","Campaign launched; issue round orders through Military Command."))
 		selected_civilization_id=civ_id
 		if campaign.has("error"):
@@ -17757,6 +18666,45 @@ func _open_world_menu()->void:
 	explanation.add_theme_color_override("font_color",Color("#a6ada8"))
 	content.add_child(explanation)
 	content.add_child(HSeparator.new())
+	var save_title:=Label.new()
+	save_title.text="SAVE, LOAD & CIVICS AI"
+	save_title.add_theme_font_size_override("font_size",11)
+	save_title.add_theme_color_override("font_color",Color("#c8b77e"))
+	content.add_child(save_title)
+	var save_status:=Label.new()
+	var existing_save:Dictionary=SaveSystem.save_metadata()
+	save_status.text="Saved world: %s · day %d · population %d" % [String(existing_save.get("settlement_name","the settlement")),int(existing_save.get("elapsed_days",0)),int(existing_save.get("population",0))] if not existing_save.is_empty() else "No saved world exists yet."
+	save_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	save_status.add_theme_font_size_override("font_size",11)
+	save_status.add_theme_color_override("font_color",Color("#8f9994"))
+	content.add_child(save_status)
+	var save_row:=HBoxContainer.new()
+	save_row.add_theme_constant_override("separation",8)
+	content.add_child(save_row)
+	var save_button:=Button.new()
+	save_button.text="SAVE GAME"
+	save_button.custom_minimum_size=Vector2(0,38)
+	save_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	save_button.tooltip_text="Write this world — terrain seed, people, knowledge, wars, and history — to disk."
+	save_button.pressed.connect(func()->void:
+		var result:Dictionary=SaveSystem.save_game()
+		save_status.text=String(result.get("message",result.get("error","The save failed."))))
+	save_row.add_child(save_button)
+	var load_button:=Button.new()
+	load_button.text="LOAD GAME"
+	load_button.custom_minimum_size=Vector2(0,38)
+	load_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	load_button.disabled=existing_save.is_empty()
+	load_button.tooltip_text="Abandon the current session and restore the saved world." if not existing_save.is_empty() else "No saved world exists yet."
+	load_button.pressed.connect(_load_saved_world)
+	save_row.add_child(load_button)
+	var civic_ai_button:=Button.new()
+	civic_ai_button.custom_minimum_size=Vector2(0,38)
+	civic_ai_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	civic_ai_button.pressed.connect(_toggle_world_menu_civic_ai.bind(civic_ai_button))
+	save_row.add_child(civic_ai_button)
+	_refresh_world_menu_civic_ai_button(civic_ai_button)
+	content.add_child(HSeparator.new())
 	var seed_label:=Label.new()
 	seed_label.text="NEW GAME  •  WORLD SEED"
 	seed_label.add_theme_font_size_override("font_size",11)
@@ -17818,6 +18766,23 @@ func _close_world_menu()->void:
 	world_seed_status=null
 	_set_game_speed(world_menu_previous_speed)
 
+
+func _toggle_world_menu_civic_ai(button:Button)->void:
+	PronouncementInterpreter.set_api_enabled(not bool(GameState.civic_api_enabled))
+	_refresh_world_menu_civic_ai_button(button)
+	if hud and hud.has_method("request_immediate_dock_refresh"):
+		hud.request_immediate_dock_refresh()
+
+
+func _refresh_world_menu_civic_ai_button(button:Button)->void:
+	if button==null or not is_instance_valid(button): return
+	var status:Dictionary=PronouncementInterpreter.configuration_status()
+	var enabled:=bool(GameState.civic_api_enabled)
+	var configured:=bool(status.get("configured",false))
+	button.text="AI · ON" if enabled and configured else ("AI · NO KEY" if enabled else "AI · OFF")
+	button.tooltip_text="Civics AI is enabled and ready. Click to turn it off; OFF sends zero API requests." if enabled and configured else ("Civics AI is enabled, but this game process has no usable API credential. Click to turn it off, or relaunch through tools/launch_game.ps1 after saving." if enabled else "Civics AI is disabled by you. Click to turn it on; configured Terra interpretation will resume when credentials are available.")
+	button.add_theme_color_override("font_color",Color("#8fc28e") if enabled and configured else (Color("#d5ad58") if enabled else Color("#8f9994")))
+
 func _restart_with_entered_seed()->void:
 	if not world_seed_input or not world_seed_input.text.strip_edges().is_valid_int():
 		world_seed_status.text="Enter a valid whole-number seed."
@@ -17828,13 +18793,25 @@ func _restart_with_entered_seed()->void:
 	if selected==0: selected=1
 	_restart_world(selected)
 
+func _load_saved_world()->void:
+	## Restores the quicksave into the autoload layer, then rebuilds the
+	## rendered world from it — the same scene-reload path a restart uses.
+	var result:Dictionary=SaveSystem.load_game()
+	if result.has("error"):
+		if world_seed_status: world_seed_status.text=String(result.error)
+		return
+	pending_pronouncement_inputs.clear()
+	get_tree().reload_current_scene()
+
 func _restart_world(selected_seed:int)->void:
 	GameState.reset_for_new_world(selected_seed)
 	DiscoverySystem.reset_for_new_world()
 	ProgressionSystem.reset_for_new_world()
+	PlanetEnvironment.reset_for_new_world()
 	ResourceSystem.reset_for_new_world()
 	EconomySystem.reset_for_new_world()
 	_settlement_model().reset_for_new_world()
+	GovernmentPeopleSystem.reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
 	_food_system().reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
@@ -17974,13 +18951,15 @@ func _input(event: InputEvent) -> void:
 			dragging = event.pressed and not _pointer_over_ui()
 			rotating_camera = event.shift_pressed
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed and not _pointer_over_ui():
-			_zoom_camera_at_screen(event.position,camera.size/1.18)
+			_queue_camera_zoom(event.position,-maxf(0.05,event.factor),event.shift_pressed)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed and not _pointer_over_ui():
-			_zoom_camera_at_screen(event.position,camera.size*1.18)
+			_queue_camera_zoom(event.position,maxf(0.05,event.factor),event.shift_pressed)
 	elif event is InputEventMouseMotion and dragging:
 		if rotating_camera:
+			north_reset_active=false
+			camera_input_msec=Time.get_ticks_msec()
 			camera_yaw -= event.relative.x * 0.006
-			camera_pitch = clampf(camera_pitch - event.relative.y * 0.004, -1.18, -0.48)
+			camera_pitch = clampf(camera_pitch - event.relative.y * 0.004, -1.50, -0.40)
 			_update_camera()
 		else:
 			var units_per_pixel:=camera.size/maxf(1.0,float(get_viewport().get_visible_rect().size.y))
@@ -18002,6 +18981,14 @@ func _pointer_over_ui()->bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_N:
+		_reset_camera_north()
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F7:
+		_inspect_aerial_altitude()
+		get_viewport().set_input_as_handled()
+		return
 	if actions_menu_panel and actions_menu_panel.visible and event is InputEventMouseButton and event.pressed:
 		_close_actions_menu()
 	if placement_building != "":
@@ -18026,6 +19013,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		# Target counters win hit-testing when formations overlap. Otherwise the
+		# player can see a scout or enemy but can only select their own army under
+		# it — precisely the opposite of the action they are trying to take.
+		if _open_foreign_formation_from_screen(event.position):
+			get_viewport().set_input_as_handled()
+			return
 		# HoI4-style army control: left-click selects an army marker (or clears
 		# the selection when clicking empty ground).
 		if _select_field_army_from_screen(event.position):
@@ -18063,6 +19056,7 @@ func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: b
 			selected_screen_distance=distance
 			selected=settlement
 	if selected.is_empty() or selected_screen_distance>30.0: return false
+	_settlement_model().select_settlement(String(selected.get("id","")))
 	var selected_center_2d:Vector2=selected.get("position",Vector2.ZERO)
 	var center:=Vector3(selected_center_2d.x,_height_at(selected_center_2d.x,selected_center_2d.y),selected_center_2d.y)
 	_set_camera_target(center)
@@ -18074,19 +19068,21 @@ func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: b
 	_update_camera()
 	_update_scale_lod()
 	_inspect_location(center)
+	# A marker is an entry into that named place's management context. Double-click
+	# still means geographic zoom; a single click opens the existing dock rather
+	# than introducing another permanent map panel.
+	if hud and not close_inspection: _on_hud_section_requested("settlement",0)
 	if travel_status_label:
-		travel_status_label.text="%s SELECTED  •  double-click to move one scale closer  •  wheel zoom remains anchored" % String(selected.get("name","SETTLEMENT")).to_upper()
+		travel_status_label.text="%s SELECTED  •  settlement management is open  •  double-click to move one scale closer" % String(selected.get("name","SETTLEMENT")).to_upper()
 	return true
 
 func _update_camera() -> void:
-	# Orthographic scale and camera altitude are independent. Keeping the camera at
-	# the old 92 km overview altitude while showing a 100 m footprint collapsed all
-	# metre-scale landscape layers into the terrain depth buffer. Follow the visible
-	# footprint down toward the ground, Google-Earth style, while retaining the same
-	# orthographic framing and a high ceiling for planetary views.
-	var effective_distance:=clampf(camera.size*1.85+0.8,1.8,50000.0) if SEAMLESS_WORLD else camera_distance
+	# camera.size remains the visible height at the focus plane for LOD and input.
+	# Perspective gives the aerial view depth; distance follows its physical field
+	# of view. The near plane expands at continental scale to preserve depth precision.
+	var effective_distance:=camera.size/(2.0*tan(deg_to_rad(camera.fov)*0.5)) if SEAMLESS_WORLD else camera_distance
 	if SEAMLESS_WORLD:
-		camera.near=0.015 if camera.size<=6.0 else 0.10
+		camera.near=maxf(0.00005,effective_distance*lerpf(0.001,0.20,smoothstep(30.0,1200.0,camera.size)))
 		camera.far=maxf(240.0,effective_distance*4.0+camera.size*4.0)
 	# Continental footprints become progressively more nadir-facing. A strongly
 	# oblique camera only a few dozen kilometres above a 20,000 km plane exposed its
@@ -18098,7 +19094,58 @@ func _update_camera() -> void:
 	camera.position = camera_target + Vector3(cos(camera_yaw) * horizontal, -sin(display_pitch) * effective_distance, sin(camera_yaw) * horizontal)
 	camera.look_at(camera_target, Vector3.UP)
 
-func _zoom_camera_at_screen(screen_position:Vector2,requested_size:float)->void:
+func _queue_camera_zoom(pointer:Vector2,steps:float,fast:bool=false)->void:
+	if camera==null: return
+	var start:=zoom_target_size if zoom_target_size>0.0 else camera.size
+	zoom_target_size=clampf(start*pow(1.8 if fast else 1.4,steps),0.035,18000.0 if SEAMLESS_WORLD else 128.0)
+	zoom_pointer=pointer
+	camera_input_msec=Time.get_ticks_msec()
+
+func _reset_camera_north()->void:
+	north_reset_active=true
+	camera_input_msec=Time.get_ticks_msec()
+
+func _camera_in_motion()->bool:
+	return zoom_target_size>0.0 or north_reset_active or dragging or Time.get_ticks_msec()-camera_input_msec<100
+
+func _process_smooth_camera(delta:float)->void:
+	if camera==null: return
+	var blend:=1.0-exp(-18.0*maxf(0.0,delta))
+	if zoom_target_size>0.0:
+		var next:=exp(lerpf(log(camera.size),log(zoom_target_size),blend))
+		if absf(log(next/zoom_target_size))<0.001:
+			next=zoom_target_size
+			zoom_target_size=-1.0
+		_zoom_camera_at_screen(zoom_pointer,next,false)
+	if north_reset_active:
+		camera_yaw=lerp_angle(camera_yaw,PI*0.5,blend)
+		if absf(wrapf(camera_yaw-PI*0.5,-PI,PI))<0.001:
+			camera_yaw=PI*0.5
+			north_reset_active=false
+		_update_camera()
+
+
+func aerial_altitude_feet()->float:
+	if camera==null: return 0.0
+	return maxf(0.0,camera.position.y-_height_at(camera.position.x,camera.position.z))*3280.839895
+
+func _inspect_aerial_altitude(feet:float=10000.0)->void:
+	if camera==null: return
+	zoom_target_size=-1.0
+	camera_pitch=deg_to_rad(-50.0)
+	var wanted:=maxf(0.05,feet/3280.839895)
+	var lower:=0.05
+	var upper:=maxf(20.0,wanted*4.0)
+	for iteration in 24:
+		var distance:=(lower+upper)*0.5
+		camera.size=distance*2.0*tan(deg_to_rad(camera.fov)*0.5)
+		_update_camera()
+		if aerial_altitude_feet()/3280.839895<wanted: lower=distance
+		else: upper=distance
+	_update_scale_lod()
+
+
+func _zoom_camera_at_screen(screen_position:Vector2,requested_size:float,refresh_lod:bool=true)->void:
 	if camera == null:
 		return
 	var before:=_terrain_hit(screen_position)
@@ -18112,4 +19159,82 @@ func _zoom_camera_at_screen(screen_position:Vector2,requested_size:float)->void:
 			var correction:Vector3=before.position-after.position
 			correction.y=0.0
 			_set_camera_target(camera_target+correction)
-	_update_scale_lod()
+	if refresh_lod: _update_scale_lod()
+
+
+func _on_score_interval_timeout()->void:
+	# Score cadence is wall-clock based: simulation speed and pausing the world do
+	# not turn a ten-minute musical cue into a stutter or a rapid replay. Tracks
+	# rotate in score order; a cue never cuts off a piece that is still playing.
+	var score_player:=get_node_or_null("Score") as AudioStreamPlayer
+	if score_player==null or score_player.playing: return
+	score_track_index=(score_track_index+1)%SCORE_TRACKS.size()
+	score_player.stream=SCORE_TRACKS[score_track_index]
+	score_player.play()
+
+func _initialize_city_resource_sites(settlement_id:String)->void:
+	var model:=_settlement_model()
+	var city:Dictionary=model.settlement_record(settlement_id)
+	if city.is_empty() or bool(city.get("primary",false)) : return
+	model.city_resource_snapshot(settlement_id)
+	var point:Vector2=city.position
+	var local_deposits:Array[Dictionary]=[]
+	local_deposits.assign(city.local_resources.resource_deposits)
+	var retained:Array[Dictionary]=[]
+	# Transfer nearby physical occurrences, preserving depletion and knowledge;
+	# never duplicate a deposit or the first city's delivered inventory.
+	for deposit in GameState.resource_deposits:
+		var location:=Vector2(deposit.position.x,deposit.position.z)
+		var nearest_id:=settlement_id
+		var distance:=point.distance_to(location)
+		for other in GameState.player_settlements:
+			var other_distance:float=(other.position as Vector2).distance_to(location)
+			if other_distance<distance:
+				distance=other_distance
+				nearest_id=String(other.id)
+		if (String(deposit.get("source_settlement_id",""))==settlement_id or (nearest_id==settlement_id and distance<=6.0 and String(deposit.get("source_settlement_id",""))=="")) and (deposit.get("shipments",[]) as Array).is_empty():
+			local_deposits.append(deposit)
+		else: retained.append(deposit)
+	GameState.resource_deposits=retained
+	city.local_resources.resource_deposits=local_deposits
+	city["resource_sites_initialized"]=true
+
+func _process_other_city_resources()->void:
+	for city in GameState.player_settlements:
+		if bool(city.get("primary",false)): continue
+		var city_id:=String(city.id)
+		_initialize_city_resource_sites(city_id)
+		var point:Vector2=city.position
+		var context:={"origin":Vector3(point.x,0.0,point.y),"traveling":false,"settled":true,"surface_water_distance_km":_river_distance_at(point.x,point.y)*KM_PER_WORLD_UNIT,"tools":ConsequenceEngine.tools_factor()}
+		context["woodland_catchment"]=_woodland_catchment(Vector3(point.x,0.0,point.y))
+		_settlement_model().process_city_resources(city_id,context,_process_settlement_day)
+	_settlement_model().process_city_trade(_city_trade_route_assessment)
+
+func _city_trade_route_assessment(source:Dictionary,destination:Dictionary)->Dictionary:
+	var start:Vector2=source.position
+	var finish:Vector2=destination.position
+	return _analyze_convoy_route(Vector3(start.x,0.0,start.y),Vector3(finish.x,0.0,finish.y))
+
+
+var settlement_camera_tween:Tween
+func _select_city(settlement_id:String)->void:
+	if not bool(SettlementModel.select_settlement(settlement_id).get("ok",false)): return
+	_initialize_city_resource_sites(settlement_id)
+	var city:=SettlementModel.settlement_record(settlement_id)
+	var point:Vector2=city.position
+	var destination:=Vector3(point.x,_height_at(point.x,point.y),point.y)
+	if settlement_camera_tween and settlement_camera_tween.is_running(): settlement_camera_tween.kill()
+	var start:=camera_target
+	var start_size:=camera.size
+	settlement_camera_tween=create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	settlement_camera_tween.tween_method(func(weight:float)->void:
+		_set_camera_target(start.lerp(destination,weight))
+		camera.size=lerpf(start_size,4.0,weight)
+		_update_camera()
+		_update_scale_lod()
+	,0.0,1.0,0.65)
+	if hud:
+		hud.refresh()
+		hud.close_detail()
+		if hud.dock and hud.dock.visible: hud.dock.rebuild()
+	_refresh_discovered_resource_overlays()

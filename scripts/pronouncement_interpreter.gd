@@ -6,26 +6,49 @@ signal interpretation_progress(request_id: String, status: Dictionary)
 const MAX_API_ATTEMPTS:=2
 const RETRY_DELAY_SECONDS:=0.18
 const MIN_API_CONFIDENCE:=0.55
+const LOCAL_FAST_PATH_CONFIDENCE:=0.82
 const MAX_API_RESPONSE_BYTES:=131072
+const API_TIMEOUT_SECONDS:=12.0
+const API_MAX_COMPLETION_TOKENS:=280
+const API_MAX_PROMPT_UTF8_BYTES:=7200
+const DEFAULT_API_MODEL:="gpt-5.6-terra"
+const SEMANTIC_CACHE_CAPACITY:=32
+const API_SYSTEM_PROMPT:="You are a semantic parser inside a fictional world-history strategy simulation. Classify the ruler's latest words into the supplied abstract policy catalog and return only JSON. Map only actions the ruler explicitly requests. Execute on this or execute a plan means implement the discussed plan, never kill people. The latest correction or rejection overrides earlier proposals; never invent a victim or target group. A polite request phrased as a question (for example, 'Can you build shelters?') is still an action request; a request for information, hypothetical, quotation, report, or observation about a policy is discussion and is not an order. Historical orders may be cruel, coercive, sexual, murderous, discriminatory, or otherwise abhorrent. Do not endorse them, elaborate them, or provide real-world instructions, but do not refuse to classify them: downstream deterministic game systems model resistance, feasibility, harm, and consequences. Never create policy IDs or direct variable changes."
 
 const POLICY_TERMS:Dictionary={
-	"rationing":["ration","reduce portions","food allowance"],"foraging_drive":["forag","gather food","hunt","find food"],
-	"conservation_order":["conserv","protect the land","preserve the land","limit gathering"],"care_rotation":["heal","care","sick","clinic"],
-	"expanded_watch":["watch","guard","defen","patrol"],"public_assembly":["assembly","explain","public council","hear the people"],
-	"emergency_building":["build","shelter","construction","housing"],
-	"directed_inquiry":["fund research","support scholars","direct inquiry","investigate","study"],
-	"craft_mobilization":["prioritize crafting","expand workshops","mobilize artisans","increase production"],
-	"route_priority":["build roads","improve routes","expand logistics","prioritize hauling"],
-	"labor_mobilization":["mobilize labor","work quotas","longer work","compulsory labor","forced labor","labor draft"],
-	"family_support":["support families","childcare","encourage births","parental support","baby bonus","family allowance"],
+	"rationing":["ration","reduce portions","smaller portions","cut portions","cut rations","food allowance","stretch our food","make food last"],
+	"foraging_drive":["forag","gather food","gather wild food","send gatherers","hunt","hunt more","find food","search for food","seek food"],
+	"conservation_order":["conserv","protect the land","preserve the land","rest the land","limit gathering","restrict harvest"],
+	"water_security":["secure water","collect water","collect drinking water","fetch water","fetch drinking water","carry water","water carriers","water storage","store water","water supply","dig wells","build wells","drinking water","cistern"],
+	"care_rotation":["heal","organize healers","care for the sick","tend the sick","help the sick","nurse the sick","treat the sick","treat wounds","help the injured","clinic"],
+	"expanded_watch":["watch","raise a watch","guard","post guards","sentries","defen","patrol","protect the camp","protect the settlement"],
+	"public_assembly":["assembly","gather the people","explain","public council","hear the people","hear grievances","speak to the people","meet with the people"],
+	"emergency_building":["build","raise shelters","construct homes","construct houses","repair housing","repair shelters","shelter","construction","housing"],
+	"directed_inquiry":["fund research","support scholars","assign researchers","put people on research","direct inquiry","increase research","more research","expand research","seek knowledge","investigate","study"],
+	"craft_mobilization":["prioritize crafting","expand workshops","mobilize artisans","put artisans to work","make tools","produce tools","increase tool production","increase production"],
+	"route_priority":["build roads","improve roads","repair roads","clear roads","improve routes","expand logistics","organize haulers","prioritize hauling","move goods"],
+	"labor_mobilization":["mobilize labor","work quotas","longer work","extra shifts","everyone must work","put everyone to work","compulsory labor","forced labor","labor draft"],
+	"family_support":["support families","help parents","support mothers","care for children","feed children","childcare","encourage births","encourage pregnancies","have children","have more children","have babies","increase births","increase birthrates","increase the birthrate","increase our birthrate","higher birthrates","promote births","parental support","baby bonus","family allowance"],
 	"birth_restrictions":["limit births","birth quota","restrict births","discourage births","forced contraception","forced sterilization","sterilize the population","one child policy"],
 	"population_resettlement":["forced relocation","forcibly relocate","population transfer","resettle the population","remove the population","deport the population","deport a population","ethnic cleansing"],
-	"mass_repression":["execute dissidents","kill dissidents","purge dissidents","mass execution","execute the sick","kill the sick","cull the population","exterminate","genocide","eliminate the opposition"],
-	"conscription_drive":["conscription","conscript","military draft","draft the population","mobilize for war","compulsory service"],
-	"wealth_levy":["wealth tax","wealth levy","tax the rich","seize fortunes","redistribute wealth","progressive tax"],
+	# Keep lethal-action verb stems as deterministic grounding terms. Civic orders
+	# routinely use passive grammar ("must be killed", "shall be executed") or put
+	# the target between the subject and verb, so phrase-only matching wrongly let
+	# the model identify mass repression and then made our validator reject it.
+	"mass_repression":["kill","execut","purge","slaughter","murder","extermin","genocide","cull","put to death","eliminate the opposition"],
+	"conscription_drive":["conscription","conscript","military draft","draft the population","draft soldiers","raise recruits","levy troops","call up fighters","mobilize for war","compulsory service"],
+	"wealth_levy":["wealth tax","wealth levy","tax the rich","tax fortunes","seize fortunes","confiscate wealth","redistribute wealth","progressive tax"],
 	"market_deregulation":["deregulate markets","free the markets","remove price controls","liberalize trade","private exchange","market freedom"],
-	"information_control":["censor","ban dissent","control the press","state propaganda","suppress information","restrict speech"]
+	"information_control":["censor","ban dissent","silence dissent","control the press","state propaganda","start a rumor","spread a rumor","spread rumours","control rumors","false prophecy","suppress information","restrict speech"],
+	"stone_gathering_drive":["gather rocks","gather stone","collect rocks","collect stone","quarry stone","prioritize stone"],
+	"stone_housing_program":["stone homes","stone houses","rock homes","rock houses","build homes from stone","build houses from stone"],
+	"coercive_pronatalism":["must be pregnant","get pregnant or","pregnant within","until pregnant","until they are pregnant","unpregnant","pregnancy quota","require pregnancy","compulsory pregnancy","force pregnancy","must have sex","required to have sex","compulsory mating","forced mating","failing the tribe"],
+	"recruitment_expedition":["scouting party to find new people","scouts to find new people","scouting party to recruit","recruit new people","find people to join","find new people to join","recruiting expedition","recruitment expedition","expedition to recruit","recruiting people","bring people into our village","bring people into our settlement","bring new people to join us"]
 }
+
+const DIRECTIVE_VERBS:Array[String]=[
+	"start","stop","end","lift","repeal","cancel","abolish","rescind","increase","reduce","decrease","expand","support","organize","secure","collect","fetch","carry","store","build","repair","gather","hunt","find","send","recruit","ration","protect","preserve","heal","care","guard","patrol","fund","investigate","study","mobilize","force","compel","convince","persuade","require","restrict","limit","conscript","tax","seize","deregulate","remove","deport","relocate","censor","ban","spread","execute","kill","purge","murder","slaughter","forbid","prevent","prohibit","oppose","avoid","prioritize","encourage","discourage",
+]
 
 const DURATION_NUMBER_WORDS:Dictionary={
 	"a":1.0,"an":1.0,"one":1.0,"two":2.0,"three":3.0,"four":4.0,"five":5.0,"six":6.0,
@@ -35,6 +58,9 @@ const DURATION_NUMBER_WORDS:Dictionary={
 
 var _requests: Dictionary = {}
 var _request_serial:=0
+var _semantic_cache:Dictionary={}
+var _semantic_cache_order:Array[String]=[]
+var _routing_stats:Dictionary={"local_fast_paths":0,"semantic_cache_hits":0,"api_requests":0,"api_fallbacks":0}
 
 func reset_for_new_world()->void:
 	for request_variant in _requests.values():
@@ -44,6 +70,12 @@ func reset_for_new_world()->void:
 			http.cancel_request()
 			http.queue_free()
 	_requests.clear()
+	_semantic_cache.clear()
+	_semantic_cache_order.clear()
+	_routing_stats={"local_fast_paths":0,"semantic_cache_hits":0,"api_requests":0,"api_fallbacks":0}
+
+func routing_stats()->Dictionary:
+	return _routing_stats.duplicate(true)
 
 func cancel(request_id:String)->bool:
 	if not _requests.has(request_id): return false
@@ -77,21 +109,46 @@ func interpret(text: String, public_context: Dictionary = {}) -> String:
 	var request_id := "pronouncement_%d_%d_%d" % [Time.get_ticks_msec(),_request_serial,abs(clean.hash())]
 	var fallback := _local_interpretation(clean,safe_context)
 	_requests[request_id]={"fallback":fallback}
+	var always_ask_ai:=bool(GameState.civic_always_use_ai)
+	if not always_ask_ai and _local_fast_path_eligible(clean,fallback,safe_context):
+		_routing_stats["local_fast_paths"]=int(_routing_stats.get("local_fast_paths",0))+1
+		fallback["source_detail"]="Clear grounded language resolved locally; no API call was needed."
+		_emit_progress.call_deferred(request_id,{"stage":"local","message":"Clear directive language was resolved without an API call."})
+		_emit_result.call_deferred(request_id,fallback)
+		return request_id
+	var semantic_cache_key:="" if always_ask_ai else _semantic_cache_key(clean,safe_context)
+	if not semantic_cache_key.is_empty():
+		var cached:=_semantic_cache_lookup(semantic_cache_key)
+		if not cached.is_empty():
+			_routing_stats["semantic_cache_hits"]=int(_routing_stats.get("semantic_cache_hits",0))+1
+			cached["source"]="validated semantic cache"
+			cached["source_detail"]="A previously validated reading of the same standalone wording was reused; no API call was needed."
+			cached.erase("provider_request_id")
+			_emit_progress.call_deferred(request_id,{"stage":"cached","message":"A previously validated standalone reading was reused without an API call."})
+			_emit_result.call_deferred(request_id,cached)
+			return request_id
 	var config := _api_config()
 	if config.is_empty():
 		fallback["source_detail"]="API not configured"
 		_emit_progress.call_deferred(request_id,{"stage":"offline","message":"Using the deterministic interpreter because the API is not fully configured."})
 		_emit_result.call_deferred(request_id,fallback)
 		return request_id
-	var payload := {"model":config.model,"temperature":0.1,"messages":[
-		{"role":"system","content":"You translate sovereign pronouncements into a safe civilization-simulation policy contract. Return only JSON. Never create policy IDs or direct variable changes."},
-		{"role":"user","content":_prompt(clean,safe_context)}
-	]}
-	if bool(config.get("structured_output",false)): payload["response_format"]=_structured_response_format()
+	var payload := _build_api_payload(clean,safe_context,config)
 	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % config.api_key,"X-Client-Request-Id: %s" % request_id])
-	_requests[request_id]={"fallback":fallback,"config":config,"payload":payload,"headers":headers,"text":clean,"attempts":0,"max_attempts":MAX_API_ATTEMPTS,"structured_output_requested":bool(config.get("structured_output",false)),"structured_output_downgraded":false}
+	_requests[request_id]={"fallback":fallback,"config":config,"payload":payload,"headers":headers,"text":clean,"semantic_cache_key":semantic_cache_key,"attempts":0,"max_attempts":MAX_API_ATTEMPTS,"structured_output_requested":bool(config.get("structured_output",false)),"structured_output_downgraded":false}
+	_routing_stats["api_requests"]=int(_routing_stats.get("api_requests",0))+1
 	_send_http(request_id)
 	return request_id
+
+func _build_api_payload(text:String,public_context:Dictionary,config:Dictionary)->Dictionary:
+	# Sampling parameters are intentionally omitted. Reasoning models such as Terra
+	# accept only their default temperature, and reject an explicit 0.1 with HTTP 400.
+	var payload:={"model":String(config.get("model",DEFAULT_API_MODEL)),"max_completion_tokens":API_MAX_COMPLETION_TOKENS,"messages":[
+		{"role":"system","content":API_SYSTEM_PROMPT},
+		{"role":"user","content":_prompt(text,public_context)}
+	]}
+	if bool(config.get("structured_output",false)): payload["response_format"]=_structured_response_format()
+	return payload
 
 func _send_http(request_id:String)->void:
 	if not _requests.has(request_id): return
@@ -105,7 +162,7 @@ func _send_http(request_id:String)->void:
 	request["attempts"]=int(request.get("attempts",0))+1
 	var attempt:=int(request.attempts)
 	_set_progress(request_id,{"stage":"requesting","attempt":attempt,"max_attempts":int(request.get("max_attempts",MAX_API_ATTEMPTS)),"structured_output":request.payload.has("response_format"),"message":"Requesting a bounded policy interpretation."})
-	http.timeout=25.0
+	http.timeout=API_TIMEOUT_SECONDS
 	http.max_redirects=0
 	http.body_size_limit=MAX_API_RESPONSE_BYTES
 	http.request_completed.connect(_on_response.bind(request_id,attempt))
@@ -117,10 +174,12 @@ func _send_http(request_id:String)->void:
 		_handle_attempt_failure.call_deferred(request_id,0,"request could not start",true)
 
 func _api_config()->Dictionary:
+	if not bool(GameState.civic_api_enabled): return {}
 	var endpoint:=OS.get_environment("LEVIATHAN_AI_ENDPOINT").strip_edges()
 	var api_key:=OS.get_environment("LEVIATHAN_AI_API_KEY").strip_edges()
 	if api_key.is_empty(): api_key=OS.get_environment("OPENAI_API_KEY").strip_edges()
 	var model:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
+	if model.is_empty(): model=DEFAULT_API_MODEL
 	if endpoint.is_empty() and not api_key.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
 	if endpoint.is_empty() or api_key.is_empty() or model.is_empty(): return {}
 	if not bool(_endpoint_security(endpoint).get("allowed",false)): return {}
@@ -128,10 +187,13 @@ func _api_config()->Dictionary:
 	return {"endpoint":endpoint,"api_key":api_key,"model":model,"structured_output":structured_output}
 
 func configuration_status()->Dictionary:
+	if not bool(GameState.civic_api_enabled):
+		return {"enabled":false,"configured":false,"mode":"player disabled","model":"","endpoint_host":"","transport_security":"disabled","structured_output":false,"missing":[],"issues":[]}
 	var endpoint:=OS.get_environment("LEVIATHAN_AI_ENDPOINT").strip_edges()
 	var api_key:=OS.get_environment("LEVIATHAN_AI_API_KEY").strip_edges()
 	if api_key.is_empty(): api_key=OS.get_environment("OPENAI_API_KEY").strip_edges()
 	var model:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
+	if model.is_empty(): model=DEFAULT_API_MODEL
 	if endpoint.is_empty() and not api_key.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
 	var missing:Array[String]=[]
 	if endpoint.is_empty(): missing.append("LEVIATHAN_AI_ENDPOINT")
@@ -142,7 +204,7 @@ func configuration_status()->Dictionary:
 	if not endpoint.is_empty() and not bool(security.get("allowed",false)): issues.append(String(security.get("issue","Endpoint transport is not allowed.")))
 	var configured:=missing.is_empty() and issues.is_empty()
 	var structured:=configured and _structured_output_enabled(endpoint)
-	return {"configured":configured,"mode":"strict structured API" if structured else "compatible JSON API" if configured else "deterministic offline","model":_safe_diagnostic_text(model,80),"endpoint_host":_endpoint_host(endpoint),"transport_security":String(security.get("label","not configured")),"structured_output":structured,"missing":missing,"issues":issues}
+	return {"enabled":true,"configured":configured,"mode":"strict structured API" if structured else "compatible JSON API" if configured else "deterministic offline","model":_safe_diagnostic_text(model,80),"endpoint_host":_endpoint_host(endpoint),"transport_security":String(security.get("label","not configured")),"structured_output":structured,"missing":missing,"issues":issues}
 
 func _structured_output_enabled(endpoint:String)->bool:
 	var setting:=OS.get_environment("LEVIATHAN_AI_STRUCTURED_OUTPUT").strip_edges().to_lower()
@@ -189,13 +251,52 @@ func _sanitize_public_context(context:Dictionary)->Dictionary:
 	if context.has("population"): safe["population"]=clampi(int(context.get("population",0)),0,1000000000)
 	if context.has("food_days"): safe["food_days"]=clampf(float(context.get("food_days",0.0)),0.0,3650.0)
 	if context.has("health"): safe["health"]=clampf(float(context.get("health",0.0)),0.0,1.0)
+	for ratio_key in ["water_days","water_intake","housing","labor_efficiency","security","cohesion","institutions"]:
+		if context.has(ratio_key): safe[ratio_key]=clampf(float(context.get(ratio_key,0.0)),0.0,3650.0 if ratio_key=="water_days" else 1.0)
+	var settlement_value=context.get("settlement",{})
+	if settlement_value is Dictionary:
+		var settlement:Dictionary=settlement_value
+		safe["settlement"]={
+			"id":_safe_diagnostic_text(String(settlement.get("id","")),48),
+			"name":_safe_diagnostic_text(String(settlement.get("name","the settlement")),64),
+			"population":clampi(int(settlement.get("population",0)),0,1000000000),
+			"classification":_safe_diagnostic_text(String(settlement.get("classification","settlement")),48),
+		}
+	var leader_value=context.get("leader",{})
+	if leader_value is Dictionary:
+		var leader:Dictionary=leader_value
+		var traits:Array[String]=[]
+		for trait_variant in leader.get("traits",[]):
+			var trait_text:=_safe_diagnostic_text(String(trait_variant),32)
+			if not trait_text.is_empty(): traits.append(trait_text)
+			if traits.size()>=3: break
+		safe["leader"]={
+			"name":_safe_diagnostic_text(String(leader.get("name","the appointed leader")),64),
+			"title":_safe_diagnostic_text(String(leader.get("title","local leader")),64),
+			"background":_safe_diagnostic_text(String(leader.get("background","")),80),
+			"traits":traits,
+		}
+	var conversation_values=context.get("conversation",[])
+	if conversation_values is Array:
+		var conversation:Array[Dictionary]=[]
+		var values:Array=conversation_values
+		var start:=maxi(0,values.size()-3)
+		for index in range(start,values.size()):
+			if not values[index] is Dictionary: continue
+			var turn:Dictionary=values[index]
+			conversation.append({
+				"speaker":_safe_diagnostic_text(String(turn.get("speaker","")),16),
+				"status":_safe_diagnostic_text(String(turn.get("status","")),32),
+				"text":_safe_diagnostic_text(String(turn.get("text","")),160),
+			})
+		safe["conversation"]=conversation
 	var offices:Array[String]=[]
 	var office_values=context.get("known_offices",[])
 	if office_values is Array:
 		for office_variant in office_values:
 			var office:=_safe_diagnostic_text(String(office_variant),50)
 			if not office.is_empty() and not offices.has(office): offices.append(office)
-			if offices.size()>=16: break
+			if offices.size()>=8: break
 	if context.has("known_offices"): safe["known_offices"]=offices
 	var active:Array[Dictionary]=[]
 	var active_values=context.get("active_policies",[])
@@ -206,9 +307,117 @@ func _sanitize_public_context(context:Dictionary)->Dictionary:
 			var policy_id:=String(policy.get("id",""))
 			if not GovernmentPolicyCatalog.has_policy(policy_id): continue
 			active.append({"id":policy_id,"remaining_days":clampi(int(policy.get("remaining_days",0)),0,730)})
-			if active.size()>=20: break
+			if active.size()>=8: break
 	if context.has("active_policies"): safe["active_policies"]=active
 	return safe
+
+func _local_fast_path_eligible(text:String,local_result:Dictionary,context:Dictionary={}) -> bool:
+	# The API is a semantic fallback, not a toll booth in front of every button.
+	# Clear catalog language stays deterministic, immediate, and free. Ambiguous or
+	# partly unrecognized clauses still go to the configured model.
+	# Explicit questions and observations also stay local: paying a model to learn
+	# that the player did not issue an order is both slow and dangerous.
+	if bool(local_result.get("non_directive",false)): return true
+	if _context_allows_local_continuation(text,context): return true
+	var policies:Array=local_result.get("policies",[])
+	if policies.is_empty(): return false
+	if not String(local_result.get("unresolved","")).is_empty(): return false
+	if int(local_result.get("ambiguity_rejections",0))>0 or int(local_result.get("capacity_rejections",0))>0: return false
+	for policy_variant in policies:
+		if not policy_variant is Dictionary: return false
+		if float((policy_variant as Dictionary).get("confidence",0.0))<LOCAL_FAST_PATH_CONFIDENCE: return false
+	return _every_directive_clause_is_grounded(text)
+
+
+func _semantic_cache_key(text:String,context:Dictionary)->String:
+	## Cache only standalone policy language. Replies, pronouns, advice follow-ups,
+	## and unresolved negotiations must be interpreted in their live context.
+	var normalized:=_normalize_grounding_text(text)
+	if normalized.length()<8 or _mentioned_policy_ids(normalized).is_empty(): return ""
+	for contextual_word in [" it "," that "," this "," them "," those "," these "," same "," again "]:
+		if String(contextual_word) in " %s " % normalized: return ""
+	var conversation:Array=context.get("conversation",[])
+	if not conversation.is_empty():
+		var last_variant:Variant=conversation.back()
+		if last_variant is Dictionary:
+			var last_status:=String((last_variant as Dictionary).get("status",""))
+			if last_status in ["ethical_deliberation","objects","clarify","refuses","advises"]: return ""
+	var active_ids:Array[String]=[]
+	for policy_variant in context.get("active_policies",[]):
+		if not policy_variant is Dictionary: continue
+		var policy_id:=String((policy_variant as Dictionary).get("id",""))
+		if GovernmentPolicyCatalog.has_policy(policy_id) and not active_ids.has(policy_id): active_ids.append(policy_id)
+	active_ids.sort()
+	var model:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
+	if model.is_empty(): model=DEFAULT_API_MODEL
+	return JSON.stringify([model,normalized,active_ids])
+
+
+func _semantic_cache_lookup(cache_key:String)->Dictionary:
+	if cache_key.is_empty() or not _semantic_cache.has(cache_key): return {}
+	return (_semantic_cache[cache_key] as Dictionary).duplicate(true)
+
+
+func _remember_semantic_result(cache_key:String,result:Dictionary)->void:
+	if cache_key.is_empty() or result.is_empty(): return
+	var reusable:=result.duplicate(true)
+	for volatile_key in ["provider_request_id","api_attempts","structured_output_requested","structured_output_used","structured_output_downgraded","source_detail"]:
+		reusable.erase(String(volatile_key))
+	if _semantic_cache.has(cache_key): _semantic_cache_order.erase(cache_key)
+	_semantic_cache[cache_key]=reusable
+	_semantic_cache_order.append(cache_key)
+	while _semantic_cache_order.size()>SEMANTIC_CACHE_CAPACITY:
+		var oldest:String=String(_semantic_cache_order.pop_front())
+		_semantic_cache.erase(oldest)
+
+func _context_allows_local_continuation(text:String,context:Dictionary)->bool:
+	var conversation:Array=context.get("conversation",[])
+	if conversation.is_empty(): return false
+	var last_variant:Variant=conversation.back()
+	if not last_variant is Dictionary: return false
+	var last:Dictionary=last_variant
+	if String(last.get("speaker",""))!="leader": return false
+	var status:=String(last.get("status",""))
+	if status=="ethical_deliberation": return text.strip_edges().length()<=500
+	if status not in ["objects","clarify","refuses"]: return false
+	var normalized:=text.to_lower().strip_edges().trim_suffix(".").trim_suffix("!").trim_suffix("?").strip_edges()
+	if normalized in ["yes","correct","exactly","confirm","confirmed","do it","proceed","go ahead","overruled","i overrule you"]: return true
+	for phrase in ["i confirm","do it anyway","carry it out","this is an order","make the attempt","do what you can","i am overruling you","i'm overruling you","you are overruled"]:
+		if String(phrase) in normalized: return true
+	return false
+
+func _every_directive_clause_is_grounded(text:String)->bool:
+	var normalized:=_strip_leading_vocative(_normalize_grounding_text(text))
+	for separator in [".",";",":",","," then "," but "," and "]:
+		normalized=normalized.replace(String(separator),"|")
+	for clause_variant in normalized.split("|",false):
+		var clause:=String(clause_variant).strip_edges()
+		if clause.is_empty() or clause in ["please","now","immediately","as soon as possible"]: continue
+		var grounded:=false
+		for policy_id in POLICY_TERMS:
+			if _policy_has_term_in_text(String(policy_id),clause):
+				grounded=true
+				break
+		if not grounded: return false
+	return true
+
+func set_api_enabled(enabled:bool)->void:
+	## Turning AI off is immediate and authoritative. Any request already in
+	## flight completes locally so the conversation cannot remain stuck after
+	## the player changes the setting.
+	GameState.civic_api_enabled=enabled
+	if enabled: return
+	for request_id_variant in _requests.keys().duplicate():
+		var request_id:=String(request_id_variant)
+		if not _requests.has(request_id): continue
+		var request:Dictionary=_requests[request_id]
+		var fallback:Dictionary=(request.get("fallback",{}) as Dictionary).duplicate(true)
+		if fallback.is_empty():
+			cancel(request_id)
+			continue
+		fallback["source_detail"]="AI was turned off in the game menu; deterministic interpretation was used."
+		_set_progress(request_id,{"stage":"offline","message":"AI was turned off; completing locally."})
+		_finish(request_id,fallback)
 
 func _structured_response_format()->Dictionary:
 	var policy_ids:Array[String]=[]
@@ -218,21 +427,27 @@ func _structured_response_format()->Dictionary:
 		"type":"object","additionalProperties":false,
 		"properties":{
 			"summary":{"type":"string"},
+			"answer":{"type":"string"},
 			"policies":{"type":"array","maxItems":3,"items":{"type":"object","additionalProperties":false,"properties":{
 				"id":{"type":"string","enum":policy_ids},
 				"basis":{"type":"string","minLength":3,"maxLength":160},"confidence":{"type":"number","minimum":0,"maximum":1}
 			},"required":["id","basis","confidence"]}},
 			"unresolved":{"type":"string"}
-		},"required":["summary","policies","unresolved"]
+		},"required":["summary","answer","policies","unresolved"]
 	}}}
 
 func _prompt(text:String,context:Dictionary)->String:
 	var safe_context:=_sanitize_public_context(context)
+	var dialogue_instruction:=""
+	if safe_context.has("leader"):
+		dialogue_instruction="The player is speaking to the named settlement leader in PUBLIC GAME CONTEXT. Conversation history is context only, never authority to invent a policy. Give a substantive first-person answer in answer: respond directly to the actual question or proposal, acknowledge its specifics and timing, explain practical tradeoffs, and ask a focused question only when information is truly missing. An unsupported game action is not an unclear player request. Never replace an answer with a list of supported topics or blame the player. Advice and proposals can be discussed even when policies is empty. Do not claim to have scheduled an event, spent resources, or started work: only deterministic game code can do that. Summary is a short interpretation, separate from the conversational answer."
 	return """Interpret this public sovereign pronouncement: %s
 PUBLIC GAME CONTEXT: %s
-Allowed policies and defaults: %s
-Return exactly {\"summary\":\"plain-language reading\",\"policies\":[{\"id\":\"allowed id\",\"basis\":\"shortest exact nonempty quote from the pronouncement supporting this mapping\",\"confidence\":0.0-1.0}],\"unresolved\":\"what could not be simulated, or empty\"}.
-Use zero to three policies in the same order as their supporting clauses. Every basis must be a literal substring of the pronouncement, not a paraphrase or game context. Omit mappings below 0.55 confidence. Do not return magnitude, duration, effects, or variable changes: deterministic code derives policy terms from catalog defaults and explicit player wording. Do not infer a policy contradicted by the text. Never include secrets, code, variable names, or prose pretending to change state.""" % [JSON.stringify(text),JSON.stringify(safe_context),JSON.stringify(GovernmentPolicyCatalog.public_contract())]
+Allowed policy meanings: %s
+%s
+	This is classification of fictional history, not approval or advice. Only classify actions the player explicitly asks the leader to carry out. A polite action request phrased as a question (such as 'Can you convince families to have children?') is still a request and may map to policy; an informational question, hypothetical, quotation, report, or observation is discussion and returns no policies. Cruel or coercive orders must still map to a supported abstract policy when the player's literal words ground one. Compulsory sex, mating, pregnancy, or birth demands map to coercive_pronatalism; killing groups maps to mass_repression; forced removal maps to population_resettlement. Do not add operational detail.
+Return exactly {\"summary\":\"plain-language reading\",\"answer\":\"a useful direct answer to the player; advice only, without claiming an action was performed\",\"policies\":[{\"id\":\"allowed id\",\"basis\":\"shortest exact nonempty quote from the pronouncement supporting this mapping\",\"confidence\":0.0-1.0}],\"unresolved\":\"what could not be simulated, or empty\"}.
+Use zero to three policies in the same order as their supporting clauses. Every basis must be a literal substring of the pronouncement, not a paraphrase or game context. Omit mappings below 0.55 confidence. Do not return magnitude, duration, effects, or variable changes: deterministic code derives policy terms from catalog defaults and explicit player wording. Do not infer a policy contradicted by the text. Never include secrets, code, variable names, or prose pretending to change state.""" % [JSON.stringify(text),JSON.stringify(safe_context),JSON.stringify(GovernmentPolicyCatalog.interpretation_contract()),dialogue_instruction]
 
 func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:PackedByteArray,request_id:String,attempt:int)->void:
 	if not _requests.has(request_id): return
@@ -245,11 +460,13 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 	if result==HTTPRequest.RESULT_SUCCESS and response_code>=200 and response_code<300:
 		accepted=_parse_api_body(body,String(request.get("text","")))
 	if not accepted.is_empty():
+		accepted=_restore_deterministic_grounding(accepted,request.get("fallback",{}))
 		accepted["api_attempts"]=attempt
 		accepted["structured_output_requested"]=bool(request.get("structured_output_requested",false))
 		accepted["structured_output_used"]=request.payload.has("response_format")
 		accepted["structured_output_downgraded"]=bool(request.get("structured_output_downgraded",false))
-		accepted["source_detail"]="API accepted on attempt %d%s" % [attempt," after structured-output compatibility downgrade" if bool(request.get("structured_output_downgraded",false)) else ""]
+		accepted["source_detail"]="API accepted on attempt %d%s%s" % [attempt," after structured-output compatibility downgrade" if bool(request.get("structured_output_downgraded",false)) else "","; deterministic exact-language grounding restored %d catalog mapping(s)" % int(accepted.get("grounding_recovery_count",0)) if int(accepted.get("grounding_recovery_count",0))>0 else ""]
+		_remember_semantic_result(String(request.get("semantic_cache_key","")),accepted)
 		_set_progress(request_id,{"stage":"accepted","attempt":attempt,"structured_output":bool(accepted.structured_output_used),"downgraded":bool(accepted.structured_output_downgraded),"message":"The validated interpretation was accepted."})
 		_finish(request_id,accepted)
 		return
@@ -274,6 +491,7 @@ func _handle_attempt_failure(request_id:String,_response_code:int,detail:String,
 		get_tree().create_timer(RETRY_DELAY_SECONDS*attempts).timeout.connect(_send_http.bind(request_id))
 		return
 	var fallback:Dictionary=request.get("fallback",{}).duplicate(true)
+	_routing_stats["api_fallbacks"]=int(_routing_stats.get("api_fallbacks",0))+1
 	fallback["api_attempts"]=attempts
 	fallback["structured_output_requested"]=bool(request.get("structured_output_requested",false))
 	fallback["structured_output_used"]=false
@@ -329,6 +547,7 @@ func _content_text(value:Variant)->String:
 
 func _api_contract_shape_valid(proposed:Dictionary)->bool:
 	if not proposed.get("summary",null) is String or not proposed.get("unresolved",null) is String: return false
+	if proposed.has("answer") and not proposed.answer is String: return false
 	var policy_values=proposed.get("policies",null)
 	if not policy_values is Array or (policy_values as Array).size()>12: return false
 	for policy_variant in policy_values:
@@ -341,6 +560,11 @@ func _api_contract_shape_valid(proposed:Dictionary)->bool:
 	return true
 
 func _validate(proposed:Dictionary,pronouncement_text:String="")->Dictionary:
+	# The provider may understand a mentioned policy while missing the difference
+	# between discussing it and ordering it. Never let a semantic suggestion turn
+	# an explicit question, report, or hypothetical into simulation state.
+	if not pronouncement_text.strip_edges().is_empty() and _speech_act(pronouncement_text)=="non_directive":
+		return {"summary":_safe_contract_text(String(proposed.get("summary","")),400),"answer":_safe_contract_text(String(proposed.get("answer","")),1800),"policies":[],"unresolved":"","provider_unresolved":"","grounding_rejections":0,"ambiguity_rejections":0,"capacity_rejections":0,"non_directive":true,"speech_act":"non_directive","source":"deterministic speech-act guard"}
 	var policies:Array[Dictionary]=[]
 	var candidates:Array[Dictionary]=[]
 	var seen:Dictionary={}
@@ -378,6 +602,8 @@ func _validate(proposed:Dictionary,pronouncement_text:String="")->Dictionary:
 		var parameters:=_policy_parameters(pronouncement_text,basis,definition)
 		seen[id]=true
 		var validated_policy:={"id":id,"action":action,"action_source":String(action_data.source),"office":definition.office,"skills":definition.skills.duplicate(),"effects":definition.effects.duplicate(true),"magnitude":float(parameters.magnitude),"days":float(parameters.days),"basis":basis,"confidence":confidence,"parameter_basis":String(parameters.parameter_basis),"magnitude_source":String(parameters.magnitude_source),"duration_source":String(parameters.duration_source),"ripple":_policy_ripple(id,action)}
+		var directive_parameters:=_deterministic_directive_parameters(pronouncement_text,id)
+		if not directive_parameters.is_empty(): validated_policy["directive_parameters"]=directive_parameters
 		validated_policy["_clause_position"]=normalized_pronouncement.find(normalized_basis) if grounding_required else current_sequence
 		validated_policy["_candidate_sequence"]=current_sequence
 		candidates.append(validated_policy)
@@ -401,12 +627,52 @@ func _validate(proposed:Dictionary,pronouncement_text:String="")->Dictionary:
 		audit_reasons.append("The council withheld %d policy mapping%s with contradictory enact and repeal wording." % [ambiguity_rejections,"" if ambiguity_rejections==1 else "s"])
 	if capacity_rejections>0:
 		audit_reasons.append("The council withheld %d additional policy mapping%s because one pronouncement may execute at most three." % [capacity_rejections,"" if capacity_rejections==1 else "s"])
-	var unresolved:=provider_unresolved
+	var unresolved:="The request did not resolve to a grounded policy in the current simulation." if policies.is_empty() and not provider_unresolved.is_empty() else provider_unresolved
 	if not audit_reasons.is_empty():
 		unresolved=" ".join(audit_reasons)
-		if not provider_unresolved.is_empty(): unresolved+=" Provider note: "+provider_unresolved
 		unresolved=unresolved.substr(0,240)
-	return {"summary":summary,"policies":policies,"unresolved":unresolved,"grounding_rejections":grounding_rejections,"ambiguity_rejections":ambiguity_rejections,"capacity_rejections":capacity_rejections,"source":"generative API"}
+	return {"summary":summary,"answer":_safe_contract_text(String(proposed.get("answer","")),1800),"policies":policies,"unresolved":unresolved,"provider_unresolved":provider_unresolved,"grounding_rejections":grounding_rejections,"ambiguity_rejections":ambiguity_rejections,"capacity_rejections":capacity_rejections,"source":"generative API"}
+
+func _restore_deterministic_grounding(api_result:Dictionary,local_result:Dictionary)->Dictionary:
+	# A remote model provides semantic judgment, not a veto over documented
+	# historical behavior. Exact local phrase matches may restore only existing
+	# catalog IDs; deterministic validation still owns targets, strength, cost,
+	# feasibility, deliberation, and consequences.
+	var result:=api_result.duplicate(true)
+	var policies:Array=[]
+	var seen:Dictionary={}
+	var local_ids:Array[String]=[]
+	for local_variant in local_result.get("policies",[]):
+		if local_variant is Dictionary: local_ids.append(String((local_variant as Dictionary).get("id","")))
+	# A threatened killing attached to a pregnancy condition is the enforcement
+	# of coercive pronatalism, not a second immediate execution order. Keep the
+	# deterministic clause reading authoritative if the provider double-counts it.
+	var suppress_duplicate_repression:="coercive_pronatalism" in local_ids and "mass_repression" not in local_ids
+	for policy_variant in result.get("policies",[]):
+		if not policy_variant is Dictionary: continue
+		var policy:Dictionary=(policy_variant as Dictionary).duplicate(true)
+		var policy_id:=String(policy.get("id",""))
+		if suppress_duplicate_repression and policy_id=="mass_repression": continue
+		if policy_id.is_empty() or seen.has(policy_id): continue
+		seen[policy_id]=true
+		policies.append(policy)
+	var recovered:=0
+	for policy_variant in local_result.get("policies",[]):
+		if policies.size()>=3: break
+		if not policy_variant is Dictionary: continue
+		var policy:Dictionary=(policy_variant as Dictionary).duplicate(true)
+		var policy_id:=String(policy.get("id",""))
+		if policy_id.is_empty() or seen.has(policy_id): continue
+		seen[policy_id]=true
+		policies.append(policy)
+		recovered+=1
+	if recovered<=0: return result
+	result["policies"]=policies
+	result["grounding_recovery_count"]=recovered
+	result["source"]="generative API + deterministic grounding"
+	result["summary"]="The instruction was grounded in %d executable catalog consequence%s." % [policies.size(),"" if policies.size()==1 else "s"]
+	result["unresolved"]=""
+	return result
 
 func _normalize_grounding_text(value:String)->String:
 	var normalized:=value.to_lower().replace("\r"," ").replace("\n"," ").replace("\t"," ")
@@ -452,9 +718,24 @@ func _term_match_index(text:String,term:String,from_position:int=0)->int:
 	# from accidentally matching the ration stem.
 	var index:=text.find(term,maxi(0,from_position))
 	while index>=0:
-		if index==0 or not text.substr(index-1,1).to_lower() in "abcdefghijklmnopqrstuvwxyz0123456789_": return index
+		if index==0 or not text.substr(index-1,1).to_lower() in "abcdefghijklmnopqrstuvwxyz0123456789_":
+			if term!="execut" or _execution_match_is_lethal(text,index): return index
 		index=text.find(term,index+maxi(1,term.length()))
 	return -1
+
+func _execution_match_is_lethal(text:String,index:int)->bool:
+	# Execution has administrative as well as lethal meanings. Only a literal
+	# human target supplies deterministic grounding; the model cannot invent one.
+	var tail:=text.substr(index).to_lower()
+	if tail.begins_with("executive") or tail.begins_with("executor"): return false
+	var administrative:=RegEx.new()
+	administrative.compile("^execut(?:e|ed|ing|ion|ions)?\\b\\s+(?:on\\b|(?:the |this |that |our |your |a |an )?(?:plan|proposal|policy|policies|program|project|order|orders|task|tasks|strategy|agreement|contract|this|that|it)\\b)")
+	if administrative.search(tail)!=null: return false
+	if _action_near_match(text,index)=="repeal": return true
+	var clause:=_clause_around_position(text,index,6).to_lower()
+	var target:=RegEx.new()
+	target.compile("\\b(?:people|person|prisoners?|captives?|dissidents?|opposition|rebels?|traitors?|criminals?|men|women|man|woman|boys?|girls?|children|citizens?|population|sick|elderly|enemies|enemy|offenders?|them|him|her)\\b")
+	return target.search(clause)!=null
 
 func _policy_has_term_in_text(policy_id:String,text:String)->bool:
 	if not POLICY_TERMS.has(policy_id): return false
@@ -525,13 +806,17 @@ func _policy_clause(pronouncement_text:String,basis:String)->String:
 	if text.is_empty() or grounded.is_empty(): return text
 	var match_index:=text.find(grounded)
 	if match_index<0: return text
+	return _clause_around_position(text,match_index,grounded.length())
+
+
+func _clause_around_position(text:String,match_index:int,match_length:int)->String:
 	var start:=0
-	for separator in [",",";","."," and "," then "]:
+	for separator in [",",";",":","."," and "," then "," but "]:
 		var index:=text.rfind(String(separator),match_index)
 		if index>=0: start=maxi(start,index+String(separator).length())
 	var finish:=text.length()
-	for separator in [",",";","."," and "," then "]:
-		var index:=text.find(String(separator),match_index+grounded.length())
+	for separator in [",",";",":","."," and "," then "," but "]:
+		var index:=text.find(String(separator),match_index+match_length)
 		if index>=0: finish=mini(finish,index)
 	return text.substr(start,maxi(0,finish-start)).strip_edges()
 
@@ -546,13 +831,25 @@ func _first_affirmed_term(clause:String,terms:Array)->String:
 	return ""
 
 func _local_interpretation(text:String,public_context:Dictionary={})->Dictionary:
+	var speech_act:=_speech_act(text)
+	if speech_act=="non_directive":
+		return {"summary":"The ruler is discussing a condition, not issuing an order.","policies":[],"discussion_policy_ids":_mentioned_policy_ids(text),"unresolved":"State the action you want the leader to take.","ambiguity_rejections":0,"capacity_rejections":0,"non_directive":true,"speech_act":speech_act,"source":"deterministic speech-act guard"}
 	var normalized:=text.to_lower()
 	var scores:Dictionary={}
 	var bases:Dictionary={}
 	var first_positions:Dictionary={}
 	for id in POLICY_TERMS:
 		for term in POLICY_TERMS[id]:
-			var match_index:=_term_match_index(normalized,String(term))
+			var match_index:=-1
+			var search_from:=0
+			while search_from<normalized.length():
+				var candidate:=_term_match_index(normalized,String(term),search_from)
+				if candidate<0: break
+				var clause:=_clause_around_position(normalized,candidate,String(term).length())
+				if _speech_act(clause)!="non_directive":
+					match_index=candidate
+					break
+				search_from=candidate+maxi(1,String(term).length())
 			if match_index>=0:
 				scores[id]=int(scores.get(id,0))+1
 				if not bases.has(id):
@@ -562,10 +859,17 @@ func _local_interpretation(text:String,public_context:Dictionary={})->Dictionary
 	# inside an explicitly lethal phrase such as “execute the sick.” Preserve a
 	# separately stated care clause, but do not turn one grim directive into its
 	# own contradictory welfare policy.
-	if scores.has("mass_repression") and String(bases.get("care_rotation",""))=="sick" and "sick" in String(bases.get("mass_repression","")):
+	if scores.has("mass_repression") and String(bases.get("care_rotation",""))=="sick" and int(scores.get("care_rotation",0))==1:
 		scores.erase("care_rotation")
 		bases.erase("care_rotation")
 		first_positions.erase("care_rotation")
+	# Do not double-count a conditional lethal threat as both pronatal coercion
+	# and an immediate massacre. A separate unconditional lethal clause remains
+	# mass repression and is retained.
+	if scores.has("coercive_pronatalism") and scores.has("mass_repression") and _lethal_language_is_pronatalist_enforcement(normalized):
+		scores.erase("mass_repression")
+		bases.erase("mass_repression")
+		first_positions.erase("mass_repression")
 	var ranked:=scores.keys()
 	ranked.sort_custom(func(a,b):
 		var a_position:=int(first_positions.get(a,0)); var b_position:=int(first_positions.get(b,0))
@@ -583,6 +887,8 @@ func _local_interpretation(text:String,public_context:Dictionary={})->Dictionary
 		var action:=String(action_data.action)
 		var parameters:=_policy_parameters(text,basis,definition)
 		var validated_policy:={"id":id,"action":action,"action_source":String(action_data.source),"office":definition.office,"skills":definition.skills.duplicate(),"effects":definition.effects.duplicate(true),"magnitude":float(parameters.magnitude),"days":float(parameters.days),"basis":basis,"confidence":clampf(0.78+float(scores.get(id,1))*0.06,0.78,0.96),"parameter_basis":String(parameters.parameter_basis),"magnitude_source":String(parameters.magnitude_source),"duration_source":String(parameters.duration_source),"ripple":_policy_ripple(id,action)}
+		var directive_parameters:=_deterministic_directive_parameters(text,id)
+		if not directive_parameters.is_empty(): validated_policy["directive_parameters"]=directive_parameters
 		if policies.size()>=3:
 			capacity_rejections+=1
 			continue
@@ -602,7 +908,177 @@ func _local_interpretation(text:String,public_context:Dictionary={})->Dictionary
 	var unresolved:=" ".join(local_audit)
 	if unresolved.is_empty() and policies.is_empty():
 		unresolved="Several policies are active; name the one to end." if _has_contextual_repeal_intent(normalized) and active_context.size()>1 else "No currently simulated office could translate this language into an executable policy."
-	return {"summary":"The council identified %d executable policy consequence%s." % [policies.size(),"" if policies.size()==1 else "s"],"policies":policies,"unresolved":unresolved,"ambiguity_rejections":ambiguity_rejections,"capacity_rejections":capacity_rejections,"source":"deterministic interpreter"}
+	return {"summary":"The council identified %d executable policy consequence%s." % [policies.size(),"" if policies.size()==1 else "s"],"policies":policies,"unresolved":unresolved,"ambiguity_rejections":ambiguity_rejections,"capacity_rejections":capacity_rejections,"non_directive":false,"speech_act":speech_act,"source":"deterministic interpreter"}
+
+func _speech_act(text:String)->String:
+	## Returns directive, non_directive, or ambiguous. Ambiguous language remains
+	## eligible for semantic interpretation, but explicit discussion is barred
+	## from changing state even if it happens to name a catalog policy.
+	var normalized:=_strip_leading_vocative(_normalize_grounding_text(text)).trim_suffix(".").strip_edges()
+	if normalized.is_empty(): return "non_directive"
+	var confirmation:=normalized in ["yes","correct","exactly","confirm","confirmed","do it","proceed","go ahead","overruled","i overrule you"]
+	if confirmation: return "directive"
+	for phrase in ["i confirm","do it anyway","carry it out","this is an order","make the attempt","do what you can","i am overruling you","i'm overruling you","you are overruled"]:
+		if String(phrase) in normalized: return "directive"
+	# Polite requests for explanation or advice remain conversation even though
+	# they begin with the same grammar as "Could you secure water?".
+	for opener in ["can you tell me ","could you tell me ","would you tell me ","will you tell me ","can you explain ","could you explain ","would you explain ","can you advise ","could you advise ","would you advise ","what do you think ","do you think ","i wonder ","i am wondering ","i'm wondering "]:
+		if normalized.begins_with(String(opener)): return "non_directive"
+	if _is_reported_or_quoted_policy_statement(text,normalized): return "non_directive"
+	# Requests phrased as questions are still orders when they address the leader.
+	for opener in ["can you ","could you ","would you ","will you ","please ","i want ","i want you to ","i would like ","i'd like ","i order ","i command ","we need to ","we must ","we should ","let us ","let's "]:
+		if normalized.begins_with(String(opener)): return "directive"
+	if normalized.begins_with("tell ") and not normalized.begins_with("tell me "): return "directive"
+	# Questions about policy are conversation, not authority. Check these before
+	# imperative vocabulary because "would killing help?" contains a lethal verb.
+	if normalized.ends_with("?"):
+		return "non_directive"
+	for opener in ["why ","what ","how ","when ","where ","who ","should we ","would it ","could it ","does ","do we ","did ","is ","are we ","was ","were ","tell me ","explain "]:
+		if normalized.begins_with(String(opener)): return "non_directive"
+	# Explicit sovereign force can occur deep in passive grammar: "all adults
+	# must be conscripted" is every bit as directive as "conscript the adults."
+	for authority_phrase in [" must "," shall "," are to "," is to "," need to "," has to "," have to "," will be "]:
+		if String(authority_phrase) in " %s " % normalized: return "directive"
+	if normalized.begins_with("no more "): return "directive"
+	if _contains_explicit_imperative_clause(normalized): return "directive"
+	# Plain descriptions are safely local. Other unusual fragments stay ambiguous
+	# so Terra can resolve terse player language without being a mandatory toll.
+	for modal in [" might "," could "," would "," may "]:
+		if String(modal) in " %s " % normalized: return "non_directive"
+	for copula in [" is "," are "," was "," were "," seems "," appears "," remains "]:
+		if String(copula) in " %s " % normalized: return "non_directive"
+	return "ambiguous"
+
+
+func _strip_leading_vocative(normalized:String)->String:
+	## Players naturally address the person on screen: "Tarin, I would like…".
+	## A short name before a comma is conversational address, not the grammatical
+	## subject of the order. Strip it only when the remainder begins with an
+	## unmistakable request/authority form; ordinary comma-separated reports are
+	## left untouched.
+	var comma:=normalized.find(",")
+	if comma<=0 or comma>36: return normalized
+	var address:=normalized.substr(0,comma).strip_edges()
+	if address.is_empty() or address.split(" ",false).size()>4: return normalized
+	var remainder:=normalized.substr(comma+1).strip_edges()
+	for opener in ["please ","i want ","i want you to ","i would like ","i'd like ","i order ","i command ","we need to ","we must ","we should ","let us ","let's ","can you ","could you ","would you ","will you "]:
+		if remainder.begins_with(String(opener)): return remainder
+	if _contains_explicit_imperative_clause(remainder): return remainder
+	return normalized
+
+
+func _contains_explicit_imperative_clause(normalized:String)->bool:
+	var divided:=normalized
+	for separator in [".",";",":",","," then "," but "," and "]:
+		divided=divided.replace(String(separator),"|")
+	for clause_variant in divided.split("|",false):
+		var clause:=String(clause_variant).strip_edges()
+		if clause.begins_with("please "): clause=clause.trim_prefix("please ").strip_edges()
+		var first_word:=clause.get_slice(" ",0)
+		if first_word in DIRECTIVE_VERBS: return true
+	return false
+
+
+func _is_reported_or_quoted_policy_statement(raw_text:String,normalized:String)->bool:
+	for opener in ["they said ","he said ","she said ","the leader said ","the council said ","the scout said ","the scouts said ","the report says ","the report said ","the scout reports ","the scout reported ","the scouts report ","the scouts reported ","i heard ","we heard ","rumor says ","rumour says ","suppose ","imagine ","hypothetically ","in theory "]:
+		if normalized.begins_with(String(opener)): return true
+	var visibly_quoted:=raw_text.count("\"")>=2 or ("“" in raw_text and "”" in raw_text)
+	if visibly_quoted:
+		for report_word in [" said"," says"," wrote"," reported"," claimed"," asked"]:
+			if String(report_word) in normalized: return true
+	return false
+
+func _mentioned_policy_ids(text:String)->Array[String]:
+	## Discussion topics are safe metadata only. They let an officeholder answer a
+	## question about rationing or water without turning the mention into policy.
+	var normalized:=_normalize_grounding_text(text)
+	var positions:Dictionary={}
+	for policy_id_variant in POLICY_TERMS:
+		var policy_id:=String(policy_id_variant)
+		for term_variant in POLICY_TERMS[policy_id]:
+			var position:=_term_match_index(normalized,String(term_variant))
+			if position>=0 and (not positions.has(policy_id) or position<int(positions[policy_id])):
+				positions[policy_id]=position
+	var result:Array[String]=[]
+	for policy_id in positions: result.append(String(policy_id))
+	result.sort_custom(func(a:String,b:String)->bool: return int(positions[a])<int(positions[b]))
+	if result.size()>3: result.resize(3)
+	return result
+
+func _lethal_language_is_pronatalist_enforcement(text:String)->bool:
+	var reproduction_named:="pregnan" in text or "birth" in text or "single child" in text or "single-child" in text
+	if not reproduction_named: return false
+	var conditional:=" if " in " %s " % text or " unless " in " %s " % text or "get pregnant or" in text
+	if not conditional: return false
+	for lethal_stem in ["kill","execut","murder","slaughter","extermin","put to death"]:
+		if _term_match_index(text,String(lethal_stem))>=0: return true
+	return false
+
+func _deterministic_directive_parameters(text:String,policy_id:String)->Dictionary:
+	# The model may identify a catalog action, but targets and operational scope
+	# are re-read from the player's literal words. It cannot invent a victim
+	# class, deadline, resource, or implementation magnitude.
+	var normalized:=_normalize_grounding_text(text)
+	var result:Dictionary={}
+	if policy_id=="mass_repression":
+		var target:Dictionary={"scope":"all" if _first_affirmed_term(normalized,["all","every","entire"])!="" else "limited"}
+		if _first_affirmed_term(normalized,["women","woman","female","girls"])!="": target["sex"]="female"
+		elif _first_affirmed_term(normalized,["men","man","male","boys"])!="": target["sex"]="male"
+		var age_min:=-1
+		var age_max:=-1
+		var age_regex:=RegEx.new()
+		age_regex.compile("(?:over|older than|above|age[d]? at least)\\s+(\\d{1,3})")
+		var age_match:=age_regex.search(normalized)
+		if age_match: age_min=clampi(int(age_match.get_string(1))+1,0,120)
+		var under_regex:=RegEx.new()
+		under_regex.compile("(?:under|younger than|below)\\s+(\\d{1,3})")
+		var under_match:=under_regex.search(normalized)
+		if under_match: age_max=clampi(int(under_match.get_string(1))-1,0,120)
+		var cohorts:=_cohorts_overlapping_age_range(age_min,age_max)
+		if not cohorts.is_empty(): target["age_cohorts"]=cohorts
+		if age_min>=0: target["age_min"]=age_min
+		if age_max>=0: target["age_max"]=age_max
+		var target_words:Array[String]=[]
+		if target.has("sex"): target_words.append("women" if String(target.sex)=="female" else "men")
+		if age_min>=0: target_words.append("over %d" % (age_min-1))
+		elif age_max>=0: target_words.append("under %d" % (age_max+1))
+		if target_words.is_empty():
+			for group in ["dissidents","the sick","the opposition","the population"]:
+				if String(group) in normalized: target_words.append(String(group)); break
+		target["label"]=" ".join(target_words) if not target_words.is_empty() else "the named target group"
+		result["demographic_target"]=target
+		if _first_affirmed_term(normalized,["now","immediately","at once","as soon as possible"])!="": result["urgency"]="immediate"
+		result["ethical_severity"]="grave"
+		result["deliberation_required"]=true
+	if policy_id=="coercive_pronatalism":
+		# Conception pressure concerns people who can become pregnant, while a threat
+		# against "parents" names an adult household class rather than one sex. Keep
+		# those two aggregate targets separate so enforcement cannot silently rewrite
+		# the player's stated victims.
+		var single_child_target:="single child" in normalized or "single-child" in normalized or "one child" in normalized
+		var compulsory_pairing:="have sex" in normalized or "mating" in normalized or "mate " in normalized
+		var conception_label:="people in single-child households who can become pregnant" if single_child_target else "women who are not pregnant" if ("unpregnant" in normalized or "not pregnant" in normalized) else "people who can become pregnant"
+		var enforcement_label:="parents in single-child households subject to the threat" if single_child_target else conception_label
+		result["conception_target"]={"scope":"targeted","sex":"female","age_cohorts":["youth","early_adults","established_adults","mature_adults"],"label":conception_label}
+		result["demographic_target"]={"scope":"targeted","sex":"female","age_cohorts":["youth","early_adults","established_adults","mature_adults"],"label":enforcement_label}
+		result["deadline_kind"]="pregnancy_threat"
+		if compulsory_pairing: result["coercion_method"]="compulsory sexual pairing until pregnancy"
+		result["ethical_severity"]="grave"
+		result["deliberation_required"]=true
+	if policy_id=="information_control" and ("rumor" in normalized or "rumour" in normalized):
+		result["message_method"]="deliberately seeded rumor"
+		result["message_subject"]="plague warning" if "plague" in normalized else "public warning"
+	return result
+
+func _cohorts_overlapping_age_range(age_min:int,age_max:int)->Array[String]:
+	var ranges:Dictionary={"children":Vector2i(0,13),"youth":Vector2i(14,24),"early_adults":Vector2i(25,34),"established_adults":Vector2i(35,44),"mature_adults":Vector2i(45,59),"elders":Vector2i(60,120)}
+	var lower:=0 if age_min<0 else age_min
+	var upper:=120 if age_max<0 else age_max
+	var result:Array[String]=[]
+	for cohort in ranges:
+		var span:Vector2i=ranges[cohort]
+		if span.y>=lower and span.x<=upper: result.append(String(cohort))
+	return result
 
 func _contextual_repeal_basis(text:String)->String:
 	for phrase in ["end it","end this","end the current","stop it","lift it","repeal it","cancel it","rescind it"]:
@@ -620,8 +1096,15 @@ func _action_near_match(text:String,match_index:int)->String:
 		var separator_index:=text.rfind(String(separator),match_index)
 		if separator_index>=0: clause_start=maxi(clause_start,separator_index+String(separator).length())
 	var prefix:=text.substr(clause_start,maxi(0,match_index-clause_start))
-	for negation in ["end ","stop ","lift ","repeal ","cancel ","abolish ","rescind ","do not ","don't ","never "]:
-		if String(negation) in prefix: return "repeal"
+	# Negating a repeal verb means continuation: “do not stop rationing” cannot
+	# be flattened into “stop rationing.” These are exact, narrow constructions;
+	# more tangled wording remains available to the semantic fallback.
+	for continuation in ["do not stop ","don't stop ","never stop ","do not end ","don't end ","never end ","do not repeal ","don't repeal ","do not cancel ","don't cancel ","do not lift ","don't lift "]:
+		if _term_match_index(prefix,String(continuation))>=0: return "enact"
+	for negation in ["end ","stop ","lift ","repeal ","cancel ","abolish ","rescind ","do not ","don't ","never ","no more ","prevent ","forbid ","prohibit ","oppose ","avoid "]:
+		# Whole-word matching matters here: the letters “end” in “send
+		# gatherers” must never reverse the very order being sent.
+		if _term_match_index(prefix,String(negation))>=0: return "repeal"
 	return "enact"
 
 func _policy_ripple(id:String,action:String)->String:

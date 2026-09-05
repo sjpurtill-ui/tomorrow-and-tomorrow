@@ -4,7 +4,7 @@
 
 Population is stored and simulated only as authoritative numeric cohort counts. The game never creates one runtime object, name, household membership, pregnancy record, soldier ID, building, or UI row per human. The same six age cohorts and four reproductive stages represent 120 people, one billion people, or any scale between them.
 
-Military formations, food demand, fertility, mortality, labor, economy, resources, government, and settlement occupancy all use counts as their source of truth. Leadership and military command are institutions with aggregate capacities, never selected people. Settlement morphology is capped at 2,048 simulated plots, 1,024 routes, and 128 nuclei, with larger populations expressed through density, capacity, districts, and land-use cells. Runtime histories and ledgers have explicit retention limits. Any new population-dependent feature must preserve these rules: work per tick may depend on the fixed number of cohorts, systems, formations, districts, or visible aggregate cells—never on total population.
+Military formations, food demand, fertility, mortality, labor, economy, resources, and settlement occupancy all use counts as their source of truth. Government uses a small capped pool of named public figures; ordinary citizens are never instantiated. Settlement morphology is capped at 2,048 simulated plots, 1,024 routes, and 128 nuclei, with larger populations expressed through density, capacity, districts, and land-use cells. Runtime histories and ledgers have explicit retention limits. Any new population-dependent feature must preserve these rules: work per tick may depend on the fixed number of cohorts, systems, formations, districts, public officials, or visible aggregate cells—never on total population.
 
 A Godot 4 grand-strategy prototype built around an organic province map.
 
@@ -46,8 +46,8 @@ The `INQUIRY` panel contains active research projects, not passive observations.
 To use an OpenAI-compatible generative endpoint, provide these environment
 variables before launching Godot:
 
-- `LEVIATHAN_AI_ENDPOINT` — full chat-completions endpoint
-- `LEVIATHAN_AI_MODEL` — provider model identifier
+- `LEVIATHAN_AI_ENDPOINT` — full chat-completions endpoint; the official OpenAI endpoint is used when only an API key is supplied
+- `LEVIATHAN_AI_MODEL` — provider model identifier; defaults to `gpt-5.6-terra`
 - `LEVIATHAN_AI_API_KEY` — API credential (or use `OPENAI_API_KEY`)
 - `LEVIATHAN_AI_STRUCTURED_OUTPUT` — `on`, `off`, or `auto` (default); `auto`
   enables strict JSON schema for the official OpenAI endpoint
@@ -89,10 +89,10 @@ accepted before the same allowlist validation boundary. A local OpenAI-compatibl
 HTTP probe verifies the full request,
 validation, execution, and provenance path without requiring a real API key.
 Every API-proposed policy must also include a literal quote from the player's typed
-pronouncement and confidence of at least 0.55. The validator checks that quote against
-the original text before execution. Ungrounded or uncertain mappings are withheld,
-counted in the unresolved record, and change no variables; the accepted quote and
-confidence remain visible in active and historical government records.
+pronouncement and a hidden self-assessed confidence. The validator checks that quote
+against the original text before execution. Low confidence triggers one focused
+in-character question and changes no variables. The score and internal policy weights
+are never shown to the player.
 Only a typed, bounded public context allowlist—day, population, food days, health,
 known office names, and active policy IDs/durations—may enter the provider prompt.
 Unknown caller fields and nested internal state are discarded before any request.
@@ -149,7 +149,12 @@ Support, objection, and assigned responsibility make small deterministic changes
 trust, respect, and resentment. These reactions are stored on the sovereign order,
 shown in council history, aggregated as council support, and feed back into later
 office execution and legitimacy. Stale, rejected, duplicate, cancelled, and no-effect
-interpretations produce no political reaction.
+interpretations produce no political reaction. Routine leader exchanges end with an
+explicit UNDERWAY, REFUSED, BLOCKED, or NEEDS YOUR DECISION state. Grave lethal,
+sexually coercive, or forced-population directives require an ethical-deliberation
+exchange and exact confirmation before any effect can begin; the leader may still
+refuse. Accepted orders receive one later qualitative success, partial-success, or
+failure report derived from simulation state rather than generated numeric changes.
 
 ## Core consequence simulation
 
@@ -176,3 +181,21 @@ population-cohort mortality, and historical records—remain an explicit integra
 For safe manual experimentation, open `res://tools/battle_lab.tscn` in Godot
 and run the current scene (F6). The Battle Lab is isolated from `GameState` and
 cannot alter the campaign.
+
+### City stores, civic answers, and military attention
+
+Use the city dropdown above the map toolbar to select an owned settlement and move the camera to it. Food, freshwater, materials, deposits, storage, and communal construction belong to that city. Old secondary settlements start with empty inventories rather than inheriting the first city’s stockpile; new founding convoys bring only their remaining travel provisions, because their construction supplies are spent establishing the settlement. Local leaders use local shortages and allocations. Population cohorts remain aggregate across the civilization.
+
+At 30% logistics and 20% institutional capacity, leaders can arrange bounded shipments along known, usable land routes. Donors retain reserves; cargo is withdrawn at departure, occupies transport capacity, and arrives after travel time. Food can spoil in transit. Transport knowledge increases reach, speed, and load capacity. The selected city’s Economy page lists its shipments and recent deliveries.
+
+Civic interpretation preserves a conversational answer independently of executable policy mappings. Unsupported proposals receive a substantive answer without being treated as a leader refusal. Future anniversary requests are recorded as proposals: no festival calendar or scheduled spending is implied. Incoming military threats and completed battles pause time with an explicit War Planning action. Civics displays full military reports separately from routine reports.
+
+### Concrete technology branches
+
+Inquiry now offers 150 distinct, one-time technologies across twelve domains. The Tech Tree tab shows prerequisites, material constraints, effects (including costs), successor technologies, and an explicit research-target action. Switching projects preserves accumulated progress. Eighteen authored additions strengthen culture, labor, demography, and logistics. Recent discoveries appear ahead of the attention controls.
+
+The 4,608 generated lens/maturity permutations are retired from live research. Their definitions and earned effects remain available to old saves, and the library labels them as archived refinements. Player and rival research priorities vary with seeded affinity, geography, activity, and emphasis. Per-technology difficulty varies reproducibly between 85% and 115%; reloads do not reroll it. Randomness never bypasses prerequisite knowledge, earliest discovery dates, or material-access checks. Rival histories now record actual technology IDs; their resource-access estimates also require suitable regional potential and production/logistics capacity. Civilization-scale evidence requirements use the finite authored catalog rather than demanding hundreds of retired permutations.
+
+Military recruitment and exercises are separate: RECRUIT & DEPLOY fills a numeric army design from a shared reserve, while TRAINING improves existing formations. Deployment previews its exact personnel transfer and keeps total service personnel visible. Eight exercises develop command, tactics, logistics, and resolve; home reserves and assembled armies stationed at home attend, while moving or distant armies do not. Shared command practice benefits every unit type and persists through save/load. Prototype orders report their actual capped intake, and prototype identity survives deployment.
+
+Map navigation: mouse wheel smoothly accumulates zoom (Shift + wheel is faster); Q/E or Shift + middle-drag rotates, with vertical drag adjusting tilt. N or the NORTH compass resets north-up. F7 / 10,000 FT enters the terrain-relative aerial view. Regional terrain generation is spread across short frame slices and keeps the current patch visible until replacement is ready.

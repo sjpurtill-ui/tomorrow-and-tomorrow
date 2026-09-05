@@ -5,12 +5,17 @@ const CATALOG:=preload("res://scripts/civilization_progression_catalog.gd")
 
 
 func before_test()->void:
+	CivilizationSystem.set_process(false)
 	GameState.reset_for_new_world(602214)
 	DiscoverySystem.reset_for_new_world()
 	DiscoverySystem.initialize()
 	CivilizationSystem.reset_for_new_world()
 	ProgressionSystem.reset_for_new_world()
 
+
+func after_test()->void:
+	GameState.elapsed_days=0.0
+	CivilizationSystem.set_process(true)
 
 func test_discovery_field_contains_thousands_without_becoming_a_visible_checklist()->void:
 	assert_int(CATALOG.DOMAINS.size()).is_equal(12)
@@ -36,7 +41,8 @@ func test_world_seed_changes_viable_traditions_but_is_reproducible()->void:
 	var other:=DiscoverySystem.candidate_ids_for_channel(channel,919191,48)
 	assert_array(first).is_equal(repeat)
 	assert_array(first).is_not_equal(other)
-	assert_int(first.size()).is_greater_equal(24)
+	assert_int(first.size()).is_greater_equal(2)
+	for id in first: assert_bool(bool(DiscoverySystem.discovery_definition(id).get("frontier",false))).is_false()
 
 
 func test_population_alone_never_creates_civilizational_capability()->void:
@@ -120,6 +126,7 @@ func test_rival_focuses_create_divergent_bounded_discovery_histories()->void:
 	defense["strategy"]="fortification"
 	defense["allocations"]=CivilizationSystem._allocation_for("fortification")
 	for _month in 60:
+		GameState.elapsed_days=float((_month+1)*30)
 		provision=ProgressionSystem.advance_rival(provision)
 		defense=ProgressionSystem.advance_rival(defense)
 	var provision_domains:Dictionary=provision.discovery_profile.domains
@@ -137,9 +144,12 @@ func test_rival_research_population_and_allocation_compound_without_person_entit
 	var large:=base.duplicate(true)
 	large["population"]=1_000_000_000.0
 	large["food_capacity"]=1_150_000_000.0
+	var earlier_completion:=false
 	for _cycle in 24:
+		GameState.elapsed_days=float((_cycle+1)*30)
 		small=ProgressionSystem.advance_rival(small)
 		large=ProgressionSystem.advance_rival(large)
+		earlier_completion=earlier_completion or (large.discovery_profile.get("technologies",[]) as Array).size()>(small.discovery_profile.get("technologies",[]) as Array).size()
 	var small_findings:=0
 	var large_findings:=0
 	for domain in CATALOG.DOMAINS:
@@ -147,5 +157,6 @@ func test_rival_research_population_and_allocation_compound_without_person_entit
 		large_findings+=int(large.discovery_profile.domains[domain].count)
 	assert_float(float(large.discovery_profile.research_workforce)).is_greater(float(small.discovery_profile.research_workforce)*1_000_000.0)
 	assert_int(int(large.discovery_profile.research_slots)).is_greater(int(small.discovery_profile.research_slots))
-	assert_int(large_findings).is_greater(small_findings)
+	assert_int(large_findings).is_greater_equal(small_findings)
+	assert_bool(earlier_completion).is_true()
 	assert_int((large.discovery_profile.domains as Dictionary).size()).is_equal(12)

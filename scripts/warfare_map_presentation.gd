@@ -25,7 +25,10 @@ static func scale_band(camera_size:float)->String:
 
 
 static func marker_scale(camera_size:float)->float:
-	return clampf(camera_size*0.016,0.45,32.0)
+	# Orthographic scale should keep a marker near one stable screen footprint.
+	# The former 0.45 floor made counters enormous when zoomed in, immediately
+	# before the presentation layer hid them altogether.
+	return clampf(camera_size*0.016,0.0005,32.0)
 
 
 static func formation_echelon(personnel:int)->int:
@@ -58,6 +61,18 @@ static func formation_role(army:Dictionary)->String:
 			role=candidate
 			highest=float(weights[candidate])
 	return role
+
+
+static func dominant_unit(army:Dictionary)->String:
+	var dominant:="levy"
+	var highest:=-1
+	for formation_variant in (army.get("formations",[]) as Array):
+		var formation:Dictionary=formation_variant
+		var count:=maxi(0,int(formation.get("count",0)))
+		if count>highest:
+			highest=count
+			dominant=String(formation.get("unit","levy"))
+	return dominant
 
 
 static func formation_era(army:Dictionary)->int:
@@ -203,12 +218,12 @@ static func _apply_formation_label_budget(views:Array[Dictionary],camera_size:fl
 	var band:=scale_band(camera_size)
 	var budget:=0
 	if player_owned:
-		budget=6 if band=="local" else (5 if band=="regional" else (3 if band=="continental" else 0))
+		budget=6 if band in ["ground","local"] else (5 if band=="regional" else (3 if band=="continental" else 0))
 	else:
-		budget=6 if band=="local" else (4 if band=="regional" else 0)
+		budget=6 if band in ["ground","local"] else (4 if band=="regional" else 0)
 	for view in views: view["show_label"]=false
 	if budget<=0: return
-	var clusters:=_cluster_views(views,maxf(2.5,camera_size*(0.035 if band=="local" else 0.065)))
+	var clusters:=_cluster_views(views,maxf(0.5,camera_size*(0.035 if band in ["ground","local"] else 0.065)))
 	var leaders:Array[Dictionary]=[]
 	for cluster_variant in clusters:
 		var cluster:Array=cluster_variant
@@ -352,13 +367,14 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 	var readiness_text:=readiness_band(readiness)
 	var visual_state:=formation_visual_state(army)
 	var damage_text:="" if String(visual_state.damage_state)=="intact" else " • %s" % String(visual_state.damage_state).to_upper()
+	var strength_text:="%s SOLDIERS" % compact_count(troops)
 	var label:=""
-	if band=="local":
-		label="%s • %s\n%s %d%% • SUPPLY %d%%%s\n%s" % [String(army.get("name","FIELD ARMY")).to_upper(),compact_count(troops),readiness_text,roundi(readiness*100.0),roundi(supply*100.0),damage_text,("→ %s • D%d" % [destination.to_upper(),int(army.get("arrival_day",0))]) if moving else destination.to_upper()]
+	if band in ["ground","local"]:
+		label="YOU · %s · %s\n%s %d%% · SUPPLY %d%%%s%s" % [String(army.get("name","FIELD ARMY")).to_upper(),strength_text,readiness_text,roundi(readiness*100.0),roundi(supply*100.0),damage_text,(" · → %s" % destination.to_upper()) if moving else ""]
 	elif band=="regional":
-		label="YOU • %s • %s %d%%%s\n%s" % [compact_count(troops),readiness_text,roundi(readiness*100.0),damage_text,("→ %s" % destination.to_upper()) if moving else destination.to_upper()]
+		label="YOU • %s • %s %d%%%s\n%s" % [strength_text,readiness_text,roundi(readiness*100.0),damage_text,("→ %s" % destination.to_upper()) if moving else destination.to_upper()]
 	elif band=="continental":
-		label="YOU • %s • %d%% READY%s%s" % [compact_count(troops),roundi(readiness*100.0),damage_text," →" if moving else ""]
+		label="YOU • %s • %d%% READY%s%s" % [strength_text,roundi(readiness*100.0),damage_text," →" if moving else ""]
 	var position_data:Dictionary=(army.get("position",{}) as Dictionary).duplicate(true)
 	var destination_data:Dictionary=(army.get("destination_position",{}) as Dictionary).duplicate(true)
 	var heading:=0.0
@@ -366,12 +382,12 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 		var heading_delta:=Vector2(float(destination_data.get("x",0.0))-float(position_data.get("x",0.0)),float(destination_data.get("z",0.0))-float(position_data.get("z",0.0)))
 		if heading_delta.length_squared()>0.000001: heading=-heading_delta.angle()-PI*0.5
 	return {
-		"id":str(int(army.get("army_id",0))),"owner":"player","owner_label":"YOU","visible":band not in ["ground","world"],
-		"show_label":band in ["local","regional"] or (band=="continental" and (selected or moving)),"label":label,
+		"id":str(int(army.get("army_id",0))),"owner":"player","owner_label":"YOU","visible":band!="world",
+		"show_label":band in ["ground","local","regional"] or (band=="continental" and (selected or moving)),"label":label,
 		# Selection is the gold outer ring, never a temporary change of faction color.
 		# Keeping the counter blue makes ownership stable while orders are being issued.
 		"selected":selected,"moving":moving,"color":PLAYER_COLOR,"selection_color":PLAYER_SELECTED_COLOR,
-		"troops":troops,"echelon":formation_echelon(troops),"formation_role":formation_role(army),"formation_era":formation_era(army),"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
+		"troops":troops,"echelon":formation_echelon(troops),"formation_role":formation_role(army),"formation_unit":dominant_unit(army),"formation_era":formation_era(army),"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
 		"order_state":visual_state.order_state,"damage_state":visual_state.damage_state,"damage_ratio":visual_state.damage_ratio,"scatter":visual_state.scatter,"missing_elements":visual_state.missing_elements,"visual_element_budget":visual_state.element_budget,
 		"position":position_data,"destination_id":String(army.get("destination_id","")),"heading":heading,
 		"destination_name":destination,
@@ -403,16 +419,16 @@ static func foreign_marker(sighting:Dictionary,camera_size:float)->Dictionary:
 	var moving:=bool(sighting.get("moving",sighting.get("movement_observed",false)))
 	var damage_text:="" if damage_state=="intact" else " • %s" % damage_state.to_upper()
 	var label:=""
-	if band=="local":
-		label="%s\n~%s–%s OBSERVED%s\nREADY ~%d–%d%% • %.0f KM%s" % [owner.to_upper(),compact_count(low),compact_count(high),damage_text,roundi(readiness_low*100.0),roundi(readiness_high*100.0),float(sighting.get("distance_km",0.0))," • REPORT" if scout else ""]
+	if band in ["ground","local"]:
+		label="%s · ~%s–%s SOLDIERS%s\n%s" % ["FOREIGN SCOUTS" if scout and not identified else owner.to_upper(),compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
 	elif band=="regional":
-		label="%s • ~%s–%s%s\nREADY ~%d–%d%%" % [owner.to_upper(),compact_count(low),compact_count(high),damage_text,roundi(readiness_low*100.0),roundi(readiness_high*100.0)]
+		label="%s · ~%s–%s SOLDIERS%s\n%s" % ["FOREIGN SCOUTS" if scout and not identified else owner.to_upper(),compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
 	return {
-		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["local","regional"],
-		"show_label":band in ["local","regional"],"label":label,"selected":false,"moving":moving,"heading":float(sighting.get("heading",0.0)),
+		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["ground","local","regional"],
+		"show_label":band in ["ground","local","regional"],"label":label,"selected":false,"moving":moving,"heading":float(sighting.get("heading",0.0)),
 		"color":HOSTILE_COLOR if hostile else (SCOUT_COLOR if scout else FOREIGN_COLOR),"hostile":hostile,"scout":scout,"identified":identified,
 		"strength_low":low,"strength_high":high,"echelon":formation_echelon(high),"readiness_low":readiness_low,"readiness_high":readiness_high,
-		"formation_role":observed_role,"formation_era":observed_era,
+		"formation_role":observed_role,"formation_unit":String(sighting.get("formation_unit",observed_role)),"formation_era":observed_era,
 		"order_state":order_state,"damage_state":damage_state,"damage_ratio":damage_ratio,"scatter":clampf(1.0-readiness_mid,0.0,0.78),"missing_elements":clampi(floori(damage_ratio*4.0),0,3),"visual_element_budget":7,
 		"readiness_color":readiness_color(readiness_mid),"position":(sighting.get("position",{}) as Dictionary).duplicate(true),"scale":marker_scale(camera_size)
 	}

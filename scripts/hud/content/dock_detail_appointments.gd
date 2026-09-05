@@ -1,19 +1,16 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## Detail dock: commission an institution for one government office.
-## Candidates are institutional slates, not individuals; the chosen structure
-## shapes how policy in that portfolio actually executes.
+## Detail dock: appoint an actual person to one evolving government office.
 
 var office:String="Steward"
 
-# What each governing structure is mechanically good and bad at. The "now"
-# number is live: it is exactly the execution strength the doctrine would have
-# in the realm's present condition, so no slate is best in every situation.
+# What each governing style is reputed to do well and badly. These descriptions
+# expose the nature of a tradeoff without collapsing it into a numerical answer.
 const DOCTRINE_NOTES:Dictionary={
-	"directive":{"label":"DIRECTIVE","strength":"Strongest execution while legitimacy holds","risk":"Decays as legitimacy slips; obstructive below 25% · erodes council culture"},
-	"federated":{"label":"FEDERATED","strength":"Gains strength with every federated settlement · steadies institutions","risk":"Modest while the realm is a single settlement"},
-	"measured":{"label":"MEASURED","strength":"Identical output in every condition · feeds knowledge","risk":"Never exceeds its modest ceiling"},
-	"representative":{"label":"ROTATING","strength":"Builds council culture and support","risk":"Capability arrives in waves as cohorts rotate"},
-	"territorial":{"label":"TERRITORIAL","strength":"Holds strength across distance · aids logistics","risk":"Thin until the realm actually spreads"},
+	"directive":{"label":"DIRECTIVE","strength":"inclined to decide quickly when authority is accepted","risk":"may harden opposition and fail badly when legitimacy is weak"},
+	"federated":{"label":"FEDERATED","strength":"inclined to bargain with local leaders and preserve their cooperation","risk":"may be slow or indecisive while only one settlement bears the work"},
+	"measured":{"label":"METHODICAL","strength":"inclined to demand records and repeatable procedure","risk":"may remain cautious when an exceptional response is needed"},
+	"representative":{"label":"ROTATING","strength":"inclined to share voice and cultivate broad support","risk":"changing participants can make execution uneven"},
+	"territorial":{"label":"DELEGATING","strength":"inclined to trust distant agents and preserve reach","risk":"may build machinery the present realm is too small to use"},
 }
 
 func _init(terrain_node:Node,hud_node:Control,target_office:String="Steward")->void:
@@ -22,60 +19,59 @@ func _init(terrain_node:Node,hud_node:Control,target_office:String="Steward")->v
 	terrain._generate_leader_candidates(office)
 
 func meta()->Dictionary:
+	var definition:=GovernmentPeopleSystem.office_definition(office)
 	return {
 		"eyebrow":"GOVERNMENT · APPOINTMENT",
-		"title":"%s Portfolio" % office,
-		"subtabs":["CANDIDATE INSTITUTIONS"],
+		"title":String(definition.get("title",office)),
+		"subtabs":["ELIGIBLE PEOPLE"],
 	}
 
 func tab(_sub:int)->Dictionary:
-	var incumbent:Dictionary=GameState.leadership_positions.get(office,{})
+	var incumbent:Dictionary=GovernmentPeopleSystem.officeholder(office)
+	var office_title:=String(GovernmentPeopleSystem.office_definition(office).get("title",office))
 	var kpis:Array=[
-		{"label":"OFFICE","value":office,"delta":"","accent":Tokens.GOLD,"tip":"The portfolio being commissioned"},
-		{"label":"HOLDER","value":String(incumbent.get("name","vacant")).substr(0,14) if not incumbent.is_empty() else "vacant","delta":"","accent":Tokens.GREEN if not incumbent.is_empty() else Tokens.AMBER,"tip":"The institution currently charged with this portfolio"},
-		{"label":"CANDIDATES","value":str(terrain.leader_candidates.size()),"delta":"slates","accent":Tokens.BLUE,"tip":"Institutional structures able to take the portfolio"},
-		{"label":"EXECUTION","value":"−30%" if incumbent.is_empty() else "full","delta":"if vacant" if incumbent.is_empty() else "","accent":Tokens.RED if incumbent.is_empty() else Tokens.GREEN,"tip":"Vacant offices execute matching policy at reduced effect"},
+		{"label":"OFFICE","value":office_title.substr(0,15),"delta":"evolves","accent":Tokens.GOLD,"tip":"The title changes as the civilization's government develops."},
+		{"label":"HOLDER","value":String(incumbent.get("name","vacant")).substr(0,14) if not incumbent.is_empty() else "vacant","delta":"age %d" % int(incumbent.get("age",0)) if not incumbent.is_empty() else "","accent":Tokens.GREEN if not incumbent.is_empty() else Tokens.AMBER,"tip":"The living person holding this office."},
+		{"label":"SHORTLIST","value":str(terrain.leader_candidates.size()),"delta":"people","accent":Tokens.BLUE,"tip":"Known people put forward for consideration. Their order is not a ranking."},
+		{"label":"EVIDENCE","value":"partial","delta":"accounts","accent":Tokens.AMBER,"tip":"Reputation is incomplete. Actual performance becomes clearer through service and consequences."},
 	]
-	var brief:Dictionary={"tone":"warn" if incumbent.is_empty() else "info","title":"Choose the structure, not a person" if incumbent.is_empty() else "Replacing the standing institution","why":"Each structure executes differently and its strength depends on the realm's present condition — legitimacy, settlements, spread, and time. The strongest structure today may not be the strongest next decade."}
+	var brief:Dictionary={"tone":"warn" if incumbent.is_empty() else "info","title":"Choose an actual officeholder" if incumbent.is_empty() else "Review or replace the current officeholder","why":"These are reputations, witnessed habits, and political impressions—not measurements. Appointment reveals performance over time; governing style may help in one circumstance and fail in another."}
 	var blocks:Array=[]
-	var society_model=DiscoverySystem.society_model
-	var best_now:=-1.0
-	for candidate_variant in terrain.leader_candidates:
-		best_now=maxf(best_now,float(society_model.doctrine_execution_strength(String((candidate_variant as Dictionary).get("doctrine","")))))
 	for candidate_index in terrain.leader_candidates.size():
 		var candidate:Dictionary=terrain.leader_candidates[candidate_index]
 		var candidate_name:=String(candidate.get("name","INSTITUTION"))
 		var doctrine:=String(candidate.get("doctrine",""))
 		var notes:Dictionary=DOCTRINE_NOTES.get(doctrine,{"label":"UNSTRUCTURED","strength":"","risk":""})
-		var execution_now:=float(society_model.doctrine_execution_strength(doctrine))
-		var execution_percent:=roundi(execution_now*100.0)
+		var traits:Array=candidate.get("traits",[])
+		var assessment:=GovernmentPeopleSystem.appointment_assessment(candidate,office)
+		var duty_note:=" · currently %s" % String(assessment.current_duty) if String(assessment.current_duty)!="" and candidate_name!=String(incumbent.get("name","")) else ""
 		blocks.append({"type":"rows","items":[{
-			"name":candidate_name,
-			"sub":String(candidate.get("background","")),
-			"detail":"▲ %s\n▼ %s" % [String(notes.strength),String(notes.risk)],
-			"value":"%s · now %s%d%%" % [String(notes.label),"+" if execution_percent>=0 else "−",absi(execution_percent)],
-			"value_color":Tokens.GREEN if execution_now>=0.09 else (Tokens.RED if execution_now<0.0 else Tokens.AMBER),
+			"name":"%s · age %d" % [candidate_name,int(candidate.get("age",0))],
+			"sub":"%s · %s%s" % [String(candidate.get("background",""))," / ".join(traits),duty_note],
+			"detail":"KNOWN FOR · %s\nDOUBT · %s\n%s · %s · %s" % [String(assessment.known_for),String(assessment.public_concern),String(notes.label),String(notes.strength),String(notes.risk)],
+			"value":"%s · %s" % [String(assessment.record),String(assessment.standing)],
+			"value_color":Tokens.BODY_2,
 			"accent":Tokens.GOLD if candidate_name==String(incumbent.get("name","")) else Tokens.BLUE,
-			"tip":"Execution strength in the realm's current condition. It will move with legitimacy, settlements, territory, and rotation cycles — not a fixed aptitude.",
+			"tip":"What your society presently believes about this person. It is evidence, not a forecast or a complete account of their ability.",
 		}]})
 		blocks.append({"type":"actions","items":[{
-			"label":"COMMISSION","sub":"charge it with the portfolio","primary":execution_now>=best_now-0.005,
+			"label":"APPOINT","sub":"entrust this office and learn through results","primary":false,
 			"disabled":candidate_name==String(incumbent.get("name","")),
 			"on_press":func()->void: _commission(candidate_name),
-			"tip":"Appoint %s to the %s portfolio" % [candidate_name,office],
+			"tip":"Appoint %s as %s" % [candidate_name,office_title],
 		}]})
 	if blocks.is_empty():
-		blocks.append({"type":"text","text":"No institutional slate is available for this portfolio yet."})
+		blocks.append({"type":"text","text":"No eligible person is available for this office yet."})
 	return {"kpis":kpis,"brief":brief,"blocks":blocks}
 
 func _commission(candidate_name:String)->void:
 	if AdvisorSystem.appoint(candidate_name,office):
 		var topics:Dictionary={"Steward":"population","Quartermaster":"food","Scholar":"knowledge","Marshal":"security","Envoy":"resources"}
 		AdvisorSystem.generate_council_item(office,String(topics.get(office,"construction")),0.58)
-		terrain._report_military_action({"message":"%s commissioned for the %s portfolio." % [candidate_name,office]})
+		terrain._report_military_action({"message":"%s appointed as %s." % [candidate_name,String(GovernmentPeopleSystem.office_definition(office).get("title",office))]})
 	hud.live_refresh_dock()
 
 func signature()->Array:
-	# The "now" execution numbers move with legitimacy, settlements, and rotation
-	# time, so the dock refreshes when any of those shift visibly.
-	return [office,String((GameState.leadership_positions.get(office,{}) as Dictionary).get("name","")),terrain.leader_candidates.size(),roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)*50.0),GameState.player_settlements.size(),int(GameState.elapsed_days/30.0)]
+	# Reputation and incumbent status can change over time even though exact
+	# aptitude and execution remain deliberately hidden from the player.
+	return [office,int(GovernmentPeopleSystem.officeholder(office).get("person_id",0)),GovernmentPeopleSystem.revision,terrain.leader_candidates.size(),roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)*50.0),GameState.player_settlements.size(),int(GameState.elapsed_days/30.0)]

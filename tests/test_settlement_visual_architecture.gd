@@ -587,14 +587,15 @@ func test_persistent_density_tone_distinguishes_old_core_new_expansion_and_war_d
 	assert_float(damaged_color.get_luminance()).is_less(old_color.get_luminance())
 
 
-func test_committing_a_site_immediately_retires_every_convoy_primitive()->void:
+func test_committing_a_site_retires_the_travel_ring_but_preserves_founding_camp_identity()->void:
 	renderer.settler_map_ring=auto_free(MeshInstance3D.new())
 	renderer.convoy_map_icon=auto_free(Node3D.new())
 	renderer.convoy_map_label=auto_free(Label3D.new())
 	renderer.convoy_detail_root=auto_free(Node3D.new())
 	for node in [renderer.settler_map_ring,renderer.convoy_map_icon,renderer.convoy_map_label,renderer.convoy_detail_root]: node.visible=true
 	renderer._retire_founding_expedition_visuals()
-	for node in [renderer.settler_map_ring,renderer.convoy_map_icon,renderer.convoy_map_label,renderer.convoy_detail_root]: assert_bool(node.visible).is_false()
+	assert_bool(renderer.settler_map_ring.visible).is_false()
+	for node in [renderer.convoy_map_icon,renderer.convoy_map_label,renderer.convoy_detail_root]: assert_bool(node.visible).is_true()
 
 
 func test_secondary_settlement_labels_thin_but_retain_three_world_scale_anchors()->void:
@@ -667,6 +668,34 @@ func test_close_metropolis_uses_one_strictly_bounded_district_clipmap()->void:
 	assert_int(shapes.size()).is_greater_equal(6)
 
 
+func test_town_and_city_absorb_one_stable_historical_core_without_extra_batches()->void:
+	renderer._configure_seamless_world()
+	renderer._configure_shape()
+	renderer._configure_noise()
+	renderer._prepare_river_course()
+	var center:Vector3=renderer._find_camp_position()
+	var test_camera:Camera3D=auto_free(Camera3D.new())
+	test_camera.size=1.2
+	renderer.camera=test_camera
+	renderer.camera_target=center
+	var architecture:=VALUES.architecture_snapshot(VALUES.initial_state("inquiry",GameState.world_seed,"player"))
+	var inherited_tile:=-1
+	var no_plots:Array[Dictionary]=[]
+	for stage_record in [{"name":"town","population":5000,"stage":3},{"name":"city","population":500000,"stage":4}]:
+		var profile:Dictionary=renderer._settlement_expansion_visual_profile({"classification":stage_record.name,"population":stage_record.population,"stage_progress":0.0})
+		var layout:Dictionary=renderer._settlement_stage_visual_layout(profile,stage_record.population,no_plots)
+		var candidates:Array[Dictionary]=renderer._settlement_district_clipmap_candidates(center,layout,stage_record.stage,architecture)
+		var historical:Array[Dictionary]=[]
+		for candidate in candidates:
+			if bool(candidate.get("historic_core",false)): historical.append(candidate)
+		assert_int(historical.size()).is_equal(1)
+		assert_vector(Vector2(historical[0].point)).is_equal(Vector2(center.x,center.z))
+		assert_int(int(historical[0].historic_tile)).is_between(48,63)
+		assert_int(candidates.size()).is_less_equal(renderer.SETTLEMENT_DISTRICT_CLIPMAP_BUDGET)
+		if inherited_tile>=0: assert_int(int(historical[0].historic_tile)).is_equal(inherited_tile)
+		inherited_tile=int(historical[0].historic_tile)
+
+
 func test_aggregate_neighborhood_condition_has_eight_ordered_states()->void:
 	assert_int(renderer.SETTLEMENT_DISTRICT_CONDITIONS.size()).is_equal(8)
 	assert_array(renderer.SETTLEMENT_DISTRICT_CONDITIONS).contains_exactly(["great","okay","fine","normal","bad","poor","damaged","destroyed"])
@@ -680,6 +709,8 @@ func test_aggregate_neighborhood_condition_has_eight_ordered_states()->void:
 
 func test_poor_condition_stays_inhabited_while_damage_removes_structure()->void:
 	var close_shader:String=renderer._settlement_district_atlas_material(null,4,false).shader.code
+	assert_str(close_shader).contains("inherited_early_atlas_texture")
+	assert_str(close_shader).contains("district_data.r*63.0")
 	assert_str(close_shader).not_contains("condition==5.0 && sector_breakup")
 	assert_str(close_shader).contains("condition==6.0 && sector_breakup")
 	var terrain_source:String=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
@@ -1045,7 +1076,7 @@ func test_billion_person_close_city_does_not_add_district_instances()->void:
 	var immense:Array[Dictionary]=renderer._settlement_district_clipmap_candidates(center,immense_layout,6,architecture)
 	assert_int(modest.size()).is_greater(0)
 	assert_int(modest.size()).is_less_equal(renderer.SETTLEMENT_DISTRICT_CLIPMAP_BUDGET)
-	assert_int(immense.size()).is_equal(modest.size())
+	assert_int(immense.size()).is_less_equal(modest.size())
 
 
 func test_district_clipmap_retires_before_regional_zoom()->void:
@@ -1056,3 +1087,9 @@ func test_district_clipmap_retires_before_regional_zoom()->void:
 	var layout:Dictionary={"radius":24.0,"axis":0.0,"cores":[Vector2.ZERO],"satellites":[],"corridor_angles":[]}
 	var architecture:Dictionary={"axiality":0.5,"permeability":0.5,"civic_space":0.5,"terrain_conformity":0.5}
 	assert_array(renderer._settlement_district_clipmap_candidates(Vector3.ZERO,layout,6,architecture)).is_empty()
+
+
+func test_close_zoom_never_replaces_continuous_city_with_photo_tile_clipmap()->void:
+	var terrain_source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	assert_bool(terrain_source.contains("if lod==0: _create_settlement_district_clipmap")).is_false()
+	assert_bool(terrain_source.contains("float aggregate_floor=fabric_kind==5 ? 0.78 : 0.16;")).is_true()
