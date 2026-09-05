@@ -90,7 +90,7 @@ var civic_dialogues: Dictionary = {}
 ## both the deterministic fast reply and semantic cache whenever an API route
 ## is configured. The simulation's deterministic feasibility gate still owns
 ## every actual consequence.
-var civic_always_use_ai := false
+var civic_always_use_ai := true
 ## Master player switch for paid civic interpretation. This is distinct from
 ## SMART / ALWAYS ASK AI routing: when false, no civic API request may leave
 ## the game even if credentials are present.
@@ -417,7 +417,7 @@ func reset_for_new_world(new_seed:int)->void:
 	council_inbox=[]
 	sovereign_orders=[]
 	civic_dialogues={}
-	civic_always_use_ai=false
+	civic_always_use_ai=true
 	civic_api_enabled=true
 	research_allocations={"demography":0,"nutrition":1,"health":1,"labor":0,"knowledge":1,"production":0,"infrastructure":0,"logistics":0,"ecology":1,"institutions":0,"security":0,"culture":0}
 	research_subcategory_allocations={
@@ -987,9 +987,9 @@ func register_directive_population_deaths(count:int,directive_id:String,descript
 	var day:=int(elapsed_days)
 	var record:Dictionary={
 		"id":"directive_deaths_%d_%d" % [day,demographic_ledger.size()],"day":day,"start_day":day,"end_day":day,
-		"title":"%d deaths during %s" % [actual,safe_id.replace("_"," ")],"description":description.substr(0,320),
+		"title":("%d executed by decree" % actual) if target.has("exact_count") else "%d deaths during %s" % [actual,safe_id.replace("_"," ")],"description":description.substr(0,320),
 		"domain":"population","severity":"demographic","kind":"death","count":actual,"cause":cause,
-		"location":"Civilization under directive","population_after":population_total,
+		"location":"Civilization under directive","population_after":population_total,"source_order_id":String(target.get("source_order_id","")),
 		"affected_cohorts":(result.get("affected_cohorts",{}) as Dictionary).duplicate(true),"demographic_target":target.duplicate(true),"target_label":String(target.get("label","")),"aggregate":true
 	}
 	demographic_ledger.push_front(record)

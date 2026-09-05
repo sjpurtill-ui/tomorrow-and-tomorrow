@@ -34,6 +34,11 @@ func tab(_sub:int)->Dictionary:
 	var blocks:Array=[
 		{"type":"tiles","heading":"MATERNITY & INFANCY","items":maternity_items},
 	]
+	var records:Array=[]
+	for record in GameState.demographic_ledger:
+		if String(record.get("kind",""))!="death": continue
+		records.append({"name":String(record.get("title","Deaths")),"value":str(int(record.get("count",0))),"sub":"Day %d · %s" % [int(record.get("day",0)),String(record.get("cause","Unknown cause"))],"detail":"%s %s Population afterward: %d." % [String(record.get("target_label","")),String(record.get("description","")),int(record.get("population_after",0))],"accent":Tokens.RED})
+	blocks.append({"type":"rows","heading":"RECORDED DEATHS","items":records} if not records.is_empty() else {"type":"text","heading":"RECORDED DEATHS","text":"No deaths have been recorded."})
 	if not mortality_items.is_empty():
 		blocks.append({"type":"bars","heading":"CURRENT MORTALITY RISK","note":"annual pressure now · not historical totals","items":mortality_items})
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()

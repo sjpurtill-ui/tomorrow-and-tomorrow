@@ -5,6 +5,87 @@ func before_test()->void:
 	_reset_directive_world(441177,10_000,true)
 
 
+func test_one_example_is_one_worker_with_a_conserved_population_and_receipt()->void:
+	_reset_directive_world(441178,120,true)
+	var text:="Just execute one example to scare the workers."
+	var reading:=PronouncementInterpreter._local_interpretation(text)
+	assert_int(reading.policies.size()).is_equal(1)
+	if reading.policies.is_empty(): return
+	var target:Dictionary=reading.policies[0].directive_parameters.demographic_target
+	assert_int(int(target.get("exact_count",0))).is_equal(1)
+	assert_str(String(target.get("role",""))).is_equal("worker")
+	assert_bool(target.has("sex")).is_false()
+	var population:=GameState.population_exact
+	var workers:=float(GameState.population_cohorts.working_age)
+	var children:=float(GameState.population_cohorts.children)
+	var deaths:=GameState.lifetime_deaths
+	var order:=AdvisorSystem.execute_pronouncement(text,reading)
+	var policy:Dictionary=order.parameters.interpretation.policies[0]
+	assert_bool(bool(policy.applied)).is_true()
+	assert_int(int(policy.direct_effects.get("population_deaths",0))).is_equal(1)
+	assert_float(GameState.population_exact).is_equal_approx(population-1.0,0.00001)
+	assert_float(float(GameState.population_cohorts.working_age)).is_equal_approx(workers-1.0,0.00001)
+	assert_float(float(GameState.population_cohorts.children)).is_equal_approx(children,0.00001)
+	assert_int(GameState.lifetime_deaths).is_equal(deaths+1)
+	assert_int(int(GameState.demographic_ledger[0].count)).is_equal(1)
+	assert_str(String(GameState.demographic_ledger[0].source_order_id)).is_equal(String(order.id))
+	assert_int(ConsequenceEngine.active_policies().size()).is_equal(0)
+	var again:=ConsequenceEngine.apply_directive("mass_repression",0.1,30,"repeat",{"source_order_id":order.id,"directive_parameters":policy.directive_parameters})
+	assert_bool(bool(again.applied)).is_false()
+	assert_int(GameState.lifetime_deaths).is_equal(deaths+1)
+	var report:=CivicImplementationSystem._evaluate_policy(String(order.id),{"id":"mass_repression","directive_parameters":policy.directive_parameters,"direct_effects":policy.direct_effects},30,0)
+	assert_str(String(report.outcome)).is_equal("success")
+	assert_str(String(report.qualitative_evidence)).contains("1 person")
+	var ledger_ui:RefCounted=load("res://scripts/hud/content/dock_detail_population_ledger.gd").new(null,null)
+	var ledger_view:Dictionary=ledger_ui.tab(0)
+	assert_str(JSON.stringify(ledger_view)).contains("1 executed by decree")
+	var council_ui:RefCounted=load("res://scripts/hud/content/dock_content_civilization.gd").new(null,null)
+	assert_str(council_ui._directive_state({"status":"active","implementation_followup":{"state":"reported"}})).is_equal("REPORTED")
+
+
+func test_target_words_and_confirmation_cannot_expand_one_worker_to_men()->void:
+	var policy:Dictionary=PronouncementInterpreter._local_interpretation("Execute one worker as an example.").policies[0]
+	var target:Dictionary=policy.directive_parameters.demographic_target.duplicate(true)
+	AdvisorSystem._merge_grave_followup_parameters(policy,"I COMMAND YOU!")
+	assert_dict(policy.directive_parameters.demographic_target).is_equal(target)
+	var parsed:=PronouncementInterpreter._deterministic_directive_parameters("Execute one worker; mandatory attendance for all men to scare them.","mass_repression")
+	assert_int(int(parsed.demographic_target.exact_count)).is_equal(1)
+	assert_bool(parsed.demographic_target.has("sex")).is_false()
+	var mandatory:=PronouncementInterpreter._deterministic_directive_parameters("Execute one worker as mandatory punishment.","mass_repression")
+	assert_bool(mandatory.demographic_target.has("sex")).is_false()
+
+
+func test_unavailable_exact_count_has_no_partial_deaths_or_metric_changes()->void:
+	var before:=GameState.population_exact
+	var metrics:=GameState.simulation_metrics.duplicate(true)
+	var result:=ConsequenceEngine.apply_directive("mass_repression",0.1,30,"test",{"directive_parameters":{"one_time":true,"demographic_target":{"exact_count":10001,"scope":"counted"}}})
+	assert_bool(bool(result.applied)).is_false()
+	assert_float(GameState.population_exact).is_equal(before)
+	assert_dict(GameState.simulation_metrics).is_equal(metrics)
+	assert_array(GameState.demographic_ledger).is_empty()
+
+
+func test_terra_numerical_plan_controls_only_validated_statistical_channels()->void:
+	var text:="Execute one worker as an example."
+	var raw:={"policies":[{"id":"mass_repression","basis":"Execute one worker","confidence":0.99,"statistical_effects":[
+		{"metric":"cohesion","delta":-0.02,"uncertainty":0.01,"reason":"Fear can reduce mutual trust."},
+		{"metric":"population","delta":-0.08,"uncertainty":0.01,"reason":"Must not be writable."},
+		{"metric":"security","delta":100,"uncertainty":0.01,"reason":"Out of bounds."}
+	]}]}
+	var reading:=PronouncementInterpreter._validate(raw,text)
+	var parameters:Dictionary=reading.policies[0].directive_parameters
+	assert_int(parameters.statistical_effects.size()).is_equal(1)
+	var assessment:=ConsequenceEngine.directive_assessment("mass_repression",0.1,30,1.0,parameters)
+	assert_float(float(assessment.direct_effects_planned.cohesion_delta)).is_equal_approx(-0.02*float(assessment.implementation_rate),0.000001)
+	assert_bool(assessment.direct_effects_planned.has("security_delta")).is_false()
+	assert_int(int(assessment.direct_effects_planned.population_deaths)).is_equal(1)
+	var prompt:=PronouncementInterpreter._prompt(text,{})
+	assert_str(prompt).contains("writable_direct_metrics")
+	assert_str(prompt).contains("uncertainty")
+	PronouncementInterpreter._remember_semantic_result("numeric_plan",reading)
+	assert_dict(PronouncementInterpreter._semantic_cache_lookup("numeric_plan")).is_empty()
+
+
 func test_offline_interpreter_recognizes_broad_directive_domains()->void:
 	var cases:=[
 		["Limit births through a one child policy.","birth_restrictions","demographic"],
@@ -52,8 +133,8 @@ func test_terra_request_uses_supported_sampling_defaults()->void:
 		"conversation":conversation,"known_offices":offices,"active_policies":active,
 	}
 	var safe_context:=PronouncementInterpreter._sanitize_public_context(maximal_context)
-	assert_int((safe_context.conversation as Array).size()).is_equal(3)
-	assert_int(String((safe_context.conversation as Array)[0].text).length()).is_less_equal(160)
+	assert_int((safe_context.conversation as Array).size()).is_equal(8)
+	assert_int(String((safe_context.conversation as Array)[0].text).length()).is_less_equal(400)
 	assert_int((safe_context.known_offices as Array).size()).is_less_equal(8)
 	assert_int((safe_context.active_policies as Array).size()).is_less_equal(8)
 	var bounded_prompt:=PronouncementInterpreter._prompt("A".repeat(500),maximal_context)

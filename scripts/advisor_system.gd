@@ -693,13 +693,16 @@ func _merge_grave_followup_parameters(policy:Dictionary,text:String)->void:
 		if "husband" in normalized:
 			parameters["punishment_target"]={"scope":"targeted","sex":"male","role":"husbands","label":"their husbands"}
 	elif policy_id=="mass_repression":
-		var supplies_target:=false
-		for term in ["women","woman","female","girls","men","man","male","boys","over ","older than","under ","younger than","dissidents","the sick","the opposition","the population"]:
-			if term in normalized:
-				supplies_target=true
-				break
+		if _is_civic_confirmation(text) or _is_civic_insistence(text): return
+		var supplies_target:=PronouncementInterpreter._has_whole_word(normalized,"women|woman|female|girls|men|man|male|boys|workers?|over|older than|under|younger than|dissidents|the sick|the opposition|the population")
 		if supplies_target:
 			var supplemented:Dictionary=PronouncementInterpreter._deterministic_directive_parameters(text,policy_id)
+			var prior_target:Dictionary=parameters.get("demographic_target",{})
+			var revised_target:Dictionary=supplemented.get("demographic_target",{})
+			if prior_target.has("exact_count") and not revised_target.has("exact_count"):
+				revised_target["exact_count"]=prior_target.exact_count
+				revised_target["scope"]="counted"
+				revised_target["label"]="exactly %d %s" % [int(prior_target.exact_count),String(revised_target.get("label","people"))]
 			for key in supplemented: parameters[key]=supplemented[key]
 	policy["directive_parameters"]=parameters
 
@@ -769,16 +772,9 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 			grave_confirmed=true
 			break
 	var prior_deliberation:Dictionary=prior_context.get("ethical_deliberation",{})
-	if (grave or not prior_deliberation.is_empty()) and not grave_confirmed:
-		var prior_stage:=int(prior_deliberation.get("stage",0))
-		if prior_stage<=0:
-			return _hold_grave_deliberation(order,leader,settlement_id,text,result,1,_grave_opening_question(leader,policies))
-		if prior_stage==1 or not _is_civic_confirmation(text):
-			_close_civic_context(prior_context,"deliberated",String(order.get("id","")))
-			return _hold_grave_deliberation(order,leader,settlement_id,text,result,2,_grave_confirmation_question(leader,policies))
-		# Only this explicit confirmation advances a grave directive to ordinary
-		# feasibility and personal-willingness gates. Its accepted meaning remains
-		# attached to both the internal order and the player-facing commitment.
+	if grave and not grave_confirmed:
+		# Clear fictional orders use the same execution rules regardless of harm.
+		# Clarification below concerns uncertain meaning, never mandatory ethics.
 		order["accepted_meaning"]=_grave_meaning(policies)
 		result["confirmed_grave_meaning"]=String(order.accepted_meaning)
 		for policy_variant in policies:
@@ -817,21 +813,11 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 			policy["blocker"]=String(assessment.get("blocker","The settlement cannot carry this out."))
 			limitation_texts.append(String(policy.blocker))
 			blocked+=1
-		elif _leader_refuses(disposition,willingness,insistence):
-			policy["_conversation_refused"]=true
-			policy["blocker"]=_leader_refusal(leader,String(policy.get("id","")),assessment,insistence)
-			limitation_texts.append(String(policy.blocker))
-			refused+=1
-		elif willingness<0.42 and not insistence:
-			policy["_conversation_deferred"]=true
-			policy["blocker"]=_leader_objection(leader,String(policy.get("id","")),assessment)
-			limitation_texts.append(String(policy.blocker))
-			deferred+=1
 		else:
-			var compelled:=insistence and willingness<0.42
+			var compelled:=willingness<0.42
 			policy["leader_compelled"]=compelled
-			# Temperament decides whether this person accepts the work. Once they do,
-			# their personality cannot create or erase material implementation capacity.
+			if compelled: limitation_texts.append(_leader_objection(leader,String(policy.get("id","")),assessment))
+			# Objections affect characterization and relationships, not authorization.
 			policy["_office_execution_override"]=execution
 			policy["_executor_override"]="%s, %s" % [String(leader.get("name","The leader")),String(leader.get("title","local leader"))]
 			committed+=1
@@ -1072,7 +1058,7 @@ func _grave_meaning(policies:Array)->String:
 		match policy_id:
 			"mass_repression":
 				var urgency:="immediately " if String(parameters.get("urgency",""))=="immediate" else ""
-				meanings.append("%suse lethal repression against %s" % [urgency,target_label])
+				meanings.append("%sexecute %s once" % [urgency,target_label] if target.has("exact_count") else "%suse lethal repression against %s" % [urgency,target_label])
 			"coercive_pronatalism":
 				var meaning:="compel %s into repeated sexual pairings until pregnancy" % target_label if String(parameters.get("coercion_method",""))=="compulsory sexual pairing until pregnancy" else "threaten %s with punishment unless pregnancies occur" % target_label
 				var enforcement_method:=String(parameters.get("enforcement_method",""))
@@ -1158,18 +1144,10 @@ func _leader_objection(leader:Dictionary,policy_id:String,assessment:Dictionary)
 		_: return reason
 
 
-func _leader_refuses(disposition:Dictionary,willingness:float,insistence:bool)->bool:
-	var disposition_id:=String(disposition.get("id","pragmatic"))
-	if disposition_id=="sycophantic": return false
-	if not insistence:
-		if disposition_id=="principled": return willingness<0.34
-		if disposition_id=="cantankerous": return willingness<0.22
-		return willingness<0.12
-	# Insistence moves most leaders, but it does not turn every person into a
-	# puppet. A principled leader may stake their office on a final refusal.
-	if disposition_id=="principled": return willingness<0.30
-	if disposition_id=="cantankerous": return willingness<0.13
-	return willingness<0.08
+func _leader_refuses(_disposition:Dictionary,_willingness:float,_insistence:bool)->bool:
+	# Kept for callers loading older conversation records. Current execution
+	# decisions are made by the physical and institutional assessment only.
+	return false
 
 
 func _leader_refusal(leader:Dictionary,policy_id:String,assessment:Dictionary,insistence:bool)->String:
@@ -1485,6 +1463,16 @@ func _join_limitations(limitations:Array[String])->String:
 
 
 func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance:String,committed:int,uncommitted:int,implementation_total:float,limitations:Array[String])->String:
+	var receipts:Array[String]=[]
+	for policy in policies:
+		if not bool(policy.get("applied",false)): continue
+		var receipt:=DecreeStatistics.receipt(policy.get("direct_effects",{}))
+		var estimates:=DecreeStatistics.validate(policy.get("directive_parameters",{}).get("statistical_effects",[]))
+		for estimate in estimates:
+			receipt+=" Estimate before capacity adjustment: %s %+.2f ± %.2f percentage points. %s" % [String(estimate.metric),float(estimate.delta)*100.0,float(estimate.uncertainty)*100.0,String(estimate.reason)]
+		if not receipt.is_empty(): receipts.append(receipt)
+	if not receipts.is_empty():
+		return "Recorded result: %s Further effects on work, food and public order will develop through the simulation; these immediate changes do not prove that the wider aim succeeded." % " ".join(receipts)
 	var actions:Array[String]=[]
 	for policy in policies:
 		if bool(policy.get("_conversation_blocked",false)) or bool(policy.get("_conversation_deferred",false)) or bool(policy.get("_conversation_refused",false)): continue
@@ -1514,6 +1502,9 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 
 
 func _implementation_report_promise(followup:Dictionary)->String:
+	var snapshots:Array=followup.get("policies",[])
+	if not snapshots.is_empty() and snapshots.all(func(snapshot:Dictionary)->bool: return bool(snapshot.get("directive_parameters",{}).get("one_time",false))):
+		return "The counted action is complete. I will review its wider consequences around %s." % _calendar_label(int(followup.get("due_day",GameState.elapsed_days+7)))
 	var has_operation:=false
 	for snapshot_variant in followup.get("policies",[]):
 		if not String((snapshot_variant as Dictionary).get("operation_kind","")).is_empty():

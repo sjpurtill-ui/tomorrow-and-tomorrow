@@ -111,6 +111,10 @@ func _council_brief()->Dictionary:
 	var latest_order:=_latest_civic_order(String(settlement.get("id","")),int(leader.get("person_id",0)))
 	var directive_state:=_directive_state(latest_order)
 	match directive_state:
+		"OBSERVING EFFECTS":
+			return {"tone":"info","title":"ACTION COMPLETE · watching the consequences","why":"The counted action and its population record are complete. The leader will review its wider effects."}
+		"REPORTED":
+			return {"tone":"info","title":"REPORTED · the outcome is recorded","why":"Read the leader's report below for the result and its limits."}
 		"INTERPRETING":
 			return {"tone":"info","title":"NOT YET UNDERWAY · interpreting your instruction","why":"No policy has been applied. The leader is still deciding what your words mean."}
 		"NEEDS YOUR DECISION":
@@ -338,6 +342,8 @@ func _pronouncement_status_text(settlement_id:String,leader_person_id:int)->Stri
 		"BLOCKED": return "BLOCKED · No policy was applied; the instruction exceeded present means or was not concrete enough."
 		"WITHDRAWN": return "WITHDRAWN · The unresolved instruction was closed and no policy was applied."
 		"UNDERWAY": return "UNDERWAY · The leader committed; the outcome report will arrive later."
+		"REPORTED": return "REPORTED · The leader's outcome report is in this conversation."
+		"OBSERVING EFFECTS": return "ACTION COMPLETE · The counted result is recorded; wider effects are being reviewed."
 	return ""
 
 func signature()->Array:
@@ -387,9 +393,11 @@ func _civic_order_by_id(order_id:String)->Dictionary:
 
 func _directive_state(order:Dictionary)->String:
 	if order.is_empty(): return ""
+	if String(order.get("implementation_followup",{}).get("state",""))=="reported": return "REPORTED"
 	var status:=String(order.get("status",""))
 	var stance:=String(order.get("leader_stance",""))
 	var policies:Array=order.get("parameters",{}).get("interpretation",{}).get("policies",[])
+	if not policies.is_empty() and policies.all(func(policy:Dictionary)->bool: return bool(policy.get("applied",false)) and bool(policy.get("directive_parameters",{}).get("one_time",false))): return "OBSERVING EFFECTS"
 	var applied:=false
 	var discussion_pending:=false
 	var refused:=false
@@ -416,6 +424,8 @@ func _directive_state(order:Dictionary)->String:
 func _directive_state_color(state:String)->Color:
 	match state:
 		"UNDERWAY": return Tokens.GREEN
+		"REPORTED": return Tokens.GREEN
+		"OBSERVING EFFECTS": return Tokens.GREEN
 		"INTERPRETING": return Tokens.BLUE
 		"DISCUSSION","PROPOSAL RECORDED": return Tokens.BLUE
 		"WITHDRAWN": return Tokens.BODY_2

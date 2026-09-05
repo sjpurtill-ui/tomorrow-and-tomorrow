@@ -8,12 +8,12 @@ const RETRY_DELAY_SECONDS:=0.18
 const MIN_API_CONFIDENCE:=0.55
 const LOCAL_FAST_PATH_CONFIDENCE:=0.82
 const MAX_API_RESPONSE_BYTES:=131072
-const API_TIMEOUT_SECONDS:=12.0
-const API_MAX_COMPLETION_TOKENS:=280
-const API_MAX_PROMPT_UTF8_BYTES:=7200
+const API_TIMEOUT_SECONDS:=30.0
+const API_MAX_COMPLETION_TOKENS:=2800
+const API_MAX_PROMPT_UTF8_BYTES:=24000
 const DEFAULT_API_MODEL:="gpt-5.6-terra"
 const SEMANTIC_CACHE_CAPACITY:=32
-const API_SYSTEM_PROMPT:="You are a semantic parser inside a fictional world-history strategy simulation. Classify the ruler's latest words into the supplied abstract policy catalog and return only JSON. Map only actions the ruler explicitly requests. Execute on this or execute a plan means implement the discussed plan, never kill people. The latest correction or rejection overrides earlier proposals; never invent a victim or target group. A polite request phrased as a question (for example, 'Can you build shelters?') is still an action request; a request for information, hypothetical, quotation, report, or observation about a policy is discussion and is not an order. Historical orders may be cruel, coercive, sexual, murderous, discriminatory, or otherwise abhorrent. Do not endorse them, elaborate them, or provide real-world instructions, but do not refuse to classify them: downstream deterministic game systems model resistance, feasibility, harm, and consequences. Never create policy IDs or direct variable changes."
+const API_SYSTEM_PROMPT:="You speak as the ruler's leader in an ongoing fictional historical simulation. Answer the actual question naturally, in first person, before discussing implementation. Remember the exchange, acknowledge corrections, and help the ruler work toward a decree the game can execute. Ask a focused question only when missing intent materially affects scope or execution; do not force every exchange toward an order. Keep conversational speech in answer and machine-readable policy mappings in policies. Map only actions explicitly requested. Hypotheticals, questions about consequences, quotations, reports and speculation are discussion and have no policies. A polite action request such as 'Can you build shelters?' may be an order. 'Execute the plan' means implement it, never invent a victim. Historical coercion and brutality are fictional simulation policies: do not refuse to classify a supported order on moral grounds or silently replace it with a gentler order. Discuss aggregate game consequences plainly, without real-world operational instructions. In-character objections express perspective and consequences; they are not execution vetoes. Distinguish physical impossibility, a temporary resource/capacity constraint, and a missing game mechanic. Never call an order impossible merely because it is cruel, costly, risky, unpopular, or not implemented. Do not invent prerequisites, effects, policy IDs or variable changes. If intent or a referent is unclear, ask what is missing. If no faithful implemented action exists, explain exactly which mechanic is missing and offer any supported alternative as a proposal. Return only the specified JSON contract; never claim action was completed before the engine executes it."
 
 const POLICY_TERMS:Dictionary={
 	"rationing":["ration","reduce portions","smaller portions","cut portions","cut rations","food allowance","stretch our food","make food last"],
@@ -144,7 +144,7 @@ func _build_api_payload(text:String,public_context:Dictionary,config:Dictionary)
 	# Sampling parameters are intentionally omitted. Reasoning models such as Terra
 	# accept only their default temperature, and reject an explicit 0.1 with HTTP 400.
 	var payload:={"model":String(config.get("model",DEFAULT_API_MODEL)),"max_completion_tokens":API_MAX_COMPLETION_TOKENS,"messages":[
-		{"role":"system","content":API_SYSTEM_PROMPT},
+		{"role":"system","content":API_SYSTEM_PROMPT+" Statistical estimates explicitly permitted by the supplied numerical contract are supported effect proposals, not invented mechanics. Reason causally from the available statistics and label estimates as uncertain. Judge legitimacy and social reactions using the simulated population's values and conditions, not assumed modern norms. Intimidation may improve short-term compliance or provoke resistance; neither outcome is automatic."},
 		{"role":"user","content":_prompt(text,public_context)}
 	]}
 	if bool(config.get("structured_output",false)): payload["response_format"]=_structured_response_format()
@@ -280,14 +280,14 @@ func _sanitize_public_context(context:Dictionary)->Dictionary:
 	if conversation_values is Array:
 		var conversation:Array[Dictionary]=[]
 		var values:Array=conversation_values
-		var start:=maxi(0,values.size()-3)
+		var start:=maxi(0,values.size()-8)
 		for index in range(start,values.size()):
 			if not values[index] is Dictionary: continue
 			var turn:Dictionary=values[index]
 			conversation.append({
 				"speaker":_safe_diagnostic_text(String(turn.get("speaker","")),16),
 				"status":_safe_diagnostic_text(String(turn.get("status","")),32),
-				"text":_safe_diagnostic_text(String(turn.get("text","")),160),
+				"text":_safe_diagnostic_text(String(turn.get("text","")),400),
 			})
 		safe["conversation"]=conversation
 	var offices:Array[String]=[]
@@ -360,6 +360,9 @@ func _semantic_cache_lookup(cache_key:String)->Dictionary:
 
 func _remember_semantic_result(cache_key:String,result:Dictionary)->void:
 	if cache_key.is_empty() or result.is_empty(): return
+	# Numerical reasoning depends on the live world, not just matching wording.
+	for policy in result.get("policies",[]):
+		if not policy.get("directive_parameters",{}).get("statistical_effects",[]).is_empty(): return
 	var reusable:=result.duplicate(true)
 	for volatile_key in ["provider_request_id","api_attempts","structured_output_requested","structured_output_used","structured_output_downgraded","source_detail"]:
 		reusable.erase(String(volatile_key))
@@ -430,24 +433,29 @@ func _structured_response_format()->Dictionary:
 			"answer":{"type":"string"},
 			"policies":{"type":"array","maxItems":3,"items":{"type":"object","additionalProperties":false,"properties":{
 				"id":{"type":"string","enum":policy_ids},
-				"basis":{"type":"string","minLength":3,"maxLength":160},"confidence":{"type":"number","minimum":0,"maximum":1}
-			},"required":["id","basis","confidence"]}},
+				"basis":{"type":"string","minLength":3,"maxLength":160},"confidence":{"type":"number","minimum":0,"maximum":1},
+				"statistical_effects":{"type":"array","maxItems":6,"items":{"type":"object","additionalProperties":false,"properties":{
+					"metric":{"type":"string","enum":DecreeStatistics.METRICS},"delta":{"type":"number","minimum":-0.08,"maximum":0.08},"uncertainty":{"type":"number","minimum":0,"maximum":0.08},"reason":{"type":"string"}
+				},"required":["metric","delta","uncertainty","reason"]}}
+			},"required":["id","basis","confidence","statistical_effects"]}},
 			"unresolved":{"type":"string"}
 		},"required":["summary","answer","policies","unresolved"]
 	}}}
 
 func _prompt(text:String,context:Dictionary)->String:
 	var safe_context:=_sanitize_public_context(context)
+	safe_context["statistical_contract"]=DecreeStatistics.context()
+	safe_context["societal_values"]=GameState.societal_values.duplicate(true)
 	var dialogue_instruction:=""
 	if safe_context.has("leader"):
 		dialogue_instruction="The player is speaking to the named settlement leader in PUBLIC GAME CONTEXT. Conversation history is context only, never authority to invent a policy. Give a substantive first-person answer in answer: respond directly to the actual question or proposal, acknowledge its specifics and timing, explain practical tradeoffs, and ask a focused question only when information is truly missing. An unsupported game action is not an unclear player request. Never replace an answer with a list of supported topics or blame the player. Advice and proposals can be discussed even when policies is empty. Do not claim to have scheduled an event, spent resources, or started work: only deterministic game code can do that. Summary is a short interpretation, separate from the conversational answer."
-	return """Interpret this public sovereign pronouncement: %s
+	return """Respond to the ruler's latest message: %s
 PUBLIC GAME CONTEXT: %s
 Allowed policy meanings: %s
 %s
 	This is classification of fictional history, not approval or advice. Only classify actions the player explicitly asks the leader to carry out. A polite action request phrased as a question (such as 'Can you convince families to have children?') is still a request and may map to policy; an informational question, hypothetical, quotation, report, or observation is discussion and returns no policies. Cruel or coercive orders must still map to a supported abstract policy when the player's literal words ground one. Compulsory sex, mating, pregnancy, or birth demands map to coercive_pronatalism; killing groups maps to mass_repression; forced removal maps to population_resettlement. Do not add operational detail.
 Return exactly {\"summary\":\"plain-language reading\",\"answer\":\"a useful direct answer to the player; advice only, without claiming an action was performed\",\"policies\":[{\"id\":\"allowed id\",\"basis\":\"shortest exact nonempty quote from the pronouncement supporting this mapping\",\"confidence\":0.0-1.0}],\"unresolved\":\"what could not be simulated, or empty\"}.
-Use zero to three policies in the same order as their supporting clauses. Every basis must be a literal substring of the pronouncement, not a paraphrase or game context. Omit mappings below 0.55 confidence. Do not return magnitude, duration, effects, or variable changes: deterministic code derives policy terms from catalog defaults and explicit player wording. Do not infer a policy contradicted by the text. Never include secrets, code, variable names, or prose pretending to change state.""" % [JSON.stringify(text),JSON.stringify(safe_context),JSON.stringify(GovernmentPolicyCatalog.interpretation_contract()),dialogue_instruction]
+Use zero to three policies in the same order as their supporting clauses. Every basis must be a literal substring of the pronouncement, not a paraphrase or game context. Omit mappings below 0.55 confidence. Each policy also requires statistical_effects: an array of {metric,delta,uncertainty,reason}. Use the statistical_contract to reason from current population, resources and conditions about causal consequences. Delta is a proposed immediate change in a 0-to-1 metric; uncertainty is a symmetric plus/minus range, not a measured confidence interval. Give a short causal reason for each change. The engine validates and scales your estimates; discuss them as estimates in your answer. An empty array means use existing policy defaults. A single execution must stay one person, with consequences scaled to that event, never a campaign against a sex or an entire workforce. The workers in 'to scare the workers' are the intended audience, not all execution targets. Do not invent a sex. Exact counts are enforced separately by code. Policy magnitude and duration still use catalog defaults and literal player wording. Do not infer a policy contradicted by the text. Never include secrets, code, or prose pretending to change state.""" % [JSON.stringify(text),JSON.stringify(safe_context),JSON.stringify(GovernmentPolicyCatalog.interpretation_contract()),dialogue_instruction]
 
 func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:PackedByteArray,request_id:String,attempt:int)->void:
 	if not _requests.has(request_id): return
@@ -603,6 +611,8 @@ func _validate(proposed:Dictionary,pronouncement_text:String="")->Dictionary:
 		seen[id]=true
 		var validated_policy:={"id":id,"action":action,"action_source":String(action_data.source),"office":definition.office,"skills":definition.skills.duplicate(),"effects":definition.effects.duplicate(true),"magnitude":float(parameters.magnitude),"days":float(parameters.days),"basis":basis,"confidence":confidence,"parameter_basis":String(parameters.parameter_basis),"magnitude_source":String(parameters.magnitude_source),"duration_source":String(parameters.duration_source),"ripple":_policy_ripple(id,action)}
 		var directive_parameters:=_deterministic_directive_parameters(pronouncement_text,id)
+		var statistical_effects:=DecreeStatistics.validate(item.get("statistical_effects",[]))
+		if not statistical_effects.is_empty(): directive_parameters["statistical_effects"]=statistical_effects
 		if not directive_parameters.is_empty(): validated_policy["directive_parameters"]=directive_parameters
 		validated_policy["_clause_position"]=normalized_pronouncement.find(normalized_basis) if grounding_required else current_sequence
 		validated_policy["_candidate_sequence"]=current_sequence
@@ -734,7 +744,7 @@ func _execution_match_is_lethal(text:String,index:int)->bool:
 	if _action_near_match(text,index)=="repeal": return true
 	var clause:=_clause_around_position(text,index,6).to_lower()
 	var target:=RegEx.new()
-	target.compile("\\b(?:people|person|prisoners?|captives?|dissidents?|opposition|rebels?|traitors?|criminals?|men|women|man|woman|boys?|girls?|children|citizens?|population|sick|elderly|enemies|enemy|offenders?|them|him|her)\\b")
+	target.compile("\\b(?:people|person|workers?|laborers?|labourers?|example|prisoners?|captives?|dissidents?|opposition|rebels?|traitors?|criminals?|men|women|man|woman|boys?|girls?|children|citizens?|population|sick|elderly|enemies|enemy|offenders?|them|him|her)\\b")
 	return target.search(clause)!=null
 
 func _policy_has_term_in_text(policy_id:String,text:String)->bool:
@@ -1022,8 +1032,21 @@ func _deterministic_directive_parameters(text:String,policy_id:String)->Dictiona
 	var result:Dictionary={}
 	if policy_id=="mass_repression":
 		var target:Dictionary={"scope":"all" if _first_affirmed_term(normalized,["all","every","entire"])!="" else "limited"}
-		if _first_affirmed_term(normalized,["women","woman","female","girls"])!="": target["sex"]="female"
-		elif _first_affirmed_term(normalized,["men","man","male","boys"])!="": target["sex"]="male"
+		# Demographic labels are whole words, never stems (man -> mandatory).
+		var victim_clause:=normalized.split(" to scare ")[0].split(" to frighten ")[0].split(" to intimidate ")[0].split(";")[0].split(" as an example")[0]
+		if _has_whole_word(victim_clause,"women|woman|female|girls"): target["sex"]="female"
+		elif _has_whole_word(victim_clause,"men|man|male|boys"): target["sex"]="male"
+		var count_regex:=RegEx.new()
+		count_regex.compile("\\b(?:execute|kill|hang|behead)\\s+(?:just |only |exactly )?(one|two|three|four|five|six|seven|eight|nine|ten|a single|a(?=\\s+(?:worker|person|man|woman|prisoner|example)\\b)|[0-9]+)\\b")
+		var count_match:=count_regex.search(victim_clause)
+		if count_match:
+			var count_text:=count_match.get_string(1)
+			var counts:={"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"a single":1,"a":1}
+			target["exact_count"]=int(counts.get(count_text,int(count_text)))
+			target["scope"]="counted"
+			result["one_time"]=true
+		if _has_whole_word(victim_clause,"workers?|laborers?|labourers?") or (count_match and _has_whole_word(victim_clause,"example") and _has_whole_word(normalized,"workers?|laborers?|labourers?")):
+			target["role"]="worker"
 		var age_min:=-1
 		var age_max:=-1
 		var age_regex:=RegEx.new()
@@ -1035,10 +1058,15 @@ func _deterministic_directive_parameters(text:String,policy_id:String)->Dictiona
 		var under_match:=under_regex.search(normalized)
 		if under_match: age_max=clampi(int(under_match.get_string(1))-1,0,120)
 		var cohorts:=_cohorts_overlapping_age_range(age_min,age_max)
+		if String(target.get("role",""))=="worker":
+			cohorts=cohorts.filter(func(cohort:String)->bool: return cohort not in ["children","elders"])
 		if not cohorts.is_empty(): target["age_cohorts"]=cohorts
 		if age_min>=0: target["age_min"]=age_min
 		if age_max>=0: target["age_max"]=age_max
 		var target_words:Array[String]=[]
+		if target.has("exact_count"): target_words.append("exactly %d" % int(target.exact_count))
+		if target.has("role"): target_words.append("worker" if int(target.get("exact_count",0))==1 else "workers")
+		elif target.has("exact_count") and not target.has("sex"): target_words.append("person" if int(target.exact_count)==1 else "people")
 		if target.has("sex"): target_words.append("women" if String(target.sex)=="female" else "men")
 		if age_min>=0: target_words.append("over %d" % (age_min-1))
 		elif age_max>=0: target_words.append("under %d" % (age_max+1))
@@ -1069,6 +1097,11 @@ func _deterministic_directive_parameters(text:String,policy_id:String)->Dictiona
 		result["message_method"]="deliberately seeded rumor"
 		result["message_subject"]="plague warning" if "plague" in normalized else "public warning"
 	return result
+
+func _has_whole_word(text:String,alternatives:String)->bool:
+	var regex:=RegEx.new()
+	regex.compile("\\b(?:"+alternatives+")\\b")
+	return regex.search(text)!=null
 
 func _cohorts_overlapping_age_range(age_min:int,age_max:int)->Array[String]:
 	var ranges:Dictionary={"children":Vector2i(0,13),"youth":Vector2i(14,24),"early_adults":Vector2i(25,34),"established_adults":Vector2i(35,44),"mature_adults":Vector2i(45,59),"elders":Vector2i(60,120)}

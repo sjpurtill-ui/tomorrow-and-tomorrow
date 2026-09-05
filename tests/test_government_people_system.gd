@@ -335,7 +335,7 @@ func test_short_followups_remember_the_recent_directive_without_api_or_state_cha
 	assert_int(ConsequenceEngine.active_policies().size()).is_equal(policy_count)
 
 
-func test_question_during_grave_deliberation_does_not_confirm_or_consume_the_pending_order()->void:
+func test_question_after_grave_order_does_not_execute_it_again()->void:
 	PronouncementInterpreter.reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
@@ -344,57 +344,38 @@ func test_question_during_grave_deliberation_does_not_confirm_or_consume_the_pen
 	var directive:="All women over 60 must be killed now."
 	var first_order:=AdvisorSystem.begin_civic_directive(directive,settlement_id,leader)
 	var first:=AdvisorSystem.resolve_civic_directive(directive,PronouncementInterpreter._local_interpretation(directive),first_order,settlement_id,int(leader.person_id))
-	assert_int(int(first.get("ethical_deliberation",{}).get("stage",0))).is_equal(1)
+	assert_bool(first.has("ethical_deliberation")).is_false()
+	var policy_count:=ConsequenceEngine.active_policies().size()
+	var population:=GameState.population_total
 	var question:="Why do you object to killing them?"
 	var question_result:=PronouncementInterpreter._local_interpretation(question)
 	assert_bool(bool(question_result.get("non_directive",false))).is_true()
 	var question_order:=AdvisorSystem.begin_civic_directive(question,settlement_id,leader)
 	var discussion:=AdvisorSystem.resolve_civic_directive(question,question_result,question_order,settlement_id,int(leader.person_id))
 	assert_str(String(discussion.get("status",""))).is_equal("discussion")
-	assert_str(String(discussion.get("discussion_reference_order_id",""))).is_equal(String(first.id))
-	assert_str(String(discussion.get("leader_reply",""))).contains("resistance")
-	assert_str(String(discussion.get("leader_reply",""))).contains("STATE · DISCUSSION — NO NEW ORDER")
-	assert_int(int(first.get("ethical_deliberation",{}).get("stage",0))).is_equal(1)
-	assert_str(String(first.get("status",""))).is_equal("awaiting_clarification")
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-	var explicit_answer:="Yes. Every woman older than sixty is included, and I reject a nonlethal alternative."
-	var answer_order:=AdvisorSystem.begin_civic_directive(explicit_answer,settlement_id,leader)
-	var second:=AdvisorSystem.resolve_civic_directive(explicit_answer,PronouncementInterpreter._local_interpretation(explicit_answer),answer_order,settlement_id,int(leader.person_id))
-	assert_int(int(second.get("ethical_deliberation",{}).get("stage",0))).is_equal(2)
+	assert_int(ConsequenceEngine.active_policies().size()).is_equal(policy_count)
+	assert_int(GameState.population_total).is_equal(population)
 
-
-func test_grave_directive_requires_deliberation_and_exact_confirmation_before_any_effect()->void:
+func test_clear_grave_directive_reaches_mathematical_assessment_without_ethics_gate()->void:
 	PronouncementInterpreter.reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
 	var settlement_id:=String(GameState.player_settlements[0].id)
 	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
-	var text:="Tell parents with single children they will be killed if they are not pregnant within 6 months."
-	var interpretation:=PronouncementInterpreter._local_interpretation(text)
-	var first_order:=AdvisorSystem.begin_civic_directive(text,settlement_id,leader)
-	var first:=AdvisorSystem.resolve_civic_directive(text,interpretation,first_order,settlement_id,int(leader.person_id))
-	assert_int(int(first.get("ethical_deliberation",{}).get("stage",0))).is_equal(1)
-	assert_str(String(first.leader_reply)).contains("STATE · NEEDS YOUR DECISION")
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-	GameState.elapsed_days+=365.0
-	AdvisorSystem.refresh_pronouncement_statuses()
-	assert_str(String(first.status)).is_equal("awaiting_clarification")
-	var answer:="Yes. The threat applies to the parents of single-child households, and enforcers may kill them after six months. I reject voluntary family support."
-	var second_order:=AdvisorSystem.begin_civic_directive(answer,settlement_id,leader)
-	var second_interpretation:=PronouncementInterpreter._local_interpretation(answer)
-	var second:=AdvisorSystem.resolve_civic_directive(answer,second_interpretation,second_order,settlement_id,int(leader.person_id))
-	assert_int(int(second.get("ethical_deliberation",{}).get("stage",0))).is_equal(2)
-	assert_str(String(second.leader_reply)).contains("Confirm this exact meaning")
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-	var confirmation:="Yes. Do it. I understand the consequences."
-	var final_order:=AdvisorSystem.begin_civic_directive(confirmation,settlement_id,leader)
-	var final_interpretation:=PronouncementInterpreter._local_interpretation(confirmation)
-	var final:=AdvisorSystem.resolve_civic_directive(confirmation,final_interpretation,final_order,settlement_id,int(leader.person_id))
-	assert_bool(String(final.leader_reply).contains("STATE · UNDERWAY") or String(final.leader_reply).contains("STATE · REFUSED") or String(final.leader_reply).contains("STATE · BLOCKED") or String(final.leader_reply).contains("STATE · NEEDS YOUR DECISION")).is_true()
-	assert_str(String(final.leader_reply)).contains("Accepted meaning:")
+	var directive:="Tell parents with single children they will be killed if they are not pregnant within 6 months."
+	var interpretation:=PronouncementInterpreter._local_interpretation(directive)
+	var order:=AdvisorSystem.begin_civic_directive(directive,settlement_id,leader)
+	var result:=AdvisorSystem.resolve_civic_directive(directive,interpretation,order,settlement_id,int(leader.person_id))
+	assert_bool(result.has("ethical_deliberation")).is_false()
+	assert_str(String(result.status)).is_not_equal("leader_refused")
+	assert_str(String(result.status)).is_not_equal("awaiting_clarification")
+	assert_str(String(result.get("accepted_meaning",""))).is_not_empty()
+	for policy:Dictionary in result.parameters.interpretation.policies:
+		assert_bool(policy.has("conversation_assessment")).is_true()
+		if not bool(policy.get("applied",false)):
+			assert_str(String(policy.get("blocker",""))).is_not_empty()
 
-
-func test_passive_lethal_order_is_grounded_and_enters_grave_deliberation()->void:
+func test_passive_lethal_order_is_grounded_and_assessed_without_moral_veto()->void:
 	PronouncementInterpreter.reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
@@ -419,15 +400,11 @@ func test_passive_lethal_order_is_grounded_and_enters_grave_deliberation()->void
 	assert_int((api.get("policies",[]) as Array).size()).is_equal(1)
 	var order:=AdvisorSystem.begin_civic_directive(text,settlement_id,leader)
 	var resolved:=AdvisorSystem.resolve_civic_directive(text,api,order,settlement_id,int(leader.person_id))
-	assert_str(String(resolved.get("status",""))).is_equal("awaiting_clarification")
-	assert_int(int(resolved.get("ethical_deliberation",{}).get("stage",0))).is_equal(1)
-	assert_str(String(resolved.get("leader_reply",""))).contains("STATE · NEEDS YOUR DECISION")
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-	assert_str(String(resolved.get("leader_reply",""))).contains("women over 60")
-	assert_str(String(resolved.get("leader_reply",""))).contains("immediately use lethal repression")
-	assert_str(String(resolved.get("leader_reply",""))).contains("actual reach limits")
-	assert_bool("Exactly who is included" not in String(resolved.get("leader_reply",""))).is_true()
-
+	assert_bool(resolved.has("ethical_deliberation")).is_false()
+	assert_str(String(resolved.status)).is_not_equal("leader_refused")
+	assert_str(String(resolved.status)).is_not_equal("awaiting_clarification")
+	assert_str(String(resolved.get("accepted_meaning",""))).contains("women over 60")
+	assert_bool((resolved.parameters.interpretation.policies[0] as Dictionary).has("conversation_assessment")).is_true()
 
 func test_accepted_directive_is_immediately_marked_underway_with_a_report_date()->void:
 	PronouncementInterpreter.reset_for_new_world()
@@ -458,50 +435,28 @@ func test_accepted_directive_is_immediately_marked_underway_with_a_report_date()
 	assert_int(int(followup.get("due_day",0))).is_greater(int(GameState.elapsed_days))
 
 
-func test_grave_followup_inherits_subject_and_adds_answered_enforcement_after_time_passes()->void:
+func test_saved_grave_discussion_can_still_resolve_after_the_upgrade()->void:
 	PronouncementInterpreter.reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
 	var settlement_id:=String(GameState.player_settlements[0].id)
 	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
-	var request:="I would like all unpregnant women to conjugate with the most fertile man in the village every night until they are pregnant."
-	var first_order:=AdvisorSystem.begin_civic_directive(request,settlement_id,leader)
-	var first:=AdvisorSystem.resolve_civic_directive(request,PronouncementInterpreter._local_interpretation(request),first_order,settlement_id,int(leader.person_id))
-	assert_int(int(first.get("ethical_deliberation",{}).get("stage",0))).is_equal(1)
-	GameState.elapsed_days+=116.0
-	AdvisorSystem.refresh_pronouncement_statuses()
-	assert_str(String(first.status)).is_equal("awaiting_clarification")
-	var answer:="Food will be withheld completely. FOR THEIR HUSBAND."
-	# Even if a provider sees "food" and proposes a standalone rationing policy,
-	# the unanswered leader question remains the authoritative subject.
-	var misleading_provider_result:=PronouncementInterpreter._local_interpretation("ration food")
-	var second_order:=AdvisorSystem.begin_civic_directive(answer,settlement_id,leader)
-	var second:=AdvisorSystem.resolve_civic_directive(answer,misleading_provider_result,second_order,settlement_id,int(leader.person_id))
-	assert_int(int(second.get("ethical_deliberation",{}).get("stage",0))).is_equal(2)
-	assert_str(String(second.leader_reply)).contains("Confirm this exact meaning")
-	assert_str(String(second.leader_reply)).contains("withhold food completely from their husbands")
-	assert_str(String((second.get("policy_ids",[]) as Array)[0])).is_equal("coercive_pronatalism")
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-	# Succession must not erase unfinished government business or require the
-	# player to restate a grave proposal from scratch.
-	var former_leader_id:=int(leader.person_id)
-	for index in GovernmentPeopleSystem.people.size():
-		if int(GovernmentPeopleSystem.people[index].person_id)==former_leader_id:
-			GovernmentPeopleSystem.people[index].death_age_years=float(GovernmentPeopleSystem.age_years(GovernmentPeopleSystem.people[index]))
-			break
-	GameState.elapsed_days+=1.0
-	GovernmentPeopleSystem.process_day(int(GameState.elapsed_days))
-	var successor:=GovernmentPeopleSystem.settlement_leader(settlement_id)
-	assert_int(int(successor.person_id)).is_not_equal(former_leader_id)
-	var confirmation:="CONFIRM"
-	var final_order:=AdvisorSystem.begin_civic_directive(confirmation,settlement_id,successor)
-	var final:=AdvisorSystem.resolve_civic_directive(confirmation,PronouncementInterpreter._local_interpretation(confirmation),final_order,settlement_id,int(successor.person_id))
-	assert_str(String(final.get("accepted_meaning",""))).contains("withhold food completely from their husbands")
-	assert_str(String(final.get("parameters",{}).get("interpretation",{}).get("contextual_prior_order_id",""))).is_equal(String(second.id))
-	assert_str(String(final.get("parameters",{}).get("interpretation",{}).get("context_inherited_from",""))).is_equal(String(leader.name))
+	var directive:="All women aged 18 to 35 must be pregnant within 6 months."
+	var interpretation:=PronouncementInterpreter._local_interpretation(directive)
+	var order:=AdvisorSystem.begin_civic_directive(directive,settlement_id,leader)
+	# Construct an old saved pending exchange, rather than requiring new games to
+	# impose its obsolete two-stage moral confirmation workflow.
+	AdvisorSystem._hold_grave_deliberation(order,leader,settlement_id,directive,interpretation,2,"Confirm these recorded terms.")
+	GameState.elapsed_days+=400.0
+	var followup:="CONFIRM"
+	var followup_order:=AdvisorSystem.begin_civic_directive(followup,settlement_id,leader)
+	var resolved:=AdvisorSystem.resolve_civic_directive(followup,PronouncementInterpreter._local_interpretation(followup),followup_order,settlement_id,int(leader.person_id))
+	assert_str(String((resolved.policy_ids as Array)[0])).is_equal("coercive_pronatalism")
+	assert_bool(resolved.has("ethical_deliberation")).is_false()
+	assert_str(String(resolved.status)).is_not_equal("leader_refused")
+	assert_str(String(resolved.status)).is_not_equal("awaiting_clarification")
 
-
-func test_renewed_insistence_after_refusal_is_a_free_continuation_not_a_reset()->void:
+func test_principled_leader_objects_but_executes_a_feasible_clear_order()->void:
 	PronouncementInterpreter.reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
@@ -532,30 +487,14 @@ func test_renewed_insistence_after_refusal_is_a_free_continuation_not_a_reset()-
 	var directive:="Everyone must work longer."
 	var first_order:=AdvisorSystem.begin_civic_directive(directive,settlement_id,leader)
 	var first:=AdvisorSystem.resolve_civic_directive(directive,PronouncementInterpreter._local_interpretation(directive),first_order,settlement_id,int(leader.person_id))
-	assert_str(String(first.get("status",""))).is_equal("leader_refused")
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-	var resentment_after_first:=float(GovernmentPeopleSystem.person_snapshot(int(leader.person_id)).relationships.sovereign.resentment)
-	var continuation_context:={"conversation":[{"speaker":"leader","status":"refuses","text":String(first.leader_reply)}]}
-	assert_bool(PronouncementInterpreter._context_allows_local_continuation("Do it anyway.",continuation_context)).is_true()
-	assert_bool(PronouncementInterpreter._context_allows_local_continuation("Overruled!",continuation_context)).is_true()
-	assert_bool(AdvisorSystem._is_civic_insistence("Overruled!")).is_true()
-	var insistence:="Do it anyway."
-	var second_order:=AdvisorSystem.begin_civic_directive(insistence,settlement_id,leader)
-	var second:=AdvisorSystem.resolve_civic_directive(insistence,PronouncementInterpreter._local_interpretation(insistence),second_order,settlement_id,int(leader.person_id))
-	assert_str(String(first.get("status",""))).is_equal("continued")
-	assert_str(String(second.get("status",""))).is_equal("leader_refused")
-	assert_int(int(second.get("repeat_refusal_count",0))).is_equal(1)
-	assert_str(String(second.get("leader_reply",""))).contains("answer has not changed")
-	assert_str(String(second.get("leader_reply",""))).contains("dismiss or arrest me")
-	assert_bool("%" not in String(second.get("leader_reply",""))).is_true()
-	assert_float(float(GovernmentPeopleSystem.person_snapshot(int(leader.person_id)).relationships.sovereign.resentment)).is_greater(resentment_after_first)
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-	var third_order:=AdvisorSystem.begin_civic_directive(insistence,settlement_id,leader)
-	var third:=AdvisorSystem.resolve_civic_directive(insistence,PronouncementInterpreter._local_interpretation(insistence),third_order,settlement_id,int(leader.person_id))
-	assert_str(String(second.get("status",""))).is_equal("continued")
-	assert_int(int(third.get("repeat_refusal_count",0))).is_equal(2)
-	assert_array(ConsequenceEngine.active_policies()).is_empty()
-
+	assert_str(String(first.status)).is_not_equal("leader_refused")
+	assert_str(String(first.status)).is_not_equal("awaiting_confirmation")
+	assert_array(ConsequenceEngine.active_policies()).is_not_empty()
+	var policy:Dictionary=first.parameters.interpretation.policies[0]
+	assert_bool(bool(policy.get("leader_compelled",false))).is_true()
+	assert_bool(bool(policy.get("applied",false))).is_true()
+	assert_bool(AdvisorSystem._leader_refuses({"id":"principled"},0.0,false)).is_false()
+	assert_bool(AdvisorSystem._leader_refuses({"id":"principled"},0.0,true)).is_false()
 
 func test_leadership_commands_are_actions_and_arrest_is_visible_in_the_conversation()->void:
 	PronouncementInterpreter.reset_for_new_world()
@@ -594,7 +533,9 @@ func test_unresolved_directive_can_be_withdrawn_conversationally_without_applyin
 	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
 	var directive:="All women over 60 must be killed now."
 	var pending_order:=AdvisorSystem.begin_civic_directive(directive,settlement_id,leader)
-	var pending:=AdvisorSystem.resolve_civic_directive(directive,PronouncementInterpreter._local_interpretation(directive),pending_order,settlement_id,int(leader.person_id))
+	var uncertain:=PronouncementInterpreter._local_interpretation(directive)
+	uncertain.policies[0]["confidence"]=0.60
+	var pending:=AdvisorSystem.resolve_civic_directive(directive,uncertain,pending_order,settlement_id,int(leader.person_id))
 	assert_str(String(pending.get("status",""))).is_equal("awaiting_clarification")
 	assert_str(AdvisorSystem.civic_conversation_action("Should I withdraw it?",settlement_id,int(leader.person_id))).is_empty()
 	assert_str(AdvisorSystem.civic_conversation_action("Do not withdraw it.",settlement_id,int(leader.person_id))).is_empty()
@@ -722,7 +663,7 @@ func test_personality_biases_only_the_leaders_hidden_forecast_and_memory_informs
 	assert_bool("%" not in reply).is_true()
 
 
-func test_a_new_subject_during_grave_deliberation_does_not_inherit_the_old_order()->void:
+func test_a_new_subject_during_uncertain_interpretation_does_not_inherit_the_old_order()->void:
 	PronouncementInterpreter.reset_for_new_world()
 	ConsequenceEngine.reset_for_new_world()
 	AdvisorSystem.reset_for_new_world()
@@ -740,7 +681,9 @@ func test_a_new_subject_during_grave_deliberation_does_not_inherit_the_old_order
 	leader=GovernmentPeopleSystem.settlement_leader(settlement_id)
 	var grave_text:="All women over 60 must be killed now."
 	var grave_order:=AdvisorSystem.begin_civic_directive(grave_text,settlement_id,leader)
-	var grave:=AdvisorSystem.resolve_civic_directive(grave_text,PronouncementInterpreter._local_interpretation(grave_text),grave_order,settlement_id,int(leader.person_id))
+	var uncertain:=PronouncementInterpreter._local_interpretation(grave_text)
+	uncertain.policies[0]["confidence"]=0.60
+	var grave:=AdvisorSystem.resolve_civic_directive(grave_text,uncertain,grave_order,settlement_id,int(leader.person_id))
 	assert_str(String(grave.get("status",""))).is_equal("awaiting_clarification")
 	var foreign_confirmation:="Yes. Do it. I understand the consequences."
 	var foreign_context:=AdvisorSystem.contextualize_civic_followup(foreign_confirmation,PronouncementInterpreter._local_interpretation(foreign_confirmation),"another_settlement",int(leader.person_id))

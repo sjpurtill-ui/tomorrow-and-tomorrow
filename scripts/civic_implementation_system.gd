@@ -63,6 +63,7 @@ func schedule_order(order:Dictionary,day:int=-1)->Dictionary:
 		if mission_id<=0:
 			mission_id=_mission_id_from_dispatch_status(operation_result.get("status",{}),operation_kind)
 		snapshots.append({
+			"direct_effects":(policy.get("direct_effects",{}) as Dictionary).duplicate(true),
 			"id":String(policy.get("id","")),
 			"requested_magnitude":float(policy.get("requested_magnitude",policy.get("magnitude",0.0))),
 			"duration_days":duration,
@@ -126,6 +127,8 @@ func _repair_pending_snapshot(order:Dictionary,followup:Dictionary)->void:
 				break
 		if not snapshot.has("directive_parameters"):
 			snapshot["directive_parameters"]=(policy.get("directive_parameters",{}) as Dictionary).duplicate(true)
+		if not snapshot.has("direct_effects"):
+			snapshot["direct_effects"]=(policy.get("direct_effects",{}) as Dictionary).duplicate(true)
 		if not snapshot.has("operation_kind"):
 			snapshot["operation_kind"]=String(GovernmentPolicyCatalog.directive_contract(String(snapshot.get("id",""))).get("operation",""))
 		if String(snapshot.get("operation_kind",""))!="" and int(snapshot.get("mission_id",0))<=0:
@@ -238,9 +241,18 @@ func _ensure_report_in_memory(order:Dictionary,followup:Dictionary,leader:Dictio
 
 func _evaluate_policy(order_id:String,snapshot:Dictionary,current_day:int,scheduled_day:int)->Dictionary:
 	var policy_id:=String(snapshot.get("id",""))
+	var parameters:Dictionary=snapshot.get("directive_parameters",{})
+	if bool(parameters.get("one_time",false)):
+		var requested:=int(parameters.get("demographic_target",{}).get("exact_count",0))
+		var effects:Dictionary=snapshot.get("direct_effects",{})
+		var actual:=int(effects.get("population_deaths",0))
+		return {"id":policy_id,"label":"the counted action","outcome":"success" if actual==requested and requested>0 else "failure","delivery_score":1.0 if actual==requested and requested>0 else 0.0,"qualitative_evidence":DecreeStatistics.receipt(effects)+" This verifies the action only; intimidation and productivity are not guaranteed.","limitations":[],"bounded":true}
 	if String(snapshot.get("operation_kind",""))!="":
 		return _evaluate_operation(snapshot)
 	var modifier:=_modifier_for(order_id,policy_id)
+	var direct_receipt:Dictionary=snapshot.get("direct_effects",{})
+	if policy_id=="mass_repression" and direct_receipt.has("population_deaths") and int(direct_receipt.population_deaths)==0:
+		return {"id":policy_id,"label":"the execution order","outcome":"failure","delivery_score":0.0,"qualitative_evidence":"No execution was recorded. No one was removed from the population or added to the death ledger by this order.","limitations":[],"bounded":true}
 	var duration:=maxf(7.0,float(snapshot.get("duration_days",30.0)))
 	var elapsed:=maxf(0.0,float(current_day-scheduled_day))
 	var continuity:=clampf(elapsed/duration,0.0,1.0)
@@ -272,7 +284,7 @@ func _evaluate_policy(order_id:String,snapshot:Dictionary,current_day:int,schedu
 		"delivery_score":clampf(score,0.0,1.0),"planned_implementation":planned_score,
 		"current_capacity":capacity_score,"observed_evidence":evidence,"continuity":continuity,
 		"observation_summary":String(observation.get("summary","No linked result was measurable.")),
-		"qualitative_evidence":_qualitative_evidence(observation.get("metrics",[])),
+		"qualitative_evidence":DecreeStatistics.receipt(direct_receipt)+" "+_qualitative_evidence(observation.get("metrics",[])),
 		"limitations":limitations,"bounded":true,
 	}
 
@@ -317,23 +329,10 @@ func _evidence_score(metrics:Array)->float:
 
 
 func _qualitative_evidence(metrics:Array)->String:
-	var favorable:Array[String]=[]
-	var unclear:Array[String]=[]
-	var adverse:Array[String]=[]
-	for metric_variant in metrics:
-		var metric:Dictionary=metric_variant
-		var expected:=float(metric.get("expected_direction",0.0))
-		if is_zero_approx(expected): continue
-		var label:=String(metric.get("label","recorded conditions")).to_lower()
-		var directed_delta:=float(metric.get("delta",0.0))*expected
-		if directed_delta>0.0001: favorable.append(label)
-		elif directed_delta>=-0.0001: unclear.append(label)
-		else: adverse.append(label)
-	var clauses:Array[String]=[]
-	if not favorable.is_empty(): clauses.append("%s moved in the intended direction" % _natural_list(favorable))
-	if not unclear.is_empty(): clauses.append("%s showed no clear change" % _natural_list(unclear))
-	if not adverse.is_empty(): clauses.append("%s moved against the intended result" % _natural_list(adverse))
-	return "; ".join(clauses)+("." if not clauses.is_empty() else "")
+	var measured:Array[String]=[]
+	for metric in metrics:
+		measured.append("%s %.3f to %.3f (change %+.3f)" % [String(metric.get("label","condition")),float(metric.get("baseline",0)),float(metric.get("current",0)),float(metric.get("delta",0))])
+	return "; ".join(measured)+(". These are observed changes during the period; other events also affect them." if not measured.is_empty() else "")
 
 
 func _qualitative_limitation(raw:String)->String:
