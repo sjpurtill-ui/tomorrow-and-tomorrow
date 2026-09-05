@@ -7359,6 +7359,7 @@ func _commit_settlement_surface(surface: SurfaceTool, node_name: String, parent:
 		elif node_name=="PersistentDesirePaths": fabric_kind=8
 		elif node_name=="PersistentYardVariation": fabric_kind=2
 		material=_settlement_fabric_material(fabric_kind,0.74 if fabric_kind==1 else (0.62 if fabric_kind==3 else 0.48))
+		if fabric_kind==1: material.set_shader_parameter("cultivation_rows",node_name=="PersistentCultivationRows")
 	else:
 		var standard:=StandardMaterial3D.new()
 		standard.vertex_color_use_as_albedo = true
@@ -7392,6 +7393,7 @@ shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_burley, specular_disabled, depth_test_disabled;
 uniform float grain_strength = 0.5;
 uniform int fabric_kind = 0;
+uniform bool cultivation_rows = false;
 uniform float aerial_lod = 0.0;
 uniform sampler2D material_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D roof_material_atlas : source_color, filter_linear_mipmap, repeat_disable;
@@ -7873,6 +7875,13 @@ void fragment() {
 	fabric=mix(fabric,fabric*vec3(1.10,1.035,0.86),dry*0.14*grain_strength);
 	ALBEDO=fabric;
 	float material_alpha=COLOR.a;
+	if (fabric_kind==1) {
+		// Metre-scale beds must integrate into crop cover instead of flickering as
+		// isolated subpixel scratches. The broad parcel retains its crop palette.
+		float field_pixel_span=max(length(dFdx(world_position.xz)),length(dFdy(world_position.xz)));
+		float bed_visibility=1.0-smoothstep(0.00035,0.0015,field_pixel_span);
+		material_alpha*=cultivation_rows ? bed_visibility : mix(1.0,3.0,1.0-bed_visibility);
+	}
 	if (fabric_kind==5) {
 		// Roofs are occupied surface, not a translucent tint over untouched grass.
 		// Preserve the geographic boundary fade while giving resolved roofs presence.
@@ -8865,7 +8874,9 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			# Close aerial views should read the underlying soil and relief through the
 			# cultivated parcel.  Rows, hedges and drainage lines supply the identity;
 			# an opaque base turns even an organic cadastral polygon into a board-game mat.
-			field_ground_color.a=(0.09 if lod>=1 else 0.035) if status=="active" else 0.050
+			# Pixel coverage, not a mesh rebuild threshold, controls the handover to
+			# aerial crop cover in the field shader.
+			field_ground_color.a=0.10 if status=="active" else 0.050
 			# A strong centre-to-edge alpha gradient made six-sided parcels look like
 			# glowing map tokens. Worked ground is a coherent, softly edged land-cover
 			# change; rows and inherited boundaries provide its internal hierarchy.
