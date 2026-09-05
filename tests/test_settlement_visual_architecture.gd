@@ -153,6 +153,22 @@ func test_main_approach_preserves_surface_color_and_route_only_material()->void:
 	assert_float(colors[1].a).is_equal_approx(0.66,0.004)
 
 
+func test_early_and_late_roofs_face_the_sky_at_each_orientation()->void:
+	for late in [false,true]:
+		for column in 4:
+			for angle in [0.0,0.8,2.1]:
+				var side:=Vector2.from_angle(angle)
+				var depth:=Vector2(-side.y,side.x)
+				var surface:=SurfaceTool.new()
+				surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+				renderer._append_roof_footprint(surface,Vector3.ZERO,Vector2.ZERO,side*0.003,depth*0.005,Color.WHITE,0.003,Vector2i(column,0),1,"timber_ridge",31,late)
+				surface.generate_normals()
+				var mesh:=surface.commit()
+				var normals:PackedVector3Array=mesh.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+				assert_int(normals.size()).is_greater(0)
+				for normal in normals: assert_float(normal.y).is_greater(0.0)
+
+
 func test_actual_founding_focus_changes_metropolitan_topology_not_only_tint()->void:
 	GameState.settlement_name="Alder Reach"
 	var profile:Dictionary=renderer._settlement_expansion_visual_profile({"classification":"metropolis","population":2400000})
