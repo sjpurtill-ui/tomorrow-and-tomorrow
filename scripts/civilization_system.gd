@@ -4148,7 +4148,8 @@ func player_effects()->Dictionary:
 			var resistance:=float(region.get("resistance",0.0))
 			var integration:=float(region.get("integration",0.0))
 			var governance:=OCCUPATION_GOVERNANCE.state(region)
-			var function:=integration*(1.0-float(region.get("damage",0.0)))*(.4+.6*float(governance.welfare))
+			var extraction:=float(OCCUPATION_GOVERNANCE.policy(region).extraction)
+			var function:=(integration*.7+extraction*.3)*(1.0-float(region.get("damage",0.0)))*(.4+.6*float(governance.welfare))
 			var damage:=float(region.get("damage",0.0))
 			occupied_population+=region_population
 			resistance_load+=region_population*resistance
@@ -4159,7 +4160,8 @@ func player_effects()->Dictionary:
 			if String(region.get("role",""))=="granary": occupation_food_transfer+=region_population*0.025*function*(1.0-resistance)
 			if String(region.get("role",""))=="market": integrated_market_bonus+=0.035*function
 			if String(region.get("role",""))=="works": occupied_production_bonus+=0.045*function
-	var occupation_burden:=clampf(resistance_load/maxf(1.0,GameState.population_exact+occupied_population),0.0,1.0)
+	var community_effects:Dictionary=MilitaryCampaign.occupation_transfers.effects()
+	var occupation_burden:=clampf(resistance_load/maxf(1.0,GameState.population_exact+occupied_population)+float(community_effects.grievance)*.4+float(community_effects.inequality)*.3,0.0,1.0)
 	var war_exhaustion:=clampf(active_war_exhaustion/maxf(1.0,float(war_count)),0.0,1.0) if war_count>0 else 0.0
 	var commitments:=player_population_commitments()
 	var scout_personnel:=float(_captured_player_scout_count())

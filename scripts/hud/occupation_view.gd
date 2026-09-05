@@ -5,6 +5,11 @@ var region_id:String=""
 var summary:Label
 var detail:Label
 var feedback:Label
+var transfer_count:SpinBox
+var transfer_status:OptionButton
+var transfer_report:Label
+var community_choice:OptionButton
+var community_signature:String=""
 var timer:float=0
 var policy_buttons:Dictionary={}
 
@@ -14,7 +19,7 @@ static func open(civ:String,region:String)->void:
 	Engine.get_main_loop().root.add_child(view)
 
 func _ready()->void:
-	layer=89
+	layer=79
 	var background:=ColorRect.new()
 	background.color=Color("142029"); background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
@@ -37,6 +42,18 @@ func _ready()->void:
 	detail=Label.new(); detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; people.add_child(detail)
 	for order:String in ["raze","reconstruct"]:
 		var button:=Button.new(); button.text="RAZE INFRASTRUCTURE • residents remain" if order=="raze" else "AUTHORIZE RECONSTRUCTION"; button.pressed.connect(_order.bind(order)); people.add_child(button); policy_buttons[order]=button
+	var transfers:=VBoxContainer.new(); transfers.name="Movement & status"; tabs.add_child(transfers)
+	var explanation:=Label.new(); explanation.text="Residents travel to your home settlement. A continuous land route, travel rations and available housing are required. Food leaves the occupied region at departure; people arrive after the journey. Penal status means imposed coercive labor, not evidence of individual guilt."; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; transfers.add_child(explanation)
+	var transfer_row:=HBoxContainer.new();transfers.add_child(transfer_row)
+	transfer_count=SpinBox.new();transfer_count.min_value=1;transfer_count.max_value=1000000000;transfer_count.value=5;transfer_row.add_child(transfer_count)
+	transfer_status=OptionButton.new()
+	for key:String in MilitaryCampaign.occupation_transfers.STATUSES: transfer_status.add_item(MilitaryCampaign.occupation_transfers.STATUSES[key])
+	transfer_row.add_child(transfer_status)
+	var send:=Button.new();send.text="REVIEW TRANSFER";send.pressed.connect(_preview_transfer);transfer_row.add_child(send)
+	var depart:=Button.new();depart.text="SEND RESIDENTS";depart.pressed.connect(_depart_transfer);transfer_row.add_child(depart)
+	transfer_report=Label.new();transfer_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;transfers.add_child(transfer_report)
+	community_choice=OptionButton.new();transfers.add_child(community_choice)
+	var rights:=Button.new();rights.text="GRANT EQUAL CITIZENSHIP";rights.pressed.connect(_emancipate);transfers.add_child(rights)
 	feedback=Label.new(); feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; column.add_child(feedback)
 	_refresh()
 
@@ -69,8 +86,35 @@ Independence support %d%% • Administrative legitimacy %d%%
 Infrastructure damage %d%% • %s
 
 Residents retain their origin and remain in this region. Razing buildings does not kill or move them. Reform changes legal treatment; it does not erase prior harm." % [roundi(float(data.welfare)*100),roundi(float(data.trust)*100),roundi(float(data.local_institutions)*100),roundi(float(data.grievance)*100),roundi(float(data.inherited_grievance)*100),roundi(float(data.inequality)*100),roundi(float(data.support)*100),roundi(float(data.legitimacy)*100),roundi(float(data.damage)*100),"reconstruction authorized" if bool(data.reconstruction) else ("ruins persist" if bool(data.ruined) else "inhabited settlement")]
+	var transfer_lines:Array[String]=[]
+	for transfer:Dictionary in MilitaryCampaign.occupation_transfers.data.transfers:
+		transfer_lines.append("%d residents from %s • %.0f km remaining • %.0f rations%s" % [int(transfer.people),String(transfer.origin_region_name),maxf(0,float(transfer.distance)-float(transfer.traveled)),float(transfer.food)," • waiting for housing" if bool(transfer.arrived) else ""])
+	transfer_report.text="TRAVELING GROUPS\n"+("\n".join(transfer_lines) if not transfer_lines.is_empty() else "No groups traveling.")
+	var signature:=JSON.stringify(MilitaryCampaign.occupation_transfers.data.groups)
+	if signature!=community_signature:
+		community_signature=signature
+		var selected_id:=community_choice.get_selected_id() if community_choice.selected>=0 else -1
+		community_choice.clear()
+		for group:Dictionary in MilitaryCampaign.occupation_transfers.data.groups:
+			community_choice.add_item("%s • %s • grievance %d%%" % [String(group.origin_name),MilitaryCampaign.occupation_transfers.STATUSES[String(group.status)],roundi(float(group.grievance)*100)],int(group.id))
+			if int(group.id)==selected_id:community_choice.select(community_choice.item_count-1)
 	var cooldown:=int(GameState.elapsed_days)-int(data.last_order_day)<30
 	for key:String in policy_buttons:
 		var button:Button=policy_buttons[key]
 		button.disabled=cooldown or key==String(data.policy)
 		button.tooltip_text="Current policy" if key==String(data.policy) else ("Wait until day %d for another administrative order." % (int(data.last_order_day)+30) if cooldown else "")
+
+func _transfer_status()->String:
+	return String(MilitaryCampaign.occupation_transfers.STATUSES.keys()[transfer_status.selected])
+func _preview_transfer()->void:
+	var result:Dictionary=MilitaryCampaign.occupation_transfers.preview(civ_id,region_id,int(transfer_count.value),_transfer_status())
+	feedback.text=String(result.error) if result.has("error") else "%d residents • %.0f km • about %d days • %.0f travel rations from the occupied region." % [int(result.people),float(result.distance),int(result.days),float(result.food)]
+func _depart_transfer()->void:
+	var result:Dictionary=MilitaryCampaign.occupation_transfers.depart(civ_id,region_id,int(transfer_count.value),_transfer_status())
+	feedback.text=String(result.get("error",result.get("message","")))
+	_refresh()
+func _emancipate()->void:
+	if community_choice.selected<0:return
+	var result:Dictionary=MilitaryCampaign.occupation_transfers.emancipate(community_choice.get_item_id(community_choice.selected))
+	feedback.text=String(result.get("error",result.get("message","")))
+	_refresh()

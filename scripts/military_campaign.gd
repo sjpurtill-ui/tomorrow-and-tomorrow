@@ -77,6 +77,7 @@ var active_siege:Dictionary={}
 var siege_history:Array[Dictionary]=[]
 var war_reputation:Dictionary={"mercy":0.0,"fear":0.0,"grievance":0.0}
 var occupation_forces:Array[Dictionary]=[]
+var occupation_transfers=preload("res://scripts/occupation_transfers.gd").new()
 var field_armies:Array[Dictionary]=[]
 var next_field_army_id:=1
 ## Runner messages in flight from field armies back to the settlement. Until
@@ -119,6 +120,7 @@ func _process(_delta:float)->void:
 
 
 func reset_for_new_world()->void:
+	occupation_transfers.reset()
 	last_world_seed=GameState.world_seed
 	last_processed_day=int(GameState.elapsed_days)
 	home_army={}
@@ -2313,6 +2315,7 @@ func export_state()->Dictionary:
 		"siege_history":siege_history.duplicate(true),
 		"war_reputation":war_reputation.duplicate(true),
 		"occupation_forces":occupation_forces.duplicate(true),
+		"occupation_transfers":occupation_transfers.data.duplicate(true),
 		"field_armies":field_armies.duplicate(true),
 		"runner_messages":runner_messages.duplicate(true),
 		"army_templates":army_templates.duplicate(true),
@@ -2323,6 +2326,9 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if not payload.get("occupation_transfers",{}) is Dictionary: return {"error":"Invalid occupation population state."}
+	var transfer_errors:Array[String]=preload("res://scripts/occupation_transfers.gd").validate(payload.get("occupation_transfers",{}))
+	if not transfer_errors.is_empty(): return {"error":"Invalid occupation population state.","details":transfer_errors}
 	if not payload.get("runner_messages",[]) is Array: return {"error":"Invalid runner messages."}
 	for message in payload.get("runner_messages",[]):
 		if not message is Dictionary or not message.get("snapshot",{}) is Dictionary or not CivilizationSystem.city_intelligence.valid_carried(message.get("snapshot",{})): return {"error":"Invalid carried city observation."}
@@ -2571,6 +2577,8 @@ func validate_state()->Array[String]:
 	return errors
 
 func _apply_imported_state(payload:Dictionary)->void:
+	occupation_transfers.reset()
+	occupation_transfers.data.merge(payload.get("occupation_transfers",{}).duplicate(true),true)
 	active_siege=(payload.get("active_siege",{}) as Dictionary).duplicate(true)
 	siege_history.assign(payload.get("siege_history",[]))
 	last_processed_day=int(payload.get("last_processed_day",int(GameState.elapsed_days)))
@@ -3189,6 +3197,7 @@ func _process_military_day()->void:
 	_process_field_army_movement_day()
 	_process_army_runners_day()
 	_process_siege_day()
+	occupation_transfers.advance(int(GameState.elapsed_days))
 	_process_threat_day()
 	if not active_engagement.is_empty(): return
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
@@ -4168,7 +4177,6 @@ func begin_siege()->Dictionary:
 	if active_threat.is_empty() or bool(active_threat.get("field_encounter",false)) or String(active_threat.get("incident_kind","campaign"))=="raid": return {"error":"A siege needs a settlement campaign, not a passing raid or field encounter."}
 	var offensive:=String(active_threat.get("campaign_mode","defensive"))=="offensive"
 	if not offensive and not String(active_threat.get("target_region_id","")).is_empty(): return {"error":"This siege interface currently supports the home settlement and field-army offensives; defend the occupation through its existing battle controls."}
-	if not offensive and int(settlement_defense.get("level",settlement_defense.get("stage",0)))<1: return {"error":"Build settlement defenses before sheltering behind them."}
 	var army_id:=int(active_threat.get("field_army_id",0))
 	var index:=_field_army_index(army_id)
 	if offensive and (index<0 or int(field_armies[index].get("troops",0))<=0): return {"error":"The investing army is no longer available."}
@@ -4370,3 +4378,39 @@ func training_progress_snapshot()->Dictionary:
 		if reasons.is_empty(): reasons.append("Normal instruction pace")
 		result[int(order.id)]={"id":int(order.id),"count":int(order.count),"unit":String(order.unit),"weapon":weapon,"progress":progress,"required":required,"percent":roundi(clampf(progress/required,0,1)*100),"rate":rate,"estimated_days":ceili(maxf(0,required-progress)/rate) if rate>0 else -1,"elapsed_days":maxi(0,int(GameState.elapsed_days)-int(order.start_day)) if order.has("start_day") else -1,"reason":" · ".join(reasons),"injured":maxi(0,int(order.get("initial_count",order.count))-int(order.count))}
 	return result
+
+func siege_visual_snapshot(siege_id:String="")->Dictionary:
+	var operation:Dictionary=active_siege
+	if operation.is_empty() or (siege_id!="" and String(operation.id)!=siege_id):
+		operation={}
+		for past:Dictionary in siege_history:
+			if siege_id=="" or String(past.id)==siege_id: operation=past;break
+	if operation.is_empty():return {}
+	var offensive:=String(operation.mode)=="offensive"
+	var city:Dictionary=CivilizationSystem.city_intelligence.known("player",String(operation.region_id)) if offensive else {}
+	var population:=SettlementModel.primary_population_exact() if not offensive else -1.0
+	var damage:=0.0
+	var defense_stage:=int(settlement_defense.get("stage",0)) if not offensive else -1
+	var description:="Your settlement and its current defenses."
+	if offensive:
+		var fields:Dictionary=city.get("fields",{})
+		var count:Dictionary=fields.get("population",{})
+		if not count.is_empty():population=(float(count.low)+float(count.high))*.5
+		var fort:Dictionary=fields.get("fortification",{})
+		if not fort.is_empty():
+			# Foreign reports currently describe strength, not architectural material.
+			# Show reported earthworks, never infer stone walls from an abstract score.
+			defense_stage=2 if float(fort.low)>.1 else 0
+		var ruin:Dictionary=fields.get("damage",{})
+		if not ruin.is_empty():damage=(float(ruin.low)+float(ruin.high))*.5
+		description="Representative layout from dated reports. Building materials and exact interior layout are unconfirmed."
+	var own_force:Dictionary={}
+	if offensive:
+		var index:=_field_army_index(int(operation.get("army_id",0)))
+		if index>=0:own_force=field_armies[index].duplicate(true)
+	else:own_force=_home_defense_force()
+	var battle:Dictionary={}
+	var seed_value:=int((operation.get("threat",{}) as Dictionary).get("seed",-1))
+	if not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value:battle=engagement_snapshot()
+	elif not battle_history.is_empty() and int(battle_history[0].get("seed",-2))==seed_value:battle=battle_history[0].duplicate(true)
+	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(GameState.settlement_name if GameState.settlement_name!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not battle.is_empty() and not active_engagement.is_empty(),"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
