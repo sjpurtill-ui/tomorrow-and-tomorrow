@@ -26,6 +26,9 @@ func advance(budget_usec:int=2500)->bool:
 	var started:=Time.get_ticks_usec()
 	var total:=vertices.size()
 	var spacing:=span/float(resolution-1)
+	# Close relief uses a twenty-metre derivative baseline so ridge cusps do not
+	# become hard lighting seams. Geometry and authoritative heights are unchanged.
+	var normal_radius:=maxi(1,ceili(0.02/spacing))
 	while phase<2:
 		var x_index:=cursor%resolution
 		var z_index:=cursor/resolution
@@ -37,8 +40,8 @@ func advance(budget_usec:int=2500)->bool:
 			heights[cursor]=height
 			colors[cursor]=sample_color.call(x,z,height)
 		else:
-			var left:=maxi(0,x_index-1); var right:=mini(resolution-1,x_index+1)
-			var up:=maxi(0,z_index-1); var down:=mini(resolution-1,z_index+1)
+			var left:=maxi(0,x_index-normal_radius); var right:=mini(resolution-1,x_index+normal_radius)
+			var up:=maxi(0,z_index-normal_radius); var down:=mini(resolution-1,z_index+normal_radius)
 			var dx:=(vertices[z_index*resolution+right].y-vertices[z_index*resolution+left].y)/(float(right-left)*spacing)
 			var dz:=(vertices[down*resolution+x_index].y-vertices[up*resolution+x_index].y)/(float(down-up)*spacing)
 			normals[cursor]=Vector3(-dx,1.0,-dz).normalized()

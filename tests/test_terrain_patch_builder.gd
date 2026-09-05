@@ -30,3 +30,14 @@ func test_incremental_and_uninterrupted_builds_are_identical()->void:
 	assert_bool(sliced.heights==complete.heights).is_true()
 	assert_bool(sliced.normals==complete.normals).is_true()
 	assert_bool(sliced.indices==complete.indices).is_true()
+
+func test_close_ridge_shading_is_smoothed_without_flattening_geometry()->void:
+	var ridge:=func(x:float,_z:float)->float:return -absf(x)*0.2
+	var builder:=BUILDER.new(65,0.128,Vector2.ZERO,ridge,func(_x:float,_z:float,_h:float)->Color:return Color.WHITE)
+	while not builder.advance(100000): pass
+	var row:=32*65
+	for index in range(1,64):
+		assert_float(builder.normals[row+index].distance_to(builder.normals[row+index-1])).is_less(0.035)
+		assert_float(builder.vertices[row+index].y).is_equal_approx(-absf(builder.vertices[row+index].x)*0.2+0.0006,0.000001)
+	assert_float(builder.normals[row+8].x).is_less(-0.15)
+	assert_float(builder.normals[row+56].x).is_greater(0.15)

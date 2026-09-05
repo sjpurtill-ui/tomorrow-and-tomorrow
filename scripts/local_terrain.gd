@@ -3179,6 +3179,7 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 	detail_surface_center=Vector2(center.x,center.z)
 	var resolution := 112
 	var span := 0.42
+	var normal_cache:Dictionary={}
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for z in resolution - 1:
@@ -3187,10 +3188,16 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 				var world_x := center.x + (float(corner.x) / (resolution - 1) - 0.5) * span
 				var world_z := center.z + (float(corner.y) / (resolution - 1) - 0.5) * span
 				var height := _close_surface_height_at(world_x, world_z) + 0.00045
+				# Match regional relief shading instead of lighting the micro-skin separately.
+				if not normal_cache.has(corner):
+					var normal_step:=0.02
+					var dx:=(_height_at(world_x+normal_step,world_z)-_height_at(world_x-normal_step,world_z))/(normal_step*2.0)
+					var dz:=(_height_at(world_x,world_z+normal_step)-_height_at(world_x,world_z-normal_step))/(normal_step*2.0)
+					normal_cache[corner]=Vector3(-dx,1.0,-dz).normalized()
+				surface.set_normal(normal_cache[corner])
 				surface.set_color(_terrain_color_at(world_x, world_z, height))
 				surface.add_vertex(Vector3(world_x, height, world_z))
 	surface.index()
-	surface.generate_normals()
 	detail_terrain_patch = MeshInstance3D.new()
 	detail_terrain_patch.name = "SettlementGroundDetail"
 	detail_terrain_patch.mesh = surface.commit()
