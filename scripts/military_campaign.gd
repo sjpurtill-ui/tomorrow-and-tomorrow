@@ -716,12 +716,20 @@ func occupation_action_availability(civ_id:String,region_id:String,action:String
 	var force:=occupation_force_for_region(civ_id,region_id)
 	match action:
 		"reinforce_occupation":
-			if int(home_army.get("troops",0))<=0: return {"error":"No trained field personnel are available to reinforce this occupation."}
+			var source_id:=0
+			var available:=0
+			for army in field_armies:
+				if String(army.get("location_id",""))==region_id and String(army.get("status",""))=="stationed" and int(army.get("troops",0))>available:
+					source_id=int(army.army_id); available=int(army.troops)
+			if available<=0: return {"error":"March a field army to this region first. Reinforcements must arrive before joining its garrison."}
 			var required:=CivilizationSystem.occupation_requirement(CivilizationSystem.civilizations[CivilizationSystem._civilization_index(civ_id)],region)
 			var gap:=maxi(1,ceili(required)-int(force.get("troops",0)))
-			return {"ok":true,"amount":mini(gap,int(home_army.get("troops",0))),"required":required}
+			return {"ok":true,"amount":mini(gap,available),"required":required,"source_army_id":source_id}
 		"evacuate_occupation":
 			if force.is_empty() or int(force.get("troops",0))<=0: return {"error":"No occupation force is stationed here."}
+			if field_armies.size()>=ABSOLUTE_MAX_FIELD_ARMIES: return {"error":"The field-force table is full. Return and dissolve one army before forming this withdrawal column."}
+			if not active_engagement.is_empty(): return {"error":"Finish the active battle before ordering a withdrawal march."}
+			if _movement_destination("player_home").is_empty(): return {"error":"No known home destination is available for this return march."}
 			return {"ok":true,"amount":int(force.get("troops",0))}
 	return {"error":"Unknown occupation order."}
 
@@ -731,8 +739,8 @@ func reinforce_occupation(civ_id:String,region_id:String)->Dictionary:
 	if availability.has("error"): return availability
 	var region:=CivilizationSystem.region_snapshot(civ_id,region_id)
 	var existing_index:=_occupation_force_index(civ_id,region_id)
-	if existing_index<0: return establish_occupation_force(civ_id,region,float(availability.required))
-	var detached:=_detach_occupation_formations(int(availability.amount))
+	if existing_index<0: return establish_occupation_force(civ_id,region,float(availability.required),int(availability.source_army_id))
+	var detached:=_detach_field_army_formations(int(availability.source_army_id),int(availability.amount))
 	var force:Dictionary=occupation_forces[existing_index]
 	var combined:Array=force.get("formations",[]).duplicate(true)
 	combined.append_array(detached)
@@ -749,9 +757,25 @@ func evacuate_occupation(civ_id:String,region_id:String)->Dictionary:
 	var availability:=occupation_action_availability(civ_id,region_id,"evacuate_occupation")
 	if availability.has("error"): return availability
 	var region:=CivilizationSystem.region_snapshot(civ_id,region_id)
-	var result:=remove_occupation_force(civ_id,region_id,true)
-	result["ok"]=true
-	result["message"]="The occupation force left %s; surviving personnel returned to the recruit reserve and its issued equipment returned to stores. Control is now dangerously unsupported." % String(region.name)
+	var occupation_index:=_occupation_force_index(civ_id,region_id)
+	var force:Dictionary=occupation_forces[occupation_index].duplicate(true)
+	var army_id:=next_field_army_id
+	var position:Dictionary=CivilizationSystem.city_intelligence.site(region_id).get("position",{})
+	if not CivilizationSystem.city_intelligence.valid_point(position): return {"error":"The occupation's location is unavailable; no return route can be issued."}
+	# Transfer the complete record, including injuries, captives and issued gear.
+	# A withdrawal can exceed normal command capacity but never the hard bound.
+	force.merge({"army_id":army_id,"name":"Withdrawal from %s" % String(region.name),"status":"stationed","location_id":region_id,"location_name":String(region.name),"position":position.duplicate(true),"destination_id":"","distance_total_km":0.0,"distance_remaining_km":0.0,"runner_count":RUNNERS_PER_ARMY,"last_runner_departure_day":int(GameState.elapsed_days)},true)
+	force["last_report"]=_army_report_snapshot(force)
+	field_armies.append(force)
+	var result:=return_field_army(army_id)
+	if result.has("error"):
+		field_armies.pop_back()
+		return result
+	next_field_army_id+=1
+	occupation_forces.remove_at(occupation_index)
+	army_changed.emit(home_army.duplicate(true))
+	result["army_id"]=army_id
+	result["message"]="The garrison is marching home from %s. Its people and equipment remain with the column until it arrives; the region is now unsupported." % String(region.name)
 	return result
 
 
