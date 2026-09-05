@@ -11896,7 +11896,7 @@ func _refresh_foreign_formation_markers()->void:
 		var display_offset:Dictionary=view.get("display_offset",{})
 		world_position.x+=float(display_offset.get("x",0.0))
 		world_position.z+=float(display_offset.get("z",0.0))
-		world_position.y=_height_at(world_position.x,world_position.z)+0.15
+		world_position.y=_height_at(world_position.x,world_position.z)+WarfareMapPresentation.marker_ground_clearance(camera.size if camera else 190.0)
 		var marker:Node3D=foreign_formation_markers.get(sighting_id,null)
 		if marker==null or not is_instance_valid(marker):
 			marker=_create_warfare_formation_marker("Observed_%s" % sighting_id,false)
@@ -11942,7 +11942,7 @@ func _refresh_player_field_army_markers()->void:
 		var display_offset:Dictionary=view.get("display_offset",{})
 		world_position.x+=float(display_offset.get("x",0.0))
 		world_position.z+=float(display_offset.get("z",0.0))
-		world_position.y=_height_at(world_position.x,world_position.z)+0.18
+		world_position.y=_height_at(world_position.x,world_position.z)+WarfareMapPresentation.marker_ground_clearance(camera.size if camera else 190.0)
 		var marker:Node3D=player_field_army_markers.get(army_id,null)
 		if marker==null or not is_instance_valid(marker):
 			marker=_create_warfare_formation_marker("PlayerFieldArmy_%s" % army_id,true)

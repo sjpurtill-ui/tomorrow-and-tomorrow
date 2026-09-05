@@ -162,6 +162,48 @@ func test_regional_stacked_armies_collapse_to_one_aggregate_label()->void:
 		occupied_display_slots[slot]=true
 
 
+func test_close_separated_armies_keep_individual_labels_and_locations()->void:
+	var first:=_army(1,100)
+	var second:=_army(2,200)
+	first.position={"x":0.0,"z":0.0}
+	second.position={"x":0.3,"z":0.0}
+	var snapshot:=PRESENTATION.build_snapshot(0.7,[first,second],[],[],[],{},0)
+	for view in snapshot.player:
+		assert_bool(bool(view.show_label)).is_true()
+		assert_int(int(view.get("cluster_count",0))).is_equal(1)
+		assert_float(float(view.display_offset.x)).is_equal(0.0)
+		assert_float(float(view.display_offset.z)).is_equal(0.0)
+
+
+func test_close_distinct_opponents_do_not_share_a_contact_lane()->void:
+	var army:=_army(1,100)
+	army.position={"x":0.0,"z":0.0}
+	var sighting:=_foreign()
+	sighting.position={"x":0.3,"z":0.0}
+	var snapshot:=PRESENTATION.build_snapshot(0.7,[army],[sighting],[],[],{},0)
+	assert_bool(bool(snapshot.player[0].get("contested_location",false))).is_false()
+	assert_bool(bool(snapshot.foreign[0].get("contested_location",false))).is_false()
+
+
+func test_close_colocated_armies_still_receive_separate_counter_slots()->void:
+	var first:=_army(1,100)
+	var second:=_army(2,200)
+	first.position={"x":0.0,"z":0.0}
+	second.position={"x":0.0,"z":0.0}
+	var snapshot:=PRESENTATION.build_snapshot(0.7,[first,second],[],[],[],{},0)
+	assert_float(absf(float(snapshot.player[0].display_offset.x)-float(snapshot.player[1].display_offset.x))).is_greater(PRESENTATION.marker_scale(0.7)*6.0)
+	var labels:Array=snapshot.player.filter(func(view:Dictionary)->bool: return bool(view.show_label))
+	assert_int(labels.size()).is_equal(1)
+	assert_str(String(labels[0].label)).contains("2 ARMIES")
+
+
+func test_counter_clearance_tracks_close_zoom_and_caps_regionally()->void:
+	assert_float(PRESENTATION.marker_ground_clearance(0.7)).is_less(0.001)
+	assert_float(PRESENTATION.marker_ground_clearance(0.001)).is_greater(0.0)
+	assert_float(PRESENTATION.marker_ground_clearance(320.0)).is_equal(0.18)
+	assert_float(PRESENTATION.marker_ground_clearance(12000.0)).is_equal(0.18)
+
+
 func test_regional_foreign_stack_uses_unique_nonoverlapping_counter_slots()->void:
 	var sightings:Array=[]
 	for sighting_id in 8:

@@ -31,6 +31,12 @@ static func marker_scale(camera_size:float)->float:
 	return clampf(camera_size*0.016,0.0005,32.0)
 
 
+static func marker_ground_clearance(camera_size:float)->float:
+	# Coordinates are kilometres: a fixed .18 lift floats a close counter 180m
+	# above its formation. Retain regional clearance, scale it down for inspection.
+	return clampf(camera_size*0.0008,0.0005,0.18)
+
+
 static func formation_echelon(personnel:int)->int:
 	# Four visual bars communicate the order of magnitude of a formation without
 	# making its map node count proportional to troop count. A billion-person force
@@ -158,7 +164,7 @@ static func _apply_counter_stack_offsets(views:Array[Dictionary],camera_size:flo
 	for view in views: view["display_offset"]={"x":0.0,"z":0.0}
 	if views.size()<2: return
 	var counter_scale:=marker_scale(camera_size)
-	var clusters:=_cluster_views(views,maxf(0.8,counter_scale*5.4))
+	var clusters:=_cluster_views(views,maxf(minf(0.8,camera_size*0.08),counter_scale*5.4))
 	for cluster_variant in clusters:
 		var cluster:Array=cluster_variant
 		if cluster.size()<2: continue
@@ -182,7 +188,7 @@ static func _apply_cross_faction_counter_lanes(player:Array[Dictionary],foreign:
 	# one another. The displacement is screen-scale bounded and never changes simulation
 	# coordinates, movement distance, or combat membership.
 	if player.is_empty() or foreign.is_empty(): return
-	var proximity:=maxf(2.5,marker_scale(camera_size)*6.4)
+	var proximity:=maxf(minf(2.5,camera_size*0.10),marker_scale(camera_size)*6.4)
 	var player_contested:Dictionary={}
 	var foreign_contested:Dictionary={}
 	for player_index in player.size():
@@ -223,7 +229,7 @@ static func _apply_formation_label_budget(views:Array[Dictionary],camera_size:fl
 		budget=6 if band in ["ground","local"] else (4 if band=="regional" else 0)
 	for view in views: view["show_label"]=false
 	if budget<=0: return
-	var clusters:=_cluster_views(views,maxf(0.5,camera_size*(0.035 if band in ["ground","local"] else 0.065)))
+	var clusters:=_cluster_views(views,maxf(minf(0.5,camera_size*0.035),camera_size*(0.035 if band in ["ground","local"] else 0.065)))
 	var leaders:Array[Dictionary]=[]
 	for cluster_variant in clusters:
 		var cluster:Array=cluster_variant
