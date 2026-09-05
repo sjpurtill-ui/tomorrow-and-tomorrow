@@ -33,7 +33,8 @@ func _ready()->void:
 		_expect(label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"army label inherits the regional marker scale")
 		_expect(_render_element_count(marker)<=16,"one aggregate player icon exceeds the fixed render-element budget")
 		_expect(marker.get_node_or_null("RoleGlyphPrimary")!=null and marker.get_node_or_null("RoleGlyphFourth")!=null,"aggregate icon is missing its reusable silhouette parts")
-		_expect((marker.get_node("StrengthLabel") as Label3D).text.contains("SOLDIERS"),"army icon has no explicit soldier count")
+		_expect((marker.get_node("StrengthLabel") as Label3D).text=="8.0K","army icon has no explicit compact soldier count")
+		_expect(marker.get_node_or_null("CommandSpine")==null,"counter retains a bar obscuring the centered weapon")
 		_expect(marker.get_node_or_null("RoleInfantryA")==null and marker.get_node_or_null("RoleArmoredHull")==null,"aggregate counter still retains dormant role-specific branches")
 		for historical_unit in ["levy","line_infantry","skirmisher","cavalry","siege_engineer","field_artillery","rifle_infantry","machine_gun_company","motorized_infantry","armored_formation","modern_artillery"]:
 			terrain._configure_warfare_role_glyph(marker,"infantry",historical_unit)
@@ -169,6 +170,16 @@ func _ready()->void:
 		terrain._apply_warfare_formation_view(grounded_counter,view)
 		_expect(detail_label.visible and not compact_label.visible,"clear army label does not return after leaving HUD obstruction")
 		detail_label.position=saved_label_position
+		var saved_yaw:float=terrain.camera_yaw
+		for yaw in [0.0,1.2,2.6]:
+			terrain.camera_yaw=yaw
+			terrain._update_camera()
+			terrain._apply_warfare_formation_view(grounded_counter,view)
+			var counter_screen:Vector2=terrain.camera.unproject_position(grounded_counter.global_position)
+			var count_screen:Vector2=terrain.camera.unproject_position(compact_label.global_position)
+			_expect(count_screen.y>counter_screen.y,"troop count stops sitting below counter after camera rotation")
+		terrain.camera_yaw=saved_yaw
+		terrain._update_camera()
 	if not failures.is_empty():
 		for failure in failures: push_error(failure)
 		get_tree().quit(1)

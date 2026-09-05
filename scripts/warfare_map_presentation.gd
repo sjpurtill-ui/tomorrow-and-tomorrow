@@ -494,3 +494,12 @@ static func compact_count(value:int)->String:
 	if value>=1_000_000: return "%.2fM" % (float(value)/1_000_000.0)
 	if value>=1_000: return "%.1fK" % (float(value)/1_000.0)
 	return str(value)
+
+
+static func counter_strength(view:Dictionary)->String:
+	if view.has("troops"): return compact_count(maxi(0,int(view.troops)))
+	var low:=maxi(0,int(view.get("strength_low",0)))
+	var high:=maxi(low,int(view.get("strength_high",0)))
+	if high<=0: return "?"
+	if low==high or low==0: return "~%s" % compact_count(high)
+	return "~%s–%s" % [compact_count(low),compact_count(high)]

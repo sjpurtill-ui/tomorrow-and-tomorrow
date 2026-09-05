@@ -3,6 +3,15 @@ extends GdUnitTestSuite
 const PRESENTATION:=preload("res://scripts/warfare_map_presentation.gd")
 
 
+func test_compact_strength_preserves_exact_owned_and_uncertain_foreign_counts()->void:
+	assert_str(PRESENTATION.counter_strength({"troops":1200})).is_equal("1.2K")
+	assert_str(PRESENTATION.counter_strength({"troops":0})).is_equal("0")
+	assert_str(PRESENTATION.counter_strength({"strength_low":900,"strength_high":1500})).is_equal("~900–1.5K")
+	assert_str(PRESENTATION.counter_strength({"strength_low":1200,"strength_high":1200})).is_equal("~1.2K")
+	assert_str(PRESENTATION.counter_strength({"strength_high":500})).is_equal("~500")
+	assert_str(PRESENTATION.counter_strength({})).is_equal("?")
+
+
 func test_map_label_requires_viewport_and_hud_clearance()->void:
 	var viewport:=Rect2(0,0,1440,900)
 	var pill:=Rect2(500,10,400,50)

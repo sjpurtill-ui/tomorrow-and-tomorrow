@@ -12308,14 +12308,6 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	border_material.render_priority=-3
 	counter_border.material_override=border_material
 	marker.add_child(counter_border)
-	var command_spine:=MeshInstance3D.new()
-	command_spine.name="CommandSpine"
-	var spine_mesh:=BoxMesh.new()
-	spine_mesh.size=Vector3(0.30,0.19,2.55)
-	command_spine.mesh=spine_mesh
-	command_spine.position=Vector3(0.0,0.27,0.0)
-	command_spine.material_override=_warfare_marker_material(owner_color.darkened(0.10))
-	marker.add_child(command_spine)
 	# Four reusable primitive slots form readable historical unit silhouettes. Meshes
 	# are swapped when composition changes; no dormant unit scenes or sprite atlases
 	# are retained per army.
@@ -12340,7 +12332,7 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	echelon_multimesh.instance_count=4
 	echelon_multimesh.visible_instance_count=1
 	for bar_index in 4:
-		echelon_multimesh.set_instance_transform(bar_index,Transform3D(Basis.IDENTITY,Vector3(-0.86+float(bar_index)*0.58,0.29,-0.70)))
+		echelon_multimesh.set_instance_transform(bar_index,Transform3D(Basis.IDENTITY,Vector3(-0.86+float(bar_index)*0.58,0.29,-1.95)))
 	echelon_bars.multimesh=echelon_multimesh
 	echelon_bars.material_override=_warfare_marker_material(owner_color.lightened(0.22))
 	marker.add_child(echelon_bars)
@@ -12352,7 +12344,7 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	heading_mesh.height=0.18
 	heading_mesh.radial_segments=3
 	heading_chevron.mesh=heading_mesh
-	heading_chevron.position=Vector3(0.0,0.27,-2.22)
+	heading_chevron.position=Vector3(0.0,0.27,-3.65)
 	heading_chevron.material_override=_warfare_marker_material(owner_color.lightened(0.18))
 	heading_chevron.visible=false
 	marker.add_child(heading_chevron)
@@ -12371,7 +12363,7 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	var supply_track_mesh:=BoxMesh.new()
 	supply_track_mesh.size=Vector3(3.70,0.13,0.46)
 	supply_track.mesh=supply_track_mesh
-	supply_track.position=Vector3(0.30,0.24,1.22)
+	supply_track.position=Vector3(0.30,0.24,2.10)
 	supply_track.material_override=_warfare_marker_material(Color("#252d2d"))
 	marker.add_child(supply_track)
 	var supply:=MeshInstance3D.new()
@@ -12379,7 +12371,7 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	var supply_mesh:=BoxMesh.new()
 	supply_mesh.size=Vector3(3.7,0.16,0.48)
 	supply.mesh=supply_mesh
-	supply.position=Vector3(0.30,0.27,1.22)
+	supply.position=Vector3(0.30,0.27,2.10)
 	supply.material_override=_warfare_marker_material(Color("#76b99a"))
 	marker.add_child(supply)
 	# Up to three aggregate wear scars share one MultiMesh and one material. Damage can
@@ -12413,7 +12405,7 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	# Explicit render order matters because strategic counters intentionally ignore
 	# terrain depth. The plate stays behind its glyph, readiness, supply and selection.
 	for priority_record in [
-		{"name":"CommandSpine","priority":1},{"name":"SupplyTrack","priority":1},
+		{"name":"SupplyTrack","priority":1},
 		{"name":"SupplyStripe","priority":2},{"name":"HeadingChevron","priority":4},
 		{"name":"RoleGlyphPrimary","priority":3},{"name":"RoleGlyphSecondary","priority":4},{"name":"RoleGlyphTertiary","priority":4},{"name":"RoleGlyphFourth","priority":4},
 		{"name":"ReadinessPip","priority":5},{"name":"SelectedRing","priority":6}
@@ -12518,7 +12510,7 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 	var role:=String(view.get("formation_role","infantry"))
 	var unit:=String(view.get("formation_unit",role))
 	_configure_warfare_role_glyph(marker,role,unit)
-	for part_name in ["CommandSpine","HeadingChevron","ObservationRing","RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
+	for part_name in ["HeadingChevron","ObservationRing","RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
 		var part:=marker.get_node_or_null(part_name) as MeshInstance3D
 		if part: _set_warfare_part_color(part,color)
 	# Readiness displaces the complete branch symbol as one coherent staff mark. Ring
@@ -12531,16 +12523,7 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 			# Preserve wheels, spearheads and barrels relative to the authored symbol.
 			# Replacing every X/Z with one anchor collapsed them into a single blob.
 			var authored:Vector3=role_part.get_meta("glyph_base_position",Vector3(-0.72,0.40,0.0))
-			role_part.position=authored+Vector3(-1.13,0,0)+role_offset
-	var era:=clampi(int(view.get("formation_era",0)),0,3)
-	var era_tones:=[color.darkened(0.16),color.lerp(Color("#c49a5d"),0.48),color.lerp(Color("#b9c0c1"),0.52),color.lerp(Color("#78c6d2"),0.56)]
-	var command_spine:=marker.get_node_or_null("CommandSpine") as MeshInstance3D
-	if command_spine:
-		_set_warfare_part_color(command_spine,Color(era_tones[era]))
-		# Vertical premodern staff, broad gunpowder column, thin industrial rail, then a
-		# heavy mechanized rail. Rotation/weight make the era legible without new nodes.
-		command_spine.rotation.y=PI*0.5 if era>=2 else 0.0
-		command_spine.scale=[Vector3(1.0,1.0,1.0),Vector3(3.6,1.0,0.86),Vector3(1.0,1.0,0.90),Vector3(2.5,1.0,1.0)][era]
+			role_part.position=authored+Vector3(0.72,0,0)+role_offset
 	var counter_border:=marker.get_node_or_null("CounterBorder") as MeshInstance3D
 	if counter_border:
 		_set_warfare_part_color(counter_border,color.lightened(0.12).lerp(Color("#665f59"),damage_ratio*0.48))
@@ -12555,7 +12538,7 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 		echelon_bars.multimesh.visible_instance_count=echelon
 		for bar_index in 4:
 			var bar_damaged:=bar_index<echelon and bar_index>=maxi(0,echelon-missing_elements)
-			var bar_origin:=Vector3(-0.86+float(bar_index)*0.58,0.29,-0.70+(scatter*0.50 if bar_index%2==0 else -scatter*0.38))
+			var bar_origin:=Vector3(-0.86+float(bar_index)*0.58,0.29,-1.95+(scatter*0.18 if bar_index%2==0 else -scatter*0.14))
 			var bar_basis:=Basis.IDENTITY.scaled(Vector3(1.0,1.0,0.48 if bar_damaged else 1.0))
 			echelon_bars.multimesh.set_instance_transform(bar_index,Transform3D(bar_basis,bar_origin))
 		var echelon_color:=color.lightened(0.22).lerp(Color("#51433f"),damage_ratio*0.34)
@@ -12616,12 +12599,15 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 	var strength_label:=marker.get_node_or_null("StrengthLabel") as Label3D
 	if strength_label:
 		strength_label.scale=Vector3.ONE/marker_scale
+		# Put the count below its symbol in screen space, including after rotation.
+		strength_label.position=Vector3(0,0.5,4.25)
+		if camera:
+			strength_label.position=-(marker.global_basis.orthonormalized().inverse()*camera.global_basis.y)*4.25
 		if camera and camera.projection==Camera3D.PROJECTION_PERSPECTIVE:
-			strength_label.font_size=40
+			strength_label.font_size=36 if view.has("troops") else 30
 			strength_label.outline_size=8
 			strength_label.pixel_size=0.0003125
-		var exact_strength:=int(view.get("troops",view.get("strength_high",0)))
-		strength_label.text="%s\nSOLDIERS" % WarfareMapPresentation.compact_count(exact_strength)
+		strength_label.text=WarfareMapPresentation.counter_strength(view)
 		strength_label.visible=bool(view.get("visible",true)) and (label==null or not label.visible)
 		strength_label.modulate=color.lightened(0.34)
 
