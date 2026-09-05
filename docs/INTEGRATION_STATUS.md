@@ -3,7 +3,13 @@
 Canonical player checkout: `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`.
 The OneDrive project is archived. Use `tools/launch_game.ps1` or the existing **Play Tomorrow and Tomorrow** desktop shortcut. The launcher prints the commit it starts. F5 runs the game; F6 may run a preview scene.
 
-Latest integrated code: `42595fb` (zoom terrain streaming), following `d418704` (city intelligence with founding-focus visibility fix) and `12d16a3` (strategic charts) and preserving scouting archive and siege/protection work through `046e869`. Combined city-intelligence/siege/relief/commitment/chart/city-resource/archive/UI validation: 113 cases across eight suites, zero errors, failures, skips or orphans. Canonical muted GPU chart probe passes; its capture was inspected and its process exited.
+Latest player release: `80a2fc4`, including Show Home navigation (`8059513`) and saved-campaign startup on top of consolidated release `4db697f`. The canonical launcher resumes quicksave when present; use `-ResumeSaved:$false` only to intentionally start without it. Editor launches are unaffected.
+
+Current live player: PID 63992, launched from canonical on September 5 after the user saved and closed the older session. Live startup log verifies SeanTown, day 5400, population 291, seed 1792400273. The 11:00:31 quicksave was read without being overwritten. Do not restart this live session for continuing development.
+
+Show Home's actual detail-panel action now closes the dock, focuses the saved home location at label-readable zoom, and cancels an older zoom target. A recorded city marker can remain visible over unsurveyed ground without revealing terrain. Canonical HOME_FOCUS_PASS and real SAVED_CAMPAIGN_RESUMED checks pass. Saved-load probe shutdown retained two ObjectDB instances and one resource diagnostic; no clean-shutdown claim.
+
+New approved work is isolated in `C:/Users/sjpur/tt-rumor-leads`, branch `codex/rumor-leads`: rumor network/map implementation. Separately queued: Inquiry graphical tree, larger Materials view, crowded scouting UI stability, expanded occupation governance. These are not in the running release. Outposts and the unfinished military usability foundation remain held.
 
 ## Consolidation queue — September 5
 
@@ -15,7 +21,7 @@ Latest integrated code: `42595fb` (zoom terrain streaming), following `d418704` 
 | Military usability redesign | HELD | `C:/Users/sjpur/tt-military-usability`; unfinished live-binding/status foundation, no completed UI or end-to-end verification |
 | Outposts, sliced vegetation, unrelated economy and Blender authoring experiment | HELD | Preserved prototypes below; excluded from the player build |
 
-Player PID 65696 was verified running the canonical project, launched September 5 at 10:27:16 before the chart integration. Its session is preserved. Save and exit normally, then use **Play Tomorrow and Tomorrow** to load the integrated code. The shortcut's target and working directory were verified canonical. Older process references below are historical checkpoints, not current status.
+Historical consolidation session: player PID 65696 started before the integrations; the user later saved and closed it. See the current release/session status above. Save and exit normally, then use **Play Tomorrow and Tomorrow** to load the integrated code. The shortcut's target and working directory were verified canonical. Older process references below are historical checkpoints, not current status.
 
 ## Integrated
 

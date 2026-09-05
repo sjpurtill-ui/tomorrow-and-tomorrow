@@ -35,7 +35,7 @@ commit and tested behavior before saying a feature is in the player's build.
 
 ## Integration status
 
-Check `docs/INTEGRATION_STATUS.md` before assigning work. Keep unfinished prototypes listed separately from committed player features. A handoff is not delivery: only the integrator can mark a change integrated. The launcher prints the canonical commit so the build can be identified. A running process keeps its loaded scripts/state; save and restart after a structural integration. Never silently restart a live player session.
+Check `docs/INTEGRATION_STATUS.md` before assigning work. Keep unfinished prototypes listed separately from committed player features. A handoff is not delivery: only the integrator can mark a change integrated. The launcher prints the canonical commit so the build can be identified. Player launches now resume quicksave if it exists; `-ResumeSaved:$false` intentionally bypasses this, and editor launches do not load it. A running process keeps its loaded scripts/state; save and restart after a structural integration. Never silently restart a live player session.
 
 ## Copy-ready worker prompt
 
