@@ -50,7 +50,10 @@ func capture()->void:
 		scene.add_child(label)
 	for frame in 8: await process_frame
 	await RenderingServer.frame_post_draw
-	var path:=ProjectSettings.globalize_path("res://artifacts/neighborhood-conditions.png")
+	var filename:="neighborhood-conditions.png"
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--output="): filename=argument.trim_prefix("--output=").get_file()
+	var path:=ProjectSettings.globalize_path("res://artifacts/"+filename)
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var result:=root.get_texture().get_image().save_png(path)
 	renderer.free()
