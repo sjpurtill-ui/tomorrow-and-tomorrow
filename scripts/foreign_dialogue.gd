@@ -68,7 +68,7 @@ func known_context(id:String)->Dictionary:
 		observations.append({"day":int(record.returned_day),"observations":record.get("observations",[]),"outcome":String(record.get("outcome",""))})
 		if observations.size()>=3: break
 	var civ:=ForeignDiplomacy.civilization(id); var relation:Dictionary=civ.player_relation
-	return {"day":int(GameState.elapsed_days),"leader":{"name":person.name,"temperament":person.temperament,"bio":person.bio},"community":civ.name,"communicated_position":ForeignDiplomacy.situation(id),"relationship":{"at_war":bool(relation.get("at_war",false)),"treaty":String(relation.get("treaty","none"))},"memories":person.memories,"counteroffer":person.counter,"understanding":person.accord,"current_draft":thread(id).draft,"returned_reports":observations,"access":access(id),"commitments":ForeignDiplomacy.commitments.public_snapshot(id),"active_siege":ForeignDiplomacy.commitments.siege_info("current")}
+	return {"day":int(GameState.elapsed_days),"leader":{"name":person.name,"temperament":person.temperament,"bio":person.bio},"community":civ.name,"communicated_position":ForeignDiplomacy.situation(id),"relationship":{"at_war":bool(relation.get("at_war",false)),"treaty":String(relation.get("treaty","none"))},"memories":person.memories,"counteroffer":person.counter,"understanding":person.accord,"current_draft":thread(id).draft,"returned_reports":observations,"access":access(id),"commitments":ForeignDiplomacy.commitments.public_snapshot(id),"active_siege":ForeignDiplomacy.commitments.siege_info("current"),"city_reports":CivilizationSystem.city_intelligence.known_cities("player",id)}
 
 func _request(id:String)->void:
 	var gate:=access(id)

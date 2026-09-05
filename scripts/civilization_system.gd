@@ -72,6 +72,7 @@ const REGION_VALUE_TEXT:={
 }
 
 var civilizations:Array[Dictionary]=[]
+var city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
 var world_events:Array[Dictionary]=[]
 var pending_player_incidents:Array[Dictionary]=[]
 var last_world_seed:=-2147483648
@@ -129,6 +130,7 @@ func initialize()->void:
 
 
 func reset_for_new_world()->void:
+	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
 	last_world_seed=GameState.world_seed
 	last_processed_day=int(floor(GameState.elapsed_days))
 	last_turn_day=(last_processed_day/STRATEGIC_TURN_DAYS)*STRATEGIC_TURN_DAYS
@@ -468,34 +470,18 @@ func military_fronts_snapshot()->Dictionary:
 		var front_force:Dictionary={"field_personnel":0,"inbound_personnel":0,"occupation_personnel":0,"reserve_personnel":0,"supply":0.0,"readiness":0.0,"armies":[]}
 		if MilitaryCampaign!=null and MilitaryCampaign.has_method("front_force_snapshot"):
 			front_force=MilitaryCampaign.front_force_snapshot(String(civ.id),target_region_id if target_region_id!="" else "player_home")
-		fronts.append({"id":"front_%s" % String(civ.id),"war_id":String(relation.get("war_id","")),"war_name":war_name,"opponent_id":String(civ.id),"opponent":String(civ.name),"target_region_id":target_region_id,"target":target_name,"stance":String(relation.get("front_stance","balanced")),"objective":String(objective.get("description","DEFEND")),"progress":float(objective.get("progress",0.0)),"field_personnel":int(front_force.get("field_personnel",0)),"inbound_personnel":int(front_force.get("inbound_personnel",0)),"occupation_personnel":int(front_force.get("occupation_personnel",0)),"reserve_personnel":int(front_force.get("reserve_personnel",0)),"supply":float(front_force.get("supply",0.0)),"readiness":float(front_force.get("readiness",0.0)),"armies":front_force.get("armies",[]),"enemy_personnel":float(civ.get("military_population",0.0)),"war_score":float(relation.get("war_score",0.0)),"our_exhaustion":float(relation.get("player_war_exhaustion",0.0)),"enemy_exhaustion":float(relation.get("rival_war_exhaustion",0.0))})
+		fronts.append({"id":"front_%s" % String(civ.id),"war_id":String(relation.get("war_id","")),"war_name":war_name,"opponent_id":String(civ.id),"opponent":String(civ.name),"target_region_id":target_region_id,"target":target_name,"stance":String(relation.get("front_stance","balanced")),"objective":String(objective.get("description","DEFEND")),"progress":float(objective.get("progress",0.0)),"field_personnel":int(front_force.get("field_personnel",0)),"inbound_personnel":int(front_force.get("inbound_personnel",0)),"occupation_personnel":int(front_force.get("occupation_personnel",0)),"reserve_personnel":int(front_force.get("reserve_personnel",0)),"supply":float(front_force.get("supply",0.0)),"readiness":float(front_force.get("readiness",0.0)),"armies":front_force.get("armies",[]),"enemy_personnel":float(strategic_assessment(String(civ.id),target_region_id).get("enemy_estimate",-1)),"war_score":float(relation.get("war_score",0.0)),"our_exhaustion":float(relation.get("player_war_exhaustion",0.0)),"enemy_exhaustion":float(relation.get("rival_war_exhaustion",0.0))})
 	return {"fronts":fronts,"active":fronts.size(),"bounded":true}
 
 
 func military_movement_destinations()->Array[Dictionary]:
-	# Movement orders can target only places the player has actually learned.
-	# Each destination is a bounded strategic record, not a tile or a unit path.
-	var destinations:Array[Dictionary]=[]
-	destinations.append({"id":"player_home","civ_id":"player","region_id":"","label":GameState.settlement_name if GameState.settlement_name!="" else "HOME SETTLEMENT","kind":"home","position":{"x":player_world_origin.x,"z":player_world_origin.y},"known":true})
-	for civ_variant in civilizations:
-		var civ:Dictionary=civ_variant
-		var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
-		if int(relation.get("contact_level",0))<2: continue
-		# Meeting a formation identifies a polity, not its territory. Foreign army
-		# destinations exist only after a returned report confirms where it lives,
-		# sustained intelligence identifies its strategic regions, and the specific
-		# destination lies inside terrain that has actually reached the player's map.
-		if not bool(relation.get("home_location_known",false)): continue
-		if float(relation.get("contact_intelligence",0.0))<0.55: continue
-		var known_home:Dictionary=relation.get("home_position",{})
-		if not known_home.has("x") or not known_home.has("z"): continue
-		var center:=Vector2(float(known_home.x),float(known_home.z))
-		for region_variant in _public_regions(civ):
-			var region:Dictionary=region_variant
-			var local_offset:=Vector2((float(region.get("map_x",0.5))-0.5)*220.0,(float(region.get("map_y",0.5))-0.5)*180.0)
-			var position:=center+local_offset
-			if not _position_is_revealed(position): continue
-			destinations.append({"id":String(region.get("id","")),"civ_id":String(civ.id),"region_id":String(region.get("id","")),"label":"%s — %s" % [String(civ.name),String(region.get("name","KNOWN REGION"))],"kind":"strategic_region","position":{"x":position.x,"z":position.y},"known":true,"controller":String(region.get("controller",String(civ.id))),"available_campaign":bool(region.get("available",false)),"at_war":bool(relation.get("at_war",false))})
+	var destinations:Array[Dictionary]=[{"id":"player_home","civ_id":"player","region_id":"","label":GameState.settlement_name if GameState.settlement_name!="" else "HOME SETTLEMENT","kind":"home","position":{"x":player_world_origin.x,"z":player_world_origin.y},"known":true}]
+	for city:Dictionary in city_intelligence.known_cities():
+		if city.civ_id=="" or city.controller=="": continue
+		var index:=_civilization_index(String(city.civ_id))
+		if index<0: continue
+		var relation:Dictionary=civilizations[index].player_relation
+		destinations.append({"id":city.city_id,"civ_id":city.civ_id,"region_id":city.city_id,"label":city.name,"kind":"strategic_region","position":city.position.duplicate(true),"known":true,"controller":city.controller,"available_campaign":true,"at_war":bool(relation.get("at_war",false))})
 	return destinations
 
 
@@ -564,6 +550,7 @@ func advance_to_day(target_day:int)->void:
 		last_turn_day+=STRATEGIC_TURN_DAYS
 		_process_strategic_turn(last_turn_day)
 	last_processed_day=target_day
+	city_intelligence.sample_missions(target_day)
 	_process_foreign_scout_reports(target_day)
 	_complete_due_scout_missions(target_day)
 	_process_diplomatic_mission(target_day)
@@ -586,6 +573,7 @@ func _process_strategic_turn(day:int)->void:
 	_process_foreign_scout_reports(day)
 	_process_player_contact(day)
 	_process_player_relations(day)
+	city_intelligence.sample_missions(day)
 	_rebuild_competition(true,day)
 	world_changed.emit(competition_snapshot())
 
@@ -1089,23 +1077,14 @@ func scout_target_options()->Array[Dictionary]:
 			"description":"Return to the known encounter site, chart its surroundings, and look for routes toward the polity's home.",
 			"position":position.duplicate(true)
 		})
-	for civ_variant in civilizations:
-		var civ:Dictionary=civ_variant
-		var relation:=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
-		if int(relation.get("contact_level",0))<2 or not bool(relation.get("home_location_known",false)): continue
-		var home:Dictionary=relation.get("home_position",{})
-		if not home.has("x") or not home.has("z"): continue
-		options.append({
-			"id":"settlement:%s" % String(civ.id),"kind":"observe_settlement","civ_id":String(civ.id),
-			"label":"OBSERVE %s SETTLEMENT" % String(civ.name).to_upper(),
-			"description":"Approach the confirmed home settlement, observe its visible activity and defenses, and return with a current report.",
-			"position":home.duplicate(true)
-		})
+	for city:Dictionary in city_intelligence.known_cities():
+		options.append({"id":"city:"+String(city.city_id),"kind":"observe_city","city_id":city.city_id,"civ_id":city.civ_id,"label":"OBSERVE "+String(city.name).to_upper(),"description":"Revisit this independently reported city. Only a returning party updates its dated estimates.","position":city.position.duplicate(true)})
 	return options
 
 
 func _scout_target_option(target_id:String)->Dictionary:
 	var normalized:=target_id if target_id!="" else "open_world"
+	if normalized.begins_with("settlement:"): normalized="city:"+city_intelligence.primary_id(normalized.trim_prefix("settlement:"))
 	for option in scout_target_options():
 		if String(option.get("id",""))==normalized: return option.duplicate(true)
 	return {}
@@ -1183,7 +1162,7 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	var concealment:=clampf(0.72+field_knowledge*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93)
 	var evasion:=clampf(0.76+logistics*0.14+field_knowledge*0.08,0.74,0.95)
 	var planned_heading:=_compass_phrase(player_world_origin,Vector2(float(route[-1].get("x",player_world_origin.x)),float(route[-1].get("z",player_world_origin.y))))
-	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"ordered_heading":normalized_heading if String(target_option.kind) in ["explore","recruit_people"] else "","planned_heading":planned_heading,"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
+	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"ordered_heading":normalized_heading if String(target_option.kind) in ["explore","recruit_people"] else "","planned_heading":planned_heading,"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_city_id":String(target_option.get("city_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
 	# Journeys are not clockwork. The settlement counts down to the planned
 	# day; the road decides the real one. Delay scales with the expedition:
 	# the old fixed 21-day cap made nearly every long overdue party return at
@@ -1327,6 +1306,11 @@ func _process_diplomatic_mission(day:int)->void:
 	if not bool(diplomatic_mission.get("arrival_resolved",false)) and day>=int(diplomatic_mission.get("arrival_day",day+1)):
 		diplomatic_mission["arrival_resolved"]=true
 		diplomatic_mission["stage"]="returning"
+		if day<=int(diplomatic_mission.return_day):
+			var access:=clampf(.46+float(relation.get("opinion",0))*.24+(.10 if float(diplomatic_mission.get("gift_amount",0))>0 else 0),.22,.85)
+			city_intelligence.stage(diplomatic_mission,"player",city_intelligence.vector(diplomatic_mission.target_position),access,day,"envoy:%s:%d" % [civ_id,int(diplomatic_mission.depart_day)])
+		var origin_city:=city_intelligence.primary_id("player")
+		if origin_city!="": city_intelligence.publish(civ_id,city_intelligence.location_record({"city_id":origin_city,"civ_id":"player","name":"Envoys' reported home","position":diplomatic_mission.origin_position},day,"envoys disclosed their origin","envoy:%d" % int(diplomatic_mission.depart_day)),day)
 		if String(diplomatic_mission.get("purpose","goodwill"))=="declare_war":
 			var declaration_result:=conduct_player_action(civ_id,"declare_war",true)
 			diplomatic_mission["proposal_resolved"]=true
@@ -1383,32 +1367,13 @@ func _process_diplomatic_mission(day:int)->void:
 	civilizations[index]=civ
 
 
-func _diplomatic_return_report(civ:Dictionary,relation:Dictionary,mission:Dictionary,day:int)->Dictionary:
-	var purpose:=String(mission.get("purpose","goodwill"))
-	var reception_access:=clampf(0.46+float(relation.get("opinion",0.0))*0.24+(0.10 if float(mission.get("gift_amount",0.0))>0.0 else 0.0),0.22,0.78)
-	if purpose=="declare_war": reception_access=0.18
-	elif purpose=="seek_peace": reception_access=maxf(reception_access,0.34)
-	var intelligence_gain:=0.055+reception_access*0.075
-	var estimate_error:=lerpf(0.24,0.10,reception_access)
-	var population:=maxf(1.0,float(civ.get("population",1.0)))
+func _diplomatic_return_report(civ:Dictionary,_relation:Dictionary,mission:Dictionary,day:int)->Dictionary:
+	var cities:Array[Dictionary]=city_intelligence.deliver(mission,"player",day)
 	var observations:Array[String]=[]
-	observations.append("Settlement population appears to be %s–%s" % [_compact_number(population*(1.0-estimate_error)),_compact_number(population*(1.0+estimate_error))])
-	var logistics_word:=_diplomatic_capacity_word(float(civ.get("logistics",0.0)))
-	observations.append("Road and carrying traffic appears %s" % logistics_word.to_lower())
-	var fortification:=0.0
-	var regions:Array=civ.get("strategic_regions",[])
-	for region_variant in regions: fortification+=float((region_variant as Dictionary).get("fortification",0.0))
-	fortification/=maxf(1.0,float(regions.size()))
-	var defense_observation:="Visible settlement defenses appear %s" % _diplomatic_capacity_word(fortification).to_lower()
-	if purpose in ["declare_war","seek_peace","non_aggression"] or reception_access>=0.56:
-		defense_observation+="; organized military readiness appears %s" % _diplomatic_capacity_word(float(civ.get("military_readiness",0.0))).to_lower()
-	observations.append(defense_observation)
-	if purpose in ["open_trade","send_aid"] or reception_access>=0.50:
-		var reserve_word:="precarious" if float(civ.get("food_days",0.0))<30.0 else ("seasonal" if float(civ.get("food_days",0.0))<90.0 else "substantial")
-		observations.append("Visible food reserves appear %s; exchange activity appears %s" % [reserve_word,_diplomatic_capacity_word(float(civ.get("production",0.0))).to_lower()])
-	if purpose in ["goodwill","non_aggression","open_trade"] and reception_access>=0.48:
-		observations.append("Officials received the delegation through institutions that appear %s" % _diplomatic_capacity_word(float(civ.get("institutions",0.0))).to_lower())
-	return {"day":day,"observations":observations,"intelligence_gain":intelligence_gain,"access":reception_access}
+	for city:Dictionary in cities: observations.append(city_intelligence.describe(city))
+	if observations.is_empty(): observations.append("No dated city assessment survived this journey. The previously known location remains on the chart.")
+	mission["returned_city_observations"]=cities
+	return {"day":day,"observations":observations,"city_observations":cities,"intelligence_gain":.055 if not cities.is_empty() else .015,"access":.5}
 
 
 func _diplomatic_capacity_word(value:float)->String:
@@ -1540,6 +1505,7 @@ func _foreign_scout_investigation_target(civ:Dictionary,relation:Dictionary,sequ
 
 func _schedule_foreign_scout_mission(formation:Dictionary,civ:Dictionary,depart_day:int,force_exploration:bool=false)->Dictionary:
 	var result:=formation.duplicate(true)
+	result.erase("city_observations")
 	var relation:=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 	var sequence:=maxi(-1,int(result.get("search_sequence",-1)))+1
 	var max_range:=_foreign_scout_operational_range(civ)
@@ -1678,6 +1644,7 @@ func _process_foreign_scout_reports(day:int)->void:
 			# party physically completes its return. At that point its actual route is
 			# assessed, then a new mission is chosen from the updated evidence.
 			civ["knowledge"]=clampf(float(civ.get("knowledge",0.0))+0.0025,0.0,1.0)
+			city_intelligence.deliver(formation,String(civ.id),day)
 			var relation:=_relation_with_strategy_defaults(civ.player_relation,civ)
 			var route_distance:=_formation_route_distance_to(formation,player_world_origin)
 			var signal_radius:=_player_settlement_signal_radius(day)
@@ -1741,6 +1708,7 @@ func _publish_observed_event(title:String,description:String,day:int,metadata:Di
 func _process_local_observation(day:int,force:bool=false)->void:
 	if not force and day==last_observation_day: return
 	last_observation_day=day
+	city_intelligence.observe_near_player(day)
 	var radius:=_local_observation_radius()
 	var visible_ids:Dictionary={}
 	var changed:=false
@@ -2236,6 +2204,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 		_fail_player_scout_mission(mission,interception,day)
 		return
 	var route:Array=mission.get("route",[])
+	var city_reports:Array[Dictionary]=city_intelligence.deliver(mission,"player",day)
 	# One aggregate capsule trail follows the physical chart. Do not convert its
 	# samples into circles: circle consolidation was what inflated a returned line
 	# into an impossible continental reveal.
@@ -2265,6 +2234,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 		var contact_description:="Returning scouts report direct contact with people of the %s at the marked point on their charted route. This is the encounter site, not a revealed homeland." % String(civ.name)
 		_publish_observed_event("First contact — %s" % String(civ.name),contact_description,day,{"kind":"first_contact","civ_id":String(civ.id),"formation_id":"","formation_kind":"returned scout party","identified":true,"position":contact_record.position})
 	var targeted_finding:=_resolve_targeted_scout_report(mission,day)
+	city_intelligence.seed_known_homes()
 	var recruits:=_resolve_scout_recruitment(mission,day)
 	var recruitment_account:=_recruitment_return_account(mission,day,recruits)
 	var fate:=_resolve_party_fate(mission,day)
@@ -2291,6 +2261,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var return_route:=_reverse_scout_route(route)
 	var report:Dictionary={"mission_id":int(mission.get("mission_id",0)),"day":day,"duration_days":int(mission.duration_days),"personnel":int(mission.personnel),"distance_km":roundi(_scout_route_distance(route)*2.0),"mission_kind":String(mission.get("target_kind","explore")),"target_id":String(mission.get("target_id","open_world")),"target_label":String(mission.get("target_label","OPEN EXPLORATION")),"target_finding":targeted_finding,"recruitment_account":recruitment_account,"contacts":contacts,"contact_records":contact_records,"route":route.duplicate(true),"return_route":return_route,"travel_mode":String(mission.get("travel_mode","land")),"route_status":String(mission.get("route_status","returned")),"turnback_reason":String(mission.get("turnback_reason","")),"new_contact_count":contacts.size(),"recruits":recruits,"returned_personnel":int(fate.returned),"lost_personnel":int(fate.lost),"stayed_personnel":int(fate.stayed),"journal":_compose_scout_journal(mission,route),"windfalls":windfalls.duplicate()}
 	report["discoveries"]=(mission.get("discoveries",[]) as Array).duplicate(true)
+	report["city_observations"]=city_reports
 	report["actual_days"]=maxi(1,day-int(mission.get("start_day",day-int(mission.duration_days))))
 	report["start_day"]=int(mission.get("start_day",day-int(mission.duration_days)))
 	report["archive_reviewed"]=false
@@ -2365,6 +2336,7 @@ func _compose_scout_journal(mission:Dictionary,route:Array)->Array[String]:
 
 func _resolve_targeted_scout_report(mission:Dictionary,day:int)->String:
 	var kind:=String(mission.get("target_kind","explore"))
+	if kind=="observe_city": return "The party reports only the city observations it physically carried home."
 	if kind not in ["investigate_contact","observe_settlement"]: return ""
 	if String(mission.get("route_status",""))=="turning_back":
 		return String(mission.get("turnback_reason","The land route was blocked, so the party turned back."))
@@ -2812,7 +2784,7 @@ func _external_threat(civ:Dictionary) -> float:
 		if bool(relation.get("at_war",false)): pressure+=0.30
 		highest=maxf(highest,pressure)
 	var player_relation:Dictionary=civ.get("player_relation",{})
-	var player_ratio:=_player_military_power()/maxf(1.0,own_power)
+	var player_ratio:=float(city_intelligence.player_estimate(String(civ.id)).power)/maxf(1.0,own_power)
 	var player_pressure:=float(player_relation.get("border_tension",0.0))*0.42+clampf(player_ratio-0.8,0.0,1.5)*0.18+(0.30 if bool(player_relation.get("at_war",false)) else 0.0)
 	return clampf(maxf(highest,player_pressure),0.0,1.0)
 
@@ -3227,9 +3199,10 @@ func _resolve_ai_region_control(first:Dictionary,second:Dictionary,first_won:boo
 
 
 func _process_player_relations(day:int)->void:
-	var player_power:=_player_military_power()
 	for index in civilizations.size():
 		var civ:Dictionary=civilizations[index]
+		var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id))
+		var player_power:=float(known_player.power) if float(known_player.power)>0 else _military_power(civ)
 		var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
 		var opinion:=float(relation.get("opinion",0.0))
 		if int(relation.get("contact_level",0))<2:
@@ -3358,7 +3331,9 @@ func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->
 	if day-int(relation.get("last_incident_day",-9999))<90: return
 	for incident in pending_player_incidents:
 		if String(incident.get("source_civ_id",""))==String(civ.id): return
-	var projection:=minf(float(civ.military_population)*0.42,maxf(3.0,GameState.population_exact*0.18))
+	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
+	if not bool(known_player.known) and _recapture_target(civ).is_empty(): return
+	var projection:=float(civ.military_population)*0.42
 	var strength:=maxi(3,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
 	var incident_readiness:=clampf(float(civ.military_readiness)*0.82+float(civ.get("command_readiness",0.4))*0.18,0.1,1.0)
 	var incident:Dictionary={"id":"campaign_%s_%d" % [String(civ.id),day],"source_civ_id":String(civ.id),"source_name":String(civ.name),"strength":strength,"technology":float(civ.knowledge),"readiness":incident_readiness,"aggression":float(civ.aggression),"created_day":day}
@@ -3374,6 +3349,7 @@ func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->
 
 
 func _queue_player_raid_if_due(civ:Dictionary,relation:Dictionary,day:int,civ_index:int)->void:
+	if not bool(city_intelligence.player_estimate(String(civ.id),true).known): return
 	if pending_player_incidents.size()>=INCIDENT_LIMIT: return
 	if day-int(relation.get("last_raid_day",-9999))<180: return
 	if int(relation.get("rival_contact_level",0))<2: return
@@ -3386,7 +3362,9 @@ func _queue_player_raid_if_due(civ:Dictionary,relation:Dictionary,day:int,civ_in
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=last_world_seed^day*32452843^(civ_index+1)*49979687
 	if rng.randf()>clampf(0.025+hostility*0.085,0.0,0.12): return
-	var projection:=minf(float(civ.military_population)*0.16,maxf(3.0,GameState.population_exact*0.075))
+	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
+	if not bool(known_player.known): return
+	var projection:=float(civ.military_population)*0.16
 	var strength:=maxi(3,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
 	pending_player_incidents.append({"id":"raid_%s_%d" % [String(civ.id),day],"incident_kind":"raid","field_encounter":true,"source_civ_id":String(civ.id),"source_name":String(civ.name),"strength":strength,"technology":float(civ.knowledge),"readiness":clampf(float(civ.military_readiness),0.1,1.0),"aggression":float(civ.aggression),"created_day":day})
 	relation["last_raid_day"]=day
@@ -3478,6 +3456,7 @@ func offensive_campaign_data(civ_id:String,fielded_strength:int,region_id:String
 	if not bool(relation.get("at_war",false)) and not raid: return {"error":"Open war must exist before a campaign can be launched."}
 	if raid and String(relation.get("treaty","none")) in ["non_aggression","truce"]: return {"error":"A standing non-aggression compact or truce bars a raid."}
 	if fielded_strength<=0: return {"error":"No trained field formation is available for an offensive campaign."}
+	if region_id!="" and city_intelligence.known("player",region_id).is_empty(): return {"error":"No report identifies that city."}
 	var selected_region_id:=region_id
 	if selected_region_id=="":
 		for target in campaign_targets(civ_id):
@@ -3508,10 +3487,12 @@ func war_goal_options(civ_id:String,region_id:String="") -> Array[Dictionary]:
 	var selected:Dictionary={}
 	for region in _public_regions(civ):
 		if String(region.get("id",""))==region_id: selected=region; break
-	var frontline_id:=_default_war_target(civ,"limited")
+	var frontline_id:=""
+	for known_region:Dictionary in _public_regions(civ):
+		if bool(known_region.get("available",false)): frontline_id=String(known_region.id); break
 	var limited_target:=region_id if not selected.is_empty() and bool(selected.get("available",false)) and not bool(selected.get("foreign_holding",false)) else frontline_id
 	options.append({"id":"limited","label":String(WAR_GOAL_LABELS.limited),"target_region_id":limited_target,"available":limited_target!="","description":"Take one exposed strategic region, then press for a bounded settlement."})
-	options.append({"id":"break_power","label":String(WAR_GOAL_LABELS.break_power),"target_region_id":_default_war_target(civ,"break_power"),"available":_default_war_target(civ,"break_power")!="","description":"Occupy the capital or three home regions. Greater leverage, exhaustion, and occupation cost."})
+	options.append({"id":"break_power","label":String(WAR_GOAL_LABELS.break_power),"target_region_id":_default_war_target(civ,"break_power") if not city_intelligence.known("player",_default_war_target(civ,"break_power")).is_empty() else "","available":not city_intelligence.known("player",_default_war_target(civ,"break_power")).is_empty(),"description":"Occupy the capital or three home regions. Greater leverage, exhaustion, and occupation cost."})
 	var liberation_available:=not selected.is_empty() and bool(selected.get("foreign_holding",false))
 	options.append({"id":"liberation","label":String(WAR_GOAL_LABELS.liberation),"target_region_id":region_id if liberation_available else "","available":liberation_available,"description":"Defeat this occupier and return the selected foreign region to its original polity."})
 	return options
@@ -3551,7 +3532,7 @@ func war_objective_status(civ_id:String) -> Dictionary:
 	if not location.is_empty():
 		var owner:Dictionary=civilizations[int(location.owner_index)]
 		target=(owner.strategic_regions[int(location.region_index)] as Dictionary)
-		target_name=String(target.get("name",""))
+		target_name=String(city_intelligence.known("player",target_id).get("name","Unconfirmed city"))
 	match goal:
 		"limited":
 			complete=not target.is_empty() and String(target.get("controller",""))=="player"
@@ -3591,37 +3572,15 @@ func peace_forecast(civ_id:String) -> Dictionary:
 
 
 func strategic_assessment(civ_id:String,region_id:String="") -> Dictionary:
-	initialize()
-	var index:=_civilization_index(civ_id)
-	if index<0: return {"error":"Unknown civilization."}
-	var civ:Dictionary=civilizations[index]
-	var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
-	var selected:Dictionary={}
-	for region in _public_regions(civ):
-		if String(region.get("id",""))==region_id: selected=region; break
-	if selected.is_empty():
-		for region in _public_regions(civ):
-			if bool(region.get("available",false)): selected=region; break
-	var fielded:=int(MilitaryCampaign.home_army.get("troops",0)) if MilitaryCampaign!=null else 0
-	var player_readiness:=clampf(float(MilitaryCampaign.home_army.get("readiness",0.0)),0.0,1.25) if MilitaryCampaign!=null else 0.0
-	var player_supply:=clampf(float(MilitaryCampaign.home_army.get("supply_level",1.0)),0.0,1.0) if MilitaryCampaign!=null else 0.0
-	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.16)),0.0,1.0)
-	var fortification:=float(selected.get("fortification",0.25))*(1.0-float(selected.get("damage",0.0))*0.65)
-	var enemy_strength:=maxf(3.0,float(civ.military_population)*float(selected.get("strategic_weight",0.12))*(0.72+fortification)*(0.82+float(civ.logistics)*0.36)) if not selected.is_empty() else maxf(3.0,float(civ.military_population)*0.12)
-	var terrain:=clampf(1.03+fortification*0.34+float(civ.logistics)*0.07+float(civ.institutions)*0.05,1.04,1.38)
-	var player_effective:=float(fielded)*(0.42+player_readiness*0.58)*(0.62+player_supply*0.23+logistics*0.15)
-	var enemy_effective:=enemy_strength*(0.44+float(civ.military_readiness)*0.56)*terrain
-	var ratio:=player_effective/maxf(1.0,enemy_effective)
-	var outlook:="NO FIELD ARMY" if fielded<=0 else ("DECISIVE ADVANTAGE" if ratio>=1.55 else ("FAVORABLE" if ratio>=1.12 else ("CONTESTED" if ratio>=0.78 else ("HIGH RISK" if ratio>=0.50 else "OVERMATCHED"))))
-	var casualty_risk:="LOW" if ratio>=1.55 else ("MODERATE" if ratio>=1.0 else ("SEVERE" if ratio>=0.62 else "EXTREME"))
-	var confidence:=clampf(0.28+GameState.combined_intelligence*0.36+float(GameState.society_capacities.get("institutions",0.25))*0.16+(0.14 if String(relation.get("treaty","none"))=="trade" else 0.0),0.25,0.94)
-	var uncertainty:=1.0-confidence
-	var estimate_low:=roundi(enemy_strength*(1.0-uncertainty*0.55))
-	var estimate_high:=roundi(enemy_strength*(1.0+uncertainty*0.75))
-	var food_days:=float(GameState.simulation_metrics.get("food_days",0.0))
-	var supply_label:="SUSTAINED" if food_days>=45.0 and logistics>=0.42 else ("ADEQUATE" if food_days>=20.0 and logistics>=0.20 else ("STRAINED" if food_days>=8.0 else "CRITICAL"))
-	var power_ratio:=_military_power(civ)/maxf(1.0,_player_military_power())
-	return {"outlook":outlook,"casualty_risk":casualty_risk,"power_ratio":ratio,"fielded":fielded,"enemy_estimate":roundi(enemy_strength),"enemy_estimate_low":estimate_low,"enemy_estimate_high":estimate_high,"intel_confidence":confidence,"player_readiness":player_readiness,"player_supply":player_supply,"supply_label":supply_label,"food_days":food_days,"logistics":logistics,"occupation_required":float(selected.get("occupation_required",0.0)),"region_value":String(REGION_VALUE_TEXT.get(String(selected.get("role","")),"Changes population control, territory, and strategic capacity.")),"rival_intent":_rival_intent(civ,relation,power_ratio),"threat_level":_threat_level(civ,relation,power_ratio)}
+	var city:Dictionary=city_intelligence.known("player",region_id)
+	var guard:Dictionary=city.get("fields",{}).get("garrison",{})
+	var fielded:=int(MilitaryCampaign.home_army.get("troops",0))
+	var low:=int(guard.get("low",-1)); var high:=int(guard.get("high",-1))
+	var confidence:=float(guard.get("quality",0))
+	var usable:=not guard.is_empty() and not bool(guard.get("stale",true))
+	var ratio:=float(fielded)/maxf(1,float(high)*1.3) if usable else -1.0
+	var food_days:=float(GameState.simulation_metrics.get("food_days",0))
+	return {"outlook":"UNKNOWN — obtain city reconnaissance" if not usable else ("FAVORABLE ESTIMATE" if ratio>1.2 else "CONTESTED ESTIMATE"),"casualty_risk":"UNCERTAIN","power_ratio":ratio,"fielded":fielded,"enemy_estimate":roundi((low+high)*.5) if usable else -1,"enemy_estimate_low":low,"enemy_estimate_high":high,"intel_confidence":confidence,"player_readiness":float(MilitaryCampaign.home_army.get("readiness",0)),"player_supply":float(MilitaryCampaign.home_army.get("supply_level",1)),"supply_label":"ADEQUATE" if food_days>=20 else "STRAINED","food_days":food_days,"logistics":float(GameState.simulation_metrics.get("logistics",0)),"occupation_required":0.0,"region_value":"Dated city observations, not live enemy strength. Actual resistance is resolved at contact.","rival_intent":"UNCONFIRMED","threat_level":"UNCERTAIN","observation_day":int(guard.get("observed_day",-1))}
 
 
 func _rival_intent(civ:Dictionary,relation:Dictionary,power_ratio:float=-1.0) -> String:
@@ -3668,7 +3627,7 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 			if opinion<-0.28: return {"error":"Relations are too hostile for a non-aggression compact."}
 		"send_aid":
 			var available:=maxf(0.0,FoodSystem.total_stored())
-			var amount:=minf(available*0.10,maxf(5.0,minf(GameState.population_exact,float(civ.population))*0.75))
+			var amount:=minf(available*0.10,maxf(5.0,GameState.population_exact*0.75))
 			if amount<5.0: return {"error":"At least 5.0 Food must be available for meaningful aid."}
 			return {"ok":true,"action":normalized,"amount":amount}
 		"contain":
@@ -3678,6 +3637,7 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 			if at_war: return {"error":"Open war already exists with this civilization."}
 			if int(relation.get("truce_until_day",0))>int(GameState.elapsed_days): return {"error":"The truce remains binding for %d more days." % (int(relation.truce_until_day)-int(GameState.elapsed_days))}
 			var objective:=war_objective_status(civ_id)
+			if String(objective.get("goal","limited"))!="defend" and city_intelligence.known("player",String(objective.get("target_region_id",""))).is_empty(): return {"error":"Choose a discovered city before declaring this offensive war."}
 			if String(objective.get("target_region_id",""))=="" and String(objective.get("goal","limited"))!="defend": return {"error":"Choose a valid war objective before declaring war."}
 		"seek_peace":
 			if not at_war: return {"error":"There is no active war to end."}
@@ -3912,6 +3872,8 @@ func resolve_player_battle(civ_id:String,result:Dictionary)->Dictionary:
 		_record_war_battle(String(relation.war_id),{"day":int(GameState.elapsed_days),"name":"Battle of %s" % String(result.get("target_region_name",target_region_id if target_region_id!="" else _player_civilization_name())).capitalize(),"location":String(result.get("target_region_name",target_region_id if target_region_id!="" else "home territory")),"outcome":"player victory" if player_won else ("rival victory" if decisive else "continued"),"losses":{"player":{"military_dead":int(home_breakdown.killed),"civilian_dead":player_civilian_dead,"wounded":int(home_breakdown.wounded),"captured":int(termination.get("prisoners",0)) if not player_won else 0,"displaced":player_displaced},String(civ.id):{"military_dead":int(rival_breakdown.killed),"civilian_dead":rival_civilian_dead,"wounded":int(rival_breakdown.wounded),"captured":prisoners,"displaced":rival_displaced}},"territorial_change":territorial_change})
 	civ["player_relation"]=relation
 	civilizations[index]=civ
+	if target_region_id!="":
+		city_intelligence.publish("player",city_intelligence.capture("player",target_region_id,.85,int(GameState.elapsed_days),"field campaign report","battle:"+target_region_id),int(GameState.elapsed_days))
 	_rebuild_competition()
 	world_changed.emit(competition_snapshot())
 	return strategic_result
@@ -4228,75 +4190,45 @@ func known_competition_snapshot()->Dictionary:
 	var full:=competition_snapshot()
 	var strategic_knowledge:=strategic_knowledge_snapshot()
 	var visible:Array[Dictionary]=[]
-	for contender_variant in full.leaders:
-		var contender:Dictionary=contender_variant
-		if String(contender.id)=="player" or int((contender.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2:
-			var visible_contender:=contender.duplicate(true)
-			if String(visible_contender.id)!="player" and float(visible_contender.get("intel_confidence",0.0))<0.58:
-				visible_contender["command_readiness"]=-1.0
-				visible_contender["training_focus"]="unknown"
-				visible_contender["training_cycles"]=-1
-				visible_contender["founding_focus"]="unknown"
-				visible_contender["military_era"]="unknown"
-				visible_contender["military_era_tier"]=-1
-				visible_contender["military_production_lines"]=-1
-				visible_contender["military_replacement_coverage"]=-1.0
-			visible.append(visible_contender)
-	visible.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.score)>float(b.score))
-	var player_rank:=1
-	for index in visible.size():
-		visible[index]["known_rank"]=index+1
-		if String(visible[index].id)=="player": player_rank=index+1
-	var known_domains:=_domain_leaders(visible)
-	for index in visible.size():
-		var contender:Dictionary=visible[index]
-		contender["domains_led"]=_domains_led_by(String(contender.id),known_domains)
-		contender["lead_margin"]=_lead_margin_for(String(contender.id),visible)
-		contender["victory_requirements"]=_victory_requirements(contender,int(contender.known_rank),int(contender.domains_led),float(contender.lead_margin))
-		visible[index]=contender
-	var exact_scoring_known:=bool(strategic_knowledge.exact_scoring_known)
-	if not exact_scoring_known:
-		for index in visible.size():
-			var redacted:Dictionary=visible[index]
-			for key in ["score","score_breakdown","rank","known_rank","domains_led","lead_margin","victory_requirements","dominance_turns"]: redacted.erase(key)
-			visible[index]=redacted
+	for contender:Dictionary in full.leaders:
+		if String(contender.id)=="player":
+			var own:=contender.duplicate(true)
+			for key in ["rank","known_rank","domains_led","lead_margin","victory_requirements","dominance_turns"]: own.erase(key)
+			if not bool(strategic_knowledge.exact_scoring_known):
+				own.erase("score"); own.erase("score_breakdown")
+			visible.append(own)
+		elif int(contender.get("player_relation",{}).get("contact_level",0))>=2:
+			visible.append(_redact_known_foreign_profile(contender))
+	# Knowing how to calculate a score does not supply other nations' census.
+	# Alphabetical order must not reveal a hidden live ranking either.
+	visible.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return String(a.name)<String(b.name))
 	var public_domains:Dictionary={}
 	if bool(strategic_knowledge.framework_known):
-		for domain in strategic_knowledge.known_domains:
-			public_domains[String(domain)]=String(known_domains.get(String(domain),"")) if exact_scoring_known else ""
-	var global_rank_hidden:=not exact_scoring_known or visible.size()<civilizations.size()+1
-	var leader:Dictionary=visible[0] if exact_scoring_known and not visible.is_empty() else {}
-	# The competition model needs exact aggregate state internally, but the
-	# player-facing snapshot must not carry those values behind visually hidden
-	# widgets. Identity is earned by contact; population remains a bounded
-	# estimate, while the strategic-region graph requires both a confirmed home
-	# and sustained returned intelligence.
-	for index in visible.size():
-		if String(visible[index].get("id",""))=="player": continue
-		visible[index]=_redact_known_foreign_profile(visible[index])
-	if not leader.is_empty() and String(leader.get("id",""))!="player":
-		leader=_redact_known_foreign_profile(leader)
-	return {"day":int(full.day),"player_rank":player_rank if exact_scoring_known else -1,"contender_count":visible.size(),"contacted_count":maxi(0,visible.size()-1),"leader":leader,"leaders":visible,"domain_leaders":public_domains,"player_domains_led":_domains_led_by("player",known_domains) if exact_scoring_known else -1,"victory_progress":float(full.victory_progress) if exact_scoring_known else -1.0,"dominance_turns":dominance_turns if exact_scoring_known else -1,"collapse_turns":collapse_turns if exact_scoring_known else -1,"outcome":competition_outcome,"winner_id":competition_winner_id if exact_scoring_known else "","victory_rule":String(full.victory_rule) if bool(strategic_knowledge.victory_thresholds_known) else "No formal global victory condition has been established by your civilization.","defeat_rule":String(full.defeat_rule) if bool(strategic_knowledge.victory_thresholds_known) else "Distant paths to supremacy or collapse remain unknown.","global_rank_hidden":global_rank_hidden,"strategic_knowledge":strategic_knowledge,"exploration":exploration_status()}
+		for domain in strategic_knowledge.known_domains: public_domains[String(domain)]=""
+	return {"day":int(full.day),"player_rank":-1,"contender_count":visible.size(),"contacted_count":maxi(0,visible.size()-1),"leader":{},"leaders":visible,"domain_leaders":public_domains,"player_domains_led":-1,"victory_progress":-1.0,"dominance_turns":-1,"collapse_turns":collapse_turns,"outcome":competition_outcome,"winner_id":competition_winner_id if competition_outcome!="ongoing" else "","victory_rule":String(full.victory_rule) if bool(strategic_knowledge.victory_thresholds_known) else "No formal global victory condition has been established by your civilization.","defeat_rule":String(full.defeat_rule) if bool(strategic_knowledge.victory_thresholds_known) else "Distant paths to supremacy or collapse remain unknown.","global_rank_hidden":true,"strategic_knowledge":strategic_knowledge,"exploration":exploration_status()}
 
 
 func _redact_known_foreign_profile(profile:Dictionary)->Dictionary:
 	var visible:=profile.duplicate(true)
-	var intelligence:=clampf(float(visible.get("intel_confidence",0.0)),0.0,1.0)
+	var cities:Array[Dictionary]=city_intelligence.known_cities("player",String(profile.id))
+	for key in ["population","controlled_population","occupied_population","foreign_controlled_population","cohorts","births_last_turn","deaths_last_turn","population_estimate_low","population_estimate_high","military_population","military_estimate_low","military_estimate_high","score","score_breakdown","rank","known_rank","domains_led","lead_margin","victory_requirements","dominance_turns","societal_identity","research_profile","progression_tiers","wars","trade_total","war_opponents"]: visible.erase(key)
+	for key in ["health","cohesion","knowledge","production","logistics","institutions","ecology","military_readiness","command_readiness","food_days","territory","home_control","relative_military_power","military_replacement_coverage","world_reach"]: visible[key]=-1.0
+	for key in ["military_era_tier","military_production_lines","training_cycles","home_regions_controlled","home_regions_total","diplomatic_partners","diplomatic_rivals"]: visible[key]=-1
+	visible["training_focus"]="unknown"; visible["military_era"]="unknown"; visible["strategic_status"]="PARTIALLY OBSERVED"
+	visible["rival_intent"]="Unconfirmed beyond dated reports"; visible["threat_level"]="UNCERTAIN"
+	visible["strategic_regions"]=city_intelligence.public_regions(String(profile.id))
+	visible["population_scope"]="observed cities only; not a national census"
+	for city:Dictionary in cities:
+		for field:String in ["population","garrison"]:
+			var estimate:Dictionary=city.fields.get(field,{})
+			if estimate.is_empty(): continue
+			var prefix:="population" if field=="population" else "military"
+			for bound:String in ["low","high"]:
+				var key:=prefix+"_estimate_"+bound
+				visible[key]=float(visible.get(key,0))+float(estimate[bound])
 	var relation:Dictionary=visible.get("player_relation",{})
-	# Even excellent reports remain estimates: the exact simulation population,
-	# demographic cohorts, and recent demographic flows never belong in this API.
-	for key in ["population","controlled_population","occupied_population","foreign_controlled_population","cohorts","births_last_turn","deaths_last_turn"]:
-		visible.erase(key)
-	if intelligence<0.20:
-		visible.erase("population_estimate_low")
-		visible.erase("population_estimate_high")
-	var regions_known:=intelligence>=0.55 and bool(relation.get("home_location_known",false))
-	if not regions_known:
-		visible["strategic_regions"]=[]
-		visible["home_regions_controlled"]=-1
-		visible["home_regions_total"]=-1
-		visible["strategic_status"]="UNKNOWN"
-		visible["territory"]=-1.0
+	for key in relation.keys():
+		if String(key).begins_with("rival_player_") or key in ["rival_contact_level","rival_met_day"]: relation.erase(key)
 	return visible
 
 
@@ -4400,37 +4332,7 @@ func _public_rival_research_profile(civ:Dictionary)->Dictionary:
 
 
 func _public_regions(civ:Dictionary)->Array[Dictionary]:
-	var frontline_index:=_frontline_region_index(civ)
-	var result:Array[Dictionary]=[]
-	for index in (civ.get("strategic_regions",[]) as Array).size():
-		var region:Dictionary=(civ.strategic_regions[index] as Dictionary).duplicate(true)
-		var controller:=String(region.get("controller",String(civ.id)))
-		region["available"]=controller==String(civ.id) and index==frontline_index
-		region["controller_label"]=_controller_label(controller)
-		region["original_controller_label"]=String(civ.name)
-		region["foreign_holding"]=false
-		if controller=="player": region["availability_reason"]="Under your occupation."
-		elif controller!=String(civ.id): region["availability_reason"]="Held by %s. Campaign against that controller to liberate it." % _controller_label(controller)
-		elif index!=frontline_index: region["availability_reason"]="The campaign front must reach this region first."
-		else: region["availability_reason"]="Frontline target available during open war."
-		region["occupation_required"]=occupation_requirement(civ,region)
-		result.append(region)
-	# Foreign occupations are additional views onto the same fixed 40 records,
-	# never copied simulation entities. They make an AI occupier's holdings
-	# reachable from its own diplomacy panel.
-	for owner in civilizations:
-		if String(owner.id)==String(civ.id): continue
-		for region_variant in owner.get("strategic_regions",[]):
-			var region:Dictionary=(region_variant as Dictionary).duplicate(true)
-			if String(region.get("controller",""))!=String(civ.id): continue
-			region["available"]=true
-			region["controller_label"]=String(civ.name)
-			region["original_controller_label"]=String(owner.name)
-			region["foreign_holding"]=true
-			region["availability_reason"]="Foreign occupation exposed to a liberation campaign."
-			region["occupation_required"]=occupation_requirement(owner,region)
-			result.append(region)
-	return result
+	return city_intelligence.public_regions(String(civ.id))
 
 
 func civilization_snapshot(civ_id:String)->Dictionary:
@@ -4688,10 +4590,11 @@ func export_state()->Dictionary:
 		for point_key in ["point_a","point_b"]:
 			var point:Variant=exported_formations[index].get(point_key,Vector2.ZERO)
 			if point is Vector2: exported_formations[index][point_key]={"x":point.x,"y":point.y}
-	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
+	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if not city_intelligence.validate(payload.get("city_intelligence",{})): return {"error":"Invalid city intelligence records."}
 	var incoming:=payload.duplicate(true)
 	var incoming_version:=int(incoming.get("version",-1))
 	if incoming_version in [1,2,3,4]: incoming=_migrate_legacy_state(incoming)
@@ -4704,6 +4607,8 @@ func import_state(payload:Dictionary)->Dictionary:
 	if int(incoming.get("world_seed",GameState.world_seed))!=GameState.world_seed: return {"error":"Civilization save belongs to a different world."}
 	var shape_error:=_payload_shape_error(incoming)
 	if shape_error!="": return {"error":shape_error}
+	for mission:Dictionary in incoming.get("scout_missions",[])+incoming.get("foreign_formations",[])+[incoming.get("diplomatic_mission",{})]:
+		if not city_intelligence.valid_carried(mission): return {"error":"Invalid carried city observations."}
 	var previous:=export_state()
 	_apply_state(incoming)
 	var errors:=validate_state()
@@ -4711,6 +4616,7 @@ func import_state(payload:Dictionary)->Dictionary:
 		_apply_state(previous)
 		return {"error":"Invalid civilization state.","details":errors}
 	_rebuild_competition()
+	if not incoming.has("city_intelligence"): city_intelligence.migrate()
 	world_changed.emit(competition_snapshot())
 	return {"ok":true,"version":SAVE_VERSION}
 
@@ -4940,6 +4846,8 @@ func _payload_shape_error(payload:Dictionary)->String:
 
 
 func _apply_state(payload:Dictionary)->void:
+	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
+	city_intelligence.records=payload.get("city_intelligence",{}).duplicate(true)
 	last_world_seed=int(payload.get("world_seed",GameState.world_seed))
 	last_processed_day=maxi(0,int(payload.get("last_processed_day",0)))
 	last_turn_day=maxi(0,int(payload.get("last_turn_day",0)))

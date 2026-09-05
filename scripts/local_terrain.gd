@@ -12042,17 +12042,14 @@ func _create_resource_overlay_batch(stage:String,clusters:Array,zoom:float)->Mul
 	batch.material_override=material
 	return batch
 func _refresh_contact_encounter_markers()->void:
-	# Historical encounter labels stay in the discovery map. A settlement is
-	# different: once a returned report confirms its home, the physical place
-	# must become visible on the terrain. Each polity gets one bounded aggregate
-	# footprint rather than thousands of buildings or a permanent screen label.
 	var confirmed:Array[Dictionary]=[]
-	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
-		var encounter:Dictionary=encounter_variant
-		if not bool(encounter.get("home_location_known",false)): continue
-		var home:Dictionary=encounter.get("home_position",{})
-		if not home.has("x") or not home.has("z"): continue
-		confirmed.append({"civ_id":String(encounter.get("civ_id","")),"name":String(encounter.get("name","FOREIGN SETTLEMENT")),"x":float(home.x),"z":float(home.z),"observed":int(encounter.get("last_observed_day",-1))})
+	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities():
+		var location:Dictionary=city.position
+		if camera!=null and Vector2(camera.global_position.x,camera.global_position.z).distance_to(Vector2(float(location.x),float(location.z)))>camera.size*1.5+100.0: continue
+		confirmed.append({"city_id":city.city_id,"civ_id":city.civ_id,"name":city.name,"x":float(location.x),"z":float(location.z)})
+	if camera!=null:
+		confirmed.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return Vector2(a.x,a.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z))<Vector2(b.x,b.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z)))
+	if confirmed.size()>64: confirmed.resize(64)
 	var signature:=JSON.stringify(confirmed)
 	if signature!=rendered_contact_encounter_signature:
 		for civ_id in contact_encounter_markers.keys():
@@ -12061,23 +12058,23 @@ func _refresh_contact_encounter_markers()->void:
 		contact_encounter_markers.clear()
 		for site in confirmed:
 			var marker:=Node3D.new()
-			marker.name="ConfirmedForeignSettlement_%s" % String(site.civ_id)
-			marker.set_meta("civilization_id",String(site.civ_id))
+			marker.name="ConfirmedForeignSettlement_%s" % String(site.city_id)
+			marker.set_meta("civilization_id",String(site.civ_id)); marker.set_meta("city_id",String(site.city_id))
 			marker.set_meta("settlement_name",String(site.name))
 			marker.position=Vector3(float(site.x),_height_at(float(site.x),float(site.z))+0.05,float(site.z))
-			var accent:=Color.from_hsv(float(abs(String(site.civ_id).hash())%1000)/1000.0,0.34,0.82)
+			var accent:=Color.from_hsv(float(abs(String(site.city_id).hash())%1000)/1000.0,0.34,0.82)
 			var material:=StandardMaterial3D.new(); material.albedo_color=accent.darkened(0.28); material.emission_enabled=true; material.emission=accent.darkened(0.58); material.emission_energy_multiplier=0.42; material.roughness=0.88
 			var boundary:=MeshInstance3D.new(); boundary.name="ObservedFootprint"
-			var ring:=TorusMesh.new(); ring.inner_radius=5.4; ring.outer_radius=6.0; ring.rings=32; ring.ring_segments=8; boundary.mesh=ring; boundary.material_override=material; marker.add_child(boundary)
-			var rng:=RandomNumberGenerator.new(); rng.seed=GameState.world_seed^String(site.civ_id).hash()
-			for cluster_index in 12:
+			var ring:=TorusMesh.new(); ring.inner_radius=2.4; ring.outer_radius=2.7; ring.rings=32; ring.ring_segments=8; boundary.mesh=ring; boundary.material_override=material; marker.add_child(boundary)
+			var rng:=RandomNumberGenerator.new(); rng.seed=GameState.world_seed^String(site.city_id).hash()
+			for cluster_index in 6:
 				var structure:=MeshInstance3D.new()
 				var structure_mesh:=BoxMesh.new(); structure_mesh.size=Vector3(rng.randf_range(0.8,1.8),rng.randf_range(0.45,1.25),rng.randf_range(0.8,1.8)); structure.mesh=structure_mesh; structure.material_override=material
-				var radial:=Vector2.RIGHT.rotated(rng.randf_range(0.0,TAU))*rng.randf_range(0.8,4.8)
+				var radial:=Vector2.RIGHT.rotated(rng.randf_range(0.0,TAU))*rng.randf_range(0.4,2.2)
 				structure.position=Vector3(radial.x,float(structure_mesh.size.y)*0.5,radial.y); structure.rotation.y=rng.randf_range(0.0,TAU); marker.add_child(structure)
-			var label:=Label3D.new(); label.name="SettlementLabel"; label.text="%s\nCONFIRMED FOREIGN SETTLEMENT" % String(site.name).to_upper(); label.font_size=13; label.outline_size=6; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0.0,3.4,0.0); label.modulate=accent.lightened(0.22); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
+			var label:=Label3D.new(); label.name="SettlementLabel"; label.text="%s" % String(site.name).to_upper(); label.font_size=13; label.outline_size=6; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0.0,3.4,0.0); label.modulate=accent.lightened(0.22); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
 			add_child(marker)
-			contact_encounter_markers[String(site.civ_id)]=marker
+			contact_encounter_markers[String(site.city_id)]=marker
 		rendered_contact_encounter_signature=signature
 	for marker_variant in contact_encounter_markers.values():
 		var marker:Node3D=marker_variant
@@ -13198,20 +13195,17 @@ func _settlement_plot_lens_report(plot:Dictionary)->String:
 	return report
 
 func _contact_encounter_at(position:Vector3,radius_km:float=5.0)->Dictionary:
-	var ground_position:=Vector2(position.x,position.z)
-	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
-		var encounter:Dictionary=encounter_variant
-		var home:Dictionary=encounter.get("home_position",{}) if bool(encounter.get("home_location_known",false)) else {}
-		if home.has("x") and home.has("z") and ground_position.distance_to(Vector2(float(home.x),float(home.z)))<=radius_km:
-			var settlement:=encounter.duplicate(true)
-			settlement["point_kind"]="settlement"
-			return settlement
-		var encounter_position:Dictionary=encounter.get("position",{})
-		if not encounter_position.has("x") or not encounter_position.has("z"): continue
-		if ground_position.distance_to(Vector2(float(encounter_position.x),float(encounter_position.z)))<=radius_km:
-			var contact_site:=encounter.duplicate(true)
-			contact_site["point_kind"]="encounter"
-			return contact_site
+	var ground:=Vector2(position.x,position.z)
+	var nearest:Dictionary={}; var distance:=radius_km
+	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities():
+		var delta:=ground.distance_to(Vector2(float(city.position.x),float(city.position.z)))
+		if delta<=distance:
+			distance=delta; nearest=city.duplicate(true); nearest["point_kind"]="settlement"
+	if not nearest.is_empty(): return nearest
+	for encounter:Dictionary in CivilizationSystem.contact_encounters_snapshot():
+		var point:Dictionary=encounter.get("position",{})
+		if point.has_all(["x","z"]) and ground.distance_to(Vector2(float(point.x),float(point.z)))<=radius_km:
+			var result:=encounter.duplicate(true); result["point_kind"]="encounter"; return result
 	return {}
 
 
@@ -13298,6 +13292,9 @@ func _inspect_location(position: Vector3) -> void:
 	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: _inspect_location_local(position))
 
 func _inspect_location_local(position: Vector3) -> void:
+	var city_report:=_contact_encounter_at(position)
+	if city_report.has("city_id"):
+		CivilizationSystem.city_intelligence.open(String(city_report.city_id)); return
 	if lens_panel==null and interface_layer: _build_lens(interface_layer)
 	_show_map_selection(position)
 	if travel_status_label: travel_status_label.text=_map_inspection_summary(position)
@@ -16883,15 +16880,19 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 	relation_text.add_theme_font_size_override("font_size",12)
 	relation_text.add_theme_color_override("font_color",Color("#c6b98e"))
 	civilization_detail_root.add_child(relation_text)
+	var city_directory:=Button.new()
+	city_directory.text="CITY REPORTS · OBSERVED LOCATIONS ONLY"
+	city_directory.pressed.connect(func(): CivilizationSystem.city_intelligence.open("",String(profile.id)))
+	civilization_detail_root.add_child(city_directory)
 	var regions:Array=profile.get("strategic_regions",[])
-	if intel<0.55:
+	if regions.is_empty():
 		var frontier_unknown:=Label.new()
 		frontier_unknown.text="STRATEGIC FRONT UNKNOWN  •  Maintain contact, trade, or reconnaissance to identify campaign regions and defensive estimates."
 		frontier_unknown.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		frontier_unknown.add_theme_font_size_override("font_size",11)
 		frontier_unknown.add_theme_color_override("font_color",Color("#a99672"))
 		civilization_detail_root.add_child(frontier_unknown)
-	if intel>=0.55 and not regions.is_empty():
+	if not regions.is_empty():
 		var selected_exists:=false
 		for region_variant in regions:
 			if String((region_variant as Dictionary).get("id",""))==selected_civilization_region_id: selected_exists=true
@@ -16902,7 +16903,7 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 				if bool(region.get("available",false)): selected_civilization_region_id=String(region.id); break
 			if selected_civilization_region_id=="": selected_civilization_region_id=String((regions[0] as Dictionary).id)
 		var region_heading:=Label.new()
-		region_heading.text="CAMPAIGN ROUTE  •  ADVANCE FROM LEFT TO RIGHT"
+		region_heading.text="INDEPENDENTLY REPORTED CITIES"
 		region_heading.add_theme_font_size_override("font_size",11)
 		region_heading.add_theme_color_override("font_color",Color("#d3b66d"))
 		civilization_detail_root.add_child(region_heading)
@@ -16918,7 +16919,7 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 			var state:="YOU CONTROL IT" if held_by_player else ("LIBERATE IT" if bool(region.get("foreign_holding",false)) else ("NEXT TARGET" if bool(region.get("available",false)) else "TAKE REGION %d FIRST" % region_index))
 			var region_button:=Button.new()
 			var selected_marker:="▶ " if String(region.id)==selected_civilization_region_id else ""
-			region_button.text="%s%d  %s\n%s" % [selected_marker,region_index+1,_campaign_region_label(String(region.get("role","region"))),state]
+			region_button.text="%s%s\nLAST REPORTED" % [selected_marker,String(region.name)]
 			region_button.custom_minimum_size=Vector2(112,50)
 			region_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			region_button.add_theme_font_size_override("font_size",9)
@@ -16926,7 +16927,7 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 			if String(region.id)==selected_civilization_region_id: region_accent=region_accent.lightened(0.22)
 			region_button.add_theme_stylebox_override("normal",_knowledge_style(Color("#0c1517"),region_accent.darkened(0.25),1,3,4))
 			region_button.add_theme_stylebox_override("hover",_knowledge_style(Color("#152226"),region_accent,1,3,4))
-			region_button.tooltip_text="%s\n%s\nThese five cards are the route through this civilization, not buildings or technologies." % [String(region.get("name","Strategic region")),String(region.get("availability_reason",""))]
+			region_button.tooltip_text="%s\n%s\nOnly cities described by surviving reports appear here. Conditions may have changed." % [String(region.get("name","Strategic region")),String(region.get("availability_reason",""))]
 			region_button.pressed.connect(_select_campaign_region_button.bind(String(profile.id),String(region.id)))
 			front_grid.add_child(region_button)
 			if String(region.id)==selected_civilization_region_id: selected_region_index=region_index
@@ -16935,7 +16936,7 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 		var region_detail:=Label.new()
 		var control_label:=String(selected_region.get("controller_label",profile.name))
 		var force_status:="GARRISON %s / %s" % [_compact_population(int(occupation_force.get("troops",0))),_compact_population(roundi(float(selected_region.get("occupation_required",0.0))))] if String(selected_region.get("controller",""))=="player" else "OCCUPATION NEED %s" % _compact_population(roundi(float(selected_region.get("occupation_required",0.0))))
-		region_detail.text="%s — %s\nACCESS: %s\nPopulation %s  •  Controlled by %s  •  Defenses %d%%  •  War damage %d%%  •  %s" % [String(selected_region.name),_campaign_region_label(String(selected_region.get("role","region"))),String(selected_region.get("availability_reason","")),_compact_population(roundi(float(selected_region.get("population",0.0)))),control_label,roundi(float(selected_region.get("fortification",0.0))*100.0),roundi(float(selected_region.get("damage",0.0))*100.0),force_status]
+		region_detail.text=CivilizationSystem.city_intelligence.describe(selected_region.get("intelligence",{}))
 		region_detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		region_detail.add_theme_font_size_override("font_size",10)
 		region_detail.add_theme_color_override("font_color",Color("#acb5ae"))
@@ -16975,7 +16976,7 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 		operation.add_theme_stylebox_override("panel",_knowledge_style(Color("#0d1719"),outlook_color.darkened(0.25),1,3,6))
 		civilization_detail_root.add_child(operation)
 		var operation_text:=Label.new()
-		operation_text.text="OPERATIONAL FORECAST  %s  •  CASUALTY RISK %s  •  SUPPLY %s\nFIELD %s  •  DEFENDER EST. %s–%s  •  INTEL %d%%  •  READINESS %d%%\nWHY IT MATTERS  %s" % [String(assessment.get("outlook","UNKNOWN")),String(assessment.get("casualty_risk","UNKNOWN")),String(assessment.get("supply_label","UNKNOWN")),_compact_population(int(assessment.get("fielded",0))),_compact_population(int(assessment.get("enemy_estimate_low",0))),_compact_population(int(assessment.get("enemy_estimate_high",0))),roundi(float(assessment.get("intel_confidence",0.0))*100.0),roundi(float(assessment.get("player_readiness",0.0))*100.0),String(assessment.get("region_value",""))]
+		operation_text.text="OPERATIONAL FORECAST  %s  •  CASUALTY RISK %s  •  SUPPLY %s\nFIELD %s  •  DEFENDER EST. %s–%s  •  INTEL %d%%  •  READINESS %d%%\nWHY IT MATTERS  %s" % [String(assessment.get("outlook","UNKNOWN")),String(assessment.get("casualty_risk","UNKNOWN")),String(assessment.get("supply_label","UNKNOWN")),_compact_population(int(assessment.get("fielded",0))),("unknown" if int(assessment.get("enemy_estimate_low",-1))<0 else _compact_population(int(assessment.enemy_estimate_low))),("unknown" if int(assessment.get("enemy_estimate_high",-1))<0 else _compact_population(int(assessment.enemy_estimate_high))),roundi(float(assessment.get("intel_confidence",0.0))*100.0),roundi(float(assessment.get("player_readiness",0.0))*100.0),String(assessment.get("region_value",""))]
 		operation_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		operation_text.add_theme_font_size_override("font_size",10)
 		operation_text.add_theme_color_override("font_color",outlook_color.lightened(0.12))
@@ -17048,7 +17049,7 @@ func _foreign_relation_label(relation:Dictionary)->String:
 
 
 func _qualitative_foreign_capacity(value:float,intelligence:float)->String:
-	if intelligence<0.48: return "UNKNOWN"
+	if intelligence<0.48 or value<0: return "UNKNOWN"
 	if value<0.22: return "FRAGILE"
 	if value<0.40: return "LIMITED"
 	if value<0.60: return "DEVELOPING"
@@ -17144,6 +17145,7 @@ func _open_scout_dispatch_panel()->void:
 		target_selector.item_selected.connect(_select_scout_target.bind(target_selector,duration_grid,heading_selector))
 	scout_dispatch_status=Label.new(); scout_dispatch_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; scout_dispatch_status.add_theme_font_size_override("font_size",11); scout_dispatch_status.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(scout_dispatch_status)
 	var footer:=HBoxContainer.new(); footer.alignment=BoxContainer.ALIGNMENT_END; root.add_child(footer)
+	var reports:=Button.new(); reports.text="ALL CITY REPORTS"; reports.custom_minimum_size=Vector2(180,38); reports.pressed.connect(func(): CivilizationSystem.city_intelligence.open()); footer.add_child(reports)
 	var close:=Button.new(); close.text="CLOSE"; close.custom_minimum_size=Vector2(140,38); close.pressed.connect(_close_scout_dispatch_panel); footer.add_child(close)
 
 
