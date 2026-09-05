@@ -7160,6 +7160,10 @@ func _settlement_plot_color(plot: Dictionary) -> Color:
 			field_palette=crop_palettes.get(crop_family,field_palette)
 		var palette_index:=absi(int(plot.get("id",0))*7)%field_palette.size()
 		color=field_palette[palette_index].lerp(field_palette[(palette_index+1)%field_palette.size()],0.12+0.10*sin(field_phase*31.0))
+		if cultivation_phase=="growing":
+			# Crop-family palettes describe the mature canopy. New growth is greener;
+			# grain must not look harvest-gold immediately after it starts growing.
+			color=color.lerp(Color("#38603c"),0.62)
 	elif land_use in ["vacant", "pasture"]:
 		color = Color("#68704d")
 	elif land_use == "ruin":
@@ -7532,6 +7536,12 @@ void fragment() {
 			vec3 source_surface=aerial_photographic*weather_tint;
 			vec3 simulated_surface=COLOR.rgb*mix(vec3(1.0),normalized_detail,photographic_detail);
 			fabric=mix(source_surface,simulated_surface,0.42)*source_value*0.92;
+		} else if (fabric_kind==1) {
+			// Crop and cultivation phase already choose the vertex palette. Keep
+			// that signal; the dirt photograph supplies surface variation, not a
+			// replacement crop color shared by every field in every season.
+			float field_surface_value=clamp(source_luma/0.50,0.74,1.24);
+			fabric=COLOR.rgb*field_surface_value;
 		} else {
 			photographic*=mix(vec3(1.0),tint,0.08);
 			fabric=mix(fabric,photographic,0.94);
