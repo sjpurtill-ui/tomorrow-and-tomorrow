@@ -9,11 +9,16 @@ func reset()->void:
 func home_unavailable()->bool:
 	var home:=SettlementModel.settlement_record(SettlementModel._primary_settlement_id())
 	return not String(home.get("occupied_by","")).is_empty()
+func has_active_occupation()->bool:
+	for entry:Dictionary in data.occupied:
+		if not bool(entry.get("liberated",false)):return true
+	return false
 func absent_group()->Dictionary:
 	return data.preparation if not data.preparation.is_empty() else data.remnant
 func absent_people()->int:
 	return int(absent_group().get("people",0))
 func prepare(people:int,days:int)->Dictionary:
+	if home_unavailable():return {"error":"The home city is occupied. Use local recovery decisions."}
 	if MilitaryCampaign.active_siege.is_empty() or String(MilitaryCampaign.active_siege.mode)!="defensive":return {"error":"Escape preparation requires a siege of your home settlement."}
 	if not data.preparation.is_empty() or not data.remnant.is_empty():return {"error":"An escape group is already committed."}
 	if bool(GameState.settlement_convoy.get("active",false)):return {"error":"An existing founding convoy must finish before another displaced group is organized."}
@@ -134,7 +139,7 @@ func _activate_capital(city:Dictionary)->void:
 func queue_resistance(city_id:String,order:String)->Dictionary:
 	if not ORDERS.has(order):return {"error":"Unknown recovery decision."}
 	for entry:Dictionary in data.occupied:
-		if String(entry.city_id)!=city_id:continue
+		if String(entry.city_id)!=city_id or bool(entry.get("liberated",false)):continue
 		if not entry.order.is_empty() or int(GameState.elapsed_days)<int(entry.next_order_day):return {"error":"The current local effort needs time before another can begin."}
 		var city:=SettlementModel.settlement_record(city_id)
 		var population:=SettlementModel._settlement_population(city)
@@ -168,7 +173,7 @@ func _resolve_resistance(entry:Dictionary,day:int)->void:
 			if not success:
 				government.repression=clampf(float(government.repression)+.2,0,1);government.welfare=maxf(0,float(government.welfare)-.12)
 				var deaths:=maxi(0,floori(float(region.population)*.01))
-				GameState.register_population_deaths(deaths,"Deaths in failed independence attempt")
+				_lose_people(deaths,"Deaths in failed independence attempt",String(entry.city_id))
 	if rng.randf()<float(government.suspicion)*float(government.repression):government.welfare=maxf(0,float(government.welfare)-.04)
 	region.governance=government;entry.region=region;entry.order={}
 	if success:
@@ -206,8 +211,7 @@ func seek_site(heading:String,distance:float=32)->Dictionary:
 	var start:=CivilizationSystem.city_intelligence.vector(data.remnant.position)
 	var angle:=deg_to_rad(float(CivilizationSystem.SCOUT_HEADINGS.get(heading,0)))
 	var destination:=start+Vector2(cos(angle),sin(angle))*clampf(distance,8,120)
-	var eligibility:=assess_site(destination)
-	if not bool(eligibility.get("valid",false)):return {"error":String(eligibility.reason)}
+	# A destination is a possibility, not a remote survey. Conditions are discovered on arrival.
 	var route:Dictionary=CivilizationSystem._plan_scout_land_route(start,destination)
 	if not bool(route.get("ok",false)):return {"error":String(route.get("reason","No land route reaches the site."))}
 	data.remnant.merge({"route":route.route,"distance":float(route.distance_km),"traveled":0.0,"destination":CivilizationSystem.city_intelligence.point(destination),"phase":"seeking_site"},true)
@@ -241,7 +245,7 @@ func _day(day:int)->void:
 		if eaten<people:
 			group.mortality_remainder=float(group.mortality_remainder)+people*.01*(1-eaten/maxf(1,people))
 			var dead:=mini(people,floori(float(group.mortality_remainder)));group.mortality_remainder=float(group.mortality_remainder)-dead
-			var loss:Dictionary=GameState.register_population_deaths(dead,"Deaths among displaced survivors")
+			var loss:Dictionary=_lose_people(dead,"Deaths among displaced survivors")
 			group.people=people-int(loss.get("count",0))
 			var remaining_ratio:=float(group.people)/maxf(1,float(people))
 			for key in group.cohorts:group.cohorts[key]=float(group.cohorts[key])*remaining_ratio
@@ -271,7 +275,11 @@ func _day(day:int)->void:
 		var city_record:=SettlementModel.settlement_record(String(entry.city_id))
 		entry.region.population=SettlementModel._settlement_population(city_record)
 		var welfare:=float(entry.region.governance.get("welfare",.5))
-		SettlementModel.with_city_resources(String(entry.city_id),func()->void:FoodSystem.process_day({"traveling":false},.3+welfare*.4,.6))
+		var food_report:Dictionary=SettlementModel.with_city_resources(String(entry.city_id),func()->Dictionary:return FoodSystem.process_day({"traveling":false},.3+welfare*.4,.6))
+		entry.hunger_loss=float(entry.get("hunger_loss",0))+float(entry.region.population)*.002*maxf(0,.75-float(food_report.get("food_intake_ratio",1)))
+		var deaths:=floori(float(entry.hunger_loss))
+		if deaths>0:
+			_lose_people(deaths,"Hunger deaths under occupation",String(entry.city_id));entry.hunger_loss=float(entry.hunger_loss)-deaths
 		if day%30==0:
 			var index:int=CivilizationSystem._civilization_index(String(entry.occupier))
 			var occupier:Dictionary=CivilizationSystem.civilizations[index] if index>=0 else {}
@@ -312,9 +320,50 @@ static func validate(payload:Dictionary)->Array[String]:
 		for field in ["food","timber"]:
 			var amount:=float(group.get(field,NAN))
 			if not is_finite(amount) or amount<0:errors.append("Invalid survivor supplies.")
-	if not payload.get("occupied",[]) is Array or payload.get("occupied",[]).size()>MAX_OCCUPIED:errors.append("Invalid occupied-city table.")
+	if not payload.get("preparation",{}).is_empty() and not payload.get("remnant",{}).is_empty():errors.append("Two survivor groups cannot own the same population.")
+	for key in ["preparation","remnant"]:
+		var group:Dictionary=payload.get(key,{})
+		if group.is_empty():continue
+		for required in ["people","food","timber","cohorts","functions","prepared_day","siege_id","origin_city","origin_name","origin_position","mortality_remainder"]:
+			if not group.has(required):errors.append("Incomplete survivor record: "+required)
+		if not valid_point(group.get("origin_position")):errors.append("Invalid survivor origin.")
+		for table in ["cohorts","functions"]:
+			if not group.get(table) is Dictionary:return ["Invalid survivor population profile."]
+			for amount in group[table].values():
+				if not amount is int and not amount is float:return ["Invalid survivor cohort amount."]
+				if not is_finite(float(amount)) or float(amount)<0:errors.append("Invalid survivor cohort amount.")
+		if key=="remnant":
+			if not valid_route(group.get("route")) or not valid_point(group.get("position")) or not valid_point(group.get("destination")):errors.append("Invalid survivor travel route.")
+			if not String(group.get("phase","")) in ["escaping","camped","seeking_site"]:errors.append("Invalid survivor travel phase.")
+			for field in ["distance","traveled"]:
+				if not is_finite(float(group.get(field,NAN))) or float(group.get(field,-1))<0:errors.append("Invalid survivor travel distance.")
+	if not payload.get("occupied",[]) is Array or payload.get("occupied",[]).size()>MAX_OCCUPIED:return ["Invalid occupied-city table."]
+	var cities:Dictionary={}
+	for entry in payload.get("occupied",[]):
+		if not entry is Dictionary:return ["Invalid occupied-city record."]
+		for required in ["city_id","occupier","captured_day","region","order","report","report_due","last_report_day","next_order_day"]:
+			if not entry.has(required):return ["Incomplete occupied-city record."]
+		if String(entry.city_id).is_empty() or cities.has(String(entry.city_id)):errors.append("Invalid occupied-city identity.")
+		cities[String(entry.city_id)]=true
+		for field in ["region","order","report"]:
+			if not entry[field] is Dictionary:return ["Invalid occupied-city state."]
+		errors.append_array(GOVERNANCE.validate(entry.region))
+		if not entry.order.is_empty():
+			if not ORDERS.has(String(entry.order.get("kind",""))) or not entry.order.has_all(["arrival_day","resolve_day","food_cost","funded"]):errors.append("Invalid resistance order.")
 	if not payload.get("history",[]) is Array or payload.get("history",[]).size()>32:errors.append("Invalid recovery history.")
 	return errors
+
+static func valid_point(value:Variant)->bool:
+	if not value is Dictionary:return false
+	for axis in ["x","z"]:
+		if not value.get(axis) is float and not value.get(axis) is int:return false
+		if not is_finite(float(value[axis])):return false
+	return true
+static func valid_route(value:Variant)->bool:
+	if not value is Array or value.is_empty() or value.size()>512:return false
+	for point in value:
+		if not valid_point(point):return false
+	return true
 
 func cancel_preparation()->Dictionary:
 	if data.preparation.is_empty():return {"error":"No preparation to cancel."}
@@ -333,3 +382,14 @@ func held_military()->int:
 	for entry:Dictionary in data.occupied:
 		if not bool(entry.get("liberated",false)):total+=maxi(0,int(entry.get("captive_people",0)))
 	return total
+
+func _lose_people(count:int,reason:String,city_id:String="")->Dictionary:
+	var counts:Dictionary={}
+	for city:Dictionary in GameState.player_settlements:
+		counts[String(city.id)]=SettlementModel._settlement_population(city)
+	var result:=GameState.register_population_deaths(count,reason)
+	for city:Dictionary in GameState.player_settlements:
+		if not bool(city.get("primary",false)):
+			var amount:=float(counts[String(city.id)])-(int(result.get("count",0)) if String(city.id)==city_id else 0)
+			city.population_share=maxf(0,amount)/maxf(1,GameState.population_exact)
+	return result

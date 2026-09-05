@@ -741,7 +741,7 @@ func territory_control_snapshot()->Dictionary:
 	var claims:Array[Dictionary]=[]
 	for settlement_variant in network.settlements:
 		var settlement:Dictionary=settlement_variant
-		claims.append({"id":String(settlement.get("id","")),"kind":"settlement_claim","name":String(settlement.get("name","SETTLEMENT")),"controller":"player","population":int(settlement.get("population",0)),"position":settlement.get("position",Vector2.ZERO),"boundary":settlement.get("boundary",PackedVector2Array()),"area_km2":float(settlement.get("controlled_area_km2",0.0)),"status":String(settlement.get("status","established")),"territory_drivers":settlement.get("territory_drivers",{})})
+		claims.append({"id":String(settlement.get("id","")),"kind":"settlement_claim","name":String(settlement.get("name","SETTLEMENT")),"controller":String(settlement.get("occupied_by","player")),"population":int(settlement.get("population",0)),"position":settlement.get("position",Vector2.ZERO),"boundary":settlement.get("boundary",PackedVector2Array()),"area_km2":float(settlement.get("controlled_area_km2",0.0)),"status":String(settlement.get("status","established")),"territory_drivers":settlement.get("territory_drivers",{})})
 	var occupations:Array[Dictionary]=[]
 	var civilization_system:=_autoload_node("CivilizationSystem")
 	if civilization_system:

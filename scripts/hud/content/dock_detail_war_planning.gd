@@ -47,6 +47,8 @@ func tab(_sub:int)->Dictionary:
 	if not siege.is_empty():
 		brief={"tone":"warn","title":"Siege of "+String(siege.target_name),"why":"Hold the approaches, seek terms, or leave. Orders continue as time passes; no daily micromanagement is required."}
 		blocks.append_array(_siege_blocks(siege))
+	if siege.is_empty() and not MilitaryCampaign.siege_history.is_empty():
+		blocks.append({"type":"actions","items":[{"label":"REOPEN LAST SIEGE","sub":"outcome and recovery","on_press":func()->void:preload("res://scripts/hud/siege_screen.gd").open(String(MilitaryCampaign.siege_history[0].id))}]})
 	if not threat.is_empty():
 		blocks.append({"type":"rows","heading":"THREAT","items":[{
 			"name":String(threat.get("title","Enemy force")),

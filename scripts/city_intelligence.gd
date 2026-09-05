@@ -61,7 +61,8 @@ func truth(city_id:String)->Dictionary:
 			values["garrison"]=float(MilitaryCampaign.home_army.get("troops",0))
 			values["fortification"]=clampf(float(MilitaryCampaign.settlement_defense.get("stage",0))/5.0,0,1)
 		# Secondary cities do not have an independent garrison/defense ledger yet.
-		place["controller"]="player"
+		place["controller"]=String(city.get("occupied_by","player"))
+		if String(place.controller)!="player":values.erase("garrison")
 	else:
 		var location:Dictionary=system._region_location(city_id)
 		if location.is_empty(): return {}

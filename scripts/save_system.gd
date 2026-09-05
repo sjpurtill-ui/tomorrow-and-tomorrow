@@ -40,6 +40,7 @@ func save_game(slot:String=DEFAULT_SLOT)->Dictionary:
 		"version":SAVE_VERSION,
 		"metadata":{
 			"saved_unix":Time.get_unix_time_from_system(),
+			"game_release":String(ProjectSettings.get_setting("application/config/version","development")),
 			"world_seed":GameState.world_seed,
 			"elapsed_days":GameState.elapsed_days,
 			"settlement_name":GameState.settlement_name,

@@ -357,6 +357,9 @@ var military_attention_dialog:ConfirmationDialog
 var military_attention_seen:Dictionary={}
 
 func _ready() -> void:
+	var release_version:=String(ProjectSettings.get_setting("application/config/version","development"))
+	get_window().title="Tomorrow and Tomorrow · "+release_version
+	print("GAME_RELEASE: ",release_version)
 	if "--resume-saved" in OS.get_cmdline_user_args() and not get_tree().root.has_meta("saved_campaign_resumed"):
 		var restored:Dictionary=SaveSystem.load_game()
 		if restored.has("error"):
@@ -19124,7 +19127,7 @@ func _open_world_menu()->void:
 	content.add_theme_constant_override("separation",8)
 	modal.add_child(content)
 	var eyebrow:=Label.new()
-	eyebrow.text="GAME MENU"
+	eyebrow.text="GAME MENU · "+String(ProjectSettings.get_setting("application/config/version","development"))
 	eyebrow.add_theme_font_size_override("font_size",11)
 	eyebrow.add_theme_color_override("font_color",Color("#b9a56c"))
 	content.add_child(eyebrow)
