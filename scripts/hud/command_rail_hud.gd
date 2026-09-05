@@ -383,8 +383,6 @@ func _build_decision_queue()->void:
 	queue_root.custom_minimum_size=Vector2(Tokens.QUEUE_WIDTH,0)
 	queue_root.add_theme_constant_override("separation",6)
 	add_child(queue_root)
-	queue_footer=Tokens.make_label("",10,Tokens.MUTED,0.12)
-	queue_footer.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 
 func dismiss_alert(alert_id:String)->void:
 	if not dismissed_alert_ids.has(alert_id):

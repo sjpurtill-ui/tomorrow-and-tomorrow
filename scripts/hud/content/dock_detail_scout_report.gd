@@ -49,6 +49,18 @@ func tab(_sub:int)->Dictionary:
 	else:
 		brief={"tone":"info","title":"They brought the horizon home","why":"%d travelers returned with a route through the unknown. Here is what they found—and what it could mean for your people." % returned}
 	var blocks:Array=[]
+	if is_recruitment:
+		blocks.append({"type":"text","heading":"RECRUITMENT OUTCOME","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
+		var encountered:=int(recruitment.get("encountered",0))
+		if encountered>0:
+			blocks.append({"type":"rows","heading":"WHO THEY MET","items":[{
+				"name":String(recruitment.get("group","People on the road")).capitalize(),
+				"sub":"%d approached · %d joined · %d declined" % [encountered,recruits,int(recruitment.get("declined",maxi(0,encountered-recruits)))],
+				"value":"%d JOINED" % recruits if recruits>0 else "NONE","value_color":Tokens.GREEN if recruits>0 else Tokens.AMBER,"accent":Tokens.GREEN if recruits>0 else Tokens.AMBER,
+			}]})
+		var reason_lines:Array[String]=[]
+		for reason_variant in recruitment.get("reasons",[]): reason_lines.append("• "+String(reason_variant))
+		if not reason_lines.is_empty(): blocks.append({"type":"text","heading":"WHY THEY DECIDED","text":"\n".join(reason_lines)})
 	if _sub==0:
 		var discoveries:Array=report.get("discoveries",[])
 		blocks.append({"type":"image","path":_cover_path(),"height":225,"cover":true,"tip":"Symbolic expedition cover inspired by the recorded journey. The actual route chart is in Journey & Accounts."})
@@ -76,18 +88,6 @@ func tab(_sub:int)->Dictionary:
 		blocks.append({"type":"text","text":"Read Journey & Accounts for the road, encounters and supplies. Reading a report leaves your chosen simulation speed unchanged."})
 		return {"kpis":kpis,"brief":brief,"blocks":blocks}
 	blocks.append({"type":"expedition_chart","route":report.get("route",[]),"discoveries":report.get("discoveries",[])})
-	if is_recruitment:
-		blocks.append({"type":"text","heading":"RECRUITMENT OUTCOME","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
-		var encountered:=int(recruitment.get("encountered",0))
-		if encountered>0:
-			blocks.append({"type":"rows","heading":"WHO THEY MET","items":[{
-				"name":String(recruitment.get("group","People on the road")).capitalize(),
-				"sub":"%d approached · %d joined · %d declined" % [encountered,recruits,int(recruitment.get("declined",maxi(0,encountered-recruits)))],
-				"value":"%d JOINED" % recruits if recruits>0 else "NONE","value_color":Tokens.GREEN if recruits>0 else Tokens.AMBER,"accent":Tokens.GREEN if recruits>0 else Tokens.AMBER,
-			}]})
-		var reason_lines:Array[String]=[]
-		for reason_variant in recruitment.get("reasons",[]): reason_lines.append("• "+String(reason_variant))
-		if not reason_lines.is_empty(): blocks.append({"type":"text","heading":"WHY THEY DECIDED","text":"\n".join(reason_lines)})
 	var journal:Array=report.get("journal",[])
 	if not journal.is_empty():
 		var journal_lines:Array[String]=[]
