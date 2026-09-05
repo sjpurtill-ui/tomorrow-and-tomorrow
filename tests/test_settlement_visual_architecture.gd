@@ -22,6 +22,24 @@ func test_visual_signature_is_bounded_and_ignores_imperceptible_daily_drift()->v
 	assert_int(renderer._settlement_architecture_signature(first).split(":").size()).is_equal(11)
 
 
+func test_specialized_yards_use_their_full_material_palette()->void:
+	renderer._configure_seamless_world()
+	renderer._configure_shape()
+	renderer._configure_noise()
+	renderer._prepare_river_course()
+	for use in ["storage","civic","sacred","dirty_industry"]:
+		for generation in [0,9]:
+			var plot:Dictionary={"seed":19,"land_use":use,"fabric_generation":generation,"centroid":Vector2.ZERO,"polygon":PackedVector2Array([Vector2(-0.04,-0.04),Vector2(0.04,-0.04),Vector2(0.04,0.04),Vector2(-0.04,0.04)])}
+			var surface:=SurfaceTool.new()
+			surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+			var patch_count:int=renderer._append_yard_variation(surface,plot,Vector3.ZERO)
+			var mesh:=surface.commit()
+			var used_cells:Dictionary={}
+			for uv:Vector2 in mesh.surface_get_arrays(0)[Mesh.ARRAY_TEX_UV]:
+				used_cells[Vector2i(floori(uv.x*4),floori(uv.y*4))]=true
+			assert_int(used_cells.size()).is_equal(mini(3,patch_count))
+
+
 func test_wall_fabric_colors_do_not_depend_on_mesh_build_zoom()->void:
 	renderer._configure_seamless_world()
 	renderer._configure_shape()
