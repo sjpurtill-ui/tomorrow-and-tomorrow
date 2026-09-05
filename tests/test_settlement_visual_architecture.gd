@@ -22,6 +22,33 @@ func test_visual_signature_is_bounded_and_ignores_imperceptible_daily_drift()->v
 	assert_int(renderer._settlement_architecture_signature(first).split(":").size()).is_equal(11)
 
 
+func test_wall_fabric_colors_do_not_depend_on_mesh_build_zoom()->void:
+	renderer._configure_seamless_world()
+	renderer._configure_shape()
+	renderer._configure_noise()
+	renderer._prepare_river_course()
+	var camera:Camera3D=auto_free(Camera3D.new())
+	renderer.camera=camera
+	var reference:PackedColorArray
+	for zoom in [0.20,0.42,0.43,1.0]:
+		camera.size=zoom
+		var surface:=SurfaceTool.new()
+		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+		assert_int(renderer._append_roof_wall_skirt(surface,Vector3.ZERO,Vector2.ZERO,Vector2(0.006,0),Vector2(0,0.004),{"material_family":"stone","condition":0.75},0.004)).is_equal(4)
+		var parent:Node3D=auto_free(Node3D.new())
+		renderer._commit_settlement_surface(surface,"PersistentWallFabric",parent,true)
+		var wall:MeshInstance3D=parent.get_node("PersistentWallFabric")
+		var colors:PackedColorArray=wall.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		assert_int(colors.size()).is_equal(24)
+		if reference.is_empty(): reference=colors
+		else: assert_array(Array(colors)).contains_exactly(Array(reference))
+		assert_bool(wall.material_override is ShaderMaterial).is_true()
+		var code:String=wall.material_override.shader.code
+		assert_str(code).contains("dFdx(wall_world_position)")
+		assert_str(code).not_contains("depth_test_disabled")
+	assert_object(renderer._settlement_wall_material().shader).is_same(renderer._settlement_wall_material().shader)
+
+
 func test_morphology_mesh_signature_ignores_invisible_drift_but_catches_visible_change()->void:
 	GameState.settlement_plots=[{
 		"id":1,"land_use":"residential_compound","form":"courtyard_compound","material_family":"earth",

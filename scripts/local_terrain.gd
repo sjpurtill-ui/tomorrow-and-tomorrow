@@ -213,6 +213,7 @@ var settlement_convoy_pending_route:Dictionary={}
 var settlement_convoy_pending_quote:Dictionary={}
 var settlement_convoy_confirmation_previous_speed:=0.0
 var settlement_fabric_shader:Shader
+var settlement_wall_shader:Shader
 var vegetation_surface_shader:Shader
 var settlement_land_use_root: Node3D
 var footprint_population := -1
@@ -7367,6 +7368,8 @@ func _commit_settlement_surface(surface: SurfaceTool, node_name: String, parent:
 		elif node_name=="PersistentYardVariation": fabric_kind=2
 		material=_settlement_fabric_material(fabric_kind,0.74 if fabric_kind==1 else (0.62 if fabric_kind==3 else 0.48))
 		if fabric_kind==1: material.set_shader_parameter("cultivation_rows",node_name=="PersistentCultivationRows")
+	elif node_name=="PersistentWallFabric":
+		material=_settlement_wall_material()
 	else:
 		var standard:=StandardMaterial3D.new()
 		standard.vertex_color_use_as_albedo = true
@@ -7391,6 +7394,27 @@ func _commit_settlement_surface(surface: SurfaceTool, node_name: String, parent:
 	else: material.render_priority = 2 if "Ground" in node_name else (4 if "Roof" in node_name else 3)
 	instance.material_override = material
 	parent.add_child(instance)
+
+func _settlement_wall_material()->ShaderMaterial:
+	var material:=ShaderMaterial.new()
+	if settlement_wall_shader==null:
+		settlement_wall_shader=Shader.new()
+		settlement_wall_shader.code="""
+shader_type spatial;
+render_mode blend_mix,cull_disabled;
+varying vec3 wall_world_position;
+void vertex(){ wall_world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+void fragment(){
+	// Camera-independent mesh colors; pixel coverage controls the aerial fade.
+	float pixel_span=max(length(dFdx(wall_world_position)),length(dFdy(wall_world_position)));
+	float aerial_wall=smoothstep(0.00030,0.0015,pixel_span);
+	ALBEDO=mix(COLOR.rgb,vec3(0.408,0.392,0.353),aerial_wall*0.34);
+	ALPHA=COLOR.a*mix(1.0,0.46,aerial_wall);
+	ROUGHNESS=0.96;
+}
+"""
+	material.shader=settlement_wall_shader
+	return material
 
 func _settlement_fabric_material(fabric_kind:int,grain_strength:float)->ShaderMaterial:
 	if settlement_fabric_shader==null:
@@ -8383,12 +8407,6 @@ func _append_roof_wall_skirt(surface:SurfaceTool,center:Vector3,local_center:Vec
 	elif use in ["civic","sacred"]: wall_color=wall_color.lerp(Color("#aaa398"),0.34)
 	wall_color=wall_color.darkened((1.0-condition)*0.22)
 	wall_color.a=0.46
-	if camera!=null and camera.size>0.42:
-		# These walls are height/detail evidence at aerial LOD, not white monuments.
-		# Compress them into the city material field so the historical core does not
-		# become a cluster of luminous proxy blocks when the camera pulls back.
-		wall_color=wall_color.lerp(Color("#68645a"),0.34)
-		wall_color.a*=0.46
 	var corners:=[local_center-right-forward,local_center+right-forward,local_center+right+forward,local_center-right+forward]
 	var sides:=0
 	for side_index in 4:
