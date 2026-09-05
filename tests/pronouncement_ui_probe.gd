@@ -27,6 +27,14 @@ func _ready()->void:
 			break
 	_expect(order_input!=null,"real council panel did not expose its pronouncement field")
 	if order_input:
+		order_input.text="What would rationing do to our food stores?"
+		order_input.text_submitted.emit(order_input.text)
+		_expect(GameState.sovereign_orders.is_empty(),"conversation question was executed as a decree")
+		_expect(is_instance_valid(LeaderConversation.panel) and LeaderConversation.panel.visible,"council input did not open the conversation")
+		_expect(LeaderConversation.transcript.get_parsed_text().contains("What would rationing"),"council did not forward the player's question")
+		LeaderConversation.panel.hide()
+		# Keep checking the legacy explicit interpreter's order lifecycle below;
+		# the visible council input now takes the conversational route above.
 		order_input.text="Ration food and improve routes."
 		terrain._issue_freeform_order(order_input)
 		_expect(not order_input.editable,"input remained editable during interpretation")

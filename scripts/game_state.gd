@@ -392,6 +392,8 @@ var lifetime_maternal_deaths := 0
 var lifetime_neonatal_deaths := 0
 
 func reset_for_new_world(new_seed:int)->void:
+	var conversation:=get_node_or_null("/root/LeaderConversation")
+	if conversation: conversation.reset_for_new_world()
 	resource_settlement_id=""
 	city_trade_shipments=[]
 	city_trade_history=[]

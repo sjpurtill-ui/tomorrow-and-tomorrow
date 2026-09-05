@@ -149,6 +149,7 @@ func _build_interface()->void:
 	var title_row:=HBoxContainer.new(); outer.add_child(title_row)
 	var title:=Label.new(); title.text="MILITARY COMMAND"; title.add_theme_font_size_override("font_size",24); title.add_theme_color_override("font_color",GOLD); title_row.add_child(title)
 	var spacer:=Control.new(); spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL; title_row.add_child(spacer)
+	var speak:=Button.new(); speak.text="TALK TO MARSHAL"; speak.pressed.connect(func(): LeaderConversation.open("Marshal")); title_row.add_child(speak)
 	var close:=Button.new(); close.text="RETURN TO MAP"; close.custom_minimum_size=Vector2(142,34); close.tooltip_text="Close Military Command and return to the map (F6)"; close.pressed.connect(func(): modal.hide()); title_row.add_child(close)
 
 	command_tabs=TabContainer.new(); command_tabs.name="MilitaryCommandSections"; command_tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL; outer.add_child(command_tabs)

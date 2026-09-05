@@ -256,6 +256,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 			_record_city_trade(shipment)
 
 func reset_for_new_world()->void:
+	_local_population_scope=false
 	# All authoritative data lives in GameState and is reset atomically there.
 	pass
 

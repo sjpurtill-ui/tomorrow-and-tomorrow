@@ -1,5 +1,9 @@
 extends Node3D
 
+const ArmyFigureFormationScript:=preload("res://scripts/army_figure_formation.gd")
+const MAX_CLOSE_ARMY_FORMATIONS:=4
+var close_army_figures:Dictionary={}
+
 const FIT_CONTENT_PANEL:=preload("res://scripts/viewport_fit_panel.gd")
 const FoodSystemScript := preload("res://scripts/food_system.gd")
 const SettlementModelScript:=preload("res://scripts/settlement_model.gd")
@@ -11747,6 +11751,7 @@ func _refresh_player_field_army_markers()->void:
 			army["distance_remaining_km"]=float(report.get("distance_remaining_km",army.get("distance_remaining_km",0.0)))
 			army["report_age_days"]=maxi(0,int(GameState.elapsed_days)-int(report.get("day",GameState.elapsed_days)))
 		reported_armies.append(army)
+	_refresh_close_army_figures(reported_armies,marker_selected_id)
 	var presentation:Dictionary=WarfareMapPresentation.build_snapshot(camera.size if camera else 190.0,reported_armies,[],front_state.get("fronts",[]),state.get("destinations",[]),MilitaryCampaign.engagement_snapshot(),marker_selected_id)
 	var visible_ids:Dictionary={}
 	for view_variant in presentation.get("player",[]):
@@ -15086,7 +15091,7 @@ func _open_council_panel() -> void:
 		if pronouncement_count>=3: break
 	if pronouncement_count>0: reports.add_child(HSeparator.new())
 	pronouncement_status_label=Label.new()
-	pronouncement_status_label.text="Describe a policy in plain language. The Council will show what changed, how long it lasts, and the first observed result."
+	pronouncement_status_label.text="Talk with the Council. Ask questions, discuss alternatives, and work toward a decree you can issue."
 	pronouncement_status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	pronouncement_status_label.add_theme_font_size_override("font_size",11)
 	pronouncement_status_label.add_theme_color_override("font_color",Color("#9fa59d"))
@@ -15098,13 +15103,15 @@ func _open_council_panel() -> void:
 	var order_row := HBoxContainer.new()
 	root.add_child(order_row)
 	var order_input := LineEdit.new()
-	order_input.placeholder_text = "Describe a policy to enact, change, or end…"
+	order_input.name="CouncilConversationInput"
+	order_input.placeholder_text = "What would you like to discuss with your leaders?"
 	order_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	order_row.add_child(order_input)
 	var send := Button.new()
-	send.text = "INTERPRET & ISSUE POLICY"
-	send.pressed.connect(_issue_freeform_order.bind(order_input))
-	order_input.text_submitted.connect(func(_submitted:String): _issue_freeform_order(order_input))
+	send.text = "TALK TO COUNCIL"
+	send.name="CouncilConversationButton"
+	send.pressed.connect(func(): LeaderConversation.open("Council",order_input.text); order_input.clear())
+	order_input.text_submitted.connect(func(_submitted:String): LeaderConversation.open("Council",order_input.text); order_input.clear())
 	order_row.add_child(send)
 	var close := Button.new()
 	close.text = "BACK TO CIVILIZATION"
@@ -15749,6 +15756,10 @@ func _create_office_card(parent: Control, office: String, responsibility: String
 		mandate.add_theme_color_override("font_color",accent.lightened(0.08))
 		mandate.tooltip_text="This office directly modifies these canonical society dynamics and their subcategories."
 		column.add_child(mandate)
+		var speak:=Button.new()
+		speak.text="TALK TO "+office.to_upper()
+		speak.pressed.connect(func(): LeaderConversation.open(office))
+		column.add_child(speak)
 		var appoint := Button.new()
 		appoint.text = "REVIEW 5 SLATES" if occupied else "VIEW 5 INSTITUTIONAL SLATES"
 		appoint.tooltip_text = "Compare five governing arrangements using the twelve society dynamics."
@@ -19238,3 +19249,67 @@ func _select_city(settlement_id:String)->void:
 		hud.close_detail()
 		if hud.dock and hud.dock.visible: hud.dock.rebuild()
 	_refresh_discovered_resource_overlays()
+
+
+func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
+	# Strategic counters disappear below size 8. Ground figures use the same
+	# kilometre coordinates and building-detail scale as the city inspection view.
+	var candidates:Array[Dictionary]=[]
+	if camera and camera.size<8.0:
+		for army:Dictionary in armies:
+			var point:Dictionary=army.get("position",{})
+			if not point.has("x") or not point.has("z"): continue
+			var world:=Vector3(float(point.x),0.0,float(point.z))
+			var distance:=Vector2(world.x-camera_target.x,world.z-camera_target.z).length()
+			if distance>camera.size*1.4+0.25 or not _world_position_is_revealed(world): continue
+			var counts:Dictionary=ArmyFigureFormationScript.composition(army)
+			var supported:=0
+			for count in counts.values(): supported+=int(count)
+			if supported<=0: continue
+			candidates.append({"army":army,"counts":counts,"world":world,"distance":distance,"selected":int(army.get("army_id",0))==selected_army_id})
+	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if bool(a.selected)!=bool(b.selected): return bool(a.selected)
+		return float(a.distance)<float(b.distance))
+	if candidates.size()>MAX_CLOSE_ARMY_FORMATIONS: candidates.resize(MAX_CLOSE_ARMY_FORMATIONS)
+	var keep:Dictionary={}
+	var occupied:Array[Vector3]=[]
+	for candidate:Dictionary in candidates:
+		var army:Dictionary=candidate.army
+		var id:=str(int(army.get("army_id",0))); keep[id]=true
+		var figures:Node3D=close_army_figures.get(id,null)
+		if figures==null:
+			figures=ArmyFigureFormationScript.new(); figures.name="CloseArmy_"+id
+			add_child(figures); close_army_figures[id]=figures
+			figures.scale=Vector3.ONE*SETTLEMENT_DETAIL_SCALE
+			var label:=Label3D.new(); label.name="Strength"; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+			label.fixed_size=true; label.font_size=12; label.outline_size=4; label.no_depth_test=true
+			label.scale=Vector3.ONE/SETTLEMENT_DETAIL_SCALE; figures.add_child(label)
+		var world:Vector3=candidate.world
+		# Multiple hosts can share one simulation location. Separate the bounded
+		# visual blocks without changing their authoritative army coordinates.
+		for attempt in MAX_CLOSE_ARMY_FORMATIONS:
+			var overlaps:=false
+			for other:Vector3 in occupied:
+				if Vector2(world.x-other.x,world.z-other.z).length()<0.24: overlaps=true
+			if not overlaps: break
+			world.x+=0.25
+		occupied.append(world)
+		world.y=_height_at(world.x,world.z)
+		var destination:Dictionary=army.get("destination_position",{})
+		var direction:=Vector2(float(destination.get("x",world.x))-world.x,float(destination.get("z",world.z))-world.z)
+		var facing:=atan2(direction.x,direction.y) if direction.length()>0.001 else 0.0
+		var ground_signature:="%s/%s/%s/%s" % [candidate.counts,world,facing,bool(candidate.selected)]
+		var needs_ground:=String(figures.get_meta("ground_signature",""))!=ground_signature
+		figures.position=world; figures.rotation.y=facing
+		figures.configure(candidate.counts,Color(WarfareMapPresentation.PLAYER_SELECTED_COLOR if bool(candidate.selected) else WarfareMapPresentation.PLAYER_COLOR))
+		figures.set_animation("walk" if String(army.get("status",""))=="moving" else "idle")
+		figures.animation_speed=1.0 if game_speed>0.0 else 0.0
+		if needs_ground:
+			figures.fit_to_ground(Callable(self,"_height_at")); figures.set_meta("ground_signature",ground_signature)
+		var strength:=figures.get_node("Strength") as Label3D
+		strength.position=Vector3(0,3.6,0)
+		strength.text="%s • %s\n%d representative figures" % [String(army.get("name","FIELD ARMY")),WarfareMapPresentation.compact_count(int(army.get("troops",0))),int(figures.figure_count)]
+	for id in close_army_figures.keys():
+		if keep.has(id): continue
+		var stale:Node3D=close_army_figures[id]
+		remove_child(stale); stale.queue_free(); close_army_figures.erase(id)

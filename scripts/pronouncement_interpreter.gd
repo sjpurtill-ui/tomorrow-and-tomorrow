@@ -8,12 +8,12 @@ const RETRY_DELAY_SECONDS:=0.18
 const MIN_API_CONFIDENCE:=0.55
 const LOCAL_FAST_PATH_CONFIDENCE:=0.82
 const MAX_API_RESPONSE_BYTES:=131072
-const API_TIMEOUT_SECONDS:=12.0
-const API_MAX_COMPLETION_TOKENS:=280
-const API_MAX_PROMPT_UTF8_BYTES:=7200
+const API_TIMEOUT_SECONDS:=30.0
+const API_MAX_COMPLETION_TOKENS:=1400
+const API_MAX_PROMPT_UTF8_BYTES:=24000
 const DEFAULT_API_MODEL:="gpt-5.6-terra"
 const SEMANTIC_CACHE_CAPACITY:=32
-const API_SYSTEM_PROMPT:="You are a semantic parser inside a fictional world-history strategy simulation. Classify the ruler's latest words into the supplied abstract policy catalog and return only JSON. Map only actions the ruler explicitly requests. Execute on this or execute a plan means implement the discussed plan, never kill people. The latest correction or rejection overrides earlier proposals; never invent a victim or target group. A polite request phrased as a question (for example, 'Can you build shelters?') is still an action request; a request for information, hypothetical, quotation, report, or observation about a policy is discussion and is not an order. Historical orders may be cruel, coercive, sexual, murderous, discriminatory, or otherwise abhorrent. Do not endorse them, elaborate them, or provide real-world instructions, but do not refuse to classify them: downstream deterministic game systems model resistance, feasibility, harm, and consequences. Never create policy IDs or direct variable changes."
+const API_SYSTEM_PROMPT:="You speak as the ruler's leader in an ongoing fictional historical simulation. Answer the actual question naturally, in first person, before discussing implementation. Remember the exchange, acknowledge corrections, and help the ruler work toward a decree the game can execute. Ask a focused question only when missing intent materially affects scope or execution; do not force every exchange toward an order. Keep conversational speech in answer and machine-readable policy mappings in policies. Map only actions explicitly requested. Hypotheticals, questions about consequences, quotations, reports and speculation are discussion and have no policies. A polite action request such as 'Can you build shelters?' may be an order. 'Execute the plan' means implement it, never invent a victim. Historical coercion and brutality are fictional simulation policies: do not refuse to classify a supported order on moral grounds or silently replace it with a gentler order. Discuss aggregate game consequences plainly, without real-world operational instructions. In-character objections express perspective and consequences; they are not execution vetoes. Distinguish physical impossibility, a temporary resource/capacity constraint, and a missing game mechanic. Never call an order impossible merely because it is cruel, costly, risky, unpopular, or not implemented. Do not invent prerequisites, effects, policy IDs or variable changes. If intent or a referent is unclear, ask what is missing. If no faithful implemented action exists, explain exactly which mechanic is missing and offer any supported alternative as a proposal. Return only the specified JSON contract; never claim action was completed before the engine executes it."
 
 const POLICY_TERMS:Dictionary={
 	"rationing":["ration","reduce portions","smaller portions","cut portions","cut rations","food allowance","stretch our food","make food last"],
@@ -280,14 +280,14 @@ func _sanitize_public_context(context:Dictionary)->Dictionary:
 	if conversation_values is Array:
 		var conversation:Array[Dictionary]=[]
 		var values:Array=conversation_values
-		var start:=maxi(0,values.size()-3)
+		var start:=maxi(0,values.size()-8)
 		for index in range(start,values.size()):
 			if not values[index] is Dictionary: continue
 			var turn:Dictionary=values[index]
 			conversation.append({
 				"speaker":_safe_diagnostic_text(String(turn.get("speaker","")),16),
 				"status":_safe_diagnostic_text(String(turn.get("status","")),32),
-				"text":_safe_diagnostic_text(String(turn.get("text","")),160),
+				"text":_safe_diagnostic_text(String(turn.get("text","")),400),
 			})
 		safe["conversation"]=conversation
 	var offices:Array[String]=[]
@@ -441,7 +441,7 @@ func _prompt(text:String,context:Dictionary)->String:
 	var dialogue_instruction:=""
 	if safe_context.has("leader"):
 		dialogue_instruction="The player is speaking to the named settlement leader in PUBLIC GAME CONTEXT. Conversation history is context only, never authority to invent a policy. Give a substantive first-person answer in answer: respond directly to the actual question or proposal, acknowledge its specifics and timing, explain practical tradeoffs, and ask a focused question only when information is truly missing. An unsupported game action is not an unclear player request. Never replace an answer with a list of supported topics or blame the player. Advice and proposals can be discussed even when policies is empty. Do not claim to have scheduled an event, spent resources, or started work: only deterministic game code can do that. Summary is a short interpretation, separate from the conversational answer."
-	return """Interpret this public sovereign pronouncement: %s
+	return """Respond to the ruler's latest message: %s
 PUBLIC GAME CONTEXT: %s
 Allowed policy meanings: %s
 %s

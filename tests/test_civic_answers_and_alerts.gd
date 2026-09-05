@@ -73,7 +73,9 @@ func test_birthrate_correction_escapes_pending_repression()->void:
 	var leader:=GovernmentPeopleSystem.settlement_leader(city_id)
 	var prior_text:="Execute the sick."
 	var prior_order:=AdvisorSystem.begin_civic_directive(prior_text,city_id,leader)
-	var prior:=AdvisorSystem.resolve_civic_directive(prior_text,PronouncementInterpreter._local_interpretation(prior_text),prior_order,city_id,int(leader.person_id))
+	var uncertain:=PronouncementInterpreter._local_interpretation(prior_text)
+	uncertain.policies[0]["confidence"]=0.60
+	var prior:=AdvisorSystem.resolve_civic_directive(prior_text,uncertain,prior_order,city_id,int(leader.person_id))
 	var correction:="No, please just increase birthrates? What are you talking about!? Lunatic!"
 	var local:=PronouncementInterpreter._local_interpretation(correction)
 	assert_array(local.policies).is_not_empty()
@@ -91,7 +93,9 @@ func test_rejection_without_a_replacement_closes_pending_order()->void:
 	var leader:=GovernmentPeopleSystem.settlement_leader(city_id)
 	var request:="Execute prisoners."
 	var order:=AdvisorSystem.begin_civic_directive(request,city_id,leader)
-	var prior:=AdvisorSystem.resolve_civic_directive(request,PronouncementInterpreter._local_interpretation(request),order,city_id,int(leader.person_id))
+	var uncertain:=PronouncementInterpreter._local_interpretation(request)
+	uncertain.policies[0]["confidence"]=0.60
+	var prior:=AdvisorSystem.resolve_civic_directive(request,uncertain,order,city_id,int(leader.person_id))
 	var rejection:="No, that's not what I meant."
 	var reply_order:=AdvisorSystem.begin_civic_directive(rejection,city_id,leader)
 	var reply:=AdvisorSystem.resolve_civic_directive(rejection,PronouncementInterpreter._local_interpretation(rejection),reply_order,city_id,int(leader.person_id))

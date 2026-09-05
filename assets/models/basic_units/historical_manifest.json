@@ -1,0 +1,55 @@
+{
+  "units": [
+    {
+      "id": "slinger",
+      "label": "SLINGER",
+      "file": "slinger.glb",
+      "triangles": 1304,
+      "bones": 14
+    },
+    {
+      "id": "javelin_skirmisher",
+      "label": "JAVELIN SKIRMISHER",
+      "file": "javelin_skirmisher.glb",
+      "triangles": 1362,
+      "bones": 13
+    },
+    {
+      "id": "crossbow_infantry",
+      "label": "CROSSBOW INFANTRY",
+      "file": "crossbow_infantry.glb",
+      "triangles": 1398,
+      "bones": 14
+    },
+    {
+      "id": "chariot_archer",
+      "label": "CHARIOT ARCHER",
+      "file": "chariot_archer.glb",
+      "triangles": 4110,
+      "bones": 27
+    },
+    {
+      "id": "horse_archer",
+      "label": "HORSE ARCHER",
+      "file": "horse_archer.glb",
+      "triangles": 2934,
+      "bones": 24
+    },
+    {
+      "id": "camel_cavalry",
+      "label": "CAMEL CAVALRY",
+      "file": "camel_cavalry.glb",
+      "triangles": 3094,
+      "bones": 23
+    }
+  ],
+  "fps": 24,
+  "clips": {
+    "idle": 2.0,
+    "walk": 1.0,
+    "attack": 1.75,
+    "death": 2.5
+  },
+  "source": "Historical_Military_Unit_Progression.docx",
+  "status": "visual prototypes; recruitment integration pending"
+}

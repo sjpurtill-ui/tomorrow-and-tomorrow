@@ -52,8 +52,8 @@ func test_terra_request_uses_supported_sampling_defaults()->void:
 		"conversation":conversation,"known_offices":offices,"active_policies":active,
 	}
 	var safe_context:=PronouncementInterpreter._sanitize_public_context(maximal_context)
-	assert_int((safe_context.conversation as Array).size()).is_equal(3)
-	assert_int(String((safe_context.conversation as Array)[0].text).length()).is_less_equal(160)
+	assert_int((safe_context.conversation as Array).size()).is_equal(8)
+	assert_int(String((safe_context.conversation as Array)[0].text).length()).is_less_equal(400)
 	assert_int((safe_context.known_offices as Array).size()).is_less_equal(8)
 	assert_int((safe_context.active_policies as Array).size()).is_less_equal(8)
 	var bounded_prompt:=PronouncementInterpreter._prompt("A".repeat(500),maximal_context)

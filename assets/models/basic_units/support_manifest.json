@@ -1,0 +1,33 @@
+{
+  "units": [
+    {
+      "id": "cavalry",
+      "label": "MOUNTED LANCER",
+      "file": "cavalry.glb",
+      "triangles": 2922,
+      "bones": 19
+    },
+    {
+      "id": "siege_engineer",
+      "label": "SIEGE ENGINEERS",
+      "file": "siege_engineer.glb",
+      "triangles": 2446,
+      "bones": 16
+    },
+    {
+      "id": "field_artillery",
+      "label": "FIELD ARTILLERY",
+      "file": "field_artillery.glb",
+      "triangles": 2864,
+      "bones": 12
+    }
+  ],
+  "fps": 24,
+  "clips": {
+    "idle": 2.0,
+    "walk": 1.0,
+    "attack": 1.75,
+    "death": 2.5
+  },
+  "forward_axis_godot": "+Z"
+}

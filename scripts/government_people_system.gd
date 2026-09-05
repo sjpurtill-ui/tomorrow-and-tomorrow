@@ -289,9 +289,9 @@ func leader_disposition(person:Dictionary)->Dictionary:
 	if (courage<0.38 and fear>0.22) or (honesty<0.40 and float(personality.get("assertiveness",0.5))<0.48):
 		return {"id":"sycophantic","label":"EAGERLY DEFERENTIAL","description":"Quick to praise and agree; apparent enthusiasm is not proof of sound execution."}
 	if suspicion>0.66 or (pride>0.68 and trust<0.48) or "Skeptical" in traits or "Severe" in traits:
-		return {"id":"cantankerous","label":"CANTANKEROUS","description":"Challenges instructions, emphasizes flaws, and may demand explicit insistence."}
+		return {"id":"cantankerous","label":"CANTANKEROUS","description":"Challenges instructions and emphasizes flaws while carrying out feasible orders."}
 	if "Principled" in traits or (honesty>0.72 and courage>0.58):
-		return {"id":"principled","label":"PLAIN-SPOKEN","description":"Answers directly and may refuse instructions judged indefensible."}
+		return {"id":"principled","label":"PLAIN-SPOKEN","description":"Answers directly and voices objections; implementation follows actual capacity and resources."}
 	if float(personality.get("empathy",0.5))>0.68 or "Diplomatic" in traits or "Warm" in traits:
 		return {"id":"diplomatic","label":"DIPLOMATIC","description":"Seeks workable compromise and explains human costs before committing."}
 	return {"id":"pragmatic","label":"PRAGMATIC","description":"Judges instructions mainly by feasibility, cost, and likely compliance."}

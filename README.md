@@ -57,7 +57,17 @@ model may interpret a typed pronouncement only through the fixed policy catalog.
 All output is validated and clamped before the deterministic consequence engine
 can apply it; generated text cannot directly change population, resources, or code.
 
-The council's free-form pronouncement field uses the same endpoint and model.
+The Council's free-form field now opens a conversation using the same endpoint
+and model. **Talk to…** on leadership cards and **Talk to Marshal** in Military
+Command open the same interface with separate office histories. Leaders discuss
+intent, ask focused questions, and propose decrees with engine-calculated effects.
+Only accepting a displayed draft issues it; questions and hypotheticals never do.
+Historical coercive policies use their existing mathematical rules. Missing
+mechanics and temporary constraints must be identified accurately, without being
+presented as moral vetoes or historical impossibilities. See
+[leader conversation behavior and validation](docs/LEADER_CONVERSATION.md).
+
+The underlying explicit pronouncement interpreter uses the same endpoint and model.
 Pronouncements are translated into zero to three policies from a fixed allowlist.
 The generative service may choose only a policy ID, literal grounding quote, and
 confidence; any action, magnitude, or duration it sends is ignored. Deterministic

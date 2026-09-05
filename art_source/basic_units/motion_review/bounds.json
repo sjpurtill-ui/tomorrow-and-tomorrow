@@ -1,0 +1,164 @@
+[
+  {
+    "unit": "levy",
+    "beat": "windup",
+    "min_z": -6.47081651550252e-06,
+    "max_z": 2.1408815383911133,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "beat": "windup",
+    "min_z": -1.0862413546419702e-06,
+    "max_z": 1.8269271850585938,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "beat": "windup",
+    "min_z": -1.6970298943874695e-08,
+    "max_z": 1.927243947982788,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "levy",
+    "beat": "strike",
+    "min_z": -4.14587589148141e-07,
+    "max_z": 1.7689673900604248,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "beat": "strike",
+    "min_z": 1.586617059956552e-08,
+    "max_z": 1.8212238550186157,
+    "lowest_bones": [
+      "foot.L"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "beat": "strike",
+    "min_z": -1.6970298943874695e-08,
+    "max_z": 1.9268585443496704,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "levy",
+    "beat": "release",
+    "min_z": -2.414386472082697e-06,
+    "max_z": 1.7756812572479248,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "beat": "release",
+    "min_z": -1.2231925211381167e-05,
+    "max_z": 1.8243401050567627,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "beat": "release",
+    "min_z": -1.6970298943874695e-08,
+    "max_z": 1.9275994300842285,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "levy",
+    "beat": "buckle",
+    "min_z": -1.6130506708122994e-08,
+    "max_z": 1.5668838024139404,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "beat": "buckle",
+    "min_z": -5.3718686388037895e-08,
+    "max_z": 1.615858554840088,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "beat": "buckle",
+    "min_z": -4.478730275536691e-08,
+    "max_z": 1.585482120513916,
+    "lowest_bones": [
+      "foot.R"
+    ]
+  },
+  {
+    "unit": "levy",
+    "beat": "impact",
+    "min_z": -0.02821791172027588,
+    "max_z": 0.5352656841278076,
+    "lowest_bones": [
+      "hand.L"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "beat": "impact",
+    "min_z": 0.010352909564971924,
+    "max_z": 0.5532387495040894,
+    "lowest_bones": [
+      "pelvis"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "beat": "impact",
+    "min_z": 0.011236138641834259,
+    "max_z": 0.5320126414299011,
+    "lowest_bones": [
+      "foot.L"
+    ]
+  },
+  {
+    "unit": "levy",
+    "beat": "settled",
+    "min_z": 0.001000046730041504,
+    "max_z": 0.534733772277832,
+    "lowest_bones": [
+      "hand.R"
+    ]
+  },
+  {
+    "unit": "line_infantry",
+    "beat": "settled",
+    "min_z": 0.001001724973320961,
+    "max_z": 0.5351401567459106,
+    "lowest_bones": [
+      "foot.L"
+    ]
+  },
+  {
+    "unit": "skirmisher",
+    "beat": "settled",
+    "min_z": 0.0010017119348049164,
+    "max_z": 0.5323734283447266,
+    "lowest_bones": [
+      "foot.L"
+    ]
+  }
+]
