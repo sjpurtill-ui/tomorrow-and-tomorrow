@@ -357,6 +357,14 @@ var military_attention_dialog:ConfirmationDialog
 var military_attention_seen:Dictionary={}
 
 func _ready() -> void:
+	if "--resume-saved" in OS.get_cmdline_user_args() and not get_tree().root.has_meta("saved_campaign_resumed"):
+		var restored:Dictionary=SaveSystem.load_game()
+		if restored.has("error"):
+			push_error("Saved campaign could not be reopened: "+String(restored.error))
+			get_tree().quit(1)
+			return
+		get_tree().root.set_meta("saved_campaign_resumed",true)
+		print("SAVED_CAMPAIGN_RESUMED: ",String(restored.message),"; settlement=",GameState.settlement_name,"; seed=",GameState.world_seed)
 	if not MilitaryCampaign.threat_changed.is_connected(_on_military_threat_attention): MilitaryCampaign.threat_changed.connect(_on_military_threat_attention)
 	if not MilitaryCampaign.battle_resolved.is_connected(_on_battle_attention): MilitaryCampaign.battle_resolved.connect(_on_battle_attention)
 	_restore_military_attention.call_deferred()
