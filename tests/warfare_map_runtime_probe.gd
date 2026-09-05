@@ -162,6 +162,16 @@ func _ready()->void:
 		var scout_route:Node3D=terrain._create_player_scout_route_marker({"mission_id":"direction_probe"},route,"local")
 		terrain.add_child(army_route)
 		terrain.add_child(scout_route)
+		for route_node in [army_route,scout_route]:
+			for part in route_node.get_children():
+				if part is GeometryInstance3D and not part is Label3D:
+					var material:StandardMaterial3D=part.material_override
+					_expect(material.transparency==BaseMaterial3D.TRANSPARENCY_ALPHA,"route part can be overdrawn by transparent drapes")
+					_expect(material.render_priority>4 and material.render_priority<17,"route escaped its below-counter layer band")
+		_expect(army_route.get_node("MarchChevrons").material_override.render_priority>army_route.get_node("MovementPath").material_override.render_priority,"army line covers its arrowheads")
+		_expect(scout_route.get_node("ScoutDirectionPennants").material_override.render_priority>scout_route.get_node("ScoutCorridor").material_override.render_priority,"scout corridor covers its arrowheads")
+		var objective:Node3D=army_route.get_node("MovementObjective")
+		_expect(objective.get_node("ObjectiveArrow").material_override.render_priority>objective.get_node("ObjectiveRing").material_override.render_priority,"objective ring covers its pointer")
 		for arrows:MultiMeshInstance3D in [army_route.get_node("MarchChevrons"),scout_route.get_node("ScoutDirectionPennants")]:
 			var vertices:PackedVector3Array=arrows.multimesh.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 			_expect(vertices.size()==24,"route direction marker is not a triangular prism")
