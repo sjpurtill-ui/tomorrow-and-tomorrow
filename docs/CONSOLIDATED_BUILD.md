@@ -13,7 +13,7 @@ visibility rules instead of revealing live positions of unseen armies.
 
 Conversation changes are applied to the actual current civic path as well as
 the new council/office conversation panel. Terra receives up to eight recent
-messages of 400 characters, a 1,400-token completion budget, and a conversational
+messages of 400 characters, a 2,800-token completion budget, and a conversational
 role. Clear historical directives proceed to deterministic simulation assessment
 without repeated ethical questioning or personality-based execution vetoes.
 Ambiguous meaning still asks for clarification. Costs, resistance, casualties,
@@ -24,7 +24,26 @@ The new office conversation service retains its own draft/acceptance flow.
 The existing settlement Civics interface continues to execute clear orders
 through its existing local implementation and feedback systems.
 
-Validation includes 63 government/directive/conversation tests, leader-conversation
+The statistical decree update exposes current simulation statistics and six
+bounded writable metrics (health, cohesion, knowledge, security, ecology,
+legitimacy). Terra proposes immediate deltas, uncertainty ranges and causal
+reasons. Validated proposals replace immediate catalog metric defaults, then the
+engine scales the mean by implementation capacity and clamps the resulting
+metric. Uncertainty describes the model assumption; it is not a measured confidence
+interval or a sampled outcome. Other statistics respond through existing systems.
+New games ask Terra by default; the existing routing switch remains available.
+
+Counted executions preserve the literal count and whole-word demographic scope.
+Workers come from the aggregate working-age cohorts. These are one-time actions,
+not standing repression policies. The full count must fit the eligible population
+and enforcement capacity, otherwise no action or statistical effects are applied.
+An execution removes population, updates vital statistics, and creates a death
+record linked to its order. The Population Ledger displays those records. Reports
+distinguish an actual counted result from uncertain downstream effects and expose
+observed numerical changes without claiming exclusive causation. Saved historical
+reports are preserved; no deaths are fabricated retroactively.
+
+Validation includes 71 government/directive/conversation/implementation tests, leader-conversation
 runtime, city-civic runtime, save/load, warfare-map runtime, and all 27 unit imports
 with 108 animated clips. A live Terra conversation request also returned a valid
 substantive answer, and a live recruitment order mapped correctly on its first

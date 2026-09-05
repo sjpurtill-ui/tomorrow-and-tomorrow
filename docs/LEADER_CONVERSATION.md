@@ -34,11 +34,15 @@ through `ConsequenceEngine`. The result shown after issuing comes from that engi
 not a model claim. Multi-policy estimates are individual snapshots; actual policies
 execute in order and can have different outcomes as earlier policies consume resources.
 
-This adds dialogue around the existing civilization-wide policy mechanics. It does
-not add arbitrary effects, individual/subgroup targeting, exact casualty outcomes,
-or natural-language execution of army movement and production queues. The prompt
-requires those limitations to be explained as limitations of the current build,
-not as historical impossibilities. Existing military controls remain available.
+Both leader paths now accept bounded numerical effect proposals with causal
+reasons and uncertainty. The engine scales the proposed mean by capacity, records
+realized changes, and keeps population/resource accounting authoritative. Explicit
+counted executions preserve the count and supported demographic target, including
+the aggregate working-age pool. A completed counted action has no standing-policy
+effect. Named individuals and natural-language army movement or production queues
+remain outside this decree contract. See `CONSOLIDATED_BUILD.md` for limits and
+validation, including a live Terra test of one worker, population removal and the
+death ledger.
 
 If configuration, transport, or response validation fails, the conversation reports
 that nothing was issued. It never silently falls back to executing keyword matches.

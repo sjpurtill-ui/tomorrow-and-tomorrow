@@ -93,6 +93,8 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 	if resource_recognition_factor<=0.0: blockers.append("no recognized %s source or stored supply exists" % recognized_resource.to_lower())
 	if operation_factor<=0.0: blockers.append(String(operation_quote.get("blocker",operation_quote.get("error","the physical expedition cannot depart"))))
 	var direct_plan:Dictionary={}
+	var counted_target:Dictionary=directive_parameters.get("demographic_target",{})
+	var counted_action:=effect_id=="mass_repression" and counted_target.has("exact_count")
 	for channel_variant in (contract.get("direct_effects",{}) as Dictionary):
 		var channel:=String(channel_variant)
 		var coefficient:=float((contract.direct_effects as Dictionary)[channel])
@@ -101,13 +103,32 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 			var target_population:=_directive_target_population(target,population)
 			var raw_deaths:=floori((target_population if String(target.get("scope",""))=="all" else population*maxf(0.0,coefficient)*requested)*implementation_rate)
 			var annual_capacity:=_remaining_directive_death_capacity(population,security_capacity)
+			if counted_action:
+				annual_capacity=floori(float(GameState.population_cohorts.get("working_age",0))*security_capacity)
+				# A person is indivisible. Require the full explicit count; never round
+				# a single act down through standing-policy magnitude/compliance.
+				raw_deaths=maxi(0,int(target.exact_count))
+				if raw_deaths>floori(target_population) or raw_deaths>annual_capacity or implementation_rate<=0.0:
+					raw_deaths=0
 			direct_plan["population_deaths"]=mini(raw_deaths,annual_capacity)
 		else:
 			direct_plan[channel]=clampf(coefficient*requested*implementation_rate,-0.08,0.08)
+	var estimates:=DecreeStatistics.validate(directive_parameters.get("statistical_effects",[]))
+	if counted_action:
+		# Scale fallback social consequences to the actual fraction affected.
+		var scale:=clampf(float(direct_plan.get("population_deaths",0))/maxf(1.0,population*requested),0.0,1.0)
+		for channel in direct_plan:
+			if channel!="population_deaths": direct_plan[channel]*=scale
+	if not estimates.is_empty():
+		# The accepted model plan replaces direct metric defaults, avoiding double counting.
+		for metric in DecreeStatistics.METRICS: direct_plan.erase(metric+"_delta")
+		for estimate in estimates: direct_plan[String(estimate.metric)+"_delta"]=float(estimate.delta)*implementation_rate
 	var can_apply:=effective_magnitude>=0.0025
+	if counted_action: can_apply=int(direct_plan.get("population_deaths",0))==int(counted_target.exact_count) and int(counted_target.exact_count)>0
 	var blocker:=""
 	if not can_apply:
 		blocker="; ".join(blockers) if not blockers.is_empty() else "Implementation capacity is too low to produce a measurable effect."
+		if counted_action: blocker="The requested count is %d; eligible population is %d and available enforcement capacity is %d. No one was killed and no effects were applied." % [int(counted_target.exact_count),floori(_directive_target_population(counted_target,population)),floori(float(GameState.population_cohorts.get("working_age",0))*security_capacity)]
 	return {
 		"id":effect_id,"domain":String(contract.get("domain","social")),"can_apply":can_apply,
 		"blocker":blocker,"limitations":blockers,
@@ -145,8 +166,14 @@ func _directive_target_population(target:Dictionary,population:float)->float:
 	return clampf(eligible,0.0,maxf(0.0,population-1.0))
 
 func apply_directive(effect_id:String,requested_magnitude:float,duration_days:float,source:String,metadata:Dictionary={},office_execution:float=1.0)->Dictionary:
+	var source_id:=String(metadata.get("source_order_id",""))
+	if not source_id.is_empty():
+		for prior in GameState.active_modifiers:
+			if String(prior.get("source_order_id",""))==source_id and String(prior.get("id",""))==effect_id:
+				return {"applied":false,"stale":true,"error":"This order already has an execution record."}
 	var directive_parameters:Dictionary=metadata.get("directive_parameters",{})
 	var assessment:=directive_assessment(effect_id,requested_magnitude,duration_days,office_execution,directive_parameters)
+	assessment["source_order_id"]=String(metadata.get("source_order_id",""))
 	if not bool(assessment.get("can_apply",false)):
 		return {"applied":false,"assessment":assessment,"error":String(assessment.get("blocker","Directive cannot be implemented."))}
 	if String(assessment.get("operation",""))=="recruitment_scouts":
@@ -192,6 +219,11 @@ func apply_directive(effect_id:String,requested_magnitude:float,duration_days:fl
 		if String(modifier.get("id",""))!=effect_id or String(modifier.get("source_order_id",""))!=String(metadata.get("source_order_id","")): continue
 		modifier["directive_costs"]=costs.duplicate(true)
 		modifier["direct_effects_applied"]=direct_effects.duplicate(true)
+		if bool(directive_parameters.get("one_time",false)):
+			# Retain the receipt for saves/reviews, without a standing repression program.
+			modifier["effects"]={}
+			modifier["ended_reason"]="completed"
+			modifier["until_day"]=GameState.elapsed_days-0.001
 		break
 	var consequence:=String(assessment.second_order_consequence)
 	var implementation_phrase:="Implementation is broad" if float(assessment.implementation_rate)>=0.72 else "Implementation is uneven" if float(assessment.implementation_rate)>=0.36 else "Implementation is narrow"
@@ -251,11 +283,14 @@ func _apply_directive_direct_effects(effect_id:String,assessment:Dictionary)->Di
 			var requested_deaths:=maxi(0,int(planned[channel]))
 			var parameters:Dictionary=assessment.get("directive_parameters",{})
 			var target:Dictionary=parameters.get("demographic_target",{})
-			var death_result:=GameState.register_directive_population_deaths(requested_deaths,effect_id,String(assessment.get("second_order_consequence","Deaths resulted from directive enforcement.")),target)
+			target=target.duplicate(true)
+			target["source_order_id"]=String(assessment.get("source_order_id",""))
+			var description:="The order executed %s once." % String(target.get("label","the specified count")) if bool(parameters.get("one_time",false)) else String(assessment.get("second_order_consequence","Deaths resulted from directive enforcement."))
+			var death_result:=GameState.register_directive_population_deaths(requested_deaths,effect_id,description,target)
 			applied[channel]=int(death_result.get("count",0))
 			# Some targeted people flee or hide when enforcement is visible. Departures
 			# are living population loss, not falsely recorded casualties.
-			if requested_deaths>0 and float(assessment.get("resistance",0.0))>0.30:
+			if requested_deaths>0 and not bool(parameters.get("one_time",false)) and float(assessment.get("resistance",0.0))>0.30:
 				var departures:=floori(float(requested_deaths)*float(assessment.get("resistance",0.0))*0.45)
 				var departure_result:=GameState.register_population_departures(departures,"Flight from directive: %s" % effect_id.replace("_"," "))
 				applied["population_departures"]=int(departure_result.get("count",0))
@@ -286,6 +321,7 @@ func apply_policy(effect_id: String,magnitude: float,duration_days: float,source
 	var superseded:=false
 	var prior_magnitude:=0.0
 	for modifier in GameState.active_modifiers:
+		if bool(metadata.get("directive_parameters",{}).get("one_time",false)): break
 		if String(modifier.get("id",""))==effect_id and String(modifier.get("kind",""))=="policy" and GameState.elapsed_days<=float(modifier.get("until_day",-INF)):
 			superseded=true
 			prior_magnitude=float(modifier.get("magnitude",0.0))

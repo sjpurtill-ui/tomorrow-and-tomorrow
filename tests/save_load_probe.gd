@@ -21,6 +21,7 @@ func _ready()->void:
 
 	# Mutate a spread of state across systems.
 	GameState.elapsed_days=140.0
+	GameState.register_directive_population_deaths(1,"mass_repression","One counted execution.",{"exact_count":1,"role":"worker","age_cohorts":["youth","early_adults","established_adults","mature_adults"],"source_order_id":"saved_counted_decree","label":"exactly 1 worker"})
 	GameState.civic_always_use_ai=true
 	GameState.civic_api_enabled=false
 	GameState.register_population_arrivals(30,"probe arrivals")
@@ -72,6 +73,7 @@ func _ready()->void:
 	_expect(GameState.world_seed==saved_seed,"world seed not restored (%d)" % GameState.world_seed)
 	_expect(absf(GameState.elapsed_days-140.0)<1.0,"elapsed days not restored (%.1f)" % GameState.elapsed_days)
 	_expect(GameState.population_total==saved_population,"population not restored (%d vs %d)" % [GameState.population_total,saved_population])
+	_expect(GameState.demographic_ledger.any(func(record:Dictionary)->bool: return String(record.get("source_order_id",""))=="saved_counted_decree" and int(record.get("count",0))==1),"counted execution death record was not restored")
 	_expect(GameState.civic_always_use_ai,"civic Always Ask AI routing preference not restored")
 	_expect(not GameState.civic_api_enabled,"civic API master switch not restored")
 	_expect("food_drying" in GameState.known_discoveries,"known discovery not restored")

@@ -693,13 +693,16 @@ func _merge_grave_followup_parameters(policy:Dictionary,text:String)->void:
 		if "husband" in normalized:
 			parameters["punishment_target"]={"scope":"targeted","sex":"male","role":"husbands","label":"their husbands"}
 	elif policy_id=="mass_repression":
-		var supplies_target:=false
-		for term in ["women","woman","female","girls","men","man","male","boys","over ","older than","under ","younger than","dissidents","the sick","the opposition","the population"]:
-			if term in normalized:
-				supplies_target=true
-				break
+		if _is_civic_confirmation(text) or _is_civic_insistence(text): return
+		var supplies_target:=PronouncementInterpreter._has_whole_word(normalized,"women|woman|female|girls|men|man|male|boys|workers?|over|older than|under|younger than|dissidents|the sick|the opposition|the population")
 		if supplies_target:
 			var supplemented:Dictionary=PronouncementInterpreter._deterministic_directive_parameters(text,policy_id)
+			var prior_target:Dictionary=parameters.get("demographic_target",{})
+			var revised_target:Dictionary=supplemented.get("demographic_target",{})
+			if prior_target.has("exact_count") and not revised_target.has("exact_count"):
+				revised_target["exact_count"]=prior_target.exact_count
+				revised_target["scope"]="counted"
+				revised_target["label"]="exactly %d %s" % [int(prior_target.exact_count),String(revised_target.get("label","people"))]
 			for key in supplemented: parameters[key]=supplemented[key]
 	policy["directive_parameters"]=parameters
 
@@ -1055,7 +1058,7 @@ func _grave_meaning(policies:Array)->String:
 		match policy_id:
 			"mass_repression":
 				var urgency:="immediately " if String(parameters.get("urgency",""))=="immediate" else ""
-				meanings.append("%suse lethal repression against %s" % [urgency,target_label])
+				meanings.append("%sexecute %s once" % [urgency,target_label] if target.has("exact_count") else "%suse lethal repression against %s" % [urgency,target_label])
 			"coercive_pronatalism":
 				var meaning:="compel %s into repeated sexual pairings until pregnancy" % target_label if String(parameters.get("coercion_method",""))=="compulsory sexual pairing until pregnancy" else "threaten %s with punishment unless pregnancies occur" % target_label
 				var enforcement_method:=String(parameters.get("enforcement_method",""))
@@ -1460,6 +1463,16 @@ func _join_limitations(limitations:Array[String])->String:
 
 
 func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance:String,committed:int,uncommitted:int,implementation_total:float,limitations:Array[String])->String:
+	var receipts:Array[String]=[]
+	for policy in policies:
+		if not bool(policy.get("applied",false)): continue
+		var receipt:=DecreeStatistics.receipt(policy.get("direct_effects",{}))
+		var estimates:=DecreeStatistics.validate(policy.get("directive_parameters",{}).get("statistical_effects",[]))
+		for estimate in estimates:
+			receipt+=" Estimate before capacity adjustment: %s %+.2f ± %.2f percentage points. %s" % [String(estimate.metric),float(estimate.delta)*100.0,float(estimate.uncertainty)*100.0,String(estimate.reason)]
+		if not receipt.is_empty(): receipts.append(receipt)
+	if not receipts.is_empty():
+		return "Recorded result: %s Further effects on work, food and public order will develop through the simulation; these immediate changes do not prove that the wider aim succeeded." % " ".join(receipts)
 	var actions:Array[String]=[]
 	for policy in policies:
 		if bool(policy.get("_conversation_blocked",false)) or bool(policy.get("_conversation_deferred",false)) or bool(policy.get("_conversation_refused",false)): continue
@@ -1489,6 +1502,9 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 
 
 func _implementation_report_promise(followup:Dictionary)->String:
+	var snapshots:Array=followup.get("policies",[])
+	if not snapshots.is_empty() and snapshots.all(func(snapshot:Dictionary)->bool: return bool(snapshot.get("directive_parameters",{}).get("one_time",false))):
+		return "The counted action is complete. I will review its wider consequences around %s." % _calendar_label(int(followup.get("due_day",GameState.elapsed_days+7)))
 	var has_operation:=false
 	for snapshot_variant in followup.get("policies",[]):
 		if not String((snapshot_variant as Dictionary).get("operation_kind","")).is_empty():
