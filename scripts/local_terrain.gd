@@ -12379,6 +12379,20 @@ func _warfare_arrowhead_mesh(radius:float,height:float,forward:=Vector2.RIGHT)->
 	return surface.commit()
 
 
+func _warfare_bow_mesh()->ArrayMesh:
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for segment in 8:
+		var a:=lerpf(-PI*0.5,PI*0.5,float(segment)/8.0)
+		var b:=lerpf(-PI*0.5,PI*0.5,float(segment+1)/8.0)
+		var first:=Vector2(-cos(a),sin(a))
+		var second:=Vector2(-cos(b),sin(b))
+		for point in [first*1.18,first*1.00,second*1.00,first*1.18,second*1.00,second*1.18]:
+			surface.add_vertex(Vector3(point.x,0.10,point.y))
+	surface.generate_normals()
+	return surface.commit()
+
+
 func _warfare_horse_head_mesh()->ArrayMesh:
 	# One readable cavalry silhouette, rather than overlapping person-like discs.
 	var points:=PackedVector2Array([Vector2(-0.72,1.12),Vector2(0.88,1.12),Vector2(0.72,0.50),Vector2(0.54,-0.55),Vector2(0.20,-0.95),Vector2(0.08,-1.35),Vector2(-0.16,-0.94),Vector2(-0.45,-0.80),Vector2(-1.08,-0.25),Vector2(-0.94,0.08),Vector2(-0.38,-0.06),Vector2(-0.12,0.16),Vector2(-0.40,0.65)])
@@ -12609,9 +12623,10 @@ func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->vo
 			primary.mesh=bar.call(2.15,0.20); primary.rotation.y=PI*0.5; primary.visible=true
 			secondary.mesh=_warfare_arrowhead_mesh(0.48,0.22,Vector2.UP); secondary.position=Vector3(-0.72,0.42,-1.02); secondary.visible=true
 		"skirmisher":
-			primary.mesh=bar.call(1.62,0.18); primary.rotation.y=0.76; primary.visible=true
-			secondary.mesh=bar.call(1.62,0.18); secondary.rotation.y=-0.76; secondary.visible=true
-			tertiary.mesh=bar.call(2.20,0.13); tertiary.rotation.y=PI*0.5; tertiary.visible=true
+			primary.mesh=_warfare_bow_mesh(); primary.position.x=-0.37; primary.visible=true
+			secondary.mesh=bar.call(2.20,0.10); secondary.position.x=-0.37; secondary.rotation.y=PI*0.5; secondary.visible=true
+			tertiary.mesh=bar.call(1.95,0.13); tertiary.position.x=-0.62; tertiary.visible=true
+			fourth.mesh=_warfare_arrowhead_mesh(0.34,0.22); fourth.position.x=0.48; fourth.visible=true
 		"cavalry","mobile":
 			primary.mesh=_warfare_horse_head_mesh(); primary.visible=true
 		"siege_engineer":
