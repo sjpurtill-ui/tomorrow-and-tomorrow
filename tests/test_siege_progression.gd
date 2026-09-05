@@ -6,6 +6,7 @@ func before_test()->void:
 	GameState.settlement_site_committed=true
 	CivilizationSystem.reset_for_new_world()
 	MilitaryCampaign.reset_for_new_world()
+	ForeignDiplomacy.reset_for_new_world(); ForeignDiplomacy.ensure()
 	FoodSystem.reset_for_new_world()
 	MilitaryCampaign.settlement_defense={"stage":2,"integrity":1.0,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":0}
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
