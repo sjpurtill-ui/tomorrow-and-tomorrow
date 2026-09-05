@@ -214,3 +214,16 @@ Validation:19/19 existing terrain-builder and map-onboarding tests pass, zero er
 Audit --detail-build-profile checks repeated mesh fingerprints and accepts --expect-detail-hash=2260915481 for this fixedseed fixture. Baseline/optimized serialized mesh attribute fingerprints match2260915481. Reviewed artifacts/detail-after.png; Pillow image difference between detail-before.png and detail-after.png is empty (pixel-identical). Existing shutdown RID/texture leak messages remain. Captures/logs excluded from commit.
 
 Save compatibility:unchanged. Temporary dictionary holds12,544 vertex records only during construction; no persistent cache invalidation or new saved state. Next priority: bounded/asynchronous close mesh construction if further pause reduction is needed, with vegetation build considered separately. Existing Google Earth references continue to guide zoom/scale; this performance pass adds no imagery or photorealism claim. Shared-file conflict risk limited to named close-build function and audit block. Integrator owns merge and canonical launch.
+
+
+## 2026-09-05: Direct indexed close terrain construction
+
+Worker C:/Users/sjpur/tt-indexed-detail, codex/indexed-detail, based9485b911493d56f7e1531f11d6abdfcc630f4be. Previous cache integratedc07d2c0. Scope coordinated with integrator: close-grid helper/test, _build_detail_terrain_patch hookup, audit equivalence/profile and this record.
+
+Close terrain now fills packed position/normal/color arrays once per vertex and creates the existing fixed-diagonal triangle indices directly. This avoids triangle-corner expansion, temporary per-vertex dictionaries and SurfaceTool deduplication. Sampling remains inline in the terrain owner; the helper only assembles the supplied grid. Geometry resolution, triangle order, attributes, materials, vegetation, triggers, simulation and save schema remain unchanged.
+
+Validation:20/20 tests across close-grid equivalence, rendered-surface height and map onboarding; zero errors/failures/orphans. New test compares every indexed triangle corner's position, normal and color against a SurfaceTool reference. Final editor import clean. Real GPU audit compares expanded per-triangle attributes independent of vertex storage order:baseline/final fingerprint2888042706. Reviewed indexed-final.png; before/final screenshots are pixel-identical. No script/shader errors; existing exit cleanup leaks persist.
+
+Three-sample isolated full rebuild median279999us baseline (271166/279999/325095),222875us final (207363/222875/242476), about20% lower in this fixture. An initial callback-based helper regressed to359423us and was replaced before final validation. These timings include the function's vegetation rebuild and are not whole-game frame rates. Remaining223ms is synchronous and can still cause a pause. Captures/logs stay in artifacts outside source commits.
+
+Save compatibility:unchanged; no geography or stocks altered. Next useful performance work is splitting remaining close mesh/vegetation construction across frames with cancellation, rather than assuming this optimization removes all zoom stalls. Existing Google Earth references remain the scale guide; no imagery added or photorealism claim. Shared-file conflicts limited to the named close-build function/audit; integrator handles merge and canonical launch.
