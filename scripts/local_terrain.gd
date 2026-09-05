@@ -12610,19 +12610,19 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	return marker
 
 
-func _configure_warfare_overlay_layers(marker:Node3D)->void:
+func _configure_warfare_overlay_layers(marker:Node3D,base_priority:int=20)->void:
 	# Depth-free map counters must share the transparent pass above settlement drapes.
 	# Raising an opaque glyph's priority alone cannot put it after transparent roofs.
 	for counter_part in marker.get_children():
 		if counter_part is Label3D:
-			counter_part.render_priority=32
+			counter_part.render_priority=base_priority+12
 		elif counter_part is GeometryInstance3D:
 			var counter_material:=counter_part.material_override as StandardMaterial3D
 			if counter_material:
 				counter_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
 				if not counter_material.has_meta("overlay_relative_priority"):
 					counter_material.set_meta("overlay_relative_priority",counter_material.render_priority)
-				counter_material.render_priority=20+int(counter_material.get_meta("overlay_relative_priority"))
+				counter_material.render_priority=base_priority+int(counter_material.get_meta("overlay_relative_priority"))
 
 
 func _warfare_marker_material(color:Color)->StandardMaterial3D:
@@ -12936,6 +12936,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 		var pennant_scale:=route_width*1.8
 		pennants.set_instance_transform(pennant_index,Transform3D(Basis(Vector3.UP,heading).scaled(Vector3(pennant_scale,1.0,pennant_scale)),world_point))
 	var pennant_instance:=MultiMeshInstance3D.new(); pennant_instance.name="ScoutDirectionPennants"; pennant_instance.multimesh=pennants; pennant_instance.material_override=_warfare_marker_material(amber.lightened(0.16)); root.add_child(pennant_instance)
+	pennant_instance.material_override.render_priority=5
 	var endpoint:=route_points[route_points.size()-1]
 	var label:=Label3D.new(); label.name="ScoutOrderLabel"
 	var ordered:=String(mission.get("ordered_heading","")).to_upper()
@@ -12944,6 +12945,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	label.text="%s\nPLANNED CORRIDOR · DUE DAY %d" % [first_line,int(mission.get("return_day",0))]
 	label.font_size=10; label.outline_size=5; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.render_priority=10; label.modulate=amber.lightened(0.22); label.outline_modulate=Color(0.01,0.015,0.017,0.98)
 	label.position=Vector3(endpoint.x,_height_at(endpoint.x,endpoint.y)+1.2,endpoint.y); root.add_child(label)
+	_configure_warfare_overlay_layers(root,10)
 	return root
 
 
@@ -12985,6 +12987,7 @@ func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:
 	chevron_instance.name="MarchChevrons"
 	chevron_instance.multimesh=chevrons
 	chevron_instance.material_override=_warfare_marker_material(color.lightened(0.16))
+	chevron_instance.material_override.render_priority=5
 	root.add_child(chevron_instance)
 	var objective:=Node3D.new(); objective.name="MovementObjective"
 	var objective_scale:=maxf(0.001,float(view.get("scale",1.0))*0.90)
@@ -12995,7 +12998,11 @@ func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:
 	var ring_mesh:=TorusMesh.new(); ring_mesh.inner_radius=2.9; ring_mesh.outer_radius=3.5; ring_mesh.rings=28; ring_mesh.ring_segments=8; ring.mesh=ring_mesh; ring.material_override=_warfare_marker_material(color); objective.add_child(ring)
 	var arrow:=MeshInstance3D.new(); arrow.name="ObjectiveArrow"
 	var arrow_mesh:=CylinderMesh.new(); arrow_mesh.top_radius=0.12; arrow_mesh.bottom_radius=0.82; arrow_mesh.height=1.6; arrow_mesh.radial_segments=4; arrow.mesh=arrow_mesh; arrow.position.y=0.80; arrow.material_override=_warfare_marker_material(color); objective.add_child(arrow)
+	arrow.material_override.render_priority=1
 	var label:=Label3D.new(); label.name="ObjectiveLabel"; label.text="MARCH TO %s\n%.0f KM • DAY %d" % [String(view.get("destination_name","DESTINATION")).to_upper(),float(view.get("distance_remaining_km",0.0)),int(view.get("arrival_day",0))]; label.font_size=9; label.outline_size=4; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,6.0,-4.0); label.scale=Vector3.ONE/objective_scale; label.modulate=color.lightened(0.25); label.outline_modulate=Color(0.02,0.025,0.027,0.98); label.visible=bool(view.get("show_objective_label",false)); objective.add_child(label)
+	# Routes clear terrain drapes, but remain below the counter's 17+ layer band.
+	_configure_warfare_overlay_layers(root,10)
+	_configure_warfare_overlay_layers(objective,14)
 	return root
 
 
