@@ -905,10 +905,15 @@ func _process(delta: float) -> void:
 		event_report_button.visible=false
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
+	if GameState.founding_focus!="" and PeopleDirection.needs_century_choice():
+		if game_speed>0.0: _set_game_speed(0.0)
+		if not is_instance_valid(PeopleDirection.panel): PeopleDirection.open_direction()
+		return
 	if game_speed <= 0.0:
 		return
 	var days_advanced := delta * _speed_hours_per_second()/24.0
-	GameState.elapsed_days += days_advanced
+	# Stop at the calendar boundary; never simulate part of an unchosen century.
+	GameState.elapsed_days = minf(GameState.elapsed_days+days_advanced,float(PeopleDirection.next_century_day()))
 	var current_discovery_day := int(floor(GameState.elapsed_days))
 	while last_discovery_day < current_discovery_day and game_speed>0.0:
 		last_discovery_day += 1
