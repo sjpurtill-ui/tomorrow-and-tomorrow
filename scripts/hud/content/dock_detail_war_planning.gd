@@ -148,6 +148,7 @@ func _siege_blocks(siege:Dictionary)->Array:
 	]
 	if float(siege.own_food_days)>=0: rows.append({"name":"HOME FOOD RESERVE","sub":"Current food stores at current demand; not a guaranteed survival countdown","value":"%.1f days" % float(siege.own_food_days)})
 	var blocks:Array=[{"type":"rows","heading":"SIEGE · "+String(siege.target_name),"items":rows},{"type":"actions","items":[
+		{"label":"WATCH SIEGE","sub":"city, forces and live decisions","on_press":func()->void: preload("res://scripts/hud/siege_screen.gd").open(identity)},
 		{"label":"CONTINUE","sub":"hold current orders","on_press":func()->void: _siege_notice(MilitaryCampaign.siege_order(identity,"continue"))},
 		{"label":"NEGOTIATE","sub":"seek terms through envoys","on_press":func()->void: ForeignDiplomacy.open(rival)},
 		{"label":"RELIEF & ALLIES","sub":"review real commitments and ability","on_press":func()->void: _open_siege_relief(identity)},
