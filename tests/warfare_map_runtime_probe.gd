@@ -58,6 +58,12 @@ func _ready()->void:
 				if (marker.get_node(glyph_name) as MeshInstance3D).visible: visible_icon_parts+=1
 			_expect(visible_icon_parts>=1,"%s icon has no visible silhouette" % historical_unit)
 		var damaged_army:=army.duplicate(true)
+		terrain._configure_warfare_role_glyph(marker,"infantry","skirmisher")
+		var bow_mesh:ArrayMesh=marker.get_node("RoleGlyphPrimary").mesh
+		_expect(bow_mesh.surface_get_array_len(0)==48,"bow arc exceeds its eight-segment budget")
+		for normal in bow_mesh.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]:
+			_expect(normal.y>0.99,"bow arc faces away from the map camera")
+		_expect(marker.get_node("RoleGlyphFourth").visible,"bow has no directional arrowhead")
 		terrain._configure_warfare_role_glyph(marker,"mobile","cavalry")
 		var horse_mesh:ArrayMesh=marker.get_node("RoleGlyphPrimary").mesh
 		var horse_arrays:=horse_mesh.surface_get_arrays(0)

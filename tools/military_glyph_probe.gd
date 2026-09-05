@@ -7,11 +7,13 @@ func capture()->void:
 	var scene:=Node3D.new()
 	root.add_child(scene)
 	var renderer:Node3D=load("res://scripts/local_terrain.gd").new()
+	var units:Array=preload("res://scripts/military_unit_catalog.gd").ARCHETYPES.keys()
+	var rows:=ceili(float(units.size())/4.0)
 	var camera:=Camera3D.new()
 	camera.projection=Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov=35.0
-	camera.size=42.0
-	camera.position=Vector3(0,42.0/(2.0*tan(deg_to_rad(35.0)*0.5)),0)
+	camera.size=float(rows)*19.0+4.0
+	camera.position=Vector3(0,camera.size/(2.0*tan(deg_to_rad(35.0)*0.5)),0)
 	scene.add_child(camera)
 	camera.look_at(Vector3.ZERO,Vector3.FORWARD)
 	renderer.camera=camera
@@ -25,9 +27,8 @@ func capture()->void:
 	var sun:=DirectionalLight3D.new()
 	sun.rotation_degrees=Vector3(-55,-25,0)
 	scene.add_child(sun)
-	var units:=["levy","line_infantry","cavalry","siege_engineer","field_artillery","rifle_infantry","motorized_infantry","armored_formation"]
 	for index in units.size():
-		var center:=Vector3((float(index%4)-1.5)*16.0,0,(float(index/4)-0.5)*19.0)
+		var center:=Vector3((float(index%4)-1.5)*16.0,0,(float(index/4)-float(rows-1)*0.5)*19.0)
 		var marker:Node3D=renderer._create_warfare_formation_marker("Icon%d" % index,true)
 		scene.add_child(marker)
 		marker.position=center
