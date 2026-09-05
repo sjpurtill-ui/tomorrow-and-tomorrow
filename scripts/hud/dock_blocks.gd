@@ -5,6 +5,7 @@ class_name DockBlocks
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const HealthHistoryChart:=preload("res://scripts/hud/health_history_chart.gd")
+const ExpeditionChart:=preload("res://scripts/hud/expedition_chart.gd")
 
 
 static func render(container:VBoxContainer,blocks:Array)->void:
@@ -24,6 +25,12 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"expedition_chart":
+				var chart:=ExpeditionChart.new()
+				chart.route=block.get("route",[])
+				chart.discoveries=block.get("discoveries",[])
+				section.add_child(chart)
+			"discovery": _render_discovery(section,block)
 			"line_chart": _render_line_chart(section,block)
 			"segments": _render_segments(section,block)
 			"alloc": _render_alloc(section,block)
@@ -37,6 +44,37 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"image": _render_image(section,block)
 			_: _render_text(section,block)
 
+
+static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
+	var accent:Color=Tokens.GOLD if String(block.get("kind",""))=="landmark" else Tokens.TEAL if String(block.get("kind",""))=="resource" else Tokens.BLUE
+	var frame:=PanelContainer.new()
+	var style:=Tokens.flat(Color("#111e20"),accent.darkened(0.5),1,6)
+	style.content_margin_left=20; style.content_margin_right=20
+	style.content_margin_top=16; style.content_margin_bottom=18
+	frame.add_theme_stylebox_override("panel",style)
+	parent.add_child(frame)
+	var column:=VBoxContainer.new()
+	column.add_theme_constant_override("separation",9)
+	frame.add_child(column)
+	var heading:=String(block.get("kind","discovery")).to_upper()
+	if block.has("distance_km"): heading+="   /   %s KM FROM HOME" % str(int(block.distance_km))
+	column.add_child(Tokens.make_label(heading,10,accent))
+	var title:=Tokens.make_label(String(block.get("title","A new discovery")),23,Tokens.INK)
+	var serif:=SystemFont.new()
+	serif.font_names=PackedStringArray(["Georgia","Noto Serif","serif"])
+	title.add_theme_font_override("font",serif)
+	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(title)
+	for key in ["description","consequence","myth"]:
+		var text:=String(block.get(key,""))
+		if text.is_empty(): continue
+		if key=="myth": text="AROUND THEIR CAMPFIRES\n“"+text+"”"
+		if key=="consequence": text="WHAT THIS OPENS UP\n"+text
+		var label:=Tokens.make_label(text,13 if key=="description" else 12,Tokens.BODY if key=="description" else accent if key=="myth" else Tokens.TEXT_SOFT)
+		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		column.add_child(label)
+	var action:Variant=block.get("on_press")
+	if action is Callable: _render_actions(column,{"items":[{"label":"EXAMINE THIS PLACE","on_press":action}]})
 
 static func _render_line_chart(parent:VBoxContainer,block:Dictionary)->void:
 	var chart:=HealthHistoryChart.new()
@@ -539,8 +577,8 @@ static func _render_image(parent:VBoxContainer,block:Dictionary)->void:
 	var frame:=TextureRect.new()
 	frame.texture=load(path)
 	frame.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-	frame.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	frame.custom_minimum_size=Vector2(0,216)
+	frame.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED if bool(block.get("cover",false)) else TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	frame.custom_minimum_size=Vector2(0,float(block.get("height",216)))
 	frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	frame.tooltip_text=String(block.get("tip",""))
 	parent.add_child(frame)
