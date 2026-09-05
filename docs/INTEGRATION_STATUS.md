@@ -2,7 +2,7 @@
 
 ## Latest: release 2026.09.05.5
 
-Battle/siege HUD delivery through worker 018cedd is now selected for integration
+Battle/siege HUD delivery through worker 018cedd is integrated as 540d1d4
 from c89b895 with test project settings excluded. Includes formation orders,
 replay, siege controls and linked battle history. Saved notification restoration
 preserves fractional time. See RELEASE_2026_09_05_5.md for validation and audit.
@@ -13,6 +13,13 @@ no implementation commit exists yet. Outposts, sliced vegetation and unfinished
 Blender authoring remain HELD. All prior worktrees/local changes are preserved.
 Copy-ready worker prompt: WORKER_PROMPT.txt. Player: canonical main via the
 desktop shortcut. A running test scene is never the current campaign.
+
+Verified canonical launch September5 16:56:05: PID3672, source540d1d4,
+release2026.09.05.5, --resume-saved. Title and log confirm SeanTown/day9432/
+population405. Exact saved time9432.03296121855 passed the isolated resume check.
+The disposable siege preview PID51828 closed normally; no worker was stopped.
+Original quicksave hash remains unchanged. Latest validation:174/174 cases plus
+private-desktop battle/siege interaction probes and actual copied-save GPU check.
 
 Canonical player checkout: `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`.
 The OneDrive project is archived. Use `tools/launch_game.ps1` or the existing **Play Tomorrow and Tomorrow** desktop shortcut. The launcher prints the commit it starts. F5 runs the game; F6 may run a preview scene.
