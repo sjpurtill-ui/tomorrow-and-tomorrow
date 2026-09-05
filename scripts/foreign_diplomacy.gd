@@ -12,9 +12,11 @@ var seed_value:=-999999
 var leaders:Dictionary={}
 var layer:CanvasLayer
 var panel:Control
+var commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 
 func reset_for_new_world()->void:
 	seed_value=-999999; leaders.clear()
+	commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 	if is_instance_valid(panel): panel.queue_free()
 	ForeignDialogue.reset()
 
@@ -97,6 +99,7 @@ func send_audience(id:String)->Dictionary:
 
 func resolve(id:String)->Dictionary:
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	if mission.has("commitment_terms"): return commitments.resolve(id,mission)
 	var terms:Dictionary=mission.get("leader_terms",{})
 	var p:=leader(id)
 	if not p.is_empty() and String(mission.get("civ_id",""))==id and bool(mission.get("leader_audience",false)):
@@ -146,6 +149,7 @@ func remember(id:String,message:String)->void:
 
 func advance(day:int)->void:
 	ensure()
+	commitments.advance(day)
 	for id:String in leaders.keys():
 		var civ:=civilization(id); var p:Dictionary=leaders[id]
 		if civ.is_empty() or (p.accord as Dictionary).is_empty(): continue
@@ -166,10 +170,11 @@ func valid_terms(t:Dictionary)->bool:
 	return t.has_all(["accord","tone","generous","cost","serial"]) and ACCORDS.has(t.accord) and TONES.has(t.tone) and t.generous is bool and t.cost==(12 if t.generous else 4) and (t.serial is int or t.serial is float) and float(t.serial)>=1
 
 func export_state()->Dictionary:
-	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true),"dialogue":ForeignDialogue.export_state()}
+	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true),"dialogue":ForeignDialogue.export_state(),"commitments":commitments.state.duplicate(true)}
 
 func import_state(data:Dictionary)->Dictionary:
-	if data.get("seed")!=GameState.world_seed or not data.get("leaders") is Dictionary or data.leaders.size()>8: return {"error":"Invalid foreign leader state."}
+	if data.get("seed")!=GameState.world_seed or not data.get("leaders") is Dictionary or data.leaders.size()>64: return {"error":"Invalid foreign leader state."}
+	if data.has("commitments") and not commitments.validate(data.commitments): return {"error":"Invalid protection or league commitments."}
 	if not ForeignDialogue.validate_state(data.get("dialogue",{})): return {"error":"Invalid foreign discussion history."}
 	for id in data.get("dialogue",{}):
 		if not data.leaders.has(id): return {"error":"Discussion references an unknown leader."}
@@ -188,7 +193,21 @@ func import_state(data:Dictionary)->Dictionary:
 		if not p.accord.is_empty():
 			if not ACCORDS.has(p.accord.get("kind","")) or p.accord.get("bonus",0) not in [.08,.12] or not (p.accord.get("until") is int or p.accord.get("until") is float) or not is_finite(float(p.accord.until)) or p.accord.until<0: return {"error":"Invalid active understanding."}
 	leaders=data.leaders.duplicate(true); seed_value=GameState.world_seed; ForeignDialogue.import_state(data.get("dialogue",{}))
+	commitments=preload("res://scripts/diplomatic_commitments.gd").new()
+	if data.has("commitments"): commitments.state=data.commitments.duplicate(true)
 	return {"ok":true}
+
+func notify_defensive_siege(attacker_id:String,defender_id:String,siege_id:String,day:int)->void:
+	ensure(); commitments.notify_attack(attacker_id,defender_id,siege_id,day)
+
+func complete_siege_relief(receipt_id:String,survivors:int,unused_food:float)->Dictionary:
+	return commitments.complete_relief(receipt_id,survivors,unused_food)
+
+func open_relief(siege_id:String)->void:
+	ensure()
+	if is_instance_valid(panel): panel.queue_free()
+	if not is_instance_valid(layer): layer=CanvasLayer.new(); layer.layer=84; add_child(layer)
+	panel=preload("res://scripts/relief_request_screen.gd").new(); panel.siege_id=siege_id; layer.add_child(panel)
 
 func open(id:String)->void:
 	if leader(id).is_empty(): return
