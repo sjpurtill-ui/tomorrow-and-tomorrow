@@ -12481,6 +12481,11 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	if echelon_bars.material_override: echelon_bars.material_override.render_priority=2
 	if damage_scars.material_override: damage_scars.material_override.render_priority=5
 	var label:=Label3D.new(); label.name="ArmyLabel" if player_owned else "FormationLabel"; label.font_size=8; label.outline_size=3; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,7.6 if player_owned else 7.0,-4.8); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
+	_configure_warfare_overlay_layers(marker)
+	return marker
+
+
+func _configure_warfare_overlay_layers(marker:Node3D)->void:
 	# Depth-free map counters must share the transparent pass above settlement drapes.
 	# Raising an opaque glyph's priority alone cannot put it after transparent roofs.
 	for counter_part in marker.get_children():
@@ -12490,8 +12495,9 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 			var counter_material:=counter_part.material_override as StandardMaterial3D
 			if counter_material:
 				counter_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
-				counter_material.render_priority+=20
-	return marker
+				if not counter_material.has_meta("overlay_relative_priority"):
+					counter_material.set_meta("overlay_relative_priority",counter_material.render_priority)
+				counter_material.render_priority=20+int(counter_material.get_meta("overlay_relative_priority"))
 
 
 func _warfare_marker_material(color:Color)->StandardMaterial3D:
@@ -12945,6 +12951,8 @@ func _create_warfare_front_marker(front_id:String)->Node3D:
 	var selected_ring:=MeshInstance3D.new(); selected_ring.name="SelectedRing"
 	var selected_mesh:=TorusMesh.new(); selected_mesh.inner_radius=4.18; selected_mesh.outer_radius=4.54; selected_mesh.rings=28; selected_mesh.ring_segments=7; selected_ring.mesh=selected_mesh; selected_ring.material_override=_warfare_marker_material(Color(WarfareMapPresentation.PLAYER_SELECTED_COLOR)); selected_ring.visible=false; marker.add_child(selected_ring)
 	var label:=Label3D.new(); label.name="FrontLabel"; label.font_size=9; label.outline_size=4; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,7.4,-4.6); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
+	selected_ring.material_override.render_priority=6
+	_configure_warfare_overlay_layers(marker)
 	return marker
 
 func _build_lens(layer: CanvasLayer) -> void:
