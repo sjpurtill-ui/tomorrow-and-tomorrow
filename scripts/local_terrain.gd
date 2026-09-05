@@ -12329,6 +12329,28 @@ func _world_surface_is_land(position:Vector3)->bool:
 	return CivilizationSystem._scout_land_at(Vector2(position.x,position.z))
 
 
+func _warfare_arrowhead_mesh(radius:float,height:float,forward:=Vector2.RIGHT)->ArrayMesh:
+	# CylinderMesh clamps radial_segments to at least four: use a real triangle.
+	var direction:=forward.normalized()
+	var side:=Vector2(-direction.y,direction.x)
+	var points:=[-direction*radius*0.5-side*radius*0.8660254,direction*radius,-direction*radius*0.5+side*radius*0.8660254]
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	surface.set_smooth_group(-1)
+	for face in [[0,1,2],[2,1,0]]:
+		var y:=height*0.5 if face[0]==0 else -height*0.5
+		for index in face:
+			var point:Vector2=points[index]
+			surface.add_vertex(Vector3(point.x,y,point.y))
+	for index in 3:
+		var a:Vector2=points[index]
+		var b:Vector2=points[(index+1)%3]
+		for vertex in [Vector3(a.x,height*0.5,a.y),Vector3(a.x,-height*0.5,a.y),Vector3(b.x,-height*0.5,b.y),Vector3(a.x,height*0.5,a.y),Vector3(b.x,-height*0.5,b.y),Vector3(b.x,height*0.5,b.y)]:
+			surface.add_vertex(vertex)
+	surface.generate_normals()
+	return surface.commit()
+
+
 func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Node3D:
 	var marker:=Node3D.new()
 	marker.name=marker_name
@@ -12407,11 +12429,7 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	marker.add_child(echelon_bars)
 	var heading_chevron:=MeshInstance3D.new()
 	heading_chevron.name="HeadingChevron"
-	var heading_mesh:=CylinderMesh.new()
-	heading_mesh.top_radius=0.82
-	heading_mesh.bottom_radius=0.82
-	heading_mesh.height=0.18
-	heading_mesh.radial_segments=3
+	var heading_mesh:=_warfare_arrowhead_mesh(0.82,0.18,Vector2.UP)
 	heading_chevron.mesh=heading_mesh
 	heading_chevron.position=Vector3(0.0,0.27,-3.65)
 	heading_chevron.material_override=_warfare_marker_material(owner_color.lightened(0.18))
@@ -12933,11 +12951,7 @@ func _create_warfare_front_marker(front_id:String)->Node3D:
 	for wing_record in [{"name":"AttackerWing","x":-1.58,"angle":0.0,"lighten":0.12},{"name":"DefenderWing","x":1.58,"angle":PI,"lighten":-0.12}]:
 		var wing:=MeshInstance3D.new()
 		wing.name=String(wing_record.name)
-		var wing_mesh:=CylinderMesh.new()
-		wing_mesh.top_radius=1.08
-		wing_mesh.bottom_radius=1.08
-		wing_mesh.height=0.20
-		wing_mesh.radial_segments=3
+		var wing_mesh:=_warfare_arrowhead_mesh(1.08,0.20)
 		wing.mesh=wing_mesh
 		wing.position=Vector3(float(wing_record.x),0.31,0.0)
 		wing.rotation.y=float(wing_record.angle)
