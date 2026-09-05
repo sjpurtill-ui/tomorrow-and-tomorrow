@@ -177,3 +177,14 @@ Validation: clean headless editor import; 14/14 tests across rendered-surface, h
 Save compatibility: no schema, simulation or extraction changes. Limitations: this grounds stump centers only; broad objects or extreme slopes can still intersect at their edges. It does not correct other vegetation/building placement. The existing sparse representative aesthetic remains, and this is not a photorealism claim. Next useful priorities are geographic woodland/worksite shapes and terrain contact for other small surface details, coordinated with their owners. Original Google Earth reference set remains the scale guide; no new imagery imported.
 
 Shared-file risk: regional height retention, detail grid center, harvest sampling/refresh in scripts/local_terrain.gd; audit fixture and this record. No known conflicts at handoff. Integrator owns merge and canonical launch.
+
+
+## 2026-09-05: Filter procedural vegetation detail during zoom
+
+Worker C:/Users/sjpur/tt-canopy-filter, codex/canopy-filter, base 221963f63630002c2b78ab2a109446b57d164513. Prior grounding integrated as98384e3. Scope coordinated with integrator: only the procedural noise portion of _vegetation_surface_material and this record.
+
+Crown, leaf and gap variation now measures projected pixel footprint with fragment derivatives and fades unresolved noise toward 0.5. The canopy atlas already uses mipmaps; its separate procedural modulation previously had no scale filtering. This removes one source of sub-pixel intensity variation without changing crown placement, mesh, atlas, discovery, harvest removal or LOD thresholds. Nonlinear gap/highlight thresholds are applied after the filtered noise, so distant color is an approximation rather than an exact area integral.
+
+Validation: initial editor import clean. Existing map-onboarding and landscape-resource suites:23/23 passed, zero failures/errors/orphans. Matched isolated real-render captures at600m span, artifacts/canopy-before.png and canopy-after.png, inspected;837 of921600 pixels changed, maximum channel difference29/255. Inspected canopy-close.png at60m span. All captures completed MAP_AUDIT without script/shader errors; existing shutdown leaks persist. These are static checks, not a motion-aliasing benchmark or a measured frame-time improvement.
+
+The effect is subtle. Captures expose more prominent existing terrain shading seams and simplistic/sparse canopy geometry; filtering does not fix either. Those deserve the next graphics investigation, particularly overlapping close/regional terrain and directional shadows. No photorealism claim. Original Google Earth references remain the visual scale guide; no external assets added. Saves and simulation unchanged. Shared-file conflict risk is restricted to the named material function; integrator owns merge and canonical launch. Generated captures/logs/import metadata excluded.

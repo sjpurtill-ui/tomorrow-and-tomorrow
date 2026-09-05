@@ -3436,12 +3436,17 @@ float vn(vec2 p) {
 	vec2 i=floor(p); vec2 f=fract(p); f=f*f*(3.0-2.0*f);
 	return mix(mix(vh(i),vh(i+vec2(1,0)),f.x),mix(vh(i+vec2(0,1)),vh(i+vec2(1,1)),f.x),f.y);
 }
+// Stop sub-pixel procedural leaves from becoming unstable dark/light speckles.
+float filtered_vn(vec2 point) {
+	float footprint=max(length(dFdx(point)),length(dFdy(point)));
+	return mix(vn(point),0.5,smoothstep(0.35,1.1,footprint));
+}
 void vertex() { world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
 void fragment() {
 	if(vegetation_kind==0 && tree_keep<0.5) discard;
-	float crown=vn(world_position.xz*410.0+vec2(17.0,-31.0));
-	float leaf=vn(world_position.xz*1350.0+vec2(-73.0,29.0));
-	float gap=smoothstep(0.68,0.92,vn(world_position.xz*780.0+vec2(91.0,7.0)));
+	float crown=filtered_vn(world_position.xz*410.0+vec2(17.0,-31.0));
+	float leaf=filtered_vn(world_position.xz*1350.0+vec2(-73.0,29.0));
+	float gap=smoothstep(0.68,0.92,filtered_vn(world_position.xz*780.0+vec2(91.0,7.0)));
 	vec3 base=COLOR.rgb*canopy_tint.rgb*(0.70+crown*0.38+(leaf-0.5)*0.15);
 	if (vegetation_kind==0) {
 		if (atlas_variant>=0) {
