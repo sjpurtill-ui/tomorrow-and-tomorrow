@@ -43,6 +43,26 @@ pass. Expedition findings, mobility and billion-scale verification were integrat
 
 See `WORKER_HANDOFF.md` for ownership, worktree and integration rules.
 
+## Combined canonical verification
+
+After civic `fb5c118` and expedition/mobility commits through `95a6b0d`:
+
+- 272/272 tests across nine suites passed (report 728, 3m14s), covering civics,
+  directives, government, expedition findings, civilization, military development,
+  settlement architecture and warfare presentation. The civilization suite
+  includes a century with billion-person populations and bounded save records.
+- Canonical population-scale probe passed with nine cohorts and one formation;
+  whole-game save/load passed after the combined changes.
+- GPU expedition report probe passed; both report and journey captures inspected.
+  Five painting assets are imported. The real return handler opens the same
+  report provider, also reachable through World reports.
+- GPU warfare-map runtime probe passed, including current route geometry and hover.
+- Existing shutdown resource leaks remain. No paid API call was made by this pass.
+
+The worker's additional 133-test demographics/government/architecture sweep passed
+in its isolated checkout; this is supporting evidence, not additional canonical
+coverage claimed on top of the 272 tests above.
+
 ## Expedition, mobility and scale handoff (worker evidence)
 
 # Feature reconciliation — September 5, 2026

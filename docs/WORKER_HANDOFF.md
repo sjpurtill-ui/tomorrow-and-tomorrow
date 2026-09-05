@@ -12,6 +12,27 @@ The player build is `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`. Start i
 
 If two tasks touch a shared simulation or UI file, coordinate ownership or let the integrator apply that part. Do not copy complete old files over evolved systems. Do not discard uncommitted work to make a merge clean. Preserve saves and never kill a player's running game as cleanup.
 
+## Editor development
+
+The integrator can open the canonical editor with
+`powershell -ExecutionPolicy Bypass -File tools/launch_game.ps1 -Editor`
+from the canonical checkout, then use **F5 / Run Project**. F6 runs the selected
+scene and may launch a test or preview; it is not the standard player launch.
+Keep the editor and game visible. Save the player session before a restart.
+
+Use Godot's **Debug → Synchronize Scene Changes** and **Synchronize Script
+Changes**, plus **Editor Settings → Text Editor → Behavior → Files → Auto Reload
+Scripts on External Change**. These are enabled on this machine. External edits
+are detected when the editor regains focus; unsaved conflicts still need review.
+Structural changes, autoloads and initialization changes can require a restart.
+Live synchronization does not merge a worker branch or replay world generation.
+Workers must still hand off commits; the integrator merges and verifies them.
+Godot documents the external reload and unsaved-conflict behavior in
+[EditorSettings](https://docs.godotengine.org/en/stable/classes/class_editorsettings.html#class-editorsettings-property-text-editor-behavior-files-auto-reload-scripts-on-external-change).
+
+Integration records belong in `FEATURE_RECONCILIATION.md`; state the canonical
+commit and tested behavior before saying a feature is in the player's build.
+
 ## Copy-ready worker prompt
 
 ```text

@@ -1,5 +1,6 @@
 param(
-    [switch]$Fullscreen = $true
+    [switch]$Fullscreen = $true,
+    [switch]$Editor
 )
 
 $ErrorActionPreference = 'Stop'
@@ -32,9 +33,12 @@ $configuredModel = [Environment]::GetEnvironmentVariable('LEVIATHAN_AI_MODEL', '
 $env:LEVIATHAN_AI_MODEL = if ([string]::IsNullOrWhiteSpace($configuredModel)) { 'gpt-5.6-terra' } else { $configuredModel }
 
 $arguments = @('--path', ('"' + $projectRoot + '"'))
-if ($Fullscreen) {
+if ($Editor) {
+    $arguments += @('--editor', 'res://main.tscn')
+} elseif ($Fullscreen) {
     $arguments += '--fullscreen'
 }
 
 $process = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $arguments -WorkingDirectory $projectRoot -PassThru
-Write-Output "Launched current game from $projectRoot (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"
+$launchKind = if ($Editor) { 'canonical editor' } else { 'current game' }
+Write-Output "Launched $launchKind from $projectRoot (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"
