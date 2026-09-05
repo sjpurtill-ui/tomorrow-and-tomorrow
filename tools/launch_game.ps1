@@ -33,7 +33,10 @@ if (-not [string]::IsNullOrWhiteSpace($leviathanKey)) {
 $configuredModel = [Environment]::GetEnvironmentVariable('LEVIATHAN_AI_MODEL', 'User')
 $env:LEVIATHAN_AI_MODEL = if ([string]::IsNullOrWhiteSpace($configuredModel)) { 'gpt-5.6-terra' } else { $configuredModel }
 
-$arguments = @('--path', ('"' + $projectRoot + '"'))
+$launchLogDirectory = Join-Path $projectRoot 'artifacts'
+[IO.Directory]::CreateDirectory($launchLogDirectory) | Out-Null
+$launchLog = Join-Path $launchLogDirectory ('player-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.log')
+$arguments = @('--path', ('"' + $projectRoot + '"'), '--log-file', ('"' + $launchLog + '"'))
 if ($Editor) {
     $arguments += @('--editor', 'res://main.tscn')
 } elseif ($Fullscreen) {
@@ -50,3 +53,5 @@ $buildCommit = & git -C $projectRoot rev-parse --short HEAD
 if ($LASTEXITCODE -ne 0) { $buildCommit = 'unknown' }
 $launchKind = if ($Editor) { 'canonical editor' } else { 'current game' }
 Write-Output "Launched $launchKind from $projectRoot, build $buildCommit (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"
+
+Write-Output "Player log: $launchLog"

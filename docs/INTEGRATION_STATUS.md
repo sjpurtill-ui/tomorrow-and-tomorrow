@@ -3,13 +3,9 @@
 Canonical player checkout: `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`.
 The OneDrive project is archived. Use `tools/launch_game.ps1` or the existing **Play Tomorrow and Tomorrow** desktop shortcut. The launcher prints the commit it starts. F5 runs the game; F6 may run a preview scene.
 
-Latest player release: `80a2fc4`, including Show Home navigation (`8059513`) and saved-campaign startup on top of consolidated release `4db697f`. The canonical launcher resumes quicksave when present; use `-ResumeSaved:$false` only to intentionally start without it. Editor launches are unaffected.
+Release **2026.09.05.1** is integrated on main through `a9dddbb` (gameplay through `c337a0f`), pending the final canonical launch. The previous player has exited. The newest quicksave is September 5 11:15:04, SeanTown, day6176.3846, population307, seed1792400273. Read-only fresh-process/terrain verification passes; no save overwritten.
 
-Current live player: PID 63992, launched from canonical on September 5 after the user saved and closed the older session. Live startup log verifies SeanTown, day 5400, population 291, seed 1792400273. The 11:00:31 quicksave was read without being overwritten. Do not restart this live session for continuing development.
-
-Show Home's actual detail-panel action now closes the dock, focuses the saved home location at label-readable zoom, and cancels an older zoom target. A recorded city marker can remain visible over unsurveyed ground without revealing terrain. Canonical HOME_FOCUS_PASS and real SAVED_CAMPAIGN_RESUMED checks pass. Saved-load probe shutdown retained two ObjectDB instances and one resource diagnostic; no clean-shutdown claim.
-
-New approved work is isolated in `C:/Users/sjpur/tt-rumor-leads`, branch `codex/rumor-leads`: rumor network/map implementation. Separately queued: Inquiry graphical tree, larger Materials view, crowded scouting UI stability, expanded occupation governance. These are not in the running release. Outposts and the unfinished military usability foundation remain held.
+Military readability `cc5ffc5`, rumors `1672447`, Inquiry/Materials/scouting `aba8c73`, occupation `5c39a0f`/`81c38d2`, recovery `d8bf575`, final guards/version `c337a0f`, and isolated spatial report `a9dddbb` are integrated. See docs/RELEASE_2026_09_05_1.md for behavior-specific validation and limits. Canonical combined suite:125 cases pass. Outposts, unrelated economy, sliced vegetation and unfinished Blender authoring remain HELD.
 
 ## Consolidation queue — September 5
 
@@ -18,7 +14,7 @@ New approved work is isolated in `C:/Users/sjpur/tt-rumor-leads`, branch `codex/
 | Strategic charts and dynamic dock tabs | INTEGRATED | Worker `4107fd1` → main `12d16a3`; 64 combined tests + GPU |
 | Discovered city intelligence | INTEGRATED | Worker `02a6587` → main `efbff12`, follow-up `691eed6` → `d418704`; 113 combined tests + 14 focused follow-up cases + GPU |
 | Zoom terrain fill | INTEGRATED | Worker `1142441` → main `42595fb`; five terrain cases and expanded camera runtime probe pass |
-| Military usability redesign | HELD | `C:/Users/sjpur/tt-military-usability`; unfinished live-binding/status foundation, no completed UI or end-to-end verification |
+| Military usability redesign | INTEGRATED | cc5ffc5 after explicit reauthorization; live progress/focus/selection and canonical GPU checks |
 | Outposts, sliced vegetation, unrelated economy and Blender authoring experiment | HELD | Preserved prototypes below; excluded from the player build |
 
 Historical consolidation session: player PID 65696 started before the integrations; the user later saved and closed it. See the current release/session status above. Save and exit normally, then use **Play Tomorrow and Tomorrow** to load the integrated code. The shortcut's target and working directory were verified canonical. Older process references below are historical checkpoints, not current status.
