@@ -7558,8 +7558,8 @@ void fragment() {
 		// District roads are meaningful around city zoom, but must integrate into
 		// land cover at continental scale. Otherwise one 1-2 km grid becomes a
 		// screen-wide sheet of graph paper when the camera pulls back.
-		float neighborhood_visibility=1.0-smoothstep(0.008,0.026,pixel_span);
-		float regional_visibility=smoothstep(0.007,0.024,pixel_span)*(1.0-smoothstep(0.075,0.24,pixel_span));
+		float neighborhood_visibility=1.0-smoothstep(0.018,0.065,pixel_span);
+		float regional_visibility=smoothstep(0.025,0.065,pixel_span)*(1.0-smoothstep(0.11,0.30,pixel_span));
 		float raw_family=floor(UV2.y+0.001);
 		bool packed_strategic_field=raw_family>=8.0;
 		float packed_state=fract(UV2.y)*16.0;
@@ -7663,18 +7663,22 @@ void fragment() {
 			roof_mask*=smoothstep(0.13-roof_aa,0.13+roof_aa,court_distance);
 		}
 		roof_mask*=step(layout_form==5.0 ? 0.30 : 0.12,roof_roll)*(1.0-local_lane);
-		float roof_resolved=1.0-smoothstep(0.0025,0.009,pixel_span);
+		float roof_resolved=1.0-smoothstep(0.006,0.025,pixel_span);
 		vec2 shadow_edge=roof_extent-abs(roof_local-roof_center-vec2(0.055,0.075));
 		float roof_shadow=smoothstep(-roof_aa,roof_aa,min(shadow_edge.x,shadow_edge.y))*(1.0-roof_mask);
 		fabric=mix(fabric,COLOR.rgb*0.38,roof_shadow*occupied_block*neighborhood_survival*roof_resolved*0.38);
-		vec3 roof_tone=COLOR.rgb*mix(0.82,1.28,roof_roll);
+		float roof_color_roll=mix(neighborhood_break,roof_roll,roof_resolved);
+		vec3 roof_tone=COLOR.rgb*mix(0.82,1.28,roof_color_roll);
 		roof_tone=mix(roof_tone,vec3(0.48,0.43,0.34),0.22);
 		float roof_plane=smoothstep(-roof_aa,roof_aa,roof_local.x-roof_center.x);
+		roof_plane=mix(0.5,roof_plane,roof_resolved);
 		float roof_weather=value_noise(urban_point*370.0+vec2(layout_variant*3.0,roof_roll*19.0));
 		roof_weather=mix(0.5,roof_weather,1.0-smoothstep(0.25,0.75,pixel_span*370.0));
 		roof_tone*=0.82+roof_plane*0.16+roof_weather*0.08;
 		if(district_condition<6.0) roof_tone*=condition_upkeep;
-		urban_roof_coverage=roof_mask*occupied_block*neighborhood_survival*roof_resolved;
+		// Integrate sub-pixel roofs to their mean coverage rather than erasing them.
+		// At regional altitude, the 300 m neighborhood is still several pixels wide.
+		urban_roof_coverage=mix(0.44,roof_mask,roof_resolved)*occupied_block*neighborhood_survival*neighborhood_visibility;
 		fabric=mix(fabric,roof_tone,urban_roof_coverage*0.86);
 		float garden_interior=smoothstep(0.015,0.18,min(neighborhood_edge.x,neighborhood_edge.y));
 		vec3 garden_tone=mix(COLOR.rgb*0.78,vec3(0.22,0.27,0.16),0.38);
