@@ -4,12 +4,13 @@ func _initialize()->void:
 	call_deferred("capture")
 
 func capture()->void:
+	var bends:=OS.get_cmdline_user_args().has("--bends")
 	var scene:=Node3D.new()
 	root.add_child(scene)
 	var renderer:Node3D=load("res://scripts/local_terrain.gd").new()
 	var camera:=Camera3D.new()
 	camera.projection=Camera3D.PROJECTION_ORTHOGONAL
-	camera.size=0.21
+	camera.size=0.38 if bends else 0.21
 	camera.position=Vector3(0,1,0)
 	scene.add_child(camera)
 	camera.look_at(Vector3.ZERO,Vector3.FORWARD)
@@ -26,7 +27,9 @@ func capture()->void:
 	for tier in 6:
 		var parent:=Node3D.new()
 		scene.add_child(parent)
-		var routes:Array[Dictionary]=[{"active":true,"kind":"desire_path","hierarchy":"main_approach","surface_tier":tier,"condition":0.8,"points":PackedVector2Array([Vector2(-0.10,0),Vector2(0.10,0)])}]
+		var points:=PackedVector2Array([Vector2(-0.10,0),Vector2(0.10,0)])
+		if bends: points=PackedVector2Array([Vector2(-0.10,0),Vector2(-0.035,0),Vector2(0,0.013),Vector2(0.02,-0.013),Vector2(0.02,0.009),Vector2(0.10,0.009)])
+		var routes:Array[Dictionary]=[{"active":true,"kind":"desire_path","hierarchy":"main_approach","surface_tier":tier,"condition":0.8,"points":points}]
 		renderer._create_persistent_settlement_routes(Vector3.ZERO,routes,parent)
 		var patch:=parent.get_node("PersistentDesirePaths") as MeshInstance3D
 		# Flatten only the test strip; keep production width, color and material.
@@ -37,17 +40,20 @@ func capture()->void:
 		var mesh:=ArrayMesh.new()
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 		patch.mesh=mesh
-		parent.position.z=(float(tier)-2.5)*0.033
+		parent.position.z=(float(tier)-2.5)*(0.058 if bends else 0.033)
 		var label:=Label3D.new()
 		label.text="SURFACE TIER %d" % tier
 		label.font_size=12
 		label.fixed_size=true
 		label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-		label.position=Vector3(0,0.001,parent.position.z+0.012)
+		label.position=Vector3(0,0.001,parent.position.z+(0.023 if bends else 0.012))
 		scene.add_child(label)
 	for frame in 8: await process_frame
 	await RenderingServer.frame_post_draw
-	var path:=ProjectSettings.globalize_path("res://artifacts/road-materials.png")
+	var filename:="road-materials.png"
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--output="): filename=argument.trim_prefix("--output=").get_file()
+	var path:=ProjectSettings.globalize_path("res://artifacts/"+filename)
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var result:=root.get_texture().get_image().save_png(path)
 	renderer.free()

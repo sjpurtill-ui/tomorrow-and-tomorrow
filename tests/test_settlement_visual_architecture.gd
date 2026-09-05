@@ -134,6 +134,32 @@ func test_six_value_paths_produce_six_bounded_road_grammars_without_more_geometr
 	assert_int(signatures.size()).is_equal(6)
 
 
+func test_route_join_offsets_are_bounded_through_sharp_turns()->void:
+	for angle in [0.0,PI/2.0,-PI/2.0,PI-0.001,PI]:
+		var points:=PackedVector2Array([Vector2(-0.1,0),Vector2.ZERO,Vector2.from_angle(angle)*0.1])
+		var offset:Vector2=renderer._settlement_route_join_offset(points,1,0.004)
+		assert_bool(offset.is_finite()).is_true()
+		assert_float(offset.length()).is_less_equal(0.008001)
+		assert_float(offset.length()).is_greater(0.003999)
+
+
+func test_road_bends_share_edges_without_extra_vertices_or_save_mutation()->void:
+	for duplicate in [false,true]:
+		var points:=PackedVector2Array([Vector2(-0.1,0),Vector2.ZERO])
+		if duplicate: points.append(Vector2.ZERO)
+		points.append(Vector2(0,0.1))
+		var routes:Array[Dictionary]=[{"active":true,"kind":"desire_path","hierarchy":"main_approach","surface_tier":5,"condition":0.8,"points":points}]
+		var original:=routes.duplicate(true)
+		var parent:Node3D=auto_free(Node3D.new())
+		renderer._create_persistent_settlement_routes(Vector3.ZERO,routes,parent)
+		var mesh:=parent.get_node("PersistentDesirePaths") as MeshInstance3D
+		var vertices:PackedVector3Array=mesh.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		assert_int(vertices.size()).is_equal(12)
+		assert_bool(vertices[1].is_equal_approx(vertices[6])).is_true()
+		assert_bool(vertices[2].is_equal_approx(vertices[11])).is_true()
+		assert_array(routes).is_equal(original)
+
+
 func test_main_approach_preserves_surface_color_and_route_only_material()->void:
 	var colors:Array[Color]=[]
 	for tier in [0,5]:
