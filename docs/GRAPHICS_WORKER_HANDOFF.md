@@ -22,6 +22,16 @@ and battle scales before integration, especially deep mixed siege columns.
 
 ## Next passes
 
+Pass 4: source-controlled mipmapped imports for six terrain/settlement albedos.
+Their custom samplers requested mipmaps but Godot's default imports generated
+none. Matched town-fabric.png / town-filtered.png captures show the high-frequency
+terrain noise reduced without replacing source art or changing simulation.
+The new test_map_texture_filtering.gd checks actual loaded images for mip chains;
+1 test passed across all six textures. Added narrow .gitignore exceptions for
+these import settings only. Import with the editor before validating integrated
+main; no .godot cache is committed. Mip chains add the standard ~one-third texture
+storage overhead. No saves, menu layout, or game rules changed.
+
 Pass 3: restored authoritative occupied plot fabric at close aerial zoom. The
 old photographic district clipmap remains retired. Its obsolete suppression
 flag was still removing every built plot at LOD 0, leaving a village nearly
