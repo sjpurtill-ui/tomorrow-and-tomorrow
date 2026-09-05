@@ -154,6 +154,24 @@ func _ready()->void:
 	if path:
 		var objective_label:=path.get_node("MovementObjective/ObjectiveLabel") as Label3D
 		_expect(objective_label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"movement objective label inherits the objective marker scale")
+	var previous_path_id:=0
+	for zoom in [8.0,20.0,40.0,320.0]:
+		terrain.camera.size=zoom
+		terrain._refresh_player_field_army_markers()
+		var scaled_path:Node3D=terrain.player_field_army_paths.get("1")
+		var path_id:=scaled_path.get_instance_id()
+		_expect(path_id!=previous_path_id,"army path retains a different zoom's width")
+		previous_path_id=path_id
+		_expect(is_equal_approx(float(scaled_path.get_meta("route_scale")),PRESENTATION.marker_scale(zoom)),"army path scale exceeds its presentation scale")
+		var objective:Node3D=scaled_path.get_node("MovementObjective")
+		var lift:float=objective.position.y-terrain._close_surface_height_at(objective.position.x,objective.position.z)
+		_expect(absf(lift-PRESENTATION.marker_ground_clearance(zoom))<0.00001,"army objective floats above its intended ground point")
+		if DisplayServer.get_name()!="headless":
+			var arrows:MultiMeshInstance3D=scaled_path.get_node("MarchChevrons")
+			_expect(is_equal_approx(arrows.multimesh.get_instance_transform(0).basis.get_scale().x,clampf(PRESENTATION.marker_scale(zoom)*0.86,0.0005,5.4)),"march arrows retain an oversized minimum")
+		terrain._refresh_player_field_army_markers()
+		_expect(terrain.player_field_army_paths.get("1").get_instance_id()==path_id,"stationary army path rebuilds every frame")
+	terrain.camera.size=320.0
 	var front:={"id":"front_probe","war_name":"War of North Crossing","opponent":"Cedar League","target_region_id":"probe_objective","target":"North Crossing","objective":"Take North Crossing","progress":0.36,"field_personnel":8000,"inbound_personnel":0,"occupation_personnel":0,"readiness":0.62,"supply":0.58}
 	var planned_route:Array=[{"x":origin.x,"z":origin.z},{"x":origin.x,"z":origin.z-0.02}]
 	var scout_mission:Dictionary={"mission_id":"scale_probe","ordered_heading":"north","return_day":100000,"route":planned_route.duplicate(true)}

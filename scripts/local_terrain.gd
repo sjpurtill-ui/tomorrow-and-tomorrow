@@ -12859,7 +12859,9 @@ func _refresh_player_field_army_path(view:Dictionary)->void:
 	var current:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0)))
 	var destination:=Vector3(float(destination_data.get("x",0.0)),0.0,float(destination_data.get("z",0.0)))
 	var band:=WarfareMapPresentation.scale_band(camera.size if camera else 190.0)
-	var signature:="%.1f:%.1f:%.1f:%.1f:%s:%s" % [current.x,current.z,destination.x,destination.z,band,str(bool(view.get("selected",false)))]
+	var visual_zoom:=maxf(0.035,camera.size if camera else 190.0)
+	var zoom_bucket:=floori(log(visual_zoom)/log(1.08))
+	var signature:="%.1f:%.1f:%.1f:%.1f:%s:%s:%d" % [current.x,current.z,destination.x,destination.z,band,str(bool(view.get("selected",false))),zoom_bucket]
 	if existing==null or not is_instance_valid(existing) or String(existing.get_meta("signature",""))!=signature:
 		if existing and is_instance_valid(existing): existing.queue_free()
 		existing=_create_player_field_army_path(view,current,destination,band)
@@ -12869,7 +12871,7 @@ func _refresh_player_field_army_path(view:Dictionary)->void:
 	if objective:
 		var objective_scale:=maxf(0.001,float(view.get("scale",1.0))*0.90)
 		objective.scale=Vector3.ONE*objective_scale
-		objective.position=Vector3(destination.x,_height_at(destination.x,destination.z)+0.10,destination.z)
+		objective.position=Vector3(destination.x,_close_surface_height_at(destination.x,destination.z)+WarfareMapPresentation.marker_ground_clearance(visual_zoom),destination.z)
 		var objective_label:=objective.get_node_or_null("ObjectiveLabel") as Label3D
 		if objective_label: objective_label.scale=Vector3.ONE/objective_scale
 
@@ -12970,14 +12972,17 @@ func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:
 	# terrain-draped ribbons keep it readable over forest, water and cities at every
 	# strategic scale; personnel never changes their geometry.
 	var route_points:=PackedVector2Array([Vector2(current.x,current.z),Vector2(destination.x,destination.z)])
-	var route_scale:=maxf(0.45,float(view.get("scale",1.0)))
+	var route_scale:=maxf(0.0005,float(view.get("scale",1.0)))
+	var visual_zoom:=camera.size if camera else route_scale/0.016
+	var clearance:=WarfareMapPresentation.marker_ground_clearance(visual_zoom)
+	root.set_meta("route_scale",route_scale)
 	var backing_surface:=SurfaceTool.new(); backing_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var backing_color:=Color("#101718"); backing_color.a=0.72
-	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_scale*0.19,backing_color,0.24,18)
+	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_scale*0.19,backing_color,clearance,18)
 	var backing:=MeshInstance3D.new(); backing.name="MovementPathBacking"; backing.mesh=backing_surface.commit()
 	var backing_material:=StandardMaterial3D.new(); backing_material.vertex_color_use_as_albedo=true; backing_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; backing_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; backing_material.no_depth_test=true; backing_material.render_priority=1; backing.material_override=backing_material; root.add_child(backing)
 	var path_surface:=SurfaceTool.new(); path_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_scale*0.075,color,0.29,18)
+	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_scale*0.075,color,clearance*1.1,18)
 	var line:=MeshInstance3D.new(); line.name="MovementPath"; line.mesh=path_surface.commit()
 	var path_material:=StandardMaterial3D.new(); path_material.vertex_color_use_as_albedo=true; path_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; path_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; path_material.no_depth_test=true; path_material.render_priority=2; line.material_override=path_material; root.add_child(line)
 	# Fixed-count march chevrons make direction readable even when the thin dashed
@@ -12990,11 +12995,11 @@ func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:
 	chevrons.mesh=chevron_mesh
 	var march_direction:=Vector2(destination.x-current.x,destination.z-current.z)
 	var march_heading:=-march_direction.angle()-PI*0.5 if march_direction.length_squared()>0.000001 else 0.0
-	var chevron_scale:=clampf(float(view.get("scale",1.0))*0.86,0.50,5.4)
+	var chevron_scale:=clampf(float(view.get("scale",1.0))*0.86,0.0005,5.4)
 	for chevron_index in chevron_count:
 		var travel_progress:=(float(chevron_index)+1.0)/float(chevron_count+1)
 		var chevron_position:=current.lerp(destination,travel_progress)
-		chevron_position.y=_height_at(chevron_position.x,chevron_position.z)+0.31
+		chevron_position.y=_close_surface_height_at(chevron_position.x,chevron_position.z)+clearance*1.2
 		var chevron_basis:=Basis(Vector3.UP,march_heading).scaled(Vector3(chevron_scale,1.0,chevron_scale))
 		chevrons.set_instance_transform(chevron_index,Transform3D(chevron_basis,chevron_position))
 	var chevron_instance:=MultiMeshInstance3D.new()
@@ -13006,7 +13011,7 @@ func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:
 	var objective:=Node3D.new(); objective.name="MovementObjective"
 	var objective_scale:=maxf(0.001,float(view.get("scale",1.0))*0.90)
 	objective.scale=Vector3.ONE*objective_scale
-	objective.position=Vector3(destination.x,_height_at(destination.x,destination.z)+0.10,destination.z)
+	objective.position=Vector3(destination.x,_close_surface_height_at(destination.x,destination.z)+clearance,destination.z)
 	root.add_child(objective)
 	var ring:=MeshInstance3D.new(); ring.name="ObjectiveRing"
 	var ring_mesh:=TorusMesh.new(); ring_mesh.inner_radius=2.9; ring_mesh.outer_radius=3.5; ring_mesh.rings=28; ring_mesh.ring_segments=8; ring.mesh=ring_mesh; ring.material_override=_warfare_marker_material(color); objective.add_child(ring)
