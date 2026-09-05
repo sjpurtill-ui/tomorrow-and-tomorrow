@@ -50,9 +50,43 @@ func _ready()->void:
 	get_tree().root.add_child.call_deferred(terrain)
 	await get_tree().process_frame
 	get_tree().current_scene=terrain;terrain._set_game_speed(0)
+	# Scenario placement must validate its whole footprint, not just the polity anchor.
+	var previous_city:=Vector2(float(report.position.x),float(report.position.z))
+	var safe_city:=Vector2.INF
+	for ring in range(1,31):
+		for sector in 16:
+			var candidate:=previous_city+Vector2.from_angle(float(sector)*TAU/16.0)*float(ring)*2.0
+			var dry:=true
+			for dx in [-3.0,0.0,3.0]:
+				for dz in [-3.0,0.0,3.0]:
+					if terrain._height_at(candidate.x+dx,candidate.y+dz)<.18:dry=false
+			if dry:safe_city=candidate;break
+		if safe_city!=Vector2.INF:break
+	assert(safe_city!=Vector2.INF)
+	var previous_home:=CivilizationSystem._civilization_world_position(civ)
+	var relocated_home:=previous_home+safe_city-previous_city
+	civ.position=Vector2(relocated_home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,relocated_home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",city_id,.95,0,"TEST SETUP: verified dry site","manual-assault-dry"),0)
+	report=CivilizationSystem.city_intelligence.known("player",city_id)
+	army.position=report.position.duplicate(true);army.position.x=float(army.position.x)+.06
+	army.last_report=MilitaryCampaign._army_report_snapshot(army)
+	print("DRY_SITE ",JSON.stringify({"position":report.position,"height":terrain._height_at(float(report.position.x),float(report.position.z)),"minimum_sampled_margin":.18,"sample_radius_km":3}))
 	terrain._focus_known_city(city_id);terrain.selected_army_id=-1
 	terrain.camera.size=maxf(.24,terrain.camera.size);terrain._update_camera();terrain._update_scale_lod()
 	for frame in 70:await get_tree().process_frame
+	if "--diagnose-water" in OS.get_cmdline_user_args():
+		terrain.camera.size=1.5;terrain._update_camera();terrain._update_scale_lod()
+		for frame in 40:await get_tree().process_frame
+		print("WATER_DIAG ",JSON.stringify({"city":report.position,"height":terrain._height_at(float(report.position.x),float(report.position.z)),"near":terrain.camera.near,"far":terrain.camera.far}))
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("res://artifacts/water-before.png")
+		for mesh in terrain.get_children():
+			if mesh is MeshInstance3D and mesh.mesh is PlaneMesh and mesh.material_override is ShaderMaterial and "ROUGHNESS=0.40" in mesh.material_override.shader.code:
+				print("WATER_PLANE_HIDDEN ",mesh.mesh.size);mesh.hide()
+		for frame in 5:await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("res://artifacts/water-after.png")
+		get_tree().quit();return
 	var incident:=CivilizationSystem.offensive_campaign_data(civ_id,180,city_id)
 	assert(not incident.has("error"));assert(MilitaryCampaign.active_engagement.is_empty())
 	var layer:=CanvasLayer.new();layer.layer=150;add_child(layer)
@@ -75,6 +109,13 @@ func _ready()->void:
 		assert(terrain.selected_army_id==-1 and not action_panel.visible)
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("res://artifacts/manual-map-ready.png")
+		for size:float in [.055,.24,1.5,6.0]:
+			terrain.camera.size=size;terrain._update_camera();terrain._update_scale_lod()
+			for frame in 15:await get_tree().process_frame
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png("res://artifacts/dry-zoom-%s.png" % str(size))
+		terrain.camera.size=.24;terrain._update_camera();terrain._update_scale_lod()
+		for frame in 15:await get_tree().process_frame
 		var marker:Node3D=terrain.player_field_army_markers[str(army_id)]
 		assert(marker.visible)
 		await click(terrain.camera.unproject_position(marker.global_position))
