@@ -122,6 +122,10 @@ func _ready()->void:
 	_expect(not bool(MilitaryCampaign.field_armies_snapshot().get("live_reports",true)),"report fixture unexpectedly has live military signals")
 	terrain._refresh_player_field_army_markers()
 	var reported_figures:Node3D=terrain.close_army_figures.get("71",null)
+	var grounded_counter:Node3D=terrain.player_field_army_markers.get("71",null)
+	if grounded_counter:
+		var lift:float=grounded_counter.position.y-terrain._height_at(grounded_counter.position.x,grounded_counter.position.z)
+		_expect(lift>0.0 and lift<0.002,"close army counter is floating metres above its formation")
 	_expect(reported_figures!=null,"reported army lost its close formation")
 	if reported_figures:
 		_expect(is_equal_approx(reported_figures.position.x,origin.x) and is_equal_approx(reported_figures.position.z,origin.z),"close figures expose live coordinates instead of the runner report")
