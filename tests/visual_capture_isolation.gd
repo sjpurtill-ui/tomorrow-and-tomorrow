@@ -27,6 +27,13 @@ func _ready()->void:
 	if _has_argument("--qa-war-markers"): _seed_war_markers(Vector2.ZERO)
 	terrain=TERRAIN_SCENE.instantiate()
 	add_child(terrain)
+	# The capture path synthesizes years of inherited fabric directly. These
+	# independent autoload clocks would otherwise catch up every skipped day before
+	# the first frame, spending minutes on wars and encounters unrelated to the
+	# visual fixture. Freeze only this self-terminating QA scene, never gameplay.
+	CivilizationSystem.set_process(false)
+	MilitaryCampaign.set_process(false)
+	ProgressionSystem.set_process(false)
 	call_deferred("_isolate_requested_layer")
 
 
