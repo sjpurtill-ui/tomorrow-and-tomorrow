@@ -8241,7 +8241,9 @@ func _append_roof_footprint(surface:SurfaceTool,center:Vector3,local_center:Vect
 			[[ridge_back,ridge_rise,right_color],[right_front,0.0,right_color],[right_back,0.0,right_color]]
 		]
 		for face in roof_faces:
-			for roof_vertex in face:
+			# SurfaceTool follows Godot's clockwise front-face winding. These pitched
+			# spans were reversed relative to every polygon roof, lighting their backs.
+			for roof_vertex in [face[0],face[2],face[1]]:
 				var point_2d:Vector2=roof_vertex[0]
 				var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
 				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+lift+float(roof_vertex[1])
