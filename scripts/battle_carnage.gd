@@ -6,6 +6,7 @@ const CAPACITY := 194
 const DROPS := 12
 const SPLATS := 5
 var events: Array[Dictionary] = []
+var ground_query:Callable=Callable()
 var spray: MultiMeshInstance3D
 var stains: MultiMeshInstance3D
 var debris: MultiMeshInstance3D
@@ -79,13 +80,14 @@ func update_effects(time:float)->void:
 			var t:=minf(age,1.6)
 			var position:=origin+Vector3(cos(angle)*speed*t,1.1+(3.5+(i%4)*.65)*t-5.8*t*t,sin(angle)*speed*t)
 			var radius:=.13+(i%3)*.055
-			var scale:=Vector3(radius,radius*1.8,radius) if position.y>.06 and age<1.6 else Vector3.ZERO
+			var scale:=Vector3(radius,radius*1.8,radius) if position.y>origin.y+.06 and age<1.6 else Vector3.ZERO
 			spray.multimesh.set_instance_transform(index*DROPS+i,Transform3D(Basis.IDENTITY.scaled(scale),position))
 		for i in SPLATS:
 			var angle:=i*2.399+index
 			var spread:=0.0 if i==0 else .55+i*.32
 			var size:=(.9 if i==0 else .28+i*.055)*clampf(age*3,0,1)
 			var position:=Vector3(origin.x+cos(angle)*spread,.025+(index%5)*.001,origin.z+sin(angle)*spread)
+			if ground_query.is_valid(): position.y+=float(ground_query.call(Vector2(position.x,position.z)))
 			stains.multimesh.set_instance_transform(index*SPLATS+i,Transform3D(Basis(Vector3.UP,angle).scaled(Vector3(size,1.0,size*.7)),position))
 		for i in 3:
 			var t:=minf(age,1.3)

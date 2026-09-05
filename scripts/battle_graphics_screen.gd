@@ -50,7 +50,7 @@ func _ready() -> void:
 	var scores:=HBoxContainer.new(); layout.add_child(scores)
 	for side in 2:
 		var box:=VBoxContainer.new(); box.size_flags_horizontal=Control.SIZE_EXPAND_FILL; scores.add_child(box)
-		var label:=Label.new(); label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.add_theme_color_override("font_color",BattleDiorama.COLORS[side]); box.add_child(label); force_labels.append(label)
+		var label:=Label.new(); label.add_theme_font_size_override("font_size",18); label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.add_theme_color_override("font_color",BattleDiorama.COLORS[side]); box.add_child(label); force_labels.append(label)
 		var meter:=ProgressBar.new(); meter.custom_minimum_size.y=10; meter.show_percentage=false; box.add_child(meter); meters.append(meter)
 	var body:=HBoxContainer.new(); body.size_flags_vertical=Control.SIZE_EXPAND_FILL; layout.add_child(body)
 	stage=SubViewportContainer.new(); stage.stretch=true; stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL; stage.size_flags_vertical=Control.SIZE_EXPAND_FILL
@@ -64,7 +64,7 @@ func _ready() -> void:
 	details.text="FORMATION INSPECTOR\nClick a formation to see its soldiers and condition."
 	life_story=button(sidebar,"READ LIFE STORY",func(): HistoricalFigures.open_chronicle(selected_figure_id)); life_story.visible=false
 	var legend:=Label.new(); legend.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; legend.add_theme_font_size_override("font_size",14)
-	legend.text="Each figure represents a group. Fallen figures include killed, wounded and scattered soldiers."
+	legend.text="CASUALTIES = dead + wounded.\nOUT OF ACTION also includes scattered.\nLasting injuries are a subset of wounded survivors; they retain reduced work capacity after returning home.\nEach figure represents a group."
 	sidebar.add_child(legend)
 	appearance=VBoxContainer.new(); sidebar.add_child(appearance)
 	var appearance_title:=Label.new(); appearance_title.text="ARMY APPEARANCE"; appearance.add_child(appearance_title)
@@ -126,11 +126,11 @@ func _sync_campaign()->void:
 		if signature==key: return
 		var id:=str(active.get("seed",0))
 		var a:Dictionary=active.attacker; var d:Dictionary=active.defender
-		if encounter!=id: view.reset(a,d); encounter=id
+		if encounter!=id: view.set_landscape(active); view.reset(a,d); encounter=id
 		var records:Array=active.get("rounds",[])
 		present(a,d,records[-1] if not records.is_empty() else {},"",records)
 		heading.text="LIVE BATTLE • ROUND %d" % int(active.get("round",0))
-		status.text="Orders resolve one campaign round. Defender terrain defense: %+.0f%%. Figures represent groups of soldiers." % ((float(active.get("terrain_defense",1))-1.0)*100.0)
+		status.text="%s · Orders resolve one campaign round. Defender terrain defense: %+.0f%%. Figures represent groups of soldiers." % [String(view.landscape.context.get("label","Battlefield")),(float(active.get("terrain_defense",1))-1.0)*100.0]
 		signature=key
 	elif not encounter.is_empty() and not MilitaryCampaign.battle_history.is_empty():
 		var result:Dictionary=MilitaryCampaign.battle_history[0]
@@ -160,7 +160,10 @@ func present(attacker:Dictionary,defender:Dictionary,round_record:Dictionary={},
 	view.apply_snapshot(attacker,defender,round_record,final_outcome)
 	for side in 2:
 		var force:Dictionary=cached_forces[side]
-		force_labels[side].text="%s · %s\n%d soldiers remaining · %d lost this round\nMorale (will to fight): %d%%" % [String(force.get("name","No opposing force")),"Attacker" if side==0 else "Defender",int(force.get("troops",force.get("remaining_troops",0))),int(round_record.get("attacker_losses" if side==0 else "defender_losses",0)),roundi(float(force.get("morale",0))*100)]
+		var ledger:=BattleLossSummary.from_rounds(records if not records.is_empty() else ([round_record] if not round_record.is_empty() else []),side,int(force.get("troops",force.get("remaining_troops",0))))
+		var disabled_text:=str(ledger.disabled) if ledger.disability_recorded else "not recorded"
+		force_labels[side].text="%s  |  %d at start\n%d FIGHTING  ·  %d OUT OF ACTION\n%d CASUALTIES: %d dead + %d wounded  ·  %d scattered\nLasting injuries: %s (included in wounded)  ·  Morale %d%%" % [String(force.get("name","No opposing force")),ledger.starting,ledger.remaining,ledger.out_of_action,ledger.casualties,ledger.dead,ledger.wounded,ledger.scattered,disabled_text,roundi(float(force.get("morale",0))*100)]
+		force_labels[side].tooltip_text="This battle only. Casualties = dead + wounded. Out of action also includes scattered/missing. Lasting injuries are surviving wounded, never additional deaths. Earlier wounds are not counted again."
 		meters[side].value=clampf(float(force.get("morale",0)),0,1)*100
 		meters[side].tooltip_text="Morale: willingness to keep fighting. A full bar is 100%."
 	event_label.text="Click a unit or the ground to focus. View controls change animation only."
@@ -217,7 +220,7 @@ func _show_round(index:int)->void:
 		timeline.text+="%s: %d lost\n" % [army_name,losses]
 		if not casualties.is_empty():
 			timeline.text+="%d killed · %d wounded · %d scattered\n" % [int(casualties.get("killed",0)),int(casualties.get("wounded",0)),int(casualties.get("scattered",0))]
-	timeline.text+="Summary only; battlefield stays live."
+	timeline.text+="Round figures above; whole-battle totals are at the top. Scattered personnel are absent, not recorded dead."
 	event_label.text="Round %d: %s" % [int(entry.get("round",selected_round+1)),String(entry.get("event","Round resolved."))]
 
 func _selected(data:Dictionary)->void:

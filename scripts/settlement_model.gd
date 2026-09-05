@@ -561,7 +561,7 @@ func _territory_drivers(record:Dictionary,population:float)->Dictionary:
 	var able:=maxf(1.0,float(GameState.able_population()))
 	var working:=0.0
 	for role in ["Food","Survey","Extraction","Construction","Logistics"]:
-		working+=maxf(0.0,float(GameState.population_allocations.get(role,0)))
+		working+=maxf(0.0,GameState.effective_workers(role))
 	var derived_work:=clampf(working/maxf(1.0,able*0.68),0.0,1.0)
 	var route_condition:=0.0
 	var active_routes:=0
@@ -633,8 +633,8 @@ func _settlement_classification(record:Dictionary,population:float)->String:
 func _base_claim_radius_km(record:Dictionary,population:float)->float:
 	var territory:=_territory_drivers(record,population)
 	var able:=maxf(1.0,float(GameState.able_population()))
-	var survey_share:=clampf(float(GameState.population_allocations.get("Survey",0))/maxf(1.0,able*0.10),0.0,1.0)
-	var administration_share:=clampf(float(GameState.population_allocations.get("Administration",0))/maxf(1.0,able*0.08),0.0,1.0)
+	var survey_share:=clampf(GameState.effective_workers("Survey")/maxf(1.0,able*0.10),0.0,1.0)
+	var administration_share:=clampf(GameState.effective_workers("Administration")/maxf(1.0,able*0.08),0.0,1.0)
 	var logistics:=float(territory.logistics)
 	var state_capacity:=clampf(float(GameState.society_capacities.get("institutions",0.25))+DiscoverySystem.effect("state_capacity"),0.0,1.0)
 	var defense_factor:=0.0
@@ -1109,7 +1109,7 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	var active_construction:Array[Dictionary]=[]
 	for plot in GameState.settlement_plots:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
-	var builders:=float(GameState.population_allocations.get("Construction",0))
+	var builders:=GameState.effective_workers("Construction")
 	var labor_efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
 	var builders_per_site:=builders/float(maxi(1,active_construction.size()))
 	for plot in GameState.settlement_plots:
@@ -1170,7 +1170,7 @@ func _active_construction_count()->int:
 	return count
 
 func _monthly_construction_slots()->int:
-	var builders:=float(GameState.population_allocations.get("Construction",0))
+	var builders:=GameState.effective_workers("Construction")
 	if builders<4.0: return 0
 	var efficiency:=clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.12,1.45)
 	# One early household project occupies roughly six effective builder-months.
@@ -1790,7 +1790,7 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 			_record_plot_building_event(plot,"vacated" if String(plot.status)=="vacant" else "reoccupied",day,{},false,"Population redistributed across usable household ground.")
 			GameState.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Ground %s" % ("Vacated" if String(plot.status)=="vacant" else "Reoccupied"),"plot_id":int(plot.id)})
-	var builders:=float(GameState.population_allocations.get("Construction",0))
+	var builders:=GameState.effective_workers("Construction")
 	var labor_efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
 	var maintained_plots:=0
 	for plot in GameState.settlement_plots:
@@ -2586,7 +2586,7 @@ func rebuild_summary()->Dictionary:
 	var permanence:=clampf(0.16+float(active_plots)/maxf(1.0,float(count))*0.15+float(GameState.settlement_completed.size())*0.035+fabric_maturity*0.34,0.0,1.0)
 	var specialization:=clampf(float(GameState.population_allocations.get("Crafting",0)+GameState.population_allocations.get("Extraction",0)+GameState.population_allocations.get("Knowledge",0)+GameState.population_allocations.get("Administration",0)+GameState.population_allocations.get("Logistics",0))/maxf(1.0,_primary_able_population()),0.0,1.0)
 	var exchange:=clampf(float(GameState.economy_metrics.get("market_access",float(GameState.simulation_metrics.get("logistics",0.16))*0.35+DiscoverySystem.effect("trade_capacity")*0.40)),0.0,1.0)
-	var institutions:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.62))*0.35+float(GameState.population_allocations.get("Administration",0))/maxf(1.0,float(population)*0.06)*0.25,0.0,1.0)
+	var institutions:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.62))*0.35+GameState.effective_workers("Administration")/maxf(1.0,float(population)*0.06)*0.25,0.0,1.0)
 	var connectivity:=clampf(float(GameState.simulation_metrics.get("logistics",0.16))*0.55+DiscoverySystem.effect("route_speed")*0.30,0.0,1.0)
 	var infrastructure:=clampf(float(GameState.settlement_completed.size())/10.0+DiscoverySystem.effect("construction_rate")*0.20+fabric_maturity*0.26+surfaced_route_share*0.18,0.0,1.0)
 	var service_population:=roundi(float(population)*(1.0+exchange*0.55+connectivity*0.35))

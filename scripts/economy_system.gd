@@ -217,7 +217,7 @@ func _market_access(context:Dictionary)->float:
 	if not GameState.settlement_site_committed or "Hearth Circle" not in GameState.settlement_completed: return 0.0
 	if float(GameState.water_metrics.get("intake_ratio",0.0))<0.98: return 0.0
 	var logistics:=float(GameState.simulation_metrics.get("logistics",0.16))
-	var admin:=float(GameState.population_allocations.get("Administration",0))/maxf(1.0,GameState.population_exact*0.05)
+	var admin:=GameState.effective_workers("Administration")/maxf(1.0,GameState.population_exact*0.05)
 	var storage:=float(GameState.simulation_metrics.get("storage_function",0.0))
 	var foreign_access:=float(CivilizationSystem.player_effects().market_access_bonus)
 	return clampf(logistics*0.36+admin*0.14+storage*0.10+DiscoverySystem.effect("trade_capacity")*0.32+DiscoverySystem.effect("standardization")*0.24+GameState.founding_effect("trade_access")+ProgressionSystem.effect("trade_capacity")+foreign_access,0.0,1.0)
@@ -440,7 +440,7 @@ func _real_economy_accounts(trade_volume:float,market_access:float,military_burd
 	material_coverage/=4.0
 	var housing_ratio:=clampf(float(GameState.housing_capacity)/population,0.0,1.0)
 	if GameState.convoy_traveling:
-		housing_ratio=clampf(0.20+float(GameState.population_allocations.get("Logistics",0))/maxf(1.0,population*0.10)*0.27+float(GameState.population_allocations.get("Construction",0))/maxf(1.0,population*0.12)*0.17,0.0,0.86)
+		housing_ratio=clampf(0.20+GameState.effective_workers("Logistics")/maxf(1.0,population*0.10)*0.27+GameState.effective_workers("Construction")/maxf(1.0,population*0.12)*0.17,0.0,0.86)
 	var essential_coverage:=clampf(food_coverage*0.62+material_coverage*0.18+housing_ratio*0.20,0.0,1.0)
 	var mobilized:=_first_numeric(military_burden,["mobilized_population","field_personnel","mobilized_citizens","field_soldiers"])
 	var security_duty:=maxf(mobilized,float(GameState.population_allocations.get("Defense",0))*0.50)
@@ -481,7 +481,7 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 	var councils:=DiscoverySystem.adoption("household_councils")
 	var customary_law:=DiscoverySystem.adoption("customary_law")
 	var tallies:=DiscoverySystem.adoption("tallies")
-	var admin_coverage:=clampf(float(GameState.population_allocations.get("Administration",0))/maxf(1.0,population*0.04),0.0,1.0)
+	var admin_coverage:=clampf(GameState.effective_workers("Administration")/maxf(1.0,population*0.04),0.0,1.0)
 	var scheduled:=levy_adoption>=0.25
 	var regime:="customary obligations"
 	if scheduled: regime="scheduled in-kind levies"
@@ -523,7 +523,7 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 
 func _process_public_finance(trade_volume:float,monetization:float,military_burden:Dictionary={})->Dictionary:
 	if GameState.economy_stage!=STAGE_CURRENCY: return {"revenue":0.0,"spending":0.0,"civil_upkeep":0.0,"military_upkeep":0.0,"civil_due":0.0,"military_due":0.0,"civil_coverage":1.0,"military_coverage":1.0,"spending_priority":GameState.public_spending_priority,"borrowing":0.0,"debt_service":0.0,"interest_accrued":0.0,"debt_capacity":0.0,"tax_capacity":_tax_capacity_for(GameState.tax_rate,trade_volume,monetization,GameState.private_currency)}
-	var admin_coverage:=clampf(float(GameState.population_allocations.get("Administration",0))/maxf(1.0,GameState.population_exact*0.04),0.0,1.0)
+	var admin_coverage:=clampf(GameState.effective_workers("Administration")/maxf(1.0,GameState.population_exact*0.04),0.0,1.0)
 	var tax_capacity:=_tax_capacity_for(GameState.tax_rate,trade_volume,monetization,GameState.private_currency)
 	var revenue:=float(tax_capacity.collectible)
 	GameState.private_currency-=revenue
@@ -594,7 +594,7 @@ func _tax_capacity_for(rate:float,trade_volume:float,monetization:float,private_
 	var statutory_rate:=clampf(rate,0.0,0.25)
 	var result:={"active":GameState.economy_stage==STAGE_CURRENCY,"statutory_rate":statutory_rate,"compliance":0.0,"administrative_reach":0.0,"taxable_exchange":0.0,"statutory_assessment":0.0,"administratively_assessed":0.0,"compliant_assessment":0.0,"collectible":0.0,"effective_rate":0.0,"noncompliance_gap":0.0,"liquidity_gap":0.0}
 	if GameState.economy_stage!=STAGE_CURRENCY: return result
-	var admin_coverage:=clampf(float(GameState.population_allocations.get("Administration",0))/maxf(1.0,GameState.population_exact*0.04),0.0,1.0)
+	var admin_coverage:=clampf(GameState.effective_workers("Administration")/maxf(1.0,GameState.population_exact*0.04),0.0,1.0)
 	var legitimacy:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.50)),0.0,1.0)
 	var institutions:=clampf(float(GameState.society_capacities.get("institutions",0.25)),0.0,1.0)
 	var records:=maxf(DiscoverySystem.adoption("tallies"),DiscoverySystem.adoption("property_registers"))
@@ -632,7 +632,7 @@ func cycle_public_spending_priority()->String:
 
 func _allocate_public_spending(available:float,civil_due:float,military_due:float,priority:String="balanced")->Dictionary:
 	var normalized:=priority if priority in PUBLIC_SPENDING_PRIORITIES else "balanced"
-	var civil:=maxf(0.0,civil_due)
+	var civil:=GameState.settlement_completed.size()*0.018+float(GameState.population_allocations.get("Administration",0))*0.004
 	var military:=maxf(0.0,military_due)
 	var spending:=minf(maxf(0.0,available),civil+military)
 	var civil_paid:=0.0

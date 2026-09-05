@@ -48,7 +48,9 @@ func tab(_sub:int)->Dictionary:
 		{"label":"DEPENDENT","value":str(int(profile.get("dependent",0))),"note":"children and elders","note_color":Tokens.MUTED,"tip":"People supported by the rest"},
 		{"label":"AWAY","value":str(int(profile.get("absent",0))+int(profile.get("mobilized",0))),"note":"missions and arms","note_color":Tokens.AMBER,"tip":"Physically absent or mobilized"},
 	]})
+	var workforce:=GameState.workforce_capacity_snapshot()
+	blocks.append({"type":"text","heading":"PEOPLE AND EFFECTIVE WORK","text":"%d assigned people provide %.1f effective workers across current jobs. %d returned veterans have lasting injuries. They remain living population; heavy carrying, construction and extraction lose more capacity than knowledge or administration. Temporary military wounds remain in recovery and are not counted twice here." % [int(workforce.people),float(workforce.effective_workers),int(workforce.lasting_injuries)]})
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:
-	return [GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]
+	return [GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]

@@ -1,5 +1,7 @@
 extends Node
 
+var civilian_injuries:Dictionary={"limited":0.0,"severe":0.0}
+
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 
 const POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
@@ -392,6 +394,7 @@ var lifetime_maternal_deaths := 0
 var lifetime_neonatal_deaths := 0
 
 func reset_for_new_world(new_seed:int)->void:
+	civilian_injuries={"limited":0.0,"severe":0.0}
 	for system_name in ["HistoricalFigures","PeopleDirection","CommunityNetwork"]:
 		var system:=get_node_or_null("/root/"+system_name)
 		if system: system.reset_for_new_world()
@@ -821,6 +824,9 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 		remaining=maxf(0.0,remaining-removed_this_pass)
 		if removed_this_pass<=0.000001: break
 	var removed_total:=actual-remaining
+	if cause!="Killed in battle" and resource_settlement_id.is_empty():
+		var survival:=clampf(1.0-removed_total/maxf(1.0,population_exact),0,1)
+		for severity in civilian_injuries: civilian_injuries[severity]*=survival
 	population_exact=maxf(1.0,population_exact-removed_total)
 	_normalize_population_cohorts()
 	return removed_total
@@ -1341,3 +1347,23 @@ func adjust_population_role_percentage(role:String,delta:float) -> void:
 			population_allocation_percentages[other]=maxf(0.0,float(population_allocation_percentages.get(other,0.0))*remaining/other_total)
 	population_allocation_percentages[role]=target
 	synchronize_population_allocations()
+
+func effective_workers(role:String)->float:
+	var civilian_workers:=0.0
+	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
+	return PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
+
+func receive_injured_veterans(count:int,severe:int)->void:
+	# Transfer within this population: never add people or deaths here.
+	severe=clampi(severe,0,maxi(0,count))
+	civilian_injuries["limited"]=float(civilian_injuries.get("limited",0))+maxi(0,count-severe)
+	civilian_injuries["severe"]=float(civilian_injuries.get("severe",0))+severe
+	synchronize_population_allocations()
+
+func workforce_capacity_snapshot()->Dictionary:
+	var heads:=0.0; var effective:=0.0; var roles:Dictionary={}
+	for role in population_allocations:
+		var amount:=effective_workers(role)
+		heads+=float(population_allocations[role]); effective+=amount
+		roles[role]={"people":population_allocations[role],"effective_workers":amount}
+	return {"people":heads,"effective_workers":effective,"lasting_injuries":PermanentInjuries.total(civilian_injuries),"roles":roles}

@@ -47,9 +47,9 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: float) -> Dictionary:
 	initialize()
 	var traveling:=bool(context.get("traveling",GameState.convoy_traveling))
-	var workers:=float(GameState.population_allocations.get("Food",0))
-	var logistics:=float(GameState.population_allocations.get("Logistics",0))
-	var makers:=float(GameState.population_allocations.get("Crafting",0))
+	var workers:=GameState.effective_workers("Food")
+	var logistics:=GameState.effective_workers("Logistics")
+	var makers:=GameState.effective_workers("Crafting")
 	var military_campaign:Node=get_node_or_null("/root/MilitaryCampaign") if GameState.resource_settlement_id=="" else null
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
@@ -238,7 +238,7 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=GameState.world_seed^int(GameState.elapsed_days+1.0)*7919
 	var variation:=rng.randf_range(0.93,1.07)
-	var route_factor:=0.48+clampf(float(GameState.population_allocations.get("Logistics",0))/maxf(1.0,GameState.population_exact*0.08),0.0,1.0)*0.08 if traveling else 1.0
+	var route_factor:=0.48+clampf(GameState.effective_workers("Logistics")/maxf(1.0,GameState.population_exact*0.08),0.0,1.0)*0.08 if traveling else 1.0
 	result["Fresh plants"]=workers*gathering_weight*4.55*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_gather*plant_season*efficiency*ecological*float(GameState.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor*(1.0+float(coastal.foraging_bonus))*_food_type_weather_multiplier("Fresh plants",weather_factor)
 	result["Fresh meat"]=workers*hunting_weight*4.85*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_hunt*game_season*efficiency*ecological*float(GameState.food_source_health.get("Hunting",0.9))*(1.0+float(access.game)*0.18)*(1.0+DiscoverySystem.effect("hunting_yield"))*practice*variation*route_factor*_food_type_weather_multiplier("Fresh meat",weather_factor)
 	var fishing_access:=maxf(float(access.freshwater),float(coastal.marine_opportunity)*0.90)

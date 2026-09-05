@@ -200,9 +200,13 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		attacking_force["formations"] = attacker_cohort_result.formations
 		defending_force["formations"] = defender_cohort_result.formations
 		attacking_force["wounded_pool"]=int(attacking_force.get("wounded_pool",0))+int(attacker_casualties.wounded)
+		attacking_force["disabled_pool"]=int(attacking_force.get("disabled_pool",0))+int(attacker_casualties.get("disabled",0))
+		attacking_force["severe_disabled_pool"]=int(attacking_force.get("severe_disabled_pool",0))+int(attacker_casualties.get("severe_disability",0))
 		attacking_force["scattered_pool"]=int(attacking_force.get("scattered_pool",0))+int(attacker_casualties.scattered)
 		attacking_force["dead"]=int(attacking_force.get("dead",0))+int(attacker_casualties.killed)
 		defending_force["wounded_pool"]=int(defending_force.get("wounded_pool",0))+int(defender_casualties.wounded)
+		defending_force["disabled_pool"]=int(defending_force.get("disabled_pool",0))+int(defender_casualties.get("disabled",0))
+		defending_force["severe_disabled_pool"]=int(defending_force.get("severe_disabled_pool",0))+int(defender_casualties.get("severe_disability",0))
 		defending_force["scattered_pool"]=int(defending_force.get("scattered_pool",0))+int(defender_casualties.scattered)
 		defending_force["dead"]=int(defending_force.get("dead",0))+int(defender_casualties.killed)
 		attacking_force["troops"] = attacker_troops
@@ -353,7 +357,8 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	prepared["formations"]=formations
 	prepared["morale"]=move_toward(float(prepared.get("morale",1.0)),1.0,organization_recovery)
 	var scattered_available:=int(prepared.get("scattered_pool",0))
-	var wounded_available:=int(prepared.get("wounded_pool",0))
+	var disabled:=clampi(int(prepared.get("disabled_pool",0)),0,int(prepared.get("wounded_pool",0)))
+	var wounded_available:=int(prepared.get("wounded_pool",0))-disabled
 	var reserves_available:=int(prepared.get("reserve_manpower",0))
 	var recovery_multiplier:=clampf(float(context.get("recovery_multiplier",1.0)),0.10,1.60)
 	var scattered_progress:=float(prepared.get("scattered_recovery_accumulator",0.0))+float(scattered_available)*(0.22+logistics*0.28)
@@ -384,7 +389,7 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	consumed-=from_wounded
 	var from_reserves:=mini(reserve_arrivals,consumed)
 	prepared["scattered_pool"]=scattered_available-from_scattered
-	prepared["wounded_pool"]=wounded_available-from_wounded
+	prepared["wounded_pool"]=wounded_available-from_wounded+disabled
 	prepared["reserve_manpower"]=reserves_available-from_reserves
 	prepared["formations"]=formations
 	prepared["troops"]=_formation_manpower(formations)
@@ -500,7 +505,10 @@ func _casualty_breakdown(losses: int,rng: RandomNumberGenerator,intensity: float
 	var wounded_share:=clampf(0.43+rng.randf_range(-0.09,0.10),0.28,0.62)
 	var killed:=clampi(roundi(float(losses)*killed_share),0,losses)
 	var wounded:=clampi(roundi(float(losses)*wounded_share),0,losses-killed)
-	return {"killed":killed,"wounded":wounded,"scattered":losses-killed-wounded}
+	# Severity is a bounded game assumption. No additional random draw changes
+	# casualty totals or outcomes; disability is a subset of surviving wounds.
+	var disabled:=floori(wounded*clampf(.08+intensity*.035,.08,.20))
+	return {"killed":killed,"wounded":wounded,"scattered":losses-killed-wounded,"disabled":disabled,"severe_disability":floori(disabled*.35)}
 
 
 func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses: int,rng: RandomNumberGenerator,targeted_cohort: int=-1) -> Dictionary:
@@ -584,6 +592,8 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 		formation_force["commander"]=force.get("commander",{}).duplicate(true)
 		formation_force["reserve_manpower"]=int(force.get("reserve_manpower",formation_force.get("reserve_manpower",0)))
 		formation_force["wounded_pool"]=int(force.get("wounded_pool",0))
+		formation_force["disabled_pool"]=int(force.get("disabled_pool",0))
+		formation_force["severe_disabled_pool"]=int(force.get("severe_disabled_pool",0))
 		formation_force["scattered_pool"]=int(force.get("scattered_pool",0))
 		formation_force["dead"]=int(force.get("dead",0))
 		return formation_force
@@ -599,6 +609,7 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 	normalized["penetration"] = clampf(float(force.get("penetration", 0.0)), 0.0, 2.0)
 	normalized["composition"] = force.get("composition", []).duplicate(true)
 	normalized["commander"] = force.get("commander",{}).duplicate(true)
+	for key in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","dead"]: normalized[key]=int(force.get(key,0))
 	return normalized
 
 
@@ -731,6 +742,8 @@ func _force_result(force: Dictionary, initial: int, remaining: int, morale: floa
 		"formations": force.get("formations", []).duplicate(true),
 		"reserve_manpower":int(force.get("reserve_manpower",0)),
 		"wounded_pool":int(force.get("wounded_pool",0)),
+		"disabled_pool":int(force.get("disabled_pool",0)),
+		"severe_disabled_pool":int(force.get("severe_disabled_pool",0)),
 		"scattered_pool":int(force.get("scattered_pool",0)),
 		"dead":int(force.get("dead",0))
 	}

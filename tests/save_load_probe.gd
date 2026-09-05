@@ -22,6 +22,7 @@ func _ready()->void:
 	# Mutate a spread of state across systems.
 	GameState.elapsed_days=140.0
 	GameState.register_directive_population_deaths(1,"mass_repression","One counted execution.",{"exact_count":1,"role":"worker","age_cohorts":["youth","early_adults","established_adults","mature_adults"],"source_order_id":"saved_counted_decree","label":"exactly 1 worker"})
+	GameState.civilian_injuries={"limited":7.0,"severe":5.0}
 	GameState.civic_always_use_ai=true
 	GameState.civic_api_enabled=false
 	GameState.register_population_arrivals(30,"probe arrivals")
@@ -68,6 +69,7 @@ func _ready()->void:
 
 	# Load and verify the state layer.
 	var load_result:Dictionary=SaveSystem.load_game(SLOT)
+	_expect(GameState.civilian_injuries=={"limited":7.0,"severe":5.0},"Lasting injuries must survive real save/load")
 	_expect(bool(load_result.get("ok",false)),"load failed: %s" % load_result.get("error",""))
 	_expect(GameState.world_seed==saved_seed,"world seed not restored (%d)" % GameState.world_seed)
 	_expect(absf(GameState.elapsed_days-140.0)<1.0,"elapsed days not restored (%.1f)" % GameState.elapsed_days)
