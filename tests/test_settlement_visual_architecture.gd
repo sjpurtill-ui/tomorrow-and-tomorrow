@@ -1314,6 +1314,25 @@ func test_early_service_ground_is_feathered_not_a_pond_token()->void:
 			assert_float(color.r).is_greater(color.g)
 
 
+func test_camp_path_contrast_does_not_depend_on_mesh_creation_zoom()->void:
+	var test_camera:Camera3D=auto_free(Camera3D.new())
+	renderer.camera=test_camera
+	var routes:Array[Dictionary]=[{
+		"active":true,"kind":"camp_path","hierarchy":"camp_path","condition":0.8,
+		"points":PackedVector2Array([Vector2(-0.02,0),Vector2(0.02,0)])
+	}]
+	var original_colors:=PackedColorArray()
+	for zoom in [0.20,0.42,0.43,1.0]:
+		test_camera.size=zoom
+		var parent:Node3D=auto_free(Node3D.new())
+		renderer._create_persistent_settlement_routes(Vector3.ZERO,routes,parent)
+		var paths:=parent.get_node("PersistentDesirePaths") as MeshInstance3D
+		var colors:PackedColorArray=paths.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		assert_int(colors.size()).is_equal(6)
+		if original_colors.is_empty(): original_colors=colors
+		else: assert_bool(colors==original_colors).is_true()
+
+
 func test_roof_opacity_is_not_baked_at_the_old_camera_threshold()->void:
 	var test_camera:Camera3D=auto_free(Camera3D.new())
 	renderer.camera=test_camera
