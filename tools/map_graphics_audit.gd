@@ -177,6 +177,28 @@ func _ready()->void:
 			material.shader.code=material.shader.code.replace(", depth_test_disabled", "")
 	if "--hide-rivers" in OS.get_cmdline_user_args():
 		for river in terrain.river_overlays: river.visible=false
+	if "--vegetation-cache-audit" in OS.get_cmdline_user_args():
+		var vegetation_origin:Vector3=terrain.camera_target
+		terrain._rebuild_close_vegetation(vegetation_origin)
+		var original_root:Node3D=terrain.close_vegetation_root
+		terrain._rebuild_close_vegetation(vegetation_origin)
+		assert(terrain.close_vegetation_root==original_root,"Unchanged woodland must reuse its root")
+		var relocated:=vegetation_origin+Vector3(0.4,0,0)
+		terrain._rebuild_close_vegetation(relocated)
+		assert(terrain.close_vegetation_root!=original_root,"Relocation must rebuild woodland even without morphology changes")
+		assert(terrain.close_vegetation_center==Vector2(relocated.x,relocated.z))
+		var moved_root:Node3D=terrain.close_vegetation_root
+		terrain.close_vegetation_root.queue_free()
+		terrain._rebuild_close_vegetation(relocated)
+		assert(terrain.close_vegetation_root!=moved_root,"Queued roots must never satisfy the cache")
+		var seed_root:Node3D=terrain.close_vegetation_root
+		var original_seed:int=GameState.world_seed
+		GameState.world_seed+=1
+		terrain._rebuild_close_vegetation(relocated)
+		assert(terrain.close_vegetation_root!=seed_root,"Changed seed must invalidate vegetation")
+		GameState.world_seed=original_seed
+		terrain._rebuild_close_vegetation(vegetation_origin)
+		print("VEGETATION_CACHE_AUDIT unchanged reused; relocation, queued root and seed rebuilt")
 	if "--sliced-detail-profile" in OS.get_cmdline_user_args():
 		terrain._request_close_terrain_job(terrain.settler_marker.position)
 		var close_span:float=terrain.camera.size

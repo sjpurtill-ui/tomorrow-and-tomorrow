@@ -173,6 +173,8 @@ var close_terrain_last_slice_usec:=0
 var close_terrain_last_finish_usec:=0
 var close_vegetation_root: Node3D
 var close_vegetation_revision := -1
+var close_vegetation_center:=Vector2(INF,INF)
+var close_vegetation_seed:=0
 var convoy_map_icon: Node3D
 var convoy_banner_sprite: Sprite3D
 var convoy_map_label: Label3D
@@ -3300,14 +3302,16 @@ func _near_persistent_settlement_surface(local_point: Vector2) -> bool:
 	return false
 
 func _rebuild_close_vegetation(center: Vector3) -> void:
-	if close_vegetation_root and close_vegetation_revision == GameState.morphology_revision:
+	if is_instance_valid(close_vegetation_root) and not close_vegetation_root.is_queued_for_deletion() and close_vegetation_revision == GameState.morphology_revision and close_vegetation_center==Vector2(center.x,center.z) and close_vegetation_seed==GameState.world_seed:
 		return
-	if close_vegetation_root:
+	if is_instance_valid(close_vegetation_root):
 		close_vegetation_root.queue_free()
 	close_vegetation_root = Node3D.new()
 	close_vegetation_root.name = "CloseLandscapeVegetation"
 	add_child(close_vegetation_root)
 	close_vegetation_revision = GameState.morphology_revision
+	close_vegetation_center=Vector2(center.x,center.z)
+	close_vegetation_seed=GameState.world_seed
 	var rng := RandomNumberGenerator.new()
 	rng.seed = GameState.world_seed ^ int(round(center.x * 100.0)) ^ (int(round(center.z * 100.0)) << 11) ^ 0x31f2a7
 	var canopy_transforms: Array[Transform3D] = []
