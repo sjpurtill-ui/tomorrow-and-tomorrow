@@ -96,7 +96,7 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 		var amount:=int(allocations[id])
 		if amount==0: continue
 		var pitch:=visual_spacing(id,spacing)
-		var group_columns:=mini(amount,maxi(1,floori(frontage/pitch)))
+		var group_columns:=group_frontage_columns(amount,frontage,pitch)
 		var group_rows:=ceili(float(amount)/float(group_columns))
 		layouts[id]={"pitch":pitch,"columns":group_columns,"depth":depth}
 		depth+=float(group_rows)*pitch+maxf(spacing,1.0)
@@ -144,6 +144,14 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 		add_child(batch)
 		batches[id] = batch; materials.append(material)
 	_set_clip_parameters()
+
+static func group_frontage_columns(amount:int,frontage:float,pitch:float)->int:
+	if amount<=0: return 0
+	# Equipment may occupy a wider frontage than the infantry. Forcing elephants
+	# and siege trains into infantry-width files produced a very long procession,
+	# shrinking the entire army to fit the camera. Keep each arm a compact block.
+	var balanced_columns:=ceili(sqrt(float(amount)*1.25))
+	return mini(amount,maxi(balanced_columns,maxi(1,floori(frontage/maxf(pitch,0.01)))))
 
 static func visual_spacing(id:String,spacing:float)->float:
 	if id=="counterweight_trebuchet": return maxf(spacing,9.0)
