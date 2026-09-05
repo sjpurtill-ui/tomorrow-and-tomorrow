@@ -1,6 +1,14 @@
 # Godot generated cache and imported resources
 .godot/
 *.import
+# Custom-shader aerial materials need reproducible mipmap imports. Godot does
+# not automatically identify these samplers as 3D texture usage.
+!assets/terrain/temperate_ground_albedo_v1.png.import
+!assets/terrain/temperate_forest_albedo_v1.png.import
+!assets/terrain/temperate_regional_satellite_v2.png.import
+!assets/textures/settlement_material_atlas_v2.png.import
+!assets/textures/settlement_roof_material_atlas_v1.png.import
+!assets/textures/settlement_roof_material_atlas_late_v1.png.import
 
 # Generated test reports and local visual captures
 reports/
