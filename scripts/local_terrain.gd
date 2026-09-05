@@ -937,6 +937,7 @@ func _process(delta: float) -> void:
 				AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
 		_process_settlement_day()
 		_process_other_city_resources()
+		preload("res://scripts/strategic_history.gd").sample()
 		_settlement_model().process_month(_settlement_spatial_context(daily_context))
 		var progression_events:=ProgressionSystem.process_day(last_discovery_day)
 		_refresh_discovered_resource_overlays()

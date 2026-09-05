@@ -1,5 +1,5 @@
 extends PanelContainer
-## The reusable Dock: header (eyebrow/title/ESC/close), three sub-tabs, a
+## The reusable Dock: header (eyebrow/title/ESC/close), provider sub-tabs, a
 ## four-tile KPI row, a decision brief with one direct action, and a scrolling
 ## body of DockBlocks. One instance serves all six sections; a second instance
 ## serves deep-detail views at x:652.
@@ -16,6 +16,7 @@ var sub:int=0
 var eyebrow_label:Label
 var title_label:Label
 var tab_buttons:Array[Button]=[]
+var tabs_row:HBoxContainer
 var kpi_row:GridContainer
 var brief_panel:PanelContainer
 var body_scroll:ScrollContainer
@@ -66,17 +67,9 @@ func _ready()->void:
 	tabs_margin.add_theme_constant_override("margin_left",18)
 	tabs_margin.add_theme_constant_override("margin_right",18)
 	root.add_child(tabs_margin)
-	var tabs_row:=HBoxContainer.new()
+	tabs_row=HBoxContainer.new()
 	tabs_row.add_theme_constant_override("separation",2)
 	tabs_margin.add_child(tabs_row)
-	for index in 3:
-		var tab:=Button.new()
-		tab.custom_minimum_size=Vector2(0,28)
-		tab.add_theme_font_size_override("font_size",10)
-		tab.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-		tab.pressed.connect(_on_tab_pressed.bind(index))
-		tabs_row.add_child(tab)
-		tab_buttons.append(tab)
 	var tabs_rule:=ColorRect.new()
 	tabs_rule.color=Tokens.BORDER
 	tabs_rule.custom_minimum_size=Vector2(0,1)
@@ -119,7 +112,7 @@ func _ready()->void:
 
 func present(new_provider:Object,new_sub:int=0)->void:
 	provider=new_provider
-	sub=clampi(new_sub,0,2)
+	sub=maxi(0,new_sub)
 	rebuild()
 
 
@@ -129,6 +122,15 @@ func rebuild()->void:
 	eyebrow_label.text=String(meta.get("eyebrow",""))
 	title_label.text=String(meta.get("title",""))
 	var subtabs:Array=meta.get("subtabs",[])
+	sub=clampi(sub,0,maxi(0,subtabs.size()-1))
+	while tab_buttons.size()<subtabs.size():
+		var tab:=Button.new()
+		tab.custom_minimum_size=Vector2(0,28)
+		tab.add_theme_font_size_override("font_size",10)
+		tab.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		tab.pressed.connect(_on_tab_pressed.bind(tab_buttons.size()))
+		tabs_row.add_child(tab)
+		tab_buttons.append(tab)
 	for index in tab_buttons.size():
 		var tab:=tab_buttons[index]
 		tab.visible=index<subtabs.size()

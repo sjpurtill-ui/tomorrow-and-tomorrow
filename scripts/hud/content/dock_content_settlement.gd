@@ -1,4 +1,5 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
+const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 ## SETTLEMENT section: People & Labor / Works & Defense / History.
 ## Replaces the settlement dashboard, the settler side panel, and the
 ## population ledger summary.
@@ -84,6 +85,7 @@ func _people_blocks(productive:int,local_population:int,local_share:float,settle
 		})
 	var settlement_id:=String(settlement.get("id",""))
 	var blocks:Array=[
+		Charts.population(settlement_id,true),
 		{"type":"segments","heading":"AGE STRUCTURE","note":"dependency %.2f" % dependency,"items":segment_items,"legend":"Green = productive-age • warm/grey = dependent • life expectancy is not a maximum age"},
 		{"type":"alloc","heading":"DELEGATED LOCAL LABOR","note":"about %d of %d productive" % [assigned,productive],"items":alloc_items},
 		{"type":"actions","items":[
@@ -193,4 +195,4 @@ func _history_blocks(metrics:Dictionary,settlement:Dictionary)->Array:
 	return blocks
 
 func signature()->Array:
-	return [GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size()]
+	return [GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size()]

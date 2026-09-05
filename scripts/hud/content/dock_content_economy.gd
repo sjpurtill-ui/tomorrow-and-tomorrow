@@ -1,4 +1,5 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
+const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 ## ECONOMY section: Food & Water / Materials / Who Eats.
 ## Replaces the provisions panel, the materials panel, and their overlays.
 
@@ -6,7 +7,7 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"ECONOMY · PROVISIONS & MATERIALS",
 		"title":"%s · Provisions" % String(SettlementModel.selected_settlement().get("name","Settlement")),
-		"subtabs":["FOOD & WATER","MATERIALS","WHO EATS"],
+		"subtabs":["FOOD & WATER","MATERIALS","WHO EATS","WEALTH"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -15,6 +16,7 @@ func tab(sub:int)->Dictionary:
 	return data
 
 func _local_tab(sub:int)->Dictionary:
+	if sub==3: return _wealth_tab()
 	var metrics:Dictionary=GameState.simulation_metrics
 	var water:Dictionary=GameState.water_metrics
 	var food_days:=float(metrics.get("food_days",0.0))
@@ -37,7 +39,7 @@ func _local_tab(sub:int)->Dictionary:
 	var tone:="info" if "STABLE" in status else ("danger" if ("SHORTAGE" in status or "SHORTFALL" in status) else "warn")
 	var brief:=adapt_brief(raw_brief,tone,"")
 	match sub:
-		1: return {"kpis":kpis,"brief":_materials_brief(),"blocks":_materials_blocks()}
+		1: return {"kpis":kpis,"brief":_materials_brief(),"blocks":[Charts.stocks(GameState.selected_player_settlement_id)]+_materials_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_who_eats_blocks(metrics)}
 	return {"kpis":kpis,"brief":brief,"blocks":_food_blocks(metrics)}
 
@@ -86,7 +88,7 @@ func _food_blocks(metrics:Dictionary)->Array:
 			"accent":Tokens.GREEN if amount>0.05 else Color(0,0,0,0),
 			"tip":"Today's production and current access for this source",
 		})
-	var blocks:Array=[{"type":"bars","heading":"TODAY'S FLOW","note":"rations · weather %d%%" % weather,"items":flow_items}]
+	var blocks:Array=[Charts.reserves(GameState.selected_player_settlement_id),Charts.food_flow(GameState.selected_player_settlement_id),{"type":"bars","heading":"TODAY'S FLOW","note":"rations · weather %d%%" % weather,"items":flow_items}]
 	if not stock_items.is_empty():
 		blocks.append({"type":"rows","heading":"STORES BY KIND","note":"stock · lost today","items":stock_items})
 	if not source_items.is_empty():
@@ -206,3 +208,10 @@ func _trade_block()->Dictionary:
 		if shown>=5: break
 	if trade.shipments.is_empty(): lines.append("No deliveries in transit.")
 	return {"type":"text","heading":"INTERCITY TRADE","text":"\n".join(lines)}
+
+func _wealth_tab()->Dictionary:
+	var blocks:Array=[Charts.stocks(GameState.selected_player_settlement_id)]
+	if GameState.economy_stage in ["currency","weighed_metal"]: blocks.append(Charts.finance(GameState.selected_player_settlement_id))
+	else: blocks.append({"type":"text","heading":"WEALTH BEFORE MONEY","text":"This economy uses direct allocation and reciprocity. Material stores above belong to the selected city. No issued-currency treasury or household-currency trend exists yet."})
+	blocks.append({"type":"text","heading":"WHAT THESE ACCOUNTS COVER","text":"Goods and reserves are physical wealth. Currency balances are separate city accounts and must not be added to material units. The current aggregate records do not provide a historical monetary valuation of buildings, land, private enterprises or household possessions."})
+	return {"kpis":[],"brief":{},"blocks":blocks}

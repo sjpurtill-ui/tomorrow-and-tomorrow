@@ -31,6 +31,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				archive.view_state=block.get("view_state",{})
 				archive.open_report=block.get("on_open",Callable())
 				section.add_child(archive)
+			"trend_chart":
+				var chart:=preload("res://scripts/hud/trend_chart.gd").new()
+				section.add_child(chart)
+				chart.setup(block)
 			"expedition_chart":
 				var chart:=ExpeditionChart.new()
 				chart.route=block.get("route",[])
