@@ -188,7 +188,7 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 		if year < definition.recognition_year:
 			continue
 		if deposit.stage == "unknown":
-			var survey_effort := float(GameState.population_allocations.get("Survey", 0)) / 6.0*ConsequenceEngine.survey_factor()
+			var survey_effort := GameState.effective_workers("Survey") / 6.0*ConsequenceEngine.survey_factor()
 			var nature_focus := float(GameState.research_allocations.get("ecology", 0)) * 0.15
 			var material_focus := float(GameState.research_allocations.get("production", 0)) * 0.12
 			deposit.clues += definition.base * (0.5 + survey_effort + nature_focus + material_focus) * _family_literacy(resource_name) * rng.randf_range(0.5, 1.5)
@@ -197,7 +197,7 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 				_gain_practice(resource_name,"recognition",0.12)
 				events.append(_event("Resource Indicated", "Evidence suggests %s is present. Its extent and accessibility remain unknown." % resource_name, deposit.id))
 		elif deposit.stage == "recognized":
-			var survey_effort := float(GameState.population_allocations.get("Survey",0)) / 6.0*ConsequenceEngine.survey_factor()
+			var survey_effort := GameState.effective_workers("Survey") / 6.0*ConsequenceEngine.survey_factor()
 			deposit.survey += definition.base * 0.55 * survey_effort * (1.0+DiscoverySystem.effect("survey_speed")) * _family_literacy(resource_name) * rng.randf_range(0.7,1.3)
 			if deposit.survey >= 1.0:
 				deposit.stage = "surveyed"
@@ -250,8 +250,8 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 		source_kind=String(context.get("surface_water_kind","visible river or drainage"))
 		source_id=String(context.get("surface_water_id","local_surface_hydrology"))
 		source_origin="mapped_hydrology"
-	var carriers:=float(GameState.population_allocations.get("Logistics",0))
-	var food_workers:=float(GameState.population_allocations.get("Food",0))
+	var carriers:=GameState.effective_workers("Logistics")
+	var food_workers:=GameState.effective_workers("Food")
 	# Water fetching is basic household subsistence, not a specialist occupation
 	# that vanishes when the player changes a labor slider. People beside exposed
 	# surface water can meet their immediate drinking need themselves; assigned
@@ -336,8 +336,8 @@ func _calculate_access(deposit: Dictionary, definition: Dictionary, context: Dic
 		# Carrying from exposed surface water needs assigned hands, not years of
 		# roadbuilding or advanced hydrological practice.
 		return 1.0 if int(GameState.population_allocations.get("Extraction",0))>0 and int(GameState.population_allocations.get("Logistics",0))>0 else 0.0
-	var logistics := float(GameState.population_allocations.get("Logistics", 0)) / 5.0
-	var construction := float(GameState.population_allocations.get("Construction", 0)) / 8.0
+	var logistics := GameState.effective_workers("Logistics") / 5.0
+	var construction := GameState.effective_workers("Construction") / 8.0
 	var tools := float(context.get("tools", 0.25))
 	var knowledge := 0.0
 	for requirement in definition.processing:
@@ -420,8 +420,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		if not _is_material_resource(String(deposit.resource)): continue
 		deposit.distance_km=Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
 		material_deposits.append(deposit)
-	var extractors:=float(GameState.population_allocations.get("Extraction",0))
-	var carriers:=float(GameState.population_allocations.get("Logistics",0))
+	var extractors:=GameState.effective_workers("Extraction")
+	var carriers:=GameState.effective_workers("Logistics")
 	var labor_eff:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
 	var total_weight:=0.0
 	for deposit in material_deposits:
@@ -501,7 +501,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	for amount in capacities.values(): capacity_total+=float(amount)
 	var active_shipments:=0
 	for deposit in material_deposits: active_shipments+=(deposit.get("shipments",[]) as Array).size()
-	GameState.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":float(GameState.population_allocations.get("Knowledge",0)),"labor_efficiency":labor_eff,"accessible_occurrences":material_deposits.size(),"active_shipments":active_shipments,"bounded":true}
+	GameState.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":GameState.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":material_deposits.size(),"active_shipments":active_shipments,"bounded":true}
 	GameState.material_history.append({"day":int(GameState.elapsed_days),"extracted":extracted_total,"delivered":delivered_total,"lost":lost_total,"at_source":at_source,"in_transit":in_transit,"stored":stored_bulk})
 	if GameState.material_history.size()>370: GameState.material_history.pop_front()
 	return events

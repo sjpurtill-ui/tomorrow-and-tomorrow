@@ -24,33 +24,32 @@ var outcome := ""
 var record: Dictionary = {}
 var last_phase := ""
 var cinematic := false
+var landscape:BattleLandscape
+var contact:=BattleContact.new()
+var contact_sparks:Array[MeshInstance3D]=[]
+var spark_cursor:=0
 
 func _ready() -> void:
 	carnage=preload("res://scripts/battle_carnage.gd").new(); add_child(carnage)
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color("182a31")
+	settings.background_color = Color("a7c9c8")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	settings.ambient_light_color = Color("d4dfd8")
-	settings.ambient_light_energy = 0.65
+	settings.ambient_light_energy = 0.48
 	environment.environment = settings; add_child(environment)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-42,-28,0); sun.light_color = Color("ffe4b2")
 	sun.light_energy = 1.25; sun.shadow_enabled = true
 	add_child(sun)
-	var floor_mesh := PlaneMesh.new(); floor_mesh.size = Vector2(600,600)
-	var ground := MeshInstance3D.new(); ground.mesh = floor_mesh
-	var mat := StandardMaterial3D.new(); mat.albedo_color = Color("536348"); mat.roughness = 1
-	ground.material_override = mat; ground.position.y = -0.025; add_child(ground)
-	# Sparse perimeter dressing never implies tactical cover or changes the terrain modifier.
-	for i in 36:
-		var rock := MeshInstance3D.new(); var stone := SphereMesh.new()
-		stone.radial_segments = 5; stone.rings = 2; stone.radius = 0.45 + (i%4)*0.2; stone.height = stone.radius
-		rock.mesh = stone
-		var stone_mat := StandardMaterial3D.new(); stone_mat.albedo_color = Color("777863")
-		rock.material_override = stone_mat
-		rock.position = Vector3(sin(i*2.4)*100,0,cos(i*2.4)*75); add_child(rock)
+	landscape=BattleLandscape.new(); add_child(landscape)
+	landscape.build(Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z),CivilizationSystem.ground_survey_authority)
+	carnage.ground_query=Callable(landscape,"height_at")
+	for i in 16:
+		var spark:=MeshInstance3D.new(); var mesh:=SphereMesh.new(); mesh.radius=.12; mesh.height=.24; mesh.radial_segments=6; mesh.rings=3; spark.mesh=mesh
+		var mat:=StandardMaterial3D.new(); mat.albedo_color=Color("ffe6aa"); mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; spark.material_override=mat; spark.visible=false
+		add_child(spark); contact_sparks.append(spark)
 	camera = Camera3D.new(); camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.far = 1000; add_child(camera); _camera_update()
 	for side in 2:
@@ -109,9 +108,11 @@ func reset(attacker: Dictionary, defender: Dictionary) -> void:
 			banner.font_size = 24; banner.pixel_size = .025; banner.modulate = COLORS[side].lightened(.3)
 			banner.billboard = BaseMaterial3D.BILLBOARD_ENABLED; banner.position = group.center+Vector3(0,4,0)
 			army.add_child(banner)
+			group["banner"]=banner
 			var flag:=MeshInstance3D.new(); var cloth:=BoxMesh.new(); cloth.size=Vector3(1.2,.75,.05); flag.mesh=cloth
 			var flag_mat:=StandardMaterial3D.new(); flag_mat.albedo_color=COLORS[side]; flag.material_override=flag_mat
 			flag.position=group.center+Vector3(0,3.3,0); flag.set_meta("battle_banner",true); army.add_child(flag)
+			group["flag"]=flag
 	for side in 2:
 		var commander:Dictionary=forces[side].get("commander",{})
 		if commander.is_empty(): continue
@@ -119,6 +120,7 @@ func reset(attacker: Dictionary, defender: Dictionary) -> void:
 		add_child(general); general.setup(commander,COLORS[side]); general.set_meta("side",side)
 		general.position=Vector3(14,0,22 if side==1 else -22); general.rotation.y=PI if side==1 else 0.0
 		general.home=general.position; generals.append(general)
+	contact.configure(self)
 	zoom = 65.0
 	_camera_update()
 
@@ -170,7 +172,7 @@ func _process(delta: float) -> void:
 	carnage.update_effects(clock)
 	for general in generals:
 		general.advance(delta,playback_speed)
-		general.label.pixel_size=.025*zoom/24.0
+		general.label.pixel_size=.018*clampf(zoom/45.0,.65,1.4)
 	var phase := "walk" if round_clock < .45 else ("attack" if round_clock < 2.3 and not record.is_empty() else "idle")
 	if phase != last_phase:
 		for side in 2: armies[side].set_animation("walk" if _routed(side) else phase,true)
@@ -202,6 +204,11 @@ func _process(delta: float) -> void:
 			var morale := float(forces[group.side].get("morale",1))
 			pose.origin.x += sin(i*2.3)*maxf(0,.65-morale)*2.5
 			batch.multimesh.set_instance_transform(i,pose)
+	contact.advance(self)
+	for spark in contact_sparks:
+		if spark.visible and clock-float(spark.get_meta("born",0))>.12: spark.visible=false
+	for general in generals:
+		general.position.y=landscape.height_at(Vector2(general.position.x,general.position.z))
 	for side in 2:
 		var fired := 0
 		for used in record.get(("attacker" if side == 0 else "defender")+"_cohort_ammunition_used",[]): fired += int(used)
@@ -229,8 +236,17 @@ func orbit(amount: float,tilt:float=0.0) -> void:
 	yaw += amount; elevation=clampf(elevation+tilt,.22,1.35); _camera_update()
 
 func ground_at(point:Vector2)->Vector3:
-	var hit:Variant=Plane(Vector3.UP,0).intersects_ray(camera.project_ray_origin(point),camera.project_ray_normal(point))
-	return hit if hit is Vector3 else target
+	var origin:=camera.project_ray_origin(point)
+	var direction:=camera.project_ray_normal(point)
+	if direction.y>=0: return target
+	var near:=0.0; var far:=2000.0
+	for step in 24:
+		var distance:float=(near+far)*.5
+		var sample:=origin+direction*distance
+		if sample.y>landscape.height_at(Vector2(sample.x,sample.z)): near=distance
+		else: far=distance
+	return origin+direction*((near+far)*.5)
+
 
 func pan(from:Vector2,to:Vector2)->void:
 	cinematic=false
@@ -276,3 +292,10 @@ func representative_count() -> int:
 	var total := 0
 	for group in groups: total += group.poses.size()
 	return total
+
+func set_landscape(engagement:Dictionary)->void:
+	landscape.build(BattleLandscape.encounter_position(engagement),CivilizationSystem.ground_survey_authority)
+
+func contact_flash(at:Vector3,variant:int)->void:
+	var spark:MeshInstance3D=contact_sparks[spark_cursor%contact_sparks.size()]; spark_cursor+=1
+	spark.position=at; spark.scale=Vector3(1.5,.5,1) if variant%2 else Vector3(.5,1.5,1); spark.visible=true; spark.set_meta("born",clock)

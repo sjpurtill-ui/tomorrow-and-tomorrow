@@ -209,18 +209,20 @@ func demobilize(count:int)->Dictionary:
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before demobilizing personnel."}
 	var requested:=maxi(0,count)
 	if requested<=0: return {"error":"Demobilization count must be positive."}
-	var recruit_release:=mini(requested,aggregate_recruits)
+	var injured_release:=_demobilize_disabled(requested)
+	var recruit_release:=mini(requested-injured_release,aggregate_recruits)
 	aggregate_recruits-=recruit_release
 	var field_result:={"released":0,"returned_equipment":{}}
-	if requested>recruit_release: field_result=_stand_down_aggregate(requested-recruit_release)
+	if requested>recruit_release+injured_release: field_result=_stand_down_aggregate(requested-recruit_release-injured_release)
 	army_changed.emit(home_army.duplicate(true))
 	return {
 		"requested":requested,
-		"released":recruit_release+int(field_result.released),
+		"released":injured_release+recruit_release+int(field_result.released),
+		"released_injured_veterans":injured_release,
 		"released_recruits":recruit_release,
 		"released_field_soldiers":int(field_result.get("released",0)),
 		"returned_equipment":field_result.get("returned_equipment",{}),
-		"message":"%d personnel demobilized: %d recruits and %d field troops returned to the civilian labor pool." % [recruit_release+int(field_result.released),recruit_release,int(field_result.released)]
+		"message":"%d people returned to civilian life: %d with lasting injuries, %d recruits, %d field troops. Injured veterans remain living population; their effective work capacity depends on the task." % [injured_release+recruit_release+int(field_result.released),injured_release,recruit_release,int(field_result.released)]
 	}
 
 
@@ -686,7 +688,12 @@ func remove_occupation_force(civ_id:String,region_id:String,return_survivors:boo
 	var returned_equipment:Dictionary={}
 	if return_survivors:
 		if survivors+scattered>0: aggregate_recruits+=survivors+scattered
-		if wounded>0: training_injury_pool+=wounded
+		if wounded>0:
+			var disabled:=clampi(int(force.get("disabled_pool",0)),0,wounded)
+			training_injury_pool+=wounded-disabled
+			home_army["wounded_pool"]=int(home_army.get("wounded_pool",0))+disabled
+			home_army["disabled_pool"]=int(home_army.get("disabled_pool",0))+disabled
+			home_army["severe_disabled_pool"]=int(home_army.get("severe_disabled_pool",0))+clampi(int(force.get("severe_disabled_pool",0)),0,disabled)
 		if captured>0: home_army["captured_pool"]=int(home_army.get("captured_pool",0))+captured
 		for formation in force.get("formations",[]):
 			var weapon:=String(formation.get("weapon","improvised"))
@@ -727,7 +734,7 @@ func reinforce_occupation(civ_id:String,region_id:String)->Dictionary:
 	var combined:Array=force.get("formations",[]).duplicate(true)
 	combined.append_array(detached)
 	var reinforced:Dictionary=simulator.create_formation_force(String(force.get("name","OCCUPATION")),combined,float(force.get("morale",0.55)),float(force.get("readiness",0.45)))
-	for key in ["civ_id","region_id","region_name","required","supply_level","committed_day","commander","wounded_pool","scattered_pool","captured_pool"]:
+	for key in ["civ_id","region_id","region_name","required","supply_level","committed_day","commander","wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool"]:
 		if force.has(key): reinforced[key]=force[key].duplicate(true) if force[key] is Dictionary or force[key] is Array else force[key]
 	occupation_forces[existing_index]=reinforced
 	_refresh_readiness()
@@ -1051,6 +1058,8 @@ func disband_field_army(army_id:int)->Dictionary:
 	var additions:Array=(army.get("formations",[]) as Array).duplicate(true)
 	field_armies.remove_at(index)
 	_rebuild_home_army_with(additions)
+	for pool in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool"]:
+		home_army[pool]=int(home_army.get(pool,0))+int(army.get(pool,0))
 	army_changed.emit(home_army.duplicate(true))
 	return {"ok":true,"returned":int(army.get("troops",0)),"message":"%s dissolved at home; %d trained personnel and their issued equipment returned to the unassigned field pool." % [String(army.get("name","Field army")),int(army.get("troops",0))]}
 
@@ -1809,7 +1818,7 @@ func advance_engagement(order:String="hold")->Dictionary:
 
 func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
 	var updated:=previous.duplicate(true)
-	for key in ["remaining_troops","morale","formations","reserve_manpower","wounded_pool","scattered_pool","dead"]:
+	for key in ["remaining_troops","morale","formations","reserve_manpower","wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","dead"]:
 		if not side.has(key): continue
 		if key=="remaining_troops": updated["troops"]=int(side[key])
 		else: updated[key]=side[key].duplicate(true) if side[key] is Array or side[key] is Dictionary else side[key]
@@ -2049,7 +2058,7 @@ func _create_civilization_threat(incident:Dictionary,campaign_mode:String="defen
 	var target_name:=String(incident.get("target_region_name",""))
 	var threat_title:="Raid on %s" % target_name if is_raid and offensive else ("%s raiders approaching" % source_name if is_raid else ("Campaign for %s" % target_name if offensive and target_name!="" else ("Campaign against %s" % source_name if offensive else ("%s moves to recapture %s" % [source_name,target_name] if target_name!="" else "%s campaign approaching" % source_name))))
 	var report_text:="The raiding column is committed against %s: scouts estimate about %d defenders. Victory may seize portable stores but will not occupy the region." % [target_name,strength] if is_raid and offensive else ("Watchers report roughly %d %s raiders moving toward local stores. Muster the garrison, pay them off, or yield before they arrive." % [strength,source_name] if is_raid else ("The field host is committed against %s: scouts estimate an aggregate defending capacity of %d." % [target_name if target_name!="" else source_name,strength] if offensive else ("%s is moving roughly %d personnel to retake %s. Its occupation force will defend within seven days." % [source_name,strength,target_name] if target_name!="" else "Scouts identify an organized %s field host of roughly %d. A response is required within seven days." % [source_name,strength])))
-	active_threat={"id":"threat_%d_%d" % [int(GameState.elapsed_days),threats_resolved],"title":threat_title,"incident_kind":String(incident.get("incident_kind","campaign")),"campaign_mode":campaign_mode,"source_civ_id":String(incident.get("source_civ_id","")),"source_name":source_name,"field_encounter":bool(incident.get("field_encounter",false)),"formation_id":String(incident.get("formation_id","")),"target_region_id":String(incident.get("target_region_id","")),"target_region_name":String(incident.get("target_region_name","")),"target_region_role":String(incident.get("target_region_role","")),"target_population":float(incident.get("target_population",0.0)),"occupation_required":float(incident.get("occupation_required",0.0)),"recapture_campaign":bool(incident.get("recapture_campaign",false)),"field_army_id":int(incident.get("field_army_id",0)),"discovered_day":int(GameState.elapsed_days),"deadline_day":int(GameState.elapsed_days)+(9999 if offensive else 7),"terrain_defense":float(incident.get("terrain_defense",_terrain_defense())),"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
+	active_threat={"id":"threat_%d_%d" % [int(GameState.elapsed_days),threats_resolved],"title":threat_title,"incident_kind":String(incident.get("incident_kind","campaign")),"campaign_mode":campaign_mode,"source_civ_id":String(incident.get("source_civ_id","")),"source_name":source_name,"field_encounter":bool(incident.get("field_encounter",false)),"formation_id":String(incident.get("formation_id","")),"target_region_id":String(incident.get("target_region_id","")),"target_position":incident.get("target_position",{}).duplicate(true),"target_region_name":String(incident.get("target_region_name","")),"target_region_role":String(incident.get("target_region_role","")),"target_population":float(incident.get("target_population",0.0)),"occupation_required":float(incident.get("occupation_required",0.0)),"recapture_campaign":bool(incident.get("recapture_campaign",false)),"field_army_id":int(incident.get("field_army_id",0)),"discovered_day":int(GameState.elapsed_days),"deadline_day":int(GameState.elapsed_days)+(9999 if offensive else 7),"terrain_defense":float(incident.get("terrain_defense",_terrain_defense())),"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
 	GameState.council_inbox.push_front({"id":String(active_threat.id),"advisor":"MARSHAL'S OFFICE","office":"Marshal","topic":"security","act":{"type":"report"},"text":report_text,"urgency":0.96,"day":int(GameState.elapsed_days),"status":"unread"})
 	threat_changed.emit(active_threat.duplicate(true))
 
@@ -2355,8 +2364,9 @@ func validate_state()->Array[String]:
 	if formation_total!=int(home_army.get("troops",0)): errors.append("Formation manpower does not equal army troop total.")
 	for forbidden_key in ["soldier_ids","wounded_ids","scattered_ids","captured_ids"]:
 		if home_army.has(forbidden_key): errors.append("Army contains forbidden individual-person roster: %s." % forbidden_key)
-	for pool_key in ["wounded_pool","scattered_pool","captured_pool","reserve_manpower"]:
+	for pool_key in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool","reserve_manpower"]:
 		if int(home_army.get(pool_key,0))<0: errors.append("Military population pool %s cannot be negative." % pool_key)
+	if int(home_army.get("disabled_pool",0))>int(home_army.get("wounded_pool",0)) or int(home_army.get("severe_disabled_pool",0))>int(home_army.get("disabled_pool",0)): errors.append("Disabling injuries must remain subsets of surviving wounded.")
 	if aggregate_recruits<0 or training_injury_pool<0: errors.append("Military population pools cannot be negative.")
 	for command_skill in ["command","tactics","logistics","resolve"]:
 		var development:=float(command_development.get(command_skill,0.0))
@@ -3048,6 +3058,8 @@ func _apply_home_result(side:Dictionary,rounds:Array,_battle_seed:int,home_side:
 	persisted["armor"]=float(side.get("armor",persisted.get("armor",0.0)))
 	persisted["penetration"]=float(side.get("penetration",persisted.get("penetration",0.0)))
 	persisted["wounded_pool"]=maxi(0,int(side.get("wounded_pool",persisted.get("wounded_pool",0))))
+	persisted["disabled_pool"]=clampi(int(side.get("disabled_pool",persisted.get("disabled_pool",0))),0,int(persisted.wounded_pool))
+	persisted["severe_disabled_pool"]=clampi(int(side.get("severe_disabled_pool",persisted.get("severe_disabled_pool",0))),0,int(persisted.disabled_pool))
 	persisted["scattered_pool"]=maxi(0,int(side.get("scattered_pool",persisted.get("scattered_pool",0))))
 	persisted["dead"]=int(side.get("dead",persisted.get("dead",0)))
 	for forbidden_key in ["soldier_ids","wounded_ids","scattered_ids","captured_ids"]: persisted.erase(forbidden_key)
@@ -4049,3 +4061,13 @@ func _aftermath_description(outcome:Dictionary)->String:
 		if amount>0: spoil_parts.append("%d %s" % [amount,String(entry[1])])
 	if not spoil_parts.is_empty(): parts.append("Spoils: %s" % ", ".join(spoil_parts))
 	return ". ".join(parts)+"." if not parts.is_empty() else (summary if summary!="" else "Battle aftermath resolved.")
+
+func _demobilize_disabled(requested:int)->int:
+	var amount:=mini(maxi(0,requested),mini(int(home_army.get("disabled_pool",0)),int(home_army.get("wounded_pool",0))))
+	if amount<=0: return 0
+	var severe:=mini(amount,int(home_army.get("severe_disabled_pool",0)))
+	home_army["disabled_pool"]=int(home_army.get("disabled_pool",0))-amount
+	home_army["severe_disabled_pool"]=int(home_army.get("severe_disabled_pool",0))-severe
+	home_army["wounded_pool"]=int(home_army.get("wounded_pool",0))-amount
+	GameState.receive_injured_veterans(amount,severe)
+	return amount
