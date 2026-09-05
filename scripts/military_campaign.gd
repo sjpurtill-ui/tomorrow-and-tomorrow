@@ -4577,8 +4577,10 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 	var battle:Dictionary={}
 	var seed_value:=int((operation.get("threat",{}) as Dictionary).get("seed",-1))
 	if not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value:battle=engagement_snapshot()
-	elif not battle_history.is_empty() and int(battle_history[0].get("seed",-2))==seed_value:battle=battle_history[0].duplicate(true)
-	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",GameState.settlement_name)) if String(archived_home.get("name",GameState.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not battle.is_empty() and not active_engagement.is_empty(),"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
+	else:
+		for past_battle:Dictionary in battle_history:
+			if int(past_battle.get("seed",-2))==seed_value:battle=past_battle.duplicate(true);break
+	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",GameState.settlement_name)) if String(archived_home.get("name",GameState.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value,"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
 
 func template_recruitment_blocker()->String:
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return "Resolve the battle or aftermath before recruiting."

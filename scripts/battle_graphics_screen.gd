@@ -10,6 +10,7 @@ const GOLD:=Color("f2c14e")
 const DURATION:=5.0
 var campaign_mode:=true
 var inspected_army_id:=0
+var history_seed:=-1
 var view:BattleDiorama
 var viewport:SubViewport
 var stage:SubViewportContainer
@@ -207,7 +208,12 @@ func _build_controls()->void:
 	var ends:=box(controls);skip_button=button(ends,"Skip to result →",_skip);retreat_button=button(ends,"Retreat whole army",_retreat,ORANGE);seed_label=label(ends,"",10,MUTED)
 func _initialize()->void:
 	context=MilitaryCampaign.active_engagement.duplicate(true)
-	if context.is_empty() and not MilitaryCampaign.battle_history.is_empty():context=MilitaryCampaign.battle_history.front().duplicate(true)
+	if context.is_empty() and not MilitaryCampaign.battle_history.is_empty():
+		context=MilitaryCampaign.battle_history.front().duplicate(true)
+		if history_seed>=0:
+			for past:Dictionary in MilitaryCampaign.battle_history:
+				if int(past.get("seed",-1))==history_seed:context=past.duplicate(true);break
+		finished_context=context.duplicate(true)
 	home_side=0 if String(context.get("home_side","defender"))=="attacker" else 1
 	var a:Dictionary=context.get("attacker",context.get("attacker_result",{}));var d:Dictionary=context.get("defender",context.get("defender_result",{}))
 	initial_forces=[a.duplicate(true),d.duplicate(true)]
