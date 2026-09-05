@@ -30,6 +30,7 @@ func _ready()->void:
 	var top:=HBoxContainer.new(); root.add_child(top)
 	heading=label(top,27); heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	button(top,"RETURN TO THE GAME",func(): queue_free())
+	button(top,"TREATIES & LEAGUES",func(): open_commitments())
 	var body:=HBoxContainer.new(); body.add_theme_constant_override("separation",24); body.size_flags_vertical=Control.SIZE_EXPAND_FILL; root.add_child(body)
 	var portrait:=VBoxContainer.new(); portrait.custom_minimum_size.x=300; body.add_child(portrait)
 	var crest:=Label.new(); crest.text="◈"; crest.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; crest.add_theme_font_size_override("font_size",76); crest.add_theme_color_override("font_color",Color("d7b67a")); portrait.add_child(crest)
@@ -53,6 +54,7 @@ func _ready()->void:
 	draft_button=button(audience,"REVIEW PROPOSED TERMS",func():
 		var draft:Dictionary=ForeignDialogue.thread(civ_id).draft
 		if draft.is_empty(): return
+		if draft.has("commitment"): open_commitments(draft.commitment); return
 		accord.select(ForeignDiplomacy.ACCORDS.keys().find(draft.accord)); tone.select(ForeignDiplomacy.TONES.keys().find(draft.tone)); generous.set_pressed_no_signal(draft.generous); refresh())
 	var row:=HBoxContainer.new(); audience.add_child(row)
 	accord=OptionButton.new(); accord.size_flags_horizontal=Control.SIZE_EXPAND_FILL; row.add_child(accord)
@@ -82,6 +84,10 @@ func selected_tone()->String: return ForeignDiplomacy.TONES.keys()[tone.selected
 func ask()->void:
 	if ForeignDialogue.ask(civ_id,entry.text): entry.clear()
 	refresh()
+
+func open_commitments(draft:Dictionary={})->void:
+	var council=preload("res://scripts/commitment_screen.gd").new()
+	council.civ_id=civ_id; council.draft=draft.duplicate(true); add_child(council)
 func _process(delta:float)->void:
 	timer+=delta
 	if timer>=1: timer=0; refresh()

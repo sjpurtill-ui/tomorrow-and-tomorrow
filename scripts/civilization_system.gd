@@ -568,6 +568,7 @@ func advance_to_day(target_day:int)->void:
 	_complete_due_scout_missions(target_day)
 	_process_diplomatic_mission(target_day)
 	_process_local_observation(target_day)
+	ForeignDiplomacy.advance(target_day)
 
 
 func _process_strategic_turn(day:int)->void:
@@ -577,6 +578,7 @@ func _process_strategic_turn(day:int)->void:
 		if not bool(civ.get("alive",true)): continue
 		civ["strategy"]=_choose_strategy(civ)
 		civ["allocations"]=_allocation_for(String(civ.strategy))
+		civ["allocations"]=ForeignDiplomacy.commitments.policy_allocations(String(civ.id),civ.allocations)
 		civ=_advance_civilization(civ)
 		civilizations[index]=civ
 	_process_intercivilization_relations(day)
@@ -1354,6 +1356,7 @@ func _process_diplomatic_mission(day:int)->void:
 		if purpose in CARRIED_DIPLOMATIC_ACTIONS and purpose!="send_aid" and not bool(diplomatic_mission.get("proposal_resolved",false)): proposal_result=conduct_player_action(civ_id,purpose,true)
 		elif purpose=="send_aid": proposal_result={"ok":gift_resource=="Food" and gift_amount>0.0,"message":"The food aid reached %s and improved its reserves." % String(civ.name) if gift_resource=="Food" and gift_amount>0.0 else "The aid proposal arrived without food and was refused."}
 		var accepted:=bool(proposal_result.get("ok",false))
+		if purpose=="send_aid" and accepted: ForeignDiplomacy.commitments.note_food_aid(civ_id,gift_amount,day)
 		var outcome:=String(proposal_result.get("message",proposal_result.get("error","The proposal was refused.")))
 		civ=civilizations[index]
 		relation=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
@@ -3748,6 +3751,9 @@ func conduct_player_action(civ_id:String,action:String,arrived_via_envoy:bool=fa
 	_rebuild_competition()
 	return {"ok":true,"action":normalized,"civilization":civ.duplicate(true),"message":message}
 
+func consume_siege_relief_receipt(receipt_id:String,siege_id:String)->Dictionary:
+	return ForeignDiplomacy.commitments.consume_receipt(receipt_id,siege_id)
+
 
 func _round_casualties(result:Dictionary,side:String)->Dictionary:
 	var totals:={"killed":0,"wounded":0,"scattered":0}
@@ -5186,6 +5192,9 @@ func validate_state()->Array[String]:
 			if not is_finite(scout_trait_value) or scout_trait_value<0.0 or scout_trait_value>1.0: errors.append("Scout mission %s must be normalized." % scout_trait)
 	if not diplomatic_mission.is_empty():
 		if not ids.has(String(diplomatic_mission.get("civ_id",""))): errors.append("Diplomatic mission references an unknown civilization.")
+		if diplomatic_mission.has("commitment_terms"):
+			var commitment:Variant=diplomatic_mission.commitment_terms
+			if not ForeignDiplomacy.commitments.valid_terms(commitment) or not ForeignDiplomacy.commitments.number(commitment.get("serial")) or float(commitment.get("serial",0))<1: errors.append("Diplomatic commitment terms are invalid.")
 		if int(diplomatic_mission.get("arrival_day",-1))<=int(diplomatic_mission.get("depart_day",-1)): errors.append("Diplomatic mission arrival must follow departure.")
 		if int(diplomatic_mission.get("return_day",-1))<=int(diplomatic_mission.get("arrival_day",-1)): errors.append("Diplomatic mission return must follow arrival.")
 		var diplomatic_purpose:=String(diplomatic_mission.get("purpose","goodwill"))
