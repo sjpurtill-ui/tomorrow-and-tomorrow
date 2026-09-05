@@ -10,9 +10,11 @@ config_version=5
 
 [application]
 
-config/name="Tomorrow and Tomorrow"
+config/name="Tomorrow and Tomorrow — CITY ASSAULT TEST"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="TomorrowAndTomorrow_CityAssault_Test"
 config/version="2026.09.05.4"
-run/main_scene="res://local_terrain.tscn"
+run/main_scene="res://tests/manual_city_assault.tscn"
 config/features=PackedStringArray("4.7")
 
 [autoload]
