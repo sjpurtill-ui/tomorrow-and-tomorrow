@@ -25,6 +25,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"trend_chart":
+				var chart:=preload("res://scripts/hud/trend_chart.gd").new()
+				section.add_child(chart)
+				chart.setup(block)
 			"expedition_chart":
 				var chart:=ExpeditionChart.new()
 				chart.route=block.get("route",[])

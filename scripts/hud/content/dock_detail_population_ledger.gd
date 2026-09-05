@@ -1,4 +1,5 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
+const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 ## Detail dock: the population ledger — births, deaths, causes, and the
 ## demographic record. Replaces the full-screen population ledger modal.
 
@@ -32,6 +33,7 @@ func tab(_sub:int)->Dictionary:
 		if amount<=0.0: continue
 		mortality_items.append({"name":String(cause).capitalize().replace("_"," "),"value":"%.2f%% / yr" % (amount*100.0),"ratio":amount/top,"color":Tokens.RED,"tip":"Modeled contribution to mortality under current conditions; this is not a lifetime death count"})
 	var blocks:Array=[
+		Charts.population("civilization"),
 		{"type":"tiles","heading":"MATERNITY & INFANCY","items":maternity_items},
 	]
 	var records:Array=[]
@@ -53,4 +55,4 @@ func tab(_sub:int)->Dictionary:
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:
-	return [GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]
+	return [GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]
