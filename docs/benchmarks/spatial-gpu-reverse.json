@@ -1,0 +1,127 @@
+[
+	{
+		"cull_and_upload": {
+			"max_ms": 0.652,
+			"p50_ms": 0.167,
+			"p95_ms": 0.294,
+			"p99_ms": 0.42
+		},
+		"draw_calls": 120.0,
+		"frames": {
+			"max_ms": 42.558,
+			"p50_ms": 20.164,
+			"p95_ms": 31.115,
+			"p99_ms": 34.491
+		},
+		"mode": "known_index384",
+		"planning": {
+			"max_ms": 0.001,
+			"p50_ms": 0.0,
+			"p95_ms": 0.001,
+			"p99_ms": 0.001
+		},
+		"primitives": 3760870.0,
+		"visible_max": 192,
+		"world_entities": 100000
+	},
+	{
+		"cull_and_upload": {
+			"max_ms": 2.608,
+			"p50_ms": 1.285,
+			"p95_ms": 1.753,
+			"p99_ms": 2.243
+		},
+		"draw_calls": 120.0,
+		"frames": {
+			"max_ms": 40.118,
+			"p50_ms": 23.063,
+			"p95_ms": 33.49,
+			"p99_ms": 38.293
+		},
+		"mode": "culled384_with_replanning",
+		"planning": {
+			"max_ms": 0.124,
+			"p50_ms": 0.0,
+			"p95_ms": 0.063,
+			"p99_ms": 0.092
+		},
+		"primitives": 3760870.0,
+		"visible_max": 192,
+		"world_entities": 100000
+	},
+	{
+		"cull_and_upload": {
+			"max_ms": 4.564,
+			"p50_ms": 2.085,
+			"p95_ms": 2.973,
+			"p99_ms": 3.515
+		},
+		"draw_calls": 120.0,
+		"frames": {
+			"max_ms": 60.626,
+			"p50_ms": 28.74,
+			"p95_ms": 40.822,
+			"p99_ms": 43.77
+		},
+		"mode": "culled8192",
+		"planning": {
+			"max_ms": 0.001,
+			"p50_ms": 0.0,
+			"p95_ms": 0.001,
+			"p99_ms": 0.001
+		},
+		"primitives": 4323046.0,
+		"visible_max": 4096,
+		"world_entities": 100000
+	},
+	{
+		"cull_and_upload": {
+			"max_ms": 2.433,
+			"p50_ms": 1.304,
+			"p95_ms": 1.789,
+			"p99_ms": 2.319
+		},
+		"draw_calls": 120.0,
+		"frames": {
+			"max_ms": 52.268,
+			"p50_ms": 25.359,
+			"p95_ms": 38.704,
+			"p99_ms": 42.964
+		},
+		"mode": "culled384",
+		"planning": {
+			"max_ms": 0.001,
+			"p50_ms": 0.0,
+			"p95_ms": 0.001,
+			"p99_ms": 0.001
+		},
+		"primitives": 3760870.0,
+		"visible_max": 192,
+		"world_entities": 100000
+	},
+	{
+		"cull_and_upload": {
+			"max_ms": 0.011,
+			"p50_ms": 0.005,
+			"p95_ms": 0.008,
+			"p99_ms": 0.009
+		},
+		"draw_calls": 117.0,
+		"frames": {
+			"max_ms": 35.918,
+			"p50_ms": 20.578,
+			"p95_ms": 29.532,
+			"p99_ms": 33.496
+		},
+		"mode": "baseline",
+		"planning": {
+			"max_ms": 0.001,
+			"p50_ms": 0.0,
+			"p95_ms": 0.001,
+			"p99_ms": 0.001
+		},
+		"primitives": 3733366.0,
+		"visible_max": 0,
+		"world_entities": 100000
+	}
+]
