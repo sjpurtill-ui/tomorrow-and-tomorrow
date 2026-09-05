@@ -12379,6 +12379,30 @@ func _warfare_arrowhead_mesh(radius:float,height:float,forward:=Vector2.RIGHT)->
 	return surface.commit()
 
 
+func _warfare_horse_head_mesh()->ArrayMesh:
+	# One readable cavalry silhouette, rather than overlapping person-like discs.
+	var points:=PackedVector2Array([Vector2(-0.72,1.12),Vector2(0.88,1.12),Vector2(0.72,0.50),Vector2(0.54,-0.55),Vector2(0.20,-0.95),Vector2(0.08,-1.35),Vector2(-0.16,-0.94),Vector2(-0.45,-0.80),Vector2(-1.08,-0.25),Vector2(-0.94,0.08),Vector2(-0.38,-0.06),Vector2(-0.12,0.16),Vector2(-0.40,0.65)])
+	var signed_area:=0.0
+	for index in points.size(): signed_area+=points[index].cross(points[(index+1)%points.size()])
+	if signed_area<0.0: points.reverse()
+	var triangles:=Geometry2D.triangulate_polygon(points)
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	surface.set_smooth_group(-1)
+	for index in triangles:
+		var point:=points[index]
+		surface.add_vertex(Vector3(point.x,0.10,point.y))
+	for index in range(triangles.size()-1,-1,-1):
+		var point:=points[triangles[index]]
+		surface.add_vertex(Vector3(point.x,-0.10,point.y))
+	for index in points.size():
+		var a:=points[index]
+		var b:=points[(index+1)%points.size()]
+		for vertex in [Vector3(a.x,0.10,a.y),Vector3(a.x,-0.10,a.y),Vector3(b.x,-0.10,b.y),Vector3(a.x,0.10,a.y),Vector3(b.x,-0.10,b.y),Vector3(b.x,0.10,b.y)]: surface.add_vertex(vertex)
+	surface.generate_normals()
+	return surface.commit()
+
+
 func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Node3D:
 	var marker:=Node3D.new()
 	marker.name=marker_name
@@ -12583,15 +12607,13 @@ func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->vo
 	match icon_key:
 		"line_infantry":
 			primary.mesh=bar.call(2.15,0.20); primary.rotation.y=PI*0.5; primary.visible=true
-			secondary.mesh=disc.call(0.48,3); secondary.position=Vector3(-0.72,0.42,-1.02); secondary.rotation.y=PI; secondary.visible=true
+			secondary.mesh=_warfare_arrowhead_mesh(0.48,0.22,Vector2.UP); secondary.position=Vector3(-0.72,0.42,-1.02); secondary.visible=true
 		"skirmisher":
 			primary.mesh=bar.call(1.62,0.18); primary.rotation.y=0.76; primary.visible=true
 			secondary.mesh=bar.call(1.62,0.18); secondary.rotation.y=-0.76; secondary.visible=true
 			tertiary.mesh=bar.call(2.20,0.13); tertiary.rotation.y=PI*0.5; tertiary.visible=true
 		"cavalry","mobile":
-			primary.mesh=disc.call(0.76,4); primary.rotation.y=PI*0.25; primary.visible=true
-			secondary.mesh=disc.call(0.34,5); secondary.position=Vector3(-0.72,0.43,-0.90); secondary.visible=true
-			tertiary.mesh=bar.call(2.45,0.14); tertiary.position.x=-0.28; tertiary.rotation.y=PI*0.5; tertiary.visible=true
+			primary.mesh=_warfare_horse_head_mesh(); primary.visible=true
 		"siege_engineer":
 			primary.mesh=bar.call(1.75,0.90); primary.visible=true
 			secondary.mesh=bar.call(2.45,0.20); secondary.rotation.y=PI*0.5; secondary.visible=true
