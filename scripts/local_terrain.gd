@@ -15731,6 +15731,7 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		_perform_civic_leader_removal(settlement_id,leadership_action,text)
 		return
 	var conversation_action:=AdvisorSystem.civic_conversation_action(text,settlement_id,int(leader.get("person_id",0)))
+	text=AdvisorSystem.civic_retry_text(text,settlement_id)
 	if conversation_action=="withdraw":
 		input.text=""
 		var withdrawn:=AdvisorSystem.withdraw_pending_civic_directive(settlement_id,int(leader.get("person_id",0)),text)
@@ -15757,7 +15758,8 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		"known_offices":GameState.leadership_positions.keys(),"active_policies":active_context,
 		"settlement":{"id":settlement_id,"name":String(settlement.get("name","the settlement")),"population":int(settlement.get("population",GameState.population_total)),"classification":String(settlement.get("classification","settlement"))},
 		"leader":{"name":String(leader.get("name","the appointed leader")),"title":String(leader.get("title","local leader")),"background":String(leader.get("background","")),"traits":(leader.get("traits",[]) as Array).duplicate()},
-		"conversation":AdvisorSystem.civic_dialogue_history(settlement_id,8),
+		"conversation":AdvisorSystem.civic_dialogue_history(settlement_id,24),
+		"decisions":AdvisorSystem.civic_decision_context(settlement_id),
 	}
 	var local_snapshot:=SettlementModel.city_resource_snapshot(settlement_id)
 	if not local_snapshot.is_empty():

@@ -453,6 +453,21 @@ func civic_dialogue_history(settlement_id:String,limit:int=8)->Array[Dictionary]
 	return result
 
 
+func civic_retry_text(text:String,settlement_id:String)->String:
+	if text.strip_edges().to_lower().trim_suffix(".") not in ["retry","try again","retry that"]: return text
+	var history:=civic_dialogue_history(settlement_id,2)
+	if history.is_empty() or String(history.back().get("status",""))!="connection_interrupted": return text
+	var order:=_civic_order_by_id(String(history.back().get("order_id","")))
+	return String(order.get("parameters",{}).get("text",text))
+
+func civic_decision_context(settlement_id:String)->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for order:Dictionary in GameState.sovereign_orders:
+		if String(order.get("settlement_id",""))!=settlement_id or String(order.get("status",""))=="interpreting": continue
+		result.append({"status":String(order.get("status","")),"request":String(order.get("parameters",{}).get("text",order.get("text",""))).substr(0,500),"outcome":String(order.get("leader_reply","")).substr(0,2400)})
+		if result.size()>=8: break
+	return result
+
 func civic_leadership_action(text:String,leader_name:String="")->String:
 	# Leadership commands are office actions, not policy prose. Keep the phrases
 	# deliberately second-person (or name the current leader) so "arrest
@@ -598,7 +613,7 @@ func _pending_civic_context(settlement_id:String,leader_person_id:int)->Dictiona
 	for order_variant in GameState.sovereign_orders:
 		var order:Dictionary=order_variant
 		if String(order.get("settlement_id",""))!=settlement_id: continue
-		if String(order.get("status","")) not in ["awaiting_confirmation","awaiting_clarification","leader_refused"]: continue
+		if String(order.get("status","")) not in ["awaiting_confirmation","awaiting_clarification","leader_refused","blocked"]: continue
 		var prior_interpretation:Dictionary=order.get("parameters",{}).get("interpretation",{})
 		if (prior_interpretation.get("policies",[]) as Array).is_empty(): continue
 		if int(order.get("leader_person_id",0))==leader_person_id: return order
@@ -608,15 +623,21 @@ func _pending_civic_context(settlement_id:String,leader_person_id:int)->Dictiona
 
 func contextualize_civic_followup(text:String,interpretation:Dictionary,settlement_id:String,leader_person_id:int=0)->Dictionary:
 	var result:=interpretation.duplicate(true)
+	if bool(result.get("service_failure",false)): return result
 	var prior:=_pending_civic_context(settlement_id,leader_person_id)
 	if prior.is_empty(): return result
-	if _rejects_civic_proposal(text):
+	var duration_revision:=_civic_duration_revision(text)
+	if _rejects_civic_proposal(text) and duration_revision.is_empty():
 		result["rejected_prior_order_id"]=String(prior.get("id",""))
 		return result
 	var ethical:Dictionary=prior.get("ethical_deliberation",{})
 	var prior_interpretation:Dictionary=prior.get("parameters",{}).get("interpretation",{})
 	var prior_policies:Array=prior_interpretation.get("policies",[])
 	if prior_policies.is_empty(): return result
+	if not duration_revision.is_empty() and prior_policies.size()!=1:
+		result["policies"]=[]; result["non_directive"]=true
+		result["answer"]="Which part of the proposal should use that duration? The existing terms are still recorded; nothing has changed."
+		return result
 	# A pending grave discussion supplies context, not carte blanche. Asking why,
 	# describing conditions, or testing a hypothetical must not silently inherit
 	# the prior killing/coercion policy and advance its confirmation sequence.
@@ -632,12 +653,15 @@ func contextualize_civic_followup(text:String,interpretation:Dictionary,settleme
 	# subject. A standalone reading such as "ration food" must not displace that
 	# subject merely because the reply mentions food as an enforcement answer.
 	if ethical.is_empty() and not (result.get("policies",[]) as Array).is_empty(): return result
-	if ethical.is_empty() and not _is_civic_insistence(text) and not _is_civic_confirmation(text): return result
+	if ethical.is_empty() and not _is_civic_insistence(text) and not _is_civic_confirmation(text) and duration_revision.is_empty(): return result
 	var continued:Array[Dictionary]=[]
 	for policy_variant in prior_policies:
 		var policy:Dictionary=(policy_variant as Dictionary).duplicate(true)
 		for transient_key in ["conversation_assessment","implementation_capacity","implementation_constraints","directive_costs","direct_effects","blocker","applied","skipped_as_stale","_conversation_deferred","_conversation_refused","_conversation_blocked","_office_execution_override","_executor_override"]: policy.erase(transient_key)
 		if not ethical.is_empty(): _merge_grave_followup_parameters(policy,text)
+		if not duration_revision.is_empty():
+			policy["days"]=float(duration_revision.days)
+			policy["duration_source"]=String(duration_revision.source)
 		policy["basis"]="contextual continuation: %s" % text.strip_edges().substr(0,80)
 		policy["confidence"]=1.0
 		continued.append(policy)
@@ -649,6 +673,12 @@ func contextualize_civic_followup(text:String,interpretation:Dictionary,settleme
 	result["source_detail"]=(String(result.get("source_detail",""))+" · contextual continuation of the leader's recorded civic discussion").strip_edges()
 	result["unresolved"]=""
 	return result
+
+func _civic_duration_revision(text:String)->Dictionary:
+	var pattern:=RegEx.new()
+	pattern.compile("^(?:(?:no|actually)[, ]+)?(?:(?:make it|make that|limit it to|for|only|just)\\s+)?(?:[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|thirty|sixty|ninety)\\s+(?:days?|weeks?|months?|years?)(?:\\s+(?:instead|only))?$" )
+	var clean:=text.strip_edges().to_lower().trim_suffix(".")
+	return PronouncementInterpreter._explicit_duration(clean) if pattern.search(clean)!=null else {}
 
 
 func _grave_followup_matches_context(text:String,prior_policies:Array)->bool:
@@ -711,6 +741,13 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 	initialize()
 	var order:=existing_order
 	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
+	if bool(interpretation.get("service_failure",false)):
+		order["status"]="discussion"
+		order["leader_stance"]="connection_interrupted"
+		order["leader_reply"]=String(interpretation.get("answer","The reply was interrupted. Retry or revise your message; no action was taken."))
+		order["parameters"]={"text":text,"interpretation":interpretation.duplicate(true)}
+		_append_leader_reply(settlement_id,leader,String(order.leader_reply),order,"connection_interrupted")
+		return order
 	if leader.is_empty() or int(leader.get("person_id",0))!=leader_person_id:
 		var unavailable:=_with_civic_state("No appointed leader can answer this instruction. Appoint the settlement leader, then speak to that person again.","BLOCKED")
 		order["status"]="leader_unavailable"

@@ -17,7 +17,7 @@ func _ready()->void:
 	civ.player_relation.opinion=.1; civ.player_relation.border_tension=0
 	var p:=ForeignDiplomacy.leader(id); p.temperament="Bridge-builder"
 	var before:float=GameState.resource_stockpiles.Timber
-	check(ForeignDialogue.accept(id,{"reply":"Let us exchange teachers.","accord":"exchange","tone":"equals","generous":false}),"Valid dialogue draft rejected")
+	check(not ForeignDialogue.accept(id,{"reply":"Let us exchange teachers.","accord":"exchange","tone":"equals","generous":false}),"Dialogue opened before any envoy exchange")
 	check(CivilizationSystem.diplomatic_mission.is_empty() and GameState.resource_stockpiles.Timber==before,"Conversation enacted proposal")
 	check(not ForeignDialogue.accept(id,{"reply":"Invent resources","accord":"spawn_gold","tone":"equals","generous":false}),"Invalid dialogue accepted")
 	check(ForeignDiplomacy.send(id,"exchange","equals").get("ok",false),"Envoys failed to leave")
@@ -28,6 +28,7 @@ func _ready()->void:
 	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
 	check(not p.accord.is_empty() and is_equal_approx(ForeignDiplomacy.multiplier("knowledge"),1.12),"Returned agreement has no effect")
 	check(CivilizationSystem.diplomatic_mission.is_empty(),"Returned mission retained")
+	check(ForeignDialogue.accept(id,{"reply":"We can discuss what comes next.","accord":"","tone":"equals","generous":false}),"Returned envoys did not enable ongoing dialogue")
 	var saved:=ForeignDiplomacy.export_state()
 	check(ForeignDiplomacy.import_state(JSON.parse_string(JSON.stringify(saved))).get("ok",false),"Leader state failed JSON roundtrip")
 	p=ForeignDiplomacy.leader(id)

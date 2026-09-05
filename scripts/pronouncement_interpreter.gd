@@ -129,6 +129,7 @@ func interpret(text: String, public_context: Dictionary = {}) -> String:
 			return request_id
 	var config := _api_config()
 	if config.is_empty():
+		if always_ask_ai and bool(GameState.civic_api_enabled): fallback=_conversation_service_failure(fallback)
 		fallback["source_detail"]="API not configured"
 		_emit_progress.call_deferred(request_id,{"stage":"offline","message":"Using the deterministic interpreter because the API is not fully configured."})
 		_emit_result.call_deferred(request_id,fallback)
@@ -280,16 +281,22 @@ func _sanitize_public_context(context:Dictionary)->Dictionary:
 	if conversation_values is Array:
 		var conversation:Array[Dictionary]=[]
 		var values:Array=conversation_values
-		var start:=maxi(0,values.size()-8)
+		var start:=maxi(0,values.size()-24)
 		for index in range(start,values.size()):
 			if not values[index] is Dictionary: continue
 			var turn:Dictionary=values[index]
 			conversation.append({
 				"speaker":_safe_diagnostic_text(String(turn.get("speaker","")),16),
 				"status":_safe_diagnostic_text(String(turn.get("status","")),32),
-				"text":_safe_diagnostic_text(String(turn.get("text","")),400),
+				"text":_safe_diagnostic_text(String(turn.get("text","")),2400),
 			})
 		safe["conversation"]=conversation
+	var decisions:Array[Dictionary]=[]
+	for value in context.get("decisions",[]):
+		if not value is Dictionary: continue
+		decisions.append({"status":_safe_diagnostic_text(String(value.get("status","")),40),"request":_safe_diagnostic_text(String(value.get("request","")),500),"outcome":_safe_diagnostic_text(String(value.get("outcome","")),2400)})
+		if decisions.size()>=8: break
+	safe["decisions"]=decisions
 	var offices:Array[String]=[]
 	var office_values=context.get("known_offices",[])
 	if office_values is Array:
@@ -498,15 +505,23 @@ func _handle_attempt_failure(request_id:String,_response_code:int,detail:String,
 		_set_progress(request_id,{"stage":"retrying","attempt":attempts,"next_attempt":attempts+1,"max_attempts":int(request.get("max_attempts",MAX_API_ATTEMPTS)),"delay_seconds":RETRY_DELAY_SECONDS*attempts,"reason":detail,"structured_output_downgraded":bool(request.get("structured_output_downgraded",false)),"message":"The first interpretation attempt failed safely; one bounded retry is scheduled."})
 		get_tree().create_timer(RETRY_DELAY_SECONDS*attempts).timeout.connect(_send_http.bind(request_id))
 		return
-	var fallback:Dictionary=request.get("fallback",{}).duplicate(true)
+	var fallback:=_conversation_service_failure(request.get("fallback",{}))
 	_routing_stats["api_fallbacks"]=int(_routing_stats.get("api_fallbacks",0))+1
 	fallback["api_attempts"]=attempts
 	fallback["structured_output_requested"]=bool(request.get("structured_output_requested",false))
 	fallback["structured_output_used"]=false
 	fallback["structured_output_downgraded"]=bool(request.get("structured_output_downgraded",false))
 	fallback["source_detail"]="API %s after %d attempt%s" % [detail,attempts,"" if attempts==1 else "s"]
-	_set_progress(request_id,{"stage":"fallback","attempts":attempts,"reason":detail,"message":"The API path failed safely; the deterministic interpretation will be used."})
+	_set_progress(request_id,{"stage":"unavailable","attempts":attempts,"reason":detail,"message":"No usable reply arrived. The discussion is preserved and no action will be taken."})
 	_finish(request_id,fallback)
+
+func _conversation_service_failure(previous:Dictionary)->Dictionary:
+	var result:=previous.duplicate(true)
+	result["policies"]=[]
+	result["service_failure"]=true
+	result["non_directive"]=true
+	result["answer"]="The conversation connection failed before a usable reply arrived. Your discussion is preserved and this message changed nothing. Say ‘retry’ to try this message again, or revise what you want to ask."
+	return result
 
 func _parse_api_body(body:PackedByteArray,pronouncement_text:String="")->Dictionary:
 	var envelope_parser:=JSON.new()
@@ -926,6 +941,8 @@ func _speech_act(text:String)->String:
 	## from changing state even if it happens to name a catalog policy.
 	var normalized:=_strip_leading_vocative(_normalize_grounding_text(text)).trim_suffix(".").strip_edges()
 	if normalized.is_empty(): return "non_directive"
+	for discussion_boundary in ["before i give an order","before giving an order","without committing","without ordering","not an order","only discussing","just discussing","could we discuss","can we discuss"]:
+		if discussion_boundary in normalized: return "non_directive"
 	var confirmation:=normalized in ["yes","correct","exactly","confirm","confirmed","do it","proceed","go ahead","overruled","i overrule you"]
 	if confirmation: return "directive"
 	for phrase in ["i confirm","do it anyway","carry it out","this is an order","make the attempt","do what you can","i am overruling you","i'm overruling you","you are overruled"]:

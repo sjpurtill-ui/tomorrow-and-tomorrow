@@ -2,7 +2,10 @@ extends Control
 var civ_id:=""
 var heading:Label
 var personal:Label
-var speech:Label
+var speech:RichTextLabel
+var access_note:Label
+var audience_button:Button
+var retry_button:Button
 var memory:Label
 var assessment:Label
 var costs:Label
@@ -37,11 +40,16 @@ func _ready()->void:
 	button(archive,"›",func(): page+=1; refresh())
 	memory=label(portrait,15)
 	var audience:=VBoxContainer.new(); audience.size_flags_horizontal=Control.SIZE_EXPAND_FILL; audience.add_theme_constant_override("separation",12); body.add_child(audience)
-	var note:=label(audience,14); note.text="PREPARE YOUR APPROACH · Discussion explores possible terms. Only returned envoys bring a binding answer."
-	speech=label(audience,21); speech.custom_minimum_size.y=175
+	access_note=label(audience,14)
+	audience_button=button(audience,"SEND DELEGATES TO ESTABLISH AN AUDIENCE",func():
+		var result:=ForeignDiplomacy.send_audience(civ_id)
+		message.text=String(result.get("error","Delegates departed. Return when their exchange arrives home.")); refresh())
+	speech=RichTextLabel.new(); speech.bbcode_enabled=false; speech.scroll_following=true
+	speech.custom_minimum_size.y=175; speech.size_flags_vertical=Control.SIZE_EXPAND_FILL; speech.add_theme_font_size_override("normal_font_size",16); audience.add_child(speech)
 	var talk:=HBoxContainer.new(); audience.add_child(talk)
 	entry=LineEdit.new(); entry.placeholder_text="Ask, challenge, or suggest terms…"; entry.max_length=1500; entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL; talk.add_child(entry)
 	ask_button=button(talk,"DISCUSS",ask); entry.text_submitted.connect(func(_text:String): ask())
+	retry_button=button(talk,"RETRY",func(): ForeignDialogue.retry(civ_id); refresh())
 	draft_button=button(audience,"REVIEW PROPOSED TERMS",func():
 		var draft:Dictionary=ForeignDialogue.thread(civ_id).draft
 		if draft.is_empty(): return
@@ -72,7 +80,8 @@ func button(parent:Node,text:String,action:Callable)->Button:
 func selected_accord()->String: return ForeignDiplomacy.ACCORDS.keys()[accord.selected]
 func selected_tone()->String: return ForeignDiplomacy.TONES.keys()[tone.selected]
 func ask()->void:
-	ForeignDialogue.ask(civ_id,entry.text); entry.clear(); refresh()
+	if ForeignDialogue.ask(civ_id,entry.text): entry.clear()
+	refresh()
 func _process(delta:float)->void:
 	timer+=delta
 	if timer>=1: timer=0; refresh()
@@ -88,10 +97,21 @@ func refresh()->void:
 	# One memory per page keeps long campaign histories off the main screen.
 	memory.max_lines_visible=7; memory.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	var context:Dictionary=ForeignDiplomacy.situation(civ_id); var thread:Dictionary=ForeignDialogue.thread(civ_id)
-	speech.text=context.title+"\n“"+context.line+"”" if thread.reply=="" else String(thread.reply)
-	speech.add_theme_font_size_override("font_size",18 if speech.text.length()>350 else 21)
+	var gate:=ForeignDialogue.access(civ_id)
+	access_note.text=String(gate.reason)+("\n"+String(thread.status) if String(thread.status)!="" else "")
+	audience_button.visible=not bool(gate.ok)
+	audience_button.disabled=not CivilizationSystem.diplomatic_mission.is_empty()
+	var transcript:Array[String]=[]
+	for turn:Dictionary in thread.messages:
+		transcript.append("%s · %s\n%s" % ["You" if turn.role=="user" else String(p.name),"earlier exchange" if int(turn.day)<0 else "day %d" % int(turn.day),String(turn.content)])
+	var displayed:="\n\n".join(transcript)
+	if displayed.is_empty(): displayed=String(context.title)+"\n“"+String(context.line)+"”" if bool(gate.ok) else "An audience has not yet been established. Your delegates must make the journey before this leader can answer."
+	if speech.text!=displayed: speech.text=displayed
 	draft_button.visible=not (thread.draft as Dictionary).is_empty()
-	ask_button.disabled=ForeignDialogue.pending.has(civ_id)
+	ask_button.disabled=ForeignDialogue.pending.has(civ_id) or not bool(gate.ok)
+	entry.editable=not ForeignDialogue.pending.has(civ_id) and bool(gate.ok)
+	retry_button.visible=bool(thread.retryable)
+	retry_button.disabled=ForeignDialogue.pending.has(civ_id) or not bool(gate.ok)
 	var f:Dictionary=ForeignDiplomacy.forecast(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
 	assessment.text=f.label+" · "+f.reasons+"\nThe answer is settled when envoys return; circumstances can change."
 	var quote:Dictionary=CivilizationSystem.diplomatic_mission_quote(civ_id,"","leader_parley")
