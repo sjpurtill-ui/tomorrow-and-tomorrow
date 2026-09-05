@@ -1,0 +1,51 @@
+extends SceneTree
+
+func _initialize()->void:
+	call_deferred("capture")
+
+func capture()->void:
+	var scene:=Node3D.new()
+	root.add_child(scene)
+	var renderer:Node3D=load("res://scripts/local_terrain.gd").new()
+	var camera:=Camera3D.new()
+	camera.projection=Camera3D.PROJECTION_ORTHOGONAL
+	camera.size=42.0
+	camera.position=Vector3(0,70,0)
+	scene.add_child(camera)
+	camera.look_at(Vector3.ZERO,Vector3.FORWARD)
+	renderer.camera=camera
+	var environment:=WorldEnvironment.new()
+	environment.environment=Environment.new()
+	environment.environment.background_mode=Environment.BG_COLOR
+	environment.environment.background_color=Color("22342d")
+	environment.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
+	environment.environment.ambient_light_energy=0.6
+	scene.add_child(environment)
+	var sun:=DirectionalLight3D.new()
+	sun.rotation_degrees=Vector3(-55,-25,0)
+	scene.add_child(sun)
+	var units:=["levy","line_infantry","cavalry","siege_engineer","field_artillery","rifle_infantry","motorized_infantry","armored_formation"]
+	for index in units.size():
+		var center:=Vector3((float(index%4)-1.5)*16.0,0,(float(index/4)-0.5)*19.0)
+		var marker:Node3D=renderer._create_warfare_formation_marker("Icon%d" % index,true)
+		scene.add_child(marker)
+		marker.position=center
+		var army:={"army_id":index+1,"troops":1200,"readiness":0.85,"supply_level":0.8,"formations":[{"unit":units[index],"count":1200}]}
+		var view:=WarfareMapPresentation.player_marker(army,60.0)
+		view.show_label=false
+		renderer._apply_warfare_formation_view(marker,view)
+		var label:=Label3D.new()
+		label.text=String(units[index]).replace("_"," ").to_upper()
+		label.font_size=8
+		label.fixed_size=true
+		label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+		label.position=center+Vector3(0,0.1,5.0)
+		scene.add_child(label)
+	for frame in 8: await process_frame
+	await RenderingServer.frame_post_draw
+	var path:=ProjectSettings.globalize_path("res://artifacts/military-glyphs.png")
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var result:=root.get_texture().get_image().save_png(path)
+	renderer.free()
+	print("MILITARY_GLYPH_CAPTURE ",path," result=",result)
+	quit(result)
