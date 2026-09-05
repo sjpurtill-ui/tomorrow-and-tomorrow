@@ -30,7 +30,11 @@ void vertex() {
 	if (!fallen) {
         vec2 clip = INSTANCE_CUSTOM.w > 2.5 ? battle_attack : (INSTANCE_CUSTOM.w > 1.5 ? battle_walk : (INSTANCE_CUSTOM.w > .5 ? battle_attack : battle_idle));
         active_start = clip.x; active_count = clip.y;
-        progress = INSTANCE_CUSTOM.w > 2.5 ? .22 : INSTANCE_CUSTOM.x;
+        progress = INSTANCE_CUSTOM.w > 2.5 && INSTANCE_CUSTOM.w < 3.5 ? .22 : INSTANCE_CUSTOM.x;
+        if (INSTANCE_CUSTOM.w > 3.5) {
+            float stroke = progress < .48 ? smoothstep(0., .48, progress) : 1. - smoothstep(.48, 1., progress);
+            progress = mix(.22, .58, stroke);
+        }
     }
     bool active_loop = false;
 	float frame = progress * (active_loop ? active_count : active_count - 1.0);
@@ -39,6 +43,7 @@ void vertex() {
 	vec2 a = vec2(UV2.x, (UV2.y + (active_start + first) * rows_per_frame) / texture_height);
 	vec2 b = vec2(UV2.x, (UV2.y + (active_start + second) * rows_per_frame) / texture_height);
 	VERTEX = mix(texture(position_frames, a).xyz, texture(position_frames, b).xyz, fract(frame));
+	if (!fallen) VERTEX.z += .035 * INSTANCE_CUSTOM.y * smoothstep(.75, 1.5, VERTEX.y);
 	NORMAL = normalize(mix(texture(normal_frames, a).xyz, texture(normal_frames, b).xyz, fract(frame)));
 }
 
