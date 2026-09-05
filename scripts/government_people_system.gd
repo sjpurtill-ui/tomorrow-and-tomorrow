@@ -1061,6 +1061,7 @@ func settlement_management(settlement_id:String)->Dictionary:
 
 
 func set_settlement_focus(settlement_id:String,focus:String)->Dictionary:
+	if not String(SettlementModel.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
 	if focus not in FOCUS_LABELS: return {"ok":false,"reason":"Unknown settlement focus."}
 	for index in GameState.player_settlements.size():
 		if String(GameState.player_settlements[index].get("id",""))!=settlement_id: continue
@@ -1077,6 +1078,7 @@ func set_settlement_focus(settlement_id:String,focus:String)->Dictionary:
 
 
 func restore_delegation(settlement_id:String)->Dictionary:
+	if not String(SettlementModel.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
 	for index in GameState.player_settlements.size():
 		if String(GameState.player_settlements[index].get("id",""))!=settlement_id: continue
 		GameState.player_settlements[index]["auto_manage"]=true

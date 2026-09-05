@@ -4092,6 +4092,11 @@ func player_population_commitments()->Dictionary:
 			by_function[function_id]=int(by_function.get(function_id,0))+maxi(0,int(convoy_sources.get(function_id,0)))
 		if convoy_population>0:
 			records.append({"id":"settlement_convoy","label":"SETTLEMENT CONVOY","kind":"settlement_convoy","personnel":convoy_population,"depart_day":int(GameState.settlement_convoy.get("depart_day",GameState.elapsed_days)),"return_day":int(GameState.settlement_convoy.get("arrival_day",GameState.elapsed_days)),"source":"mixed","by_function":convoy_sources.duplicate(true)})
+	var survivors:Dictionary=MilitaryCampaign.recovery.absent_group()
+	if not survivors.is_empty():
+		var sources:Dictionary=survivors.get("functions",{})
+		for function_id in by_function:by_function[function_id]=int(by_function[function_id])+int(sources.get(function_id,0))
+		records.append({"id":"siege_survivors","label":"SIEGE SURVIVORS","kind":"siege_recovery","personnel":int(survivors.people),"source":"mixed","by_function":sources.duplicate(true)})
 	var total_absent:=0
 	var working_absent:=0
 	for function_id in ["productive","support","mobilized","dependent"]:
@@ -4315,7 +4320,7 @@ func _rebuild_competition(advance_outcome:bool=false,evaluation_day:int=-1)->voi
 		dominance_turns=int(contender_dominance_turns.get("player",0))
 		var effects:=player_effects()
 		var collapsing:=GameState.population_health<0.12 and GameState.food_security<0.12 and float(GameState.simulation_metrics.get("legitimacy",0.62))<0.12 and float(effects.hostile_pressure)>0.35
-		collapse_turns=collapse_turns+1 if collapsing else 0
+		collapse_turns=collapse_turns+1 if collapsing and MilitaryCampaign.recovery.data.occupied.is_empty() and MilitaryCampaign.recovery.data.remnant.is_empty() else 0
 		var winning_id:=""
 		for contender_id in contender_dominance_turns:
 			if int(contender_dominance_turns[contender_id])>=12: winning_id=String(contender_id); break

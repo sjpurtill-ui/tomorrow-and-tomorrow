@@ -400,6 +400,7 @@ func _ready() -> void:
 	_prepare_river_course()
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_scout_land_at"))
 	CivilizationSystem.set_ground_survey_authority(Callable(self,"_survey_ground_at"))
+	MilitaryCampaign.recovery.surface_assessor=Callable(self,"_settlement_surface_assessment")
 	if not CivilizationSystem.scout_report_returned.is_connected(_on_scout_report_returned):
 		CivilizationSystem.scout_report_returned.connect(_on_scout_report_returned)
 	world_start_position = _find_camp_position()
@@ -930,6 +931,10 @@ func _process(delta: float) -> void:
 		last_discovery_day += 1
 		GameState.convoy_traveling=travel_active
 		CivilizationSystem.advance_to_day(last_discovery_day)
+		if MilitaryCampaign.recovery.home_unavailable():
+			MilitaryCampaign.recovery.advance(last_discovery_day)
+			_process_other_city_resources()
+			continue
 		var daily_context := _discovery_context()
 		var discoveries := DiscoverySystem.process_day(daily_context)
 		var resource_events := ResourceSystem.process_day(daily_context)

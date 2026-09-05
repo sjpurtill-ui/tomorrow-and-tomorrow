@@ -40,6 +40,7 @@ func _ready()->void:
 	for order:String in ["continue","assault","withdraw"]:order_buttons[order]=_button(controls,order.to_upper(),_siege_order.bind(order))
 	_button(controls,"NEGOTIATE",_negotiate)
 	var battle_row:=HBoxContainer.new();column.add_child(battle_row)
+	_button(battle_row,"SURVIVAL & INDEPENDENCE",func():preload("res://scripts/hud/recovery_screen.gd").open())
 	for order:String in ["hold","push","retreat"]:battle_buttons[order]=_button(battle_row,"BATTLE: "+order.to_upper(),_battle_order.bind(order))
 	feedback=Label.new();feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;feedback.add_theme_font_size_override("font_size",13);column.add_child(feedback)
 	_refresh()
@@ -67,6 +68,7 @@ func _refresh()->void:
 	status.text+="\n"+String(snapshot.description)+" Each soldier figure represents a group."
 	for button:Button in order_buttons.values():button.disabled=not bool(snapshot.active)
 	order_buttons.assault.text="ASSAULT" if String(snapshot.mode)=="offensive" else "SORTIE"
+	order_buttons.withdraw.text="WITHDRAW" if String(snapshot.mode)=="offensive" else "YIELD CITY"
 	for button:Button in battle_buttons.values():button.disabled=not bool(snapshot.battle_active)
 func _siege_order(order:String)->void:
 	var result:Dictionary=MilitaryCampaign.siege_order(siege_id,order)

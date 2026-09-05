@@ -152,6 +152,16 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 	var away_adults:=0.0
 	if GameState.resource_settlement_id=="" and civilization_system!=null and civilization_system.has_method("mission_absent_personnel"):
 		away_adults=clampf(float(civilization_system.mission_absent_personnel()),0.0,adults)
+	if GameState.resource_settlement_id=="":
+		# Escaped groups already leave the local settlement count; preparation is
+		# still local, but uses its reserved food, including family members.
+		var recovery=MilitaryCampaign.recovery
+		if not recovery.data.remnant.is_empty():away_adults=maxf(0,away_adults-int(recovery.data.remnant.people))
+		if not recovery.data.preparation.is_empty():
+			var prepared:Dictionary=recovery.data.preparation
+			var young:=float(prepared.cohorts.get("children",0));var old:=float(prepared.cohorts.get("elders",0))
+			away_adults=maxf(0,away_adults-young-old)
+			children=maxf(0,children-young);elders=maxf(0,elders-old)
 	adults-=away_adults
 	# Children are a full 0–13 cohort, including infancy; its weighted average
 	# is lower than the need of an older child. These are adult-equivalent rations.
