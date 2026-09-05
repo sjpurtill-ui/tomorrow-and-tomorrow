@@ -10,6 +10,7 @@ const MAP_TEXTURES:Array[String]=[
 	"res://assets/textures/settlement_material_atlas_v2.png",
 	"res://assets/textures/settlement_roof_material_atlas_v1.png",
 	"res://assets/textures/settlement_roof_material_atlas_late_v1.png",
+	"res://assets/textures/vegetation_canopy_atlas.png",
 ]
 
 func test_aerial_materials_have_real_mip_chains()->void:
@@ -22,6 +23,15 @@ func test_aerial_materials_have_real_mip_chains()->void:
 		if pixels==null: continue
 		assert_bool(pixels.has_mipmaps()).is_true()
 		assert_int(pixels.get_mipmap_count()).is_greater(0)
+
+
+func test_canopy_shader_binds_a_mipmapped_atlas()->void:
+	var renderer:Node3D=auto_free(preload("res://scripts/local_terrain.gd").new())
+	var material:ShaderMaterial=renderer._vegetation_surface_material(0,0)
+	assert_str(material.shader.code).contains("uniform sampler2D canopy_atlas : source_color, filter_linear_mipmap, repeat_disable;")
+	var texture:=material.get_shader_parameter("canopy_atlas") as Texture2D
+	assert_object(texture).is_not_null()
+	if texture: assert_bool(texture.get_image().has_mipmaps()).is_true()
 
 
 func test_both_roof_eras_actually_sample_their_mip_chains()->void:
