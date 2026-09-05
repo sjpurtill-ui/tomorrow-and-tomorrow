@@ -433,9 +433,9 @@ static func foreign_marker(sighting:Dictionary,camera_size:float)->Dictionary:
 	var damage_text:="" if damage_state=="intact" else " • %s" % damage_state.to_upper()
 	var label:=""
 	if band in ["ground","local"]:
-		label="%s · ~%s–%s SOLDIERS%s\n%s" % ["FOREIGN SCOUTS" if scout and not identified else owner.to_upper(),compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
+		label="%s · ~%s–%s SOLDIERS%s\n%s" % [(owner.to_upper()+" · SCOUT PARTY" if identified else "FOREIGN SCOUTS") if scout else owner.to_upper()+" · FIELD ARMY",compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
 	elif band=="regional":
-		label="%s · ~%s–%s SOLDIERS%s\n%s" % ["FOREIGN SCOUTS" if scout and not identified else owner.to_upper(),compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
+		label="%s · ~%s–%s SOLDIERS%s\n%s" % [(owner.to_upper()+" · SCOUT PARTY" if identified else "FOREIGN SCOUTS") if scout else owner.to_upper()+" · FIELD ARMY",compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
 	return {
 		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["ground","local","regional"],
 		"show_label":band in ["ground","local","regional"],"label":label,"selected":false,"moving":moving,"heading":float(sighting.get("heading",0.0)),

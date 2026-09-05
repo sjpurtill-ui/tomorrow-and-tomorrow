@@ -288,16 +288,13 @@ func test_visible_map_formation_requires_war_then_opens_battle_with_the_selected
 	var army_id:=int((created.get("army",{}) as Dictionary).get("army_id",0))
 	assert_int(army_id).is_greater(0)
 	var neutral:Dictionary=MilitaryCampaign.map_engagement_availability(army_id,String(foreign.id))
-	assert_bool(bool(neutral.get("can_order",true))).is_false()
-	assert_str(String(neutral.get("error",""))).contains("not an enemy")
-	civ=CivilizationSystem.civilizations[civ_index]
-	civ.player_relation["at_war"]=true
-	civ.player_relation["treaty"]="war"
-	CivilizationSystem.civilizations[civ_index]=civ
+	assert_bool(bool(neutral.get("can_order",false))).is_true()
+	assert_bool(CivilizationSystem.civilizations[civ_index].player_relation.at_war).is_false()
 	var ready:Dictionary=MilitaryCampaign.map_engagement_availability(army_id,String(foreign.id))
 	assert_bool(bool(ready.get("can_engage",false))).is_true()
 	var launched:Dictionary=MilitaryCampaign.launch_map_engagement(army_id,String(foreign.id))
 	assert_bool(bool(launched.get("engagement_started",false))).is_true()
+	assert_bool(CivilizationSystem.civilizations[civ_index].player_relation.at_war).is_true()
 	assert_bool(MilitaryCampaign.threat_snapshot().is_empty()).is_true()
 	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
 	assert_bool(bool((engagement.get("threat",{}) as Dictionary).get("field_encounter",false))).is_true()

@@ -173,3 +173,16 @@ func test_unobserved_capital_and_hidden_rank_are_not_public()->void:
 	GameState.known_discoveries.assign(["tallies","standard_measures","census_rolls","statistical_inference"])
 	for discovery in GameState.known_discoveries: GameState.discovery_adoption[discovery]=1.0
 	assert_int(CivilizationSystem.known_competition_snapshot().player_rank).is_equal(-1)
+
+func test_location_only_report_supports_named_army_movement_without_revealing_controller()->void:
+	var location:Dictionary=intel().location_record(intel().site(region()),20,"returned location","test")
+	intel().publish("player",location,30)
+	var destination:=MilitaryCampaign._movement_destination(region())
+	assert_dict(destination).is_not_empty()
+	assert_str(String(destination.controller)).is_empty()
+	assert_bool(bool(destination.available_campaign)).is_false()
+	assert_dict(intel().known("player",region()).fields).is_empty()
+	MilitaryCampaign.field_armies=[{"army_id":991,"name":"Test","troops":6,"status":"stationed","location_id":"field_position","position":location.position.duplicate(true)}]
+	assert_bool(MilitaryCampaign.move_field_army(991,region()).has("ok")).is_true()
+	assert_str(String(MilitaryCampaign.field_armies[0].location_id)).is_equal(region())
+	assert_int(int(MilitaryCampaign.field_armies[0].troops)).is_equal(6)

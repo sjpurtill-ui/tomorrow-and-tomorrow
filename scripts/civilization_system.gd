@@ -387,6 +387,23 @@ func _start_war(first_id:String,second_id:String,goal:String,target_region_id:St
 	return war_id
 
 
+func record_player_hostile_order(civ_id:String,region_id:String,cause:String)->String:
+	var index:=_civilization_index(civ_id)
+	if index<0:return ""
+	var civ:Dictionary=civilizations[index]
+	var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
+	if not bool(relation.get("at_war",false)):
+		relation["at_war"]=true;relation["treaty"]="war";relation["stance"]="hostile";relation["trade"]=0.0
+		relation["contact_level"]=maxi(2,int(relation.get("contact_level",0)))
+		relation["opinion"]=clampf(float(relation.get("opinion",0))-.42,-1,1);relation["border_tension"]=1.0
+		relation["war_goal"]="limited";relation["war_target_region_id"]=region_id
+		relation["war_score"]=0.0;relation["conflict_turns"]=0;relation["war_started_day"]=int(GameState.elapsed_days);relation["last_war_result"]="ongoing"
+		relation["war_id"]=_start_war("player",civ_id,"limited",region_id,int(GameState.elapsed_days),cause)
+	else:relation=_ensure_relation_war(relation,"player",civ_id,int(GameState.elapsed_days),cause)
+	civ["player_relation"]=relation;civilizations[index]=civ
+	return String(relation.war_id)
+
+
 func _war_record_index(war_id:String)->int:
 	for index in war_history.size():
 		if String(war_history[index].get("id",""))==war_id: return index
@@ -481,11 +498,9 @@ func military_fronts_snapshot()->Dictionary:
 func military_movement_destinations()->Array[Dictionary]:
 	var destinations:Array[Dictionary]=[{"id":"player_home","civ_id":"player","region_id":"","label":GameState.settlement_name if GameState.settlement_name!="" else "HOME SETTLEMENT","kind":"home","position":{"x":player_world_origin.x,"z":player_world_origin.y},"known":true}]
 	for city:Dictionary in city_intelligence.known_cities():
-		if city.civ_id=="" or city.controller=="": continue
 		var index:=_civilization_index(String(city.civ_id))
-		if index<0: continue
-		var relation:Dictionary=civilizations[index].player_relation
-		destinations.append({"id":city.city_id,"civ_id":city.civ_id,"region_id":city.city_id,"label":city.name,"kind":"strategic_region","position":city.position.duplicate(true),"known":true,"controller":city.controller,"available_campaign":true,"at_war":bool(relation.get("at_war",false))})
+		var relation:Dictionary=civilizations[index].player_relation if index>=0 else {}
+		destinations.append({"id":city.city_id,"civ_id":city.civ_id,"region_id":city.city_id,"label":city.name,"kind":"strategic_region","position":city.position.duplicate(true),"known":true,"controller":city.controller,"available_campaign":city.controller!="","at_war":bool(relation.get("at_war",false))})
 	return destinations
 
 
@@ -1864,7 +1879,6 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 	if civ_index<0: return {"error":"The formation's polity record no longer exists."}
 	var civ:Dictionary=civilizations[civ_index]
 	var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
-	if not bool(relation.get("at_war",false)): return {"error":"This is not an enemy force. Open war must exist before a field army can attack it."}
 	var position:Dictionary=public_sighting.get("position",{})
 	var strength:=maxi(1,roundi(float(civ.get("military_population",1.0))*float(formation.get("strength_share",0.06))))
 	return {
@@ -3547,7 +3561,6 @@ func offensive_campaign_data(civ_id:String,fielded_strength:int,region_id:String
 	if index<0: return {"error":"Unknown civilization."}
 	var civ:Dictionary=civilizations[index]
 	var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
-	if not bool(relation.get("at_war",false)) and not raid: return {"error":"Open war must exist before a campaign can be launched."}
 	if raid and String(relation.get("treaty","none")) in ["non_aggression","truce"]: return {"error":"A standing non-aggression compact or truce bars a raid."}
 	if fielded_strength<=0: return {"error":"No trained field formation is available for an offensive campaign."}
 	if region_id!="" and city_intelligence.known("player",region_id).is_empty(): return {"error":"No report identifies that city."}
@@ -3563,7 +3576,7 @@ func offensive_campaign_data(civ_id:String,fielded_strength:int,region_id:String
 	var region:Dictionary=owner.strategic_regions[target_index]
 	if String(region.get("controller",String(owner.id)))!=civ_id: return {"error":"%s is controlled by %s; conduct the campaign against that civilization instead." % [String(region.name),_controller_label(String(region.get("controller","")))]}
 	var foreign_holding:=String(owner.id)!=civ_id
-	if not foreign_holding and target_index!=_frontline_region_index(civ): return {"error":"The campaign front has not reached %s. Capture the exposed regions first." % String(region.name)}
+	if not foreign_holding and target_index!=_frontline_region_index(civ) and not _nearby_player_army(city_intelligence.vector(city_intelligence.site(selected_region_id).position),0.5): return {"error":"The campaign front has not reached %s. Capture the exposed regions first." % String(region.name)}
 	var region_weight:=float(region.get("strategic_weight",0.12))
 	var fortification:=float(region.get("fortification",0.25))*(1.0-float(region.get("damage",0.0))*0.65)
 	# The defender is drawn from the rival's actual aggregate armed capacity.

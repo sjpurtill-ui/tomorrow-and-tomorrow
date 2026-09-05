@@ -62,6 +62,12 @@ func _scout_tab(sighting:Dictionary,kpis:Array)->Dictionary:
 	var capture_chance:=roundi(float(interception.get("capture",0.0))*100.0)
 	var attack_chance:=roundi(float(interception.get("destroy",0.0))*100.0)
 	var blocks:Array=[]
+	var point:Dictionary=sighting.get("position",{})
+	var nearby:Dictionary=terrain._contact_encounter_at(Vector3(float(point.get("x",0)),0,float(point.get("z",0))),0.3)
+	if nearby.has("city_id"):
+		var nearby_id:=String(nearby.city_id)
+		blocks.append({"type":"actions","heading":"THIS COUNTER IS A SCOUT PARTY","items":[{"label":"OPEN NEARBY CITY REPORT","sub":"city movement, attack and siege orders","on_press":func()->void:CivilizationSystem.city_intelligence.open(nearby_id)}]})
+
 	if not last_outcome.is_empty():
 		blocks.append({"type":"text","heading":"RESULT","text":String(last_outcome.get("message",last_outcome.get("error","No interception occurred.")))})
 	blocks.append({"type":"text","heading":"PURSUIT","text":"Select a fast field army and order it to pursue. Cavalry can close on foot scouts; infantry and siege baggage slow a mixed force. Capturing scouts can provoke their people. The local watch can also attempt an immediate interception below."})
@@ -92,12 +98,7 @@ func _formation_tab(sighting:Dictionary,kpis:Array)->Dictionary:
 	if not last_outcome.is_empty():
 		blocks.append({"type":"text","heading":"ORDER STATUS","text":String(last_outcome.get("message",last_outcome.get("error","No order was issued.")))})
 	if not hostile:
-		blocks.append({"type":"text","heading":"WHY YOU CANNOT ATTACK YET","text":"This is an observed foreign formation, not an enemy force. Open war must exist before an army can receive an attack order. Observation alone does not silently start a war."})
-		var actions:Array=[]
-		if String(sighting.get("civ_id",""))!="":
-			actions.append({"label":"OPEN FOREIGN RECORD","sub":"diplomacy, contact, and war","primary":true,"on_press":_open_foreign_record.bind(String(sighting.get("civ_id",""))),"tip":"Review the identified polity and its current relationship with you"})
-		if not actions.is_empty(): blocks.append({"type":"actions","items":actions})
-		return {"kpis":kpis,"brief":{"tone":"info","title":"Observed, but not at war","why":"Track it or open the identified polity's record. An attack requires a deliberate war state."},"blocks":blocks}
+		blocks.append({"type":"text","heading":"ATTACKING STARTS A WAR","text":"You may attack without a declaration. War begins when your army makes battle contact; simply viewing or approaching this force does not start war."})
 	if army.is_empty():
 		blocks.append({"type":"text","heading":"HOW BATTLE STARTS","text":"1. Select a field army.  2. Click this red enemy counter.  3. Order MOVE TO INTERCEPT.  4. If sight is maintained, battle opens automatically when the forces make contact."})
 		blocks.append({"type":"actions","items":[{"label":"SELECT NEAREST FIELD ARMY","sub":"make it the active map command","primary":true,"on_press":_select_nearest_army,"tip":"Select the field army closest to this visible enemy"}]})
