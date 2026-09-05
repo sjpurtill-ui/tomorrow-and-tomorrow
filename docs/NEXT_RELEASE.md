@@ -13,10 +13,10 @@ One final versioned release and one final player relaunch, only after this check
 - [x] Persistent interactive siege view: bounded representative city mockup derived from actual known settlement type, scale, damage/style and fortifications; actual known walls/encirclement, unwalled assault in streets with actual forces, honest quiet/combat phases, full-duration live decisions including escape, leave/reopen and occupation transition without duplicated state.
 - [x] One authoritative user-facing version source, accessible UI/title, release notes/diagnostics and compatible save metadata.
 - [x] Combined regression, latest campaign fresh-process compatibility, knowledge boundaries, population accounting, silent GPU UI/marker checks.
-- [ ] Canonical integration/version notes complete. Preserve newest campaign, orderly final relaunch exactly one canonical game, verify version and resumed campaign.
+- [x] Canonical integration/version notes complete. Preserve newest campaign, orderly final relaunch exactly one canonical game, verify version and resumed campaign.
 
 Retain integrated Show Home, charts, city intelligence, zoom, combat and prior features. Outpost, unrelated economy, sliced vegetation and unfinished Blender authoring prototypes remain excluded. All prior authorized scopes above remain active across compaction.
 
 - [x] Authorized isolated hierarchical spatial-grid benchmark/report readiness from Scale game systems for billions. Compare baseline versus prototype workloads, latency, memory and visible rendering versus offscreen simulation. This does not authorize production grid migration. Coordinate with worker task 01a055ef-4718-7f10-8fad-0f5889879e2d.
 
-Behavior-by-behavior audit, evidence and explicit limits: docs/RELEASE_2026_09_05_1.md. Spatial report integrated a9dddbb; gameplay delivery c337a0f with prior occupation commits. Final launch checkbox stays open until process/version/save resume are verified.
+Behavior-by-behavior audit, evidence and explicit limits: docs/RELEASE_2026_09_05_1.md. Spatial report integrated a9dddbb; gameplay delivery c337a0f with prior occupation commits. Final launch verified: version2026.09.05.1, source9509dc7, PID58360, canonical path, resumed SeanTown/day6176/population307/seed1792400273. Launch log artifacts/player-20260905-124527.log.
