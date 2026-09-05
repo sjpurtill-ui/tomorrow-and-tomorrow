@@ -73,6 +73,8 @@ var escaped_prisoners_total:=0
 var active_threat:Dictionary={}
 var threats_resolved:=0
 var active_engagement:Dictionary={}
+var active_siege:Dictionary={}
+var siege_history:Array[Dictionary]=[]
 var war_reputation:Dictionary={"mercy":0.0,"fear":0.0,"grievance":0.0}
 var occupation_forces:Array[Dictionary]=[]
 var field_armies:Array[Dictionary]=[]
@@ -122,6 +124,7 @@ func reset_for_new_world()->void:
 	home_army={}
 	battle_history.clear()
 	pending_aftermath.clear()
+	active_siege.clear(); siege_history.clear()
 	military_inventory=_empty_equipment_inventory()
 	military_consumables=_empty_consumable_inventory()
 	damaged_equipment=_empty_equipment_inventory()
@@ -919,6 +922,7 @@ func _field_army_speed(force:Dictionary)->float:
 
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
+	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
 	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
@@ -950,6 +954,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
+	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	## Map-order movement to a free position on scouted ground. The caller (the
 	## map layer) validates that the point is charted, dry land before issuing;
 	## this guard re-checks so a stray order can never march into the unknown.
@@ -1755,6 +1760,7 @@ func _home_defense_force()->Dictionary:
 
 
 func begin_threat_engagement()->Dictionary:
+	if not active_siege.is_empty(): return {"error":"Use the siege assault or sortie order to begin combat."}
 	if not active_engagement.is_empty(): return engagement_snapshot()
 	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
@@ -1960,12 +1966,14 @@ func respond_to_threat(response:String)->Dictionary:
 
 
 func has_active_operation_for_civ(civ_id:String)->bool:
+	if not active_siege.is_empty() and civ_id in [active_siege.attacker_id,active_siege.defender_id]: return true
 	if not active_threat.is_empty() and String(active_threat.get("source_civ_id",""))==civ_id: return true
 	if not active_engagement.is_empty() and String((active_engagement.get("threat",{}) as Dictionary).get("source_civ_id",""))==civ_id: return true
 	return false
 
 
 func offensive_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
+	if not active_siege.is_empty(): return {"error":"Resolve the current siege before starting another operation."}
 	if not active_engagement.is_empty(): return {"error":"Finish the active campaign engagement first."}
 	if not active_threat.is_empty(): return {"error":"Resolve the approaching campaign before launching another."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
@@ -1993,6 +2001,7 @@ func launch_offensive(civ_id:String,region_id:String="")->Dictionary:
 
 
 func raid_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
+	if not active_siege.is_empty(): return {"error":"Resolve the siege before launching a raid."}
 	if not active_engagement.is_empty() or not active_threat.is_empty(): return {"error":"Resolve the current military operation first."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
 	if region_id=="": return {"error":"Select a known strategic region to raid."}
@@ -2022,12 +2031,16 @@ func _resolve_threat_without_battle(title:String,description:String)->void:
 
 
 func _process_threat_day()->void:
+	if not active_siege.is_empty(): return
 	if not active_engagement.is_empty():
 		advance_engagement("hold")
 		return
 	if not active_threat.is_empty():
 		if int(GameState.elapsed_days)>int(active_threat.get("deadline_day",GameState.elapsed_days)) and pending_aftermath.is_empty():
 			var occupation_defense:=occupation_force_for_region(String(active_threat.get("source_civ_id","")),String(active_threat.get("target_region_id","")))
+			if int(settlement_defense.get("stage",0))>=1 and String(active_threat.get("target_region_id",""))=="" and not bool(active_threat.get("field_encounter",false)) and String(active_threat.get("incident_kind","campaign"))!="raid":
+				var investment:=begin_siege()
+				if bool(investment.get("ok",false)): return
 			respond_to_threat("defend" if int(settlement_defense_snapshot().get("garrison_personnel",0))>0 or int(occupation_defense.get("troops",0))>0 else "withdraw")
 			while not active_engagement.is_empty(): advance_engagement("hold")
 		return
@@ -2257,6 +2270,8 @@ func export_state()->Dictionary:
 		"active_threat":active_threat.duplicate(true),
 		"threats_resolved":threats_resolved,
 		"active_engagement":active_engagement.duplicate(true),
+		"active_siege":active_siege.duplicate(true),
+		"siege_history":siege_history.duplicate(true),
 		"war_reputation":war_reputation.duplicate(true),
 		"occupation_forces":occupation_forces.duplicate(true),
 		"field_armies":field_armies.duplicate(true),
@@ -2269,6 +2284,12 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	var siege_error:=SiegeModel.validate(payload.get("active_siege",{}))
+	if not siege_error.is_empty(): return {"error":siege_error}
+	if not payload.get("siege_history",[]) is Array or payload.get("siege_history",[]).size()>SiegeModel.HISTORY_LIMIT: return {"error":"Invalid siege history."}
+	for history in payload.get("siege_history",[]):
+		var history_error:=SiegeModel.validate(history)
+		if not history_error.is_empty(): return {"error":history_error}
 	var incoming:=payload.duplicate(true)
 	var incoming_version:=int(incoming.get("version",-1))
 	if incoming_version in [1,2,3]: incoming=_migrate_legacy_state(incoming)
@@ -2337,6 +2358,15 @@ func _migrate_legacy_state(payload:Dictionary)->Dictionary:
 
 func validate_state()->Array[String]:
 	var errors:Array[String]=[]
+	var siege_error:=SiegeModel.validate(active_siege)
+	if not siege_error.is_empty(): errors.append(siege_error)
+	if not active_siege.is_empty():
+		if not active_engagement.is_empty() or not active_threat.is_empty(): errors.append("A siege cannot duplicate another active encounter.")
+		if String(active_siege.get("mode",""))=="offensive" and _field_army_index(int(active_siege.get("army_id",0)))<0: errors.append("The siege references a missing field army.")
+	if siege_history.size()>SiegeModel.HISTORY_LIMIT: errors.append("Siege history exceeds its bound.")
+	for history in siege_history:
+		var history_error:=SiegeModel.validate(history)
+		if not history_error.is_empty(): errors.append(history_error)
 	var formations:Array=home_army.get("formations",[])
 	var formation_total:=0
 	var formation_ids:Dictionary={}
@@ -2450,7 +2480,10 @@ func validate_state()->Array[String]:
 		var army_id:=int(force.get("army_id",0)); greatest_field_army_id=maxi(greatest_field_army_id,army_id)
 		if army_id<=0 or field_army_ids.has(army_id): errors.append("Field army IDs must be positive and unique.")
 		field_army_ids[army_id]=true
-		if String(force.get("status","")) not in ["stationed","moving"]: errors.append("Field army has an invalid movement status.")
+		if String(force.get("status","")) not in ["stationed","moving","besieging"]: errors.append("Field army has an invalid movement status.")
+		var investing:=not active_siege.is_empty() and String(active_siege.get("mode",""))=="offensive" and int(active_siege.get("army_id",0))==army_id
+		if (String(force.get("status",""))=="besieging")!=investing: errors.append("Field army siege status does not match its operation.")
+		if investing and String(force.get("location_id",""))!=String(active_siege.get("region_id","")): errors.append("Investing army is not at its siege target.")
 		var field_total:=0
 		for formation in force.get("formations",[]):
 			field_total+=maxi(0,int(formation.get("count",0)))
@@ -2496,6 +2529,8 @@ func validate_state()->Array[String]:
 	return errors
 
 func _apply_imported_state(payload:Dictionary)->void:
+	active_siege=(payload.get("active_siege",{}) as Dictionary).duplicate(true)
+	siege_history.assign(payload.get("siege_history",[]))
 	last_processed_day=int(payload.get("last_processed_day",int(GameState.elapsed_days)))
 	home_army=(payload.get("home_army",{}) as Dictionary).duplicate(true)
 	_normalize_formation_ammunition()
@@ -3111,6 +3146,7 @@ func _process_military_day()->void:
 	_process_training_program_day()
 	_process_field_army_movement_day()
 	_process_army_runners_day()
+	_process_siege_day()
 	_process_threat_day()
 	if not active_engagement.is_empty(): return
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
@@ -4071,3 +4107,202 @@ func _demobilize_disabled(requested:int)->int:
 	home_army["wounded_pool"]=int(home_army.get("wounded_pool",0))-amount
 	GameState.receive_injured_veterans(amount,severe)
 	return amount
+
+
+func offensive_siege_availability(civ_id:String,region_id:String)->Dictionary:
+	var available:=offensive_campaign_availability(civ_id,region_id)
+	if available.has("error"): return available
+	if bool(available.incident.get("liberation_campaign",false)): return {"error":"Sieges currently require an opponent-owned settlement; use the existing liberation campaign for occupied foreign regions."}
+	return available
+
+func start_offensive_siege(civ_id:String,region_id:String)->Dictionary:
+	var available:=offensive_siege_availability(civ_id,region_id)
+	if available.has("error"): return available
+	_create_civilization_threat(available.incident,"offensive")
+	return begin_siege()
+
+func begin_siege()->Dictionary:
+	if not active_siege.is_empty() or not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Resolve the current military operation first."}
+	if active_threat.is_empty() or bool(active_threat.get("field_encounter",false)) or String(active_threat.get("incident_kind","campaign"))=="raid": return {"error":"A siege needs a settlement campaign, not a passing raid or field encounter."}
+	var offensive:=String(active_threat.get("campaign_mode","defensive"))=="offensive"
+	if not offensive and not String(active_threat.get("target_region_id","")).is_empty(): return {"error":"This siege interface currently supports the home settlement and field-army offensives; defend the occupation through its existing battle controls."}
+	if not offensive and int(settlement_defense.get("level",settlement_defense.get("stage",0)))<1: return {"error":"Build settlement defenses before sheltering behind them."}
+	var army_id:=int(active_threat.get("field_army_id",0))
+	var index:=_field_army_index(army_id)
+	if offensive and (index<0 or int(field_armies[index].get("troops",0))<=0): return {"error":"The investing army is no longer available."}
+	var rival:=String(active_threat.get("source_civ_id",""))
+	if rival.is_empty(): return {"error":"The besieging force has no known campaign owner."}
+	var day:=int(GameState.elapsed_days)
+	var region_id:=String(active_threat.get("target_region_id",""))
+	if offensive and (String(field_armies[index].get("status",""))!="stationed" or String(field_armies[index].get("location_id",""))!=region_id): return {"error":"The investing army must be stationed at the selected settlement."}
+	var position:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	if offensive:
+		var point:Dictionary=field_armies[index].get("position",{})
+		if not point.has_all(["x","z"]): return {"error":"The investing army has no valid physical position."}
+		position=Vector2(float(point.x),float(point.z))
+	active_threat["target_position"]={"x":position.x,"z":position.y}
+	active_siege={"id":"siege_%d_%d_%d_%d" % [GameState.world_seed,day,army_id,threats_resolved],"active":true,"mode":"offensive" if offensive else "defensive","attacker_id":"player" if offensive else rival,"defender_id":rival if offensive else "player","start_day":day,"last_day":day,"days":0,"target_position":{"x":position.x,"z":position.y},"region_id":region_id,"army_id":army_id,"threat":active_threat.duplicate(true),"pressure":0.0,"fatigue":0.0,"blockade":0.0,"hardship":0.0,"starving_days":0,"relief":[]}
+	active_threat.clear()
+	if offensive: field_armies[index]["status"]="besieging"
+	if not offensive and ForeignDiplomacy.has_method("notify_defensive_siege"): ForeignDiplomacy.call("notify_defensive_siege",rival,"player",String(active_siege.id),day)
+	threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
+	return {"ok":true,"siege":siege_public_snapshot(),"message":"The army takes positions around the approaches. Supply and endurance now change over time; no assault or population transfer has occurred."}
+
+func siege_snapshot()->Dictionary:
+	return siege_public_snapshot()
+
+func siege_public_snapshot(siege_id:String="")->Dictionary:
+	if active_siege.is_empty() or (not siege_id.is_empty() and siege_id!=String(active_siege.id)): return {}
+	var result:Dictionary={}
+	for key in ["id","active","mode","attacker_id","defender_id","start_day","days","target_position","region_id","pressure","blockade"]: result[key]=active_siege.get(key)
+	var offensive:=String(active_siege.mode)=="offensive"
+	result["own_supply_ratio"]=_siege_own_supply()
+	result["own_food_days"]=maxf(0,float(GameState.simulation_metrics.get("food_days",0))) if not offensive else -1.0
+	result["enemy_supply_assessment"]="No reliable count of enemy stores."
+	result["enemy_supply_report_day"]=-1
+	var rival:=String(active_siege.defender_id if offensive else active_siege.attacker_id)
+	for report:Dictionary in CivilizationSystem.diplomatic_history:
+		if String(report.get("civ_id",""))!=rival or not report.has("returned_day"): continue
+		for observation in report.get("observations",[]):
+			if "food reserves" in String(observation).to_lower():
+				result["enemy_supply_assessment"]=String(observation).substr(0,240)
+				result["enemy_supply_report_day"]=int(report.returned_day)
+				break
+		if int(result.enemy_supply_report_day)>=0: break
+	result["civilian_hardship"]=("Critical: people lack reliable food access." if float(active_siege.hardship)>.6 else "Strained: approaches and outside work are restricted.") if not offensive else "Civilian access is restricted; exact stores and hunger inside are unconfirmed."
+	result["besieger_endurance"]=("Exhausted" if float(active_siege.fatigue)>.7 else ("Strained" if float(active_siege.fatigue)>.35 else "Holding")) if offensive else "Enemy endurance is not directly known."
+	result["relief_camps"]=(active_siege.get("relief",[]) as Array).size()
+	result["target_name"]=String((active_siege.threat as Dictionary).get("target_region_name","Home settlement"))
+	if String(result.target_name).is_empty(): result.target_name="Home settlement"
+	return result
+
+func _siege_own_supply()->float:
+	if active_siege.is_empty(): return 1.0
+	var index:=_field_army_index(int(active_siege.get("army_id",0)))
+	if String(active_siege.mode)=="offensive" and index>=0: return clampf(float(field_armies[index].get("provision_ratio",field_armies[index].get("supply_level",.5))),0,1)
+	return clampf(float(GameState.simulation_metrics.get("food_intake_ratio",GameState.food_security)),0,1)
+
+func siege_home_food_access()->float:
+	if active_siege.is_empty() or String(active_siege.mode)!="defensive": return 1.0
+	return clampf(1-float(active_siege.get("blockade",0))*.8,.2,1)
+
+func siege_effects_for_civilization(civ_id:String)->Dictionary:
+	var share:=0.0
+	if not active_siege.is_empty() and String(active_siege.mode)=="offensive" and String(active_siege.defender_id)==civ_id:
+		for civ:Dictionary in CivilizationSystem.civilizations:
+			if String(civ.id)!=civ_id: continue
+			for region:Dictionary in civ.get("strategic_regions",[]):
+				if String(region.get("id",""))==String(active_siege.region_id): share=clampf(float(region.get("population",0))/maxf(1,float(civ.population)),0,1)
+	var closure:=float(active_siege.get("blockade",0))*share
+	return {"food_output_multiplier":clampf(1-closure*.8,.2,1),"logistics_multiplier":clampf(1-closure*.7,.3,1)}
+
+func _process_siege_day()->void:
+	if active_siege.is_empty(): return
+	var day:=last_processed_day
+	if day<=int(active_siege.last_day): return
+	var offensive:=String(active_siege.mode)=="offensive"
+	var rival:=String(active_siege.defender_id if offensive else active_siege.attacker_id)
+	var enemy:Dictionary={}
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		if String(civ.id)==rival: enemy=civ; break
+	if enemy.is_empty(): _end_siege("The opposing campaign is no longer active."); return
+	var relation:Dictionary=enemy.get("player_relation",{})
+	if not bool(relation.get("at_war",false)): _end_siege("A ceasefire lifts the siege."); return
+	var army_index:=_field_army_index(int(active_siege.army_id))
+	if offensive and (army_index<0 or int(field_armies[army_index].get("troops",0))<=0): _end_siege("The investing force can no longer hold the approaches."); return
+	var threat:Dictionary=active_siege.threat
+	var enemy_force:Dictionary=threat.get("enemy_force",{})
+	var own_strength:=int(field_armies[army_index].get("troops",0)) if offensive else int(settlement_defense_snapshot().get("garrison_personnel",0))
+	var enemy_strength:=int(enemy_force.get("troops",0))
+	var enemy_supply:=clampf(float(enemy.get("food_days",0))/10,0,1)*clampf(.35+float(enemy.get("logistics",.3)),0,1)
+	var besieger_relief:=0.0; var defender_relief:=0.0
+	var camps:Array=active_siege.get("relief",[])
+	for index in range(camps.size()-1,-1,-1):
+		var camp:Dictionary=camps[index]
+		var ration:=maxf(0,float(camp.troops))*.55
+		var supplied:=clampf(float(camp.food)/maxf(.01,ration),0,1)
+		camp["food"]=maxf(0,float(camp.food)-ration)
+		if supplied<.1:
+			_return_siege_relief(camp); camps.remove_at(index); continue
+		if String(camp.beneficiary_id)==String(active_siege.attacker_id): besieger_relief+=float(camp.troops)*supplied
+		else: defender_relief+=float(camp.troops)*supplied
+	active_siege["relief"]=camps
+	var inputs:={"besiegers":(own_strength if offensive else enemy_strength)+besieger_relief,"defenders":enemy_strength if offensive else own_strength,"population":float(threat.get("target_population",1000)) if offensive else SettlementModel.primary_population_exact(),"defender_relief":defender_relief,"besieger_supply":_siege_own_supply() if offensive else enemy_supply,"defender_food_days":float(enemy.get("food_days",0)) if offensive else float(GameState.simulation_metrics.get("food_days",0)),"fortification":clampf(float(threat.get("terrain_defense",1.0))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
+	active_siege=SiegeModel.advance(active_siege,day,inputs)
+	if float(active_siege.fatigue)>=.98 or int(active_siege.starving_days)>=7: _end_siege("The besiegers abandon the investment as their supply and endurance fail."); return
+	army_changed.emit(home_army.duplicate(true))
+
+func siege_order(siege_id:String,order:String)->Dictionary:
+	if active_siege.is_empty() or siege_id!=String(active_siege.id): return {"error":"This siege is no longer active."}
+	if order=="continue": return {"ok":true,"message":"The existing siege orders continue. Time, supply and access determine its progress."}
+	var saved:=active_siege.duplicate(true)
+	if order=="assault":
+		var field_index:=_field_army_index(int(saved.army_id))
+		var troops:=int(field_armies[field_index].get("troops",0)) if String(saved.mode)=="offensive" and field_index>=0 else (int(_home_defense_force().get("troops",0)) if String(saved.mode)=="defensive" else 0)
+		if troops<=0 or not pending_aftermath.is_empty() or not active_engagement.is_empty(): return {"error":"No available local force can enter battle; the siege orders remain in place."}
+		_end_siege("The forces leave siege positions for battle.",false,false)
+		active_threat=(saved.threat as Dictionary).duplicate(true)
+		var result:=begin_threat_engagement()
+		if result.has("error"): return result
+		active_engagement["terrain_defense"]=1+(float(active_engagement.terrain_defense)-1)*(1-float(saved.pressure)*.65)
+		var besieger_key:="attacker"
+		active_engagement[besieger_key]["readiness"]=float(active_engagement[besieger_key].get("readiness",.5))*(1-float(saved.fatigue)*.45)
+		return {"ok":true,"message":"The assault or sortie begins from current siege conditions.","engagement":engagement_snapshot()}
+	if order=="withdraw":
+		_end_siege("The player orders withdrawal from the siege.",true,String(saved.mode)=="offensive")
+		if String(saved.mode)=="defensive":
+			active_threat=(saved.threat as Dictionary).duplicate(true)
+			return respond_to_threat("withdraw")
+		return {"ok":true,"message":"The siege is lifted; the field army begins its physical return route if available."}
+	return {"error":"Unknown siege order."}
+
+func _end_siege(reason:String,return_army:bool=true,count_resolved:bool=true)->void:
+	if active_siege.is_empty(): return
+	var ended:=active_siege.duplicate(true)
+	for camp:Dictionary in ended.get("relief",[]): _return_siege_relief(camp)
+	active_siege.clear()
+	var index:=_field_army_index(int(ended.get("army_id",0)))
+	if index>=0:
+		field_armies[index]["status"]="stationed"
+		if return_army:
+			var return_route:=move_field_army(int(ended.army_id),"player_home")
+			if return_route.has("error"): reason+=" The army remains at its position: "+String(return_route.error)
+	ended["active"]=false; ended["ended_day"]=int(GameState.elapsed_days); ended["summary"]=reason; ended["relief"]=[]
+	siege_history.push_front(ended)
+	if siege_history.size()>SiegeModel.HISTORY_LIMIT: siege_history.resize(SiegeModel.HISTORY_LIMIT)
+	GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Siege ended","description":reason,"domain":"security","severity":"major"})
+	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+	if count_resolved: threats_resolved+=1
+	army_changed.emit(home_army.duplicate(true))
+
+func siege_negotiation_available(siege_id:String,civ_id:String)->Dictionary:
+	if active_siege.is_empty() or String(active_siege.id)!=siege_id or civ_id=="player" or civ_id not in [active_siege.attacker_id,active_siege.defender_id]: return {"ok":false,"reason":"No opposing siege is available for these talks."}
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		if String(civ.id)==civ_id and not bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): return {"ok":true,"reason":"An agreed ceasefire permits withdrawal."}
+	if float(active_siege.fatigue)>=.7: return {"ok":true,"reason":"Visible exhaustion makes lifting the siege credible."}
+	return {"ok":false,"reason":"No ceasefire or credible withdrawal condition has been established. Continue talks; no agreement is assumed."}
+
+func negotiated_siege_withdrawal(siege_id:String,civ_id:String)->Dictionary:
+	var available:=siege_negotiation_available(siege_id,civ_id)
+	if not bool(available.ok): return {"error":available.reason}
+	_end_siege("Returned envoys confirm the siege will be lifted without a territorial transfer.")
+	return {"ok":true,"message":"The siege is lifted. Forces return by their existing routes; no territory changes hands."}
+
+func receive_siege_relief(siege_id:String,receipt_id:String)->Dictionary:
+	if active_siege.is_empty() or String(active_siege.id)!=siege_id: return {"error":"The siege ended before relief arrived."}
+	var camps:Array=active_siege.get("relief",[])
+	if camps.size()>=SiegeModel.RELIEF_LIMIT: return {"error":"The siege already has its bounded relief-camp capacity."}
+	for camp:Dictionary in camps:
+		if String(camp.receipt_id)==receipt_id: return {"error":"This relief delivery has already been received."}
+	if not CivilizationSystem.has_method("consume_siege_relief_receipt"): return {"error":"No verified relief delivery is available."}
+	var receipt:Dictionary=CivilizationSystem.call("consume_siege_relief_receipt",receipt_id,siege_id)
+	if not bool(receipt.get("ok",false)): return receipt
+	if String(receipt.get("beneficiary_id","")) not in [active_siege.attacker_id,active_siege.defender_id]:
+		_return_siege_relief({"receipt_id":receipt_id,"troops":int(receipt.get("troops",0)),"food":float(receipt.get("food",0))})
+		return {"error":"Relief belongs to another operation and is returning to its donor."}
+	var camp:={"receipt_id":receipt_id,"donor_civ_id":String(receipt.get("donor_civ_id","")),"beneficiary_id":String(receipt.beneficiary_id),"troops":maxi(0,int(receipt.get("troops",0))),"food":maxf(0,float(receipt.get("food",0)))}
+	camps.append(camp); active_siege["relief"]=camps
+	return {"ok":true,"message":"A physically delivered allied camp supports the approaches. Its people remain part of their own society."}
+
+func _return_siege_relief(camp:Dictionary)->void:
+	if ForeignDiplomacy.has_method("complete_siege_relief"): ForeignDiplomacy.call("complete_siege_relief",String(camp.receipt_id),int(camp.troops),float(camp.food))
