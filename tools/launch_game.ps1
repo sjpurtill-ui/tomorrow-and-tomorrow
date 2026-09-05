@@ -1,6 +1,7 @@
 param(
     [switch]$Fullscreen = $true,
-    [switch]$Editor
+    [switch]$Editor,
+    [switch]$ResumeSaved = $true
 )
 
 $ErrorActionPreference = 'Stop'
@@ -37,6 +38,11 @@ if ($Editor) {
     $arguments += @('--editor', 'res://main.tscn')
 } elseif ($Fullscreen) {
     $arguments += '--fullscreen'
+}
+
+$savedCampaignPath = Join-Path $env:APPDATA 'Godot\app_userdata\Tomorrow and Tomorrow\saves\quicksave.save'
+if ($ResumeSaved -and -not $Editor -and (Test-Path -LiteralPath $savedCampaignPath)) {
+    $arguments += @('--', '--resume-saved')
 }
 
 $process = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $arguments -WorkingDirectory $projectRoot -PassThru
