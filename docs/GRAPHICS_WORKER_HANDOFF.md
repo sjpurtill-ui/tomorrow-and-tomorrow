@@ -22,6 +22,14 @@ and battle scales before integration, especially deep mixed siege columns.
 
 ## Next passes
 
+Pass 2: rendered and inspected the mixed infantry/skirmisher/cavalry/siege
+formation using tools/formation_graphics_capture.gd. The isolated OpenGL capture
+auto-exits and is not the playable game. Screenshot:
+artifacts/formation-review.png (local artifact, not committed).
+Centered incomplete ranks after inspection. Compact infantry and separated
+mounted/support groups are visible in the capture. This covers one mixed force;
+extreme siege compositions and live terrain framing still need review.
+
 Capture and compare mixed-unit formations and inspect camera framing. Then
 audit settlement silhouettes at supported Google Earth map distances: favor
 period-appropriate roof/ground colors, coherent expansion, fields and paths;

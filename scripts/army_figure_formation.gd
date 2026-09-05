@@ -124,7 +124,9 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 		var rank_spacing:=float(layout.pitch)
 		var group_columns:=int(layout.columns)
 		for i in amount:
-			var x := (float(i % group_columns) - float(group_columns-1)*0.5)*rank_spacing
+			var row_start:=int(i / group_columns)*group_columns
+			var row_count:=mini(group_columns,amount-row_start)
+			var x := (float(i % group_columns) - float(row_count-1)*0.5)*rank_spacing
 			var z := float(layout.depth)+float(i / group_columns)*rank_spacing-depth*0.5+rank_spacing*0.5
 			# Light troops screen in staggered, loose files; drilled infantry keeps
 			# its crisp line. Deterministic offsets remain stable during refreshes.
