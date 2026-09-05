@@ -57,18 +57,10 @@ func _contacts_blocks()->Array:
 		blocks.append({"type":"text","heading":"KNOWN CONTACTS","text":"No polity has been confirmed. An encounter site is not a diplomatic destination until scouts locate a settlement."})
 	else:
 		blocks.append({"type":"rows","heading":"KNOWN CONTACTS","note":"click for the full record","items":items})
-	var rumor_items:Array=[]
-	for rumor_variant in CivilizationSystem.rumored_civilizations_snapshot():
-		var rumor:Dictionary=rumor_variant
-		rumor_items.append({
-			"name":String(rumor.get("name","An unnamed people")),
-			"sub":"heard day %d · somewhere to the %s · %s" % [int(rumor.get("day",0)),String(rumor.get("direction","?")),String(rumor.get("distance_hint",""))],
-			"value":"RUMOR","value_color":Tokens.MUTED,
-			"accent":Tokens.MUTED,
-			"tip":"Hearsay from newcomers: a name and a rough direction, nothing confirmed. Scouts ranging that way may find them.",
-		})
-	if not rumor_items.is_empty():
-		blocks.append({"type":"rows","heading":"RUMORED PEOPLES","note":"names and directions only","items":rumor_items})
+	var lead_count:=CivilizationSystem.rumor_network.list_leads("player",int(GameState.elapsed_days)).size()
+	blocks.append({"type":"actions","heading":"ACCOUNTS BEYOND THE HORIZON","items":[{"label":"MAP OF RUMORS","sub":"%d mapped leads · where accounts were heard and where people may be" % lead_count,"on_press":func()->void: CivilizationSystem.rumor_network.open_map(terrain)}]})
+	if not CivilizationSystem.rumored_civilizations_snapshot().is_empty():
+		blocks.append({"type":"text","text":"Older hearsay has no recorded map coordinates. Its saved names and directions remain in expedition reports; no location is invented."})
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var known_destinations:=0
 	for encounter_variant in encounters:
@@ -146,4 +138,4 @@ func signature()->Array:
 	var overdue_total:=0
 	for party_variant in (exploration.get("parties",[]) as Array):
 		overdue_total+=int((party_variant as Dictionary).get("overdue_days",0))
-	return [CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0)),preload("res://scripts/scout_archive.gd").revision(CivilizationSystem.scout_reports)]
+	return [CivilizationSystem.rumor_network.revision,int(GameState.elapsed_days),CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0)),preload("res://scripts/scout_archive.gd").revision(CivilizationSystem.scout_reports)]

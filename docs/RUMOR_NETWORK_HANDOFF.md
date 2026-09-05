@@ -1,0 +1,13 @@
+# Rumor network and map
+
+Observer-owned accounts retain attributed origin, forwarding path, observed/report days, source text, uncertain region and where heard if recorded. Duplicate roots and forwarding loops do not create corroboration. Actual visiting parties exchange bounded packets; the traveler publishes only after returning. Encountering a scout gives its host an account of the encounter area, never the visitor's hidden home. More scouting creates more exposure opportunities without automatically causing hostility. Legacy hearsay without recorded coordinates stays unmapped, not invented.
+
+Map of Rumors in World separates selected uncertainty circle from where the account was heard (diamond); draws no terrain and reveals no hidden world. Filters and previous/next reach overlapping accounts; drag/zoom/fit and dated provenance are available. Investigate opens the real scout review for a sampled point in the reported area. Search cost, land path, provisions, travel and return rules remain real; failure records a searched corridor, not certainty that the whole area is empty. Existing recruitment duration/distance behavior is unchanged.
+
+Foreign observers use the same lead/search data and actual land checks with charged provisions and bounded existing scout records. Physical city observations now also permit AI-to-AI returned knowledge; no instant global city reveal. Existing aggregate AI strategy/military model is retained. Visits are sampled at actual simulation steps, so coarse long advances can miss transient encounters; no invented historic meetings.
+
+Limits:64 observers,32 accounts per observer,4 accounts per outbound packet,8 forwarding hops,32 returning inbox entries. Accounts expire after10years and are pruned; carried packets exclude temporary UI fields. Existing saves without ledger load empty; validation rejects malformed carried/received data before import. Save fields are optional and bounded independently of population.
+
+Validation:33 focused cases pass (13 rumor,13 city intelligence,6 archive,1 return speed). Broad133-case run had132pass and one fixed-size payload failure; after pruning expired accounts/excluding UI fields, original century/billion population payload budget passes without increasing its threshold. Broad suite not rerun wholesale after isolated retention fix. GPU map probe passes24-account navigation, known heard-site vs uncertain area,800x600/1280x900 controls, actual scout review and no fog change. Captures inspected, muted hidden probe exited. Final label collision refinement gives selected account priority.
+
+Integrate for the next coherent numbered release. Do not restart the live player for this individual feature.

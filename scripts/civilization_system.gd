@@ -73,6 +73,7 @@ const REGION_VALUE_TEXT:={
 
 var civilizations:Array[Dictionary]=[]
 var city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
+var rumor_network=preload("res://scripts/rumor_network.gd").new(self)
 var world_events:Array[Dictionary]=[]
 var pending_player_incidents:Array[Dictionary]=[]
 var last_world_seed:=-2147483648
@@ -131,6 +132,7 @@ func initialize()->void:
 
 func reset_for_new_world()->void:
 	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
+	rumor_network=preload("res://scripts/rumor_network.gd").new(self)
 	last_world_seed=GameState.world_seed
 	last_processed_day=int(floor(GameState.elapsed_days))
 	last_turn_day=(last_processed_day/STRATEGIC_TURN_DAYS)*STRATEGIC_TURN_DAYS
@@ -551,6 +553,7 @@ func advance_to_day(target_day:int)->void:
 		_process_strategic_turn(last_turn_day)
 	last_processed_day=target_day
 	city_intelligence.sample_missions(target_day)
+	rumor_network.sample(target_day)
 	_process_foreign_scout_reports(target_day)
 	_complete_due_scout_missions(target_day)
 	_process_diplomatic_mission(target_day)
@@ -574,6 +577,7 @@ func _process_strategic_turn(day:int)->void:
 	_process_player_contact(day)
 	_process_player_relations(day)
 	city_intelligence.sample_missions(day)
+	rumor_network.sample(day)
 	_rebuild_competition(true,day)
 	world_changed.emit(competition_snapshot())
 
@@ -1077,6 +1081,8 @@ func scout_target_options()->Array[Dictionary]:
 			"description":"Return to the known encounter site, chart its surroundings, and look for routes toward the polity's home.",
 			"position":position.duplicate(true)
 		})
+	for lead:Dictionary in rumor_network.list_leads("player",int(GameState.elapsed_days)):
+		options.append({"id":"lead:"+String(lead.id),"kind":"investigate_lead","lead_id":String(lead.id),"civ_id":String(lead.subject),"label":"INVESTIGATE LEAD · "+String(lead.name),"description":rumor_network.describe(lead),"position":lead.center.duplicate(true)})
 	for city:Dictionary in city_intelligence.known_cities():
 		options.append({"id":"city:"+String(city.city_id),"kind":"observe_city","city_id":city.city_id,"civ_id":city.civ_id,"label":"OBSERVE "+String(city.name).to_upper(),"description":"Revisit this independently reported city. Only a returning party updates its dated estimates.","position":city.position.duplicate(true)})
 	return options
@@ -1107,7 +1113,12 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 	var target_kind:=String(target.get("kind","explore"))
 	var directional_search:=target_kind in ["explore","recruit_people"]
 	var ordered_heading:=heading.to_lower().strip_edges() if SCOUT_HEADINGS.has(heading.to_lower().strip_edges()) else ""
-	if directional_search and ordered_heading!="":
+	if target_kind=="investigate_lead":
+		route_plan=rumor_network.plan("player",String(target.lead_id),next_scout_mission_id,one_way_range,int(GameState.elapsed_days))
+		target_position=route_plan.get("search_position",{}).duplicate(true)
+		target["position"]=target_position
+		target_distance=player_world_origin.distance_to(rumor_network.vector(target_position)) if not target_position.is_empty() else 0.0
+	elif directional_search and ordered_heading!="":
 		var quote_rng:=RandomNumberGenerator.new()
 		quote_rng.seed=last_world_seed^duration_days*8191^String(target.id).hash()
 		route_plan=_plan_open_scout_route(one_way_range,quote_rng,ordered_heading)
@@ -1170,6 +1181,10 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	var variance:=_scout_timing_variance(duration_days,next_scout_mission_id,start_day)
 	mission["timing_variance_days"]=variance
 	mission["actual_return_day"]=maxi(start_day+2,start_day+duration_days+variance)
+	if String(target_option.kind)=="investigate_lead":
+		mission["rumor_lead_id"]=String(target_option.lead_id)
+		mission["rumor_subject"]=String(target_option.civ_id)
+	rumor_network.prepare(mission,"player",start_day)
 	next_scout_mission_id+=1
 	var risk:=_player_scout_risk_snapshot(mission)
 	mission["estimated_interception_risk"]=float(risk.estimated_risk)
@@ -1281,6 +1296,7 @@ func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goo
 		return {"error":"The selected gift changed before the envoy could depart."}
 	var day:=int(GameState.elapsed_days)
 	diplomatic_mission={"civ_id":civ_id,"civilization":String(quote.civilization),"purpose":String(quote.purpose),"purpose_label":String(quote.purpose_label),"personnel":int(quote.personnel),"population_sources":{"support":int(quote.personnel)},"provisions":provisions,"gift_resource":String(gift.resource),"gift_amount":delivered,"origin_position":quote.origin_position,"target_position":quote.target_position,"target_kind":String(quote.target_kind),"depart_day":day,"arrival_day":day+int(quote.travel_days),"return_day":day+int(quote.total_days),"stage":"outbound","arrival_resolved":false,"distance_km":float(quote.distance_km)}
+	rumor_network.prepare(diplomatic_mission,"player",day)
 	var gift_phrase:=" with no material gift" if delivered<=0.0 else " carrying %.1f %s" % [delivered,String(gift.resource)]
 	var message:="%d envoys depart for %s to %s%s. The proposal does not take effect until they travel there and carry a response home; %.1f travel rations were issued." % [int(quote.personnel),String(quote.civilization),String(quote.purpose_label).to_lower(),gift_phrase,provisions]
 	_record_world_event("Diplomatic mission departs",message,"diplomacy",day)
@@ -1309,6 +1325,7 @@ func _process_diplomatic_mission(day:int)->void:
 		if day<=int(diplomatic_mission.return_day):
 			var access:=clampf(.46+float(relation.get("opinion",0))*.24+(.10 if float(diplomatic_mission.get("gift_amount",0))>0 else 0),.22,.85)
 			city_intelligence.stage(diplomatic_mission,"player",city_intelligence.vector(diplomatic_mission.target_position),access,day,"envoy:%s:%d" % [civ_id,int(diplomatic_mission.depart_day)])
+		rumor_network.exchange(diplomatic_mission,"player",civ_id,city_intelligence.vector(diplomatic_mission.target_position),day)
 		var origin_city:=city_intelligence.primary_id("player")
 		if origin_city!="": city_intelligence.publish(civ_id,city_intelligence.location_record({"city_id":origin_city,"civ_id":"player","name":"Envoys' reported home","position":diplomatic_mission.origin_position},day,"envoys disclosed their origin","envoy:%d" % int(diplomatic_mission.depart_day)),day)
 		if String(diplomatic_mission.get("purpose","goodwill"))=="declare_war":
@@ -1369,6 +1386,8 @@ func _process_diplomatic_mission(day:int)->void:
 
 func _diplomatic_return_report(civ:Dictionary,_relation:Dictionary,mission:Dictionary,day:int)->Dictionary:
 	var cities:Array[Dictionary]=city_intelligence.deliver(mission,"player",day)
+	rumor_network.deliver(mission,"player",day)
+	rumor_network.record_cities("player",cities,day)
 	var observations:Array[String]=[]
 	for city:Dictionary in cities: observations.append(city_intelligence.describe(city))
 	if observations.is_empty(): observations.append("No dated city assessment survived this journey. The previously known location remains on the chart.")
@@ -1506,6 +1525,7 @@ func _foreign_scout_investigation_target(civ:Dictionary,relation:Dictionary,sequ
 func _schedule_foreign_scout_mission(formation:Dictionary,civ:Dictionary,depart_day:int,force_exploration:bool=false)->Dictionary:
 	var result:=formation.duplicate(true)
 	result.erase("city_observations")
+	for key in ["route","rumor_lead_id","rumor_subject","rumor_waiting","rumor_provisions","rumor_personnel"]: result.erase(key)
 	var relation:=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 	var sequence:=maxi(-1,int(result.get("search_sequence",-1)))+1
 	var max_range:=_foreign_scout_operational_range(civ)
@@ -1524,6 +1544,8 @@ func _schedule_foreign_scout_mission(formation:Dictionary,civ:Dictionary,depart_
 	result["leg_days"]=clampf(route_distance/_foreign_scout_speed_km_per_day(civ),8.0,1800.0)
 	result["last_report_cycle"]=0
 	result["search_sequence"]=sequence
+	rumor_network.prepare(result,String(civ.id),depart_day)
+	if not force_exploration: rumor_network.ai_plan(result,civ,depart_day)
 	return result
 
 
@@ -1566,6 +1588,9 @@ func _process_foreign_player_rumors(day:int)->void:
 		var error_bearing:=rng.randf_range(-PI,PI)
 		var reported_center:=_bounded_world_point(player_world_origin+Vector2.from_angle(error_bearing)*uncertainty*rng.randf_range(0.32,0.88))
 		relation=_set_foreign_player_trace(relation,reported_center,uncertainty,0.06+network_quality*0.18,day,"traveler rumor")
+		var lead:=rumor_network.observation(String(civ.id),"player","the reported people",reported_center,uncertainty,day,"traveler account at the information frontier")
+		lead.confidence=0.06+network_quality*.18; lead.heard_position=rumor_network.point(home)
+		rumor_network.receive(String(civ.id),lead,day)
 		relation["rival_contact_level"]=maxi(1,int(relation.get("rival_contact_level",0)))
 		relation["rival_player_intelligence"]=maxf(float(relation.get("rival_player_intelligence",0.0)),0.015+network_quality*0.025)
 		civ["player_relation"]=relation
@@ -1578,10 +1603,12 @@ func _foreign_formation_position(formation:Dictionary,day:float)->Vector2:
 	var cycle:=fposmod(maxf(0.0,day-float(formation.get("depart_day",0))),leg*2.0)
 	var progress:=cycle/leg
 	if progress>1.0: progress=2.0-progress
+	if not formation.get("route",[]).is_empty(): return city_intelligence.route_position(formation.route,clampf(progress,0.0,1.0))
 	return a.lerp(b,clampf(progress,0.0,1.0))
 
 
 func _formation_route_distance_to(formation:Dictionary,point:Vector2)->float:
+	if not formation.get("route",[]).is_empty(): return _route_distance_to_point(formation.route,point)
 	var a:=Vector2(formation.get("point_a",Vector2.ZERO))
 	var b:=Vector2(formation.get("point_b",a))
 	return point.distance_to(Geometry2D.get_closest_point_to_segment(point,a,b))
@@ -1643,8 +1670,18 @@ func _process_foreign_scout_reports(day:int)->void:
 			# Nothing learned along the outward leg changes the home polity until the
 			# party physically completes its return. At that point its actual route is
 			# assessed, then a new mission is chosen from the updated evidence.
+			if bool(formation.get("rumor_waiting",false)):
+				foreign_formations[formation_index]=_schedule_foreign_scout_mission(formation,civ,day)
+				continue
 			civ["knowledge"]=clampf(float(civ.get("knowledge",0.0))+0.0025,0.0,1.0)
-			city_intelligence.deliver(formation,String(civ.id),day)
+			var city_reports:Array[Dictionary]=city_intelligence.deliver(formation,String(civ.id),day)
+			rumor_network.deliver(formation,String(civ.id),day)
+			rumor_network.record_cities(String(civ.id),city_reports,day)
+			if formation.has("rumor_lead_id"):
+				var found:=false
+				for city:Dictionary in city_reports:
+					if String(city.get("civ_id",""))==String(formation.get("rumor_subject","")): found=true
+				rumor_network.finish_search(formation,String(civ.id),day,found)
 			var relation:=_relation_with_strategy_defaults(civ.player_relation,civ)
 			var route_distance:=_formation_route_distance_to(formation,player_world_origin)
 			var signal_radius:=_player_settlement_signal_radius(day)
@@ -2205,6 +2242,14 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 		return
 	var route:Array=mission.get("route",[])
 	var city_reports:Array[Dictionary]=city_intelligence.deliver(mission,"player",day)
+	var rumor_count:=rumor_network.deliver(mission,"player",day)
+	mission["rumor_return_note"]="The party carried home %d new accounts. Their heard locations and uncertain regions are available in Map of Rumors." % rumor_count if rumor_count>0 else ""
+	rumor_network.record_cities("player",city_reports,day)
+	if mission.has("rumor_lead_id"):
+		var found:=false
+		for city:Dictionary in city_reports:
+			if String(city.get("civ_id",""))==String(mission.get("rumor_subject","")): found=true
+		mission["rumor_search_result"]=rumor_network.finish_search(mission,"player",day,found)
 	# One aggregate capsule trail follows the physical chart. Do not convert its
 	# samples into circles: circle consolidation was what inflated a returned line
 	# into an impossible continental reveal.
@@ -2239,6 +2284,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var recruitment_account:=_recruitment_return_account(mission,day,recruits)
 	var fate:=_resolve_party_fate(mission,day)
 	var windfalls:=_resolve_scout_windfalls(mission,route,day)
+	if String(mission.get("rumor_return_note",""))!="": windfalls.append(String(mission.rumor_return_note))
 	if String(fate.line)!="": windfalls.append(String(fate.line))
 	var military_accounts:=_resolve_route_military_sightings(mission,route,day)
 	windfalls.append_array(military_accounts)
@@ -2336,6 +2382,7 @@ func _compose_scout_journal(mission:Dictionary,route:Array)->Array[String]:
 
 func _resolve_targeted_scout_report(mission:Dictionary,day:int)->String:
 	var kind:=String(mission.get("target_kind","explore"))
+	if kind=="investigate_lead": return String(mission.get("rumor_search_result","No confirming observation returned."))
 	if kind=="observe_city": return "The party reports only the city observations it physically carried home."
 	if kind not in ["investigate_contact","observe_settlement"]: return ""
 	if String(mission.get("route_status",""))=="turning_back":
@@ -2519,33 +2566,10 @@ func _rumor_distance_hint(distance:float)->String:
 	return "a season's journey or more"
 
 
-func _resolve_scout_rumors(day:int,recruits:int)->String:
-	## Wanderers who join carry hearsay: the NAME of another people and a rough
-	## direction. A rumor is not contact — no position, no diplomacy, no map pin.
-	if recruits<=0: return ""
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*15485863^recruits*97846087^scout_reports.size()*54018521
-	if rng.randf()>=clampf(0.35+float(recruits)*0.04,0.0,0.75): return ""
-	var candidates:Array[int]=[]
-	for index in civilizations.size():
-		var relation:Dictionary=(civilizations[index] as Dictionary).get("player_relation",{})
-		if int(relation.get("contact_level",0))>=2 or bool(relation.get("rumored",false)): continue
-		candidates.append(index)
-	if candidates.is_empty(): return ""
-	var civ_index:int=candidates[rng.randi_range(0,candidates.size()-1)]
-	var civ:Dictionary=civilizations[civ_index]
-	var civ_position:=_civilization_world_position(civ)
-	var direction:=_compass_phrase(player_world_origin,civ_position)
-	var hint:=_rumor_distance_hint(player_world_origin.distance_to(civ_position))
-	var relation:Dictionary=civ.player_relation
-	relation["rumored"]=true
-	relation["rumor_day"]=day
-	relation["rumor_direction"]=direction
-	relation["rumor_distance_hint"]=hint
-	civ["player_relation"]=relation
-	civilizations[civ_index]=civ
-	_record_world_event("Rumor of a foreign people",'The newcomers speak of a people they call the %s, somewhere to the %s — %s away, they think. Nothing but the name and a direction is certain.' % [String(civ.name),direction,hint],"diplomacy",day)
-	return 'The newcomers speak of a people called the %s, somewhere to the %s — nothing more certain than a name and a direction.' % [String(civ.name),direction]
+func _resolve_scout_rumors(_day:int,_recruits:int)->String:
+	# Accounts now come from encountered people and carried reports, not a draw
+	# from the private list of all civilizations. Recruitment itself is unchanged.
+	return ""
 
 
 func _resolve_nomad_sighting(mission:Dictionary,route:Array,day:int,recruits:int)->String:
@@ -4591,10 +4615,11 @@ func export_state()->Dictionary:
 		for point_key in ["point_a","point_b"]:
 			var point:Variant=exported_formations[index].get(point_key,Vector2.ZERO)
 			if point is Vector2: exported_formations[index][point_key]={"x":point.x,"y":point.y}
-	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
+	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"rumor_leads":rumor_network.books.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if not rumor_network.validate(payload.get("rumor_leads",{})): return {"error":"Invalid rumor records."}
 	if not city_intelligence.validate(payload.get("city_intelligence",{})): return {"error":"Invalid city intelligence records."}
 	var incoming:=payload.duplicate(true)
 	var incoming_version:=int(incoming.get("version",-1))
@@ -4609,6 +4634,7 @@ func import_state(payload:Dictionary)->Dictionary:
 	var shape_error:=_payload_shape_error(incoming)
 	if shape_error!="": return {"error":shape_error}
 	for mission:Dictionary in incoming.get("scout_missions",[])+incoming.get("foreign_formations",[])+[incoming.get("diplomatic_mission",{})]:
+		if not rumor_network.valid_carried(mission): return {"error":"Invalid carried rumors."}
 		if not city_intelligence.valid_carried(mission): return {"error":"Invalid carried city observations."}
 	var previous:=export_state()
 	_apply_state(incoming)
@@ -4848,7 +4874,9 @@ func _payload_shape_error(payload:Dictionary)->String:
 
 func _apply_state(payload:Dictionary)->void:
 	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
+	rumor_network=preload("res://scripts/rumor_network.gd").new(self)
 	city_intelligence.records=payload.get("city_intelligence",{}).duplicate(true)
+	rumor_network.books=payload.get("rumor_leads",{}).duplicate(true)
 	last_world_seed=int(payload.get("world_seed",GameState.world_seed))
 	last_processed_day=maxi(0,int(payload.get("last_processed_day",0)))
 	last_turn_day=maxi(0,int(payload.get("last_turn_day",0)))
