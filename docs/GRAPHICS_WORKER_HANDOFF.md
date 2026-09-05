@@ -22,6 +22,25 @@ and battle scales before integration, especially deep mixed siege columns.
 
 ## Next passes
 
+Pass 3: restored authoritative occupied plot fabric at close aerial zoom. The
+old photographic district clipmap remains retired. Its obsolete suppression
+flag was still removing every built plot at LOD 0, leaving a village nearly
+empty. Roof opacity now follows the live shader's aerial LOD instead of baking
+a 73% opacity drop into vertices above 0.42 km.
+
+Capture validation now waits for real frames and completes terrain streaming
+before saving. Previously screenshots could contain an empty map or a small
+detail patch floating in black, which hid the actual rendering problem.
+
+Validation: 71 settlement visual architecture tests passed, including bounded
+mesh counts at both close/aggregate LOD and identical roof vertex colors on
+either side of the old opacity threshold. Inspected village-fabric.png and
+village-readable.png at 0.5 km in artifacts. The latter has visible occupied
+roof fabric without the retired district photo tiles. Capture shutdown still
+reports pre-existing texture/RID leak warnings; no claim of leak resolution.
+Town-scale visual review continues. Shared hotspot: local_terrain.gd; integrate
+these hunks selectively with other renderer workers. No saves or menus changed.
+
 Pass 2: rendered and inspected the mixed infantry/skirmisher/cavalry/siege
 formation using tools/formation_graphics_capture.gd. The isolated OpenGL capture
 auto-exits and is not the playable game. Screenshot:

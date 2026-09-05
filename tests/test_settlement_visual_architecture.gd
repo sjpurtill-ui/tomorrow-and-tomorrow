@@ -180,11 +180,16 @@ func test_hundreds_of_aggregate_plots_still_commit_a_fixed_mesh_set()->void:
 			"roof_plan":"courtyard_flat","roof_coverage":0.42,"resident_count":26,"storeys":2,
 			"condition":0.78,"prosperity":0.48,"status":"active","fabric_generation":7,"created_day":0
 		})
-	var parent:Node3D=auto_free(Node3D.new())
-	renderer._create_plot_fabric(Vector3.ZERO,plots,1,parent)
-	assert_int(parent.get_child_count()).is_greater_equal(4)
-	assert_int(parent.get_child_count()).is_less_equal(10)
-	for child in parent.get_children(): assert_bool(child is MeshInstance3D).is_true()
+	for lod in [0,1]:
+		var parent:Node3D=auto_free(Node3D.new())
+		renderer._create_plot_fabric(Vector3.ZERO,plots,lod,parent)
+		assert_int(parent.get_child_count()).is_greater_equal(4)
+		assert_int(parent.get_child_count()).is_less_equal(10)
+		var roofs:=parent.get_node_or_null("PersistentRoofFabric") as MeshInstance3D
+		assert_object(roofs).is_not_null()
+		if roofs!=null:
+			assert_int(roofs.mesh.get_surface_count()).is_greater(0)
+		for child in parent.get_children(): assert_bool(child is MeshInstance3D).is_true()
 
 
 func test_world_scale_border_renderer_culls_offscreen_settlements_and_hidden_lod()->void:
@@ -1093,3 +1098,27 @@ func test_close_zoom_never_replaces_continuous_city_with_photo_tile_clipmap()->v
 	var terrain_source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
 	assert_bool(terrain_source.contains("if lod==0: _create_settlement_district_clipmap")).is_false()
 	assert_bool(terrain_source.contains("float aggregate_floor=fabric_kind==5 ? 0.78 : 0.16;")).is_true()
+
+
+func test_roof_opacity_is_not_baked_at_the_old_camera_threshold()->void:
+	var test_camera:Camera3D=auto_free(Camera3D.new())
+	renderer.camera=test_camera
+	var plots:Array[Dictionary]=[{
+		"id":1,"seed":741991,"centroid":Vector2.ZERO,"area_ha":0.08,
+		"polygon":PackedVector2Array([Vector2(-0.01,-0.01),Vector2(0.01,-0.01),Vector2(0.01,0.01),Vector2(-0.01,0.01)]),
+		"land_use":"residential_compound","form":"courtyard_compound","material_family":"earth",
+		"roof_plan":"courtyard_flat","roof_coverage":0.42,"resident_count":26,"storeys":2,
+		"condition":0.78,"prosperity":0.48,"status":"active","fabric_generation":7,"created_day":0
+	}]
+	var original_colors:=PackedColorArray()
+	for zoom in [0.41,0.43]:
+		test_camera.size=zoom
+		var parent:Node3D=auto_free(Node3D.new())
+		renderer._create_plot_fabric(Vector3.ZERO,plots,0,parent)
+		var roofs:=parent.get_node_or_null("PersistentRoofFabric") as MeshInstance3D
+		assert_object(roofs).is_not_null()
+		if roofs==null: return
+		var colors:PackedColorArray=roofs.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		assert_int(colors.size()).is_greater(0)
+		if original_colors.is_empty(): original_colors=colors
+		else: assert_bool(original_colors==colors).is_true()

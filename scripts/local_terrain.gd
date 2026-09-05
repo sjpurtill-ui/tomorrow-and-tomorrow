@@ -765,10 +765,20 @@ func _capture_preview_if_requested() -> void:
 		if is_finite(capture_yaw_degrees): camera_yaw=wrapf(deg_to_rad(capture_yaw_degrees),-PI,PI)
 		_update_camera()
 		_update_scale_lod()
-	# This scene and its UI layout are constructed synchronously. Force the renderer
-	# to flush them instead of awaiting ordinary frames: hidden visual-regression
-	# windows inherit the OS background throttle, where even two awaited frames can
-	# take minutes and make actual graphics iteration impractical.
+	# Scene construction is synchronous, but camera/world registration and canvas
+	# updates settle at frame boundaries. Capturing in the same deferred call can
+	# save an empty map and stale HUD. Give the renderer real frames first.
+	for capture_frame in 3:
+		await get_tree().process_frame
+	# Regional terrain is streamed in slices. Finish the initial patch, then the
+	# requested camera's patch before taking an audit image of either surface.
+	for capture_stream_pass in 2:
+		while terrain_patch_job!=null:
+			_advance_terrain_patch()
+			await get_tree().process_frame
+		_update_world_streaming()
+	_update_scale_lod()
+	await get_tree().process_frame
 	if capture_dock!="":
 		# The dock is populated in this same deferred call; give the container
 		# layout and canvas one real frame before the capture draw.
@@ -3548,8 +3558,7 @@ func _refresh_settlement_footprint(force := false) -> void:
 	_create_persistent_settlement_routes(center, render_routes, settlement_land_use_root)
 	var render_plots:Array[Dictionary]=_settlement_model().plots_for_lod(morphology_lod)
 	if morphology_lod==0: render_plots=_settlement_plots_in_current_detail_view(render_plots,center)
-	var aggregate_neighborhood_scale:=morphology_lod==0
-	_create_plot_fabric(center, render_plots, morphology_lod, settlement_land_use_root,aggregate_neighborhood_scale)
+	_create_plot_fabric(center, render_plots, morphology_lod, settlement_land_use_root)
 	# Plot fabric supplies the remembered street-by-street settlement. Mature urban
 	# systems also need a bounded, stage-specific silhouette that remains legible
 	# after billions of residents have collapsed into aggregate simulation records.
@@ -7733,6 +7742,11 @@ void fragment() {
 	fabric=mix(fabric,fabric*vec3(1.10,1.035,0.86),dry*0.14*grain_strength);
 	ALBEDO=fabric;
 	float material_alpha=COLOR.a;
+	if (fabric_kind==3) {
+		// Keep occupied roofs legible at village altitude. Fade continuously with
+		// the camera, not a vertex color baked during an arbitrary mesh rebuild.
+		material_alpha*=mix(1.0,0.55,smoothstep(0.0,0.85,aerial_lod));
+	}
 	if (fabric_kind==5 || fabric_kind==6) {
 		// Aggregate city cover belongs to the aerial/regional LOD. Fade it before
 		// plot-level roofs and yards become the player's source of truth, but retain a
@@ -8389,13 +8403,8 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		tone=tone.lightened(rng.randf_range(-0.05,0.055))
 		# At this LOD these are density flecks, not individually modelled houses.
 		tone.a=rng.randf_range(0.58,0.76) if emergency_camp else (rng.randf_range(0.80,0.93) if temporary_camp else rng.randf_range(0.91,0.99))
-		if camera!=null and camera.size>0.42:
-			# At settlement LOD the plot-derived density stain carries the inhabited
-			# extent; roofs remain material detail instead of becoming black confetti.
-			# Aerial scattering compresses contrast and opacity at this scale,
-			# especially for weathered timber and slate source photographs.
-			tone=tone.lerp(Color("#77736a"),0.20)
-			tone.a*=0.27
+		# Camera-dependent contrast and opacity belong to the live fabric shader.
+		# Baking them here caused a sharp fade at 0.42 km and stale colors on zoom.
 		if not temporary_camp:
 			walls_appended+=_append_roof_wall_skirt(wall_surface,center,local_center,side_axis*half_width,depth_axis*half_depth,plot,roof_lift)
 		_append_roof_footprint(surface,center,local_center,side_axis*half_width,depth_axis*half_depth,tone,roof_lift,roof_atlas_cell,mass_index,mass_roof_plan,int(plot.get("seed",1)),supports_late_roof)
@@ -8643,7 +8652,7 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 			surface.set_uv(Vector2(-1.0,-1.0))
 			surface.add_vertex(world_point)
 
-func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D,suppress_urban_detail:=false) -> void:
+func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
 	if plots.is_empty():
 		return
 	var ground_surface := SurfaceTool.new()
@@ -8684,10 +8693,8 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		var plot_color := _settlement_plot_color(plot)
 		var status := String(plot.get("status", "active"))
 		var land_use := String(plot.get("land_use", "vacant"))
-		# Once a place reads at aggregate neighborhood scale, its bounded historic plot
-		# ledger must not appear underneath as a second field of tiny roof glyphs. Worked
-		# land and water remain geographic; built plots are represented by the atlas.
-		if suppress_urban_detail and land_use not in ["field","pasture","water","waste"]: continue
+		# Occupied plots remain the source of close aerial fabric. The retired photo
+		# atlas must not leave a hole where actual homes and workshops should resolve.
 		var ground_inset:=1.0 if land_use in ["field","water","waste"] else 0.76
 		if _settlement_plot_has_aggregate_density(plot,plot_index,plots.size(),lod):
 			# Middle zoom needs a coherent inhabited footprint, not one dark pixel per
