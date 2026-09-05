@@ -3214,7 +3214,9 @@ func _install_close_terrain_mesh(mesh:ArrayMesh,center:Vector3)->void:
 	detail_terrain_patch=MeshInstance3D.new()
 	detail_terrain_patch.name="SettlementGroundDetail"
 	detail_terrain_patch.mesh=mesh
-	detail_terrain_patch.material_override=_create_terrain_material()
+	# Both layers use the same world-space uniforms. Reuse the registered
+	# material rather than retaining another shader in the fog material list.
+	detail_terrain_patch.material_override=regional_terrain_patch.material_override if regional_terrain_patch and regional_terrain_patch.material_override else _create_terrain_material()
 	detail_terrain_patch.visible=camera!=null and camera.size<=1.8
 	add_child(detail_terrain_patch)
 	_rebuild_close_vegetation(center)

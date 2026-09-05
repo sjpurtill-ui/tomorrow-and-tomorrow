@@ -208,6 +208,7 @@ func _ready()->void:
 		assert(sliced_hash==2888042706,"Sliced default fixture must match synchronous triangle attributes")
 		print("SLICED_DETAIL_PROFILE frames=",close_frames," max_sample_slice_usec=",terrain.close_terrain_last_slice_usec," finish_usec=",terrain.close_terrain_last_finish_usec," mesh_hash=",sliced_hash)
 	if "--detail-build-profile" in OS.get_cmdline_user_args():
+		var registered_before:int=terrain.terrain_fog_materials.size()
 		var detail_times:Array[int]=[]
 		var mesh_fingerprint:=0
 		for trial in 3:
@@ -228,6 +229,13 @@ func _ready()->void:
 			await get_tree().process_frame
 		if _arg("--expect-detail-hash=","")!="":
 			assert(mesh_fingerprint==int(_arg("--expect-detail-hash=","0")),"Optimized detail mesh must match its baseline fingerprint")
+		if "--shared-ground-material" in OS.get_cmdline_user_args():
+			assert(terrain.detail_terrain_patch.material_override==terrain.regional_terrain_patch.material_override,"Close ground must reuse registered regional material")
+			assert(terrain.terrain_fog_materials.size()==registered_before,"Close rebuilds must not accumulate fog materials")
+			terrain._set_resource_view_enabled(true)
+			assert(float(terrain.detail_terrain_patch.material_override.get_shader_parameter("land_resources"))==1.0,"Resource lens must still reach close ground")
+			terrain._set_resource_view_enabled(false)
+			print("SHARED_GROUND_AUDIT registered_materials=",registered_before," after_three_rebuilds=",terrain.terrain_fog_materials.size())
 		detail_times.sort()
 		print("DETAIL_BUILD_PROFILE median_usec=",detail_times[1]," samples=",detail_times," mesh_hash=",mesh_fingerprint)
 	if "--terrain-unshaded" in OS.get_cmdline_user_args():
