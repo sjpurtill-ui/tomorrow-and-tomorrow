@@ -7,7 +7,6 @@ func _ready()->void:
 	var route:Array=[{"x":0.0,"z":0.0},{"x":500.0,"z":-100.0},{"x":1100.0,"z":-500.0},{"x":1600.0,"z":-300.0},{"x":2200.0,"z":-900.0},{"x":2900.0,"z":-1300.0}]
 	var mission:={"mission_id":12,"duration_days":365}
 	var windfalls:=CivilizationSystem._resolve_scout_windfalls(mission,route,1524)
-	CivilizationSystem._resolve_scout_landmark(mission,route,1524)
 	var report:={"day":1524,"duration_days":365,"actual_days":391,"personnel":6,"returned_personnel":6,"distance_km":6820,"recruits":0,"route":route,"discoveries":mission.discoveries,"windfalls":windfalls,"journal":["Across dry grassland, then into the ridges beyond. Six travelers returned with a chart of the road."]}
 	DisplayServer.window_set_size(Vector2i(1000,1100))
 	get_window().size=Vector2i(1000,1100)

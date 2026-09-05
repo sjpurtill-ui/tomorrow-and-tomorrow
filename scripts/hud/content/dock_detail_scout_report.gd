@@ -7,12 +7,11 @@ var report:Dictionary={}
 
 func _init(terrain_node:Node,hud_node:Control,report_record:Dictionary={})->void:
 	super(terrain_node,hud_node)
-	report=report_record
+	report=report_record.duplicate(true)
+	CivilizationSystem._strip_retired_landmarks(report)
 
 func meta()->Dictionary:
 	var title:="Beyond the familiar world" if String(report.get("mission_kind","explore"))=="explore" else String(report.get("target_label","Scout Expedition")).capitalize()
-	for finding in report.get("discoveries",[]):
-		if String(finding.get("kind",""))=="landmark": title=String(finding.title); break
 	return {
 		"eyebrow":"THE EXPEDITION CHRONICLES · DAY %d" % int(report.get("day",0)),
 		"title":title,
@@ -58,12 +57,6 @@ func tab(_sub:int)->Dictionary:
 		for finding in discoveries:
 			var card:Dictionary=finding.duplicate(true)
 			card["type"]="discovery"
-			if String(card.get("kind",""))=="landmark" and is_instance_valid(terrain):
-				var landmark_id:=String(card.get("landmark_id",""))
-				for landmark in CivilizationSystem.landmarks:
-					if String(landmark.get("id",""))==landmark_id:
-						card["on_press"]=func()->void: terrain._open_landmark_detail(landmark)
-						break
 			blocks.append(card)
 		if discoveries.is_empty():
 			# Old saves retain their real outcomes; a new design must not invent rewards.

@@ -123,6 +123,9 @@ func _ready()->void:
 	_expect(order_input!=null,"council dock did not expose the conversation reply input")
 	if order_input:
 		var orders_before:int=GameState.sovereign_orders.size()
+		# This checks immediate UI updates using the local interpreter, not network latency.
+		GameState.civic_always_use_ai=false
+		GameState.civic_api_enabled=false
 		order_input.text="Ration the stores for the cold season"
 		terrain._issue_freeform_order(order_input)
 		_expect(GameState.sovereign_orders.size()==orders_before+1,"dock order input did not record a pronouncement")
@@ -197,16 +200,6 @@ func _ready()->void:
 	_expect(terrain.hud.detail_dock.visible,"scout report detail dock did not open")
 	_expect(terrain.game_speed==0.0,"scout report did not pause the world")
 	_expect(terrain.hud.handle_escape(),"escape did not consume with scout report open")
-	await get_tree().process_frame
-
-	# Landmark detail: opening a charted landmark's record shows the detail dock
-	# (illustration falls back to text until the plate is imported).
-	CivilizationSystem.landmarks.append({"id":"landmark_probe","name":"The Grey Scarp","kind":"cliffs","feature_id":"scarp_wall","myth":"Probe myth line.","position":{"x":0.0,"z":0.0},"discovered_day":1,"description":"Probe survey line."})
-	terrain._open_landmark_detail(CivilizationSystem.landmarks[CivilizationSystem.landmarks.size()-1])
-	await get_tree().process_frame
-	_expect(terrain.hud.detail_dock.visible,"landmark detail dock did not open")
-	_expect(terrain.hud.handle_escape(),"escape did not consume with landmark detail open")
-	_expect(not terrain.hud.detail_dock.visible,"escape did not close the landmark detail dock")
 	await get_tree().process_frame
 
 	# Detail dock: opens beside the primary dock; Esc closes detail first.

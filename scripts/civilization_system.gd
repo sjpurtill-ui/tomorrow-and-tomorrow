@@ -7,7 +7,6 @@ signal diplomatic_event(event:Dictionary)
 signal scout_report_returned(report:Dictionary)
 
 const MILITARY_DEVELOPMENT:=preload("res://scripts/military_development_catalog.gd")
-const LandmarkFeatureCatalog:=preload("res://scripts/landmark_feature_catalog.gd")
 
 const SAVE_VERSION:=10
 # Every new world draws its own rival count from this range; the player never
@@ -99,11 +98,6 @@ var fog_revision:=0
 var player_world_origin:=Vector2.ZERO
 var foreign_formations:Array[Dictionary]=[]
 var foreign_sightings:Array[Dictionary]=[]
-## Named landmarks charted by returned scout parties. They anchor navigation:
-## every known landmark slightly extends how far later parties can safely
-## range, and each is stamped on the map once its ground is revealed.
-var landmarks:Array[Dictionary]=[]
-var next_landmark_id:=1
 ## Sightings of unaffiliated nomadic bands from returned scout reports. They
 ## are indicators, not contacts: nomads move, so each mark fades with seasons.
 var nomad_sightings:Array[Dictionary]=[]
@@ -159,8 +153,6 @@ func reset_for_new_world()->void:
 	player_world_origin=Vector2.ZERO
 	foreign_formations.clear()
 	foreign_sightings.clear()
-	landmarks.clear()
-	next_landmark_id=1
 	nomad_sightings.clear()
 	next_nomad_sighting_id=1
 	observation_revision=0
@@ -2259,8 +2251,6 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	windfalls.append_array(military_accounts)
 	for account in military_accounts:
 		(mission.discoveries as Array).push_front({"kind":"intelligence","title":"Armed strangers on the road","description":account,"consequence":"A dated sighting has been added to the map. The force may have moved since it was seen."})
-	var landmark_line:=_resolve_scout_landmark(mission,route,day)
-	if landmark_line!="": windfalls.append(landmark_line)
 	var rumor_line:=_resolve_scout_rumors(day,recruits)
 	if rumor_line!="":
 		windfalls.append(rumor_line)
@@ -2346,19 +2336,6 @@ func _compose_scout_journal(mission:Dictionary,route:Array)->Array[String]:
 	if saw_coast: journal.append("For part of the journey they walked within sight of open water.")
 	if farthest_distance>1.0:
 		journal.append("At their farthest they stood roughly %d km to the %s of home." % [roundi(farthest_distance),_compass_phrase(player_world_origin,farthest_point)])
-	var steered_by:Array[String]=[]
-	for landmark_variant in landmarks:
-		if steered_by.size()>=2: break
-		var landmark:Dictionary=landmark_variant
-		var landmark_position:Dictionary=landmark.get("position",{})
-		var landmark_point:=Vector2(float(landmark_position.get("x",0.0)),float(landmark_position.get("z",0.0)))
-		for waypoint_variant in route:
-			var waypoint:Dictionary=waypoint_variant
-			if landmark_point.distance_to(Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0))))<14.0:
-				steered_by.append(String(landmark.get("name","a known waymark")))
-				break
-	if not steered_by.is_empty():
-		journal.append("They steered by %s." % " and ".join(steered_by))
 	return journal
 
 
@@ -2616,75 +2593,13 @@ func _resolve_taught_knowledge(day:int,recruits:int,contacts:Array)->String:
 
 
 const SCOUT_FIND_RESOURCES:Array[String]=["Timber","Stone","Fiber Plants","Fertile Soil","Game"]
-const LANDMARK_LIMIT:=40
-const LANDMARK_KINDS:Array[Array]=[
-	["ridge","%s Ridge","A long spine of high ground visible for a day's walk."],
-	["vale","%s Vale","A sheltered valley the party used as a waymark."],
-	["ford","%s Ford","A reliable shallow crossing the party waded twice."],
-	["stones","The %s Stones","Weathered standing stones no living people claim."],
-	["grove","%s Grove","An old stand of trees unlike the surrounding country."],
-	["springs","%s Springs","Water rising warm from the ground year-round."],
-	["cliffs","The %s Cliffs","A pale scarp face the party steered by for days."],
-	["sink","%s Hollow","A broad depression that gathers mist each morning."],
-]
-const LANDMARK_ADJECTIVES:Array[String]=["Grey","Red","Broken","Silent","Far","White","Thorn","Crow","Elder","Hollow","Bright","Ash","Wind","Stone","Lark"]
-
-
 func scout_one_way_range(duration_days:int)->float:
-	## How far a party can range: logistics staffing, the charted landmark
-	## lattice, established route-speed knowledge from Logistics inquiry, and —
+	## How far a party can range: logistics staffing, established route-speed knowledge from Logistics inquiry, and —
 	## transformatively — an adopted mounted-scouting tradition.
 	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.16)),0.0,1.0)
 	var travel_knowledge:=clampf(DiscoverySystem.effect("route_speed")+ProgressionSystem.effect("route_speed"),0.0,0.60)
 	var mount_bonus:=1.0+DiscoverySystem.adoption("mounted_scouts")*0.50
-	return float(duration_days)*14.0*(0.72+logistics*0.28)*scout_range_factor()*(1.0+travel_knowledge)*mount_bonus
-
-
-func scout_range_factor()->float:
-	## Every named landmark is a navigational anchor; a charted lattice of
-	## waymarks lets later parties range measurably farther with the same food.
-	return minf(1.20,1.0+0.02*float(landmarks.size()))
-
-
-func landmarks_snapshot()->Array[Dictionary]:
-	return landmarks.duplicate(true)
-
-
-func _resolve_scout_landmark(mission:Dictionary,route:Array,day:int)->String:
-	if landmarks.size()>=LANDMARK_LIMIT or route.size()<4: return ""
-	var duration:=maxi(1,int(mission.get("duration_days",30)))
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*217645199^int(mission.get("mission_id",0))*373587883^duration*10007
-	if duration<180 and rng.randf()>=clampf(0.30+float(duration)/365.0*0.35,0.0,0.65): return ""
-	var waypoint:Dictionary=route[rng.randi_range(route.size()/2,route.size()-1)]
-	var position:=Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0)))
-	for landmark_variant in landmarks:
-		var existing_position:Dictionary=(landmark_variant as Dictionary).get("position",{})
-		if position.distance_to(Vector2(float(existing_position.get("x",0.0)),float(existing_position.get("z",0.0))))<40.0: return ""
-	var adjective:=LANDMARK_ADJECTIVES[rng.randi_range(0,LANDMARK_ADJECTIVES.size()-1)]
-	var taken_names:Array=[]
-	for landmark_variant in landmarks: taken_names.append(String((landmark_variant as Dictionary).get("name","")))
-	# Scouts name what the rendered ground actually is: the height field and
-	# biome authority classify the spot, the catalog offers matching features.
-	var feature:Dictionary={}
-	if ground_survey_authority.is_valid():
-		feature=LandmarkFeatureCatalog.pick(ground_survey_authority.call(position),rng,adjective,taken_names)
-		if feature.is_empty(): return ""
-	if feature.is_empty():
-		# No survey authority (headless probes, old saves mid-mission): fall back
-		# to the legacy invented kinds rather than losing the windfall.
-		var kind:Array=LANDMARK_KINDS[rng.randi_range(0,LANDMARK_KINDS.size()-1)]
-		feature={"feature_id":String(kind[0]),"class":String(kind[0]),"name":String(kind[1]) % adjective,"description":String(kind[2]),"myth":""}
-	var landmark_name:=String(feature.name)
-	if landmark_name in taken_names: return ""
-	var landmark:Dictionary={"id":"landmark_%d" % next_landmark_id,"name":landmark_name,"kind":String(feature.get("class","")),"feature_id":String(feature.get("feature_id","")),"myth":String(feature.get("myth","")),"position":{"x":position.x,"z":position.y},"discovered_day":day,"description":String(feature.description)}
-	next_landmark_id+=1
-	landmarks.append(landmark)
-	var discoveries:Array=mission.get("discoveries",[])
-	discoveries.push_front({"kind":"landmark","title":landmark_name,"description":String(feature.description),"myth":String(feature.get("myth","")),"consequence":"A named waymark on the world map. Your scouts can use the growing network of landmarks to range farther.","position":landmark.position.duplicate(true),"distance_km":roundi(player_world_origin.distance_to(position)),"landmark_id":String(landmark.id),"feature_id":String(landmark.feature_id)})
-	mission["discoveries"]=discoveries
-	_record_world_event("Landmark named",'The returning party names "%s", %d km from home. %s' % [landmark_name,roundi(player_world_origin.distance_to(position)),String(feature.description)],"diplomacy",day)
-	return 'They name "%s" along the route — one more waymark extending how far future parties can safely range.' % landmark_name
+	return float(duration_days)*14.0*(0.72+logistics*0.28)*(1.0+travel_knowledge)*mount_bonus
 
 
 func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->Array[String]:
@@ -4741,7 +4656,7 @@ func export_state()->Dictionary:
 		for point_key in ["point_a","point_b"]:
 			var point:Variant=exported_formations[index].get(point_key,Vector2.ZERO)
 			if point is Vector2: exported_formations[index][point_key]={"x":point.x,"y":point.y}
-	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"landmarks":landmarks.duplicate(true),"next_landmark_id":next_landmark_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
+	return {"version":SAVE_VERSION,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
 
 
 func import_state(payload:Dictionary)->Dictionary:
@@ -5011,12 +4926,13 @@ func _apply_state(payload:Dictionary)->void:
 		if not legacy_mission.has("mission_id"): legacy_mission["mission_id"]=1
 		scout_missions.append(legacy_mission)
 	next_scout_mission_id=maxi(1,int(payload.get("next_scout_mission_id",scout_missions.size()+1)))
-	landmarks.assign((payload.get("landmarks",[]) as Array).duplicate(true))
-	next_landmark_id=maxi(1,int(payload.get("next_landmark_id",landmarks.size()+1)))
 	nomad_sightings.assign((payload.get("nomad_sightings",[]) as Array).duplicate(true))
 	next_nomad_sighting_id=maxi(1,int(payload.get("next_nomad_sighting_id",nomad_sightings.size()+1)))
 	scout_reports.assign((payload.get("scout_reports",[]) as Array).duplicate(true))
 	last_scout_outcome=(payload.get("last_scout_outcome",{}) as Dictionary).duplicate(true)
+	# Retire illustrated landmarks in older saves while keeping real expedition outcomes.
+	for record in scout_reports + scout_missions + [last_scout_outcome]:
+		_strip_retired_landmarks(record)
 	diplomatic_mission=(payload.get("diplomatic_mission",{}) as Dictionary).duplicate(true)
 	if not diplomatic_mission.is_empty():
 		# Same-version compatibility for missions saved before carried proposals
@@ -5060,6 +4976,7 @@ func _apply_state(payload:Dictionary)->void:
 		incoming_civilizations[index]=hydrated
 	civilizations.assign(incoming_civilizations)
 	world_events.assign((payload.get("world_events",[]) as Array).duplicate(true))
+	world_events.assign(world_events.filter(func(event:Dictionary)->bool: return String(event.get("title",""))!="Landmark named"))
 	pending_player_incidents.assign((payload.get("pending_player_incidents",[]) as Array).duplicate(true))
 	foreign_formations.assign((payload.get("foreign_formations",[]) as Array).duplicate(true))
 	if foreign_formations.is_empty(): _initialize_foreign_formations(last_world_seed)
@@ -5345,3 +5262,11 @@ func _contains_person_records(value:Variant)->bool:
 		for entry in value:
 			if _contains_person_records(entry): return true
 	return false
+
+func _strip_retired_landmarks(record:Dictionary)->void:
+	if record.has("discoveries"):
+		record["discoveries"]=(record.discoveries as Array).filter(func(item:Dictionary)->bool: return String(item.get("kind",""))!="landmark")
+	if record.has("windfalls"):
+		record["windfalls"]=(record.windfalls as Array).filter(func(line:Variant)->bool: return not (String(line).begins_with("They name ") and "waymark" in String(line)))
+	if record.has("journal"):
+		record["journal"]=(record.journal as Array).filter(func(line:Variant)->bool: return not String(line).begins_with("They steered by "))

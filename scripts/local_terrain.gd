@@ -894,7 +894,6 @@ func _process(delta: float) -> void:
 	_refresh_foreign_formation_markers()
 	_refresh_player_field_army_markers()
 	_refresh_player_scout_route_markers()
-	_refresh_landmark_markers()
 	_refresh_nomad_sighting_markers()
 	_refresh_settlement_network()
 	_refresh_settlement_convoy_marker()
@@ -12168,7 +12167,6 @@ func _refresh_player_field_army_markers()->void:
 	_refresh_close_army_figures(reported_armies,marker_selected_id)
 
 
-var landmark_markers:Dictionary={}
 var nomad_sighting_markers:Dictionary={}
 
 func _refresh_nomad_sighting_markers()->void:
@@ -12205,42 +12203,6 @@ func _refresh_nomad_sighting_markers()->void:
 		if stale and is_instance_valid(stale): stale.queue_free()
 		nomad_sighting_markers.erase(sighting_id)
 
-func _refresh_landmark_markers()->void:
-	## Named landmarks from returned scout reports, stamped on the map once
-	## their ground is revealed. Labels are created once and cached.
-	var known_ids:Dictionary={}
-	for landmark_variant in CivilizationSystem.landmarks_snapshot():
-		var landmark:Dictionary=landmark_variant
-		var landmark_id:=String(landmark.get("id",""))
-		known_ids[landmark_id]=true
-		var marker:Label3D=landmark_markers.get(landmark_id,null)
-		if marker==null or not is_instance_valid(marker):
-			marker=Label3D.new()
-			marker.name="Landmark_%s" % landmark_id
-			marker.text=String(landmark.get("name","LANDMARK")).to_upper()
-			# Match the settlement map label's footprint: landmarks are quiet
-			# waymarks, not banners.
-			marker.font_size=10
-			marker.modulate=Color("#c8ad72")
-			marker.outline_size=4
-			marker.outline_modulate=Color(0.018,0.026,0.028,0.97)
-			marker.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-			marker.fixed_size=true
-			marker.no_depth_test=true
-			marker.render_priority=9
-			var position_data:Dictionary=landmark.get("position",{})
-			var world_position:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0)))
-			world_position.y=_height_at(world_position.x,world_position.z)+0.4
-			marker.position=world_position
-			add_child(marker)
-			landmark_markers[landmark_id]=marker
-		marker.visible=_world_position_is_revealed(marker.global_position) and camera and camera.size>=8.0
-	for landmark_id in landmark_markers.keys():
-		if known_ids.has(String(landmark_id)): continue
-		var stale:Label3D=landmark_markers[landmark_id]
-		if stale and is_instance_valid(stale): stale.queue_free()
-		landmark_markers.erase(landmark_id)
-
 func _on_scout_report_returned(report:Dictionary)->void:
 	## A returned expedition is an event worth full attention: the world pauses
 	## and the complete report opens in the detail dock. Choosing any speed
@@ -12250,31 +12212,6 @@ func _on_scout_report_returned(report:Dictionary)->void:
 		travel_status_label.text="A SCOUT PARTY HAS RETURNED — THE WORLD WAITS WHILE YOU READ ITS REPORT"
 	if hud:
 		hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(self,hud,report))
-
-
-func _open_landmark_from_screen(screen_position:Vector2)->bool:
-	## Clicking a charted landmark's map label opens its record — illustration
-	## plate, myth, and survey — in the detail dock.
-	if camera==null: return false
-	var best:Dictionary={}
-	var best_distance:=30.0
-	for landmark_variant in CivilizationSystem.landmarks_snapshot():
-		var landmark:Dictionary=landmark_variant
-		var marker:Label3D=landmark_markers.get(String(landmark.get("id","")),null)
-		if marker==null or not is_instance_valid(marker) or not marker.visible: continue
-		if camera.is_position_behind(marker.global_position): continue
-		var distance:=screen_position.distance_to(camera.unproject_position(marker.global_position))
-		if distance<best_distance:
-			best_distance=distance
-			best=landmark
-	if best.is_empty(): return false
-	_open_landmark_detail(best)
-	return true
-
-
-func _open_landmark_detail(landmark:Dictionary)->void:
-	if hud==null: return
-	hud.open_detail(preload("res://scripts/hud/content/dock_detail_landmark.gd").new(self,hud,landmark))
 
 
 func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
@@ -19460,9 +19397,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		if not settlement_convoy_targeting and _focus_settlement_from_screen(event.position, event.double_click):
-			get_viewport().set_input_as_handled()
-			return
-		if _open_landmark_from_screen(event.position):
 			get_viewport().set_input_as_handled()
 			return
 		_move_settlers_to_screen(event.position)
