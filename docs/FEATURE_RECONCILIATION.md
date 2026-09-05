@@ -1,5 +1,10 @@
 # Canonical feature reconciliation — 2026-09-05
 
+Latest consolidation: release 2026.09.05.5 integrates the battle/siege HUD series
+through 018cedd, excluding its isolated project settings. The branch audit found
+other differing historical hashes already reconciled as described below. See
+RELEASE_2026_09_05_5.md and INTEGRATION_STATUS.md for current scope and evidence.
+
 The playable checkout is `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`.
 This record distinguishes recovered behavior from old implementations that have
 been superseded. A newer file timestamp is not a reason to replace an entire system.

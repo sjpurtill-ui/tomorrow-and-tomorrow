@@ -1,0 +1,28 @@
+Work on Tomorrow and Tomorrow as a feature worker.
+
+TASK: [describe one bounded task]
+OWNED FILES / SYSTEMS: [assign ownership]
+
+The only player game is C:/Users/sjpur/TomorrowandTomorrow on main.
+Read AGENTS.md, docs/WORKER_HANDOFF.md and docs/INTEGRATION_STATUS.md there.
+Create a separate Git worktree from its latest main on codex/<task>.
+Before editing, report your absolute worktree path, branch, base commit and scope.
+Do not develop in the archived OneDrive copy or change canonical main.
+
+Preserve other features, saves and population accounting. Coordinate changes to
+shared files with the integrator. Never copy whole folders or overwrite newer
+systems. Do not merge, synchronize folders, or launch your branch as my game.
+
+Implement and test the assigned task. Use explicit project paths. Use a separate
+test user-data directory for save tests. Graphical automation must use
+tools/run_isolated_gpu_probe.ps1 on a private desktop; hidden startup alone does
+not prevent test windows from appearing. Never stop the player or editor.
+Interactive previews require an explicit request and must be labeled TEST.
+
+Commit only your task files. Hand off READY or HELD, commit and base hashes,
+changed files, player-visible behavior, exact test results, save compatibility,
+limitations and shared-file conflicts. Stop editing that delivery after handoff.
+
+Only the designated integrator merges tested deliveries into main, verifies the
+combined game, updates the release record and launches the player game. Until
+then, say "ready for integration," never "now in your game."

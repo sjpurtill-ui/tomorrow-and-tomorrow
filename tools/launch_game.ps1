@@ -10,6 +10,24 @@ $canonicalRoot = 'C:\Users\sjpur\TomorrowandTomorrow'
 if ([IO.Path]::GetFullPath($projectRoot).TrimEnd('\') -ine $canonicalRoot) {
     throw "This launcher is outside the current game. Run $canonicalRoot\tools\launch_game.ps1 instead."
 }
+$branch = & git -C $projectRoot branch --show-current
+if ($LASTEXITCODE -ne 0 -or $branch -ne 'main') {
+    throw 'The player launcher requires the integrated main branch. Ask the integrator to finish the release.'
+}
+$projectConfig = Get-Content -LiteralPath (Join-Path $projectRoot 'project.godot') -Raw
+if ($projectConfig -notmatch 'run/main_scene="res://local_terrain.tscn"' -or $projectConfig -match 'config/use_custom_user_dir=true' -or (Test-Path -LiteralPath (Join-Path $projectRoot 'override.cfg'))) {
+    throw 'The canonical project contains a test entry point or settings override. Ask the integrator to review it before launching.'
+}
+if (-not $Editor) {
+    $existing = Get-CimInstance Win32_Process | Where-Object {
+        $_.Name -match '^Godot_v.*\.exe$' -and $_.CommandLine -and
+        $_.CommandLine.Replace('/', '\').Contains($canonicalRoot) -and
+        $_.CommandLine -notmatch '--editor|--headless'
+    }
+    if ($existing) {
+        throw "A canonical game is already running (PID $($existing.ProcessId -join ', ')). Save and exit it normally, then launch again to load the newest release."
+    }
+}
 $godotPackageRoot = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe'
 $godotExecutable = Get-ChildItem -LiteralPath $godotPackageRoot -Filter 'Godot_v*-stable_win64.exe' -File |
     Sort-Object Name -Descending |

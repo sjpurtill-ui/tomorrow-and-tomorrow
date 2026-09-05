@@ -342,14 +342,16 @@ func _body_label(parent:VBoxContainer)->Label:
 	var label:=Label.new(); label.custom_minimum_size.x=200; label.size_flags_vertical=Control.SIZE_EXPAND_FILL; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.max_lines_visible=9; label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; label.add_theme_color_override("font_color",INK); parent.add_child(label); return label
 
 
-func _open_battle_graphics(army_id:int=0)->void:
+func _open_battle_graphics(army_id:int=0,history_seed:int=-1)->void:
 	if is_instance_valid(battle_graphics): return
-	battle_graphics=preload("res://scripts/battle_graphics_screen.gd").new()
+	battle_graphics=preload("res://scripts/army_inspection_screen.gd").new() if army_id!=0 or (MilitaryCampaign.active_engagement.is_empty() and MilitaryCampaign.battle_history.is_empty()) else preload("res://scripts/battle_graphics_screen.gd").new()
 	battle_graphics.inspected_army_id=army_id
+	if battle_graphics is BattleGraphicsScreen:battle_graphics.history_seed=history_seed
 	layer.add_child(battle_graphics)
 	modal.hide()
+	var was_inspection:=battle_graphics is ArmyInspectionScreen
 	battle_graphics.tree_exited.connect(func():
-		if is_inside_tree() and is_instance_valid(modal) and modal.is_inside_tree():modal.show();_refresh())
+		if was_inspection and is_inside_tree() and is_instance_valid(modal) and modal.is_inside_tree():modal.show();_refresh())
 
 
 func _counter(parent:HBoxContainer,minimum:int,maximum:int,value:int)->SpinBox:

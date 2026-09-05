@@ -9,6 +9,7 @@ func _ready()->void:
 	var terrain:=preload("res://local_terrain.tscn").instantiate()
 	add_child(terrain);terrain._set_game_speed(0)
 	await get_tree().process_frame;await get_tree().process_frame
+	print("CAMPAIGN_RESUME_COMPARE before=",before.day," after=",GameState.elapsed_days," before_name=",before.name," after_name=",GameState.settlement_name," speed=",terrain.game_speed)
 	assert(GameState.population_total==int(before.population));assert(GameState.world_seed==int(before.seed))
 	assert(GameState.elapsed_days==float(before.day));assert(GameState.settlement_name==String(before.name))
 	assert(GameState.research_allocations==before.weights);assert(GameState.known_discoveries==before.known)

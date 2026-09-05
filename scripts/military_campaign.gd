@@ -1884,6 +1884,15 @@ func begin_threat_engagement()->Dictionary:
 	return engagement_snapshot()
 
 
+func set_battle_formation_order(index:int,kind:String,target:int=-1)->Dictionary:
+	if active_engagement.is_empty():return {"error":"No active battle."}
+	var side:=_engagement_home_side(active_engagement);var enemy:=_engagement_enemy_side(active_engagement)
+	var error:=BattleRoundOrders.validate(active_engagement[side].get("formations",[]),active_engagement[enemy].get("formations",[]),index,kind,target)
+	if error!="":return {"error":error}
+	if not active_engagement.has("formation_orders"):active_engagement["formation_orders"]={}
+	active_engagement.formation_orders[str(index)]={"kind":kind,"target":target}
+	return {"ok":true}
+
 func advance_engagement(order:String="hold")->Dictionary:
 	if active_engagement.is_empty(): return {"error":"No campaign battle is active."}
 	active_engagement.erase("awaiting_player_view")
@@ -1908,10 +1917,19 @@ func advance_engagement(order:String="hold")->Dictionary:
 		round_options["casualty_intensity"]=1.30
 		if home_side=="attacker": round_options["attacker_exposure_modifier"]=1.12
 		else: round_options["defender_exposure_modifier"]=1.12
+	var directives:Dictionary=active_engagement.get("formation_orders",{})
+	if not directives.is_empty():
+		var commanded:Dictionary=attacker if home_side=="attacker" else defender
+		var opposing:Dictionary=defender if home_side=="attacker" else attacker
+		var orders_context:=BattleRoundOrders.apply(commanded,opposing,directives)
+		round_options[home_side+"_exposure_modifier"]=float(round_options.get(home_side+"_exposure_modifier",1))*float(orders_context.exposure)
+		round_options["casualty_intensity"]=float(round_options.get("casualty_intensity",1))*float(orders_context.intensity)
+		round_options[("defender" if home_side=="attacker" else "attacker")+"_ordered_targets"]=orders_context.targets
 	var next_round:=int(active_engagement.round)+1
 	var result:Dictionary=simulator.simulate(attacker,defender,round_options)
+	BattleRoundOrders.clear_transient(result.attacker);BattleRoundOrders.clear_transient(result.defender)
 	if (result.get("rounds",[]) as Array).is_empty(): return _finish_active_engagement(false,result)
-	var record:Dictionary=(result.rounds[0] as Dictionary).duplicate(true); record["round"]=next_round; record["order"]=command
+	var record:Dictionary=(result.rounds[0] as Dictionary).duplicate(true); record["round"]=next_round; record["order"]=command; record["formation_orders"]=directives.duplicate(true)
 	(active_engagement.rounds as Array).append(record)
 	active_engagement["round"]=next_round; active_engagement["attacker"]=_force_from_round_result(active_engagement.attacker,result.attacker); active_engagement["defender"]=_force_from_round_result(active_engagement.defender,result.defender); active_engagement["last_order"]=command; active_engagement["last_result"]=result.duplicate(true)
 	# The resolver calls an undecided round "inconclusive"; it is still an active
@@ -4559,8 +4577,10 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 	var battle:Dictionary={}
 	var seed_value:=int((operation.get("threat",{}) as Dictionary).get("seed",-1))
 	if not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value:battle=engagement_snapshot()
-	elif not battle_history.is_empty() and int(battle_history[0].get("seed",-2))==seed_value:battle=battle_history[0].duplicate(true)
-	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",GameState.settlement_name)) if String(archived_home.get("name",GameState.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not battle.is_empty() and not active_engagement.is_empty(),"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
+	else:
+		for past_battle:Dictionary in battle_history:
+			if int(past_battle.get("seed",-2))==seed_value:battle=past_battle.duplicate(true);break
+	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",GameState.settlement_name)) if String(archived_home.get("name",GameState.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value,"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
 
 func template_recruitment_blocker()->String:
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return "Resolve the battle or aftermath before recruiting."

@@ -191,8 +191,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		if defender_losses==0 and float(engagement.intensity)>=0.65: defender_losses=1
 		attacker_troops -= attacker_losses
 		defender_troops -= defender_losses
-		var attacker_cohort_result:=_apply_cohort_losses(attacking_force.get("formations", []), attacker_cohorts, attacker_losses,rng,engagement.get("attacker_target",-1))
-		var defender_cohort_result:=_apply_cohort_losses(defending_force.get("formations", []), defender_cohorts, defender_losses,rng,engagement.get("defender_target",-1))
+		var attacker_cohort_result:=_apply_cohort_losses(attacking_force.get("formations", []), attacker_cohorts, attacker_losses,rng,engagement.get("attacker_target",-1),options.get("attacker_ordered_targets",{}))
+		var defender_cohort_result:=_apply_cohort_losses(defending_force.get("formations", []), defender_cohorts, defender_losses,rng,engagement.get("defender_target",-1),options.get("defender_ordered_targets",{}))
 		var attacker_ammunition_used:=_consume_ammunition(attacker_cohort_result.formations,float(engagement.intensity)*casualty_intensity,rng)
 		var defender_ammunition_used:=_consume_ammunition(defender_cohort_result.formations,float(engagement.intensity)*casualty_intensity,rng)
 		var attacker_casualties:=_casualty_breakdown(attacker_losses,rng,float(engagement.intensity))
@@ -294,8 +294,8 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) - _enemy_penetration(enemy_formations)) * 0.35
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
-			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier,
-			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier,
+			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*float(formation.get("round_order_defense",1.0)),
 			"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
 		})
 	return result
@@ -511,7 +511,7 @@ func _casualty_breakdown(losses: int,rng: RandomNumberGenerator,intensity: float
 	return {"killed":killed,"wounded":wounded,"scattered":losses-killed-wounded,"disabled":disabled,"severe_disability":floori(disabled*.35)}
 
 
-func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses: int,rng: RandomNumberGenerator,targeted_cohort: int=-1) -> Dictionary:
+func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses: int,rng: RandomNumberGenerator,targeted_cohort: int=-1,ordered_targets:Dictionary={}) -> Dictionary:
 	var updated: Array[Dictionary] = []
 	var original_counts:Array[int]=[]
 	var cohort_losses:Array[int]=[]
@@ -525,6 +525,8 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 	for index in updated.size():
 		var contact:=rng.randf_range(0.55,1.45)
 		if index==targeted_cohort: contact*=2.25
+		contact*=1.0+1.25*clampf(float(ordered_targets.get(str(index),0)),0,1)
+		contact*=float(updated[index].get("round_order_exposure",1.0))
 		contact_factors.append(contact)
 	var remaining_losses := losses
 	while remaining_losses > 0:

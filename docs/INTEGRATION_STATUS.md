@@ -1,5 +1,19 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.5
+
+Battle/siege HUD delivery through worker 018cedd is now selected for integration
+from c89b895 with test project settings excluded. Includes formation orders,
+replay, siege controls and linked battle history. Saved notification restoration
+preserves fractional time. See RELEASE_2026_09_05_5.md for validation and audit.
+The sections below are historical checkpoints, not the current launch record.
+
+Continuous actual-world city encounters and faction uniforms remain PENDING;
+no implementation commit exists yet. Outposts, sliced vegetation and unfinished
+Blender authoring remain HELD. All prior worktrees/local changes are preserved.
+Copy-ready worker prompt: WORKER_PROMPT.txt. Player: canonical main via the
+desktop shortcut. A running test scene is never the current campaign.
+
 Canonical player checkout: `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`.
 The OneDrive project is archived. Use `tools/launch_game.ps1` or the existing **Play Tomorrow and Tomorrow** desktop shortcut. The launcher prints the commit it starts. F5 runs the game; F6 may run a preview scene.
 
