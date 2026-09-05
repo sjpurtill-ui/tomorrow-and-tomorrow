@@ -58,6 +58,10 @@ func _ready()->void:
 				if (marker.get_node(glyph_name) as MeshInstance3D).visible: visible_icon_parts+=1
 			_expect(visible_icon_parts>=1,"%s icon has no visible silhouette" % historical_unit)
 		var damaged_army:=army.duplicate(true)
+		terrain._configure_warfare_role_glyph(marker,"artillery","siege_engineer")
+		_expect(marker.get_node("RoleGlyphSecondary").mesh is BoxMesh,"engineer hammer head is missing")
+		_expect(marker.get_node("RoleGlyphTertiary").mesh is BoxMesh,"engineer retains artillery wheels")
+		_expect(marker.get_node("RoleGlyphFourth").mesh is ArrayMesh,"engineer spade is missing")
 		terrain._configure_warfare_role_glyph(marker,"infantry","skirmisher")
 		var bow_mesh:ArrayMesh=marker.get_node("RoleGlyphPrimary").mesh
 		_expect(bow_mesh.surface_get_array_len(0)==48,"bow arc exceeds its eight-segment budget")
