@@ -1,5 +1,11 @@
 # Ongoing gameplay graphics work
 
+## Integration validation
+
+The six ready commits through worker 88d04f1 were integrated into canonical main after river/woodland 11516ba. Their canonical commits are a36d43d, 1226f12, 517d906, 58647c0, cc2d6da and 62e8c01. Shared terrain hunks merged cleanly. The worker's compact-equipment helper supersedes an equivalent provisional integrator fix; there is only one implementation.
+
+Canonical verification: editor reimport; 71 settlement architecture tests and one six-texture mipmap test passed; five formation tests passed with the actual Compatibility renderer (including billion-person visual-budget proportions, tight infantry spacing and cache invalidation); battle_graphics_probe passed. The two MultiMesh readback tests explicitly skip the headless dummy renderer, whose readback returns zero transforms. Actual GPU tests passed with no skipped cases. Inspected canonical artifacts/village-integrated.png and artifacts/siege-integrated.png. The large 80-year/12,000-person town capture was stopped after a lengthy setup; it is not claimed as completed verification. The smaller village capture completed. Static captures do not establish motion/shimmer quality, and vegetation at this distance still appears noisy. Existing capture shutdown resource warnings remain. No player session was interrupted or launched.
+
 Worktree: C:/Users/sjpur/tt-gameplay-graphics
 Branch: codex/gameplay-graphics
 Base: ffefea66752e12ccd6e59ae4ecf85c829ef901b9
