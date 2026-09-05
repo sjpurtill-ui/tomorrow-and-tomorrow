@@ -4,13 +4,13 @@ One final versioned release and one final player relaunch, only after this check
 
 - [x] Military recruitment/deployment readability, live progress, reliable army selection/focus/visibility. Integratedcc5ffc5;49 cases + canonical runtime probe pass. Earlier partial hold was consolidation exclusion, not cancellation.
 - [x] Rumor contact network, delayed attributed accounts, uncertainty/search costs, AI access and spatial rumor map. Integrated from3c071ff;33 focused cases + unchanged century/billion payload budget + GPU pass.
-- [ ] Large graphical Inquiry tree, actual dependencies, unknown/known states and noncolor cues, pan/zoom and preserved actions.
-- [ ] Larger graphical Materials surface with actual resources/relationships, quantities and actions.
-- [ ] Reproduce and fix crowded Scouting-screen jitter, preserving selections/scroll/live updates.
+- [x] Large graphical Inquiry tree, actual dependencies, unknown/known states and noncolor cues, pan/zoom and preserved actions.
+- [x] Larger graphical Materials surface with actual resources/relationships, quantities and actions.
+- [x] Reproduce and fix crowded Scouting-screen jitter, preserving selections/scroll/live updates.
 - [ ] Occupation governance/integration: policy alternatives and lasting consequences, resistance/logistics, raze infrastructure separately from inhabitants, physically timed conserved population transfers and differentiated status, intergenerational institutions/grievances/reform.
 - [x] Save/load investigation: changed weights, manual Research, second-city Auto, completed knowledge and adjacent preferences survive separate-process tests; current11:15 save retains Research. Report unproven original reset honestly; inspect further shared paths as relevant. Preserve evidence.
 - [ ] Siege escape preparations, physically supplied surviving group, capture continuity when other cities survive, viable resettlement and occupied-player resistance/recovery decisions. Share occupation policies, conserved cohorts/resources, delayed communication and save state; neither escape nor independence is automatic. Newly authorized September5.
-- [ ] Persistent interactive siege view: actual known walls/encirclement, unwalled assault in streets with actual forces, honest quiet/combat phases, full-duration live decisions including escape, leave/reopen and occupation transition without duplicated state.
+- [ ] Persistent interactive siege view: bounded representative city mockup derived from actual known settlement type, scale, damage/style and fortifications; actual known walls/encirclement, unwalled assault in streets with actual forces, honest quiet/combat phases, full-duration live decisions including escape, leave/reopen and occupation transition without duplicated state.
 - [ ] One authoritative user-facing version source, accessible UI/title, release notes/diagnostics and compatible save metadata.
 - [ ] Combined regression, latest campaign fresh-process compatibility, knowledge boundaries, population accounting, silent GPU UI/marker checks.
 - [ ] Canonical integration/version notes complete. Preserve newest campaign, orderly final relaunch exactly one canonical game, verify version and resumed campaign.
