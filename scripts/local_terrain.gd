@@ -11616,27 +11616,9 @@ func _add_resource_outcrops(parent:Node3D,center:Vector3,style:Dictionary)->void
 	var rocks:=MeshInstance3D.new()
 	rocks.name="ExposedRockFaces"
 	rocks.mesh=surface.commit()
-	var shader:=Shader.new()
-	shader.code="""
-shader_type spatial;
-render_mode cull_disabled, diffuse_burley, specular_disabled;
-varying vec3 ground_position;
-float grain_hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
-float grain(vec2 p){
-	vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
-	return mix(mix(grain_hash(i),grain_hash(i+vec2(1,0)),f.x),mix(grain_hash(i+vec2(0,1)),grain_hash(i+vec2(1,1)),f.x),f.y);
-}
-void vertex(){ ground_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
-void fragment(){
-	float weathering=grain(ground_position.xz*620.0);
-	float mineral_grain=grain(ground_position.xz*2200.0);
-	float beds=sin(ground_position.y*2100.0+grain(ground_position.xz*160.0)*2.0);
-	ALBEDO=COLOR.rgb*(0.82+weathering*0.22+mineral_grain*0.08)*(0.97+beds*0.03);
-	ROUGHNESS=0.96;
-}
-"""
 	var material:=ShaderMaterial.new()
-	material.shader=shader
+	material.shader=preload("res://scripts/shaders/resource_outcrop.gdshader")
+	material.set_shader_parameter("layered",layered)
 	rocks.material_override=material
 	parent.add_child(rocks)
 
