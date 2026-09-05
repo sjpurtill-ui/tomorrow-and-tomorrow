@@ -108,3 +108,8 @@ User requested visible Godot editor and game with supported built-in external-sc
 ## Combined checkpoint: century, battle, conversation and scout returns
 
 The authoritative main now includes `69bc384` (century choices), `3485f1b` (battle terrain/contact and persistent veteran injuries), `2dff85c` (leader dialogue continuity), `cf3a058` (noninterrupting scout returns) and `4bc66f4` (first-page recruitment outcomes/HUD cleanup). Earlier eight-turn civic context is expanded to 24 messages plus recent decisions. See INTEGRATION_STATUS.md for validation and explicit held prototypes; no folder overwrite or blanket old-branch merge was used. Player saves and live campaign were preserved.
+
+
+## September 5 — sustained sieges and independent protection leagues
+
+Integrated siege worker `1f10c0d` as `8077fa3`, diplomacy worker `4ce8a64` as `60910ec`, and real relief/save integration tests `d727f9d` as `7964a29`. Canonical 98-case checks, world save/load and GPU siege UI pass. These extend the existing food, population, army and ForeignDiplomacy owners rather than creating duplicate simulation authorities. Main retains all previous terrain, battle, injury, century and dialogue changes. The open player from `883a8f2` is preserved and needs a save/relaunch to load structural changes. Details and limits are in docs/INTEGRATION_STATUS.md; chart work is pending, held prototypes remain excluded.
