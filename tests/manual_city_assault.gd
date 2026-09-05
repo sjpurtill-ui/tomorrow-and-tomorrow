@@ -92,17 +92,17 @@ func _ready()->void:
 	var layer:=CanvasLayer.new();layer.layer=150;add_child(layer)
 	var panel:=PanelContainer.new();panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE);layer.add_child(panel)
 	var bar:=HBoxContainer.new();panel.add_child(bar)
-	var label:=Label.new();label.text="  TEST ONLY  •  180 attackers / %d defenders / 600 residents  •  seed 74017  •  campaign isolated" % int(incident.strength);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.add_child(label)
+	var label:=Label.new();label.text="  NEW BATTLE HUD · TEST ONLY  •  180 attackers / %d defenders / 600 residents  •  seed 74017  •  campaign isolated" % int(incident.strength);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;label.add_theme_font_size_override("font_size",12);bar.add_child(label)
 	var report_button:=Button.new();report_button.text="CITY REPORT";bar.add_child(report_button);report_button.pressed.connect(func():CivilizationSystem.city_intelligence.open(city_id))
-	var reset:=Button.new();reset.text="RESET TEST";bar.add_child(reset);reset.pressed.connect(func():OS.create_process(OS.get_executable_path(),["--path",ProjectSettings.globalize_path("res://"),"res://tests/manual_city_assault.tscn"]);get_tree().quit())
+	var reset:=Button.new();reset.text="RESET TEST";bar.add_child(reset);reset.pressed.connect(func():OS.create_process(OS.get_executable_path(),["--path",ProjectSettings.globalize_path("res://"),"--fullscreen","res://tests/manual_city_assault.tscn"]);get_tree().quit())
 	action_panel=PanelContainer.new();action_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT);action_panel.position=Vector2(get_viewport().get_visible_rect().size.x-370,86);action_panel.size=Vector2(340,100);layer.add_child(action_panel)
 	var actions:=VBoxContainer.new();action_panel.add_child(actions)
 	action_note=Label.new();action_note.text="TEST ASSAULT ARMY selected\nTarget: Test River City";actions.add_child(action_note)
 	attack_button=Button.new();attack_button.text="ATTACK TEST RIVER CITY";attack_button.custom_minimum_size.y=46;actions.add_child(attack_button);attack_button.pressed.connect(_attack)
 	action_panel.visible=false
-	get_window().title="CITY ASSAULT TEST — 180 vs %d — NOT YOUR CAMPAIGN" % int(incident.strength)
+	get_window().title="NEW BATTLE HUD · CITY ASSAULT TEST — 180 vs %d — NOT YOUR CAMPAIGN" % int(incident.strength)
 	print("MANUAL_ASSAULT_READY ",JSON.stringify({"seed":74017,"attackers":180,"defenders":incident.strength,"residents":600,"occupation_required":incident.occupation_required,"paused":terrain.game_speed==0,"battle_started":not MilitaryCampaign.active_engagement.is_empty(),"user_data":OS.get_user_data_dir(),"city":city_id,"army":army_id}))
-	if "--verify-setup" in OS.get_cmdline_user_args():
+	if "--verify-setup" in OS.get_cmdline_user_args() or "--verify-hud" in OS.get_cmdline_user_args():
 		for frame in 15:await get_tree().process_frame
 		assert(not is_instance_valid(CivilizationSystem.city_intelligence.screen_layer))
 		assert(not is_instance_valid(terrain.founding_focus_panel) and not is_instance_valid(PeopleDirection.panel))
@@ -130,6 +130,7 @@ func _ready()->void:
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("res://artifacts/manual-map-battle.png")
 		print("MANUAL_MAP_INPUT_PASS: actual army mouse click -> contextual attack mouse click -> visible battle round0; no founding screen; music muted")
+		if "--verify-hud" in OS.get_cmdline_user_args():await _verify_hud()
 		get_tree().quit()
 
 func _process(_delta:float)->void:
@@ -144,3 +145,97 @@ func click(point:Vector2)->void:
 	for pressed in [true,false]:
 		var event:=InputEventMouseButton.new();event.position=point;event.global_position=point;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed;get_viewport().push_input(event,true)
 		await get_tree().process_frame
+func _verify_hud()->void:
+	var hud:BattleGraphicsScreen=MilitaryCommandUI.battle_graphics
+	await _hud_capture("orders")
+	await click(hud.camera_buttons.frontline.get_global_rect().get_center());assert(hud.view.zoom==32)
+	await click(hud.camera_buttons.overview.get_global_rect().get_center());assert(hud.view.zoom==85 and not hud.view.cinematic)
+	assert(hud.phase=="orders" and hud.resolve_button.disabled)
+	await click(hud.targets.get_child(0).get_global_rect().get_center())
+	await click(hud.order_buttons.charge.get_global_rect().get_center())
+	assert(hud._orders().get("0",{}).get("kind","")=="charge")
+	await click(hud.order_buttons.hold.get_global_rect().get_center())
+	assert(not hud.resolve_button.disabled)
+	await click(hud.resolve_button.get_global_rect().get_center())
+	assert(hud.phase=="resolving" and hud.resolve_count==1)
+	await click(hud.pause_button.get_global_rect().get_center())
+	var paused_at:=hud.elapsed;var committed:=MilitaryCampaign.export_state().duplicate(true)
+	for frame in 10:await get_tree().process_frame
+	assert(hud.elapsed==paused_at)
+	await click(hud.pause_button.get_global_rect().get_center())
+	await get_tree().create_timer(2.0).timeout
+	await click(hud.pause_button.get_global_rect().get_center())
+	await _hud_capture("resolving")
+	await click(hud.skip_button.get_global_rect().get_center())
+	assert(hud.phase in ["result","ended"] and hud.resolve_count==1)
+	assert(MilitaryCampaign.export_state()==committed)
+	await _hud_capture("result")
+	await click(hud.replay_button.get_global_rect().get_center())
+	assert(hud.replaying and hud.phase=="resolving")
+	await click(hud.skip_button.get_global_rect().get_center())
+	assert(not hud.replaying and hud.resolve_count==1 and MilitaryCampaign.export_state()==committed)
+	get_window().size=Vector2i(1000,720)
+	for frame in 10:await get_tree().process_frame
+	await _hud_capture("small-result")
+	if hud.phase=="result":
+		await click(hud.result_primary.get_global_rect().get_center())
+		assert(hud.phase=="orders")
+		await _hud_capture("small-orders")
+		var actual_forces:Array=hud.cached_forces.duplicate(true)
+		for side in 2:
+			var sample:Dictionary=hud.cached_forces[side].formations[0].duplicate(true);hud.cached_forces[side].formations=[]
+			for i in 13:
+				var f:Dictionary=sample.duplicate(true);f.count=10;hud.cached_forces[side].formations.append(f)
+		get_window().size=Vector2i(900,700)
+		for frame in 6:await get_tree().process_frame
+		hud._rebuild_orders();hud._phase_ui()
+		await _hud_capture("small-roster-many")
+		await click(hud.small_toggle.get_global_rect().get_center())
+		await _hud_capture("small-targets-many")
+		hud.cached_forces=actual_forces;hud._rebuild_orders();hud._phase_ui()
+		get_window().size=Vector2i(1000,720)
+		for frame in 6:await get_tree().process_frame
+		if "--verify-retreat" in OS.get_cmdline_user_args():
+			await click(hud.retreat_button.get_global_rect().get_center())
+			await click(hud.skip_button.get_global_rect().get_center())
+		else:
+			for round_index in 15:
+				if hud.phase=="ended":break
+				if hud.phase=="result":await click(hud.result_primary.get_global_rect().get_center())
+				hud._hold_all()
+				await click(hud.resolve_button.get_global_rect().get_center())
+				await click(hud.skip_button.get_global_rect().get_center())
+	assert(hud.phase=="ended" and MilitaryCampaign.active_engagement.is_empty())
+	await _hud_capture("ended")
+	if not MilitaryCampaign.pending_aftermath.is_empty():
+		await click(hud.result_primary.get_global_rect().get_center())
+		assert(hud.phase=="aftermath")
+		await _hud_capture("aftermath")
+		await click(hud.result_primary.get_global_rect().get_center())
+		assert(MilitaryCampaign.pending_aftermath.is_empty())
+	# Exercise the victory policy panel with a clearly synthetic UI fixture only.
+	# The real 180-v-119 baseline above remains unchanged and is recorded first.
+	if "--verify-aftermath" in OS.get_cmdline_user_args():
+		MilitaryCampaign.pending_aftermath={"type":"surrender","captor":"TEST ASSAULT ARMY","home_force_name":"TEST ASSAULT ARMY","prisoners":8,"captured_general":false,"spoils":{}}
+		hud._show_result();hud._phase_ui()
+		await click(hud.result_primary.get_global_rect().get_center())
+		assert(hud.phase=="aftermath")
+		await _hud_capture("aftermath-fixture")
+		await click(hud.result_primary.get_global_rect().get_center())
+		assert(MilitaryCampaign.pending_aftermath.is_empty())
+	await click(hud.result_primary.get_global_rect().get_center())
+	for frame in 5:await get_tree().process_frame
+	assert(not is_instance_valid(MilitaryCommandUI.battle_graphics))
+	assert(not MilitaryCommandUI.modal.visible)
+	print("HUD_MOUSE_PASS orders,target,charge,hold,resolve-once,pause,skip,replay-without-state-change,next-orders,ended; aftermath_pending=",not MilitaryCampaign.pending_aftermath.is_empty()," retreat_test=", "--verify-retreat" in OS.get_cmdline_user_args())
+func _hud_capture(suffix:String)->void:
+	for frame in 6:await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var hud:BattleGraphicsScreen=MilitaryCommandUI.battle_graphics
+	for node in hud.find_children("*","Button",true,false):
+		if not node.is_visible_in_tree():continue
+		var rect:Rect2=node.get_global_rect()
+		if node.is_ancestor_of(hud.bottom):continue
+		if hud.left_panel.is_ancestor_of(node) or hud.right_panel.is_ancestor_of(node):assert(rect.end.y<=hud.bottom.position.y,"Order panel overlaps bottom controls: "+node.text)
+		assert(rect.position.x>=-1 and rect.position.y>=-1 and rect.end.x<=hud.size.x+1 and rect.end.y<=hud.size.y+1,"HUD button outside window: "+node.text+str(rect)+str(hud.size))
+	get_viewport().get_texture().get_image().save_png("res://artifacts/battle-hud-"+suffix+".png")
