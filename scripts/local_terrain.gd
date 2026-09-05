@@ -86,6 +86,9 @@ var zoom_pointer:=Vector2.ZERO
 var north_reset_active:=false
 var camera_input_msec:int=0
 var terrain_patch_job:RefCounted
+var terrain_patch_cache:Array[Dictionary]=[]
+var regional_patch_resolution:=0
+var terrain_patch_cancellations:=0
 var terrain_patch_last_slice_usec:int=0
 var terrain_patch_last_commit_usec:int=0
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
@@ -1639,36 +1642,57 @@ func _build_terrain() -> void:
 			terrain_body.name = "TerrainBody"
 
 func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
-	if not SEAMLESS_WORLD or terrain_patch_job!=null: return
+	if not SEAMLESS_WORLD: return
 	# Stable geometric buckets avoid rebuilding for each interpolated zoom frame.
 	span=clampf(pow(1.5,ceil(log(maxf(0.9,span))/log(1.5))),0.9,920.0)
 	var snap_step:=maxf(0.04,span/12.0)
 	var snapped:=Vector2(round(center.x/snap_step)*snap_step,round(center.y/snap_step)*snap_step)
-	if regional_terrain_patch and regional_patch_center.distance_to(snapped)<snap_step*0.72 and is_equal_approx(regional_patch_span,span): return
 	var resolution:=385 if span<=14.0 else (257 if span<=32.0 else (201 if span<=110.0 else 161))
-	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(resolution,span,snapped,_height_at,_terrain_color_at)
+	if terrain_patch_job!=null:
+		if terrain_patch_job.center==snapped and is_equal_approx(terrain_patch_job.span,span): return
+		# Latest view wins. Do not finish/upload a mesh for a camera already gone.
+		terrain_patch_job=null
+		terrain_patch_cancellations+=1
+	if regional_terrain_patch and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span) and regional_patch_resolution==resolution: return
+	for cached in terrain_patch_cache:
+		if cached.center==snapped and is_equal_approx(cached.span,span) and int(cached.resolution)==resolution:
+			_install_regional_patch(cached)
+			return
+	# A geographic low-density pass fills the current view first. It uses the same
+	# height/color authorities and is replaced by the original full-density mesh.
+	var same_patch:=regional_terrain_patch!=null and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span)
+	var next_resolution:=resolution if same_patch else 33
+	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at)
 
 func _advance_terrain_patch()->void:
 	if terrain_patch_job==null: return
-	if not terrain_patch_job.advance(2500): return
+	if not terrain_patch_job.advance(2500 if _camera_in_motion() else 5000): return
 	var started:=Time.get_ticks_usec()
+	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights}
+	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
+	terrain_patch_job=null
+	_install_regional_patch(completed)
+	if int(completed.resolution)>33:
+		terrain_patch_cache.push_front(completed)
+		if terrain_patch_cache.size()>4: terrain_patch_cache.pop_back()
+	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
+
+func _install_regional_patch(completed:Dictionary)->void:
 	var replacement:=MeshInstance3D.new()
 	replacement.name="RegionalTerrainLOD"
-	replacement.mesh=terrain_patch_job.commit()
+	replacement.mesh=completed.mesh
 	replacement.material_override=regional_terrain_patch.material_override if regional_terrain_patch else _create_terrain_material()
 	add_child(replacement)
 	var previous:=regional_terrain_patch
 	regional_terrain_patch=replacement
-	regional_patch_center=terrain_patch_job.center
-	regional_patch_span=terrain_patch_job.span
-	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
-	var height_image:=Image.create_from_data(terrain_patch_job.resolution,terrain_patch_job.resolution,false,Image.FORMAT_RF,terrain_patch_job.heights.to_byte_array())
-	rendered_regional_heights=terrain_patch_job.heights
+	regional_patch_center=completed.center
+	regional_patch_span=completed.span
+	regional_patch_resolution=int(completed.resolution)
+	var height_image:=Image.create_from_data(regional_patch_resolution,regional_patch_resolution,false,Image.FORMAT_RF,completed.heights.to_byte_array())
+	rendered_regional_heights=completed.heights
 	river_terrain_height_texture=ImageTexture.create_from_image(height_image)
-	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(terrain_patch_job.resolution))
+	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(regional_patch_resolution))
 	for river in river_overlays: _bind_river_terrain(river.material_override)
-	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
-	terrain_patch_job=null
 	if previous:
 		previous.visible=false
 		previous.queue_free()
@@ -1769,6 +1793,7 @@ uniform float land_resources = 0.0;
 uniform bool woodland_channel = true;
 
 varying vec3 world_position;
+uniform vec4 streamed_cutout = vec4(0.0);
 varying vec3 world_normal;
 
 float hash21(vec2 p) {
@@ -1807,6 +1832,7 @@ void vertex() {
 }
 
 void fragment() {
+	if (streamed_cutout.w > 0.5 && abs(world_position.x-streamed_cutout.x)<streamed_cutout.z*0.5 && abs(world_position.z-streamed_cutout.y)<streamed_cutout.z*0.5) { discard; }
 	float broad = organic_noise(world_position.xz * 0.052);
 	float regional = organic_noise(world_position.xz * 0.17 + vec2(17.0, -9.0));
 	float slope = 1.0 - clamp(dot(normalize(world_normal), vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
@@ -2970,7 +2996,11 @@ func _update_scale_lod() -> void:
 	if province_terrain_mesh:
 		# The streamed regional mesh is the same planet at higher sampling density.
 		# Rendering both layers together causes kilometre-scale diagonal z seams.
-		province_terrain_mesh.visible = camera.size>280.0 or regional_terrain_patch==null
+		# Keep geographic coverage outside the streamed mesh during pan/zoom. The
+		# coarse shader cuts out only the installed patch to avoid coplanar seams.
+		province_terrain_mesh.visible = true
+		var cutout:=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,1.0) if regional_terrain_patch!=null and camera.size<=820.0 else Vector4.ZERO
+		(province_terrain_mesh.material_override as ShaderMaterial).set_shader_parameter("streamed_cutout",cutout)
 	if regional_terrain_patch:
 		regional_terrain_patch.visible = camera.size<=820.0
 	# At country and continental footprints the coarse world mesh cannot drape a

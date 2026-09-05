@@ -48,6 +48,17 @@ func _ready()->void:
 	terrain._rebuild_regional_terrain_patch(Vector2(terrain.camera_target.x+3,terrain.camera_target.z),4.0)
 	assert(terrain.regional_terrain_patch==live_patch,"Visible patch must survive while replacement builds")
 	assert(terrain.terrain_patch_job!=null)
+	var obsolete:RefCounted=terrain.terrain_patch_job
+	terrain._rebuild_regional_terrain_patch(Vector2(terrain.camera_target.x+30,terrain.camera_target.z),40.0)
+	assert(terrain.terrain_patch_job!=obsolete,"Obsolete camera work must be canceled")
+	assert(terrain.terrain_patch_job.resolution==33,"Uncached views must receive coverage before fine detail")
+	terrain._update_scale_lod()
+	assert(terrain.province_terrain_mesh.visible,"World coverage must remain outside the streamed patch")
+	assert(terrain.terrain_patch_cache.size()<=4,"Finished terrain cache must remain bounded")
+	var cached:Dictionary=terrain.terrain_patch_cache[0]
+	terrain._rebuild_regional_terrain_patch(cached.center,cached.span*0.999999)
+	assert(terrain.terrain_patch_job==null,"Revisiting a finished patch should not regenerate terrain")
+	assert(terrain.regional_terrain_patch.mesh==cached.mesh,"Cached mesh must be reused exactly")
 	if "--profile" in OS.get_cmdline_user_args():
 		terrain.set_process(true)
 		for frame in 20: await get_tree().process_frame
