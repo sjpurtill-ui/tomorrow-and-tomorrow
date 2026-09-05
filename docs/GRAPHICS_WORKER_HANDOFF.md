@@ -22,6 +22,20 @@ and battle scales before integration, especially deep mixed siege columns.
 
 ## Next passes
 
+Pass 6: widened large-equipment groups instead of constraining them to infantry
+frontage. Classical capture exposed five elephants in one long file; the new
+layout uses a compact 3+2 block. Siege-only review also stays in distinct groups
+without overlap. Expanded formation_graphics_capture.gd with classical,
+medieval, industrial and siege presets, automatic framing and portable output.
+Inspected formation-classical-compact.png and formation-siege.png. Three layout
+tests and battle_graphics_probe pass (combat invariance, casualties, retreat,
+pause, save, bounded figure cap). No simulation or save changes.
+
+The 50,000-person/800-year inherited-city fixture exceeded several minutes and
+was stopped by its verified capture-only PID. No result is claimed for that
+fixture. A smaller developed-town capture is in progress; real late-city visual
+coverage remains a limitation, not a passed test.
+
 Pass 5: band-limited procedural roof courses (reed fibres, bindings, boards,
 plaster and masonry joints) using projected pixel size. Texture mipmaps cannot
 filter these analytic patterns. Inspected town-courses-filtered.png; shader
