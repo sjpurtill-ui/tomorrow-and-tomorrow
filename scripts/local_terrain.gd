@@ -2230,7 +2230,8 @@ func _river_width_factor(point:Vector3)->float:
 	# World coordinates keep width stable when tessellation changes.
 	return clampf(0.90+sin(point.z*0.17+float(GameState.world_seed%211))*0.10+sin(point.z*1.7+point.x*0.3)*0.035,0.72,1.08)
 
-func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: float, color: Color) -> void:
+func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: float, color: Color, headwater:bool=false) -> void:
+	var taper:=preload("res://scripts/river_geometry.gd").headwater_factors(points) if headwater else PackedFloat32Array()
 	for i in points.size() - 1:
 		var a := points[i]
 		var b := points[i + 1]
@@ -2244,8 +2245,8 @@ func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: floa
 		var following:=Vector2(after.x-b.x,after.z-b.z).normalized()
 		var bend_a:=clampf(incoming.cross(outgoing)/maxf(a.distance_to(before),0.001)*8.0,-1.0,1.0)
 		var bend_b:=clampf(outgoing.cross(following)/maxf(b.distance_to(a),0.001)*8.0,-1.0,1.0)
-		var width_a:=width*_river_width_factor(a)
-		var width_b:=width*_river_width_factor(b)
+		var width_a:=width*_river_width_factor(a)*(taper[i] if headwater else 1.0)
+		var width_b:=width*_river_width_factor(b)*(taper[i+1] if headwater else 1.0)
 		var side_a := Vector3(-tangent_a.y,0.0,tangent_a.x)*width_a
 		var side_b := Vector3(-tangent_b.y,0.0,tangent_b.x)*width_b
 		var corners: Array[Vector3] = [a-side_a,b-side_b,b+side_b,a-side_a,b+side_b,a+side_a]
@@ -2253,7 +2254,9 @@ func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: floa
 		for corner_index in corners.size():
 			var point:=corners[corner_index]
 			surface.set_uv(Vector2([0.0,0.0,1.0,0.0,1.0,1.0][corner_index],point.z))
-			surface.set_uv2(Vector2(bend_a if corner_index in [0,3,5] else bend_b,width))
+			var endpoint:=i if corner_index in [0,3,5] else i+1
+			var source_opacity:=smoothstep(0.12,0.15,taper[endpoint]) if headwater else 1.0
+			surface.set_uv2(Vector2(bend_a if corner_index in [0,3,5] else bend_b,source_opacity))
 			var seamless_lift := 0.0037 if width < 0.15 else 0.0021
 			point.y=_height_at(point.x,point.z)+(seamless_lift if SEAMLESS_WORLD else (0.105 if width<0.8 else 0.072))
 			surface.set_color(Color(color.r*reach_tint,color.g*reach_tint,color.b*reach_tint,color.a))
@@ -2315,8 +2318,8 @@ func _build_river_network() -> void:
 		for tributary in world_tributary_courses:
 			var original_course:Array[Vector3]=tributary
 			var tributary_points:=preload("res://scripts/river_geometry.gd").drape_course(original_course,_height_at)
-			_add_river_ribbon(banks, tributary_points, 0.072, Color(0.14,0.20,0.17,0.58))
-			_add_river_ribbon(water_surface, tributary_points, 0.029, Color(0.052,0.155,0.185,0.86))
+			_add_river_ribbon(banks, tributary_points, 0.072, Color(0.14,0.20,0.17,0.58),true)
+			_add_river_ribbon(water_surface, tributary_points, 0.029, Color(0.052,0.155,0.185,0.86),true)
 	banks.generate_normals()
 	water_surface.generate_normals()
 	for entry in [{"mesh": banks.commit(), "name": "RiverBanks", "rough": 1.0}, {"mesh": water_surface.commit(), "name": "RiverWater", "rough": 0.34}]:
@@ -2391,7 +2394,8 @@ void fragment(){
 	float bank_margin=smoothstep(0.30,0.50,edge)*(1.0-smoothstep(0.68,0.96,edge));
 	vec3 bank=mix(COLOR.rgb,vec3(0.30,0.285,0.205),bank_margin*(0.35+inside_bend*0.50)*bank_detail);
 	ALBEDO=mix(river_water?water:bank,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
-	ALPHA=COLOR.a*discovered*coverage;
+	// UV2.y feathers the spring/source cap; normal reaches remain opaque.
+	ALPHA=COLOR.a*discovered*coverage*UV2.y;
 	ROUGHNESS=0.72;
 }
 """

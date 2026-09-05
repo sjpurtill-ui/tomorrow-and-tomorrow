@@ -29,6 +29,19 @@ func _ready()->void:
 			var midpoint:Vector3=(vertices[segment*6]+vertices[segment*6+5])*0.5
 			assert(terrain._main_river_distance_at(midpoint.x,midpoint.z)<0.001,"Rendered main river must match water-access geography")
 		print("RIVER_AUDIT sampled authoritative course, main segments=6080")
+	if _arg("--tributary-index=","")!="":
+		var tributary:Array[Vector3]=terrain.world_tributary_courses[int(_arg("--tributary-index=","0"))]
+		var remaining:=float(_arg("--tributary-distance=","0.5"))
+		for index in tributary.size()-1:
+			var a:=tributary[index]
+			var b:=tributary[index+1]
+			var length_km:=Vector2(a.x,a.z).distance_to(Vector2(b.x,b.z))
+			if remaining<=length_km:
+				var position:=a.lerp(b,remaining/maxf(0.001,length_km))
+				position.y=terrain._height_at(position.x,position.z)
+				terrain.camera_target=position
+				break
+			remaining-=length_km
 	terrain.camera.size=float(_arg("--span=","5"))
 	terrain.camera_pitch=deg_to_rad(-50.0)
 	terrain._update_camera()
@@ -167,7 +180,11 @@ func _ready()->void:
 	for frame in 24: await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var output:=ProjectSettings.globalize_path(_arg("--output=","res://map_aerial_audit.png"))
-	get_viewport().get_texture().get_image().save_png(output)
+	var capture:=get_viewport().get_texture().get_image()
+	capture.save_png(output)
+	if "--verify-river-surface" in OS.get_cmdline_user_args() and not _verify_river_pixels(terrain,capture):
+		get_tree().quit(1)
+		return
 	print("MAP_AUDIT camera=",terrain.camera.position," target=",terrain.camera_target," span=",terrain.camera.size," image=",output)
 	get_tree().quit()
 
@@ -184,3 +201,30 @@ func _grid_height(field:Image,grid:Vector4,point:Vector3)->float:
 	if (x+y)%2==0:
 		return a+(b-a)*f.x+(c-b)*f.y if f.x>=f.y else a+(c-d)*f.x+(d-a)*f.y
 	return a+(b-a)*f.x+(d-a)*f.y if f.x+f.y<=1.0 else c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y)
+
+func _verify_river_pixels(terrain:Node,capture:Image)->bool:
+	# Sample projected channel centers, so missing GPU water fails independently
+	# of the CPU centerline checks. Restricted to the fixed clear-water audit.
+	var field:Image=terrain.river_terrain_height_texture.get_image()
+	var grid:Vector4=terrain.river_terrain_grid
+	var verified:=0
+	for offset in [-0.3,0.0,0.3]:
+		var z:float=terrain.camera_target.z+offset
+		var point:=Vector3(terrain._world_river_x(z),0.0,z)
+		point.y=_grid_height(field,grid,point)+0.0037
+		var screen:Vector2=terrain.camera.unproject_position(point)
+		# Camera coordinates use the stretched logical viewport, captures use pixels.
+		var logical_size:Vector2=terrain.camera.get_viewport().get_visible_rect().size
+		screen*=Vector2(capture.get_width(),capture.get_height())/logical_size
+		var found:=false
+		for dy in range(-6,7):
+			for dx in range(-6,7):
+				var x:=roundi(screen.x)+dx
+				var y:=roundi(screen.y)+dy
+				if x<0 or y<0 or x>=capture.get_width() or y>=capture.get_height(): continue
+				var color:=capture.get_pixel(x,y)
+				if color.g>color.r*1.2 and color.b>color.g*0.95 and color.g>0.06: found=true
+		if found: verified+=1
+	print("RIVER_PIXEL_AUDIT visible channel samples=",verified,"/3")
+	if verified!=3: push_error("Rendered river disappeared at a projected channel sample")
+	return verified==3
