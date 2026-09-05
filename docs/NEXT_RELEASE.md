@@ -16,3 +16,5 @@ One final versioned release and one final player relaunch, only after this check
 - [ ] Canonical integration/version notes complete. Preserve newest campaign, orderly final relaunch exactly one canonical game, verify version and resumed campaign.
 
 Retain integrated Show Home, charts, city intelligence, zoom, combat and prior features. Outpost, unrelated economy, sliced vegetation and unfinished Blender authoring prototypes remain excluded. All prior authorized scopes above remain active across compaction.
+
+- [ ] Authorized isolated hierarchical spatial-grid benchmark/report readiness from Scale game systems for billions. Compare baseline versus prototype workloads, latency, memory and visible rendering versus offscreen simulation. This does not authorize production grid migration. Coordinate with worker task 01a055ef-4718-7f10-8fad-0f5889879e2d.
