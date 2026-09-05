@@ -177,6 +177,24 @@ func _ready()->void:
 			material.shader.code=material.shader.code.replace(", depth_test_disabled", "")
 	if "--hide-rivers" in OS.get_cmdline_user_args():
 		for river in terrain.river_overlays: river.visible=false
+	if "--detail-build-profile" in OS.get_cmdline_user_args():
+		var detail_times:Array[int]=[]
+		var mesh_fingerprint:=0
+		for trial in 3:
+			if terrain.detail_terrain_patch: terrain.detail_terrain_patch.queue_free()
+			var detail_started:=Time.get_ticks_usec()
+			terrain._build_detail_terrain_patch(terrain.camera_target)
+			detail_times.append(Time.get_ticks_usec()-detail_started)
+			var detail_arrays:Array=terrain.detail_terrain_patch.mesh.surface_get_arrays(0)
+			var fingerprint:=hash(var_to_bytes(detail_arrays))
+			if trial>0: assert(fingerprint==mesh_fingerprint,"Repeated detail builds must preserve mesh attributes")
+			mesh_fingerprint=fingerprint
+			terrain.detail_terrain_patch.visible=true
+			await get_tree().process_frame
+		if _arg("--expect-detail-hash=","")!="":
+			assert(mesh_fingerprint==int(_arg("--expect-detail-hash=","0")),"Optimized detail mesh must match its baseline fingerprint")
+		detail_times.sort()
+		print("DETAIL_BUILD_PROFILE median_usec=",detail_times[1]," samples=",detail_times," mesh_hash=",mesh_fingerprint)
 	if "--terrain-unshaded" in OS.get_cmdline_user_args():
 		var terrain_shader:Shader=terrain.regional_terrain_patch.material_override.shader
 		terrain_shader.code=terrain_shader.code.replace("render_mode diffuse_burley, specular_disabled;","render_mode unshaded;")
