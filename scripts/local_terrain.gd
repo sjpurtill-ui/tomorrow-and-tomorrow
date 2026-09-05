@@ -7749,6 +7749,18 @@ void fragment() {
 		// At regional altitude, the 300 m neighborhood is still several pixels wide.
 		urban_roof_coverage=mix(0.44,roof_mask,roof_resolved)*occupied_block*neighborhood_survival*neighborhood_visibility;
 		fabric=mix(fabric,roof_tone,urban_roof_coverage*0.86);
+		if(district_condition>=6.0){
+			// Lost roofs leave broken foundations and aggregate rubble, not virgin
+			// ground. Reuse their footprint and survival masks; no new structures.
+			float lost_structure=occupied_block*(1.0-neighborhood_survival);
+			float foundation_edge=1.0-smoothstep(0.025,0.075+roof_aa,min(roof_edge.x,roof_edge.y));
+			float debris_break=value_noise(roof_point*vec2(2.7,3.1)+neighborhood_cell*13.0);
+			float debris_detail=1.0-smoothstep(0.18,0.55,max(fwidth(roof_point.x),fwidth(roof_point.y))*3.1);
+			debris_break=mix(0.5,debris_break,debris_detail);
+			float ruin_trace=roof_mask*mix(0.30,0.85,foundation_edge)*smoothstep(0.24,0.65,debris_break);
+			vec3 rubble_tone=mix(COLOR.rgb*0.94,vec3(0.56,0.52,0.45),0.35+roof_cross_roll*0.30);
+			fabric=mix(fabric,rubble_tone,ruin_trace*lost_structure*roof_resolved*neighborhood_visibility*0.78);
+		}
 		float garden_interior=smoothstep(0.015,0.18,min(neighborhood_edge.x,neighborhood_edge.y));
 		vec3 garden_tone=mix(COLOR.rgb*0.78,vec3(0.22,0.27,0.16),0.38);
 		if(district_condition<6.0){
@@ -7774,6 +7786,7 @@ void fragment() {
 		vec2 activity_delta=neighborhood_local-vec2(0.5);
 		float activity_seed=hash21(neighborhood_cell+vec2(109.0,district_seed*137.0));
 		float activity_spot=(1.0-smoothstep(0.035,0.16,length(activity_delta)))*step(0.965,activity_seed)*occupied_block;
+		activity_spot*=neighborhood_survival;
 		vec3 activity_tone=mix(COLOR.rgb,vec3(0.63,0.57,0.45),0.60);
 		fabric=mix(fabric,activity_tone,activity_spot*neighborhood_visibility*0.32);
 		vec2 regional_point=urban_point*vec2(0.40,0.34);
