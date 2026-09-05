@@ -37,6 +37,13 @@ static func marker_ground_clearance(camera_size:float)->float:
 	return clampf(camera_size*0.0008,0.0005,0.18)
 
 
+static func label_rect_is_clear(label_rect:Rect2,viewport_rect:Rect2,obstacles:Array)->bool:
+	if not viewport_rect.grow(-8.0).encloses(label_rect): return false
+	for obstacle:Rect2 in obstacles:
+		if obstacle.grow(6.0).intersects(label_rect): return false
+	return true
+
+
 static func formation_echelon(personnel:int)->int:
 	# Four visual bars communicate the order of magnitude of a formation without
 	# making its map node count proportional to troop count. A billion-person force

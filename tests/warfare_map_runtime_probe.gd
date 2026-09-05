@@ -132,6 +132,21 @@ func _ready()->void:
 		_expect(reported_figures.represented_troops==600,"close figures ignore reported strength")
 		_expect(reported_figures.clip=="idle","a stationary report animates as a live moving army")
 	_expect(MilitaryCampaign.field_armies[0].position.x==origin.x+0.5,"visual report handling mutated the real army")
+	if grounded_counter and terrain.hud:
+		terrain._update_camera()
+		var detail_label:=grounded_counter.get_node("ArmyLabel") as Label3D
+		var compact_label:=grounded_counter.get_node("StrengthLabel") as Label3D
+		var view:=PRESENTATION.player_marker(reported_army,1.0,true)
+		view["show_label"]=true
+		var saved_label_position:=detail_label.position
+		var pill:Control=terrain.hud.time_pill
+		detail_label.global_position=terrain.camera.project_position(pill.get_global_rect().get_center(),2.0)
+		terrain._apply_warfare_formation_view(grounded_counter,view)
+		_expect(not detail_label.visible and compact_label.visible,"HUD-obscured army label loses its compact strength fallback")
+		detail_label.global_position=terrain.camera.project_position(get_viewport().get_visible_rect().get_center(),2.0)
+		terrain._apply_warfare_formation_view(grounded_counter,view)
+		_expect(detail_label.visible and not compact_label.visible,"clear army label does not return after leaving HUD obstruction")
+		detail_label.position=saved_label_position
 	if not failures.is_empty():
 		for failure in failures: push_error(failure)
 		get_tree().quit(1)

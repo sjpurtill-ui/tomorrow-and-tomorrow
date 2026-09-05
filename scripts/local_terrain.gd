@@ -12554,6 +12554,7 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 			label.outline_size=8
 			label.pixel_size=0.0003125
 		label.text=String(view.get("label","")); label.visible=bool(view.get("show_label",false)); label.modulate=color.lightened(0.28)
+		if label.visible: label.visible=_warfare_label_has_clear_space(label)
 	var strength_label:=marker.get_node_or_null("StrengthLabel") as Label3D
 	if strength_label:
 		strength_label.scale=Vector3.ONE/marker_scale
@@ -12563,8 +12564,36 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 			strength_label.pixel_size=0.0003125
 		var exact_strength:=int(view.get("troops",view.get("strength_high",0)))
 		strength_label.text="%s\nSOLDIERS" % WarfareMapPresentation.compact_count(exact_strength)
-		strength_label.visible=bool(view.get("visible",true)) and not bool(view.get("show_label",false))
+		strength_label.visible=bool(view.get("visible",true)) and (label==null or not label.visible)
 		strength_label.modulate=color.lightened(0.34)
+
+
+func _warfare_label_has_clear_space(label:Label3D)->bool:
+	if camera==null: return true
+	if camera.is_position_behind(label.global_position): return false
+	var viewport_rect:=get_viewport().get_visible_rect()
+	var font:Font=label.font if label.font else ThemeDB.fallback_font
+	var signature:="%s/%d/%d" % [label.text,label.font_size,font.get_instance_id()]
+	if String(label.get_meta("layout_signature",""))!=signature:
+		var width:=0.0
+		var lines:=label.text.split("\n")
+		for line in lines: width=maxf(width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,label.font_size).x)
+		label.set_meta("layout_size",Vector2(width,float(lines.size()*label.font_size)*1.4))
+		label.set_meta("layout_signature",signature)
+	# Fixed-size labels scale with viewport height, not distance. Use a small
+	# conservative margin so the outline also clears the existing HUD panels.
+	var pixel_factor:=label.pixel_size*viewport_rect.size.y
+	if camera.projection==Camera3D.PROJECTION_PERSPECTIVE:
+		pixel_factor*=0.5/tan(deg_to_rad(camera.fov)*0.5)
+	var size:Vector2=Vector2(label.get_meta("layout_size"))*pixel_factor+Vector2(12,10)
+	var center:=camera.unproject_position(label.global_position)
+	var obstacles:Array=[]
+	if hud:
+		for property in ["rail_panel","time_pill","kpi_strip","toolbar","queue_root","dock","detail_dock"]:
+			var panel:=hud.get(property) as Control
+			if panel and panel.is_visible_in_tree() and panel.size.x>0.0 and panel.size.y>0.0:
+				obstacles.append(panel.get_global_rect())
+	return WarfareMapPresentation.label_rect_is_clear(Rect2(center-size*0.5,size),viewport_rect,obstacles)
 
 
 func _refresh_player_field_army_path(view:Dictionary)->void:
