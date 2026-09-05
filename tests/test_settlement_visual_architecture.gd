@@ -134,6 +134,25 @@ func test_six_value_paths_produce_six_bounded_road_grammars_without_more_geometr
 	assert_int(signatures.size()).is_equal(6)
 
 
+func test_main_approach_preserves_surface_color_and_route_only_material()->void:
+	var colors:Array[Color]=[]
+	for tier in [0,5]:
+		var parent:Node3D=auto_free(Node3D.new())
+		var routes:Array[Dictionary]=[{"active":true,"kind":"desire_path","hierarchy":"main_approach","surface_tier":tier,"condition":0.8,"points":PackedVector2Array([Vector2.ZERO,Vector2(0.1,0.0)])}]
+		renderer._create_persistent_settlement_routes(Vector3.ZERO,routes,parent)
+		var mesh:=parent.get_node("PersistentDesirePaths") as MeshInstance3D
+		var material:=mesh.material_override as ShaderMaterial
+		assert_int(int(material.get_shader_parameter("fabric_kind"))).is_equal(8)
+		var arrays:=mesh.mesh.surface_get_arrays(0)
+		assert_int((arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()).is_equal(6)
+		colors.append((arrays[Mesh.ARRAY_COLOR] as PackedColorArray)[0])
+	assert_bool(colors[0].is_equal_approx(colors[1])).is_false()
+	assert_float(colors[0].r-colors[0].b).is_greater(colors[1].r-colors[1].b)
+	# Civic tint blending slightly raises the early alpha; mesh colors are RGBA8.
+	assert_float(colors[0].a).is_between(0.54,0.59)
+	assert_float(colors[1].a).is_equal_approx(0.66,0.004)
+
+
 func test_actual_founding_focus_changes_metropolitan_topology_not_only_tint()->void:
 	GameState.settlement_name="Alder Reach"
 	var profile:Dictionary=renderer._settlement_expansion_visual_profile({"classification":"metropolis","population":2400000})
