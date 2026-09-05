@@ -892,18 +892,23 @@ func _ordinal_army_name(number:int)->String:
 
 
 func _field_army_speed(force:Dictionary)->float:
-	var era_tier:=int(military_development_snapshot().get("tier",0))
-	var weighted_speed:=0.0
+	# Sustained daily marches, including rest and baggage. A motorized escort
+	# cannot carry an attached infantry or siege column merely by averaging.
+	var slowest:=INF
 	var personnel:=0
+	var quality:=0.0
 	for formation_variant in force.get("formations",[]):
 		var formation:Dictionary=formation_variant
 		var count:=maxi(0,int(formation.get("count",0)))
+		if count==0: continue
 		var unit:=String(formation.get("unit","levy"))
-		var unit_factor:=float({"cavalry":1.35,"motorized_infantry":1.75,"armored_formation":1.40,"siege_engineer":0.62,"field_artillery":0.70,"modern_artillery":0.82}.get(unit,1.0))
-		weighted_speed+=unit_factor*count; personnel+=count
-	var composition:=weighted_speed/maxf(1.0,float(personnel))
+		var pace:=float({"levy":24.0,"line_infantry":26.0,"skirmisher":32.0,"cavalry":55.0,"siege_engineer":14.0,"field_artillery":18.0,"rifle_infantry":28.0,"machine_gun_company":22.0,"motorized_infantry":140.0,"armored_formation":95.0,"modern_artillery":80.0}.get(unit,24.0))
+		slowest=minf(slowest,pace)
+		quality+=count*(0.65+0.20*clampf(float(formation.get("training",0.5)),0.0,1.0)+0.15*clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0))
+		personnel+=count
+	if personnel==0: return 0.0
 	var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.4))*0.35+float(GameState.simulation_metrics.get("logistics",0.16))*0.35+float(force.get("supply_level",0.5))*0.30,0.15,1.0)
-	return maxf(4.0,(18.0+float(era_tier)*2.4)*composition*(0.55+logistics*0.45))
+	return maxf(2.0,slowest*(quality/float(personnel))*(0.55+logistics*0.45)*(0.5+0.5*clampf(float(force.get("supply_level",0.5)),0.0,1.0)))
 
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
@@ -979,8 +984,7 @@ func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
 	if not pending_aftermath.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the current battle aftermath first."}
 	var sighting:Dictionary=CivilizationSystem.visible_formation_sighting(formation_id)
 	if sighting.is_empty(): return {"can_order":false,"can_engage":false,"error":"Contact has been lost. Reacquire the formation before issuing an order."}
-	if bool(sighting.get("carries_report",false)): return {"can_order":false,"can_engage":false,"error":"Scout parties are intercepted by local pursuit; use CAPTURE or ATTACK on their contact card."}
-	if not bool(sighting.get("hostile",false)): return {"can_order":false,"can_engage":false,"error":"This is not an enemy force. A state of war must exist before a field army can attack it."}
+	if not bool(sighting.get("carries_report",false)) and not bool(sighting.get("hostile",false)): return {"can_order":false,"can_engage":false,"error":"This is not an enemy force. A state of war must exist before a field army can attack it."}
 	var army:Dictionary=field_armies[index]
 	if int(army.get("troops",0))<=0: return {"can_order":false,"can_engage":false,"error":"The selected field army has no personnel able to fight."}
 	var army_position:Dictionary=army.get("position",{})
@@ -1013,6 +1017,14 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 	if not bool(availability.get("can_engage",false)):
 		return {"error":String(availability.get("error","Move the selected army into contact first.")) if not bool(availability.get("can_order",false)) else "The selected army is %.0f km away. Order an intercept before attempting battle." % float(availability.get("distance_km",0.0))}
 	var army:Dictionary=availability.army
+	if bool((availability.sighting as Dictionary).get("carries_report",false)):
+		var caught:=CivilizationSystem.resolve_foreign_scout_interception(formation_id,"capture",-1.0,army_id)
+		var pursuit_index:=_field_army_index(army_id)
+		if pursuit_index>=0:
+			field_armies[pursuit_index]["status"]="stationed"
+			field_armies[pursuit_index].erase("target_formation_id")
+			field_armies[pursuit_index].erase("order_kind")
+		return caught
 	var incident:Dictionary=CivilizationSystem.foreign_formation_engagement_data(formation_id,int(army.get("troops",0)))
 	if incident.has("error"): return incident
 	incident["field_army_id"]=army_id
