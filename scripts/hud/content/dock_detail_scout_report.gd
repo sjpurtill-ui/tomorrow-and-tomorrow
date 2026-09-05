@@ -3,15 +3,19 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## on demand after a party comes home — the report can
 ## be read without changing simulation speed.
 
+const Archive:=preload("res://scripts/scout_archive.gd")
 var report:Dictionary={}
+var return_provider:Object
 
-func _init(terrain_node:Node,hud_node:Control,report_record:Dictionary={})->void:
+func _init(terrain_node:Node,hud_node:Control,report_record:Dictionary={},archive_provider:Object=null)->void:
 	super(terrain_node,hud_node)
+	return_provider=archive_provider
+	Archive.mark_reviewed(report_record)
 	report=report_record.duplicate(true)
 	CivilizationSystem._strip_retired_landmarks(report)
 
 func meta()->Dictionary:
-	var title:="Beyond the familiar world" if String(report.get("mission_kind","explore"))=="explore" else String(report.get("target_label","Scout Expedition")).capitalize()
+	var title:=String(Archive.summary(report).title)
 	return {
 		"eyebrow":"THE EXPEDITION CHRONICLES · DAY %d" % int(report.get("day",0)),
 		"title":title,
@@ -47,8 +51,10 @@ func tab(_sub:int)->Dictionary:
 	elif recruits>=10:
 		brief={"tone":"info","title":"The gamble paid out","why":"The whole party came home, and %d newcomers walked in with them." % recruits}
 	else:
-		brief={"tone":"info","title":"They brought the horizon home","why":"%d travelers returned with a route through the unknown. Here is what they found—and what it could mean for your people." % returned}
+		brief={"tone":"info","title":String(Archive.summary(report).title),"why":String(Archive.summary(report).detail)}
 	var blocks:Array=[]
+	if return_provider!=null:
+		blocks.append({"type":"actions","items":[{"label":"BACK TO ARCHIVE","sub":"keep search, filter and page","on_press":func()->void: hud.open_detail(return_provider)}]})
 	if is_recruitment:
 		blocks.append({"type":"text","heading":"RECRUITMENT OUTCOME","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
 		var encountered:=int(recruitment.get("encountered",0))
@@ -63,13 +69,16 @@ func tab(_sub:int)->Dictionary:
 		if not reason_lines.is_empty(): blocks.append({"type":"text","heading":"WHY THEY DECIDED","text":"\n".join(reason_lines)})
 	if _sub==0:
 		var discoveries:Array=report.get("discoveries",[])
-		blocks.append({"type":"image","path":_cover_path(),"height":225,"cover":true,"tip":"Symbolic expedition cover inspired by the recorded journey. The actual route chart is in Journey & Accounts."})
+
 		if not contacts.is_empty():
 			blocks.append({"type":"discovery","kind":"encounter","title":"Other people, beyond our horizon","description":"Direct contact with %s." % ", ".join(PackedStringArray(contacts)),"consequence":"Their encounter sites are marked on the returned route. Contact is a beginning; it does not reveal their homeland."})
 		for finding in discoveries:
+			if Archive.routine_finding(finding): continue
 			var card:Dictionary=finding.duplicate(true)
 			card["type"]="discovery"
 			blocks.append(card)
+		if not discoveries.is_empty() and Archive.significant_findings(report).is_empty():
+			blocks.append({"type":"text","heading":"SURVEY NOTES","text":"No additional findings recorded. Route sketches and routine evidence remain in Journey & Accounts."})
 		if discoveries.is_empty():
 			# Old saves retain their real outcomes; a new design must not invent rewards.
 			var roadside_notes:=false
@@ -87,6 +96,9 @@ func tab(_sub:int)->Dictionary:
 			if report.get("windfalls",[]).is_empty(): blocks.append({"type":"text","text":"The route is the discovery. No additional finds were recorded on this journey."})
 		blocks.append({"type":"text","text":"Read Journey & Accounts for the road, encounters and supplies. Reading a report leaves your chosen simulation speed unchanged."})
 		return {"kpis":kpis,"brief":brief,"blocks":blocks}
+	for finding:Dictionary in report.get("discoveries",[]):
+		if Archive.routine_finding(finding) and String(finding.get("kind",""))!="landmark":
+			blocks.append({"type":"text","heading":String(finding.get("title","FIELD NOTES")),"text":String(finding.get("description",""))+" "+String(finding.get("consequence",""))})
 	blocks.append({"type":"expedition_chart","route":report.get("route",[]),"discoveries":report.get("discoveries",[])})
 	var journal:Array=report.get("journal",[])
 	if not journal.is_empty():
@@ -105,13 +117,16 @@ func tab(_sub:int)->Dictionary:
 	if targeted!="":
 		blocks.append({"type":"text","heading":"THE MISSION'S QUESTION","text":targeted})
 	var windfalls:Array=report.get("windfalls",[])
-	if windfalls.is_empty() and contacts.is_empty() and targeted=="" and not is_recruitment:
-		blocks.append({"type":"text","heading":"FINDINGS","text":"The party found only ground: no people, no workable deposits, nothing worth a name. The charted route itself is the whole of the report."})
+	if windfalls.is_empty() and contacts.is_empty() and targeted=="" and not is_recruitment and Archive.significant_findings(report).is_empty() and (report.get("city_observations",[]) as Array).is_empty():
+		blocks.append({"type":"text","heading":"FINDINGS","text":"No additional findings were recorded. The returned route and survey notes remain available."})
 	else:
 		var findings:Array[String]=[]
 		for windfall in windfalls: findings.append("• "+String(windfall))
 		if not findings.is_empty():
 			blocks.append({"type":"text","heading":"FINDINGS","text":"\n".join(findings)})
+	if not _cover_path().is_empty():
+		blocks.append({"type":"image","path":_cover_path(),"height":112,"cover":true,"tip":"Illustration inspired by recorded terrain; not evidence of a particular landmark."})
+		blocks.append({"type":"text","text":"Illustration inspired by the saved terrain account. The route chart above is the recorded evidence."})
 	blocks.append({"type":"text","text":"Reports stay available here; pause or change speed whenever you choose."})
 	return {"kpis":kpis,"brief":brief,"blocks":blocks}
 
@@ -119,17 +134,4 @@ func signature()->Array:
 	return [int(report.get("day",0)),String(report.get("target_id",""))]
 
 func _cover_path()->String:
-	# Read saved observations, never resurvey a changed world or consume simulation RNG.
-	var journal:= " ".join(PackedStringArray(report.get("journal",[]))).to_lower()
-	var candidates:Array[String]=[]
-	var keywords:Dictionary={"forest":["woodland","forest"],"desert":["drylands","desert","dunes"],"mountains":["summit","high bare ground","mountain","treeline"],"river":["running water","river","wetland","floodplain"]}
-	for scene in keywords:
-		for word in keywords[scene]:
-			if String(word) in journal:
-				candidates.append(scene)
-				break
-	var selected:="dawn"
-	if not candidates.is_empty():
-		var identity:="%s:%s:%s" % [report.get("mission_id",0),report.get("day",0),report.get("target_id","")]
-		selected=candidates[posmod(identity.hash(),candidates.size())]
-	return "res://assets/textures/expeditions/chronicle-%s.png" % selected
+	return Archive.artwork(report)

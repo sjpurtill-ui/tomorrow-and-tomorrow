@@ -36,7 +36,7 @@ const VICTORY_COHESION:=0.45
 const VICTORY_INSTITUTIONS:=0.35
 const SCOUT_DURATIONS:=[30,90,180,365]
 const REVEAL_HISTORY_LIMIT:=1024
-const SCOUT_REPORT_LIMIT:=24
+const SCOUT_REPORT_LIMIT:=256
 const SCOUT_ROUTE_POINT_LIMIT:=24
 const REVEALED_TRAIL_POINT_LIMIT:=128
 const SCOUT_LAND_SAMPLE_KM:=8.0
@@ -2293,6 +2293,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	report["discoveries"]=(mission.get("discoveries",[]) as Array).duplicate(true)
 	report["actual_days"]=maxi(1,day-int(mission.get("start_day",day-int(mission.duration_days))))
 	report["start_day"]=int(mission.get("start_day",day-int(mission.duration_days)))
+	report["archive_reviewed"]=false
 	scout_reports.push_front(report)
 	if scout_reports.size()>SCOUT_REPORT_LIMIT: scout_reports.resize(SCOUT_REPORT_LIMIT)
 	var finding:=String(recruitment_account.get("summary","")) if not recruitment_account.is_empty() else ("No organized foreign polity was encountered." if contacts.is_empty() else ("Direct contact was established with %s." % ", ".join(contacts)))

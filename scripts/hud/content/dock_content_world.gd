@@ -105,15 +105,16 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 			latest_sub="last report day %d" % int(latest.get("day",0))
 		party_items.append({"name":"No party away","sub":latest_sub,"value":"","tip":String(exploration.get("message",""))})
 	blocks.append({"type":"rows","heading":"PARTIES","note":"%d of %d away" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1))],"items":party_items})
-	var report_actions:Array=[]
-	for report_record:Dictionary in CivilizationSystem.scout_reports:
-		var saved_report:=report_record.duplicate(true)
-		report_actions.append({
-			"label":"READ EXPEDITION REPORT", "sub":"day %d · %s" % [int(saved_report.get("day",0)),String(saved_report.get("target_label","open exploration")).to_lower()],
-			"on_press":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report)),
-			"tip":"Read this returned expedition's journey, findings and losses. Your simulation speed is unchanged.",
-		})
-	if not report_actions.is_empty(): blocks.append({"type":"actions","heading":"RETURNED REPORTS","items":report_actions})
+	var archive_model:=preload("res://scripts/scout_archive.gd")
+	var archive_provider:=preload("res://scripts/hud/content/dock_detail_scout_archive.gd")
+	var highlights:Array=[]
+	var newest:=archive_model.select(CivilizationSystem.scout_reports,"",0,false).slice(0,8)
+	newest.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.priority)>int(b.priority))
+	for item:Dictionary in newest.slice(0,3):
+		var saved_report:Dictionary=item.report
+		highlights.append({"name":String(item.title),"sub":"Day %d · %s · %s" % [item.day,item.party,item.place],"value":String(item.review),"accent":Tokens.RED if int(item.losses)>0 else Tokens.TEAL,"on_click":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report,archive_provider.new(terrain,hud)))})
+	blocks.append({"type":"actions","items":[{"label":"EXPEDITION ARCHIVE","sub":"Search, filter and read %d retained reports" % CivilizationSystem.scout_reports.size(),"on_press":func()->void: hud.open_detail(archive_provider.new(terrain,hud))}]})
+	if not highlights.is_empty(): blocks.append({"type":"rows","heading":"RECENT RETURNS","note":"highlights from the latest eight","items":highlights})
 	var can_begin:=bool(exploration.get("can_begin",true))
 	var duration_items:Array=[]
 	for duration in [30,90,180,365]:
@@ -145,4 +146,4 @@ func signature()->Array:
 	var overdue_total:=0
 	for party_variant in (exploration.get("parties",[]) as Array):
 		overdue_total+=int((party_variant as Dictionary).get("overdue_days",0))
-	return [CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0))]
+	return [CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0)),preload("res://scripts/scout_archive.gd").revision(CivilizationSystem.scout_reports)]

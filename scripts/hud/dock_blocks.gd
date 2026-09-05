@@ -25,6 +25,12 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"scout_archive":
+				var archive:=preload("res://scripts/hud/scout_archive_widget.gd").new()
+				archive.records=block.get("reports",[])
+				archive.view_state=block.get("view_state",{})
+				archive.open_report=block.get("on_open",Callable())
+				section.add_child(archive)
 			"expedition_chart":
 				var chart:=ExpeditionChart.new()
 				chart.route=block.get("route",[])
