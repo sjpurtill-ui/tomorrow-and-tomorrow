@@ -11345,6 +11345,7 @@ func _on_city_battle_started(_engagement:Dictionary)->void:
 	MilitaryCommandUI.call_deferred("_open_battle_graphics")
 func _on_city_aftermath(_aftermath:Dictionary)->void:
 	_set_game_speed(0)
+	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:return
 	_open_war_planning.call_deferred()
 
 func _restore_military_attention()->void:
@@ -11362,6 +11363,8 @@ func _on_military_threat_attention(threat:Dictionary)->void:
 	_pause_for_military_attention(String(threat.get("id","threat")),"ATTACK APPROACHING", "%s is approaching %s with roughly %d personnel. A response is due by day %d. Time is paused so you can review the threat before battle. If you resume without choosing a response, the garrison will defend or yield when the deadline passes." % [String(threat.get("source_name","An unidentified force")),location,int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",GameState.elapsed_days))])
 
 func _on_battle_attention(result:Dictionary)->void:
+	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:
+		_set_game_speed(0);return
 	_pause_for_military_attention("battle_%s" % str(result.get("seed",GameState.elapsed_days)),"BATTLE REPORT",MilitaryCampaign.battle_report_text(result))
 
 func _pause_for_military_attention(event_id:String,title:String,body:String)->void:

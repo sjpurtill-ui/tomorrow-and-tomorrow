@@ -344,12 +344,13 @@ func _body_label(parent:VBoxContainer)->Label:
 
 func _open_battle_graphics(army_id:int=0)->void:
 	if is_instance_valid(battle_graphics): return
-	battle_graphics=preload("res://scripts/battle_graphics_screen.gd").new()
+	battle_graphics=preload("res://scripts/army_inspection_screen.gd").new() if army_id!=0 or (MilitaryCampaign.active_engagement.is_empty() and MilitaryCampaign.battle_history.is_empty()) else preload("res://scripts/battle_graphics_screen.gd").new()
 	battle_graphics.inspected_army_id=army_id
 	layer.add_child(battle_graphics)
 	modal.hide()
+	var was_inspection:=battle_graphics is ArmyInspectionScreen
 	battle_graphics.tree_exited.connect(func():
-		if is_inside_tree() and is_instance_valid(modal) and modal.is_inside_tree():modal.show();_refresh())
+		if was_inspection and is_inside_tree() and is_instance_valid(modal) and modal.is_inside_tree():modal.show();_refresh())
 
 
 func _counter(parent:HBoxContainer,minimum:int,maximum:int,value:int)->SpinBox:
