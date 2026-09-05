@@ -826,7 +826,7 @@ func test_poor_condition_stays_inhabited_while_damage_removes_structure()->void:
 	assert_str(strategic_shader).contains("float condition_upkeep=1.12;")
 	assert_str(strategic_shader).contains("if(district_condition>4.5) condition_upkeep=0.82;")
 	# Healthy open-ground dressing must not overwrite recorded destruction.
-	assert_str(strategic_shader).contains("if(district_condition<6.0){\n\t\t\t// Existing unbuilt neighborhood ground")
+	assert_str(strategic_shader.replace("\r\n","\n")).contains("if(district_condition<6.0){\n\t\t\t// Existing unbuilt neighborhood ground")
 	assert_str(strategic_shader).contains("garden_noise=mix(0.5,garden_noise,garden_detail);")
 	assert_str(strategic_shader).contains("garden_access*=step(0.66,")
 
