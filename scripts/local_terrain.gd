@@ -2869,6 +2869,7 @@ func _update_scale_lod() -> void:
 	if settlement_network_fabric_root:
 		settlement_network_fabric_root.visible=camera.size<=2600.0
 	_update_settlement_surface_lod_materials()
+	_update_settlement_claim_opacity()
 	if settlement_blip:
 		# Never lay a bright game token over visible physical settlement fabric. The
 		# locator exists only after roofs and occupied ground have collapsed below the
@@ -3624,7 +3625,8 @@ func _refresh_settlement_network(force:=false)->void:
 		color.a=float(visual_profile.border_alpha)*(1.0 if bool(settlement.get("primary",false)) else 0.82)
 		var core_width:=clampf(radius*0.009*float(visual_profile.border_scale),0.005,0.095)
 		var ownership_color:Color=color
-		ownership_color.a=_settlement_claim_fill_alpha(float(visual_profile.fill_alpha))*(1.0 if bool(settlement.get("primary",false)) else 0.72)
+		# Store base opacity in geometry; the camera fade is updated live in material.
+		ownership_color.a=float(visual_profile.fill_alpha)*(1.0 if bool(settlement.get("primary",false)) else 0.72)
 		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032)
 		var halo_color:=Color("#121817")
 		halo_color.a=0.32 if bool(settlement.get("primary",false)) else 0.24
@@ -3639,6 +3641,7 @@ func _refresh_settlement_network(force:=false)->void:
 		ownership_instance.mesh=ownership_mesh
 		var ownership_material:=StandardMaterial3D.new()
 		ownership_material.vertex_color_use_as_albedo=true
+		ownership_material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
 		ownership_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
 		ownership_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
 		ownership_material.cull_mode=BaseMaterial3D.CULL_DISABLED
@@ -6615,7 +6618,16 @@ func _settlement_claim_fill_alpha(base_alpha:float)->float:
 	# Close inspection leaves relief, roofs and fields dominant. Strategic zoom
 	# strengthens the same restrained wash enough to make ownership legible.
 	if camera.size<=SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM: return 0.0
-	return base_alpha*lerpf(0.30,1.0,smoothstep(SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM,180.0,camera.size))
+	var close_reveal:=smoothstep(SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM,4.4,camera.size)
+	return base_alpha*close_reveal*lerpf(0.30,1.0,smoothstep(SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM,180.0,camera.size))
+
+func _update_settlement_claim_opacity()->void:
+	if settlement_border_root==null: return
+	var wash:=settlement_border_root.get_node_or_null("ControlledGroundWash") as MeshInstance3D
+	if wash==null: return
+	var material:=wash.material_override as StandardMaterial3D
+	if material==null: return
+	material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
 
 func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Array,color:Color,lift:=0.0032)->int:
 	if boundary.size()<3: return 0
