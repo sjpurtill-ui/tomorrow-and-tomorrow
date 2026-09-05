@@ -12415,6 +12415,16 @@ func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Nod
 	if echelon_bars.material_override: echelon_bars.material_override.render_priority=2
 	if damage_scars.material_override: damage_scars.material_override.render_priority=5
 	var label:=Label3D.new(); label.name="ArmyLabel" if player_owned else "FormationLabel"; label.font_size=8; label.outline_size=3; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,7.6 if player_owned else 7.0,-4.8); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
+	# Depth-free map counters must share the transparent pass above settlement drapes.
+	# Raising an opaque glyph's priority alone cannot put it after transparent roofs.
+	for counter_part in marker.get_children():
+		if counter_part is Label3D:
+			counter_part.render_priority=32
+		elif counter_part is GeometryInstance3D:
+			var counter_material:=counter_part.material_override as StandardMaterial3D
+			if counter_material:
+				counter_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+				counter_material.render_priority+=20
 	return marker
 
 

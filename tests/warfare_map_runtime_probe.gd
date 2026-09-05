@@ -79,6 +79,20 @@ func _ready()->void:
 	terrain.add_child(foreign_counter)
 	var foreign_view:Dictionary=PRESENTATION.foreign_marker({"id":"foreign_probe","civilization":"Cedar League","identified":true,"hostile":true,"strength_estimate_low":900,"strength_estimate_high":1500,"readiness_estimate_low":0.42,"readiness_estimate_high":0.66,"formation_role":"armored","formation_era":3,"damage_estimate":0.36,"position":{"x":origin.x+8.0,"z":origin.z+8.0}},320.0)
 	terrain._apply_warfare_formation_view(foreign_counter,foreign_view)
+	for counter in [marker,foreign_counter]:
+		for part in counter.get_children():
+			if part is Label3D:
+				_expect(part.render_priority==32,"counter label is not above map-symbol materials")
+			elif part is GeometryInstance3D:
+				var material:=part.material_override as StandardMaterial3D
+				_expect(material!=null,"counter part lacks an explicit material")
+				if material:
+					_expect(material.transparency==BaseMaterial3D.TRANSPARENCY_ALPHA,"opaque counter part can be overdrawn by transparent roofs")
+					_expect(material.render_priority>=17 and material.render_priority<=26,"counter part escaped its above-roof priority band")
+		var plate_name:String="ArmyPlate" if counter==marker else "ObservationPlate"
+		var plate_material:Material=counter.get_node(plate_name).material_override
+		_expect(counter.get_node("CounterBorder").material_override.render_priority<plate_material.render_priority,"counter border covers its plate")
+		_expect(counter.get_node("RoleGlyphPrimary").material_override.render_priority>plate_material.render_priority,"counter plate covers its weapon")
 	_expect(_render_element_count(foreign_counter)<=17,"one observed foreign icon exceeds the fixed render-element budget")
 	_expect((foreign_counter.get_node("RoleGlyphSecondary") as MeshInstance3D).visible,"identified foreign composition does not reach the aggregate role glyph")
 	foreign_counter.queue_free()
