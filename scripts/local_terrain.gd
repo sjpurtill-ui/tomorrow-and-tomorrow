@@ -11626,11 +11626,13 @@ func _resource_ground_indication(cluster:Dictionary)->MeshInstance3D:
 	patch.name="RecognizedGround_%s" % String(cluster.resource).replace(" ","")
 	patch.mesh=surface.commit()
 	patch.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var material:=StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo=true
-	material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.cull_mode=BaseMaterial3D.CULL_DISABLED
+	var material:=ShaderMaterial.new()
+	material.shader=preload("res://scripts/shaders/resource_ground.gdshader")
+	material.set_shader_parameter("occurrence_center",Vector2(center.x,center.z))
+	material.set_shader_parameter("layered",bool(style.get("layered",false)))
+	var sediment_random:=RandomNumberGenerator.new()
+	sediment_random.seed=GameState.world_seed^int(center.x*1000.0)^int(center.z*1700.0)
+	material.set_shader_parameter("sediment_axis",Vector2.from_angle(sediment_random.randf()*TAU))
 	patch.material_override=material
 	if bool(style.outcrops): _add_resource_outcrops(patch,center,style)
 	return patch
