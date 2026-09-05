@@ -28,3 +28,23 @@ func test_materials_have_distinct_physical_surface_types()->void:
 	assert_bool(VISUALS.surface_style("Clay").outcrops).is_false()
 	assert_bool(VISUALS.surface_style("Deep Aquifer").outcrops).is_false()
 	assert_bool(VISUALS.surface_style("Copper Ore").rock==VISUALS.surface_style("Iron Ore").rock).is_false()
+
+func test_rounded_harvest_edges_preserve_corners_and_original_limits()->void:
+	var areas:=VISUALS.areas_from_ledgers([[_source(0,10)]],Vector2.ZERO)
+	assert_float(VISUALS.retained_at(Vector2.ZERO,areas)).is_equal_approx(0.1,0.00001)
+	assert_float(VISUALS.retained_at(Vector2(1.2,1.2),areas)).is_greater(0.90)
+	for side in [-1.0,1.0]:
+		for along in range(-20,21):
+			assert_float(VISUALS.retained_at(Vector2(side*1.5,float(along)*0.1),areas)).is_equal(1.0)
+			assert_float(VISUALS.retained_at(Vector2(float(along)*0.1,side*1.5),areas)).is_equal(1.0)
+func test_boundary_is_continuous_and_regrowth_never_reduces_cover()->void:
+	var cut:=PackedVector4Array([Vector4(0,0,1.5,0.1)])
+	var regrown:=PackedVector4Array([Vector4(0,0,1.5,0.7)])
+	var previous:=VISUALS.retained_at(Vector2(0,0.5),cut)
+	for index in range(1,1601):
+		var point:=Vector2(float(index)*0.001,0.5)
+		var current:=VISUALS.retained_at(point,cut)
+		assert_float(absf(current-previous)).is_less(0.025)
+		assert_float(current).is_between(0.1,1.0)
+		assert_float(VISUALS.retained_at(point,regrown)).is_greater_equal(current)
+		previous=current

@@ -8,8 +8,14 @@ float woodland_retained(vec2 point){
 	float retained=1.0;
 	for(int i=0;i<woodland_area_count;i++){
 		vec4 area=woodland_areas[i];
-		vec2 offset=abs(point-area.xy);
-		float edge=max(offset.x,offset.y)/max(area.z,0.01);
+		vec2 offset=abs(point-area.xy)/max(area.z,0.01);
+		if(max(offset.x,offset.y)>=1.0) continue;
+		// Rounded woodland margins stay inside the saved catchment. Broad,
+		// world-anchored variation breaks up ruler-straight cutting boundaries.
+		vec2 squared=offset*offset;
+		float edge=sqrt(sqrt(dot(squared,squared)));
+		float scallop=0.08+sin(point.x*3.1+point.y*1.7)*0.035+sin(point.x*1.3-point.y*4.1)*0.035;
+		edge+=scallop*smoothstep(0.45,0.85,edge);
 		float weight=1.0-smoothstep(0.82,1.0,edge);
 		retained=min(retained,mix(1.0,area.w,weight));
 	}
@@ -35,8 +41,12 @@ static func areas_from_ledgers(ledgers:Array,center:Vector2)->PackedVector4Array
 static func retained_at(point:Vector2,areas:PackedVector4Array)->float:
 	var retained:=1.0
 	for area in areas:
-		var offset:=(point-Vector2(area.x,area.y)).abs()
-		var edge:=maxf(offset.x,offset.y)/maxf(area.z,0.01)
+		var offset:=(point-Vector2(area.x,area.y)).abs()/maxf(area.z,0.01)
+		if maxf(offset.x,offset.y)>=1.0: continue
+		var squared:=offset*offset
+		var edge:=sqrt(sqrt(squared.dot(squared)))
+		var scallop:=0.08+sin(point.x*3.1+point.y*1.7)*0.035+sin(point.x*1.3-point.y*4.1)*0.035
+		edge+=scallop*smoothstep(0.45,0.85,edge)
 		retained=minf(retained,lerpf(1.0,area.w,1.0-smoothstep(0.82,1.0,edge)))
 	return retained
 
