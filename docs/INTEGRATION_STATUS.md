@@ -3,7 +3,19 @@
 Canonical player checkout: `C:/Users/sjpur/TomorrowandTomorrow`, branch `main`.
 The OneDrive project is archived. Use `tools/launch_game.ps1` or the existing **Play Tomorrow and Tomorrow** desktop shortcut. The launcher prints the commit it starts. F5 runs the game; F6 may run a preview scene.
 
-Latest tested feature: `d0315c9`, the scouting archive, on top of siege/protection checkpoint `b0af56e`. Military console audit `de1d41d` records findings and a reproduction; it does not implement a redesign. Charts, foreign-city intelligence and zoom-fill performance work are still pending.
+Latest integrated code: `42595fb` (zoom terrain streaming), following `d418704` (city intelligence with founding-focus visibility fix) and `12d16a3` (strategic charts) and preserving scouting archive and siege/protection work through `046e869`. Combined city-intelligence/siege/relief/commitment/chart/city-resource/archive/UI validation: 113 cases across eight suites, zero errors, failures, skips or orphans. Canonical muted GPU chart probe passes; its capture was inspected and its process exited.
+
+## Consolidation queue — September 5
+
+| Delivery | State | Location / evidence |
+| --- | --- | --- |
+| Strategic charts and dynamic dock tabs | INTEGRATED | Worker `4107fd1` → main `12d16a3`; 64 combined tests + GPU |
+| Discovered city intelligence | INTEGRATED | Worker `02a6587` → main `efbff12`, follow-up `691eed6` → `d418704`; 113 combined tests + 14 focused follow-up cases + GPU |
+| Zoom terrain fill | INTEGRATED | Worker `1142441` → main `42595fb`; five terrain cases and expanded camera runtime probe pass |
+| Military usability redesign | HELD | `C:/Users/sjpur/tt-military-usability`; unfinished live-binding/status foundation, no completed UI or end-to-end verification |
+| Outposts, sliced vegetation, unrelated economy and Blender authoring experiment | HELD | Preserved prototypes below; excluded from the player build |
+
+Player PID 65696 was verified running the canonical project, launched September 5 at 10:27:16 before the chart integration. Its session is preserved. Save and exit normally, then use **Play Tomorrow and Tomorrow** to load the integrated code. The shortcut's target and working directory were verified canonical. Older process references below are historical checkpoints, not current status.
 
 ## Integrated
 
@@ -69,4 +81,20 @@ Canonical validation: 71 cases pass with zero errors/failures/skips/orphans (arc
 
 Military audit `docs/MILITARY_CONSOLE_AUDIT.md` and `tests/military_console_audit_probe.tscn`: reproduced hover-induced frozen progress labels, fractional work versus calendar-day ambiguity, and condition-based BROKEN semantics. Proposed plain-language status/grouping fixes are documented. No military usability fix is claimed integrated by this audit.
 
-Current running player was last verified as PID 54444 at 883a8f2. Save and relaunch through the canonical launcher to load later features; it was not silently restarted. Newly authorized charts, discovered-city intelligence, and measured zoom-fill work continue in separate worktrees with explicit shared-file ownership. Held outpost/economy/vegetation prototypes remain held.
+Historical session at this earlier checkpoint: PID 54444 at 883a8f2; see the top of this document for current session status. Save and relaunch through the canonical launcher to load later features; it was not silently restarted. Newly authorized charts, discovered-city intelligence, and measured zoom-fill work continue in separate worktrees with explicit shared-file ownership. Held outpost/economy/vegetation prototypes remain held.
+
+## September 5 — independent city intelligence
+
+Worker `02a6587` integrated as `efbff12`. Foreign cities use the existing five strategic urban regions per polity, independent markers and hit targets, and per-observer dated reports. Discovering one does not expose the others. Estimates age and remain frozen between observations; scouts, envoys and army runners deliver reports through their return paths. AI player-city knowledge uses the same evidence model and gates targeting. Existing secondary-city defense simulation remains absent rather than fabricated; the military campaign still targets the player primary city. Regional food outlook is not a per-city warehouse ledger. Full bounds, save compatibility and limitations: CITY_INTELLIGENCE_HANDOFF.md.
+
+Canonical eight-suite 113-case regression passes. This includes actual city-intelligence and strategic-history save/load coverage. The worker's full 118-case civilization/century run finished with 117 passes and one founding-focus visibility failure, zero runtime errors. Both 36,500-day scale simulations passed, including billion-population bounded state. The one-line visibility guard was restored in `d418704`; the failed case plus all 13 city-intelligence cases then passed canonically (14/14). The entire 118-case suite was not repeated after that isolated fix. Canonical city-report GPU capture and three independent hit targets pass; probe exited and stderr is empty.
+
+## September 5 — zoom terrain streaming
+
+Worker `1142441` integrated as `42595fb`, preserving independent-city marker/hit-test code, chart daily sampling, and the scouting archive. Obsolete camera jobs are canceled, a geographic coverage pass precedes full detail, four completed meshes and their river-height fields are cached, and the world mesh remains visible outside the streamed rectangle. Save format unchanged.
+
+Canonical five terrain cases pass; expanded camera probe passes smooth/anchored zoom, north reset, cancellation, coarse-to-fine scheduling and bounded exact mesh reuse. Camera probe shutdown reports two ObjectDB instances and one resource still in use; no clean-shutdown claim. Worker GPU comparison measured zero uncovered frames versus up to 338, and cached revisits of 40–81ms versus seconds. Cold fine detail still takes roughly six seconds, and some frame spikes remain. Synthetic million-person fixture is not a loaded mature campaign benchmark. See ZOOM_PERFORMANCE_HANDOFF.md for comparable measurements and limits.
+
+All agreed completed deliveries are integrated; no further feature expansion is underway for this consolidation. Military usability and older unfinished prototypes remain HELD.
+
+Final canonical GPU zoom run completed all eight transitions with zero uncovered frames; screenshots inspected. Its test process exited. Like the camera probe, it reports two ObjectDB instances and one resource in shutdown cleanup; no new script/parser errors appeared. This capture run is visual/integration evidence, not the screenshot-free comparative benchmark above. Player PID 65696 remains the only canonical campaign process and was not restarted.

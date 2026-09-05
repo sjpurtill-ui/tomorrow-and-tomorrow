@@ -118,3 +118,13 @@ Integrated siege worker `1f10c0d` as `8077fa3`, diplomacy worker `4ce8a64` as `6
 ## September 5 — scalable scouting archive
 
 Integrated `6e6b6d0` as `d0315c9`; military console audit `ee0283b` as `de1d41d` is evidence/recommendations only. Searchable five-card pages, 256 full reports, explicit review/retention semantics, compact recent highlights, terrain-evidenced detail-only art. Canonical 71-case checks and GPU archive pass; prior siege/protection code preserved. Chart/city-intel/zoom-fill workers continue separately. See INTEGRATION_STATUS.md for checks, limits and restart status.
+
+## September 5 — consolidation of tested deliveries
+
+Worker strategic charts `4107fd1` integrated as `12d16a3`. Both scout_archive and trend_chart renderers are retained in the shared dock; dynamic provider tabs expose Economy Wealth and Military Supply. Canonical combined 64 cases pass, plus muted GPU chart layout/range/hover checks. The player session is preserved; a normal save/exit/relaunch is required for newly integrated scripts. See INTEGRATION_STATUS.md for the current queue and held unfinished work.
+
+City intelligence `02a6587` integrated as `efbff12`, preserving archive retention/review and chart sampling. The combined eight-suite 113-case regression passes. Independent discovered cities and reciprocal dated evidence extend existing simulation/save owners; see CITY_INTELLIGENCE_HANDOFF.md for scope and limits.
+
+Follow-up `691eed6` → `d418704` restores the existing intelligence threshold for exposing founding focus. Canonical targeted 14/14 cases pass. Worker century and billion-population runs passed; its full run was 117/118 before this isolated guard fix, not an unqualified 118/118 claim.
+
+Zoom streaming `1142441` → `42595fb` cancels obsolete work, fills geography before detail, retains outside coverage and caches four completed meshes. Canonical five terrain cases and expanded camera runtime probe pass; existing city/chart/scout hooks preserved. Full limits and benchmark evidence are in ZOOM_PERFORMANCE_HANDOFF.md. The military usability rewrite remains held and is not part of this release.

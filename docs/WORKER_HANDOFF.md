@@ -30,7 +30,7 @@ Workers must still hand off commits; the integrator merges and verifies them.
 Godot documents the external reload and unsaved-conflict behavior in
 [EditorSettings](https://docs.godotengine.org/en/stable/classes/class_editorsettings.html#class-editorsettings-property-text-editor-behavior-files-auto-reload-scripts-on-external-change).
 
-Integration records belong in `FEATURE_RECONCILIATION.md`; state the canonical
+Integration records belong in `docs/FEATURE_RECONCILIATION.md`; state the canonical
 commit and tested behavior before saying a feature is in the player's build.
 
 ## Integration status
@@ -52,7 +52,15 @@ You are a feature worker, not the integrator. Create/use a Git worktree from the
 
 Preserve the latest terrain, civics, saves, military progression, animated battle visuals, ambitions, community network, and diplomacy. Keep population aggregate and visual counts bounded. Do not introduce duplicate authorities for labor, government people, research, or save state.
 
-Implement and test your task in the worktree using explicit paths. Do not launch an isolated preview as the current game. Do not merge into main or overwrite/revert existing work. Commit only your task changes.
+Implement and test only the assigned scope in the worktree using explicit paths. Prefer headless tests. Graphical probes must use --audio-driver Dummy, launch hidden, and terminate after their capture; verify their process has exited. Never stop the player or editor as test cleanup. Do not launch an isolated preview as the current game. Do not merge into main or overwrite/revert existing work. Commit only your task changes.
 
-Return: commit hash; changed files; player-visible behavior; tests and results; save compatibility; limitations; integration conflicts. Your work reaches the player only after the designated integrator merges it, tests the combined main, and launches the canonical game.
+Return: READY or HELD; commit hash and base commit; changed files; player-visible behavior; exact tests and results; save compatibility; limitations; integration conflicts. If unfinished, say what is missing and leave it isolated. After handoff, stop editing that delivery; propose any follow-up separately. Your work reaches the player only after the designated integrator merges it, tests the combined main, and launches the canonical game.
 ```
+
+## Release discipline
+
+Keep one integration queue in docs/INTEGRATION_STATUS.md: READY (tested worker commit), INTEGRATED (tested together on main), or HELD (unfinished or deliberately excluded). Commit timestamps and newer file dates are not release criteria. Preserve old worktrees until their unique work is accounted for; do not bulk-merge them.
+
+During a consolidation request, stop feature expansion. Finish only the checks and conflict resolution needed for the agreed deliveries. Unfinished prototypes remain HELD with their location and next missing step. A stopped worker does not make its partial code release-ready.
+
+The integrator records source and integrated hashes, combined validation, and the live-session state. A running game does not automatically receive branch changes. Save and exit normally, then use the canonical desktop shortcut to load the new scripts; no second game or test window should be opened to simulate a successful update.
