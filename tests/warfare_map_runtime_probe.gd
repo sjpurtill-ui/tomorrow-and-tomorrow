@@ -117,6 +117,15 @@ func _ready()->void:
 	var front_marker:Node3D=terrain.warfare_front_markers.get("front_probe",null)
 	_expect(front_marker!=null and front_marker.visible,"active engagement/front marker is absent at regional scale")
 	if front_marker:
+		terrain._configure_warfare_overlay_layers(front_marker)
+		for part in front_marker.get_children():
+			if part is Label3D:
+				_expect(part.render_priority==32,"front label is not above its counter")
+			elif part is GeometryInstance3D:
+				var material:=part.material_override as StandardMaterial3D
+				_expect(material.transparency==BaseMaterial3D.TRANSPARENCY_ALPHA,"front part can be overwritten by roof drapes")
+				_expect(material.render_priority>=17 and material.render_priority<=26,"front layer configuration drifts on repeat")
+		_expect(front_marker.get_node("FrontPlate").material_override.render_priority<front_marker.get_node("FrontCore").material_override.render_priority,"front plate covers the battle core")
 		_expect("BATTLE IN PROGRESS" in (front_marker.get_node("FrontLabel") as Label3D).text,"front marker does not distinguish an active local engagement")
 		_expect((front_marker.get_node("FrontLabel") as Label3D).global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"front label inherits the regional front scale")
 	terrain.camera.size=12_000.0
