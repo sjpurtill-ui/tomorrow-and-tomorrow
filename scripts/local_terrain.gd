@@ -7348,7 +7348,7 @@ uniform float grain_strength = 0.5;
 uniform int fabric_kind = 0;
 uniform float aerial_lod = 0.0;
 uniform sampler2D material_atlas : source_color, filter_linear_mipmap, repeat_disable;
-uniform sampler2D roof_material_atlas : source_color, filter_linear, repeat_disable;
+uniform sampler2D roof_material_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D late_roof_material_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D strategic_district_atlas : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
 uniform sampler2D strategic_district_companion_atlas : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
