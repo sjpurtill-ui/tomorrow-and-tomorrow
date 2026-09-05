@@ -1,5 +1,7 @@
 extends Node
 
+const OCCUPATION_GOVERNANCE=preload("res://scripts/occupation_governance.gd")
+
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 
 signal world_changed(snapshot:Dictionary)
@@ -2969,13 +2971,7 @@ func _advance_strategic_regions(civ:Dictionary,population_factor:float)->Array[D
 				committed=float(MilitaryCampaign.occupation_force_for_region(String(civ.id),String(region.id)).get("troops",0))
 			var coverage:=clampf(committed/maxf(1.0,required),0.0,1.5)
 			var supply:=clampf(float(GameState.simulation_metrics.get("logistics",0.16))*0.62+float(GameState.society_capacities.get("institutions",0.25))*0.23+minf(0.15,coverage*0.10),0.05,1.0)
-			var resistance:=float(region.get("resistance",0.5))
-			resistance+=0.018*(1.0-minf(1.0,coverage))+float(region.get("damage",0.0))*0.006
-			resistance-=0.012*minf(1.0,coverage)*supply+float(region.get("integration",0.0))*0.005
-			region["resistance"]=clampf(resistance,0.02,1.0)
-			var peace_factor:=0.22 if bool(relation.get("at_war",false)) else 1.0
-			region["integration"]=clampf(float(region.get("integration",0.0))+0.010*peace_factor*supply*(1.0-float(region.resistance)),0.0,1.0)
-			region["damage"]=maxf(0.0,float(region.get("damage",0.0))-0.006*supply)
+			region=OCCUPATION_GOVERNANCE.advance(region,coverage,supply,not bool(relation.get("at_war",false)))
 		elif controller!=String(civ.id):
 			region["occupation_turns"]=int(region.get("occupation_turns",0))+1
 			var controller_index:=_civilization_index(controller)
@@ -2983,14 +2979,20 @@ func _advance_strategic_regions(civ:Dictionary,population_factor:float)->Array[D
 			var occupation_capacity:=float(controller_civ.get("military_population",0.0))*float(region.get("strategic_weight",0.1))*0.35
 			var required:=occupation_requirement(civ,region)
 			var coverage:=clampf(occupation_capacity/maxf(1.0,required),0.0,1.5)
-			var resistance:=float(region.get("resistance",0.45))+0.012*(1.0-minf(1.0,coverage))-0.010*minf(1.0,coverage)
-			region["resistance"]=clampf(resistance,0.03,1.0)
-			region["integration"]=clampf(float(region.get("integration",0.0))+0.006*clampf(float(controller_civ.get("institutions",0.2)),0.0,1.0)*(1.0-float(region.resistance)),0.0,1.0)
-			region["damage"]=maxf(0.0,float(region.get("damage",0.0))-0.004*clampf(float(controller_civ.get("production",0.2)),0.0,1.0))
+			var supply:=clampf(float(controller_civ.get("logistics",.2))*.6+float(controller_civ.get("institutions",.2))*.4,.05,1)
+			region=OCCUPATION_GOVERNANCE.advance(region,coverage,supply,_war_count(controller_civ)==0)
 		else:
 			region["resistance"]=0.0
 			region["integration"]=1.0
 			region["occupation_turns"]=0
+			if region.has("governance"):
+				# Liberation does not erase damaged institutions or inherited harm.
+				var local_governance:=OCCUPATION_GOVERNANCE.state(region)
+				local_governance.policy="equal_citizenship"
+				region.governance=local_governance
+				var liberated:=OCCUPATION_GOVERNANCE.advance(region,1.0,float(civ.get("logistics",.2)),true)
+				region.governance=liberated.governance
+				if bool(region.governance.ruined): region.damage=liberated.damage
 		advanced.append(region)
 	return advanced
 
@@ -3430,6 +3432,39 @@ func region_snapshot(civ_id:String,region_id:String)->Dictionary:
 	var region_index:=_region_index(civilizations[index],region_id)
 	if region_index<0: return {}
 	return (civilizations[index].strategic_regions[region_index] as Dictionary).duplicate(true)
+
+
+func set_occupation_policy(civ_id:String,region_id:String,order:String)->Dictionary:
+	var index:=_civilization_index(civ_id)
+	if index<0: return {"error":"The region's polity no longer exists."}
+	var civ:Dictionary=civilizations[index]
+	var region_index:=_region_index(civ,region_id)
+	if region_index<0: return {"error":"Select an occupied region."}
+	var region:Dictionary=civ.strategic_regions[region_index]
+	if String(region.controller)!="player": return {"error":"You do not govern this region."}
+	var result:Dictionary=OCCUPATION_GOVERNANCE.change(region,order,int(GameState.elapsed_days))
+	if result.has("error"): return result
+	civ.strategic_regions[region_index]=result.region
+	var coercion:=float(OCCUPATION_GOVERNANCE.policy(result.region).coercion)
+	if coercion>.5 or order=="raze":
+		civ.player_relation.opinion=clampf(float(civ.player_relation.get("opinion",0))-.12,-1,1)
+		civ.player_relation.border_tension=clampf(float(civ.player_relation.get("border_tension",0))+.12,0,1)
+	civilizations[index]=civ
+	_record_world_event("Occupation administration",String(region.name)+": "+String(result.message),"war",int(GameState.elapsed_days))
+	return result
+
+func occupation_governance_snapshot(civ_id:String,region_id:String)->Dictionary:
+	var region:=region_snapshot(civ_id,region_id)
+	if region.is_empty() or String(region.controller)!="player": return {}
+	var result:=OCCUPATION_GOVERNANCE.state(region)
+	result["name"]=String(region.name)
+	result["population"]=float(region.population)
+	result["resistance"]=float(region.resistance)
+	result["integration"]=float(region.integration)
+	result["damage"]=float(region.damage)
+	result["required_garrison"]=occupation_requirement(civilizations[_civilization_index(civ_id)],region)
+	result["garrison"]=int(MilitaryCampaign.occupation_force_for_region(civ_id,region_id).get("troops",0))
+	return result
 
 
 func occupation_requirement(civ:Dictionary,region:Dictionary)->float:
@@ -4112,14 +4147,15 @@ func player_effects()->Dictionary:
 			var region_population:=float(region.get("population",0.0))
 			var resistance:=float(region.get("resistance",0.0))
 			var integration:=float(region.get("integration",0.0))
-			var function:=integration*(1.0-float(region.get("damage",0.0)))
+			var governance:=OCCUPATION_GOVERNANCE.state(region)
+			var function:=integration*(1.0-float(region.get("damage",0.0)))*(.4+.6*float(governance.welfare))
 			var damage:=float(region.get("damage",0.0))
 			occupied_population+=region_population
 			resistance_load+=region_population*resistance
 			# Occupied civilians mostly provision themselves. Only disruption creates
 			# a central relief obligation; an integrated granary can send a bounded
 			# surplus back through the player's logistics network.
-			occupation_relief_demand+=region_population*0.035*(resistance+damage)*(1.0-integration*0.50)
+			occupation_relief_demand+=region_population*0.035*(resistance+damage+float(governance.inequality)*.25)*(1.0-integration*0.50)
 			if String(region.get("role",""))=="granary": occupation_food_transfer+=region_population*0.025*function*(1.0-resistance)
 			if String(region.get("role",""))=="market": integrated_market_bonus+=0.035*function
 			if String(region.get("role",""))=="works": occupied_production_bonus+=0.045*function
@@ -5049,6 +5085,7 @@ func validate_state()->Array[String]:
 		for region_variant in regions:
 			if not region_variant is Dictionary: errors.append("Civilization %s has a malformed strategic region." % civ_id); continue
 			var region:Dictionary=region_variant
+			errors.append_array(OCCUPATION_GOVERNANCE.validate(region))
 			var region_id:=String(region.get("id",""))
 			if region_id=="" or region_ids.has(region_id): errors.append("Strategic region IDs must be non-empty and unique within %s." % civ_id)
 			region_ids[region_id]=true
