@@ -12375,48 +12375,23 @@ func _refresh_player_scout_route_markers()->void:
 		player_scout_route_markers.erase(mission_id)
 
 
-func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:String)->Node3D:
+func _create_player_scout_route_marker(mission:Dictionary,route:Array,_band:String)->Node3D:
 	var root:=Node3D.new()
 	root.name="ScoutOrder_%s" % str(mission.get("mission_id",""))
-	var route_points:=PackedVector2Array()
+	var layer:=CanvasLayer.new()
+	layer.layer=0 # Beneath the interface, above the world.
+	root.add_child(layer)
+	var overlay:=preload("res://scripts/hud/scout_route_overlay.gd").new()
+	overlay.name="ScoutRouteOverlay"
+	overlay.camera=camera
 	for point_variant in route:
 		var point:Dictionary=point_variant
-		route_points.append(Vector2(float(point.get("x",0.0)),float(point.get("z",0.0))))
-	var route_width:=0.62 if band=="local" else (1.55 if band=="regional" else 4.2)
-	var amber:=Color("#e6bd58"); amber.a=0.92
-	var backing_surface:=SurfaceTool.new(); backing_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var backing_color:=Color(0.015,0.022,0.024,0.78)
-	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_width*1.9,backing_color,0.31,42)
-	var backing:=MeshInstance3D.new(); backing.name="ScoutCorridorBacking"; backing.mesh=backing_surface.commit()
-	var backing_material:=StandardMaterial3D.new(); backing_material.vertex_color_use_as_albedo=true; backing_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; backing_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; backing_material.no_depth_test=true; backing_material.render_priority=3; backing.material_override=backing_material; root.add_child(backing)
-	var path_surface:=SurfaceTool.new(); path_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_width*0.62,amber,0.35,42)
-	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=path_surface.commit()
-	var path_material:=StandardMaterial3D.new(); path_material.vertex_color_use_as_albedo=true; path_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; path_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; path_material.no_depth_test=true; path_material.render_priority=4; path.material_override=path_material; root.add_child(path)
-	# A few forward-pointing pennants make the order legible even when the route
-	# curves around water or rough terrain. They communicate direction, not scouts.
-	var pennant_count:=5 if band=="local" else (4 if band=="regional" else 3)
-	var pennant_mesh:=CylinderMesh.new(); pennant_mesh.top_radius=0.14; pennant_mesh.bottom_radius=0.92; pennant_mesh.height=0.12; pennant_mesh.radial_segments=3
-	var pennants:=MultiMesh.new(); pennants.transform_format=MultiMesh.TRANSFORM_3D; pennants.instance_count=pennant_count; pennants.mesh=pennant_mesh
-	for pennant_index in pennant_count:
-		var progress:=(float(pennant_index)+1.0)/float(pennant_count+1)
-		var sample_index:=clampi(floori(progress*float(route_points.size()-1)),0,route_points.size()-2)
-		var local_progress:=fposmod(progress*float(route_points.size()-1),1.0)
-		var a:=route_points[sample_index]; var b:=route_points[sample_index+1]
-		var point:=a.lerp(b,local_progress); var direction:=b-a
-		var heading:=-direction.angle()-PI*0.5 if direction.length_squared()>0.000001 else 0.0
-		var world_point:=Vector3(point.x,_height_at(point.x,point.y)+0.42,point.y)
-		var pennant_scale:=route_width*1.8
-		pennants.set_instance_transform(pennant_index,Transform3D(Basis(Vector3.UP,heading).scaled(Vector3(pennant_scale,1.0,pennant_scale)),world_point))
-	var pennant_instance:=MultiMeshInstance3D.new(); pennant_instance.name="ScoutDirectionPennants"; pennant_instance.multimesh=pennants; pennant_instance.material_override=_warfare_marker_material(amber.lightened(0.16)); root.add_child(pennant_instance)
-	var endpoint:=route_points[route_points.size()-1]
-	var label:=Label3D.new(); label.name="ScoutOrderLabel"
-	var ordered:=String(mission.get("ordered_heading","")).to_upper()
-	var planned:=String(mission.get("planned_heading","")).to_upper()
-	var first_line:="SCOUT ORDER · %s" % ordered if ordered!="" else "SCOUTS · PARTY CHOSE %s" % planned
-	label.text="%s\nPLANNED CORRIDOR · DUE DAY %d" % [first_line,int(mission.get("return_day",0))]
-	label.font_size=10; label.outline_size=5; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.render_priority=10; label.modulate=amber.lightened(0.22); label.outline_modulate=Color(0.01,0.015,0.017,0.98)
-	label.position=Vector3(endpoint.x,_height_at(endpoint.x,endpoint.y)+1.2,endpoint.y); root.add_child(label)
+		var x:=float(point.get("x",0.0)); var z:=float(point.get("z",0.0))
+		overlay.points.append(Vector3(x,_height_at(x,z)+0.35,z))
+	var heading:=String(mission.get("ordered_heading",mission.get("planned_heading",""))).capitalize()
+	if heading.is_empty(): heading=String(mission.get("planned_heading","")).capitalize()
+	overlay.caption="Scouts · %s · planned route · due day %d" % [heading,int(mission.get("return_day",0))]
+	layer.add_child(overlay)
 	return root
 
 
