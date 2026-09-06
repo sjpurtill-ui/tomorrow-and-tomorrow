@@ -973,8 +973,15 @@ func show_action_feedback(message:String)->void:
 		for edge in ["left","right","top","bottom"]:style.set("content_margin_"+edge,12.0)
 		action_feedback.add_theme_stylebox_override("panel",style);add_child(action_feedback)
 		var label:=Label.new();label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.add_theme_font_size_override("font_size",14);label.mouse_filter=Control.MOUSE_FILTER_IGNORE;action_feedback.add_child(label)
+		action_feedback.resized.connect(_layout)
+	# Give the wrapping label its width BEFORE assigning text. Starting from
+	# zero width caches a thousands-of-pixels minimum height in the container.
+	var width:=minf(520,get_viewport().get_visible_rect().size.x-Tokens.DOCK_X-16)
+	var feedback_label:=action_feedback.get_child(0) as Label
+	feedback_label.custom_minimum_size.x=maxf(1,width-24)
+	feedback_label.size.x=maxf(1,width-24)
 	action_feedback.get_child(0).text=message
-	action_feedback.size=Vector2(minf(520,get_viewport().get_visible_rect().size.x-Tokens.DOCK_X-16),0)
+	action_feedback.size=Vector2(width,0)
 	action_feedback.show();feedback_sequence+=1;var sequence:=feedback_sequence
 	_layout.call_deferred()
 	get_tree().create_timer(9.0).timeout.connect(func():if is_instance_valid(action_feedback) and sequence==feedback_sequence:action_feedback.hide())

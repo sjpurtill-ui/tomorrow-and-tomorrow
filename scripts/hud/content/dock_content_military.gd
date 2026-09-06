@@ -367,9 +367,10 @@ func _training_blocks()->Array:
 	for skill in descriptions:
 		skills.append({"name":String(skill).capitalize(),"sub":descriptions[skill],"value":"+%.1f / 30" % (float(state.command_development.get(skill,0.0))*100.0),"live_value":func()->String: return "+%.1f / 30" % (float(MilitaryCampaign.command_development.get(skill,0))*100),"accent":Tokens.TEAL})
 	blocks.append({"type":"rows","heading":"SHARED COMMAND SKILLS","items":skills})
-	if not active.is_empty():
-		blocks.append({"type":"text","heading":String(active.label),"text":"%d attending · %.1f / %.0f effective days · %.1f extra rations used. %s" % [int(active.participants),float(active.progress_days),float(active.duration_days),float(active.food_consumed_total),String(active.paused_reason)]})
-		blocks.append({"type":"actions","items":[{"label":"CANCEL EXERCISE","on_press":func()->void: terrain._report_military_action(MilitaryCampaign.cancel_training_program())}]})
+	# Live text updates in place even while hover/focus protects the dock from
+	# structural rebuilds. Keep a status target through start and completion.
+	blocks.append({"type":"text","heading":"CURRENT EXERCISE","text":_exercise_progress_text(),"live_text":_exercise_progress_text})
+	blocks.append({"type":"actions","items":[{"label":"CANCEL EXERCISE","disabled":active.is_empty(),"live_disabled":func()->bool:return MilitaryCampaign.training_program.is_empty(),"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.cancel_training_program())}]})
 	for id in state.catalog:
 		var program:Dictionary=state.catalog[id]
 		var gains:Array[String]=[]
@@ -377,8 +378,16 @@ func _training_blocks()->Array:
 		var attendees:=MilitaryCampaign._training_program_participants(program)
 		blocks.append({"type":"text","heading":String(program.label),"text":"%s\n%s · formation training +%.1f points.\n%d attending · %.0f effective days · %.2f extra rations/day · fatigue and equipment wear apply.%s" % [program.description,", ".join(gains),float(program.training_gain)*100.0,attendees,float(program.duration_days),attendees*float(program.food_per_participant),"" if bool(program.unlocked) else "\n"+String(program.reason)]})
 		var program_id:=String(id)
-		blocks.append({"type":"actions","items":[{"label":"START "+String(program.label),"disabled":not active.is_empty() or not bool(program.unlocked),"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.start_training_program(program_id))}]})
+		blocks.append({"type":"actions","items":[{"label":"START "+String(program.label),"disabled":not active.is_empty() or not bool(program.unlocked),"live_disabled":func()->bool:return not MilitaryCampaign.training_program.is_empty() or MilitaryCampaign._training_program_gate(program_id,true).has("error"),"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.start_training_program(program_id))}]})
 	return blocks
+
+func _exercise_progress_text()->String:
+	var active:Dictionary=MilitaryCampaign.training_program
+	if not active.is_empty():
+		return "%s\n%d attending · %.1f / %.0f effective days · %.1f extra rations used. %s" % [String(active.label),int(active.participants),float(active.progress_days),float(active.duration_days),float(active.food_consumed_total),String(active.paused_reason)]
+	var completed:Dictionary=MilitaryCampaign.last_training_program
+	if not completed.is_empty():return "No exercise is active. Last completed: %s on day %d." % [String(completed.get("label","Exercise")),int(completed.get("completed_day",0))]
+	return "No exercise is active. Choose an available exercise for trained soldiers at home."
 
 func _build_status(template_id:int)->String:
 	for item:Dictionary in MilitaryCampaign.army_template_snapshot().templates:
@@ -443,7 +452,17 @@ func _force_report(kind:String)->Dictionary:
 	return {"blocks":chosen}
 
 func _supply_overview()->Array:
-	return [{"type":"text","heading":"KEEP THE FORCE EQUIPPED","text":"Training and deployment draw on real equipment and provisions. Workshop orders reserve materials now and finish over time; a queued order is not usable gear."},{"type":"actions","items":[focused_action("MAKE EQUIPMENT","Choose a type, quantity and material cost",_equipment_catalog),focused_action("MAKE AMMUNITION","Arrows, cartridges and artillery rounds",_ammunition_catalog),focused_action("WORKSHOP & TRANSPORT","Existing jobs, repairs and carrying capacity",func()->Dictionary:return {"blocks":_supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())}),focused_action("CONDUCT IN WAR","Mercy, fear and grievance explained",_reputation_report),{"label":"CIVILIAN STORES","sub":"Materials available for production","on_press":jump("economy",1)}]}]
+	var ammunition:=focused_action("MAKE AMMUNITION",_ammunition_access_text(),_ammunition_catalog)
+	ammunition.merge({"disabled":not _ammunition_known(),"tip":_ammunition_access_text(),"live_disabled":func()->bool:return not _ammunition_known(),"live_sub":_ammunition_access_text,"live_tip":_ammunition_access_text})
+	return [{"type":"text","heading":"KEEP THE FORCE EQUIPPED","text":"Training and deployment draw on real equipment and provisions. Workshop orders reserve materials now and finish over time; a queued order is not usable gear."},{"type":"actions","items":[focused_action("MAKE EQUIPMENT","Choose a type, quantity and material cost",_equipment_catalog),ammunition,focused_action("WORKSHOP & TRANSPORT","Existing jobs, repairs and carrying capacity",func()->Dictionary:return {"blocks":_supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())}),focused_action("CONDUCT IN WAR","Mercy, fear and grievance explained",_reputation_report),{"label":"CIVILIAN STORES","sub":"Materials available for production","on_press":jump("economy",1)}]}]
+
+func _ammunition_known()->bool:
+	for item:String in MilitaryCampaign.CONSUMABLE_KNOWLEDGE:
+		if bool(MilitaryCampaign.consumable_knowledge_availability(item).unlocked):return true
+	return false
+
+func _ammunition_access_text()->String:
+	return "Choose an understood ammunition type; materials and workshop capacity are checked before ordering." if _ammunition_known() else String(MilitaryCampaign.consumable_knowledge_availability("arrows").reason)+" Later ammunition has its own research requirements."
 
 func _equipment_catalog()->Dictionary:
 	var names:Array=MilitaryCampaign.EQUIPMENT_KNOWLEDGE.keys()
@@ -456,7 +475,11 @@ func _equipment_catalog()->Dictionary:
 func _equipment_order_report(item:String)->Dictionary:return _supply_order_report("equipment",item)
 func _ammunition_catalog()->Dictionary:
 	var items:Array=[]
-	for item:String in ["arrows","artillery_rounds","small_arms_ammunition","heavy_shells"]:items.append(focused_action(item.replace("_"," ").to_upper(),"%d in store"%int(MilitaryCampaign.military_consumables.get(item,0)),_supply_order_report.bind("ammunition",item)))
+	for item:String in MilitaryCampaign.CONSUMABLE_KNOWLEDGE:
+		var gate:=MilitaryCampaign.consumable_knowledge_availability(item)
+		var action:=focused_action(item.replace("_"," ").to_upper(),String(gate.reason),_supply_order_report.bind("ammunition",item))
+		action.merge({"disabled":not bool(gate.unlocked),"tip":String(gate.reason),"live_disabled":func()->bool:return not bool(MilitaryCampaign.consumable_knowledge_availability(item).unlocked),"live_sub":func()->String:return String(MilitaryCampaign.consumable_knowledge_availability(item).reason)})
+		items.append(action)
 	return {"blocks":[{"type":"actions","heading":"CHOOSE AMMUNITION","items":items}]}
 func _supply_order_report(kind:String,item:String)->Dictionary:
 	var quote:Dictionary

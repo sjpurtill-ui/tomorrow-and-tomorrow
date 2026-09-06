@@ -414,13 +414,20 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
+const CONSUMABLE_KNOWLEDGE:Dictionary={"arrows":"bow_craft","artillery_rounds":"powder_artillery","small_arms_ammunition":"__military_tier_5__","heavy_shells":"__military_tier_6__"}
+
+func consumable_knowledge_availability(item:String)->Dictionary:
+	var discovery:=String(CONSUMABLE_KNOWLEDGE.get(item,""))
+	if discovery=="":return {"unlocked":false,"reason":"Unknown military consumable: %s" % item,"discovery":""}
+	return _knowledge_gate(discovery,0.08)
+
 func consumable_production_quote(item:String,count:int)->Dictionary:
+	var discovery:=String(CONSUMABLE_KNOWLEDGE.get(item,""))
+	if discovery=="": return {"error":"Unknown military consumable: %s" % item}
+	var gate:=consumable_knowledge_availability(item)
+	if not bool(gate.unlocked): return {"error":gate.reason,"required_discovery":gate.discovery}
 	var line_gate:=_production_line_gate()
 	if line_gate.has("error"): return line_gate
-	var discovery:=String({"arrows":"bow_craft","artillery_rounds":"powder_artillery","small_arms_ammunition":"__military_tier_5__","heavy_shells":"__military_tier_6__"}.get(item,""))
-	if discovery=="": return {"error":"Unknown military consumable: %s" % item}
-	var gate:=_knowledge_gate(discovery,0.08)
-	if not bool(gate.unlocked): return {"error":gate.reason,"required_discovery":gate.discovery}
 	var amount:=maxi(0,count)
 	if amount<=0: return {"error":"Production amount must be positive."}
 	var recipe:=_consumable_recipe(item)
