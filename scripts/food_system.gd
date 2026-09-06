@@ -162,6 +162,7 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 			var young:=float(prepared.cohorts.get("children",0));var old:=float(prepared.cohorts.get("elders",0))
 			away_adults=maxf(0,away_adults-young-old)
 			children=maxf(0,children-young);elders=maxf(0,elders-old)
+	if GameState.resource_settlement_id=="" and GeneralCampaign.active:away_adults+=int(GeneralCampaign.army().get("troops",0))
 	away_adults=clampf(away_adults,0.0,adults)
 	adults-=away_adults
 	# Children are a full 0–13 cohort, including infancy; its weighted average
@@ -195,6 +196,7 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 		var field_personnel:=maxi(0,int(military_campaign.home_army.get("troops",0)))
 		if military_campaign.has_method("field_army_active_personnel"): field_personnel+=maxi(0,int(military_campaign.field_army_active_personnel()))
 		if military_campaign.has_method("occupation_active_personnel"): field_personnel+=maxi(0,int(military_campaign.occupation_active_personnel()))
+		if GeneralCampaign.active:field_personnel=maxi(0,field_personnel-int(GeneralCampaign.army().get("troops",0)))
 		army_field=float(field_personnel)*(1.12+(0.12 if traveling else 0.0)+maxf(0.0,-season_wave)*0.06)
 	if GameState.resource_settlement_id=="" and civilization_system!=null and civilization_system.has_method("player_effects"):
 		occupation_relief=maxf(0.0,float(civilization_system.player_effects().get("occupation_relief_demand",0.0)))

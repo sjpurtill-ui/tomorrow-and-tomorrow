@@ -1002,6 +1002,7 @@ func _field_supply_advice(army:Dictionary)->String:
 	return " Supply %d%%: the march is slowed. Return home or improve food and carrying capacity in Military > Supply."%roundi(supply*100) if supply<.5 else ""
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
+	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
@@ -1039,6 +1040,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
+	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	## Map-order movement to a free position on scouted ground. The caller (the
 	## map layer) validates that the point is charted, dry land before issuing;
@@ -2349,7 +2351,8 @@ func record_daily_provisions(required:float,delivered:float)->void:
 	if home_army.is_empty() and occupation_forces.is_empty() and field_armies.is_empty(): return
 	var need:=maxf(0.0,required)
 	var received:=clampf(delivered,0.0,need)
-	var total_active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel())
+	var prepaid:=int(GeneralCampaign.army().get("troops",0)) if GeneralCampaign.active else 0
+	var total_active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-prepaid)
 	var provision_ratio:=received/maxf(0.01,need) if need>0.0 else 1.0
 	if not home_army.is_empty():
 		var home_share:=float(maxi(0,int(home_army.get("troops",0))))/float(total_active)
@@ -2368,6 +2371,7 @@ func record_daily_provisions(required:float,delivered:float)->void:
 		home_army["formations"]=formations
 	for force_index in field_armies.size():
 		var force:Dictionary=field_armies[force_index]
+		if bool(force.get("general_managed",false)) and GeneralCampaign.active:continue
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
 		force["provisions_required_today"]=need*share
 		force["provisions_delivered_today"]=received*share

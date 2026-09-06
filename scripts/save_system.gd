@@ -10,7 +10,7 @@ const SAVE_DIR:="user://saves"
 const SAVE_VERSION:=1
 const DEFAULT_SLOT:="quicksave"
 
-const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy"]
+const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy","GeneralCampaign"]
 const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSystem","EconomySystem","SettlementModel","GovernmentPeopleSystem","WorldFacts","AdvisorSystem","FoodSystem","ConsequenceEngine","PronouncementInterpreter"]
 # Deterministic caches that rebuild from the seed; persisting them would bloat
 # saves and freeze stale copies of static content.
@@ -35,6 +35,7 @@ func save_metadata(slot:String=DEFAULT_SLOT)->Dictionary:
 
 
 func save_game(slot:String=DEFAULT_SLOT)->Dictionary:
+	if slot==DEFAULT_SLOT and GeneralCampaign.active:slot="river_war"
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 	var payload:Dictionary={
 		"version":SAVE_VERSION,

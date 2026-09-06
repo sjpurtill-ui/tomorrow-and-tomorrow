@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Tomorrow and Tomorrow"
-config/version="2026.09.05.13"
+config/version="2026.09.05.14"
 run/main_scene="res://local_terrain.tscn"
 config/features=PackedStringArray("4.7")
 
@@ -39,6 +39,8 @@ CivicImplementationSystem="*res://scripts/civic_implementation_system.gd"
 CivilizationSystem="*res://scripts/civilization_system.gd"
 PronouncementInterpreter="*res://scripts/pronouncement_interpreter.gd"
 MilitaryCampaign="*res://scripts/military_campaign.gd"
+GeneralCampaign="*res://scripts/general_campaign.gd"
+GeneralDialogue="*res://scripts/general_dialogue.gd"
 MilitaryCommandUI="*res://scripts/military_command_ui.gd"
 SaveSystem="*res://scripts/save_system.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"

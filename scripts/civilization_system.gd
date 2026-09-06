@@ -588,6 +588,9 @@ func _process_strategic_turn(day:int)->void:
 		civ["allocations"]=ForeignDiplomacy.commitments.policy_allocations(String(civ.id),civ.allocations)
 		civ=_advance_civilization(civ)
 		civilizations[index]=civ
+	if GeneralCampaign.active:
+		world_changed.emit(competition_snapshot())
+		return
 	_process_intercivilization_relations(day)
 	_process_foreign_player_rumors(day)
 	_process_foreign_scout_reports(day)

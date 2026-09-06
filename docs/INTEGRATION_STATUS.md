@@ -1,3 +1,11 @@
+# Latest integration: 2026.09.05.14
+
+General-led Alderford War: conversation, validated objectives, simultaneous world time, finite logistics, opponent plans, actual battles, reports and replay. Enter through Military → Play General Campaign. All previous integrated releases remain included.
+
+Canonical checkout: C:/Users/sjpur/TomorrowandTomorrow, main. Feature source: codex/general-campaign, base 2961a15. See RELEASE_2026_09_05_14.md for evidence and limits. A running older process keeps its loaded build until exited and relaunched through tools/launch_game.ps1. Worker instructions: WORKER_PROMPT.txt and WORKER_HANDOFF.md. General direction: GENERAL_CAMPAIGN_DESIGN.md.
+
+---
+
 # Current integration checkpoint
 
 ## Latest: release 2026.09.05.13

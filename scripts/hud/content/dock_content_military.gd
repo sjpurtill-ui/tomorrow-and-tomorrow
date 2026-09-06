@@ -20,6 +20,7 @@ const UNIT_COLORS:Dictionary={
 }
 
 func meta()->Dictionary:
+	if GeneralCampaign.active:return {"eyebrow":"GENERAL COMMAND","title":"The Alderford War","subtabs":["GENERAL"]}
 	return {
 		"eyebrow":"MILITARY COMMAND",
 		"title":"Watch & Field",
@@ -27,6 +28,8 @@ func meta()->Dictionary:
 	}
 
 func tab(sub:int)->Dictionary:
+	if GeneralCampaign.active:
+		return {"kpis":[],"blocks":[{"type":"text","heading":"YOUR GENERAL HAS THE FIELD","text":"Set objectives in conversation. Your general handles movement, camps, supply and battle execution."},{"type":"actions","items":[{"label":"TALK TO YOUR GENERAL","on_press":func():GeneralCampaign.open_screen()}]}]}
 	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	var capabilities:Dictionary=MilitaryCampaign.military_capabilities()
 	var troops:=maxi(0,int(army.get("troops",0)))
@@ -47,7 +50,7 @@ func tab(sub:int)->Dictionary:
 		1: return {"kpis":[kpis[0],kpis[1]],"blocks":_builds_blocks(capabilities)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_training_blocks()}
 		3: return {"kpis":[kpis[3]],"blocks":_supply_overview()}
-	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":_forces_overview()}
+	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":_campaign_entry()+_forces_overview()}
 
 func _command_brief()->Dictionary:
 	if not MilitaryCampaign.pending_aftermath.is_empty() and not MilitaryCampaign.battle_history.is_empty():
@@ -508,3 +511,9 @@ func _recruitment_requirements(template_id:int)->Dictionary:
 			actions.append(focused_action("MAKE "+weapon.replace("_"," ").to_upper(),"Review materials and workshop time",_equipment_order_report.bind(weapon)))
 	if float(quote.get("food",0))>FoodSystem.total_stored():actions.append({"label":"FOOD & RESERVES","sub":"Review supply and local work priority","on_press":jump("economy",0)})
 	return {"blocks":[{"type":"text","heading":"CURRENT REQUIREMENTS","text":"\n\n".join(blockers) if not blockers.is_empty() else "Requirements met. Return to Recruit & Train to issue the order."},{"type":"actions","items":actions},{"type":"text","heading":"WHAT HAPPENS NEXT","text":"A waiting order is checked as game days advance. It starts only when the full class meets every requirement. Stop Recruitment cancels future intake; already enrolled soldiers continue. If another army uses all military places, you must change that commitment or develop greater capacity; simply waiting does not guarantee recruitment."}]}
+
+func _campaign_entry()->Array:
+	return [{"type":"text","heading":"THE ALDERFORD WAR · PLAYABLE CAMPAIGN","text":"Two rivals, one war. Command through your general. Starting preserves this world separately and opens an early campaign with its own save slot."},{"type":"actions","items":[{"label":"PLAY GENERAL CAMPAIGN","on_press":func():GeneralCampaign.launch()},{"label":"RESUME GENERAL CAMPAIGN","on_press":func():
+		var result:=SaveSystem.load_game("river_war")
+		if not result.has("error"):terrain.get_tree().reload_current_scene()
+	}]}]

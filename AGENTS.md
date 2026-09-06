@@ -13,3 +13,9 @@ One designated integrator owns this canonical checkout and merges completed work
 Before starting, report the absolute worktree path, branch, base commit, and files/systems owned by the task. Read `docs/WORKER_HANDOFF.md`. Commit only task changes. Supply the commit hash, concise behavior summary, tests, known limitations, save compatibility, and any shared-file conflicts to the integrator. Do not merge into main, launch the player game, or claim the player build includes your changes until integration is verified.
 
 Shared integration hotspots are `project.godot`, `local_terrain.gd`, `game_state.gd`, `discovery_system.gd`, `military_campaign.gd`, and `save_system.gd`. Preserve the current GovernmentPeopleSystem as the owner of civic officials and daily settlement labor. HistoricalFigures records exceptional contributors and independent field generals. Preserve aggregate population counts and bounded visual representatives.
+
+## General-led campaign direction
+
+Read docs/GENERAL_CAMPAIGN_DESIGN.md before military or leader work. Generals execute battlefield operations in every era; the player observes consequences and gives objectives through conversation. Do not revive the discarded direct-cohort-control design or make routine logistics a mandatory form-filling flow.
+
+The user considers the current development campaign a disposable test and prioritizes playable implementation and behavioral quality. Do not center progress reports on preserving that test save. This preference is scoped to this development campaign, not permission to delete arbitrary user data or interrupt other sessions.

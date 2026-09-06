@@ -64,3 +64,9 @@ Keep one integration queue in docs/INTEGRATION_STATUS.md: READY (tested worker c
 During a consolidation request, stop feature expansion. Finish only the checks and conflict resolution needed for the agreed deliveries. Unfinished prototypes remain HELD with their location and next missing step. A stopped worker does not make its partial code release-ready.
 
 The integrator records source and integrated hashes, combined validation, and the live-session state. A running game does not automatically receive branch changes. Save and exit normally, then use the canonical desktop shortcut to load the new scripts; no second game or test window should be opened to simulate a successful update.
+
+## General-led campaign direction
+
+Read docs/GENERAL_CAMPAIGN_DESIGN.md before military or leader work. Generals execute battlefield operations in every era; the player observes consequences and gives objectives through conversation. Do not revive the discarded direct-cohort-control design or make routine logistics a mandatory form-filling flow.
+
+The user considers the current development campaign a disposable test and prioritizes playable implementation and behavioral quality. Do not center progress reports on preserving that test save. This preference is scoped to this development campaign, not permission to delete arbitrary user data or interrupt other sessions.

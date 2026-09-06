@@ -446,6 +446,7 @@ func _ready() -> void:
 	_refresh_settlement_network(true)
 	_refresh_settlement_convoy_marker()
 	_trace_load("settlement and interface")
+	GeneralCampaign.bind_world.call_deferred(self)
 	_capture_preview_if_requested.call_deferred()
 
 func _trace_load(stage: String) -> void:
@@ -926,13 +927,21 @@ func _process(delta: float) -> void:
 		if game_speed>0.0: _set_game_speed(0.0)
 		if not is_instance_valid(PeopleDirection.panel): PeopleDirection.open_direction()
 		return
+	if GeneralCampaign.active:
+		var committed:=GeneralCampaign.consume_time(delta)
+		if committed>0:advance_world_time(committed)
+		GeneralCampaign.after_world_time()
+		return
 	if game_speed <= 0.0:
 		return
 	var days_advanced := delta * _speed_hours_per_second()/24.0
+	advance_world_time(days_advanced)
+
+func advance_world_time(days_advanced:float)->void:
 	# Stop at the calendar boundary; never simulate part of an unchosen century.
 	GameState.elapsed_days = minf(GameState.elapsed_days+days_advanced,float(PeopleDirection.next_century_day()))
 	var current_discovery_day := int(floor(GameState.elapsed_days))
-	while last_discovery_day < current_discovery_day and game_speed>0.0:
+	while last_discovery_day < current_discovery_day and (game_speed>0.0 or GeneralCampaign.active):
 		last_discovery_day += 1
 		GameState.convoy_traveling=travel_active
 		CivilizationSystem.advance_to_day(last_discovery_day)
@@ -11353,6 +11362,7 @@ func _on_city_aftermath(_aftermath:Dictionary)->void:
 	_open_war_planning.call_deferred()
 
 func _restore_military_attention()->void:
+	if GeneralCampaign.active:return
 	if not MilitaryCampaign.pending_aftermath.is_empty():
 		_pause_for_military_attention("saved_aftermath","BATTLE AFTERMATH AWAITS","The last battle ended. Review surviving soldiers, occupation assignments and scattered personnel in Military before issuing another operation.",false)
 		return
@@ -11395,6 +11405,7 @@ func _show_military_attention(title:String,body:String)->void:
 	military_attention_dialog.popup_centered()
 
 func _open_war_planning(_tab:int=0)->void:
+	if GeneralCampaign.active:GeneralCampaign.open_screen();return
 	## Deep military decisions — threats, engagements, aftermath, fronts —
 	## open as the war-planning detail dock beside the military section.
 	if hud==null: return
@@ -18098,6 +18109,10 @@ func _settlement_display_name() -> String:
 	return "FOUNDING CONVOY"
 
 func _set_game_speed(speed: float) -> void:
+	if GeneralCampaign.active and speed<=0:GeneralCampaign.pause_to_speak()
+	if GeneralCampaign.active and speed>0:
+		GeneralCampaign.resume()
+		return
 	if speed>0.0 and GameState.founding_focus=="":
 		game_speed=0.0
 		if not founding_focus_panel or not is_instance_valid(founding_focus_panel): _open_founding_focus_panel()
@@ -19391,6 +19406,7 @@ func _restart_random_world()->void:
 # Escape always dismisses exactly the topmost game screen. This prevents a
 # second dashboard or the pause menu from appearing behind an existing modal.
 func _close_topmost_game_screen()->bool:
+	if is_instance_valid(GeneralCampaign.screen) and GeneralCampaign.screen.visible:GeneralCampaign.screen.hide();return true
 	for overlay_entry in [
 		[knowledge_panel,"InvestigationDetailOverlay"],
 		[provisions_panel,"ProvisionsDetailOverlay"],

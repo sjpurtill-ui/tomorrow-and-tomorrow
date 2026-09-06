@@ -1,3 +1,7 @@
+# Release .14: bounded general campaign
+
+The authored Alderford War now supplies an explicit playable two-rival campaign through Military → Play General Campaign. It does not certify natural first contact, a continuous 2,500-year journey, or all eras. See GENERAL_CAMPAIGN_DESIGN.md and RELEASE_2026_09_05_14.md. Earlier continuous-world findings remain below.
+
 # Current journey scope audit — release .13
 
 The sustained review resumed after .12. Three expeditions returned in one genuine

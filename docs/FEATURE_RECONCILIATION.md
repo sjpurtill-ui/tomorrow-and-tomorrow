@@ -1,3 +1,7 @@
+# General campaign integration — release .14
+
+Source codex/general-campaign from canonical 2961a15. Added the bounded authored Alderford War without replacing existing terrain, civics, force ownership or combat resolution. Verified full victory/defeat, real UI objective/withdrawal/recovery/save loop, 56 combined tests and seven actual Terra exchanges. See RELEASE_2026_09_05_14.md and INTEGRATION_STATUS.md. The full historical campaign remains outside this slice.
+
 # Canonical feature reconciliation — 2026-09-05
 
 Latest consolidation: release 2026.09.05.5 integrates the battle/siege HUD series
