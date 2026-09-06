@@ -1,5 +1,18 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.10
+
+Founding review, focused civic/government reports and diplomatic conversation /
+offer / record screens. Real costs, refundable offers and waiting outcomes are
+explicit. See RELEASE_2026_09_05_10.md for validation and limits. Includes .7–.9.
+
+Player PID46888 retains loaded .6. Save and exit normally, then launch only with
+C:/Users/sjpur/TomorrowandTomorrow/tools/launch_game.ps1. No automated restart.
+Further journey work stays isolated until verified; prior worktrees are preserved.
+
+---
+# Previous integration checkpoint
+
 ## Latest: release 2026.09.05.9
 
 Focused inquiry directions/evidence/work-priority screens, wrapping action cards,

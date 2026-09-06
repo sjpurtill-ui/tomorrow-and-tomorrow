@@ -54,3 +54,11 @@ Focused inquiry directions, explicit shares/evidence/research work, wrapping act
 cards, and enemy-home capture capacity. 123 passed; inquiry, army and command-shell
 private GPU walkthroughs passed. See RELEASE_2026_09_05_9.md.
 The enemy-home capacity item above is now complete; remaining journeys stay open.
+
+## Verified batch: release .10
+Founding review/commit; focused civic and government reports; diplomatic offer
+costs, toggles and actual dispatch. 80 passed, three GPU journeys at two sizes,
+copied-save resume exact. See RELEASE_2026_09_05_10.md.
+Remaining: ammunition/transport previews, field orders/provisioning, and continuous
+siege/recovery decision checks. Broader edge cases remain ongoing, not certified
+merely by the three representative journeys.

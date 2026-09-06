@@ -10,9 +10,16 @@ var page_index:=0
 var timer:=0.0
 var grid:GridContainer
 var selected_focus:=""
+var choice_page:=0
+var reviewing:=false
+var focus_cards:Array[Control]=[]
+var more_choices:Button
+var choice_help:Label
+var review_back:Button
 
 func _ready()->void:
 	opening=GameState.founding_focus==""
+	if not PeopleDirection.needs_century_choice():selected_focus=PeopleDirection.ambition;reviewing=true
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var background:=ColorRect.new()
 	background.color=Color("142831")
@@ -27,7 +34,7 @@ func _ready()->void:
 	margin.add_child(root)
 	var top:=HBoxContainer.new()
 	root.add_child(top)
-	var title:=_label(top,"CHOOSE OUR CENTURY",24)
+	var title:=_label(top,"WHAT WILL WE BECOME?",24)
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_button(top,"RETURN · F8",func(): queue_free()).visible=not PeopleDirection.needs_century_choice()
 	summary=_label(root,"",15)
@@ -41,22 +48,24 @@ func _ready()->void:
 	root.add_child(body)
 	var focus_page:=VBoxContainer.new()
 	body.add_child(focus_page); pages.append(focus_page)
-	_label(focus_page,"Your choice—not the council's. Pick a focus, review its tradeoff, then confirm. No discoveries, supplies or wars are granted automatically.",14)
+	choice_help=_label(focus_page,"Choose a direction to review. The commitment lasts 100 years; it shapes learning and values over time.",14)
 	grid=GridContainer.new(); grid.columns=4
 	grid.add_theme_constant_override("h_separation",12); grid.add_theme_constant_override("v_separation",12)
 	focus_page.add_child(grid)
 	for id:String in PeopleDirection.AMBITIONS:
 		var card:=VBoxContainer.new(); card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		grid.add_child(card)
-		var button:=_button(card,PeopleDirection.AMBITIONS[id].name,func(): selected_focus=id; _refresh())
+		grid.add_child(card);focus_cards.append(card)
+		var button:=_button(card,PeopleDirection.AMBITIONS[id].name,func(): selected_focus=id; reviewing=true; _refresh())
 		button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		button.custom_minimum_size.y=56
 		button.set_meta("ambition",id)
 		ambition_buttons.append(button)
 		_label(card,PeopleDirection.AMBITIONS[id].vision,13)
-	var detail:=_label(focus_page,"",14)
+	more_choices=_button(focus_page,"MORE DIRECTIONS",func():choice_page=1-choice_page;_refresh())
+	review_back=_button(focus_page,"BACK TO DIRECTIONS",func():reviewing=false;_refresh())
+	var detail:=_label(focus_page,"",16)
 	detail.name="SelectionDetail"
-	var confirm:=_button(focus_page,"CONFIRM CENTURY FOCUS",func():
+	var confirm:=_button(focus_page,"COMMIT TO THIS DIRECTION",func():
 		var result:Dictionary=PeopleDirection.choose(selected_focus)
 		status.text=String(result.get("error","Focus chosen. Resume time when ready."))
 		if not result.has("error"): queue_free())
@@ -96,12 +105,19 @@ func _refresh()->void:
 	var century:=PeopleDirection.century_at(int(GameState.elapsed_days))
 	var pending:=PeopleDirection.needs_century_choice()
 	summary.text="CENTURY %d · YEARS %d–%d · %s" % [century+1,century*100+1,(century+1)*100,"Awaiting your choice. Time remains paused." if pending else "Chosen: "+String(PeopleDirection.AMBITIONS[PeopleDirection.ambition].name)]
-	grid.columns=4 if get_viewport_rect().size.x>=1000 else 2
+	grid.columns=2
+	grid.visible=not reviewing;more_choices.visible=not reviewing
+	more_choices.text="MORE DIRECTIONS · %d / 2"%(choice_page+1)
+	review_back.visible=reviewing
+	choice_help.text="Review the benefit and tradeoff before committing. The choice does not grant resources, discoveries or wars." if reviewing else "Choose a direction to review. The commitment lasts 100 years; it shapes learning and values over time."
+	for i in focus_cards.size():focus_cards[i].visible=i/4==choice_page
 	for button in ambition_buttons:
 		button.disabled=not pending
 		button.modulate=Color("edce83") if String(button.get_meta("ambition"))==selected_focus else Color.WHITE
 	var detail:=pages[0].get_node("SelectionDetail") as Label
-	detail.text=PeopleDirection.AMBITIONS[selected_focus].effect if selected_focus!="" else "Choose a focus above to review its effect. You may renew the same focus next century."
+	detail.visible=reviewing
+	detail.text=(String(PeopleDirection.AMBITIONS[selected_focus].name)+"\n\n"+String(PeopleDirection.AMBITIONS[selected_focus].vision)+"\n\n"+String(PeopleDirection.AMBITIONS[selected_focus].effect)+"\n\nThis remains your direction until the next century. Your people still need evidence, work and experience to fulfill it.") if selected_focus!="" else ""
+	(pages[0].get_node("ConfirmFocus") as Button).visible=reviewing
 	(pages[0].get_node("ConfirmFocus") as Button).disabled=not pending or selected_focus==""
 
 func _clear(parent:Node)->void:

@@ -12,6 +12,8 @@ func _ready()->void:
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("res://artifacts/foreign-dialogue-ui.png")
+	ForeignDiplomacy.panel.show_section(1)
+	await get_tree().process_frame;await get_tree().process_frame
 	var bounds:=get_viewport().get_visible_rect()
 	if not bounds.encloses(ForeignDiplomacy.panel.submit.get_global_rect()):
 		push_error("Foreign dialogue submit control escaped viewport")

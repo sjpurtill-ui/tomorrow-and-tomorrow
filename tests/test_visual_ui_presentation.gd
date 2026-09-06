@@ -110,7 +110,10 @@ func test_civic_exchange_renders_as_wrapped_conversation_with_an_inline_reply()-
 	assert_str((messages[1] as Label).text).contains("Before anything happens")
 	assert_int(root.find_children("CivicConversationInput","LineEdit",true,false).size()).is_equal(1)
 	assert_int(root.find_children("CivicConversationSend","Button",true,false).size()).is_equal(1)
-	assert_int(root.find_children("*","ScrollContainer",true,false).size()).is_equal(0)
+	assert_int(root.find_children("CivicTranscript","ScrollContainer",true,false).size()).is_equal(1)
+	var transcript:=root.find_child("CivicTranscript",true,false)
+	assert_bool(transcript.is_ancestor_of(root.find_child("CivicConversationInput",true,false))).is_false()
+	assert_bool(transcript.is_ancestor_of(root.find_child("CivicConversationSend",true,false))).is_false()
 
 
 func test_civics_discloses_actual_ai_or_offline_interpreter_mode()->void:

@@ -463,8 +463,16 @@ static func _render_conversation(parent:VBoxContainer,block:Dictionary)->void:
 	var messages:=VBoxContainer.new()
 	messages.name="CivicConversationMessages"
 	messages.add_theme_constant_override("separation",7)
-	stack.add_child(messages)
 	var turns:Array=block.get("items",[])
+	if turns.is_empty():stack.add_child(messages)
+	else:
+		var transcript:=ScrollContainer.new()
+		transcript.name="CivicTranscript"
+		transcript.custom_minimum_size.y=clampf((parent.get_viewport_rect().size.y if parent.is_inside_tree() else 600)-440,120,260)
+		transcript.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+		messages.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		stack.add_child(transcript);transcript.add_child(messages)
+		transcript.get_v_scroll_bar().changed.connect(func():transcript.scroll_vertical=int(transcript.get_v_scroll_bar().max_value))
 	if turns.is_empty():
 		var opening:=Tokens.make_label(String(block.get("empty_text","Tell the leader what you want done.")),12,Tokens.TEXT_SOFT)
 		opening.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

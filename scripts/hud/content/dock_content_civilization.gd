@@ -37,9 +37,9 @@ func tab(sub:int)->Dictionary:
 	var raw_brief:Dictionary=terrain._society_attention_brief(capacities)
 	var brief:=adapt_brief(raw_brief,"warn" if weakest_value<0.4 else "info","")
 	match sub:
-		1: return {"kpis":kpis,"brief":_government_brief(governance),"blocks":_government_blocks(governance)}
+		1: return {"kpis":[kpis[2],kpis[3]],"brief":_government_brief(governance),"blocks":_government_overview()}
 		2: return {"kpis":[],"brief":{},"blocks":_council_blocks()}
-	return {"kpis":kpis,"brief":brief,"blocks":_society_blocks(capacities)}
+	return {"kpis":[kpis[2],kpis[3]],"brief":brief,"blocks":_society_overview()}
 
 func _society_blocks(capacities:Dictionary)->Array:
 	var items:Array=[]
@@ -57,7 +57,7 @@ func _society_blocks(capacities:Dictionary)->Array:
 func _government_brief(governance:Dictionary)->Dictionary:
 	var support:=clampf(float(governance.get("council_support",0.6)),0.0,1.0)
 	if ConsequenceEngine.active_policies().is_empty():
-		return {"tone":"info","title":"No interpreted policy is in force","why":"Issue an order in COUNCIL; it is bounded to the fixed catalog before anything changes.","action_label":"OPEN COUNCIL","on_action":jump("civ",2)}
+		return {"tone":"info","title":"No standing policy is in force","why":"Talk with your local leader in CIVICS. Advice, proposals and accepted work have distinct outcomes.","action_label":"OPEN COUNCIL","on_action":jump("civ",2)}
 	if support<0.45:
 		return {"tone":"warn","title":"Council support is low","why":"Institutions execute reluctantly at %d%% support. Fewer, better-aligned policies recover it." % roundi(support*100.0)}
 	return {"tone":"info","title":"Government is executing","why":"Standing policies are within administrative capacity."}
@@ -98,7 +98,7 @@ func _government_blocks(governance:Dictionary)->Array:
 		{"type":"bars","heading":"GOVERNANCE","items":governance_items},
 	]
 	if policy_items.is_empty():
-		blocks.append({"type":"text","heading":"STANDING POLICY","text":"No interpreted policy is in force. Issue an order in COUNCIL; it is bounded to the fixed catalog before anything changes."})
+		blocks.append({"type":"text","heading":"STANDING POLICY","text":"No standing policy is in force. Talk with your local leader in CIVICS. Advice, proposals and accepted work have distinct outcomes."})
 	else:
 		blocks.append({"type":"rows","heading":"STANDING POLICY","note":"execution","items":policy_items})
 	return blocks
@@ -136,7 +136,7 @@ func _council_brief()->Dictionary:
 		return {"tone":"warn","title":"%d decision%s await%s you" % [pending,"" if pending==1 else "s","s" if pending==1 else ""],"why":"Advisors hold these until you decide; repeated reports merge instead of repeating."}
 	return {"tone":"info","title":"The council is quiet","why":"Answered items stay quiet for a year unless severity escalates."}
 
-func _council_blocks()->Array:
+func _council_all_blocks()->Array:
 	var blocks:Array=[_interpreter_status_block()]
 	var settlement:=_civic_settlement()
 	var settlement_id:=String(settlement.get("id",""))
@@ -436,3 +436,29 @@ func _directive_state_color(state:String)->Color:
 
 func _remove_civic_leader(settlement_id:String,action:String)->void:
 	terrain._perform_civic_leader_removal(settlement_id,action)
+
+func _society_overview()->Array:
+	var details:=_society_blocks(GameState.society_capacities)
+	return [details[1],{"type":"actions","items":[{"label":"OUR DIRECTION","sub":"Long-term purpose and traditions","on_press":func():PeopleDirection.open_direction()}, {"label":"TALK TO OUR LEADER","sub":"Discuss a problem or give direction","on_press":jump("civ",2)},focused_action("CAPACITIES IN DETAIL","Twelve measures of what society can do",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}),{"label":"PEOPLE IN GOVERNMENT","sub":"Offices, responsibilities and policy","on_press":jump("civ",1)}]}]
+func _government_overview()->Array:
+	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[focused_action("OFFICEHOLDERS","Named people and their responsibilities",func()->Dictionary:return {"blocks":[_government_blocks(ConsequenceEngine.governance_metrics())[0]]}),focused_action("POLICY & EXECUTION","Standing commitments and capacity",func()->Dictionary:return {"blocks":_government_blocks(ConsequenceEngine.governance_metrics()).slice(1)}),{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work","on_press":jump("civ",2)}]}]
+func _council_blocks()->Array:
+	var all:=_council_all_blocks();var blocks:Array=[]
+	for item:Dictionary in all:
+		if item.get("type","")=="conversation":blocks.append(item)
+	if blocks.is_empty():
+		blocks.append({"type":"text","text":"Appoint a local leader to begin civic conversation."})
+		blocks.append({"type":"actions","items":[{"label":"APPOINT A LEADER","on_press":_open_civic_leadership.bind(String(_civic_settlement().get("id","")))}]})
+	blocks.append({"type":"actions","items":[focused_action("COUNCIL DECISIONS","Review pending choices and consequences",_civic_report.bind("decisions")),focused_action("WORK & REPORTS","Pending orders and returned reports",_civic_report.bind("reports")),focused_action("MILITARY REPORTS","Threats and battle outcomes",_civic_report.bind("military")),focused_action("CONVERSATION SETTINGS","AI routing and local interpretation",func()->Dictionary:return {"blocks":[_interpreter_status_block()]})]})
+	return blocks
+func _civic_report(kind:String)->Dictionary:
+	var chosen:Array=[];var section:=""
+	for block:Dictionary in _council_all_blocks():
+		var heading:=String(block.get("heading",""))
+		if heading.begins_with("DECISION ·"):section="decisions"
+		elif heading=="MILITARY ALERTS & BATTLE REPORTS":section="military"
+		elif heading in ["PENDING ORDERS","REPORTS"]:section="reports"
+		elif heading in ["DIRECTIVE INTERPRETER","NO LOCAL LEADER"] or block.get("type","")=="conversation":section=""
+		if section==kind:chosen.append(block)
+	if chosen.is_empty():chosen.append({"type":"text","text":"No pending decisions here." if kind=="decisions" else "No reports are waiting here."})
+	return {"blocks":chosen}
