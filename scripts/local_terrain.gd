@@ -10758,6 +10758,8 @@ func _present_next_foreign_alert()->void:
 
 func _arbitrate_notification_overlays()->void:
 	_sync_map_help_overlay_visibility()
+	if not active_foreign_alert.is_empty() and int(GameState.elapsed_days)-int(active_foreign_alert.get("day",0))>7:
+		_finish_active_foreign_alert()
 	if foreign_alert_panel==null: return
 	if _blocking_modal_or_report_open():
 		foreign_alert_panel.visible=false

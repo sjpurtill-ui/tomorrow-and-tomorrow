@@ -6,6 +6,9 @@ OWNED FILES / SYSTEMS: [assign ownership]
 The only player game is C:/Users/sjpur/TomorrowandTomorrow on main.
 Read AGENTS.md, docs/WORKER_HANDOFF.md and docs/INTEGRATION_STATUS.md there.
 Create a separate Git worktree from its latest main on codex/<task>.
+Use the canonical repository's main, not the current branch in an old task.
+Example (choose a unique task name and unused path):
+git -C C:/Users/sjpur/TomorrowandTomorrow worktree add -b codex/<task> C:/Users/sjpur/tt-<task> main
 Before editing, report your absolute worktree path, branch, base commit and scope.
 Do not develop in the archived OneDrive copy or change canonical main.
 
@@ -22,6 +25,10 @@ Interactive previews require an explicit request and must be labeled TEST.
 Commit only your task files. Hand off READY or HELD, commit and base hashes,
 changed files, player-visible behavior, exact test results, save compatibility,
 limitations and shared-file conflicts. Stop editing that delivery after handoff.
+Do not start additional features after finishing the assignment. If main advances,
+report that fact and the relevant conflicts; never solve them by copying an older
+whole file over current systems. The integrator controls the release queue in
+docs/INTEGRATION_STATUS.md; historical entries there are not new assignments.
 
 Only the designated integrator merges tested deliveries into main, verifies the
 combined game, updates the release record and launches the player game. Until

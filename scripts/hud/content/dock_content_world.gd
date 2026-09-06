@@ -46,7 +46,7 @@ func _contacts_blocks()->Array:
 		var civ_id:=String(encounter.get("civ_id",""))
 		items.append({
 			"name":String(encounter.get("name","Unknown polity")),
-			"sub":"met day %d · %s%s" % [int(encounter.get("day",0)),String(encounter.get("source_description",""))," · home located" if bool(encounter.get("home_location_known",false)) else ""],
+			"sub":"met year %d, day %d · %s%s" % [int(encounter.get("day",0))/365+1,int(encounter.get("day",0))%365+1,String(encounter.get("source_description",""))," · home located" if bool(encounter.get("home_location_known",false)) else ""],
 			"value":"REPORT","value_color":Tokens.GOLD,
 			"accent":Tokens.AMBER,
 			"on_click":func()->void: hud.open_detail(DetailCivReport.new(terrain,hud,civ_id)),

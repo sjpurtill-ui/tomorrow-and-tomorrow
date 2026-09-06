@@ -176,7 +176,7 @@ func seed_known_homes()->void:
 		var relation:Dictionary=civ.player_relation
 		var id:=primary_id(String(civ.id))
 		if bool(relation.get("home_location_known",false)) and not records.get("player",{}).has(id) and valid_point(relation.get("home_position",{})):
-			publish("player",location_record({"city_id":id,"civ_id":String(civ.id),"name":"Reported home of %s" % String(civ.name),"position":relation.home_position},int(relation.get("last_observed_day",-1)),"legacy or returned home location","home:"+String(civ.id)),int(GameState.elapsed_days))
+			publish("player",location_record({"city_id":id,"civ_id":String(civ.id),"name":"Reported home of %s" % String(civ.name),"position":relation.home_position},int(relation.get("last_observed_day",-1)),String(relation.get("home_location_source","earlier location report")),"home:"+String(civ.id)),int(GameState.elapsed_days))
 
 func migrate()->void:
 	seed_known_homes()

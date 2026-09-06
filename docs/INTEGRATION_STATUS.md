@@ -1,4 +1,21 @@
-# Latest integration: 2026.09.05.16
+# Current integration: 2026.09.06.1
+
+Canonical player game: C:/Users/sjpur/TomorrowandTomorrow, main. Includes all prior integrated releases through 4d1c0e6 plus the validated contact-report and envoy-entry changes from codex/contact-dialogue. See RELEASE_2026_09_06_1.md for tests and limitations.
+
+| Delivery | Current status |
+| --- | --- |
+| Earlier terrain, military units/battles, leaders, diplomacy, opening art/score, neighboring societies and continuing history | INTEGRATED through 4d1c0e6 |
+| Dated contact reports and direct leader-audience entry | INTEGRATED in this release; 21 tests and actual envoy-return GPU journey pass |
+| Outpost model, Blender authoring experiment, sliced vegetation, superseded military usability rewrite | HELD; preserved in their worktrees, not ready for wholesale integration |
+| New feature assignments | None started during this consolidation |
+
+Launch only with tools/launch_game.ps1. Worker prompt: WORKER_PROMPT.txt. A worker handoff is not a player release. Do not infer delivery from file dates or a branch preview. No player/editor process was running at the initial September 6 integration audit; subsequent launch evidence belongs in artifacts/player-*.log.
+
+Everything below is historical. Old process IDs, pending items and "latest" headings describe their dated checkpoint, not the current queue above.
+
+---
+
+# Historical integration: 2026.09.05.16
 
 Nearby connected-land societies in new worlds, objective-led contact investigation, and continuing history after dominance or distress. See RELEASE_2026_09_05_16.md for actual gameplay evidence and limits. Includes .15 artwork/new score and .14 general campaign. Remaining work: WHOLE_GAME_COHERENCE.md. Mac clone/access instructions: MAC_SETUP.md.
 
