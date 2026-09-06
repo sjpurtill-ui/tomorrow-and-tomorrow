@@ -19535,6 +19535,18 @@ func _input(event: InputEvent) -> void:
 		if world_menu_panel and is_instance_valid(world_menu_panel): return
 		if event.keycode >= KEY_0 and event.keycode <= KEY_5:
 			_set_game_speed(float(event.keycode - KEY_0))
+	elif event is InputEventPanGesture:
+		# macOS sends precise two-finger scrolling as pan gestures, not wheel
+		# clicks. Keep fractional deltas so slow trackpad motion stays smooth.
+		if not _pointer_over_ui() and is_finite(event.delta.y) and not is_zero_approx(event.delta.y):
+			_queue_camera_zoom(event.position,event.delta.y,event.shift_pressed)
+			get_viewport().set_input_as_handled()
+	elif event is InputEventMagnifyGesture:
+		if not _pointer_over_ui() and is_finite(event.factor) and event.factor>0.0 and not is_equal_approx(event.factor,1.0):
+			# A spread magnifies the map: reduce the visible camera span. Convert
+			# the native ratio to steps in the existing accumulated zoom curve.
+			_queue_camera_zoom(event.position,-log(event.factor)/log(1.4))
+			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
 			dragging = event.pressed and not _pointer_over_ui()
@@ -19570,6 +19582,18 @@ func _pointer_over_ui()->bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.alt_pressed and not event.ctrl_pressed and not event.meta_pressed:
+		if world_menu_panel and is_instance_valid(world_menu_panel): return
+		# GUI gets first refusal; typing +/- in an editor must not move the map.
+		var focused:=get_viewport().gui_get_focus_owner()
+		if not (focused is LineEdit or focused is TextEdit):
+			var zoom_step:=0.0
+			if event.keycode in [KEY_PLUS,KEY_EQUAL,KEY_KP_ADD]: zoom_step=-1.0
+			elif event.keycode in [KEY_MINUS,KEY_KP_SUBTRACT]: zoom_step=1.0
+			if zoom_step!=0.0:
+				_queue_camera_zoom(get_viewport().get_visible_rect().size*0.5,zoom_step,event.shift_pressed)
+				get_viewport().set_input_as_handled()
+				return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_N:
 		_reset_camera_north()
 		get_viewport().set_input_as_handled()

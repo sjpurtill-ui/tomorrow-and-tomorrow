@@ -25,6 +25,14 @@ Open `project.godot` in the standard Godot editor, allow asset imports to finish
 
 The project declares Godot 4.7 and was validated on Windows with 4.7.2. It uses GDScript and the Compatibility renderer. No native extension or .NET runtime is required by the tracked game. Mac execution and performance have not been tested here. Check your Mac against [Godot's system requirements](https://docs.godotengine.org/en/stable/about/system_requirements.html).
 
+### Main map zoom
+
+With the pointer over the map, spread two fingers to zoom in or pinch them together to zoom out. Vertical two-finger scrolling also zooms; its direction follows the Mac's scrolling preference. Scrolling over a panel stays with that panel. Mouse-wheel zoom remains available.
+
+Keyboard fallback: `=` or `+` zooms in; `-` zooms out, centered on the view. The numeric keypad's `+` and `-` also work. Hold a key to keep zooming, or hold Shift for faster scrolling/key zoom. Keyboard zoom is inactive while typing in a text field or using Command/Control/Option shortcuts.
+
+After updating the input code, save and exit the running game normally, then relaunch the project to load the new controls. An already-running game retains its old scripts.
+
 ## Included and local dependencies
 
 The terrain textures, exported unit assets, opening artwork, Tomorrow.mp3 and War.mp3 are included as regular Git files. No Git LFS objects are currently used. Godot regenerates `.godot/` and import caches. `art_source/.gdignore` keeps the source Blender file out of automatic Godot imports; the game loads the included GLB exports instead. Blender is needed only to rebuild source artwork, not to play.
