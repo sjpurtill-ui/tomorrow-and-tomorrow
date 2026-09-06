@@ -1,15 +1,23 @@
 # Develop and play on a Mac
 
-The repository is https://github.com/sean544/tomorrow-and-tomorrow and is private. Sign into an account with access; GitHub returns 404 to unauthenticated visitors. The publishing account on Windows is sean544. Do not make the repository public to fix authentication.
+The repository is https://github.com/sjpurtill-ui/tomorrow-and-tomorrow and is private, owned by your personal account `sjpurtill-ui`. Sign into that account on your Mac; GitHub returns 404 to unauthenticated visitors. Do not make the repository public to fix authentication.
 
 ## Get the current game
 
 Clone with your authenticated Git client, or use:
 
 ```sh
-git clone https://github.com/sean544/tomorrow-and-tomorrow.git
+git clone https://github.com/sjpurtill-ui/tomorrow-and-tomorrow.git
 cd tomorrow-and-tomorrow
 git switch main
+git pull --ff-only
+```
+
+If you already cloned before the ownership transfer, update that clone instead:
+
+```sh
+git remote set-url origin https://github.com/sjpurtill-ui/tomorrow-and-tomorrow.git
+git remote -v
 git pull --ff-only
 ```
 

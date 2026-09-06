@@ -4,6 +4,8 @@ TASK: [describe one bounded task]
 OWNED FILES / SYSTEMS: [assign ownership]
 
 The only player game is C:/Users/sjpur/TomorrowandTomorrow on main.
+The private shared repository is https://github.com/sjpurtill-ui/tomorrow-and-tomorrow.git.
+For the designated Mac checkout, follow docs/MAC_SETUP.md; do not use Windows paths there.
 Read AGENTS.md, docs/WORKER_HANDOFF.md and docs/INTEGRATION_STATUS.md there.
 Create a separate Git worktree from its latest main on codex/<task>.
 Use the canonical repository's main, not the current branch in an old task.
