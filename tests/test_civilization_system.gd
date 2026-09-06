@@ -819,7 +819,7 @@ func test_records_contact_and_inference_progressively_reveal_strategic_compariso
 	assert_int(int(known.player_rank)).is_equal(-1)
 	var own:Dictionary=(known.leaders as Array).filter(func(profile:Dictionary)->bool: return profile.id=="player")[0]
 	assert_bool(own.has("score")).is_true()
-	assert_str(String(known.victory_rule)).contains("seven")
+	assert_str(String(known.victory_rule)).contains("period of influence")
 
 
 func test_world_uses_fixed_aggregate_civilization_records()->void:
@@ -974,7 +974,7 @@ func test_limited_objective_capture_creates_war_score_and_completion()->void:
 	var target:Dictionary=system.campaign_targets(civ_id)[0]
 	assert_bool(bool(system.set_player_war_goal(civ_id,"limited",String(target.id)).get("ok",false))).is_true()
 	assert_bool(bool(system.conduct_player_action(civ_id,"declare_war",true).get("ok",false))).is_true()
-	var result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":1},"defender":{"name":String(civ.name),"dead":3},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":1}}
+	var result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":1,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":3},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":1}}
 	system.resolve_player_battle(civ_id,result)
 	var objective:Dictionary=system.war_objective_status(civ_id)
 	assert_bool(bool(objective.complete)).is_true()
@@ -1120,13 +1120,13 @@ func test_territory_moves_only_when_the_campaign_direction_can_change_control()-
 	var civ_id:=String(civ.id)
 	var rival_before:=float(civ.territory)
 	var player_before:float=system._player_territory()
-	var offensive_win:={"home_side":"attacker","campaign_mode":"offensive","attacker":{"name":"HOME HOST","dead":0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
+	var offensive_win:={"home_side":"attacker","campaign_mode":"offensive","attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
 	system.resolve_player_battle(civ_id,offensive_win)
 	assert_float(float(system.civilizations[0].territory)).is_equal_approx(rival_before-0.025,0.0001)
 	assert_float(system._player_territory()).is_equal_approx(player_before+0.025,0.0001)
 	var rival_after_conquest:=float(system.civilizations[0].territory)
 	var player_after_conquest:float=system._player_territory()
-	var offensive_loss:={"home_side":"attacker","campaign_mode":"offensive","attacker":{"name":"HOME HOST","dead":0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":String(civ.name),"defeated":"HOME HOST","prisoners":0}}
+	var offensive_loss:={"home_side":"attacker","campaign_mode":"offensive","attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":String(civ.name),"defeated":"HOME HOST","prisoners":0}}
 	system.resolve_player_battle(civ_id,offensive_loss)
 	assert_float(float(system.civilizations[0].territory)).is_equal_approx(rival_after_conquest,0.0001)
 	assert_float(system._player_territory()).is_equal_approx(player_after_conquest,0.0001)
@@ -1146,7 +1146,7 @@ func test_decisive_offensive_victory_captures_the_selected_region_and_unlocks_th
 	var target:Dictionary=system.campaign_targets(civ_id)[0]
 	var rival_territory_before:=float(civ.territory)
 	var controlled_before:=float(system._public_profile(civ).controlled_population)
-	var result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":1},"defender":{"name":String(civ.name),"dead":2},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":1}}
+	var result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":1,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":2},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":1}}
 	var outcome:Dictionary=system.resolve_player_battle(civ_id,result)
 	assert_bool(bool(outcome.get("region_captured",false))).is_true()
 	assert_str(String(system.region_snapshot(civ_id,String(target.id)).controller)).is_equal("player")
@@ -1164,7 +1164,7 @@ func test_recapture_restores_the_same_region_and_does_not_manufacture_territory(
 	var target:Dictionary=system.campaign_targets(civ_id)[0]
 	var starting_rival_territory:=float(civ.territory)
 	var starting_player_balance:float=system.player_territory_balance
-	var capture_result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
+	var capture_result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
 	system.resolve_player_battle(civ_id,capture_result)
 	var recapture_result:={"home_side":"defender","campaign_mode":"defensive","target_region_id":String(target.id),"attacker":{"name":String(civ.name),"dead":0},"defender":{"name":"HOME HOST","dead":0},"termination":{"type":"surrender","captor":String(civ.name),"defeated":"HOME HOST","prisoners":0}}
 	var outcome:Dictionary=system.resolve_player_battle(civ_id,recapture_result)
@@ -1178,7 +1178,7 @@ func test_unsupported_occupation_creates_relief_resistance_and_uprising_pressure
 	var civ:Dictionary=system.civilizations[0]
 	var civ_id:=String(civ.id)
 	var target:Dictionary=system.campaign_targets(civ_id)[0]
-	var capture_result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
+	var capture_result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
 	system.resolve_player_battle(civ_id,capture_result)
 	var region:Dictionary=system.civilizations[0].strategic_regions[0]
 	region["occupation_turns"]=3
@@ -1199,7 +1199,7 @@ func test_total_urban_control_changes_strategy_status_and_peace_leverage()->void
 	for region_index in system.STRATEGIC_REGIONS_PER_CIV:
 		var civ:Dictionary=system.civilizations[0]
 		var target:Dictionary=system.campaign_targets(civ_id)[region_index]
-		var capture_result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
+		var capture_result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
 		system.resolve_player_battle(civ_id,capture_result)
 	var occupied:Dictionary=system._player_occupation_status(system.civilizations[0])
 	assert_int(int(occupied.region_count)).is_equal(system.STRATEGIC_REGIONS_PER_CIV)
@@ -1233,7 +1233,7 @@ func test_foreign_ai_holding_is_reachable_and_liberated_without_starting_a_hidde
 	assert_bool(campaign.has("error")).is_false()
 	assert_bool(bool(campaign.liberation_campaign)).is_true()
 	var territory_before:=float(system.civilizations[0].territory)+float(system.civilizations[1].territory)
-	var battle:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":occupied_region_id,"attacker":{"name":"HOME HOST","dead":0},"defender":{"name":String(occupier.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(occupier.name),"prisoners":0}}
+	var battle:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":occupied_region_id,"attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(occupier.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(occupier.name),"prisoners":0}}
 	var outcome:Dictionary=system.resolve_player_battle(String(occupier.id),battle)
 	assert_bool(bool(outcome.get("region_liberated",false))).is_true()
 	assert_str(String(system.region_snapshot(String(original_owner.id),occupied_region_id).controller)).is_equal(String(original_owner.id))
@@ -1263,7 +1263,7 @@ func test_import_rejects_incomplete_or_asymmetric_state_without_mutating_live_wo
 func test_export_survives_a_real_json_round_trip()->void:
 	var civ:Dictionary=system.civilizations[0]
 	var target:Dictionary=system.campaign_targets(String(civ.id))[0]
-	system.resolve_player_battle(String(civ.id),{"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}})
+	system.resolve_player_battle(String(civ.id),{"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}})
 	var encoded:=JSON.stringify(system.export_state())
 	var parsed:Variant=JSON.parse_string(encoded)
 	assert_bool(parsed is Dictionary).is_true()
@@ -1283,7 +1283,7 @@ func test_age_cohorts_change_over_time_and_continue_to_conserve_population()->vo
 	assert_array(system.validate_state()).is_empty()
 
 
-func test_victory_is_attainable_from_aggregate_domain_leadership()->void:
+func test_dominance_records_influence_without_ending_history()->void:
 	GameState.ensure_population_total(1_000_000_000_000)
 	GameState.population_health=0.99
 	GameState.food_security=1.0
@@ -1292,11 +1292,11 @@ func test_victory_is_attainable_from_aggregate_domain_leadership()->void:
 	GameState.society_capacities["institutions"]=1.0
 	MilitaryCampaign.aggregate_recruits=300_000_000_000
 	system.advance_to_day(20*365+12*30)
-	assert_str(system.competition_outcome).is_equal("victory")
+	assert_str(system.competition_outcome).is_equal("ongoing")
 	assert_int(system.dominance_turns).is_greater_equal(12)
 
 
-func test_rival_wins_only_by_satisfying_the_same_twelve_turn_rule()->void:
+func test_rival_dominance_does_not_end_player_history()->void:
 	var rival:Dictionary=system.civilizations[0]
 	rival["population"]=1_000_000_000.0
 	rival["cohorts"]=system._scaled_cohorts(rival.cohorts,1_000_000_000.0)
@@ -1313,12 +1313,12 @@ func test_rival_wins_only_by_satisfying_the_same_twelve_turn_rule()->void:
 	system.civilizations[0]=rival
 	for turn in 12:
 		system._rebuild_competition(true,20*365+(turn+1)*30)
-	assert_str(system.competition_outcome).is_equal("defeat")
-	assert_str(system.competition_winner_id).is_equal(String(rival.id))
+	assert_str(system.competition_outcome).is_equal("ongoing")
+	assert_str(system.competition_winner_id).is_equal("")
 	assert_int(int(system.contender_dominance_turns.get(String(rival.id),0))).is_equal(12)
 
 
-func test_defeat_requires_twelve_monthly_collapse_turns_under_real_hostility()->void:
+func test_distress_remains_recoverable_after_twelve_turns()->void:
 	GameState.population_health=0.05
 	GameState.food_security=0.05
 	GameState.simulation_metrics["legitimacy"]=0.05
@@ -1327,7 +1327,7 @@ func test_defeat_requires_twelve_monthly_collapse_turns_under_real_hostility()->
 		system.civilizations[index].player_relation["treaty"]="war"
 		system.civilizations[index].player_relation["border_tension"]=1.0
 	system.advance_to_day(12*30)
-	assert_str(system.competition_outcome).is_equal("defeat")
+	assert_str(system.competition_outcome).is_equal("ongoing")
 	assert_int(system.collapse_turns).is_equal(12)
 
 
@@ -1351,7 +1351,7 @@ func test_competition_includes_player_and_every_rival_with_explicit_victory_stat
 	assert_int((snapshot.leaders as Array).size()).is_equal(system.civilizations.size()+1)
 	assert_int(int(snapshot.player_rank)).is_between(1,system.civilizations.size()+1)
 	assert_bool(["ongoing","victory","defeat"].has(String(snapshot.outcome))).is_true()
-	assert_str(String(snapshot.victory_rule)).contains("four strategic domains")
+	assert_str(String(snapshot.victory_rule)).contains("2,500 years")
 
 
 func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:

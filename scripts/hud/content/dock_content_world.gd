@@ -116,8 +116,16 @@ func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:
 		{"type":"text","heading":String(knowledge.get("title","NO COMPARATIVE FRAMEWORK")),"text":String(knowledge.get("summary",""))},
 		{"type":"text","heading":"NEXT","text":String(knowledge.get("next_step",""))},
 	]
-	if bool(knowledge.get("victory_structure_known",false)):
-		blocks.append({"type":"text","heading":"VICTORY","text":String(competition.get("victory_rule","")) if competition.has("victory_rule") else "After Year 20, lead four of seven domains with a 10% overall lead held twelve consecutive months. Rivals are judged by the same rule."})
+	var history:Dictionary=CivilizationSystem.chronicle.snapshot(int(GameState.elapsed_days))
+	blocks.push_front({"type":"text","heading":String(history.title).to_upper(),"text":"Year %d · %s\n\n%s"%[int(history.year),String(history.summary),String(history.next)]})
+	var records:Array=[]
+	for item:Dictionary in history.recent:
+		records.append({"name":String(item.kind),"sub":"Year %d"%(int(item.day)/365),"detail":String(item.text)})
+	if not records.is_empty():blocks.append({"type":"rows","heading":"WHAT ENDURED AND CHANGED","items":records})
+	if bool(history.review_available):
+		blocks.append({"type":"actions","items":[{"label":"REVIEW OUR LEGACY","sub":"Record a closing account; you may continue playing","on_press":func():CivilizationSystem.chronicle.reckon(int(GameState.elapsed_days));hud.request_immediate_dock_refresh()}]})
+	if not history.reckonings.is_empty():blocks.append({"type":"text","heading":"LEGACY ACCOUNT","text":String(history.reckonings[-1].text)})
+
 	return blocks
 
 func signature()->Array:

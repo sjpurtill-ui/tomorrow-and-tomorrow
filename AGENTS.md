@@ -8,6 +8,8 @@ Launch the game only through `tools/launch_game.ps1` with this checkout as the e
 
 ## Coordination
 
+For the authorized Mac clone, see `docs/MAC_SETUP.md`. Designate that clone as the Mac's canonical checkout and use Godot F5; the PowerShell launcher is Windows-only. The same integrator and worktree discipline applies.
+
 One designated integrator owns this canonical checkout and merges completed work. Other workers use Git worktrees created from its latest integrated `main`, on `codex/<task>` branches; they do not edit the canonical checkout concurrently. Worktrees are development areas, not alternative current games. Use explicit worktree paths for headless tests. No folder copying, automatic synchronization, blanket checkout, reset, or overwrite from the archived OneDrive project.
 
 Before starting, report the absolute worktree path, branch, base commit, and files/systems owned by the task. Read `docs/WORKER_HANDOFF.md`. Commit only task changes. Supply the commit hash, concise behavior summary, tests, known limitations, save compatibility, and any shared-file conflicts to the integrator. Do not merge into main, launch the player game, or claim the player build includes your changes until integration is verified.

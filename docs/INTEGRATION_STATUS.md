@@ -1,4 +1,10 @@
-# Latest integration: 2026.09.05.15
+# Latest integration: 2026.09.05.16
+
+Nearby connected-land societies in new worlds, objective-led contact investigation, and continuing history after dominance or distress. See RELEASE_2026_09_05_16.md for actual gameplay evidence and limits. Includes .15 artwork/new score and .14 general campaign. Remaining work: WHOLE_GAME_COHERENCE.md. Mac clone/access instructions: MAC_SETUP.md.
+
+---
+
+# Previous integration: 2026.09.05.15
 
 Illustrated eight-choice opening/century-focus screen and the supplied Tomorrow-001.mp3 score. Source codex/opening-screen from553a9ff. See RELEASE_2026_09_05_15.md. Includes .14 general campaign and prior releases. Whole-game coherence work remains separate in C:/Users/sjpur/tt-campaign-coherence and is not part of this release.
 

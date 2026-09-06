@@ -4,6 +4,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## physically returned as knowledge.
 
 var civ_id:String=""
+var investigation_result:Dictionary={}
 
 func _init(terrain_node:Node,hud_node:Control,target_civ_id:String="")->void:
 	super._init(terrain_node,hud_node)
@@ -48,6 +49,11 @@ func tab(_sub:int)->Dictionary:
 	if bool(relation.get("home_location_known",false)):
 		provenance+="  Home settlement located (%s)." % String(relation.get("home_location_source","returned report"))
 	blocks.append({"type":"text","heading":"PROVENANCE","text":provenance})
+	if not bool(relation.get("home_location_known",false)):
+		var proposal:=CivilizationSystem.contact_investigation_proposal(civ_id)
+		blocks.push_front({"type":"text","heading":"A PATH TO THEIR LEADER","text":String(proposal.get("message",proposal.get("error","")))})
+		blocks.push_front({"type":"actions","items":[{"label":"ASK SCOUTS TO FIND THEIR SETTLEMENT","disabled":proposal.has("error"),"on_press":func():investigation_result=CivilizationSystem.investigate_known_contact(civ_id);hud.request_immediate_dock_refresh()}]})
+	if not investigation_result.is_empty():blocks.push_front({"type":"text","heading":"EXPEDITION REPORT","text":String(investigation_result.get("message",investigation_result.get("error","")))})
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var mission_active:=bool(diplomatic_status.get("active",false))
 	blocks.append({"type":"actions","items":[
@@ -88,4 +94,4 @@ func _compact(amount:int)->String:
 func signature()->Array:
 	var civ:=_civ()
 	var relation:Dictionary=civ.get("player_relation",{})
-	return [civ_id,float(relation.get("contact_intelligence",0.0)),float(relation.get("opinion",0.0)),bool(CivilizationSystem.diplomatic_mission_status().get("active",false))]
+	return [civ_id,investigation_result.hash(),CivilizationSystem.scout_missions.size(),bool(relation.get("home_location_known",false)),float(relation.get("contact_intelligence",0.0)),float(relation.get("opinion",0.0)),bool(CivilizationSystem.diplomatic_mission_status().get("active",false))]

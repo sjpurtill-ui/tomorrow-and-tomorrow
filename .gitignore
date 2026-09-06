@@ -27,3 +27,9 @@ desktop.ini
 *.tmp
 *.temp
 ~*
+
+# Machine-local test overrides, credentials and private saves
+/override.cfg
+.env
+.env.*
+*.save
