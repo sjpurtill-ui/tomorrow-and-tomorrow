@@ -11434,7 +11434,9 @@ func _report_military_action(result:Dictionary)->void:
 	## the dock immediately so the change is visible.
 	if travel_status_label:
 		travel_status_label.text=String(result.get("message",result.get("error","")))
-	if hud: hud.live_refresh_dock()
+	if hud:
+		hud.show_action_feedback(String(result.get("message",result.get("error",""))))
+		hud.live_refresh_dock()
 
 func _on_hud_section_requested(section:String,sub:int)->void:
 	# Sections with a dock provider open in the slide-out dock beside the rail;
@@ -12422,24 +12424,23 @@ func _order_selected_army_to_screen(screen_position:Vector2)->void:
 	if selected_army_id<0: return
 	var hit:Dictionary=_terrain_hit(screen_position)
 	if hit.is_empty() or not hit.get("position") is Vector3:
-		if travel_status_label: travel_status_label.text="NO GROUND UNDER THE ORDER  •  right-click land on the map"
+		_report_military_action({"error":"No ground under the order. Right-click land on the map."})
 		return
 	var hit_position:Vector3=hit.position
 	var target:=Vector2(hit_position.x,hit_position.z)
 	var city_target:=_contact_encounter_at(hit_position,0.15)
 	if city_target.has("city_id"):
 		var city_order:=MilitaryCampaign.move_field_army(selected_army_id,String(city_target.city_id))
-		if travel_status_label:travel_status_label.text=String(city_order.get("error",city_order.get("message","City approach ordered.")))
+		_report_military_action(city_order)
 		return
 	if not CivilizationSystem._position_is_revealed(target):
-		if travel_status_label: travel_status_label.text="UNCHARTED GROUND  •  armies march only where returned scout reports have charted land"
+		_report_military_action({"error":"Uncharted ground. Send scouts first; armies march where returned reports have charted land."})
 		return
 	if not _world_surface_is_land(hit_position):
-		if travel_status_label: travel_status_label.text="OPEN WATER  •  choose a charted land destination"
+		_report_military_action({"error":"Open water. Choose a charted land destination."})
 		return
 	var result:Dictionary=MilitaryCampaign.move_field_army_to_position(selected_army_id,target.x,target.y,"MARKED GROUND")
-	if travel_status_label:
-		travel_status_label.text=String(result.get("message",result.get("error","")))
+	_report_military_action(result)
 
 
 func _world_surface_is_land(position:Vector3)->bool:
@@ -17247,7 +17248,7 @@ func _open_scout_dispatch_panel()->void:
 	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;shell.add_child(scroll)
 	var root:=VBoxContainer.new();root.size_flags_horizontal=Control.SIZE_EXPAND_FILL;root.add_theme_constant_override("separation",9);scroll.add_child(root)
 	var heading:=Label.new(); heading.text="DISPATCH SCOUT PARTY"; heading.add_theme_font_size_override("font_size",22); heading.add_theme_color_override("font_color",Color("#d9c99e")); root.add_child(heading)
-	var explanation:=Label.new(); explanation.text="Choose how long one fast aggregate party may remain away. The route, terrain, sightings, and contacts remain physically with the scouts and reveal nothing until they return. On a planetary map, short missions are local reconnaissance—not automatic contact. Time is paused while this panel is open; the road decides the true return day, so parties run early or late." ; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
+	var explanation:=Label.new(); explanation.text="Choose a target, heading and planned duration. People and food are committed only when you send. Routes can bend around terrain and return dates can slip; discoveries become known when scouts bring their report home." ; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
 	var exploration:=CivilizationSystem.exploration_status()
 	if bool(exploration.get("active",false)):
 		# Several parties can range at once; list each without blocking new ones.
@@ -17326,7 +17327,7 @@ func _populate_scout_duration_buttons(duration_grid:GridContainer,target_id:Stri
 		mission.text=_scout_mission_card_text(int(duration),quote)
 		mission.disabled=not bool(quote.get("can_dispatch",false))
 		var heading_note:=" toward %s" % pending_scout_heading.to_upper() if directional_target and pending_scout_heading!="" else ""
-		mission.tooltip_text=("BLOCKED  %s\nNEXT  Restore the listed people or food, finish the active party, or choose another heading." % String(quote.get("blocker","This mission cannot depart."))) if mission.disabled else "ACTION  Dispatch %d fast scouts for %d days%s.\nCOST  %.1f Food and %d absent people are committed at departure.\nMAP  The ordered search corridor remains visible while the party is away.\nCONSEQUENCE  No terrain, contact, recruits, or sightings become known unless the party physically returns." % [int(quote.get("personnel",0)),int(duration),heading_note,float(quote.get("provisions",0.0)),int(quote.get("personnel",0))]
+		mission.tooltip_text=("BLOCKED  %s" % String(quote.get("blocker","This mission cannot depart."))) if mission.disabled else "ACTION  Dispatch %d fast scouts for %d days%s.\nCOST  %.1f Food and %d absent people are committed at departure.\nMAP  The ordered search corridor remains visible while the party is away.\nCONSEQUENCE  No terrain, contact, recruits, or sightings become known unless the party physically returns." % [int(quote.get("personnel",0)),int(duration),heading_note,float(quote.get("provisions",0.0)),int(quote.get("personnel",0))]
 		mission.pressed.connect(_dispatch_scout_from_actions.bind(int(duration),target_id)); duration_grid.add_child(mission)
 
 
@@ -17335,7 +17336,7 @@ func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
 	if String(quote.get("ordered_heading",""))!="": text+="\nORDERED %s" % String(quote.ordered_heading).to_upper()
 	if not bool(quote.get("can_dispatch",false)):
 		var blocker:=String(quote.get("blocker",quote.get("error","Mission unavailable."))).replace("\n"," ")
-		text+="\nBLOCKED  •  %s" % blocker.left(72)
+		text+="\nBLOCKED  •  %s" % blocker
 	return text
 
 

@@ -26,6 +26,8 @@ var city_selector:OptionButton
 var city_selector_signature:String=""
 var terrain:Node
 
+var action_feedback:PanelContainer
+var feedback_sequence:=0
 var active_section:String=""
 var dismissed_alert_ids:Array=[]
 var layers:Dictionary={"resources":true,"borders":false,"charted":false}
@@ -99,6 +101,8 @@ func _layout()->void:
 		detail_dock.position=Vector2(Tokens.DOCK_X,72)
 		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-72-Tokens.DOCK_MARGIN_Y))
 	_position_toolbar()
+	if action_feedback:
+		action_feedback.position=Vector2(maxf(Tokens.DOCK_X,view.x-action_feedback.size.x-16),maxf(124,view.y-action_feedback.size.y-112))
 
 func force_dock_layout()->void:
 	## Synchronous layout for the capture harness (no idle frames before draw).
@@ -956,3 +960,17 @@ func _refresh_city_selector()->void:
 		var index:=city_selector.item_count-1
 		city_selector.set_item_metadata(index,String(city.id))
 		if String(city.id)==GameState.selected_player_settlement_id: city_selector.select(index)
+
+func show_action_feedback(message:String)->void:
+	if message.is_empty():return
+	if action_feedback==null:
+		action_feedback=PanelContainer.new();action_feedback.name="ActionFeedback";action_feedback.z_index=100;action_feedback.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var style:=Tokens.flat(Color("172c32"),Tokens.GOLD,1,6)
+		for edge in ["left","right","top","bottom"]:style.set("content_margin_"+edge,12.0)
+		action_feedback.add_theme_stylebox_override("panel",style);add_child(action_feedback)
+		var label:=Label.new();label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.add_theme_font_size_override("font_size",14);label.mouse_filter=Control.MOUSE_FILTER_IGNORE;action_feedback.add_child(label)
+	action_feedback.get_child(0).text=message
+	action_feedback.size=Vector2(minf(520,get_viewport().get_visible_rect().size.x-Tokens.DOCK_X-16),0)
+	action_feedback.show();feedback_sequence+=1;var sequence:=feedback_sequence
+	_layout.call_deferred()
+	get_tree().create_timer(9.0).timeout.connect(func():if is_instance_valid(action_feedback) and sequence==feedback_sequence:action_feedback.hide())

@@ -87,6 +87,9 @@ func _formation_blocks(army:Dictionary)->Array:
 		else:
 			status_text="moving to %s" % String(force.get("destination_name","")) if String(force.get("status",""))=="moving" else "holding %s" % String(force.get("location_name",""))
 		var selected:bool=int(terrain.selected_army_id)==army_id
+		var known:Dictionary=report if use_report else force
+		if selected and not String(known.get("movement_block_reason","")).is_empty():blocks.append({"type":"text","heading":"REPORTED ROUTE BLOCK","text":String(known.movement_block_reason)})
+		if selected and shown_supply<50:blocks.append({"type":"actions","heading":"LOW REPORTED SUPPLY · %d%%"%shown_supply,"items":[{"label":"REVIEW FIELD SUPPLY","sub":"Food, carriers and transport; shortages slow marching","on_press":jump("military",3)}]})
 		army_items.append({
 			"name":String(force.get("name","FIELD ARMY"))+(" ◈" if selected else ""),
 			"sub":"%s · supply %d%%" % [status_text,shown_supply],

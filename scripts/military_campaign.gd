@@ -988,6 +988,19 @@ func _field_army_speed(force:Dictionary)->float:
 	return maxf(2.0,slowest*(quality/float(personnel))*(0.55+logistics*0.45)*(0.5+0.5*clampf(float(force.get("supply_level",0.5)),0.0,1.0)))
 
 
+func field_route_availability(start:Vector2,target:Vector2)->Dictionary:
+	if not CivilizationSystem.scout_land_authority.is_valid():return {"error":"Terrain information is unavailable. No march was ordered; return to the map and try a charted land destination."}
+	var distance:=start.distance_to(target)
+	var samples:=clampi(ceili(distance/.5),1,131072)
+	for step in samples+1:
+		if not CivilizationSystem._scout_land_at(start.lerp(target,float(step)/samples)):
+			return {"error":"Water blocks the direct army route. No march was ordered. Choose a charted land waypoint around the obstruction; armies cannot embark on scout watercraft."}
+	return {"ok":true}
+
+func _field_supply_advice(army:Dictionary)->String:
+	var supply:=clampf(float(army.get("supply_level",1)),0,1)
+	return " Supply %d%%: the march is slowed. Return home or improve food and carrying capacity in Military > Supply."%roundi(supply*100) if supply<.5 else ""
+
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
@@ -997,12 +1010,15 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	var destination:=_movement_destination(destination_id)
 	if destination.is_empty(): return {"error":"That destination is unknown. Only returned exploration and contact reports can support an army movement order."}
 	var army:Dictionary=field_armies[index]
-	army.erase("city_operation")
 	var current_position:Dictionary=army.get("position",{})
 	var target_position:Dictionary=destination.get("position",{})
 	var start:=Vector2(float(current_position.get("x",0.0)),float(current_position.get("z",0.0)))
 	var target:=Vector2(float(target_position.get("x",0.0)),float(target_position.get("z",0.0)))
 	var distance:=start.distance_to(target)
+	var route:=field_route_availability(start,target)
+	if route.has("error"):return route
+	army.erase("city_operation")
+	army.erase("movement_block_reason")
 	if distance<0.5:
 		army["status"]="stationed"; army["location_id"]=destination_id; army["location_name"]=String(destination.get("label",destination_id)); army["position"]=target_position.duplicate(true); army["destination_id"]=""; army["distance_remaining_km"]=0.0; field_armies[index]=army
 		return {"ok":true,"message":"%s is already at %s." % [String(army.name),String(army.location_name)]}
@@ -1019,7 +1035,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
-	return {"ok":true,"army":army.duplicate(true),"message":"%s is moving to %s: %.0f km, about %d days at %.1f km/day." % [String(army.name),String(army.destination_name),distance,ceili(distance/maxf(0.1,speed)),speed]}
+	return {"ok":true,"army":army.duplicate(true),"message":"%s is moving to %s: %.0f km, about %d days at %.1f km/day." % [String(army.name),String(army.destination_name),distance,ceili(distance/maxf(0.1,speed)),speed]+_field_supply_advice(army)}
 
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
@@ -1038,10 +1054,13 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 		if CivilizationSystem.has_method("_scout_land_at") and not CivilizationSystem._scout_land_at(target):
 			return {"error":"That point is open water. Armies need a charted land destination."}
 	var army:Dictionary=field_armies[index]
-	army.erase("city_operation")
 	var current_position:Dictionary=army.get("position",{})
 	var start:=Vector2(float(current_position.get("x",0.0)),float(current_position.get("z",0.0)))
 	var distance:=start.distance_to(target)
+	var route:=field_route_availability(start,target)
+	if route.has("error"):return route
+	army.erase("city_operation")
+	army.erase("movement_block_reason")
 	if distance<0.5: return {"ok":true,"message":"%s is already at that position." % String(army.get("name","The army"))}
 	var speed:=_field_army_speed(army)
 	army["status"]="moving"
@@ -1056,7 +1075,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
-	return {"ok":true,"army":army.duplicate(true),"message":"%s marches to the marked ground: %.0f km, about %d days at %.1f km/day. Runners will carry its reports home." % [String(army.name),distance,ceili(distance/maxf(0.1,speed)),speed]}
+	return {"ok":true,"army":army.duplicate(true),"message":"%s marches to the marked ground: %.0f km, about %d days at %.1f km/day. Runners will carry its reports home." % [String(army.name),distance,ceili(distance/maxf(0.1,speed)),speed]+_field_supply_advice(army)}
 
 
 func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
@@ -1476,6 +1495,14 @@ func _process_field_army_movement_day()->void:
 		var origin:=Vector2(float(origin_data.get("x",0.0)),float(origin_data.get("z",0.0)))
 		var destination:=Vector2(float(destination_data.get("x",0.0)),float(destination_data.get("z",0.0)))
 		var current:=origin.lerp(destination,progress)
+		var previous_position:Dictionary=army.get("position",origin_data)
+		var route:=field_route_availability(Vector2(previous_position.x,previous_position.z),current)
+		if route.has("error"):
+			army["status"]="stationed";army["location_id"]="field_position";army["location_name"]="Blocked route";army["destination_id"]=""
+			army["distance_remaining_km"]=maxf(0.0,float(army.get("distance_remaining_km",0)))+traveled
+			army["movement_block_reason"]=String(route.error)
+			army=_dispatch_army_runner(army,int(GameState.elapsed_days));field_armies[index]=army
+			continue
 		army["position"]={"x":current.x,"z":current.y}
 		army["supply_level"]=clampf(move_toward(float(army.get("supply_level",0.75)),field_provision_delivery_ratio(),0.025)-0.0008*traveled,0.05,1.0)
 		if remaining<=0.001:
@@ -1526,6 +1553,7 @@ func _army_report_snapshot(army:Dictionary)->Dictionary:
 		"readiness":float(army.get("readiness",0.5)),
 		"distance_remaining_km":float(army.get("distance_remaining_km",0.0)),
 		"arrival_day":int(army.get("arrival_day",-1)),
+		"movement_block_reason":String(army.get("movement_block_reason","")),
 	}
 
 
@@ -1579,6 +1607,7 @@ func _process_army_runners_day()->void:
 				field_armies[army_index]=army
 				var report_day:=int(snapshot.get("day",day))
 				var status_text:="held position at %s" % String(snapshot.get("location_name","the field")) if String(snapshot.get("status","stationed"))=="stationed" else "was marching on %s with %.0f km remaining" % [String(snapshot.get("destination_name","its objective")),float(snapshot.get("distance_remaining_km",0.0))]
+				if not String(snapshot.get("movement_block_reason","")).is_empty():status_text+=". "+String(snapshot.movement_block_reason)
 				GameState.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of day %d the army %s with %d personnel and %d%% supply." % [String(message.get("army_name","the field army")),report_day,status_text,int(snapshot.get("troops",0)),roundi(float(snapshot.get("supply_level",1.0))*100.0)],"domain":"security","severity":"notice"})
 	runner_messages=remaining_messages
 

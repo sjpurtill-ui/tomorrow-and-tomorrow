@@ -1,4 +1,32 @@
-# Current journey scope audit — release .12
+# Current journey scope audit — release .13
+
+The sustained review resumed after .12. Three expeditions returned in one genuine
+new world, at days 45, 522 and 612, with ordinary simulation time and isolated
+save/resume. First planned 30 days took 35; second planned 365 took 477.
+The third eastward 365-day option was terrain-blocked; a 90-day option worked.
+No foreign polity was encountered. First contact and continuous diplomatic dispatch
+remain unverified: generated homelands can be thousands of kilometres away and
+scout routes must approach within 58 km. No neighbors or contacts were injected.
+Do not continue unbounded random expeditions merely hoping for a contact.
+
+Completed this batch: readable return timing/contact prerequisites; truthful full
+route blockers and shorter-trip recovery; visible map-order feedback; direct
+army water-route checks, in-transit stopping and runner reports; low-supply advice.
+130/130 tests passed across nine suites. GPU first-return/archive review and
+coastal water rejection, valid inland march and supply review completed.
+The coastal test uses authored placement and chart coverage on actual terrain;
+it does not establish naturally unlocked military progression. East heading was
+selected through the OptionButton signal; dispatch and elapsed-time controls
+used normal UI. Route sampling is not automatic pathfinding or naval transport.
+
+Remaining: natural first contact/reachable diplomacy; remote AI quality; broader
+campaign balance and actual novice observation. Secondary records still scroll.
+This batch does not claim the entire gameplay/learnability objective is finished.
+
+---
+# Historical .12 audit (superseded status)
+
+# Current journey scope audit â€” release .12
 
 Status: representative planned journeys and concrete review findings complete.
 This integration pass stops after the final canonical import and save/process

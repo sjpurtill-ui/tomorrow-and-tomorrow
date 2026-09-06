@@ -49,4 +49,8 @@ func _ready()->void:
 	assert(is_equal_approx(float(GameState.resource_stockpiles.Food),food_before-99.0))
 	await capture("coherent-scouts-departed")
 	print("COHERENT_EARLY_JOURNEY_PASS one unreset new world: founding choice, real site commitment/naming, needs/water direction, normal time advancement, research direction, waiting army order without duplicate trainees, actual 6-person scout departure reserving99Food; day=",GameState.elapsed_days," population=",GameState.population_total," settlement=",GameState.settlement_name," works=",GameState.settlement_completed)
+	await after_scout_departure()
 	get_tree().quit()
+
+func after_scout_departure()->void:
+	pass

@@ -34,9 +34,9 @@ func tab(sub:int)->Dictionary:
 	else:
 		brief={"tone":"info","title":"%d polit%s known" % [contacts,"y is" if contacts==1 else "ies are"],"why":"Knowledge is only what physically returned; estimates decay as reports age."}
 	match sub:
-		1: return {"kpis":kpis,"brief":brief,"blocks":_scouting_blocks(exploration)}
+		1: return {"kpis":[kpis[2]],"brief":{"title":"Scouts are away" if bool(exploration.get("active",false)) else "Read what returned, then choose your next expedition","why":"Return dates are estimates. An overdue party is still on the road until a report or loss is confirmed." if bool(exploration.get("active",false)) else "Recent returns below open the findings. Every retained report remains in the Expedition Archive."},"blocks":_scouting_blocks(exploration)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_standing_blocks(knowledge,competition)}
-	return {"kpis":kpis,"brief":brief,"blocks":_contacts_blocks()}
+	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_contacts_blocks()}
 
 func _contacts_blocks()->Array:
 	var encounters:Array=CivilizationSystem.contact_encounters_snapshot()
@@ -52,7 +52,7 @@ func _contacts_blocks()->Array:
 			"on_click":func()->void: hud.open_detail(DetailCivReport.new(terrain,hud,civ_id)),
 			"tip":"Open the full known record for this polity",
 		})
-	var blocks:Array=[]
+	var blocks:Array=[{"type":"text","heading":"WHAT IS KNOWN","text":"Rumors are unverified leads. Encounters record where people were met. A located settlement supplies a destination for diplomacy; an encounter alone does not."}]
 	if items.is_empty():
 		blocks.append({"type":"text","heading":"KNOWN CONTACTS","text":"No polity has been confirmed. An encounter site is not a diplomatic destination until scouts locate a settlement."})
 	else:
@@ -86,7 +86,7 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 		party_items.append({
 			"name":String(party.get("target_label","Scout party away")),
 			"sub":"%d people · OVERDUE %d day%s" % [int(party.get("personnel",0)),overdue,"" if overdue==1 else "s"] if overdue>0 else "%d people · %d days remaining" % [int(party.get("personnel",0)),int(party.get("days_remaining",0))],
-			"value":"%d%%" % roundi(float(party.get("progress",0.0))*100.0),"value_color":Tokens.AMBER if overdue>0 else Tokens.TEAL,
+			"value":"Overdue" if overdue>0 else "Due ~day %d"%int(party.get("return_day",0)),"value_color":Tokens.AMBER if overdue>0 else Tokens.TEAL,
 			"accent":Tokens.AMBER if overdue>0 else Tokens.TEAL,
 			"tip":"The road decides the true return day; an overdue party is not yet a lost one." if overdue>0 else String(party.get("turnback_reason","Observations remain aboard the party until it returns.")),
 		})
@@ -107,20 +107,7 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 		highlights.append({"name":String(item.title),"sub":"Day %d · %s · %s" % [item.day,item.party,item.place],"value":String(item.review),"accent":Tokens.RED if int(item.losses)>0 else Tokens.TEAL,"on_click":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report,archive_provider.new(terrain,hud)))})
 	blocks.append({"type":"actions","items":[{"label":"EXPEDITION ARCHIVE","sub":"Search, filter and read %d retained reports" % CivilizationSystem.scout_reports.size(),"on_press":func()->void: hud.open_detail(archive_provider.new(terrain,hud))}]})
 	if not highlights.is_empty(): blocks.append({"type":"rows","heading":"RECENT RETURNS","note":"highlights from the latest eight","items":highlights})
-	var can_begin:=bool(exploration.get("can_begin",true))
-	var duration_items:Array=[]
-	for duration in [30,90,180,365]:
-		var quote:Dictionary=CivilizationSystem.scout_mission_quote(duration,"open_world")
-		var can_dispatch:=bool(quote.get("can_dispatch",false))
-		var sub_text:="%d people · %d rations" % [int(quote.get("personnel",0)),roundi(float(quote.get("provisions",0.0)))] if can_dispatch else String(quote.get("blocker",quote.get("error","unavailable"))).to_lower().substr(0,42)
-		duration_items.append({
-			"label":"DISPATCH %d DAYS" % duration,"sub":sub_text,
-			"primary":duration==90 and can_dispatch,
-			"disabled":not can_dispatch,
-			"on_press":func()->void: terrain._open_scout_dispatch_panel(),
-			"tip":"Review personnel, provisions, risk, and target before anything departs",
-		})
-	blocks.append({"type":"actions","items":duration_items})
+	blocks.append({"type":"actions","items":[{"label":"PLAN EXPEDITION","sub":"Review target, duration, people and provisions","primary":true,"on_press":func()->void:terrain._open_scout_dispatch_panel()}]})
 	blocks.append({"type":"text","text":"Nothing is revealed while a party is away. Personnel and provisions leave at departure; interception can erase an entire report. Up to %d parties can range at once; logistics, travel knowledge, and mounts determine their range." % int(exploration.get("capacity",1))})
 	return blocks
 

@@ -175,6 +175,7 @@ func test_unobserved_capital_and_hidden_rank_are_not_public()->void:
 	assert_int(CivilizationSystem.known_competition_snapshot().player_rank).is_equal(-1)
 
 func test_location_only_report_supports_named_army_movement_without_revealing_controller()->void:
+	CivilizationSystem.set_scout_geography_authority(func(_point:Vector2)->bool:return true)
 	var location:Dictionary=intel().location_record(intel().site(region()),20,"returned location","test")
 	intel().publish("player",location,30)
 	var destination:=MilitaryCampaign._movement_destination(region())

@@ -1,16 +1,17 @@
 # Current integration checkpoint
 
-## Latest: release 2026.09.05.12
+## Latest: release 2026.09.05.13
 
-Field orders verified through arrival, runner delivery and return; post-battle
-reports now show the real surviving field force after garrison detachment.
-Occupation distinguishes assigned people from effective capacity. Includes .11.
-See RELEASE_2026_09_05_12.md and the current PLAYER_JOURNEY_BACKLOG.md scope audit.
+Scouting now explains report timing, contact prerequisites and terrain-blocked recovery.
+Army marches validate land routes and report water obstruction and low supply visibly.
+Includes all previous integrated releases. See RELEASE_2026_09_05_13.md.
 
 Player checkout: C:/Users/sjpur/TomorrowandTomorrow, main. Loaded PID46888 retains
 .6 until a normal save/exit and canonical launcher restart. No forced restart.
-Workers should use WORKER_PROMPT.txt and WORKER_HANDOFF.md. This finite integration
-and representative journey pass is complete; follow-up coverage is recorded.
+Workers should use WORKER_PROMPT.txt and WORKER_HANDOFF.md.
+The resumed continuous journey reached day 612 with three natural scout returns,
+without foreign contact. This batch is integrated; the broader learnability work
+is not certified complete. Current evidence and limits are in PLAYER_JOURNEY_BACKLOG.md.
 
 ---
 # Historical checkpoints
@@ -39,7 +40,7 @@ preserved for selective migration, not wholesale replacement.
 
 Founding review, focused civic/government reports and diplomatic conversation /
 offer / record screens. Real costs, refundable offers and waiting outcomes are
-explicit. See RELEASE_2026_09_05_10.md for validation and limits. Includes .7–.9.
+explicit. See RELEASE_2026_09_05_10.md for validation and limits. Includes .7â€“.9.
 
 Player PID46888 retains loaded .6. Save and exit normally, then launch only with
 C:/Users/sjpur/TomorrowandTomorrow/tools/launch_game.ps1. No automated restart.
@@ -144,13 +145,13 @@ Current saved campaign: September 5 13:45:30, SeanTown, day9432, population405, 
 
 Military readability `cc5ffc5`, rumors `1672447`, Inquiry/Materials/scouting `aba8c73`, occupation `5c39a0f`/`81c38d2`, recovery `d8bf575`, final guards/version `c337a0f`, and isolated spatial report `a9dddbb` are integrated. See docs/RELEASE_2026_09_05_1.md for behavior-specific validation and limits. Canonical combined suite:125 cases pass. Outposts, unrelated economy, sliced vegetation and unfinished Blender authoring remain HELD.
 
-## Consolidation queue — September 5
+## Consolidation queue â€” September 5
 
 | Delivery | State | Location / evidence |
 | --- | --- | --- |
-| Strategic charts and dynamic dock tabs | INTEGRATED | Worker `4107fd1` → main `12d16a3`; 64 combined tests + GPU |
-| Discovered city intelligence | INTEGRATED | Worker `02a6587` → main `efbff12`, follow-up `691eed6` → `d418704`; 113 combined tests + 14 focused follow-up cases + GPU |
-| Zoom terrain fill | INTEGRATED | Worker `1142441` → main `42595fb`; five terrain cases and expanded camera runtime probe pass |
+| Strategic charts and dynamic dock tabs | INTEGRATED | Worker `4107fd1` â†’ main `12d16a3`; 64 combined tests + GPU |
+| Discovered city intelligence | INTEGRATED | Worker `02a6587` â†’ main `efbff12`, follow-up `691eed6` â†’ `d418704`; 113 combined tests + 14 focused follow-up cases + GPU |
+| Zoom terrain fill | INTEGRATED | Worker `1142441` â†’ main `42595fb`; five terrain cases and expanded camera runtime probe pass |
 | Military usability redesign | INTEGRATED | cc5ffc5 after explicit reauthorization; live progress/focus/selection and canonical GPU checks |
 | Outposts, sliced vegetation, unrelated economy and Blender authoring experiment | HELD | Preserved prototypes below; excluded from the player build |
 
@@ -192,7 +193,7 @@ Revised battle demo was visibly replayed from canonical main and verified via a 
 
 Integrated `1af3fbe` from `codex/battle-planted`: fighters stay planted after approach, use varied guarded weapon strikes and small upper-body hit reactions instead of reciprocal whole-body sliding. A 100-frame/five-second GPU temporal probe measured zero root drift while attack and guard poses changed; the battle graphics regression passed. No casualty, population or save rules changed.
 
-## Sustained sieges and protection diplomacy — September 5
+## Sustained sieges and protection diplomacy â€” September 5
 
 Canonical implementation checkpoint: `7964a29` (sieges `8077fa3`, protection/leagues `60910ec`, combined relief persistence tests `7964a29`). These changes are integrated into main, not yet loaded in a player process started at `883a8f2`. Preserve its session; save and relaunch through the canonical launcher when ready.
 
@@ -208,7 +209,7 @@ Current limits: one player siege at a time; no rival-only playable siege scenes,
 
 Strategic charts are newly authorized but still being implemented in `C:/Users/sjpur/tt-strategic-charts`, branch `codex/strategic-charts`, base `883a8f2`. They are not in this checkpoint. Its held vegetation prototype remains held, as do outposts and other unrelated economy prototypes.
 
-## Scouting archive and military audit — September 5
+## Scouting archive and military audit â€” September 5
 
 Integrated scout worker `6e6b6d0` as `d0315c9`. World / Scouting shows up to three highlights from the latest eight returns plus **Expedition Archive**. The archive renders five cards per page, supports saved-text search (including exact `party N` / `day N`), All/Findings/Routine/Losses/Unread filters, and significance/newest sorting. Each card opens the retained full report; Back to Archive restores the query, filter, sorting and page. Routine evidence is summarized on the findings page and retained in Journey & Accounts.
 
@@ -222,17 +223,17 @@ Military audit `docs/MILITARY_CONSOLE_AUDIT.md` and `tests/military_console_audi
 
 Historical session at this earlier checkpoint: PID 54444 at 883a8f2; see the top of this document for current session status. Save and relaunch through the canonical launcher to load later features; it was not silently restarted. Newly authorized charts, discovered-city intelligence, and measured zoom-fill work continue in separate worktrees with explicit shared-file ownership. Held outpost/economy/vegetation prototypes remain held.
 
-## September 5 — independent city intelligence
+## September 5 â€” independent city intelligence
 
 Worker `02a6587` integrated as `efbff12`. Foreign cities use the existing five strategic urban regions per polity, independent markers and hit targets, and per-observer dated reports. Discovering one does not expose the others. Estimates age and remain frozen between observations; scouts, envoys and army runners deliver reports through their return paths. AI player-city knowledge uses the same evidence model and gates targeting. Existing secondary-city defense simulation remains absent rather than fabricated; the military campaign still targets the player primary city. Regional food outlook is not a per-city warehouse ledger. Full bounds, save compatibility and limitations: CITY_INTELLIGENCE_HANDOFF.md.
 
 Canonical eight-suite 113-case regression passes. This includes actual city-intelligence and strategic-history save/load coverage. The worker's full 118-case civilization/century run finished with 117 passes and one founding-focus visibility failure, zero runtime errors. Both 36,500-day scale simulations passed, including billion-population bounded state. The one-line visibility guard was restored in `d418704`; the failed case plus all 13 city-intelligence cases then passed canonically (14/14). The entire 118-case suite was not repeated after that isolated fix. Canonical city-report GPU capture and three independent hit targets pass; probe exited and stderr is empty.
 
-## September 5 — zoom terrain streaming
+## September 5 â€” zoom terrain streaming
 
 Worker `1142441` integrated as `42595fb`, preserving independent-city marker/hit-test code, chart daily sampling, and the scouting archive. Obsolete camera jobs are canceled, a geographic coverage pass precedes full detail, four completed meshes and their river-height fields are cached, and the world mesh remains visible outside the streamed rectangle. Save format unchanged.
 
-Canonical five terrain cases pass; expanded camera probe passes smooth/anchored zoom, north reset, cancellation, coarse-to-fine scheduling and bounded exact mesh reuse. Camera probe shutdown reports two ObjectDB instances and one resource still in use; no clean-shutdown claim. Worker GPU comparison measured zero uncovered frames versus up to 338, and cached revisits of 40–81ms versus seconds. Cold fine detail still takes roughly six seconds, and some frame spikes remain. Synthetic million-person fixture is not a loaded mature campaign benchmark. See ZOOM_PERFORMANCE_HANDOFF.md for comparable measurements and limits.
+Canonical five terrain cases pass; expanded camera probe passes smooth/anchored zoom, north reset, cancellation, coarse-to-fine scheduling and bounded exact mesh reuse. Camera probe shutdown reports two ObjectDB instances and one resource still in use; no clean-shutdown claim. Worker GPU comparison measured zero uncovered frames versus up to 338, and cached revisits of 40â€“81ms versus seconds. Cold fine detail still takes roughly six seconds, and some frame spikes remain. Synthetic million-person fixture is not a loaded mature campaign benchmark. See ZOOM_PERFORMANCE_HANDOFF.md for comparable measurements and limits.
 
 All agreed completed deliveries are integrated; no further feature expansion is underway for this consolidation. Military usability and older unfinished prototypes remain HELD.
 

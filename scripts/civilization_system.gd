@@ -993,7 +993,7 @@ func _plan_open_scout_route(one_way_range:float,rng:RandomNumberGenerator,headin
 			plan["planned_heading"]=_compass_phrase(player_world_origin,endpoint)
 			return plan
 	var direction_note:=" toward %s" % ordered_heading.to_upper() if has_ordered_heading else ""
-	return {"ok":false,"reason":"No reachable land corridor%s was found within this expedition's range. Choose another heading or a longer expedition; the party was not sent." % direction_note}
+	return {"ok":false,"reason":"No land corridor%s supports this search. Try a shorter expedition or another heading; no party was sent." % direction_note}
 
 
 func _audit_active_scout_land_route()->void:
@@ -2338,7 +2338,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	if turnback_note!="": finding="%s %s" % [turnback_note,finding]
 	var is_recruitment:=not recruitment_account.is_empty()
 	var party_name:="recruitment party" if is_recruitment else "scout party"
-	var message:="The %s returns after %d days and charts roughly %d km of land travel. %s The map now reveals only the physical route contained in its returned report." % [party_name,int(report.duration_days),int(report.distance_km),finding]
+	var message:="The %s returns after %d days and charts roughly %d km of land travel. %s The map now reveals only the physical route contained in its returned report." % [party_name,int(report.actual_days),int(report.distance_km),finding]
 	last_scout_outcome={"mission_id":int(mission.get("mission_id",0)),"day":day,"status":"returned","personnel":int(report.personnel),"message":message}
 	_record_world_event("Recruitment party returns" if is_recruitment else "Scout party returns",message,"diplomacy",day)
 	scout_report_returned.emit(report.duplicate(true))
@@ -2541,7 +2541,7 @@ func _resolve_party_fate(mission:Dictionary,day:int)->Dictionary:
 		GameState.register_population_departures(stayed,"remained with people met on the road")
 	var line:=""
 	if lost>0 and stayed>0: line="Not all who left came home: %d were lost on the road, and %d chose to remain with people they met." % [lost,stayed]
-	elif lost>0: line="Not all who left came home: %d were lost on the road." % lost
+	elif lost>0: line="Not all who left came home: %d %s lost on the road." % [lost,"person was" if lost==1 else "people were"]
 	elif stayed>0: line="%d of the party chose to remain with people they met on the road — alive, but no longer ours." % stayed
 	return {"lost":lost,"stayed":stayed,"returned":personnel-lost-stayed,"line":line}
 
