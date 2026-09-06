@@ -17,63 +17,54 @@ var more_choices:Button
 var choice_help:Label
 var review_back:Button
 
+const CARD_TITLES:=["Know the world","Build to last","Bring us together","Seek knowledge","Build strength","Create abundance","Care for people","Trade & connect"]
+const CARD_TAGS:=["LOGISTICS · ECOLOGY","CRAFT · BUILDING","CULTURE · INSTITUTIONS","KNOWLEDGE · HEALTH","SECURITY · LOGISTICS","NUTRITION · ECOLOGY","HEALTH · DEMOGRAPHY","PRODUCTION · LOGISTICS"]
+const CARD_COLORS:=["71bcb3","d8996a","d9b978","9ba7d6","cc7c68","b8c480","81c5ac","dbb57a"]
+var title:Label
+var layout:VBoxContainer
+
 func _ready()->void:
 	opening=GameState.founding_focus==""
 	if not PeopleDirection.needs_century_choice():selected_focus=PeopleDirection.ambition;reviewing=true
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var background:=ColorRect.new()
-	background.color=Color("142831")
-	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(background)
-	var margin:=MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for edge in ["left","right","top","bottom"]: margin.add_theme_constant_override("margin_"+edge,20)
+	var background:=ColorRect.new();background.color=Color("09191e");background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(background)
+	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,18)
 	add_child(margin)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",12)
-	margin.add_child(root)
-	var top:=HBoxContainer.new()
-	root.add_child(top)
-	var title:=_label(top,"WHAT WILL WE BECOME?",24)
-	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	_button(top,"RETURN · F8",func(): queue_free()).visible=not PeopleDirection.needs_century_choice()
-	summary=_label(root,"",15)
-	var tabs:=HBoxContainer.new()
-	root.add_child(tabs)
+	layout=VBoxContainer.new();layout.add_theme_constant_override("separation",9);margin.add_child(layout)
+	var top:=HBoxContainer.new();layout.add_child(top)
+	title=_label(top,"YOUR PEOPLE’S STORY BEGINS",30);title.size_flags_horizontal=SIZE_EXPAND_FILL
+	_button(top,"RETURN · F8",func():queue_free()).visible=not PeopleDirection.needs_century_choice()
+	summary=_label(layout,"",14)
+	var tabs:=HBoxContainer.new();layout.add_child(tabs)
 	for index in 3:
 		var tab_index:=index
-		_button(tabs,["FOCUS","COUNCIL ADVICE","TRADITIONS"][index],func(): _show_page(tab_index))
-	var body:=VBoxContainer.new()
-	body.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	root.add_child(body)
-	var focus_page:=VBoxContainer.new()
-	body.add_child(focus_page); pages.append(focus_page)
-	choice_help=_label(focus_page,"Choose a direction to review. The commitment lasts 100 years; it shapes learning and values over time.",14)
-	grid=GridContainer.new(); grid.columns=4
-	grid.add_theme_constant_override("h_separation",12); grid.add_theme_constant_override("v_separation",12)
-	focus_page.add_child(grid)
+		_button(tabs,["OUR DIRECTION","COUNCIL","TRADITIONS"][index],func():_show_page(tab_index))
+	var body:=VBoxContainer.new();body.size_flags_vertical=SIZE_EXPAND_FILL;layout.add_child(body)
+	var focus_page:=VBoxContainer.new();focus_page.size_flags_vertical=SIZE_EXPAND_FILL;body.add_child(focus_page);pages.append(focus_page)
+	grid=GridContainer.new();grid.columns=4;grid.size_flags_vertical=SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);focus_page.add_child(grid)
+	var index:=0
 	for id:String in PeopleDirection.AMBITIONS:
-		var card:=VBoxContainer.new(); card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		grid.add_child(card);focus_cards.append(card)
-		var button:=_button(card,PeopleDirection.AMBITIONS[id].name,func(): selected_focus=id; reviewing=true; _refresh())
-		button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		button.custom_minimum_size.y=56
-		button.set_meta("ambition",id)
-		ambition_buttons.append(button)
-		_label(card,PeopleDirection.AMBITIONS[id].vision,13)
-	more_choices=_button(focus_page,"MORE DIRECTIONS",func():choice_page=1-choice_page;_refresh())
-	review_back=_button(focus_page,"BACK TO DIRECTIONS",func():reviewing=false;_refresh())
-	var detail:=_label(focus_page,"",16)
-	detail.name="SelectionDetail"
-	var confirm:=_button(focus_page,"COMMIT TO THIS DIRECTION",func():
+		var card:=preload("res://scripts/ambition_art_card.gd").new()
+		card.art_index=index;card.caption=CARD_TITLES[index];card.subtitle=CARD_TAGS[index];card.accent=Color(CARD_COLORS[index]);card.size_flags_horizontal=SIZE_EXPAND_FILL;card.size_flags_vertical=SIZE_EXPAND_FILL
+		card.set_meta("ambition",id);card.tooltip_text=String(PeopleDirection.AMBITIONS[id].vision)
+		card.pressed.connect(func():selected_focus=id;reviewing=true;_refresh())
+		grid.add_child(card);ambition_buttons.append(card);focus_cards.append(card);index+=1
+	choice_help=_label(focus_page,"",14)
+	var detail:=_label(focus_page,"",16);detail.name="SelectionDetail";detail.custom_minimum_size.y=65
+	var confirm:=_button(focus_page,"CHOOSE A DIRECTION ABOVE",func():
 		var result:Dictionary=PeopleDirection.choose(selected_focus)
 		status.text=String(result.get("error","Focus chosen. Resume time when ready."))
-		if not result.has("error"): queue_free())
-	confirm.name="ConfirmFocus"
-	council=VBoxContainer.new(); body.add_child(council); pages.append(council)
-	traditions=VBoxContainer.new(); body.add_child(traditions); pages.append(traditions)
-	status=_label(root,"",14)
-	_show_page(0)
+		if not result.has("error"):queue_free())
+	confirm.name="ConfirmFocus";confirm.custom_minimum_size.y=43
+	var commit_style:=StyleBoxFlat.new();commit_style.bg_color=Color("c7a55f");commit_style.set_corner_radius_all(3);confirm.add_theme_stylebox_override("normal",commit_style);confirm.add_theme_color_override("font_color",Color("112126"));confirm.add_theme_font_size_override("font_size",16)
+	council=VBoxContainer.new();body.add_child(council);pages.append(council)
+	traditions=VBoxContainer.new();body.add_child(traditions);pages.append(traditions)
+	status=_label(layout,"",13);status.visible=false
+	resized.connect(_refresh);_show_page(0)
+	print("DIRECTION_SCREEN_READY: day=",GameState.elapsed_days,"; opening=",opening,"; settlement=",GameState.settlement_name,"; seed=",GameState.world_seed)
+	_capture_opening.call_deferred()
 
 func _label(parent:Node,text:String,font_size:int)->Label:
 	var label:=Label.new(); label.text=text
@@ -102,23 +93,25 @@ func _process(delta:float)->void:
 		_refresh()
 
 func _refresh()->void:
+	if not is_instance_valid(grid):return
 	var century:=PeopleDirection.century_at(int(GameState.elapsed_days))
 	var pending:=PeopleDirection.needs_century_choice()
-	summary.text="CENTURY %d · YEARS %d–%d · %s" % [century+1,century*100+1,(century+1)*100,"Awaiting your choice. Time remains paused." if pending else "Chosen: "+String(PeopleDirection.AMBITIONS[PeopleDirection.ambition].name)]
-	grid.columns=2
-	grid.visible=not reviewing;more_choices.visible=not reviewing
-	more_choices.text="MORE DIRECTIONS · %d / 2"%(choice_page+1)
-	review_back.visible=reviewing
-	choice_help.text="Review the benefit and tradeoff before committing. The choice does not grant resources, discoveries or wars." if reviewing else "Choose a direction to review. The commitment lasts 100 years; it shapes learning and values over time."
-	for i in focus_cards.size():focus_cards[i].visible=i/4==choice_page
-	for button in ambition_buttons:
-		button.disabled=not pending
-		button.modulate=Color("edce83") if String(button.get_meta("ambition"))==selected_focus else Color.WHITE
+	title.text="YOUR PEOPLE’S STORY BEGINS" if opening else "THE NEXT GENERATIONS."
+	title.add_theme_font_size_override("font_size",24 if size.x<1000 else 32)
+	summary.text="Give your people a purpose for the next 100 years. Their leaders handle the daily work." if opening else "Years %d–%d · A shared direction for the coming century."%[century*100+1,(century+1)*100]
+	grid.columns=4
+	for card in ambition_buttons:
+		card.disabled=not pending;card.select(String(card.get_meta("ambition"))==selected_focus)
+	choice_help.text="Choose the future you want to encourage. Time is paused." if selected_focus=="" else String(PeopleDirection.AMBITIONS[selected_focus].vision)
 	var detail:=pages[0].get_node("SelectionDetail") as Label
-	detail.visible=reviewing
-	detail.text=(String(PeopleDirection.AMBITIONS[selected_focus].name)+"\n\n"+String(PeopleDirection.AMBITIONS[selected_focus].vision)+"\n\n"+String(PeopleDirection.AMBITIONS[selected_focus].effect)+"\n\nThis remains your direction until the next century. Your people still need evidence, work and experience to fulfill it.") if selected_focus!="" else ""
-	(pages[0].get_node("ConfirmFocus") as Button).visible=reviewing
-	(pages[0].get_node("ConfirmFocus") as Button).disabled=not pending or selected_focus==""
+	if selected_focus=="":
+		detail.text="Each direction accelerates two kinds of learning and gradually shapes a social value.\nChoose a card to see the exact benefit and tradeoff."
+	else:
+		detail.text=String(PeopleDirection.AMBITIONS[selected_focus].effect)+"\nA direction for 100 years; progress still comes from your people's work and discoveries."
+	detail.add_theme_font_size_override("font_size",14 if size.y<700 else 16)
+	var confirm:=pages[0].get_node("ConfirmFocus") as Button
+	confirm.disabled=not pending or selected_focus==""
+	confirm.text="CHOOSE A DIRECTION ABOVE" if selected_focus=="" else ("BEGIN · " if opening else "COMMIT · ")+CARD_TITLES[PeopleDirection.AMBITIONS.keys().find(selected_focus)].to_upper()
 
 func _clear(parent:Node)->void:
 	for child in parent.get_children(): parent.remove_child(child); child.queue_free()
@@ -158,3 +151,11 @@ func _traditions_page()->void:
 	if not opening:
 		_button(traditions,"PEOPLE & LEGACIES",func(): HistoricalFigures.ensure(); HistoricalFigures.open_chronicle(String(HistoricalFigures.people[0].id)))
 		_button(traditions,"OUR CONNECTIONS",func(): CommunityNetwork.open_network())
+
+func _capture_opening()->void:
+	if "--capture-opening" not in OS.get_cmdline_user_args() or get_tree().root.has_meta("opening_captured"):return
+	get_tree().root.set_meta("opening_captured",true)
+	for frame in 8:await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var result:=get_viewport().get_texture().get_image().save_png("res://artifacts/player-opening.png")
+	print("OPENING_CAPTURE: ",result,"; day=",GameState.elapsed_days,"; opening=",opening)

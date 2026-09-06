@@ -1,3 +1,9 @@
+# Latest integration: 2026.09.05.15
+
+Illustrated eight-choice opening/century-focus screen and the supplied Tomorrow-001.mp3 score. Source codex/opening-screen from553a9ff. See RELEASE_2026_09_05_15.md. Includes .14 general campaign and prior releases. Whole-game coherence work remains separate in C:/Users/sjpur/tt-campaign-coherence and is not part of this release.
+
+---
+
 # Latest integration: 2026.09.05.14
 
 General-led Alderford War: conversation, validated objectives, simultaneous world time, finite logistics, opponent plans, actual battles, reports and replay. Enter through Military → Play General Campaign. All previous integrated releases remain included.

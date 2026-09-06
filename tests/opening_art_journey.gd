@@ -1,0 +1,26 @@
+extends "res://tests/focused_journey_probe.gd"
+func _ready()->void:
+	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_Opening_Test"))
+	GameState.reset_for_new_world(551188);PeopleDirection.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	get_window().content_scale_size=Vector2i.ZERO;get_window().size=Vector2i(1440,900)
+	PeopleDirection.open_direction();await frames()
+	var ui:=PeopleDirection.panel
+	assert(ui.ambition_buttons.size()==8)
+	await capture("opening-eight-directions")
+	for button in ui.ambition_buttons:
+		assert(button.is_visible_in_tree())
+		assert(get_viewport().get_visible_rect().encloses(button.get_global_rect()))
+	await click_control(ui.ambition_buttons[3]);await capture("opening-selected")
+	assert(PeopleDirection.ambition=="")
+	get_window().size=Vector2i(800,600);await frames()
+	await capture("opening-small")
+	for button in ui.ambition_buttons:assert(get_viewport().get_visible_rect().encloses(button.get_global_rect()))
+	var confirm:Button=ui.pages[0].get_node("ConfirmFocus")
+	assert(get_viewport().get_visible_rect().encloses(confirm.get_global_rect()))
+	await click_control(confirm)
+	assert(PeopleDirection.ambition=="inquiry")
+	assert(is_equal_approx(PeopleDirection.research_multiplier("knowledge"),1.25))
+	assert(is_equal_approx(PeopleDirection.research_multiplier("production"),.95))
+	assert(PeopleDirection.choose("military").has("error"))
+	print("OPENING_ART_JOURNEY_PASS eight visible cards, selected review, 800x600 confirmation, unchanged century commitment and research effects")
+	get_tree().quit()

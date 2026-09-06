@@ -1,7 +1,8 @@
 param(
     [switch]$Fullscreen = $true,
     [switch]$Editor,
-    [switch]$ResumeSaved = $true
+    [switch]$ResumeSaved = $true,
+    [switch]$CaptureOpening
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,9 +63,12 @@ if ($Editor) {
 }
 
 $savedCampaignPath = Join-Path $env:APPDATA 'Godot\app_userdata\Tomorrow and Tomorrow\saves\quicksave.save'
+$gameArguments = @()
 if ($ResumeSaved -and -not $Editor -and (Test-Path -LiteralPath $savedCampaignPath)) {
-    $arguments += @('--', '--resume-saved')
+    $gameArguments += '--resume-saved'
 }
+if ($CaptureOpening -and -not $Editor) { $gameArguments += '--capture-opening' }
+if ($gameArguments.Count -gt 0) { $arguments += @('--') + $gameArguments }
 
 $process = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $arguments -WorkingDirectory $projectRoot -PassThru
 $buildCommit = & git -C $projectRoot rev-parse --short HEAD
