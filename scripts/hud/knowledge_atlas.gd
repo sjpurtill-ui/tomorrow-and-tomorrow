@@ -56,7 +56,7 @@ func _ready()->void:
 	if mode=="inquiry": button(actions,"Direct attention",func()->void: _close();hud.open_dock("inquiry",0))
 	else:
 		button(actions,"Local logistics",func()->void: var result:=GovernmentPeopleSystem.set_settlement_focus(GameState.selected_player_settlement_id,"logistics");detail.text=String(result.get("label",result.get("reason","Logistics focus set"))))
-		button(actions,"Resource map",func()->void: _close();hud._on_layer_toggle("resources"))
+		button(actions,"Resource map",func()->void: _close();hud.terrain._toggle_resource_view())
 	refresh(true)
 func button(parent:Node,text:String,callback:Callable)->Button:
 	var b:=Button.new();b.text=text;b.custom_minimum_size.y=32;b.pressed.connect(callback);parent.add_child(b);return b

@@ -47,8 +47,9 @@ func _ready()->void:
 	_expect(settle_button and "FOUND SETTLEMENT" in settle_button.text and not settle_button.disabled,"founding action was not explicit on the map toolbar")
 	var diplomat_button:=terrain.hud.find_child("ToolbarDiplomat",true,false) as Button
 	_expect(diplomat_button and diplomat_button.disabled and "foreign settlement" in diplomat_button.tooltip_text,"diplomacy did not expose its physical-destination blocker")
-	var resources_toggle:=terrain.hud.find_child("LayerResources",true,false) as Button
-	_expect(resources_toggle!=null,"resource layer toggle missing from the map toolbar")
+	for retired in ["LayerResources","LayerBorders","LayerCharted"]:
+		_expect(terrain.hud.find_child(retired,true,false)==null,"retired toolbar layer button remains: "+retired)
+	_expect(terrain.resource_view_enabled,"toolbar cleanup changed default resource rendering")
 	var toolbar_node:=terrain.hud.find_child("MapToolbar",true,false) as Control
 	_expect(toolbar_node and toolbar_node.get_global_rect().end.x<=viewport_size.x and toolbar_node.get_global_rect().end.y<=viewport_size.y,"map toolbar was not a bounded lower map control")
 	terrain._inspect_location(terrain.world_start_position)

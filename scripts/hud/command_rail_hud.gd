@@ -30,7 +30,6 @@ var action_feedback:PanelContainer
 var feedback_sequence:=0
 var active_section:String=""
 var dismissed_alert_ids:Array=[]
-var layers:Dictionary={"resources":true,"borders":false,"charted":false}
 
 var rail_panel:PanelContainer
 var rail_buttons:Dictionary={}
@@ -45,7 +44,6 @@ var queue_footer:Label
 var toolbar:PanelContainer
 var toolbar_wrap:Control
 var toolbar_action_buttons:Dictionary={}
-var toolbar_layer_buttons:Dictionary={}
 var scale_line:ColorRect
 var scale_label:Label
 var compass_label:Button
@@ -536,17 +534,6 @@ func _build_toolbar()->void:
 	var actions_divider:=_toolbar_divider()
 	actions_divider.name="ToolbarActionsDivider"
 	row.add_child(actions_divider)
-	for layer in [["resources","RESOURCES","Land resources: green woodland supplies timber; pale exposed ground indicates stone; warm open ground shows productive soil. Click charted ground for details. Hidden deposits stay hidden."],["borders","BORDERS","Settlement claim"],["charted","CHARTED","Fog of observation"]]:
-		var toggle:=Button.new()
-		toggle.name="Layer"+String(layer[0]).capitalize()
-		toggle.custom_minimum_size=Vector2(0,34)
-		toggle.tooltip_text=String(layer[2])
-		toggle.add_theme_font_size_override("font_size",10)
-		toggle.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-		toggle.pressed.connect(_on_layer_toggle.bind(String(layer[0])))
-		row.add_child(toggle)
-		toolbar_layer_buttons[String(layer[0])]={"button":toggle,"label":String(layer[1])}
-	row.add_child(_toolbar_divider())
 	var scale_box:=VBoxContainer.new()
 	scale_box.alignment=BoxContainer.ALIGNMENT_CENTER
 	scale_box.add_theme_constant_override("separation",3)
@@ -575,7 +562,8 @@ func _build_toolbar()->void:
 	aerial_button.pressed.connect(func()->void: terrain._inspect_aerial_altitude())
 	scale_row.add_child(aerial_button)
 
-	_refresh_layer_toggles()
+	toolbar.reset_size()
+	_position_toolbar()
 
 func _toolbar_divider()->ColorRect:
 	var divider:=ColorRect.new()
@@ -594,27 +582,6 @@ func _on_toolbar_action(id:String)->void:
 			var position_value:Variant=GameState.settlement_convoy.get("position",Vector2.ZERO)
 			var position_2d:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
 			terrain._set_camera_target(Vector3(position_2d.x,terrain._height_at(position_2d.x,position_2d.y),position_2d.y))
-
-func _on_layer_toggle(id:String)->void:
-	layers[id]=not bool(layers.get(id,false))
-	if id=="resources" and terrain:
-		terrain._set_resource_view_enabled(bool(layers[id]))
-	_refresh_layer_toggles()
-
-func _refresh_layer_toggles()->void:
-	for id in toolbar_layer_buttons:
-		var entry:Dictionary=toolbar_layer_buttons[id]
-		var button:Button=entry.button
-		var on:=bool(layers.get(id,false))
-		button.text=String(entry.label)+(" · ON" if on else "")
-		button.add_theme_color_override("font_color",Tokens.LAYER_ON_FG if on else Tokens.MUTED)
-		var style:=Tokens.flat(Tokens.BUTTON_BG,Tokens.LAYER_ON_BORDER if on else Tokens.BORDER_2,1,3)
-		style.content_margin_left=12.0
-		style.content_margin_right=12.0
-		button.add_theme_stylebox_override("normal",style)
-		button.add_theme_stylebox_override("hover",style)
-	toolbar.reset_size()
-	_position_toolbar()
 
 var _scale_signature:String=""
 

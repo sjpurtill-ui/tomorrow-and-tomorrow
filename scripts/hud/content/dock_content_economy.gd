@@ -164,7 +164,7 @@ func _materials_blocks()->Array:
 		{"type":"rows","heading":"RECOGNIZED MATERIALS","note":"sites · flow / day","items":material_items},
 		{"type":"bars","heading":"CONSTRAINTS","items":constraint_items},
 		{"type":"actions","items":[
-			{"label":"SHOW RESOURCE LAYER","sub":"recognized deposits only","on_press":func()->void: hud._on_layer_toggle("resources"),"tip":"Toggle the resource map layer"},
+			{"label":"SHOW RESOURCE LAYER","sub":"recognized deposits only","on_press":func()->void: hud.terrain._toggle_resource_view(),"tip":"Toggle the resource map layer"},
 			{"label":"LOCAL LOGISTICS","sub":"direct this city’s carriers","primary":true,"on_press":func()->void: GovernmentPeopleSystem.set_settlement_focus(GameState.selected_player_settlement_id,"logistics"),"tip":"Ask this city’s leader to focus on logistics"},
 		]},
 	]
