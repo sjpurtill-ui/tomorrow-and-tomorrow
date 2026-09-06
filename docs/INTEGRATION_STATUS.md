@@ -4,7 +4,9 @@
 
 Continuous actual-world city encounters, faction uniforms and the occupation /
 recovery decision interface are integrated from codex/continuous-city-encounter,
-base 87d184d. See RELEASE_2026_09_05_6.md for scope and verification.
+base 87d184d, integrated gameplay commit 0df3415. See RELEASE_2026_09_05_6.md for scope and verification.
+Verified canonical player launch 18:01:37: PID46888, release .6, SeanTown/day9432/population405.
+Canonical checks: 177 passed, two renderer-only skips; exact saved time and save hash preserved.
 
 City approach, siege, assault, round result and return share the same live city
 geometry. Friendly and enemy troops have distinct cloth and marked standards.
