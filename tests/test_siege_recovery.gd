@@ -136,3 +136,38 @@ func test_malformed_survivor_state_rejected()->void:
 	assert_array(preload("res://scripts/siege_recovery.gd").validate(bad)).is_not_empty()
 	bad=model().data.duplicate(true);bad.remnant.erase("functions")
 	assert_array(preload("res://scripts/siege_recovery.gd").validate(bad)).is_not_empty()
+
+func test_tiny_or_unsupplied_victors_cannot_seize_home_or_assets()->void:
+	var cities:=GameState.player_settlements.duplicate(true)
+	var inventory:=MilitaryCampaign.military_inventory.duplicate(true)
+	var queue:=MilitaryCampaign.training_queue.duplicate(true)
+	var state:Dictionary=model().data.duplicate(true)
+	for force in [{"remaining_troops":5,"supply_level":1.0,"readiness":1.0},{"remaining_troops":200,"supply_level":0.0,"readiness":1.0}]:
+		assert_bool(model().capture(civ_id(),force).has("error")).is_true()
+	assert_array(GameState.player_settlements).is_equal(cities)
+	assert_dict(MilitaryCampaign.military_inventory).is_equal(inventory)
+	assert_array(MilitaryCampaign.training_queue).is_equal(queue)
+	assert_dict(model().data).is_equal(state)
+func test_supplied_survivors_can_hold_home_but_no_force_cannot()->void:
+	MilitaryCampaign.active_siege.clear()
+	assert_bool(model().capture(civ_id()).has("error")).is_true()
+	assert_bool(model().capture(civ_id(),{"remaining_troops":200,"supply_level":1.0,"readiness":1.0}).has("ok")).is_true()
+	assert_bool(model().home_unavailable()).is_true()
+func test_explicit_yield_is_distinct_from_forced_capture()->void:
+	var id:=String(MilitaryCampaign.active_siege.id)
+	assert_bool(MilitaryCampaign.siege_order(id,"withdraw").has("ok")).is_true()
+	assert_bool(model().home_unavailable()).is_true()
+
+func test_actual_home_battle_uses_survivors_for_capture()->void:
+	MilitaryCampaign.active_threat=MilitaryCampaign.active_siege.threat.duplicate(true)
+	MilitaryCampaign.active_siege.clear()
+	GameState.population_allocations.Defense=20
+	assert_bool(MilitaryCampaign.begin_threat_engagement().has("error")).is_false()
+	MilitaryCampaign.active_engagement.attacker.troops=5
+	MilitaryCampaign.active_engagement.attacker.supply_level=1.0
+	MilitaryCampaign.active_engagement.defender.troops=0
+	var result:=MilitaryCampaign._finish_active_engagement(false,{"outcome":"attacker_victory","winner":MilitaryCampaign.active_engagement.attacker.name,"termination":{"type":"rout","captor":MilitaryCampaign.active_engagement.attacker.name,"defeated":MilitaryCampaign.active_engagement.defender.name}})
+	assert_bool(bool(result.strategic_outcome.decisive)).is_true()
+	assert_bool(result.strategic_outcome.player_occupation.has("error")).is_true()
+	assert_bool(model().home_unavailable()).is_false()
+	assert_str(String(result.strategic_outcome.message)).contains("remains independent")

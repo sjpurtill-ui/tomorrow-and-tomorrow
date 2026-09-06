@@ -57,15 +57,15 @@ func tab(sub:int)->Dictionary:
 	]
 	var brief:Dictionary
 	if observers==0:
-		brief={"tone":"warn","title":"No observers are assigned","why":"Assign Researchers in SETTLEMENT; the weights below split them automatically.","action_label":"OPEN LABOR","on_action":jump("settlement",0)}
+		brief={"tone":"warn","title":"No observers are assigned","why":"Local leaders allocate research work. Review their priority to make room for observation.","action_label":"RESEARCH WORK","on_action":func():_open_report("RESEARCH WORK",_research_work_report)}
 	elif lines==0:
-		brief={"tone":"warn","title":"No investigation is under way","why":"Raise a domain's weight below; observers follow the shares automatically."}
+		brief={"tone":"warn","title":"No investigation is under way","why":"Attention needs evidence and prior knowledge. Open a direction to review its current investigations."}
 	else:
 		brief={"tone":"info","title":"Inquiry is under way","why":"Evidence, place, prior findings, and chance decide what completes first."}
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
-	return {"kpis":kpis,"brief":brief,"blocks":_attention_blocks()}
+	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_attention_overview()}
 
 func _attention_blocks()->Array:
 	var latest:=_latest_discovery_block()
@@ -96,12 +96,13 @@ func _attention_blocks()->Array:
 	])
 	return blocks
 
-func _investigation_blocks()->Array:
+func _investigation_blocks(domain_filter:String="")->Array:
 	var records:Array=DiscoverySystem.active_investigation_records()
 	var items:Array=[]
 	var unlock_lines:Array[String]=[]
 	for record_variant in records:
 		var record:Dictionary=record_variant
+		if domain_filter!="" and String(record.get("dynamic",""))!=domain_filter:continue
 		var progress:=roundi(clampf(float(record.get("progress",0.0)),0.0,1.0)*100.0)
 		var domain:=String(record.get("dynamic",""))
 		items.append({
@@ -222,7 +223,7 @@ func _established_effect_text(event:Dictionary)->String:
 	return " · ".join(parts)
 
 func signature()->Array:
-	return [tree_domain,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate()]
+	return [tree_domain,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate(),GovernmentPeopleSystem.revision]
 
 func _technology_blocks()->Array:
 	var blocks:Array=[]
@@ -273,3 +274,26 @@ func open_expanded_tab(sub:int)->bool:
 	if sub!=1:return false
 	preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"inquiry")
 	return true
+
+func _open_report(title:String,reader:Callable)->void:
+	var report:=preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,title,"INQUIRY",reader,signature)
+	hud.open_detail(report)
+func open_domain(domain:String)->void:
+	_open_report(domain.capitalize(),_domain_report.bind(domain))
+func _attention_overview()->Array:
+	return [{"type":"text","heading":"WHAT SHOULD WE UNDERSTAND BETTER?","text":"Choose a direction. Your people pursue the work; evidence, experience and established knowledge determine what becomes possible."},{"type":"actions","items":[focused_action("FOOD & LAND","Nutrition and the living landscape",_domain_group.bind(["nutrition","ecology"])),focused_action("PEOPLE & COMMUNITY","Growth, health and culture",_domain_group.bind(["demography","health","culture"])),focused_action("WORK & MAKING","Labor, production and construction",_domain_group.bind(["labor","production","infrastructure"])),focused_action("KNOWLEDGE & SOCIETY","Learning, institutions and security",_domain_group.bind(["knowledge","institutions","security","logistics"]))]},{"type":"actions","items":[focused_action("RESEARCH WORK","Your leader's labor priority",_research_work_report),focused_action("COMPARE ATTENTION","Advanced shares across all domains",func()->Dictionary:return {"blocks":_attention_blocks()})]}]
+func _domain_group(domains:Array)->Dictionary:
+	var items:Array=[]
+	for id:String in domains:items.append({"label":id.capitalize(),"sub":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"on_press":open_domain.bind(id)})
+	return {"blocks":[{"type":"actions","heading":"CHOOSE A DIRECTION","items":items}]}
+func _domain_report(id:String)->Dictionary:
+	var weight:=int(GameState.research_allocations.get(id,0));var total:=0
+	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
+	var share:=float(weight)/maxf(1,total)
+	var observers:=int(GameState.population_allocations.get("Knowledge",0))
+	return {"blocks":[{"type":"text","heading":"PURPOSE","text":String(DOMAIN_GOALS.get(id,""))},{"type":"text","heading":"CURRENT ATTENTION","text":"%d%% of research attention: about %.1f of %d observers. Weight %d is a relative preference, not a headcount or a success chance."%[roundi(share*100),share*observers,observers,weight]},{"type":"actions","items":[{"label":"MORE ATTENTION","sub":"Shift one preference step here","on_press":terrain._change_research_domain_allocation.bind(id,1)},{"label":"LESS ATTENTION","sub":"Free attention for other directions","disabled":weight<=0,"on_press":terrain._change_research_domain_allocation.bind(id,-1)},focused_action("CURRENT INVESTIGATIONS","Progress and actual bottlenecks",func()->Dictionary:return {"blocks":_investigation_blocks(id)}),focused_action("RESEARCH WORK","Local leadership allocates observers",_research_work_report)]},{"type":"text","text":"Changing attention reallocates existing observers. It creates no discovery, people or resources, and cannot bypass missing evidence or prior knowledge."}]}
+func _research_work_report()->Dictionary:
+	var id:=SettlementModel._primary_settlement_id()
+	var state:=GovernmentPeopleSystem.settlement_management(id)
+	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
+	return {"blocks":[{"type":"text","heading":"LOCAL RESEARCH WORK","text":"%d people currently work in Knowledge. Local leaders allocate their time alongside food, water and other needs. Current priority: %s."%[int(GameState.population_allocations.get("Knowledge",0)),String(state.get("focus_label","Delegated"))]},{"type":"actions","items":[{"label":"PRIORITIZE RESEARCH","sub":"Use local recovery while occupied" if occupied else "Ask the leader to shift local work","disabled":occupied,"on_press":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh()},{"label":"DELEGATE PRIORITY","sub":"Use local recovery while occupied" if occupied else "Let the leader choose again","disabled":occupied,"on_press":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]},{"type":"text","text":"This changes the local work priority, not discovery outcomes. Essential needs can still constrain research; observations and investigations develop as time advances."}]}

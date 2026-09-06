@@ -48,3 +48,9 @@ resume passed. Details: RELEASE_2026_09_05_8.md.
 - Founding and inquiry: focused first choices and actionable discovery requirements.
 - Civics/diplomacy: precise costs, commitments, feedback and focused navigation.
 - Remaining siege/recovery flow under viable and unsupported control.
+
+## Verified batch: release .9
+Focused inquiry directions, explicit shares/evidence/research work, wrapping action
+cards, and enemy-home capture capacity. 123 passed; inquiry, army and command-shell
+private GPU walkthroughs passed. See RELEASE_2026_09_05_9.md.
+The enemy-home capacity item above is now complete; remaining journeys stay open.

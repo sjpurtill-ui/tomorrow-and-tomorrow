@@ -389,9 +389,10 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		column.add_theme_constant_override("separation",1)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		button.add_child(column)
+		column.minimum_size_changed.connect(func():button.custom_minimum_size.y=maxf(38,column.get_combined_minimum_size().y+8))
 		var fg:=Tokens.DISABLED if disabled else (Tokens.GOLD_BRIGHT if primary else Tokens.BODY)
 		var label:=Tokens.make_label(String(item.get("label","")),11,fg,0.06)
-		label.clip_text=true
+		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		column.add_child(label)
 		Live.attach(label,"text",item.get("live_label"))
@@ -399,7 +400,7 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 			Live.attach(label,"theme_override_colors/font_color",func()->Color: return Tokens.DISABLED if button.disabled else (Tokens.GOLD_BRIGHT if primary else Tokens.BODY))
 		if String(item.get("sub",""))!="":
 			var sub_label:=Tokens.make_label(String(item.sub),10,Tokens.MUTED)
-			sub_label.clip_text=true
+			sub_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			sub_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			column.add_child(sub_label)
 			Live.attach(sub_label,"text",item.get("live_sub"))

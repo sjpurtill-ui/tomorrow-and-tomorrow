@@ -470,7 +470,7 @@ func _recruitment_requirements(template_id:int)->Dictionary:
 	var actions:Array=[]
 	if int(quote.get("missing",0))>int(quote.get("people_room",0)):
 		actions.append(focused_action("PERSONNEL ACCOUNT","See where existing military places are used",func()->Dictionary:return {"blocks":[_personnel_block()]}))
-		actions.append({"label":"SECURITY PRACTICES","sub":"Review watch and levy development","on_press":jump("inquiry",0)})
+		actions.append({"label":"SECURITY PRACTICES","sub":"Review watch and levy development","on_press":func():hud.providers["inquiry"].open_domain("security")})
 	if int(quote.get("required",0))>int(quote.get("training_places",0)):
 		actions.append({"label":"LOCAL WORK PRIORITY","sub":"Leaders allocate Defense instructors; no instant capacity","on_press":jump("settlement",0)})
 	for weapon:String in quote.get("equipment",{}):

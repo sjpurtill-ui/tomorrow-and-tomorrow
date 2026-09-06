@@ -2001,7 +2001,11 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 		elif bool(strategic_outcome.get("region_recaptured",false)):
 			strategic_outcome["occupation_force_loss"]=remove_occupation_force(source_civ_id,String(strategic_outcome.get("target_region_id",final_result.target_region_id)),false)
 		if bool(strategic_outcome.get("decisive",false)) and not bool(strategic_outcome.get("player_won",false)) and String(final_result.campaign_mode)=="defensive" and String(final_result.target_region_id).is_empty() and not bool(final_result.field_encounter) and String(threat.get("incident_kind","campaign"))!="raid":
-			strategic_outcome["player_occupation"]=recovery.capture(source_civ_id)
+			var occupation:=recovery.capture(source_civ_id,final_result[enemy_side])
+			strategic_outcome["player_occupation"]=occupation
+			if occupation.has("error"):
+				strategic_outcome["message"]=String(occupation.error)
+				GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Defeat without occupation","description":String(occupation.error),"domain":"security","severity":"notice"})
 		committed["strategic_outcome"]=strategic_outcome
 	return committed
 
@@ -4486,7 +4490,7 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 		_end_siege("The player orders withdrawal from the siege.",true,String(saved.mode)=="offensive")
 		if String(saved.mode)=="defensive":
 			threats_resolved+=1
-			return recovery.capture(String(saved.attacker_id))
+			return recovery.capture(String(saved.attacker_id),saved.get("threat",{}).get("enemy_force",{}),true)
 		return {"ok":true,"message":"The siege is lifted; the field army begins its physical return route if available."}
 	return {"error":"Unknown siege order."}
 

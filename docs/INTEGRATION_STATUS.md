@@ -1,5 +1,18 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.9
+
+Focused inquiry directions/evidence/work-priority screens, wrapping action cards,
+and enemy-home occupation capacity are integrated. Details and exact checks:
+RELEASE_2026_09_05_9.md. Earlier .7/.8 features are included.
+
+The running player PID46888 retains .6. Save and exit normally, then use the
+canonical tools/launch_game.ps1 to load the integrated game. Existing saves and
+unrelated changes remain preserved. Further journey work stays isolated until ready.
+
+---
+# Previous integration checkpoint
+
 ## Latest: release 2026.09.05.8
 
 Focused army command and three-step preparation, actionable recruitment shortages,

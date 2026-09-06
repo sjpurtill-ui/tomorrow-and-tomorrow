@@ -71,10 +71,26 @@ func escape(heading:String="east")->Dictionary:
 	data.remnant=remnant;data.preparation={}
 	_record("Escape group departed. It must physically clear the siege and reach viable land before rebuilding.")
 	return {"ok":true,"escaped":true,"chance":chance,"message":"The group slipped through the siege. It is traveling with finite supplies; rebuilding still requires viable land."}
-func capture(civ_id:String)->Dictionary:
+func capture_capacity(force:Dictionary)->Dictionary:
+	var population:=maxf(1,SettlementModel.primary_population_exact())
+	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",.58)),0,1)
+	var region:Dictionary={"population":population,"role":"capital","controller":"player","resistance":clampf(.38+cohesion*.30+.14,.25,.92)}
+	var required:=ceili(CivilizationSystem.occupation_requirement({"id":"player","cohesion":cohesion},region))
+	var troops:=maxi(0,int(force.get("remaining_troops",force.get("troops",0))))
+	var effective:=troops*clampf(float(force.get("supply_level",1)),0,1)*(.5+.45*clampf(float(force.get("readiness",1)),0,1))
+	var result:Dictionary={"required":required,"effective":effective,"troops":troops,"controlled":effective>=required}
+	if not bool(result.controlled):result.error="The attackers won the battle, but their %d survivors provide %.1f effective personnel; holding this city needs %d. Your city remains independent despite the defeat."%[troops,effective,required]
+	return result
+func capture(civ_id:String,force:Dictionary={},yielded:bool=false)->Dictionary:
 	var city:=SettlementModel.settlement_record(SettlementModel._primary_settlement_id())
 	if city.is_empty() or home_unavailable():return {"error":"No free home settlement can be occupied."}
 	if data.occupied.size()>=MAX_OCCUPIED:return {"error":"Occupied settlement capacity reached."}
+	var present:=force
+	if present.is_empty():
+		var siege:Dictionary=MilitaryCampaign.active_siege
+		if String(siege.get("mode",""))=="defensive" and String(siege.get("attacker_id",""))==civ_id:present=siege.get("threat",{}).get("enemy_force",{})
+	var capacity:=capture_capacity(present)
+	if not yielded and capacity.has("error"):return capacity
 	if not data.preparation.is_empty():
 		var attempt:=escape()
 		if attempt.has("error"):data.preparation={}
