@@ -4,17 +4,21 @@ var hud:Control
 func frames()->void:
 	for frame in 8:await get_tree().process_frame
 func click_label(text:String)->void:
+	for button in hud.find_children("*","Button",true,false):
+		if button.text==text and button.is_visible_in_tree():await click_control(button);return
 	for label in hud.find_children("*","Label",true,false):
 		if label.text!=text or not label.is_visible_in_tree():continue
 		var node:Node=label
 		while node!=null and not node is Button:node=node.get_parent()
 		if node==null:continue
-		var point:Vector2=node.get_global_rect().get_center()
-		assert(get_viewport().get_visible_rect().has_point(point),"Action must be visible without scrolling: "+text)
-		for down in [true,false]:
-			var event:=InputEventMouseButton.new();event.button_index=MOUSE_BUTTON_LEFT;event.pressed=down;event.position=point;Input.parse_input_event(event);await get_tree().process_frame
-		await frames();return
+		await click_control(node);return
 	assert(false,"Action not found: "+text)
+func click_control(node:Control)->void:
+	var point:=node.get_global_rect().get_center()
+	assert(get_viewport().get_visible_rect().has_point(point),"Action must be visible without scrolling")
+	for down in [true,false]:
+		var event:=InputEventMouseButton.new();event.button_index=MOUSE_BUTTON_LEFT;event.pressed=down;event.position=point;Input.parse_input_event(event);await get_tree().process_frame
+	await frames()
 func capture(name:String)->void:
 	await frames();await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("res://artifacts/journey-"+name+".png")

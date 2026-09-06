@@ -173,8 +173,9 @@ static func _render_alloc(parent:VBoxContainer,block:Dictionary)->void:
 		count_label.custom_minimum_size=Vector2(40,0)
 		count_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(count_label)
-		row.add_child(_step_button("−",item.get("on_minus"),String(item.get("tip",""))))
-		row.add_child(_step_button("+",item.get("on_plus"),String(item.get("tip",""))))
+		if item.get("on_minus") is Callable or item.get("on_plus") is Callable:
+			row.add_child(_step_button("−",item.get("on_minus"),String(item.get("tip",""))))
+			row.add_child(_step_button("+",item.get("on_plus"),String(item.get("tip",""))))
 
 
 static func _step_button(glyph:String,action:Variant,tip:String)->Button:

@@ -1,5 +1,18 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.8
+
+Focused army command and three-step preparation, actionable recruitment shortages,
+first-army intake runtime fix, and equipment manufacture with actual cost previews.
+See RELEASE_2026_09_05_8.md for exact validation and remaining journey scope.
+
+The running player PID46888 still has .6 loaded. Save and exit normally, then run
+C:/Users/sjpur/TomorrowandTomorrow/tools/launch_game.ps1 to load integrated updates.
+No worker preview is the player game. Save and unrelated changes are preserved.
+
+---
+# Previous integration checkpoint
+
 ## Latest: release 2026.09.05.7
 
 Focused settlement/economy reports, nested Back navigation and actionable water

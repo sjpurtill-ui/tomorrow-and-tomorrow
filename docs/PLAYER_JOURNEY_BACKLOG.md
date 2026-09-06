@@ -35,3 +35,16 @@ and occupation capacity feedback are ready for integration. Combined187 passed,
 two renderer-only skips; GPU focused-water-verified, focused-shell-verified,
 occupation-capacity-ui and copied campaign checks passed. Earlier in-progress
 list describes this batch's origin; remaining journeys above stay active.
+
+## Verified batch: release .8
+Army composition/recruitment/deployment split, real first-army runtime fix,
+recruitment shortage routes and manufacture previews. 171 passed /2 renderer-only
+skips, real GPU army and equipment actions, water/shell regression and copied-save
+resume passed. Details: RELEASE_2026_09_05_8.md.
+
+## Next checks
+- Enemy victory at player home must require surviving occupation capacity too.
+- Ammunition/transport order cost previews and field orders/provisioning.
+- Founding and inquiry: focused first choices and actionable discovery requirements.
+- Civics/diplomacy: precise costs, commitments, feedback and focused navigation.
+- Remaining siege/recovery flow under viable and unsupported control.

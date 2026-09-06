@@ -371,7 +371,7 @@ func cancel_training(order_id:int)->Dictionary:
 	return {"error":"Training order %d was not found." % order_id}
 
 
-func queue_equipment_production(item:String,count:int)->Dictionary:
+func equipment_production_quote(item:String,count:int)->Dictionary:
 	if not simulator.WEAPONS.has(item): return {"error":"Unknown equipment type: %s" % item}
 	var line_gate:=_production_line_gate()
 	if line_gate.has("error"): return line_gate
@@ -397,6 +397,12 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 		var required:=float(recipe.materials[material])*amount
 		if float(GameState.resource_stockpiles.get(material,0.0))<required:
 			return {"error":"Insufficient %s: need %.1f." % [material,required]}
+	return {"ok":true,"amount":amount,"recipe":recipe,"experimental":experimental}
+
+func queue_equipment_production(item:String,count:int)->Dictionary:
+	var quote:=equipment_production_quote(item,count)
+	if quote.has("error"):return quote
+	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe;var experimental:=bool(quote.experimental)
 	for material in recipe.materials:
 		GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
 	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
@@ -1259,7 +1265,7 @@ func template_training_quote(template_id:int)->Dictionary:
 	if active>0:blockers.append("%d people are already training; the next full intake waits for their outcome." % active)
 	if required>training_capacity()-_queued_trainees():blockers.append("Full-build class needs %d places; %d available. More Defense instructors or established training practices expand capacity." % [required,maxi(0,training_capacity()-_queued_trainees())])
 	var people_room:=aggregate_recruits+maxi(0,recruitment_capacity()-_mobilized_count())
-	if missing>people_room:blockers.append("%d recruits needed; %d can currently be mobilized." % [missing,people_room])
+	if missing>people_room:blockers.append("%d recruits needed; %d available. Military service already uses %d of %d places, including field armies and recovering soldiers. More able adults or established watch/levy practices raise this limit; waiting alone does not." % [missing,people_room,_mobilized_count(),recruitment_capacity()])
 	for weapon:String in equipment:
 		var shortfall:=maxi(0,int(equipment[weapon])-int(military_inventory.get(weapon,0)))
 		if shortfall>0:blockers.append("%d %s equipment sets missing; produce them in Supply." % [shortfall,weapon.replace("_"," ")])
@@ -1267,7 +1273,7 @@ func template_training_quote(template_id:int)->Dictionary:
 	if FoodSystem.total_stored()<food:blockers.append("At least %.0f rations needed for the full class; %.0f stored." % [food,FoodSystem.total_stored()])
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty():blockers.append("Resolve the battle or aftermath first.")
 	if recovery.home_unavailable():blockers.append("Home is occupied.")
-	return {"can_start":blockers.is_empty() and missing>0,"missing":missing,"required":required,"shortfalls":shortfalls,"blockers":blockers,"food":food}
+	return {"can_start":blockers.is_empty() and missing>0,"missing":missing,"required":required,"shortfalls":shortfalls,"blockers":blockers,"food":food,"people_room":people_room,"training_places":maxi(0,training_capacity()-_queued_trainees()),"equipment":equipment,"active_training":active}
 func queue_template_training(template_id:int,retain_order:bool=true)->Dictionary:
 	var index:=_template_index(template_id)
 	if index<0:return {"error":"Build not found."}
@@ -1284,7 +1290,8 @@ func queue_template_training(template_id:int,retain_order:bool=true)->Dictionary
 	for entry:Dictionary in template.get("entries",[]):
 		var unit:=String(entry.unit);var weapon:=String(entry.weapon);var count:=int(entry.count)
 		var existing:=mini(count,_matching_home_count(unit,weapon))
-		var detached:=_detach_matching_formations([{"unit":unit,"weapon":weapon,"count":existing}]) if existing>0 else []
+		var detached:Array[Dictionary]=[]
+		if existing>0:detached=_detach_matching_formations([{"unit":unit,"weapon":weapon,"count":existing}])
 		var experience_sum:=0.0;var condition_sum:=float(count-existing)*_trainee_condition();var skill_sum:=0.0
 		for formation:Dictionary in detached:
 			var people:=int(formation.count)

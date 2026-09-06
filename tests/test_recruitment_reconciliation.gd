@@ -14,6 +14,17 @@ func test_refresh_does_not_damage_people_or_change_population()->void:
 	for i in 100:MilitaryCampaign._refresh_readiness()
 	assert_float(float(MilitaryCampaign.home_army.formations[0].personnel_condition)).is_equal(.8)
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(6)
+
+func test_first_full_class_with_no_home_soldiers_starts_once()->void:
+	MilitaryCampaign.home_army.formations.clear();MilitaryCampaign.home_army.troops=0
+	GameState.population_allocations.Defense=20;MilitaryCampaign.military_inventory.improvised=8
+	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
+	var population:=GameState.population_total
+	assert_int(int(MilitaryCampaign.queue_template_training(1).get("queued",0))).is_equal(8)
+	assert_int(MilitaryCampaign._queued_trainees()).is_equal(8)
+	assert_int(int(MilitaryCampaign.queue_template_training(1).get("queued",0))).is_equal(0)
+	assert_int(MilitaryCampaign._queued_trainees()).is_equal(8)
+	assert_int(GameState.population_total).is_equal(population)
 func test_six_home_zero_training_two_unfilled_wait_without_partial_intake()->void:
 	var entry:Dictionary=MilitaryCampaign.army_template_snapshot().templates[0].entries[0]
 	assert_int(int(entry.ready)).is_equal(6);assert_int(int(entry.in_training)).is_equal(0);assert_int(int(entry.unfilled)).is_equal(2)
