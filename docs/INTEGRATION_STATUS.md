@@ -1,3 +1,36 @@
+# Final Mac follow-up integration — September 6, 2026
+
+Canonical Mac `main` integrates `60c95ee61e429ce350a1a5be530c794a185d6dfb`
+(training/action feedback and ammunition gate consistency), followed by
+`eb39198a83abb0d9ae3db0bb95109ab3544bf8db` (obsolete toolbar layer buttons),
+both based on the earlier Mac checkpoint `515f191`.
+
+Feedback wrapping now fits 520×67 in the canonical fixture. Exercise status,
+completion and cancel availability update while hovered. Ammunition entry/catalog
+use the existing authoritative research/adoption gate. Recruiting timing, production
+costs, simulation rules and save schema are unchanged. Resources/Borders/Charted
+buttons and unused toolbar state are removed; resource controls in Economy/Atlas
+and other toolbar actions remain.
+
+Canonical final combined training probe: 32 checks passed, zero failures, exit 0.
+An intermediate rerun found a test-only stale button reference across awaited
+layout frames; this checkpoint reacquires the current button before clicking.
+Canonical onboarding probe passes toolbar absence/default-resource/bounds checks
+but exits 1 on the pre-existing “retired Lens was constructed during normal
+inspection” assertion. Worker unchanged-baseline log reproduces that Lens failure;
+its separate old toolbar bounds failure is absent after cleanup. No full onboarding
+pass is claimed, and no Lens/campaign/battle redesign was added to this batch.
+
+All 117 original untracked import sidecars retain their hashes. Tests did not
+save/load a player world. Existing before_river_war.save mtime 15:54:52 predates
+this integration; no restore or overwrite performed. No QA override copied.
+Player PID 3981 was preserved running the earlier Mac build; normal Save & Quit
+and canonical relaunch are required to load these follow-ups. No restart or push
+performed. This closes the authorized delegated batch; further work stays with
+the coordinator. Older checkpoints below describe their historical state.
+
+---
+
 # Mac integration — September 6, 2026
 
 Canonical Mac checkout: `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`, `main`.

@@ -54,6 +54,12 @@ func _ready()->void:
 	hud.detail_dock.position=hud.detail_dock.get_global_mouse_position()
 	check(hud._dock_interaction_active(hud.detail_dock),"pointer stays over active training tab")
 	var population:=GameState.population_total
+	# The dock may rebuild during the frames used to finish scrolling.
+	# Click its current button, not a reference captured before those frames.
+	training_button=button_with_label(hud.detail_dock,"RECRUIT & TRAIN")
+	if not is_instance_valid(training_button):
+		push_error("Recruit button missing after scrolling")
+		get_tree().quit(1);return
 	training_button.pressed.emit()
 	await frames(6)
 	check(MilitaryCampaign._queued_trainees()==3,"three people enter actual training")
