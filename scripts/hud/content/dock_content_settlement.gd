@@ -22,7 +22,7 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"OWNED SETTLEMENT · %s" % String(settlement.get("classification","settlement")).to_upper(),
 		"title":String(settlement.get("name",terrain._settlement_display_name())).capitalize(),
-		"subtabs":["PEOPLE & LABOR","WORKS & DEFENSE","HISTORY"],
+		"subtabs":["OVERVIEW","WORKS","HISTORY"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -52,7 +52,7 @@ func tab(sub:int)->Dictionary:
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":SettlementModel.with_city_resources(settlement_id,func()->Array: return _works_blocks(GameState.simulation_metrics,profile,settlement,management))}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_history_blocks(metrics,settlement)}
-	return {"kpis":kpis,"brief":brief,"blocks":_people_blocks(productive,local_population,local_share,settlement,management)}
+	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_overview_blocks(settlement)}
 
 
 func _selected_settlement()->Dictionary:
@@ -196,3 +196,30 @@ func _history_blocks(metrics:Dictionary,settlement:Dictionary)->Array:
 
 func signature()->Array:
 	return [GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size()]
+
+func _overview_blocks(settlement:Dictionary)->Array:
+	var id:=String(settlement.get("id",""))
+	return [
+		{"type":"text","heading":"YOUR ROLE","text":"Choose this place’s direction. Its local leader assigns routine work; you do not need to distribute every worker. Buildings emerge from needs, labor and available materials."},
+		{"type":"actions","heading":"SHAPE THIS PLACE","items":[
+			{"label":"LOCAL LEADERSHIP","sub":"Choose who manages the settlement","primary":true,"on_press":func()->void:hud.open_detail(preload("res://scripts/hud/content/dock_detail_settlement_people.gd").new(terrain,hud,id))},
+			focused_action("LOCAL PRIORITY","Let the leader decide, or give a direction",_people_report.bind("priority"))]},
+		{"type":"actions","heading":"UNDERSTAND YOUR SETTLEMENT","items":[
+			focused_action("POPULATION","Growth and age groups",_people_report.bind("population")),
+			focused_action("DAILY WORK","Who works where, and why",_people_report.bind("work")),
+			{"label":"FOOD & MATERIALS","sub":"Reserves, sources and constraints","on_press":jump("economy",0)},
+			{"label":"RENAME","sub":"Change this place’s map name","on_press":terrain._open_settlement_naming_panel.bind(id)}]}]
+
+func _people_report(kind:String)->Dictionary:
+	var settlement:=_selected_settlement()
+	var population:=maxi(1,int(settlement.get("population",GameState.population_total)))
+	var share:=float(population)/maxf(1,GameState.population_total)
+	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
+	var productive:=maxi(0,roundi(float(profile.get("productive",terrain._able_population()))*share))
+	var management:=GovernmentPeopleSystem.settlement_management(String(settlement.get("id","")))
+	var all:=_people_blocks(productive,population,share,settlement,management)
+	match kind:
+		"population":return {"blocks":[all[0],all[1]]}
+		"work":return {"blocks":[{"type":"text","text":"These are the local leader’s current assignments. Change the settlement priority to influence the mix; essential needs still limit how much labor can move."},all[2]]}
+	var auto:=bool(management.get("auto_manage",true))
+	return {"brief":{"title":"Leader chooses priorities" if auto else "Current direction: "+String(management.get("focus_label","Balanced")),"why":String(management.get("focus_reason",""))+" "+String(management.get("focus_effect",""))},"blocks":[{"type":"text","text":"Choose a direction below. It takes effect through the leader’s labor allocation as the simulation advances. Auto returns the choice to the leader."},all[4]]}

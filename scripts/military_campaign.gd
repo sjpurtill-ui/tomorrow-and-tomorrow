@@ -625,17 +625,20 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 	var source_index:=_field_army_index(source_field_army_id) if source_field_army_id>0 else -1
 	var source_commander:Dictionary=(field_armies[source_index].get("commander",{}) as Dictionary).duplicate(true) if source_index>=0 else (home_army.get("commander",{}) as Dictionary).duplicate(true)
 	var fielded:=int(field_armies[source_index].get("troops",0)) if source_index>=0 else int(home_army.get("troops",0))
-	var requested:=mini(fielded,maxi(1,ceili(required)))
+	var source:Dictionary=field_armies[source_index] if source_index>=0 else home_army
+	var readiness:=clampf(float(source.get("readiness",.45))*.90,.15,1)
+	var supply:=clampf(float(source.get("supply_level",1)),0,1)
+	var requested:=mini(fielded,maxi(1,ceili(required/maxf(.05,supply*(.5+.5*readiness)))))
 	var detached:=_detach_field_army_formations(source_field_army_id,requested) if source_index>=0 else _detach_occupation_formations(requested)
 	var committed:=0
 	for formation in detached: committed+=int(formation.get("count",0))
 	if committed<=0: return {"error":"No surviving field personnel were available to hold the captured region.","troops":0,"required":required}
-	var force:Dictionary=simulator.create_formation_force("OCCUPATION â€¢ %s" % String(region.get("name","STRATEGIC REGION")),detached,clampf(float(home_army.get("morale",0.55))*0.92,0.20,1.0),clampf(float(home_army.get("readiness",0.45))*0.90,0.15,1.0))
+	var force:Dictionary=simulator.create_formation_force("OCCUPATION â€¢ %s" % String(region.get("name","STRATEGIC REGION")),detached,clampf(float(source.get("morale",0.55))*0.92,0.20,1.0),readiness)
 	force["civ_id"]=civ_id
 	force["region_id"]=region_id
 	force["region_name"]=String(region.get("name","STRATEGIC REGION"))
 	force["required"]=required
-	force["supply_level"]=clampf(field_provision_delivery_ratio(),0.10,1.0)
+	force["supply_level"]=supply
 	force["committed_day"]=int(GameState.elapsed_days)
 	force["commander"]=source_commander
 	occupation_forces.append(force)
@@ -727,7 +730,8 @@ func occupation_action_availability(civ_id:String,region_id:String,action:String
 	if String(region.get("controller",""))!="player": return {"error":"This region is not under your occupation."}
 	var force:=occupation_force_for_region(civ_id,region_id)
 	match action:
-		"reinforce_occupation":
+		"reinforce_occupation", "reinforce_control":
+			if not active_engagement.is_empty():return {"error":"Finish the active battle before transferring soldiers between forces."}
 			var source_id:=0
 			var available:=0
 			for army in field_armies:
@@ -735,7 +739,9 @@ func occupation_action_availability(civ_id:String,region_id:String,action:String
 					source_id=int(army.army_id); available=int(army.troops)
 			if available<=0: return {"error":"March a field army to this region first. Reinforcements must arrive before joining its garrison."}
 			var required:=CivilizationSystem.occupation_requirement(CivilizationSystem.civilizations[CivilizationSystem._civilization_index(civ_id)],region)
-			var gap:=maxi(1,ceili(required)-int(force.get("troops",0)))
+			if action=="reinforce_control":required=float(CivilizationSystem.occupation_control(civ_id,region_id,true).get("required",required))
+			var effectiveness:=clampf(float(force.get("supply_level",1.0)),.05,1.0)*(.5+.5*clampf(float(force.get("readiness",1.0)),0,1))
+			var gap:=maxi(1,ceili(required/effectiveness)-int(force.get("troops",0)))
 			return {"ok":true,"amount":mini(gap,available),"required":required,"source_army_id":source_id}
 		"evacuate_occupation":
 			if force.is_empty() or int(force.get("troops",0))<=0: return {"error":"No occupation force is stationed here."}
@@ -746,8 +752,8 @@ func occupation_action_availability(civ_id:String,region_id:String,action:String
 	return {"error":"Unknown occupation order."}
 
 
-func reinforce_occupation(civ_id:String,region_id:String)->Dictionary:
-	var availability:=occupation_action_availability(civ_id,region_id,"reinforce_occupation")
+func reinforce_occupation(civ_id:String,region_id:String,control_force:bool=false)->Dictionary:
+	var availability:=occupation_action_availability(civ_id,region_id,"reinforce_control" if control_force else "reinforce_occupation")
 	if availability.has("error"): return availability
 	var region:=CivilizationSystem.region_snapshot(civ_id,region_id)
 	var existing_index:=_occupation_force_index(civ_id,region_id)
@@ -4315,10 +4321,18 @@ func _demobilize_disabled(requested:int)->int:
 	return amount
 
 
+func _siege_capacity_for(threat:Dictionary,force:Dictionary,offensive:bool=true)->Dictionary:
+	var inputs:={"population":float(threat.get("target_population",1000)) if offensive else SettlementModel.primary_population_exact(),"defenders":int(threat.get("strength",threat.get("enemy_force",{}).get("troops",0))) if offensive else int(_home_defense_force().get("troops",0)),"besiegers":int(force.get("troops",0)),"besieger_supply":float(force.get("provision_ratio",force.get("supply_level",1.0))),"fortification":clampf(float(threat.get("terrain_defense",1))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
+	var capacity:=SiegeModel.capacity(inputs)
+	if not bool(capacity.viable):capacity.error="Too few supplied troops to hold the approaches: %.1f effective, about %d required for this settlement. Bring more soldiers and provisions; a patrol cannot maintain a siege."%[float(capacity.effective),int(capacity.required)]
+	return capacity
+
 func offensive_siege_availability(civ_id:String,region_id:String,army_id:int=0)->Dictionary:
 	var available:=offensive_campaign_availability(civ_id,region_id,army_id)
 	if available.has("error"): return available
 	if bool(available.incident.get("liberation_campaign",false)): return {"error":"Sieges currently require an opponent-owned settlement; use the existing liberation campaign for occupied foreign regions."}
+	var capacity:=_siege_capacity_for(available.incident,available.field_army)
+	if capacity.has("error"):return capacity
 	return available
 
 func start_offensive_siege(civ_id:String,region_id:String,army_id:int=0)->Dictionary:
@@ -4349,6 +4363,9 @@ func begin_siege()->Dictionary:
 		var point:Dictionary=field_armies[index].get("position",{})
 		if not point.has_all(["x","z"]): return {"error":"The investing army has no valid physical position."}
 		position=Vector2(float(point.x),float(point.z))
+	var besieger:Dictionary=field_armies[index] if offensive else active_threat.get("enemy_force",{})
+	var capacity:=_siege_capacity_for(active_threat,besieger,offensive)
+	if capacity.has("error"):return capacity
 	active_threat["target_position"]={"x":position.x,"z":position.y}
 	active_siege={"id":"siege_%d_%d_%d_%d" % [GameState.world_seed,day,army_id,threats_resolved],"active":true,"mode":"offensive" if offensive else "defensive","attacker_id":"player" if offensive else rival,"defender_id":rival if offensive else "player","start_day":day,"last_day":day,"days":0,"target_position":{"x":position.x,"z":position.y},"region_id":region_id,"army_id":army_id,"threat":active_threat.duplicate(true),"pressure":0.0,"fatigue":0.0,"blockade":0.0,"hardship":0.0,"starving_days":0,"relief":[]}
 	if not offensive:active_siege.home_city={"id":SettlementModel._primary_settlement_id(),"name":GameState.settlement_name,"population":SettlementModel.primary_population_exact(),"defense_stage":int(settlement_defense.get("stage",0))}
@@ -4436,6 +4453,8 @@ func _process_siege_day()->void:
 		else: defender_relief+=float(camp.troops)*supplied
 	active_siege["relief"]=camps
 	var inputs:={"besiegers":(own_strength if offensive else enemy_strength)+besieger_relief,"defenders":enemy_strength if offensive else own_strength,"population":float(threat.get("target_population",1000)) if offensive else SettlementModel.primary_population_exact(),"defender_relief":defender_relief,"besieger_supply":_siege_own_supply() if offensive else enemy_supply,"defender_food_days":float(enemy.get("food_days",0)) if offensive else float(GameState.simulation_metrics.get("food_days",0)),"fortification":clampf(float(threat.get("terrain_defense",1.0))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
+	if not bool(SiegeModel.capacity(inputs).viable):
+		_end_siege("The force can no longer cover the settlement approaches. The siege is lifted; surviving soldiers return.");return
 	active_siege=SiegeModel.advance(active_siege,day,inputs)
 	if float(active_siege.fatigue)>=.98 or int(active_siege.starving_days)>=7: _end_siege("The besiegers abandon the investment as their supply and endurance fail."); return
 	army_changed.emit(home_army.duplicate(true))

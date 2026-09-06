@@ -90,5 +90,8 @@ static func validate(region:Dictionary)->Array[String]:
 		var value:=float(data[field])
 		if not is_finite(value) or value<0 or value>1: errors.append("Invalid occupation measure: "+field)
 	if not data.history is Array or data.history.size()>16: errors.append("Occupation history exceeds its bound.")
+	if data.has("last_coercive_day"):
+		var day:Variant=data.last_coercive_day
+		if not (day is int or day is float) or not is_finite(float(day)) or float(day)<0 or floorf(float(day))!=float(day):errors.append("Invalid coercive operation day.")
 	if int(data.months)<0: errors.append("Negative occupation duration.")
 	return errors

@@ -3448,6 +3448,33 @@ func region_snapshot(civ_id:String,region_id:String)->Dictionary:
 	return (civilizations[index].strategic_regions[region_index] as Dictionary).duplicate(true)
 
 
+func occupation_control(civ_id:String,region_id:String,coercive:bool=false)->Dictionary:
+	var region:=region_snapshot(civ_id,region_id)
+	var index:=_civilization_index(civ_id)
+	if index<0 or region.is_empty() or String(region.get("controller",""))!="player":return {"error":"Select an occupied city."}
+	var force:=MilitaryCampaign.occupation_force_for_region(civ_id,region_id)
+	var troops:=maxi(0,int(force.get("troops",0)))
+	var supply:=clampf(float(force.get("supply_level",1.0)),0,1)
+	var readiness:=clampf(float(force.get("readiness",1.0)),0,1)
+	var effective:=troops*supply*(.5+.5*readiness)
+	var base:=occupation_requirement(civilizations[index],region)
+	var required:=base
+	if coercive:required+=float(region.get("population",0))*.3*(.25+.75*clampf(float(region.get("resistance",.5)),0,1))
+	var result:={"troops":troops,"effective":effective,"required":ceili(required),"base_required":ceili(base),"supply":supply,"controlled":effective>=ceili(required)}
+	if not bool(result.controlled):result.error="%d soldiers present, %.1f effective after supply and readiness; %d needed for %s. Bring and supply a larger garrison, or return local control."%[troops,effective,int(result.required),"city-wide coercion" if coercive else "effective occupation"]
+	return result
+
+func occupation_coercion_availability(civ_id:String,region_id:String,count:int=0)->Dictionary:
+	var control:=occupation_control(civ_id,region_id,true)
+	if control.has("error"):return control
+	var region:=region_snapshot(civ_id,region_id)
+	var state:=OCCUPATION_GOVERNANCE.state(region)
+	var remaining:=int(state.get("last_coercive_day",-9999))+30-int(GameState.elapsed_days)
+	if remaining>0:return {"error":"The force is committed to its previous coercive operation for another %d days."%remaining}
+	var capacity:=maxi(0,floori(float(control.effective)-int(control.base_required)))
+	if count>capacity:return {"error":"At most %d residents can be involved in this operation while troops maintain the occupation. A coercive operation commits the force for 30 days."%capacity}
+	return control
+
 func set_occupation_policy(civ_id:String,region_id:String,order:String)->Dictionary:
 	var index:=_civilization_index(civ_id)
 	if index<0: return {"error":"The region's polity no longer exists."}
@@ -3456,8 +3483,12 @@ func set_occupation_policy(civ_id:String,region_id:String,order:String)->Diction
 	if region_index<0: return {"error":"Select an occupied region."}
 	var region:Dictionary=civ.strategic_regions[region_index]
 	if String(region.controller)!="player": return {"error":"You do not govern this region."}
+	if order in ["raze","forced_labor","military_rule"]:
+		var ability:=occupation_coercion_availability(civ_id,region_id)
+		if ability.has("error"):return ability
 	var result:Dictionary=OCCUPATION_GOVERNANCE.change(region,order,int(GameState.elapsed_days))
 	if result.has("error"): return result
+	if order in ["raze","forced_labor","military_rule"]:result.region.governance["last_coercive_day"]=int(GameState.elapsed_days)
 	civ.strategic_regions[region_index]=result.region
 	var coercion:=float(OCCUPATION_GOVERNANCE.policy(result.region).coercion)
 	if coercion>.5 or order=="raze":
@@ -3483,12 +3514,14 @@ func occupation_resident_order(civ_id:String,region_id:String,order:String,count
 		if restored.has("error"):return restored
 		return {"ok":true,"message":"Local control returned to the original polity. The occupation force is returning physically; prior damage and grievance remain."}
 	if order!="kill_residents" or count<1:return {"error":"Choose a valid resident order and headcount."}
-	if MilitaryCampaign.occupation_force_for_region(civ_id,region_id).is_empty():return {"error":"No occupation force controls this location."}
+	var ability:=occupation_coercion_availability(civ_id,region_id,count)
+	if ability.has("error"):return ability
 	if count>floori(float(region.population)):return {"error":"The requested count exceeds the residents here."}
 	var deaths:=_apply_rival_civilian_deaths(civ,region_id,count)
 	civ=deaths.civilization
 	region=civ.strategic_regions[position]
 	var governance:=OCCUPATION_GOVERNANCE.state(region)
+	governance["last_coercive_day"]=int(GameState.elapsed_days)
 	governance.grievance=1.0;governance.trust=0.0;governance.legitimacy=0.0
 	governance.welfare=maxf(0,float(governance.welfare)-.25)
 	governance["mass_killing_deaths"]=int(governance.get("mass_killing_deaths",0))+int(deaths.dead)
@@ -3513,6 +3546,7 @@ func occupation_governance_snapshot(civ_id:String,region_id:String)->Dictionary:
 	result["damage"]=float(region.damage)
 	result["required_garrison"]=occupation_requirement(civilizations[_civilization_index(civ_id)],region)
 	result["garrison"]=int(MilitaryCampaign.occupation_force_for_region(civ_id,region_id).get("troops",0))
+	result["control"]=occupation_control(civ_id,region_id)
 	return result
 
 
@@ -4016,6 +4050,15 @@ func _capture_region(civ:Dictionary,region_id:String,home_result:Dictionary,riva
 		var liberation_message:="%s was liberated from %s and returned to %s. No player occupation or population record was created." % [String(region.name),String(civ.name),String(owner.name)]
 		_record_world_event("Strategic region liberated",liberation_message,"war",int(GameState.elapsed_days))
 		return {"civilization":civ,"outcome":{"region_liberated":true,"region":region.duplicate(true),"original_civ_id":String(owner.id),"territory_transferred":0.0,"message":liberation_message}}
+	var surviving:=maxi(0,int(home_result.get("remaining_troops",0)))
+	var held:=region.duplicate(true)
+	held.controller="player";held.resistance=clampf(.38+float(civ.cohesion)*.30+(.14 if String(region.get("role",""))=="capital" else 0.0),.25,.92)
+	var hold_need:=ceili(occupation_requirement(owner,held))
+	var effective_survivors:=surviving*clampf(float(home_result.get("supply_level",1)),0,1)*(.5+.45*clampf(float(home_result.get("readiness",1)),0,1))
+	if effective_survivors<hold_need:
+		var message:="Battle won, but %d surviving soldiers lack the supplied, ready strength to hold %s; about %d effective personnel are required. The city remains outside your control. Reinforce before another occupation attempt."%[surviving,String(region.name),hold_need]
+		_record_world_event("Victory without occupation",message,"war",int(GameState.elapsed_days))
+		return {"civilization":civ,"outcome":{"region_captured":false,"occupation_required":hold_need,"message":message}}
 	region["controller"]="player"
 	region["resistance"]=clampf(0.38+float(civ.cohesion)*0.30+(0.14 if String(region.get("role",""))=="capital" else 0.0),0.25,0.92)
 	region["integration"]=0.0
@@ -4202,7 +4245,8 @@ func player_effects()->Dictionary:
 			var integration:=float(region.get("integration",0.0))
 			var governance:=OCCUPATION_GOVERNANCE.state(region)
 			var extraction:=float(OCCUPATION_GOVERNANCE.policy(region).extraction)
-			var function:=(integration*.7+extraction*.3)*(1.0-float(region.get("damage",0.0)))*(.4+.6*float(governance.welfare))
+			var control:=occupation_control(String(civ.id),String(region.id))
+			var function:=(integration*.7+extraction*.3)*(1.0-float(region.get("damage",0.0)))*(.4+.6*float(governance.welfare))*(1.0 if bool(control.get("controlled",false)) else 0.0)
 			var damage:=float(region.get("damage",0.0))
 			occupied_population+=region_population
 			resistance_load+=region_population*resistance

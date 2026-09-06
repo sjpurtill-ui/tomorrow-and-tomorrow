@@ -734,6 +734,8 @@ func _force_result(force: Dictionary, initial: int, remaining: int, morale: floa
 		"initial_troops": initial,
 		"commander":force.get("commander",{}).duplicate(true),
 		"remaining_troops": remaining,
+		"supply_level":float(force.get("supply_level",1.0)),
+		"readiness":float(force.get("readiness",1.0)),
 		"casualties": initial - remaining,
 		"morale": morale,
 		"routed": remaining <= 0 or morale <= 0.15,

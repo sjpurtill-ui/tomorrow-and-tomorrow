@@ -1,5 +1,20 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.7
+
+Focused settlement/economy reports, nested Back navigation and actionable water
+access are integrated with authoritative city-force capacity rules. Small patrols
+cannot sustain a populated-city siege or automatically capture/control it after
+battle. Coercive orders require effective control and capacity; old saves remain
+intact. See RELEASE_2026_09_05_7.md and PLAYER_JOURNEY_BACKLOG.md.
+
+Running player PID46888 was launched on .6 and has not been interrupted. Save and
+exit normally, then use the canonical launcher to load structural updates.
+Further army/new-player journey work continues separately until verified.
+
+---
+# Historical integration checkpoint
+
 ## Latest: release 2026.09.05.6
 
 Continuous actual-world city encounters, faction uniforms and the occupation /

@@ -53,6 +53,7 @@ var detail_dock:PanelContainer
 var providers:Dictionary={}
 var _dock_signature:Array=[]
 var _detail_signature:Array=[]
+var detail_history:Array=[]
 
 var _queue_signature:String=""
 var _kpi_signature:String=""
@@ -90,10 +91,10 @@ func _layout()->void:
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(Tokens.DOCK_WIDTH,view.y-Tokens.DOCK_MARGIN_Y*2.0))
+		dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.DOCK_MARGIN_Y*2.0))
 	if detail_dock:
-		detail_dock.position=Vector2(Tokens.DOCK_DETAIL_X,Tokens.DOCK_MARGIN_Y)
-		detail_dock.set_deferred("size",Vector2(Tokens.DOCK_WIDTH,view.y-Tokens.DOCK_MARGIN_Y*2.0))
+		detail_dock.position=Vector2(Tokens.DOCK_X,Tokens.DOCK_MARGIN_Y)
+		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.DOCK_MARGIN_Y*2.0))
 	_position_toolbar()
 
 func force_dock_layout()->void:
@@ -103,7 +104,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(Tokens.DOCK_WIDTH,view.y-Tokens.DOCK_MARGIN_Y*2.0)
+		panel.size=Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.DOCK_MARGIN_Y*2.0)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 
@@ -630,6 +631,7 @@ func _build_dock()->void:
 		if dock.provider and dock.provider.has_method("open_expanded_tab") and dock.provider.open_expanded_tab(sub): close_dock())
 	detail_dock=DockPanelScript.new()
 	detail_dock.name="DetailDock"
+	detail_dock.back_mode=true
 	detail_dock.visible=false
 	add_child(detail_dock)
 	detail_dock.close_requested.connect(close_detail)
@@ -645,7 +647,8 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	if expanded and providers[section].has_method("open_expanded_tab") and providers[section].open_expanded_tab(sub):
 		close_dock();return
 	var was_open:=dock.visible
-	if section!=active_section: close_detail()
+	detail_history.clear()
+	detail_dock.visible=false
 	_layout()
 	set_active_section(section)
 	dock.present(providers[section],sub)
@@ -660,19 +663,36 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 
 func close_dock()->void:
 	dock.visible=false
-	close_detail()
+	detail_dock.visible=false
+	detail_history.clear()
 	set_active_section("")
 
 func open_detail(provider:Object,sub:int=0)->void:
-	## Deep detail (full ledgers, civilization reports, war planning) opens as
-	## a second dock to the right of the first — never a full-screen modal.
+	# One report at a time; retain the exact parent tab and scroll position.
+	var returning:Dictionary={}
+	for index in range(detail_history.size()-1,-1,-1):
+		if detail_history[index].provider==provider:
+			returning=detail_history[index];detail_history.resize(index);break
+	if returning.is_empty() and detail_dock.visible and detail_dock.provider!=provider:
+		detail_history.append({"provider":detail_dock.provider,"sub":detail_dock.sub,"scroll":detail_dock.body_scroll.scroll_vertical})
+	dock.visible=false
 	_layout()
 	detail_dock.present(provider,sub)
+	if not returning.is_empty():detail_dock.body_scroll.set_deferred("scroll_vertical",returning.scroll)
 	_detail_signature=(provider as Object).signature()+[sub]
 	detail_dock.visible=true
 
 func close_detail()->void:
-	if detail_dock: detail_dock.visible=false
+	if not detail_dock or not detail_dock.visible: return
+	if not detail_history.is_empty():
+		var previous:Dictionary=detail_history.pop_back()
+		detail_dock.present(previous.provider,previous.sub)
+		detail_dock.body_scroll.set_deferred("scroll_vertical",previous.scroll)
+		_detail_signature=previous.provider.signature()+[previous.sub]
+		return
+	detail_dock.visible=false
+	dock.visible=active_section!="" and dock.provider!=null
+	if dock.visible: dock.rebuild_body()
 
 func live_refresh_dock()->void:
 	## Called on the terrain's 0.75s live-report tick; rebuilds the dock body
@@ -698,9 +718,12 @@ func request_immediate_dock_refresh()->void:
 
 
 func _refresh_active_dock_after_action()->void:
-	if dock==null or not dock.visible or dock.provider==null: return
-	_dock_signature=(dock.provider as Object).signature()+[dock.sub]
-	dock.rebuild_body()
+	if detail_dock and detail_dock.visible and detail_dock.provider:
+		_detail_signature=detail_dock.provider.signature()+[detail_dock.sub]
+		detail_dock.rebuild_body()
+	elif dock and dock.visible and dock.provider:
+		_dock_signature=dock.provider.signature()+[dock.sub]
+		dock.rebuild_body()
 
 # --- Refresh ----------------------------------------------------------------
 

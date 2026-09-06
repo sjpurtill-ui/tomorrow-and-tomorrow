@@ -12,7 +12,7 @@ func meta()->Dictionary:
 
 func tab(sub:int)->Dictionary:
 	var data:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary: return SettlementModel.with_local_population(func()->Dictionary: return _local_tab(sub)))
-	(data.blocks as Array).append(_trade_block())
+	if sub!=0: (data.blocks as Array).append({"type":"actions","items":[focused_action("CITY DELIVERIES","Routes, shipments and requirements",_economy_report.bind("trade"))]})
 	return data
 
 func _local_tab(sub:int)->Dictionary:
@@ -28,20 +28,24 @@ func _local_tab(sub:int)->Dictionary:
 	var forecast:Dictionary=metrics.get("food_forecast_90",{})
 	var shortage_day:=int(forecast.get("first_shortage_day",-1))
 	var kpis:Array=[
-		{"label":"FOOD RESERVE","value":"%.1f d" % food_days,"delta":"%+.0f/day" % net,"delta_color":Tokens.GREEN if net>=0.0 else Tokens.RED,"accent":Tokens.AMBER,"tip":"Days of adult-equivalent rations in store"},
+		{"label":"FOOD RESERVE","value":"%.1f days" % food_days,"delta":"%+.0f/day" % net,"delta_color":Tokens.GREEN if net>=0.0 else Tokens.RED,"accent":Tokens.AMBER,"tip":"Days of adult-equivalent rations in store"},
 		{"label":"INTAKE","value":"%d%%" % intake,"delta":"diet %d%%" % diet,"delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Share of today's ration need actually received"},
-		{"label":"WATER","value":"%.1f d" % water_days,"delta":"%d%%" % water_intake,"delta_color":Tokens.GREEN if water_intake>=100 else Tokens.RED,"accent":Tokens.TEAL,"tip":"Stored drinking water"},
+		{"label":"WATER","value":"%.1f days" % water_days,"delta":"%d%%" % water_intake,"delta_color":Tokens.GREEN if water_intake>=100 else Tokens.RED,"accent":Tokens.TEAL,"tip":"Stored drinking water"},
 		{"label":"OUTLOOK","value":"%d d" % shortage_day if shortage_day>0 else "clear","delta":"to shortage" if shortage_day>0 else "90-day forecast","delta_color":Tokens.RED if shortage_day>0 else Tokens.GREEN,"accent":Tokens.RED if shortage_day>0 else Tokens.GREEN,"tip":"90-day seasonal forecast"},
 	]
 	var day:=int(GameState.elapsed_days)
 	var raw_brief:Dictionary=terrain._provisions_decision_brief(metrics,water,FoodSystem.issued_on_day(day))
+	if not water.has("required_today"):
+		raw_brief={"status":"First collection report pending","why":"The settlement has not completed its first day of water collection.","next":"Review nearby water access, then let time advance to see actual collection."}
+	elif water_intake<98:
+		raw_brief["next"]="Review water access and ask the local leader to prioritize water. The leader assigns the work; a direction cannot create a missing source."
 	var status:=String(raw_brief.get("status",""))
 	var tone:="info" if "STABLE" in status else ("danger" if ("SHORTAGE" in status or "SHORTFALL" in status) else "warn")
-	var brief:=adapt_brief(raw_brief,tone,"")
+	var brief:=adapt_brief(raw_brief,tone,"WATER ACCESS",func()->void:_open_water())
 	match sub:
 		1: return {"kpis":kpis,"brief":_materials_brief(),"blocks":[Charts.stocks(GameState.selected_player_settlement_id)]+_materials_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_who_eats_blocks(metrics)}
-	return {"kpis":kpis,"brief":brief,"blocks":_food_blocks(metrics)}
+	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_food_overview()}
 
 func _food_blocks(metrics:Dictionary)->Array:
 	var produced:=float(metrics.get("food_production",0.0))
@@ -185,7 +189,7 @@ func _who_eats_blocks(metrics:Dictionary)->Array:
 
 func signature()->Array:
 	var result:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,_local_signature)
-	result.append_array([GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size()])
+	result.append_array([GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
 	return result
 
 func _local_signature()->Array:
@@ -220,3 +224,42 @@ func open_expanded_tab(sub:int)->bool:
 	if sub!=1:return false
 	preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"materials")
 	return true
+
+func _food_overview()->Array:
+	return [{"type":"text","heading":"READING THE RESERVES","text":"Days of food and water describe what is stored against current need. They are not a countdown while production continues. Local leaders handle routine provisioning."},
+		{"type":"actions","heading":"UNDERSTAND THE SUPPLY","items":[
+			focused_action("RESERVE OUTLOOK","History and seasonal forecast",_economy_report.bind("outlook")),
+			focused_action("TODAY’S FOOD","Produced, eaten, spoiled and sent away",_economy_report.bind("flow")),
+			focused_action("FOOD SOURCES","Where it comes from and what is stored",_economy_report.bind("sources")),
+			focused_action("CITY DELIVERIES","Routes, shipments and requirements",_economy_report.bind("trade"))]},
+		{"type":"actions","heading":"GIVE DIRECTION","items":[
+			{"label":"LOCAL PRIORITY","sub":"Review the leader’s direction","on_press":jump("settlement",0)},
+			{"label":"DISCUSS FOOD POLICY","sub":"Give an instruction to your council","on_press":jump("civ",2)}]}]
+
+func _economy_report(kind:String)->Dictionary:
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:
+		return SettlementModel.with_local_population(func()->Dictionary:
+			if kind=="trade":return {"blocks":[_trade_block()]}
+			var blocks:=_food_blocks(GameState.simulation_metrics)
+			if kind=="outlook":return {"blocks":[blocks[0]]}
+			if kind=="flow":return {"blocks":[blocks[1],blocks[2]]}
+			return {"blocks":blocks.slice(3)}))
+
+func _open_water()->void:
+	hud.open_detail(preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,"WATER ACCESS",String(meta().title),_water_report,signature))
+
+func _water_report()->Dictionary:
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:
+		var water:Dictionary=GameState.water_metrics
+		var access:=ResourceSystem.water_access_snapshot(terrain._discovery_context())
+		var id:=GameState.selected_player_settlement_id
+		var management:=GovernmentPeopleSystem.settlement_management(id)
+		var recognized:=bool(access.get("recognized",false))
+		var text:="No recognized freshwater source is recorded here. Direction can increase survey and carrying effort; it does not create water. Inspect charted terrain for a river or send scouts to learn about nearby ground."
+		if recognized:text="%s · %.1f km away. %s"%[String(access.source_kind).capitalize(),float(access.distance_km),"Within collection reach. Household fetching and organized carriers supply the settlement." if bool(access.accessible) else "Beyond current collection reach. More carriers cannot make a distant source instantly accessible."]
+		var daily:="The first daily collection report is pending. Unpause to advance the settlement; a zero before that report is not a measured shortage."
+		if water.has("required_today"):daily="Daily drinking portions: %.0f collected last day / %.0f needed per day. Reserve: %.0f portions. One portion meets one person’s daily drinking need; this is an abstract unit, not liters. Collection changes as people work; choosing a priority does not refill stores."%[float(water.get("collected_today",0)),float(water.required_today),float(water.get("stored",0))]
+		return {"brief":{"title":"Current direction: "+String(management.get("focus_label","Leader decides")),"why":String(management.get("focus_effect",""))},"blocks":[{"type":"text","heading":"THE SOURCE","text":text},{"type":"text","heading":"COLLECTION AND STORAGE","text":daily},{"type":"actions","items":[{"label":"PRIORITIZE WATER","sub":"Ask the leader to change local work","primary":true,"on_press":func()->void:
+			var result:=GovernmentPeopleSystem.set_settlement_focus(id,"water")
+			if not bool(result.get("ok",false)):terrain._report_military_action({"message":String(result.get("reason","Direction unavailable."))})
+			hud.request_immediate_dock_refresh()},{"label":"LET LEADER DECIDE","sub":"Restore automatic local priorities","on_press":func()->void:GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]}]})

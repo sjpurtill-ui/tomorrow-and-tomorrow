@@ -21,6 +21,8 @@ var kpi_row:GridContainer
 var brief_panel:PanelContainer
 var body_scroll:ScrollContainer
 var body:VBoxContainer
+var close_button:Button
+var back_mode:bool=false
 
 func _ready()->void:
 	name="DockPanel" if name=="" or String(name).begins_with("@") else name
@@ -51,9 +53,11 @@ func _ready()->void:
 	esc_hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	header_row.add_child(esc_hint)
 	var close:=Button.new()
+	close_button=close
 	close.name="DockClose"
-	close.text="×"
-	close.custom_minimum_size=Vector2(30,30)
+	close.text="Back" if back_mode else "Map"
+	close.custom_minimum_size=Vector2(52,32)
+	close.tooltip_text="Return to the previous screen · Esc" if back_mode else "Return to the map · Esc"
 	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	close.add_theme_font_size_override("font_size",14)
 	close.add_theme_color_override("font_color",Tokens.TEXT_DIM)
@@ -111,6 +115,7 @@ func _ready()->void:
 
 
 func present(new_provider:Object,new_sub:int=0)->void:
+	if provider!=new_provider or sub!=new_sub: body_scroll.scroll_vertical=0
 	provider=new_provider
 	sub=maxi(0,new_sub)
 	rebuild()
@@ -122,6 +127,7 @@ func rebuild()->void:
 	eyebrow_label.text=String(meta.get("eyebrow",""))
 	title_label.text=String(meta.get("title",""))
 	var subtabs:Array=meta.get("subtabs",[])
+	tabs_row.visible=subtabs.size()>1
 	sub=clampi(sub,0,maxi(0,subtabs.size()-1))
 	while tab_buttons.size()<subtabs.size():
 		var tab:=Button.new()
@@ -228,6 +234,7 @@ func _rebuild_brief(brief:Dictionary)->void:
 
 func _on_tab_pressed(index:int)->void:
 	if index==sub: return
+	body_scroll.scroll_vertical=0
 	sub=index
 	rebuild()
 	tab_changed.emit(sub)

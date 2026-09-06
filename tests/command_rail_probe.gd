@@ -15,6 +15,7 @@ func _ready()->void:
 	ConsequenceEngine.reset_for_new_world()
 	CivilizationSystem.reset_for_new_world()
 	GameState.select_founding_focus("provision")
+	PeopleDirection.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	var terrain:=TERRAIN_SCENE.instantiate()
 	add_child(terrain)
 	await get_tree().process_frame
@@ -193,22 +194,22 @@ func _ready()->void:
 	terrain._on_hud_section_requested("",0)
 	await get_tree().process_frame
 
-	# Scout report: a returning party pauses the world and opens its full report.
+	# Scout arrivals notify without interrupting time or replacing the current screen.
 	terrain._set_game_speed(1.0)
 	terrain._on_scout_report_returned({"day":12,"duration_days":30,"personnel":6,"returned_personnel":5,"lost_personnel":1,"stayed_personnel":0,"distance_km":140,"target_label":"OPEN EXPLORATION","target_id":"open_world","contacts":["The Kalveth"],"recruits":3,"windfalls":["They mark a workable timber occurrence about 60 km out."]})
 	await get_tree().process_frame
-	_expect(terrain.hud.detail_dock.visible,"scout report detail dock did not open")
-	_expect(terrain.game_speed==0.0,"scout report did not pause the world")
-	_expect(terrain.hud.handle_escape(),"escape did not consume with scout report open")
+	_expect(not terrain.hud.detail_dock.visible,"scout arrival unexpectedly replaced the current screen")
+	_expect(terrain.game_speed==1.0,"scout report unexpectedly changed game speed")
+	terrain._set_game_speed(0)
 	await get_tree().process_frame
 
-	# Detail dock: opens beside the primary dock; Esc closes detail first.
+	# Detail report replaces its parent; Esc restores the parent.
 	terrain._on_hud_section_requested("settlement",2)
 	await get_tree().process_frame
 	terrain.hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(terrain,terrain.hud))
 	await get_tree().process_frame
 	_expect(terrain.hud.detail_dock.visible,"detail dock did not open")
-	_expect(terrain.hud.detail_dock.position.x>terrain.hud.dock.position.x,"detail dock is not beside the primary dock")
+	_expect(not terrain.hud.dock.visible,"detail report must replace the primary panel")
 	_expect(terrain.hud.handle_escape(),"escape did not consume with docks open")
 	_expect(not terrain.hud.detail_dock.visible and terrain.hud.dock.visible,"escape did not close the detail dock first")
 	_expect(terrain.hud.handle_escape(),"escape did not consume with the primary dock open")

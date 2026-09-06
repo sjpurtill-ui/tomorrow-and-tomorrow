@@ -22,6 +22,10 @@ func tab(_sub:int)->Dictionary:
 func jump(section:String,sub:int)->Callable:
 	return func()->void: hud.section_requested.emit(section,sub)
 
+func focused_action(title:String,description:String,reader:Callable)->Dictionary:
+	return {"label":title,"sub":description,"tip":description,"on_press":func()->void:
+		hud.open_detail(preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,title,String(meta().get("title","")),reader,signature))}
+
 ## Maps the legacy {status,why,next} brief dicts onto the dock brief shape.
 func adapt_brief(brief:Dictionary,tone:String,action_label:String,on_action:Variant=null)->Dictionary:
 	var result:={

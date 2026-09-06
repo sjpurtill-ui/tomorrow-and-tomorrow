@@ -20,6 +20,9 @@ func preview(civ_id:String,region_id:String,count:int,status:String)->Dictionary
 	if region.is_empty() or String(region.controller)!="player": return {"error":"Select a region you occupy."}
 	var garrison:Dictionary=MilitaryCampaign.occupation_force_for_region(civ_id,region_id)
 	if int(garrison.get("troops",0))<=0: return {"error":"An unsupported occupation cannot organize a transfer."}
+	if status!="citizen":
+		var control:=CivilizationSystem.occupation_coercion_availability(civ_id,region_id,count)
+		if control.has("error"):return control
 	if count>floori(float(region.population)): return {"error":"There are fewer residents here than requested."}
 	var available_housing:=maxi(0,GameState.housing_capacity-ceili(SettlementModel.primary_population_exact()))
 	for transfer:Dictionary in data.transfers: available_housing-=int(transfer.people)
@@ -57,6 +60,7 @@ func depart(civ_id:String,region_id:String,count:int,status:String)->Dictionary:
 	region.population=float(region.population)-count
 	var governance:Dictionary=preload("res://scripts/occupation_governance.gd").state(region)
 	if status!="citizen":
+		governance["last_coercive_day"]=int(GameState.elapsed_days)
 		governance.grievance=clampf(float(governance.grievance)+.10,0,1)
 		civ.player_relation.opinion=clampf(float(civ.player_relation.get("opinion",0))-.08,-1,1)
 	region.governance=governance

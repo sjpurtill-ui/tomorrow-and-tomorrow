@@ -5,6 +5,14 @@ extends RefCounted
 const HISTORY_LIMIT:=24
 const RELIEF_LIMIT:=8
 
+static func capacity(inputs:Dictionary)->Dictionary:
+	# Existing perimeter model, now also enforced before investment. Fortified
+	# approaches need more coverage; ration shortfalls reduce effective manpower.
+	var population:=maxf(1,float(inputs.get("population",1)))
+	var need:=(sqrt(population)*5+maxf(0,float(inputs.get("defenders",0)))*.3+maxf(0,float(inputs.get("defender_relief",0))))*(1+clampf(float(inputs.get("fortification",0)),0,1)*.5)
+	var effective:=maxf(0,float(inputs.get("besiegers",0)))*clampf(float(inputs.get("besieger_supply",0)),0,1)
+	return {"required":ceilf(need*.5),"effective":effective,"ring_need":need,"viable":effective>=ceilf(need*.5)}
+
 static func advance(previous:Dictionary,day:int,inputs:Dictionary)->Dictionary:
 	var state:=previous.duplicate(true)
 	if state.is_empty() or day<=int(state.get("last_day",day)): return state
@@ -12,14 +20,14 @@ static func advance(previous:Dictionary,day:int,inputs:Dictionary)->Dictionary:
 	var relief:=maxf(0,float(inputs.get("defender_relief",0)))
 	var supply:=clampf(float(inputs.get("besieger_supply",0)),0,1)
 	var population:=maxf(1,float(inputs.get("population",1)))
-	var ring_need:=maxf(20,sqrt(population)*5+float(inputs.get("defenders",0))*.3+relief)
-	var closure:=clampf(strength/ring_need,0,.9)*(.35+.65*supply)
+	var force_capacity:=capacity(inputs)
+	var closure:=clampf(float(force_capacity.effective)/maxf(1,float(force_capacity.ring_need)),0,.9) if bool(force_capacity.viable) else 0.0
 	var hunger:=clampf(1-float(inputs.get("defender_food_days",30))/7,0,1)
 	var fort:=clampf(float(inputs.get("fortification",0)),0,1)
 	state["last_day"]=day
 	state["days"]=maxi(0,day-int(state.start_day))
 	state["blockade"]=closure
-	state["pressure"]=clampf(float(state.get("pressure",0))+.004*closure/(1+fort*3)+hunger*.008-relief/maxf(1,strength)*.004,0,1)
+	state["pressure"]=clampf(float(state.get("pressure",0))+.004*closure/(1+fort*3)+hunger*.008*closure-relief/maxf(1,strength)*.004,0,1)
 	state["fatigue"]=clampf(float(state.get("fatigue",0))+.0015+(.012 if supply<.45 else 0)+maxf(0,.3-closure)*.003,0,1)
 	state["hardship"]=clampf(hunger*.75+closure*.15+float(state.pressure)*.1,0,1)
 	state["supply_ratio"]=supply

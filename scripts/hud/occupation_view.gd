@@ -43,6 +43,8 @@ var previous_aspect:int
 var rights:Button
 var transfer_page:=0
 var reinforce:Button
+var control_explanation:Label
+var reviewed_reinforcements:=0
 
 static func open(civ:String,region:String)->void:
 	var view=load("res://scripts/hud/occupation_view.gd").new();view.civ_id=civ;view.region_id=region
@@ -80,7 +82,7 @@ func _ready()->void:
 	alert=_label(column,"",15,GOLD)
 	reinforce=_button(column,"Reinforcements",_reinforce,GOLD);reinforce.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	var vital:=GridContainer.new();vital.columns=2;vital.add_theme_constant_override("h_separation",20);vital.add_theme_constant_override("v_separation",8);column.add_child(vital)
-	_metric(vital,"garrison","Garrison coverage","Soldiers present / required. Effective security also needs supply; understaffing increases resistance in the monthly model.")
+	_metric(vital,"garrison","Effective garrison","Soldiers present / required. Effective security also needs supply; understaffing increases resistance in the monthly model.")
 	_metric(vital,"resistance","Resistance","Opposition to occupation, not a revolt probability. Grievance and weak security increase it; security and legitimacy reduce it over time.")
 	tabs=TabContainer.new();tabs.use_hidden_tabs_for_min_size=false;tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(tabs)
 	var government:=_box(tabs);government.name="Government"
@@ -110,6 +112,11 @@ func _ready()->void:
 	rights=_button(transfers,"Grant equal citizenship",_emancipate)
 	var control:=_box(tabs);control.name="Control"
 	_label(control,"Decisions that change the city permanently",20,RED)
+	control_explanation=_label(control,"",14,GOLD)
+	_button(control,"Assign arrived troops to strengthen control",func():
+		var ready:=MilitaryCampaign.occupation_action_availability(civ_id,region_id,"reinforce_control")
+		if ready.has("error"):feedback.text=String(ready.error);return
+		reviewed_reinforcements=int(ready.amount);pending_decision="reinforce_control";tabs.hide();decision.show();decision_title.text="Strengthen the garrison";decision_detail.text="Transfer %d soldiers from the army stationed here into the occupation force. They leave that field army; no people are created. Supply and resistance can change the requirement."%int(ready.amount);decision_commit.text="Assign %d soldiers"%int(ready.amount);_layout())
 	_label(control,"Review a decision to see its consequences before issuing it. Local self-rule as a policy keeps your administration; restoring control below ends it.",14,MUTED)
 	policy_buttons.raze=_button(control,"Review destruction of infrastructure",_review.bind("raze"),RED)
 	_button(control,"Review return to original polity",_review.bind("restore_self_rule"))
@@ -146,20 +153,27 @@ func _refresh()->void:
 	var data:=current;summary.text=String(data.name)
 	var missing:=maxi(0,ceili(float(data.required_garrison))-int(data.garrison))
 	var availability:=MilitaryCampaign.occupation_action_availability(civ_id,region_id,"reinforce_occupation")
-	reinforce.visible=missing>0
+	reinforce.visible=data.get("control",{}).has("error")
 	reinforce.text="Assign %d arrived soldiers"%int(availability.amount) if availability.has("amount") else "Bring a field army to reinforce"
 	reinforce.tooltip_text=String(availability.get("error","Transfers soldiers from the strongest army stationed here into this garrison."))
-	alert.text=("Garrison short by %d soldiers. "%missing if missing>0 else "Garrison requirement met. ")+"%d residents · %s"%[roundi(float(data.population)),String(data.milestone)]
-	metrics.garrison.value.text="%d / %d"%[int(data.garrison),ceili(float(data.required_garrison))];metrics.garrison.bar.value=100*int(data.garrison)/maxf(1,float(data.required_garrison))
+	var control:Dictionary=data.get("control",{})
+	alert.text=("Troops present; control unsupported. " if control.has("error") else "Effective garrison in place. ")+"%d residents · %s"%[roundi(float(data.population)),String(data.milestone)]
+	alert.tooltip_text=String(control.get("error","Supplied and ready troops meet the current population and resistance requirement."))
+	metrics.garrison.bar.tooltip_text=String(control.get("error","Current occupation requirement met."))
+	metrics.garrison.value.text="%.1f / %d"%[float(control.get("effective",data.garrison)),ceili(float(data.required_garrison))];metrics.garrison.bar.value=100*float(control.get("effective",data.garrison))/maxf(1,float(data.required_garrison))
 	for key:String in metrics:
 		if key=="garrison":continue
 		metrics[key].value.text="%d%%"%roundi(float(data.get(key,0))*100);metrics[key].bar.value=float(data.get(key,0))*100
 	detail.text="%s · Administrative legitimacy %d%% · Independence support %d%%"%["Reconstruction authorized" if bool(data.reconstruction) else ("Ruins persist until reconstruction" if bool(data.ruined) else "Inhabited settlement"),roundi(float(data.legitimacy)*100),roundi(float(data.support)*100)]
 	if selected_policy.is_empty():selected_policy=String(data.policy)
+	var coercion:=CivilizationSystem.occupation_coercion_availability(civ_id,region_id)
+	control_explanation.text=String(coercion.get("error","The force meets the city-wide control requirement. Each coercive operation commits it for 30 days; resident operations are limited by troops left after garrison duties."))
 	var rules:Dictionary=MODEL.POLICIES[selected_policy];var remaining:=maxi(0,int(data.last_order_day)+30-int(GameState.elapsed_days))
 	policy_title.text=String(rules.label);policy_detail.text=String(rules.description)
 	policy_terms.text="Policy settings: rights %d%% · coercion %d%%\nExtraction %d%% · local autonomy %d%%\n%s"%[roundi(float(rules.rights)*100),roundi(float(rules.coercion)*100),roundi(float(rules.extraction)*100),roundi(float(rules.autonomy)*100),"Next change in %d days."%remaining if remaining>0 else "Locks administrative changes for 30 days. Social effects take years."]
 	policy_commit.disabled=remaining>0 or selected_policy==String(data.policy);policy_commit.text="Current policy" if selected_policy==String(data.policy) else "Review enslavement" if selected_policy=="forced_labor" else "Adopt "+String(rules.label)
+	if selected_policy in ["forced_labor","military_rule"] and coercion.has("error"):
+		policy_commit.disabled=true;policy_terms.text+="\n"+String(coercion.error)
 	for key:String in policy_buttons:
 		policy_buttons[key].disabled=(remaining>0) if key in ["raze","reconstruct"] else false
 		policy_buttons[key].tooltip_text="Next administrative order in %d days."%remaining if remaining>0 else ""
@@ -175,9 +189,13 @@ func _refresh()->void:
 			if int(group.id)==selected:community_choice.select(community_choice.item_count-1)
 	rights.disabled=community_choice.item_count==0
 func _review(order:String)->void:
+	if order in ["raze","kill_residents","forced_labor","military_rule"]:
+		var allowed:=CivilizationSystem.occupation_coercion_availability(civ_id,region_id,int(resident_count.value) if order=="kill_residents" else 0)
+		if allowed.has("error"):feedback.text=String(allowed.error);return
+
 	tabs.hide();reviewed_residents=int(resident_count.value)
 	pending_decision=order;decision.show();decision_title.text={"raze":"Destroy infrastructure","reconstruct":"Authorize reconstruction","restore_self_rule":"Return control","kill_residents":"Kill %d residents"%int(resident_count.value),"forced_labor":"Impose enslavement"}.get(order,order)
-	decision_detail.text={"raze":"All infrastructure damage becomes 100%. Grievance rises by 25 points, institutions lose up to 30 points, and relations worsen. Residents stay alive here. Another administrative order requires 30 days.","reconstruct":"Authorize gradual repairs supported by supply and local institutions. This does not instantly rebuild the city or charge a separate construction budget. Administrative changes lock for 30 days.","restore_self_rule":"Control returns to the original polity. Your garrison begins its physical return journey. Prior damage and grievance remain.","kill_residents":"These are permanent deaths. Trust and legitimacy become zero, grievance reaches 100%, resistance rises and relations collapse. No residents are transferred.","forced_labor":"Residents are held in slavery. Extraction increases while welfare, trust and legitimacy deteriorate. Relations worsen immediately; inherited grievance persists. Administrative changes lock for 30 days."}.get(order,"")
+	decision_detail.text={"raze":"All infrastructure damage becomes 100%. Grievance rises by 25 points, institutions lose up to 30 points, and relations worsen. Residents stay alive here. Another administrative order requires 30 days.","reconstruct":"Authorize gradual repairs supported by supply and local institutions. This does not instantly rebuild the city or charge a separate construction budget. Administrative changes lock for 30 days.","restore_self_rule":"Control returns to the original polity. Your garrison begins its physical return journey. Prior damage and grievance remain.","kill_residents":"These are permanent deaths. Trust and legitimacy become zero, grievance reaches 100%, resistance rises and relations collapse. No residents are transferred. This commits the force for 30 days.","forced_labor":"Residents are held in slavery. Extraction increases while welfare, trust and legitimacy deteriorate. Relations worsen immediately; inherited grievance persists. Administrative changes lock for 30 days."}.get(order,"")
 	decision_commit.text=decision_title.text;_layout()
 func _reinforce()->void:
 	var availability:=MilitaryCampaign.occupation_action_availability(civ_id,region_id,"reinforce_occupation")
@@ -189,7 +207,11 @@ func _reinforce()->void:
 		else:feedback.text=String(availability.error)
 func _confirm_decision()->void:
 	var order:=pending_decision;pending_decision="";decision.hide();tabs.show()
-	if order in ["kill_residents","restore_self_rule"]:_resident_order(order)
+	if order=="reinforce_control":
+		var ready:=MilitaryCampaign.occupation_action_availability(civ_id,region_id,"reinforce_control")
+		if ready.has("error") or int(ready.get("amount",0))!=reviewed_reinforcements:feedback.text=String(ready.get("error","The available force changed. Review the assignment again."));return
+		var result:=MilitaryCampaign.reinforce_occupation(civ_id,region_id,true);feedback.text=String(result.get("error",result.get("message","")));_refresh()
+	elif order in ["kill_residents","restore_self_rule"]:_resident_order(order)
 	elif not order.is_empty():_order(order)
 func _resident_order(order:String)->void:
 	var result:=CivilizationSystem.occupation_resident_order(civ_id,region_id,order,reviewed_residents);feedback.text=String(result.get("error",result.get("message","")));_refresh()
