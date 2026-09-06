@@ -12239,7 +12239,7 @@ func _refresh_player_field_army_markers()->void:
 		_apply_warfare_formation_view(marker,view)
 		# Own armies are known reports; marker visibility must not depend on
 		# unsurveyed ground beneath a cosmetic stack offset.
-		marker.visible=bool(view.get("visible",false))
+		marker.visible=bool(view.get("visible",false)) and int(get_meta("city_encounter_army",-1))!=int(army_id)
 		_refresh_player_field_army_path(view)
 	for army_id in player_field_army_markers.keys():
 		if visible_ids.has(String(army_id)): continue
@@ -19853,7 +19853,8 @@ func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
 			garrison_label=Label3D.new();garrison_label.name="GarrisonLabel";garrison_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;garrison_label.fixed_size=true;garrison_label.no_depth_test=true;garrison_label.font_size=9;figures.add_child(garrison_label);garrison_label.scale=Vector3.ONE/SETTLEMENT_DETAIL_SCALE;garrison_label.position.y=4
 		if garrison_label:garrison_label.text="YOUR GARRISON · %d SOLDIERS" % int(army.troops)
 
-		figures.configure(candidate.counts,Color(WarfareMapPresentation.PLAYER_SELECTED_COLOR if bool(candidate.selected) else WarfareMapPresentation.PLAYER_COLOR))
+		figures.configure(candidate.counts,Color(WarfareMapPresentation.PLAYER_COLOR))
+		figures.visible=int(get_meta("city_encounter_army",-1))!=int(army.get("army_id",0))
 		figures.set_animation("walk" if String(army.get("status",""))=="moving" else "idle")
 		figures.animation_speed=1.0 if game_speed>0.0 else 0.0
 		if needs_ground:

@@ -36,7 +36,7 @@ func _verify_siege_hud()->void:
 	var hud:CanvasLayer=get_tree().root.get_meta("persistent_siege_view")
 	assert(hud.last_snapshot.active and MilitaryCampaign.active_engagement.is_empty())
 	await _siege_capture("orders")
-	await click(hud.camera_buttons.gate.get_global_rect().get_center());assert(hud.scene.zoom==65)
+	await click(hud.camera_buttons.gate.get_global_rect().get_center());assert(is_equal_approx(hud.scene.zoom,.12 if hud.terrain!=null else 65.0))
 	await click(hud.camera_buttons.overview.get_global_rect().get_center())
 	var stable:Dictionary=MilitaryCampaign.export_state().duplicate(true)
 	for attempt in 20:

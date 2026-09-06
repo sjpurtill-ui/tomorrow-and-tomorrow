@@ -13,7 +13,11 @@ func _ready()->void:
 		assert(get_viewport().get_visible_rect().encloses(view.summary.get_global_rect()))
 		for button:Button in view.policy_buttons.values():
 			if button.is_visible_in_tree(): assert(get_viewport().get_visible_rect().encloses(button.get_global_rect()))
-		assert(get_viewport().get_visible_rect().encloses(view.feedback.get_global_rect()))
+		if not get_viewport().get_visible_rect().encloses(view.feedback.get_global_rect()):
+			print("OCCUPATION_LAYOUT feedback=",view.feedback.get_global_rect()," viewport=",get_viewport().get_visible_rect()," panel=",view.panel.get_global_rect())
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png("res://artifacts/occupation-overflow.png")
+			get_tree().quit(1);return
 		for tabs:TabContainer in view.find_children("*","TabContainer",true,false):
 			for tab in tabs.get_tab_count():
 				tabs.current_tab=tab

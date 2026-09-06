@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Tomorrow and Tomorrow"
-config/version="2026.09.05.5"
+config/version="2026.09.05.6"
 run/main_scene="res://local_terrain.tscn"
 config/features=PackedStringArray("4.7")
 

@@ -1,5 +1,28 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.6
+
+Continuous actual-world city encounters, faction uniforms and the occupation /
+recovery decision interface are integrated from codex/continuous-city-encounter,
+base 87d184d. See RELEASE_2026_09_05_6.md for scope and verification.
+
+City approach, siege, assault, round result and return share the same live city
+geometry. Friendly and enemy troops have distinct cloth and marked standards.
+Occupation policies, resident conditions, movement and destructive decisions have
+separate controls and explicit consequences. Existing saves remain compatible.
+
+Outposts, sliced vegetation and unfinished Blender authoring remain HELD.
+Prior worktrees and unrelated local changes are preserved. Only tested deliveries
+reach main; a stopped worker's partial code is not automatically release-ready.
+
+Use WORKER_PROMPT.txt for new workers and WORKER_HANDOFF.md for coordination.
+Canonical player: C:/Users/sjpur/TomorrowandTomorrow on main, launched only via
+tools/launch_game.ps1 or the Play Tomorrow and Tomorrow desktop shortcut.
+A running process requires a normal save/exit/relaunch to load structural changes.
+
+---
+# Historical integration checkpoints
+
 ## Latest: release 2026.09.05.5
 
 Battle/siege HUD delivery through worker 018cedd is integrated as 540d1d4

@@ -24,7 +24,8 @@ func setup(data:Dictionary,color:Color)->void:
 	var gold:=StandardMaterial3D.new(); gold.albedo_color=Color("ffd16a"); gold.metallic=.5
 	pole.material_override=gold
 	var flag:=MeshInstance3D.new(); var cloth:=BoxMesh.new(); cloth.size=Vector3(2.2,1.3,.08)
-	flag.mesh=cloth; flag.position=Vector3(1,5.2,0); flag.material_override=gold; standard.add_child(flag)
+	var faction_cloth:=StandardMaterial3D.new();faction_cloth.albedo_color=color
+	flag.mesh=cloth; flag.position=Vector3(1,5.2,0); flag.material_override=faction_cloth; standard.add_child(flag)
 	label=Label3D.new(); label.font_size=32; label.pixel_size=.025; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test=true; label.modulate=Color("ffe3a0"); label.position=Vector3(0,7,0); add_child(label)
 	_update_label()

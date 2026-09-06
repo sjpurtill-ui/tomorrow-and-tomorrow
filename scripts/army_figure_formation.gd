@@ -46,7 +46,7 @@ static func _asset(id: String) -> Dictionary:
 		vertices.append(Vector3(data.positions[i*3], data.positions[i*3+1], data.positions[i*3+2]))
 		normals.append(Vector3(data.normals[i*3], data.normals[i*3+1], data.normals[i*3+2]))
 		colors.append(Color(data.colors[i*4], data.colors[i*4+1], data.colors[i*4+2]))
-		uv.append(Vector2(float(data.team[i]), 0))
+		uv.append(Vector2(maxf(float(data.team[i]),CityEncounterWorld.cloth_mask(colors[-1])), 0))
 		lookup.append(Vector2((float(i % int(data.width)) + 0.5) / float(data.width), floorf(float(i) / float(data.width)) + 0.5))
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
@@ -72,11 +72,14 @@ func configure(counts: Dictionary, faction: Color, spacing: float = 1.25) -> voi
 	if signature == key: return
 	signature = key
 	figure_count = desired
+	var old_standard:=get_node_or_null("AllegianceStandard")
+	if old_standard!=null:remove_child(old_standard);old_standard.queue_free()
 	for child: Node in batches.values():
 		remove_child(child)
 		child.queue_free()
 	batches.clear(); materials.clear()
 	if total == 0: return
+	CityEncounterWorld.standard(self,faction)
 	# Largest remainder allocation preserves composition and the exact visual budget.
 	var allocations := {}
 	var remainders: Array[Dictionary] = []

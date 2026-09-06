@@ -22,7 +22,8 @@ func _ready()->void:
 			if DisplayServer.get_name()!="headless":
 				await RenderingServer.frame_post_draw
 				get_viewport().get_texture().get_image().save_png("res://artifacts/recovery-%d-%d.png" % [index,dimensions.x])
-		view._prepare();assert(not MilitaryCampaign.recovery.data.preparation.is_empty())
+		view._prepare();assert(MilitaryCampaign.recovery.data.preparation.is_empty())
+		view.decision_commit.pressed.emit();assert(not MilitaryCampaign.recovery.data.preparation.is_empty())
 		view._cancel();assert(MilitaryCampaign.recovery.data.preparation.is_empty())
 		view.queue_free();await get_tree().process_frame
 	MilitaryCampaign.recovery.capture(String(civ.id))
@@ -31,6 +32,8 @@ func _ready()->void:
 	var occupied_view:CanvasLayer=get_tree().root.get_meta("recovery_view")
 	occupied_view.tabs.current_tab=2
 	occupied_view._resistance("protect")
+	assert(MilitaryCampaign.recovery.data.occupied[0].order.is_empty())
+	occupied_view.decision_commit.pressed.emit()
 	assert(not MilitaryCampaign.recovery.data.occupied[0].order.is_empty())
 	await get_tree().process_frame;await get_tree().process_frame
 	assert(get_viewport().get_visible_rect().encloses(occupied_view.occupied.get_global_rect()))

@@ -9,6 +9,7 @@ var context:Dictionary={}
 var heights:=PackedFloat32Array()
 var reference_height:=0.0
 var ground:MeshInstance3D
+var live_height:Callable
 
 static func encounter_position(engagement:Dictionary)->Vector2:
 	var threat:Dictionary=engagement.get("threat",{})
@@ -97,6 +98,7 @@ func build(center:Vector2,query:Callable=Callable())->void:
 		_water_material(water); add_child(water)
 
 func height_at(point:Vector2)->float:
+	if live_height.is_valid():return float(live_height.call(point))
 	if heights.is_empty(): return 0.0
 	var grid:Vector2=(point/SPAN+Vector2(.5,.5))*(GRID-1)
 	grid=grid.clamp(Vector2.ZERO,Vector2.ONE*(GRID-1.001))

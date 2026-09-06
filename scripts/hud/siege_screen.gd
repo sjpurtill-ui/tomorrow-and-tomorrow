@@ -91,9 +91,13 @@ func _ready()->void:
 	ui_font=load("res://assets/fonts/battle/Barlow-Medium.ttf");display_font=load("res://assets/fonts/battle/BarlowCondensed-Bold.ttf")
 	canvas=Control.new();canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(canvas)
 	stage=SubViewportContainer.new();stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);stage.stretch=true;canvas.add_child(stage)
-	viewport=SubViewport.new();viewport.own_world_3d=true;viewport.msaa_3d=Viewport.MSAA_8X;viewport.size=Vector2i(1600,900);stage.add_child(viewport)
-	scene=CITY.new();viewport.add_child(scene);stage.gui_input.connect(scene.navigate)
+	viewport=SubViewport.new();viewport.own_world_3d=false;viewport.msaa_3d=Viewport.MSAA_8X;viewport.size=Vector2i(1600,900);stage.add_child(viewport)
 	terrain=_terrain(get_tree().root)
+	if terrain!=null:
+		viewport.own_world_3d=false;viewport.world_3d=terrain.get_world_3d()
+		scene=preload("res://scripts/city_encounter_scene.gd").new();scene.terrain=terrain
+	else:viewport.own_world_3d=true;scene=CITY.new()
+	viewport.add_child(scene);stage.gui_input.connect(scene.navigate)
 	_build_header();_build_details();_build_commands();_build_bottom();_build_result()
 	canvas.resized.connect(_on_resize);_refresh();_layout();print("SIEGE_UI_OPEN native-siege-v1 id=",siege_id," day=",GameState.elapsed_days)
 func _build_header()->void:
@@ -120,7 +124,7 @@ func _build_commands()->void:
 func _build_bottom()->void:
 	bottom=_panel();var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);bottom.add_child(row)
 	var cameras:=_box(row);_label(cameras,"CAMERA",10,MUTED);var camera_row:=HBoxContainer.new();cameras.add_child(camera_row)
-	for place:String in ["overview","gate","city"]:camera_buttons[place]=_button(camera_row,place.capitalize(),_camera.bind(place))
+	for place:String in ["overview","gate","city"]:camera_buttons[place]=_button(camera_row,"Army" if place=="gate" and terrain!=null else place.capitalize(),_camera.bind(place))
 	var time_row:=HBoxContainer.new();cameras.add_child(time_row)
 	for item in [["Pause",0],["Play",1],["Fast",3]]:time_buttons[str(item[1])]=_button(time_row,item[0],_speed.bind(float(item[1])),TEAL)
 	var center:=_box(row);center.size_flags_horizontal=Control.SIZE_EXPAND_FILL;time_label=_label(center,"",12,MUTED);time_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER

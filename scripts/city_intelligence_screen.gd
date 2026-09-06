@@ -36,12 +36,13 @@ func _button(parent:Node,text:String,callback:Callable,primary:bool=false)->Butt
 	button.add_theme_stylebox_override("normal",style);button.pressed.connect(callback);parent.add_child(button);return button
 func _ready()->void:
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
-	var background:=ColorRect.new();background.color=Color("090f11");background.set_anchors_and_offsets_preset(PRESET_FULL_RECT);add_child(background)
-	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(PRESET_FULL_RECT);add_child(margin)
+	mouse_filter=MOUSE_FILTER_IGNORE
+	var background:=ColorRect.new();background.color=Color("090f11");background.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE);background.offset_left=-420;add_child(background)
+	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE);margin.offset_left=-420;add_child(margin)
 	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,24)
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",12);margin.add_child(root)
 	var top:=HBoxContainer.new();root.add_child(top)
-	var eyebrow:=_label(top,"FOREIGN CITY  /  INTELLIGENCE DOSSIER",13,T.GOLD);eyebrow.size_flags_horizontal=SIZE_EXPAND_FILL
+	var eyebrow:=_label(top,"CITY ENCOUNTER",13,T.GOLD);eyebrow.size_flags_horizontal=SIZE_EXPAND_FILL
 	_button(top,"RETURN TO MAP",_close)
 	title=_label(root,"Settlement report",28,T.INK)
 	selector=OptionButton.new();selector.fit_to_longest_item=false;selector.custom_minimum_size.y=34;root.add_child(selector)
@@ -51,15 +52,16 @@ func _ready()->void:
 	selector.item_selected.connect(func(_i:int):refresh())
 	var banner:=_box(root);summary=_label(banner,"",18,T.GOLD);provenance=_label(banner,"",13,T.TEXT_SOFT)
 	var body:=HBoxContainer.new();body.add_theme_constant_override("separation",18);body.size_flags_vertical=SIZE_EXPAND_FILL;root.add_child(body)
-	var left:=VBoxContainer.new();left.size_flags_horizontal=SIZE_EXPAND_FILL;left.add_theme_constant_override("separation",10);body.add_child(left)
+	var left:=VBoxContainer.new();left.visible=false;left.size_flags_horizontal=SIZE_EXPAND_FILL;left.add_theme_constant_override("separation",10);body.add_child(left)
 	control_label=_label(left,"",14,T.TEXT_SOFT)
 	var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);left.add_child(grid)
 	for key:String in INTEL.FIELDS:
 		var card:=_box(grid);_label(card,String(INTEL.FIELDS[key].label).to_upper(),11,T.TEXT_SOFT)
 		cards[key]={"value":_label(card,"Unknown",19,T.INK),"note":_label(card,"Not observed",12,T.MUTED)}
 	var stores:=_box(grid);_label(stores,"DEPOSITS & STORES",11,T.TEXT_SOFT);_label(stores,"Not surveyed",19,T.INK);_label(stores,"Individual stores remain unknown.",12,T.MUTED)
-	var right:=VBoxContainer.new();right.custom_minimum_size.x=320;right.add_theme_constant_override("separation",12);body.add_child(right)
+	var right:=VBoxContainer.new();right.custom_minimum_size.x=0;right.size_flags_horizontal=SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",12);body.add_child(right)
 	_button(right,"SHOW THIS CITY ON MAP",_show_map,true)
+	_button(root,"CITY INTELLIGENCE / ORDERS",func():left.visible=not left.visible;right.visible=not left.visible)
 	var tabs:=TabContainer.new();tabs.size_flags_vertical=SIZE_EXPAND_FILL;right.add_child(tabs)
 	var recon:=VBoxContainer.new();recon.name="Reconnaissance";recon.add_theme_constant_override("separation",12);tabs.add_child(recon)
 	_label(recon,"Bring back better evidence",20,T.INK)
@@ -75,7 +77,7 @@ func _ready()->void:
 	for force:Dictionary in MilitaryCampaign.field_armies:
 		if int(force.get("troops",0))<=0:continue
 		army_choice.add_item(String(force.name));army_choice.set_item_metadata(army_choice.item_count-1,int(force.army_id))
-	var terrain_scene:=get_tree().current_scene
+	var terrain_scene:=CityEncounterWorld.terrain(get_tree().root)
 	if terrain_scene and "selected_army_id" in terrain_scene:
 		for i in army_choice.item_count:
 			if int(army_choice.get_item_metadata(i))==int(terrain_scene.selected_army_id):army_choice.select(i)
@@ -97,6 +99,11 @@ func _ready()->void:
 
 	if army_choice.item_count>0 or not MilitaryCampaign.pending_aftermath.is_empty():tabs.current_tab=1
 	feedback=_label(root,"Estimates describe returned observations. Conditions may have changed.",13,T.TEXT_SOFT)
+	var world:=CityEncounterWorld.terrain(get_tree().root)
+	var known:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
+	if world!=null and not known.is_empty() and MilitaryCampaign.active_engagement.is_empty():
+		world.camera.size=maxf(.22,preload("res://scripts/foreign_settlement_visual.gd").framing_size(known))
+		world._set_camera_target(Vector3(known.position.x,0,known.position.z));world._refresh_contact_encounter_markers()
 	refresh()
 func _close()->void:get_parent().queue_free()
 func _show_map()->void:
@@ -117,16 +124,20 @@ func _diplomacy()->void:
 	if scene and scene.has_method("_open_civilizations_panel"):
 		scene.selected_civilization_id=owner;scene.selected_civilization_region_id=city_id;_close();scene._open_civilizations_panel()
 func _operate(besiege:bool)->void:
+	if not MilitaryCampaign.active_siege.is_empty() and String(MilitaryCampaign.active_siege.region_id)==city_id:
+		_close();preload("res://scripts/hud/siege_screen.gd").open();return
+	if not MilitaryCampaign.active_engagement.is_empty():
+		_close();MilitaryCommandUI._open_battle_graphics();return
 	var city:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
 	var owner:=String(city.get("controller",""));if owner=="":owner=String(city.get("civ_id",""))
 	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
 	var result:=MilitaryCampaign.order_city_operation(chosen,owner,city_id,besiege)
 	if result.has("error"):feedback.text=String(result.error);refresh();return
-	if bool(result.get("queued",false)):feedback.text=String(result.message);refresh();return
+	if bool(result.get("queued",false)):feedback.text=String(result.message);_close();return
 	var scene:=get_tree().current_scene
 	_close()
 	if besiege:preload("res://scripts/hud/siege_screen.gd").open()
-	elif scene and scene.has_method("_open_war_planning"):scene._open_war_planning()
+	elif not MilitaryCampaign.active_engagement.is_empty():MilitaryCommandUI.call_deferred("_open_battle_graphics")
 func refresh()->void:
 	if selector.item_count==0:
 		title.text="No reported settlements";summary.text="A returned report must first identify a city.";send.disabled=true;march.disabled=true;attack.disabled=true;siege.disabled=true;return
@@ -160,6 +171,8 @@ func refresh()->void:
 	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
 	var availability:=MilitaryCampaign.city_operation_quote(chosen,owner,city_id)
 	attack.disabled=availability.has("error");siege.disabled=attack.disabled
+	var same_siege:=not MilitaryCampaign.active_siege.is_empty() and String(MilitaryCampaign.active_siege.region_id)==city_id
+	if same_siege:attack.disabled=false;siege.disabled=false
 	garrison_button.visible=false
 	for force:Dictionary in MilitaryCampaign.occupation_forces:
 		if String(force.get("region_id",""))==city_id and int(force.get("troops",0))>0:garrison_button.visible=true
@@ -171,6 +184,7 @@ func refresh()->void:
 	siege.text="BESIEGE NOW" if here else "MARCH & BESIEGE"
 	military_note.text=String(availability.get("error","Army is at this city. Your order starts hostilities immediately." if here else "Approach takes about %d days. Hostilities begin on arrival." % int(availability.get("days",0))))
 
+	if same_siege:attack.text="RETURN TO SIEGE";siege.visible=false;military_note.text="Your army is maintaining this siege. Return to its orders and supply situation."
 	if garrison_button.visible:military_note.text=MilitaryCampaign.city_force_summary(city_id)
 
 func _process(delta:float)->void:

@@ -4,7 +4,8 @@ extends Node3D
 signal formation_selected(details: Dictionary)
 const FIGURES := preload("res://scripts/army_figure_formation.gd")
 const MAX_PER_SIDE := 96
-const COLORS := [Color("5ec7cc"), Color("dc7863")]
+const COLORS := [Color("67b4cf"), Color("de513d")]
+var faction_colors:Array=COLORS.duplicate()
 var carnage: Node3D
 var generals:Array = []
 var camera: Camera3D
@@ -28,30 +29,39 @@ var landscape:BattleLandscape
 var contact:=BattleContact.new()
 var contact_sparks:Array[MeshInstance3D]=[]
 var spark_cursor:=0
+var live_terrain:Node
+var city_center:=Vector3.ZERO
+
+func local_ground(point:Vector2)->float:
+	var world:=to_global(Vector3(point.x,0,point.y))
+	world.y=live_terrain._close_surface_height_at(world.x,world.z)
+	return to_local(world).y
 
 func _ready() -> void:
 	carnage=preload("res://scripts/battle_carnage.gd").new(); add_child(carnage)
-	var environment := WorldEnvironment.new()
-	var settings := Environment.new()
-	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color("a7c9c8")
-	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	settings.ambient_light_color = Color("d4dfd8")
-	settings.ambient_light_energy = 0.48
-	environment.environment = settings; add_child(environment)
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-42,-28,0); sun.light_color = Color("ffe4b2")
-	sun.light_energy = 1.25; sun.shadow_enabled = true
-	add_child(sun)
+	if live_terrain==null:
+		var environment := WorldEnvironment.new()
+		var settings := Environment.new()
+		settings.background_mode = Environment.BG_COLOR
+		settings.background_color = Color("a7c9c8")
+		settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		settings.ambient_light_color = Color("d4dfd8")
+		settings.ambient_light_energy = 0.48
+		environment.environment = settings; add_child(environment)
+		var sun := DirectionalLight3D.new()
+		sun.rotation_degrees = Vector3(-42,-28,0); sun.light_color = Color("ffe4b2")
+		sun.light_energy = 1.25; sun.shadow_enabled = true
+		add_child(sun)
 	landscape=BattleLandscape.new(); add_child(landscape)
-	landscape.build(Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z),CivilizationSystem.ground_survey_authority)
+	if live_terrain==null:landscape.build(Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z),CivilizationSystem.ground_survey_authority)
+	else:landscape.live_height=local_ground
 	carnage.ground_query=Callable(landscape,"height_at")
 	for i in 16:
 		var spark:=MeshInstance3D.new(); var mesh:=SphereMesh.new(); mesh.radius=.12; mesh.height=.24; mesh.radial_segments=6; mesh.rings=3; spark.mesh=mesh
 		var mat:=StandardMaterial3D.new(); mat.albedo_color=Color("ffe6aa"); mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; spark.material_override=mat; spark.visible=false
 		add_child(spark); contact_sparks.append(spark)
 	camera = Camera3D.new(); camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.far = 1000; add_child(camera); _camera_update()
+	camera.near=.001; camera.far = 1000; add_child(camera); _camera_update()
 	for side in 2:
 		var army := FIGURES.new(); army.figure_limit = MAX_PER_SIDE
 		army.rotation.y = PI if side == 1 else 0.0; army.position.z = 8 if side == 1 else -8
@@ -60,7 +70,7 @@ func _ready() -> void:
 			var missile := MeshInstance3D.new(); var ball := SphereMesh.new()
 			ball.radius = .10; ball.height = .20; ball.radial_segments = 5; ball.rings = 2
 			missile.mesh = ball; var projectile_mat := StandardMaterial3D.new()
-			projectile_mat.albedo_color = COLORS[side].lightened(.3); missile.material_override = projectile_mat
+			projectile_mat.albedo_color = faction_colors[side].lightened(.3); missile.material_override = projectile_mat
 			missile.visible = false; add_child(missile); missiles.append(missile)
 
 func reset(attacker: Dictionary, defender: Dictionary) -> void:
@@ -75,7 +85,7 @@ func reset(attacker: Dictionary, defender: Dictionary) -> void:
 		for child in army.get_children():
 			if child is Label3D or child.has_meta("battle_banner"): child.free()
 		army.signature = ""
-		army.configure(initial_counts[side],COLORS[side],2.0)
+		army.configure(initial_counts[side],faction_colors[side],2.0)
 		var width := 0.0
 		for id in army.batches:
 			var batch: MultiMeshInstance3D = army.batches[id]
@@ -105,23 +115,24 @@ func reset(attacker: Dictionary, defender: Dictionary) -> void:
 				group.poses[i].origin.x += shift
 				(group.batch as MultiMeshInstance3D).multimesh.set_instance_transform(i,group.poses[i])
 			var banner := Label3D.new(); banner.text = String(group.role).to_upper()
-			banner.font_size = 24; banner.pixel_size = .025; banner.modulate = COLORS[side].lightened(.3)
+			banner.font_size = 24; banner.pixel_size = .025; banner.modulate = faction_colors[side].lightened(.3)
 			banner.billboard = BaseMaterial3D.BILLBOARD_ENABLED; banner.position = group.center+Vector3(0,4,0)
 			army.add_child(banner)
 			group["banner"]=banner
 			var flag:=MeshInstance3D.new(); var cloth:=BoxMesh.new(); cloth.size=Vector3(1.2,.75,.05); flag.mesh=cloth
-			var flag_mat:=StandardMaterial3D.new(); flag_mat.albedo_color=COLORS[side]; flag.material_override=flag_mat
+			var flag_mat:=StandardMaterial3D.new(); flag_mat.albedo_color=faction_colors[side]; flag.material_override=flag_mat
 			flag.position=group.center+Vector3(0,3.3,0); flag.set_meta("battle_banner",true); army.add_child(flag)
 			group["flag"]=flag
 	for side in 2:
 		var commander:Dictionary=forces[side].get("commander",{})
 		if commander.is_empty(): continue
 		var general:=preload("res://scripts/battle_general.gd").new()
-		add_child(general); general.setup(commander,COLORS[side]); general.set_meta("side",side)
+		add_child(general); general.setup(commander,faction_colors[side]); general.set_meta("side",side)
 		general.position=Vector3(14,0,22 if side==1 else -22); general.rotation.y=PI if side==1 else 0.0
 		general.home=general.position; generals.append(general)
 	contact.configure(self)
-	zoom = 65.0
+	zoom = 220.0 if live_terrain!=null else 65.0
+	if live_terrain!=null:target=city_center*.65;yaw=PI+.28
 	_camera_update()
 
 func apply_snapshot(attacker: Dictionary, defender: Dictionary, round_record: Dictionary = {}, final_outcome: String = "") -> void:
@@ -147,7 +158,7 @@ func apply_snapshot(attacker: Dictionary, defender: Dictionary, round_record: Di
 			if group.dead[i]: continue
 			group.dead[i] = true
 			var fallen_pose:Transform3D=group.batch.multimesh.get_instance_transform(i)
-			carnage.burst(armies[group.side].to_global(fallen_pose.origin),clock)
+			carnage.burst(to_local(armies[group.side].to_global(fallen_pose.origin)),clock)
 			var custom := Color(float(i%13)/13.0,clock,1,1)
 			(group.batch as MultiMeshInstance3D).multimesh.set_instance_custom_data(i,custom)
 
@@ -219,7 +230,7 @@ func _process(delta: float) -> void:
 			missile.visible = fired > 0 and not sources.is_empty() and t > 0 and t < 1 and not _routed(side)
 			if missile.visible:
 				var source:Dictionary=sources[i%sources.size()]
-				var start:Vector3=armies[side].to_global(source.center)+Vector3((i-3.5)*.35,2,0)
+				var start:Vector3=to_local(armies[side].to_global(source.center))+Vector3((i-3.5)*.35,2,0)
 				var finish:=Vector3(start.x,1.0,8 if side==0 else -8)
 				var arc:=.3 if source.id in ["rifle_infantry","machine_gun_company","hand_cannon_team"] else 6.0
 				missile.position=start.lerp(finish,t)+Vector3(0,sin(PI*t)*arc,0)
@@ -229,15 +240,15 @@ func _process(delta: float) -> void:
 func _camera_update() -> void:
 	if camera == null: return
 	camera.position = target+Vector3(sin(yaw)*cos(elevation),sin(elevation),cos(yaw)*cos(elevation))*140.0
-	camera.look_at(target); camera.size = zoom
+	camera.look_at(to_global(target)); camera.size = zoom*(.001 if live_terrain!=null else 1.0)
 
 func orbit(amount: float,tilt:float=0.0) -> void:
 	cinematic=false
 	yaw += amount; elevation=clampf(elevation+tilt,.22,1.35); _camera_update()
 
 func ground_at(point:Vector2)->Vector3:
-	var origin:=camera.project_ray_origin(point)
-	var direction:=camera.project_ray_normal(point)
+	var origin:=to_local(camera.project_ray_origin(point))
+	var direction:=global_basis.inverse()*camera.project_ray_normal(point)
 	if direction.y>=0: return target
 	var near:=0.0; var far:=2000.0
 	for step in 24:
@@ -266,13 +277,13 @@ func zoom_by(amount: float) -> void:
 func pick(point: Vector2) -> void:
 	cinematic=false
 	for general in generals:
-		if minf(camera.unproject_position(general.global_position+Vector3(0,6,0)).distance_to(point),camera.unproject_position(general.global_position).distance_to(point))<28:
-			target=general.global_position+Vector3(0,2,0); zoom=24; _camera_update()
+		if minf(camera.unproject_position(general.to_global(Vector3(0,6,0))).distance_to(point),camera.unproject_position(general.global_position).distance_to(point))<28:
+			target=to_local(general.to_global(Vector3(0,2,0))); zoom=24; _camera_update()
 			formation_selected.emit(general.details()); return
 	var best := 28.0; var selected: Dictionary = {}
 	for group in groups:
 		var world: Vector3 = armies[group.side].to_global(group.center)
-		var distance := camera.unproject_position(world+Vector3(0,4,0)).distance_to(point)
+		var distance := camera.unproject_position(armies[group.side].to_global(group.center+Vector3(0,4,0))).distance_to(point)
 		for i in group.poses.size():
 			var pose:Transform3D=group.batch.multimesh.get_instance_transform(i)
 			distance=minf(distance,camera.unproject_position(armies[group.side].to_global(pose.origin+Vector3(0,1,0))).distance_to(point))
@@ -284,7 +295,7 @@ func pick(point: Vector2) -> void:
 	for i in selected.poses.size():
 		if selected.dead[i]: continue
 		center+=selected.batch.multimesh.get_instance_transform(i).origin; count+=1
-	target=armies[selected.side].to_global(center/maxi(1,count) if count>0 else selected.center)+Vector3(0,1,0)
+	target=to_local(armies[selected.side].to_global(center/maxi(1,count) if count>0 else selected.center))+Vector3(0,1,0)
 	zoom=32; _camera_update()
 	formation_selected.emit({"name":String(selected.id).replace("_"," ").capitalize(),"role":selected.role,"count":selected.remaining,"initial":selected.initial,"side":selected.side,"morale":forces[selected.side].get("morale",1),"readiness":forces[selected.side].get("readiness",1)})
 
@@ -294,7 +305,24 @@ func representative_count() -> int:
 	return total
 
 func set_landscape(engagement:Dictionary)->void:
-	landscape.build(BattleLandscape.encounter_position(engagement),CivilizationSystem.ground_survey_authority)
+	if live_terrain!=null:
+		var at:=BattleLandscape.encounter_position(engagement)
+		scale=Vector3.ONE*.001
+		rotation.y=-PI*.5
+		position=Vector3(at.x+.07,live_terrain._close_surface_height_at(at.x+.07,at.y),at.y)
+		if String(engagement.get("home_side",""))=="attacker":
+			for army:Dictionary in MilitaryCampaign.field_armies:
+				if int(army.get("army_id",0))!=int(engagement.get("home_force_id",-1)):continue
+				var point:Dictionary=army.get("position",{})
+				var actual:=Vector2(float(point.get("x",at.x)),float(point.get("z",at.y)))
+				var approach:=at-actual
+				if approach.length()>.015 and approach.length()<.4:
+					var forward:=approach.normalized();var anchor:=actual+forward*.008
+					position=Vector3(anchor.x,live_terrain._close_surface_height_at(anchor.x,anchor.y),anchor.y)
+					rotation.y=atan2(forward.x,forward.y)
+		city_center=to_local(Vector3(at.x,live_terrain._close_surface_height_at(at.x,at.y),at.y))
+		landscape.live_height=local_ground
+	else:landscape.build(BattleLandscape.encounter_position(engagement),CivilizationSystem.ground_survey_authority)
 
 func contact_flash(at:Vector3,variant:int)->void:
 	var spark:MeshInstance3D=contact_sparks[spark_cursor%contact_sparks.size()]; spark_cursor+=1

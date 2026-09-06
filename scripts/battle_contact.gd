@@ -45,9 +45,9 @@ func advance(view:Node3D)->void:
 		for i in group.poses.size():
 			if group.dead[i]: continue
 			var pose:Transform3D=group.batch.multimesh.get_instance_transform(i)
-			var world:Vector3=view.armies[group.side].to_global(pose.origin)
+			var world:Vector3=view.to_local(view.armies[group.side].to_global(pose.origin))
 			world.y=view.landscape.height_at(Vector2(world.x,world.z))
-			pose.origin=view.armies[group.side].to_local(world)
+			pose.origin=view.armies[group.side].to_local(view.to_global(world))
 			group.batch.multimesh.set_instance_transform(i,pose)
 			var ranged_attack:bool=active and group.role in ["ranged","siege"] and view._can_attack(group)
 			group.batch.multimesh.set_instance_custom_data(i,Color(fposmod(view.clock/1.75+float(i%7)*.11,1),0,0,1 if ranged_attack else 0))
@@ -68,10 +68,10 @@ func advance(view:Node3D)->void:
 			# Roots stay planted after approach. Existing weapon/arm VAT poses carry
 			# the strike; no reciprocal whole-body translation or leaning.
 			var destination:=Vector3(pair.center.x+sin(pair.slot*1.9)*.12,0,pair.center.y-sign*float(pair.gap)*.5)
-			var start:Vector3=view.armies[side].to_global(group.poses[index].origin)
+			var start:Vector3=view.to_local(view.armies[side].to_global(group.poses[index].origin))
 			var world:Vector3=start.lerp(destination,smoothstep(0,2.5,view.clock))
 			world.y=view.landscape.height_at(Vector2(world.x,world.z))
-			var pose:=Transform3D(Basis.IDENTITY,view.armies[side].to_local(world))
+			var pose:=Transform3D(Basis.IDENTITY,view.armies[side].to_local(view.to_global(world)))
 			group.batch.multimesh.set_instance_transform(index,pose)
 			var state:=4.0 if striking and active and connected else (2.0 if view.clock<2.5 else (3.0 if active and connected else 0.0))
 			group.batch.multimesh.set_instance_custom_data(index,Color(progress,reaction,0,state))

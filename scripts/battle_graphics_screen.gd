@@ -127,8 +127,20 @@ func _ready()->void:
 	ui_font=load("res://assets/fonts/battle/Barlow-Medium.ttf")
 	display_font=load("res://assets/fonts/battle/BarlowCondensed-Bold.ttf")
 	stage=SubViewportContainer.new();stage.set_anchors_and_offsets_preset(PRESET_FULL_RECT);stage.stretch=true;add_child(stage)
-	viewport=SubViewport.new();viewport.own_world_3d=true;viewport.size=Vector2i(1600,900);viewport.msaa_3d=Viewport.MSAA_8X;stage.add_child(viewport)
-	view=BattleDiorama.new();viewport.add_child(view);view.formation_selected.connect(_selected);stage.gui_input.connect(_view_input)
+	viewport=SubViewport.new();viewport.own_world_3d=false;viewport.size=Vector2i(1600,900);viewport.msaa_3d=Viewport.MSAA_8X;stage.add_child(viewport)
+	view=BattleDiorama.new()
+	var world:=CityEncounterWorld.terrain(get_tree().root)
+	if world!=null:
+		var encounter:Dictionary=MilitaryCampaign.active_engagement
+		if encounter.is_empty() and not MilitaryCampaign.battle_history.is_empty():encounter=MilitaryCampaign.battle_history[0]
+		if history_seed>=0:
+			for past:Dictionary in MilitaryCampaign.battle_history:
+				if int(past.get("seed",-1))==history_seed:encounter=past;break
+		var region:=String(encounter.get("target_region_id",encounter.get("threat",{}).get("target_region_id","")))
+		if not region.is_empty():
+			CityEncounterWorld.focus(world,region);viewport.own_world_3d=false;viewport.world_3d=world.get_world_3d();view.live_terrain=world
+	if view.live_terrain==null:viewport.own_world_3d=true
+	viewport.add_child(view);view.formation_selected.connect(_selected);stage.gui_input.connect(_view_input)
 	vignette=ColorRect.new();vignette.set_anchors_and_offsets_preset(PRESET_FULL_RECT);vignette.mouse_filter=MOUSE_FILTER_IGNORE
 	var shader:=Shader.new();shader.code="shader_type canvas_item; void fragment(){float d=length((UV-vec2(.55,.5))*vec2(1.15,1.0));COLOR=vec4(.03,.025,.015,smoothstep(.27,.72,d)*.38);}"
 	var material:=ShaderMaterial.new();material.shader=shader;vignette.material=material;add_child(vignette)
@@ -221,7 +233,9 @@ func _initialize()->void:
 		for r:Dictionary in context.get("rounds",[]):
 			var losses:Array=r.get(("attacker" if side==0 else "defender")+"_cohort_losses",[])
 			for i in mini(losses.size(),initial_forces[side].get("formations",[]).size()):initial_forces[side].formations[i]["count"]+=int(losses[i])
+	view.faction_colors=[Color("67b4cf"),Color("de513d")] if home_side==0 else [Color("de513d"),Color("67b4cf")]
 	view.set_landscape(context);view.reset(initial_forces[0],initial_forces[1])
+	if view.live_terrain!=null:view.live_terrain.set_meta("city_encounter_army",int(context.get("home_force_id",-1)))
 	present(a,d,{},String(context.get("outcome","")),context.get("rounds",[]))
 	heading.text=String(context.get("target_region_name",context.get("threat",{}).get("target_region_name","BATTLEFIELD"))).to_upper()
 	city_button.disabled=String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))).is_empty()
@@ -327,7 +341,9 @@ func _capture_round(committed:Dictionary={})->void:
 	var records:Array=context.get("rounds",[]);var record:Dictionary=records.back() if not records.is_empty() else {}
 	present(context.get("attacker",context.get("attacker_result",{})),context.get("defender",context.get("defender_result",{})),record,String(context.get("outcome","")),records)
 func _start_presentation()->void:
-	phase="resolving";elapsed=0;playback_paused=false;_camera("director");_spawn_losses();_phase_ui()
+	phase="resolving";elapsed=0;playback_paused=false
+	if view.live_terrain==null:_camera("director")
+	_spawn_losses();_phase_ui()
 	headline_title.text=_event_text(current_record).to_upper()
 	if headline_title.text.is_empty():headline_title.text="CONTACT ON THE LINE"
 	headline_note.text="Round %d · %d of your troops and %d enemy troops out of action"%[_round(),_record_loss(home_side),_record_loss(1-home_side)]
@@ -423,10 +439,11 @@ func _city_report()->void:
 	CivilizationSystem.city_intelligence.open(String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))))
 func _close()->void:queue_free()
 func _exit_tree()->void:
+	if is_instance_valid(view) and is_instance_valid(view.live_terrain):view.live_terrain.remove_meta("city_encounter_army")
 	get_window().set_deferred("content_scale_size",previous_scale_size);get_window().set_deferred("content_scale_aspect",previous_scale_aspect)
 func _camera(mode:String)->void:
 	view.cinematic=mode=="director"
-	if mode=="overview":view.target=Vector3(0,1,0);view.zoom=85;view.elevation=.85
+	if mode=="overview":view.target=view.city_center*.65 if view.live_terrain!=null else Vector3(0,1,0);view.zoom=220 if view.live_terrain!=null else 85;view.elevation=.85
 	elif mode=="frontline":view.target=Vector3(0,1,0);view.zoom=32;view.elevation=.48
 	view._camera_update()
 	for key in camera_buttons:camera_buttons[key].modulate=TEAL if key==mode else TEXT
@@ -507,12 +524,12 @@ func _rebuild_plates()->void:
 	for side in 2:
 		for i in mini(12,_forms(side).size()):
 			if int(_forms(side)[i].get("count",0))<=0:continue
-			var b:=button(marker_layer,"%s · %d"%[_name(side,i),int(_forms(side)[i].get("count",0))],_select.bind(i) if side==home_side else _target.bind(i),TEAL if side==home_side else ORANGE)
+			var b:=button(marker_layer,"%s · %s · %d"%["YOUR" if side==home_side else "ENEMY",_name(side,i),int(_forms(side)[i].get("count",0))],_select.bind(i) if side==home_side else _target.bind(i),TEAL if side==home_side else ORANGE)
 			b.custom_minimum_size=Vector2(0,26);b.add_theme_font_size_override("font_size",11);b.add_theme_stylebox_override("normal",style(Color(INK,.82),TEAL if side==home_side else ORANGE,4));plates.append({"node":b,"side":side,"index":i})
 	for group in view.groups:group.banner.visible=false
 	for general in view.generals:
 		general.label.visible=false
-		var detail:Dictionary=general.details();var b:=button(marker_layer,"GENERAL · %s\n%s"%[String(detail.name),String(detail.fate).to_upper()],HistoricalFigures.open_chronicle.bind(String(detail.figure_id)),GOLD)
+		var detail:Dictionary=general.details();var b:=button(marker_layer,"%s GENERAL · %s\n%s"%["YOUR" if int(general.get_meta("side",-1))==home_side else "ENEMY",String(detail.name),String(detail.fate).to_upper()],HistoricalFigures.open_chronicle.bind(String(detail.figure_id)),GOLD)
 		b.add_theme_font_size_override("font_size",11);b.custom_minimum_size.y=30;b.disabled=String(detail.figure_id).is_empty();b.add_theme_stylebox_override("disabled",style(Color(INK,.85),GOLD,4));b.add_theme_color_override("font_disabled_color",GOLD);plates.append({"node":b,"general":general})
 func _update_markers()->void:
 	var occupied:Array[Rect2]=[]
@@ -520,7 +537,7 @@ func _update_markers()->void:
 		var b:Button=item.node;var point:Vector2
 		if item.has("general"):
 			if not is_instance_valid(item.general):b.hide();continue
-			var world:Vector3=item.general.global_position+Vector3(0,6,0)
+			var world:Vector3=item.general.to_global(Vector3(0,6,0))
 			point=view.camera.unproject_position(world)*stage.size/Vector2(viewport.size) if not view.camera.is_position_behind(world) else Vector2(-1000,-1000)
 		else:point=_formation_point(item.side,item.index)
 		b.position=point-Vector2(b.size.x*.5,28)

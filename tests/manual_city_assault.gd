@@ -149,7 +149,7 @@ func _verify_hud()->void:
 	var hud:BattleGraphicsScreen=MilitaryCommandUI.battle_graphics
 	await _hud_capture("orders")
 	await click(hud.camera_buttons.frontline.get_global_rect().get_center());assert(hud.view.zoom==32)
-	await click(hud.camera_buttons.overview.get_global_rect().get_center());assert(hud.view.zoom==85 and not hud.view.cinematic)
+	await click(hud.camera_buttons.overview.get_global_rect().get_center());assert(hud.view.zoom==(220 if hud.view.live_terrain!=null else 85) and not hud.view.cinematic)
 	assert(hud.phase=="orders" and hud.resolve_button.disabled)
 	await click(hud.targets.get_child(0).get_global_rect().get_center())
 	await click(hud.order_buttons.charge.get_global_rect().get_center())
