@@ -1,3 +1,37 @@
+# Mac integration — September 6, 2026
+
+Canonical Mac checkout: `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`, `main`.
+Gameplay commit: `39942ef03111cae82dc6f8975ddf2aba57feab3f`; fast-forwarded from
+`7fb7e96288313099af9d5801ae5b5f36441fb627`, including input commit `f15e59f`.
+
+INTEGRATED: native gesture and keyboard map zoom; 10 Hz presentation snapshots;
+persistent scalable UI, 3D resolution, shadows and frame limit; persistent music
+volume/mute on the Music bus; discoverable confirmed Quit with save failure protection.
+Campaign redesign/removal remains PAUSED. No campaign or world-reset behavior changed.
+
+Canonical Godot 4.7.2 headless checks: 24 input and 69 display/music/save/quit checks
+passed, zero failures, exit 0. CPU probe passed, exit 0: per-frame schedule batches
+211.423/208.960/204.248 ms versus 56.805/55.300/62.295 ms at 10 Hz for 120 paused
+process calls; 120 versus 19 snapshot refreshes each. Day/population unchanged.
+These are CPU workload measurements, not FPS. Presentation may lag by 100 ms.
+Coordinator separately verified 67 graphical checks on Apple M1 Pro and inspected
+1280×720 and 1440×900 top/bottom menu captures. No extra graphical launch by integrator.
+
+Save writer review: payload/slots unchanged; sibling temporary file, flush/error check,
+then replacement. Open/write/rename errors propagate; Save & Quit remains open on error.
+Canonical probes cover replacement success, blocked temporary writes preserving prior
+save, and quit failure/cancel/discard paths. No power-loss durability claim is made.
+
+Preservation audit: all 117 pre-existing untracked `.gd.uid` sidecars and the existing
+`before_river_war.save` retain their SHA-256 hashes. No QA override.cfg was present or
+integrated. Generated probe artifacts remain ignored. No push or player launch performed.
+Coordinator owns final relaunch. The in-game release label remains `2026.09.06.2`;
+identify this Mac checkpoint by Git commit, not that unchanged label.
+
+See `MAC_DISPLAY_VALIDATION.md` and `MAC_SETUP.md` for controls, worker evidence and limits.
+
+---
+
 # Current integration: 2026.09.06.2
 
 Stable foreign district rendering, from codex/district-hover-fix based on db0419b. Independent district caching and stable visual population eliminate repeated geometry replacement from aging reports, overlapping lookout estimates and other cities' updates. Report uncertainty remains intact. See RELEASE_2026_09_06_2.md for baseline reproduction, GPU verification and exact-scene limitation.
