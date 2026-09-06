@@ -1,4 +1,12 @@
-# Current integration: 2026.09.06.1
+# Current integration: 2026.09.06.2
+
+Stable foreign district rendering, from codex/district-hover-fix based on db0419b. Independent district caching and stable visual population eliminate repeated geometry replacement from aging reports, overlapping lookout estimates and other cities' updates. Report uncertainty remains intact. See RELEASE_2026_09_06_2.md for baseline reproduction, GPU verification and exact-scene limitation.
+
+Canonical: C:/Users/sjpur/TomorrowandTomorrow, main. Private remote: https://github.com/sjpurtill-ui/tomorrow-and-tomorrow.git. Includes all earlier integrated work. No other feature batch is active. Held prototypes remain preserved. Player PID50068 was left running with its loaded .1 scripts; normal save/exit/relaunch is needed, never a forced restart.
+
+---
+
+# Historical integration: 2026.09.06.1
 
 Canonical player game: C:/Users/sjpur/TomorrowandTomorrow, main. Includes all prior integrated releases through 4d1c0e6 plus the validated contact-report and envoy-entry changes from codex/contact-dialogue. See RELEASE_2026_09_06_1.md for tests and limitations.
 

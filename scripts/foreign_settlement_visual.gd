@@ -10,6 +10,12 @@ var surfaces:Dictionary={}
 static func display_population(report:Dictionary)->int:
 	var estimate:Dictionary=report.get("fields",{}).get("population",{})
 	return roundi((float(estimate.low)+float(estimate.high))*.5) if not estimate.is_empty() else -1
+static func stable_population(report:Dictionary,previous:int)->int:
+	var estimate:Dictionary=report.get("fields",{}).get("population",{})
+	# Repeated lookout estimates vary. Keep the existing visual representation
+	# while the new evidence still supports it; this is not a demographic census.
+	if previous>=0 and not estimate.is_empty() and previous>=float(estimate.low) and previous<=float(estimate.high):return previous
+	return display_population(report)
 static func framing_size(report:Dictionary)->float:
 	var population:=display_population(report)
 	return clampf(.22+sqrt(maxf(0,population))*.0015,.22,.8)

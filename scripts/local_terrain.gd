@@ -331,7 +331,6 @@ var terrain_fog_materials:Array[ShaderMaterial]=[]
 var rendered_fog_revision:=-1
 var foreign_formation_markers:Dictionary={}
 var contact_encounter_markers:Dictionary={}
-var rendered_contact_encounter_signature:=""
 var player_field_army_markers:Dictionary={}
 ## Map-selected field army (HoI4-style: click a marker to select, right-click
 ## charted land to order the march). -1 = nothing selected.
@@ -12131,46 +12130,58 @@ func _create_resource_overlay_batch(stage:String,clusters:Array,zoom:float)->Mul
 	return batch
 func _refresh_contact_encounter_markers()->void:
 	var confirmed:Array[Dictionary]=[]
-	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities():
+	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",false):
 		var location:Dictionary=city.position
 		if camera!=null and Vector2(camera.global_position.x,camera.global_position.z).distance_to(Vector2(float(location.x),float(location.z)))>camera.size*1.5+100.0: continue
-		city.erase("age_days");city.erase("freshness")
 		confirmed.append({"detailed":camera!=null and camera.size<=2.0,"city_id":city.city_id,"civ_id":city.civ_id,"name":city.name,"x":float(location.x),"z":float(location.z),"report":city})
 	if camera!=null:
 		confirmed.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return Vector2(a.x,a.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z))<Vector2(b.x,b.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z)))
 	if confirmed.size()>64: confirmed.resize(64)
-	var signature:=JSON.stringify(confirmed)
-	if signature!=rendered_contact_encounter_signature:
-		for civ_id in contact_encounter_markers.keys():
-			var stale:Node3D=contact_encounter_markers[civ_id]
-			if stale and is_instance_valid(stale): stale.queue_free()
-		contact_encounter_markers.clear()
-		for site in confirmed:
-			var marker:=Node3D.new()
-			marker.name="ConfirmedForeignSettlement_%s" % String(site.city_id)
-			marker.set_meta("civilization_id",String(site.civ_id)); marker.set_meta("city_id",String(site.city_id))
-			marker.set_meta("settlement_name",String(site.name))
-			marker.position=Vector3(float(site.x),_height_at(float(site.x),float(site.z))+0.05,float(site.z))
-			# Close view is actual terrain-aligned settlement fabric, not kilometre-scale boxes.
-			marker.position.y=0
-			var footprint_radius:=.065
-			if bool(site.detailed):
-				var fabric:=preload("res://scripts/foreign_settlement_visual.gd").new()
-				fabric.build(site.report,_close_surface_height_at)
-				fabric.position.x=0;fabric.position.z=0;marker.add_child(fabric)
-				footprint_radius=fabric.footprint_radius
-			var label:=Label3D.new();label.name="SettlementLabel";label.text=String(site.name).to_upper()
-			label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-			label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("ded4b5")
-			label.position=Vector3(0,_height_at(site.x,site.z)+.015,-footprint_radius*1.15)
-			marker.add_child(label)
-			var pin:=Label3D.new();pin.name="RegionalCityPin";pin.text="◆";pin.font_size=15;pin.outline_size=5
-			pin.billboard=BaseMaterial3D.BILLBOARD_ENABLED;pin.fixed_size=true;pin.no_depth_test=true
-			pin.modulate=Color("d9cba3");pin.position=Vector3(0,_height_at(site.x,site.z)+.015,0);marker.add_child(pin)
+	var visible_ids:Dictionary={}
+	for site:Dictionary in confirmed:visible_ids[String(site.city_id)]=true
+	for city_id in contact_encounter_markers.keys():
+		if visible_ids.has(city_id):continue
+		var stale:Node3D=contact_encounter_markers[city_id]
+		if is_instance_valid(stale):stale.hide();stale.queue_free()
+		contact_encounter_markers.erase(city_id)
+	for site:Dictionary in confirmed:
+		# Report dates, stores, confidence and other cities do not change this mesh.
+		var previous:Node3D=contact_encounter_markers.get(String(site.city_id))
+		var prior_population:=int(previous.get_meta("visual_population",-1)) if is_instance_valid(previous) else -1
+		var population:=preload("res://scripts/foreign_settlement_visual.gd").stable_population(site.report,prior_population)
+		var appearance:Array=[site.detailed,site.civ_id,site.name,site.x,site.z,population if site.detailed else -1,not site.report.get("fields",{}).is_empty()]
+		if is_instance_valid(previous):
+			if previous.get_meta("appearance",[])==appearance:continue
+			# queue_free is deferred; hide the old mesh now to avoid an overlapping frame.
+			previous.hide();previous.queue_free()
+		var marker:=Node3D.new()
+		marker.set_meta("appearance",appearance)
+		marker.set_meta("visual_population",population)
+		marker.name="ConfirmedForeignSettlement_%s" % String(site.city_id)
+		marker.set_meta("civilization_id",String(site.civ_id)); marker.set_meta("city_id",String(site.city_id))
+		marker.set_meta("settlement_name",String(site.name))
+		marker.position=Vector3(float(site.x),_height_at(float(site.x),float(site.z))+0.05,float(site.z))
+		# Close view is actual terrain-aligned settlement fabric, not kilometre-scale boxes.
+		marker.position.y=0
+		var footprint_radius:=.065
+		if bool(site.detailed):
+			var fabric:=preload("res://scripts/foreign_settlement_visual.gd").new()
+			var visual_report:Dictionary=site.report.duplicate(true)
+			if population>=0:visual_report.fields.population.low=population;visual_report.fields.population.high=population
+			fabric.build(visual_report,_close_surface_height_at)
+			fabric.position.x=0;fabric.position.z=0;marker.add_child(fabric)
+			footprint_radius=fabric.footprint_radius
+		var label:=Label3D.new();label.name="SettlementLabel";label.text=String(site.name).to_upper()
+		label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+		label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("ded4b5")
+		label.position=Vector3(0,_height_at(site.x,site.z)+.015,-footprint_radius*1.15)
+		marker.add_child(label)
+		var pin:=Label3D.new();pin.name="RegionalCityPin";pin.text="◆";pin.font_size=15;pin.outline_size=5
+		pin.billboard=BaseMaterial3D.BILLBOARD_ENABLED;pin.fixed_size=true;pin.no_depth_test=true
+		pin.modulate=Color("d9cba3");pin.position=Vector3(0,_height_at(site.x,site.z)+.015,0);marker.add_child(pin)
 
-			add_child(marker)
-			contact_encounter_markers[String(site.city_id)]=marker
-		rendered_contact_encounter_signature=signature
+		add_child(marker)
+		contact_encounter_markers[String(site.city_id)]=marker
 	for marker_variant in contact_encounter_markers.values():
 		var marker:Node3D=marker_variant
 		if marker==null or not is_instance_valid(marker): continue
