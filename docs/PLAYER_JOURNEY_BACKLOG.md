@@ -1,3 +1,42 @@
+# Current journey scope audit — release .12
+
+Status: representative planned journeys and concrete review findings complete.
+This integration pass stops after the final canonical import and save/process
+check. The remaining follow-up coverage below is not an active background task.
+
+Acceptance principle: both the mechanic and the act of playing must make sense.
+Passing tests does not establish that the game is great or intuitive to a novice.
+
+| Journey | Concrete coverage | Limit |
+| --- | --- | --- |
+| Founding to early development | One fresh world, actual choice/site/name, normal time through Hearth Circle, water/research direction, waiting army order, scout departure | About 10 days; no continuous founding-to-empire claim |
+| Army preparation and supply | Actual UI recruitment, daily instruction, deployment; equipment/ammunition/carts/repair costs, reservation and work completion | Authored supplies/knowledge for later workshop options |
+| Field-army map orders | Mouse selection, right-click dry charted destination, ordinary-time arrival, runner delivery, blocked disband, return and home arrival | One local land route; not all terrain or supply disruption |
+| Civic and foreign decisions | Focused conversation/reports/preferences, reviewable offers, exact costs, toggles and actual dispatch | Remote AI quality not validated by AI-off tests |
+| Siege/battle/occupation | Same live city world through siege/assault; actual equipped battle victory, sufficient surviving force, garrison detachment, real aftermath and occupation | Authored battle fixture; not unlocked by the fresh-world run |
+| Occupation and recovery | Real copied-save decisions, preview without mutation, commit/cooldown/stale review; recovery prepare/commit/cancel | Representative policies and two sizes, not every possible history |
+
+Review fixes completed: covered time controls; legacy founding labor panel;
+premature local leadership actions; fractional garrison requirement; stale
+post-battle map count; report-age clarity; literal garrison headcount versus
+adjusted capacity. Test overlay chrome removed from final occupation capture.
+
+Follow-up coverage worth scheduling:
+- Longer continuous settlement growth through first foreign contact and diplomacy.
+- Multiple field routes, water crossings/path constraints, interception and supply
+  disruption. The local march check does not certify a general land pathfinder.
+- Late-unit and large-campaign balance, remote civic interpretation quality.
+- Observe actual new players attempting these tasks without expert prompting.
+- Secondary long records/training detail can still scroll on small windows; core
+  tested order controls remain visible. Further layout review can target those.
+
+Evidence: RELEASE_2026_09_05_7.md through RELEASE_2026_09_05_12.md and their exact
+artifact logs. Historical backlog entries below describe earlier checkpoints;
+they do not override this current status.
+
+---
+# Historical progress log
+
 # Player journey acceptance and evidence
 
 Base: canonical main 6fb1802, release 2026.09.05.6. Worktree:

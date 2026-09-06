@@ -32,6 +32,11 @@ func _ready()->void:
 		await click(hud.result_primary.get_global_rect().get_center())
 	if is_instance_valid(hud):await click(hud.result_primary.get_global_rect().get_center())
 	assert(MilitaryCampaign.pending_aftermath.is_empty())
+	var field:Dictionary=MilitaryCampaign.field_armies[0]
+	assert(int(field.last_report.troops)==int(field.troops))
+	assert(int(field.troops)+int(MilitaryCampaign.occupation_forces[0].troops)==589)
+	action_panel.get_parent().hide()
+	terrain._refresh_player_field_army_markers()
 	preload("res://scripts/hud/occupation_view.gd").open(civ_id,city_id)
 	for frame in 10:await get_tree().process_frame
 	print("FULL_CITY_VICTORY_PASS real simulated 600-versus-119 battle ends; city captured only with sufficient surviving strength; actual garrison effective; aftermath resolved and occupation opened")

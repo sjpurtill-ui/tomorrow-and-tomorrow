@@ -1,5 +1,22 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.12
+
+Field orders verified through arrival, runner delivery and return; post-battle
+reports now show the real surviving field force after garrison detachment.
+Occupation distinguishes assigned people from effective capacity. Includes .11.
+See RELEASE_2026_09_05_12.md and the current PLAYER_JOURNEY_BACKLOG.md scope audit.
+
+Player checkout: C:/Users/sjpur/TomorrowandTomorrow, main. Loaded PID46888 retains
+.6 until a normal save/exit and canonical launcher restart. No forced restart.
+Workers should use WORKER_PROMPT.txt and WORKER_HANDOFF.md. This finite integration
+and representative journey pass is complete; follow-up coverage is recorded.
+
+---
+# Historical checkpoints
+
+# Current integration checkpoint
+
 ## Latest: release 2026.09.05.11
 
 Connected founding/time controls, supply order reviews and effective garrison

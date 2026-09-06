@@ -31,6 +31,7 @@ func _ready()->void:
 	assert(MilitaryCampaign.field_armies.size()==1)
 	assert(int(MilitaryCampaign.field_armies[0].troops)==target)
 	assert(GameState.population_total==population)
+	await after_deployment()
 	get_window().size=Vector2i(800,600);await frames()
 	hud.open_dock("military",1);await frames();await click_label(String(template.name));assert(hud.detail_dock.visible and not hud.dock.visible)
 	for step in 3:
@@ -54,3 +55,6 @@ func _ready()->void:
 	print("EQUIPMENT_ORDER_PASS actual small-screen manufacture, preview read-only, materials reserved once, no instant equipment")
 	print("ARMY_PREPARATION_PASS real recruit, no duplicate intake, completed instruction, ",target," deployed from reserve, population conserved; three focused stages at two sizes")
 	get_tree().quit()
+
+func after_deployment()->void:
+	pass

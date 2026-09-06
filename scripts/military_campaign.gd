@@ -2025,6 +2025,12 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 				strategic_outcome["message"]=String(occupation.error)
 				GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Defeat without occupation","description":String(occupation.error),"domain":"security","severity":"notice"})
 		committed["strategic_outcome"]=strategic_outcome
+	# The battle report is directly known, including the soldiers just detached
+	# to hold the city. Do not keep presenting a pre-battle runner headcount.
+	if String(final_result.home_force_kind)=="field_army":
+		var report_index:=_field_army_index(int(final_result.home_force_id))
+		if report_index>=0:
+			field_armies[report_index]["last_report"]=_army_report_snapshot(field_armies[report_index])
 	return committed
 
 

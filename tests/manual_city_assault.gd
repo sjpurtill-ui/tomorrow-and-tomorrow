@@ -91,12 +91,12 @@ func _ready()->void:
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("res://artifacts/water-after.png")
 		get_tree().quit();return
-	var incident:=CivilizationSystem.offensive_campaign_data(civ_id,180,city_id)
+	var incident:=CivilizationSystem.offensive_campaign_data(civ_id,fixture_attacker_count,city_id)
 	assert(not incident.has("error"));assert(MilitaryCampaign.active_engagement.is_empty())
 	var layer:=CanvasLayer.new();layer.layer=150;add_child(layer)
 	var panel:=PanelContainer.new();panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE);layer.add_child(panel)
 	var bar:=HBoxContainer.new();panel.add_child(bar)
-	var label:=Label.new();label.text="  NEW BATTLE HUD · TEST ONLY  •  180 attackers / %d defenders / 600 residents  •  seed 74017  •  campaign isolated" % int(incident.strength);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;label.add_theme_font_size_override("font_size",12);bar.add_child(label)
+	var label:=Label.new();label.text="  NEW BATTLE HUD · TEST ONLY  •  %d attackers / %d defenders / 600 residents  •  seed 74017  •  campaign isolated" % [fixture_attacker_count,int(incident.strength)];label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;label.add_theme_font_size_override("font_size",12);bar.add_child(label)
 	var report_button:=Button.new();report_button.text="CITY REPORT";bar.add_child(report_button);report_button.pressed.connect(func():CivilizationSystem.city_intelligence.open(city_id))
 	var reset:=Button.new();reset.text="RESET TEST";bar.add_child(reset);reset.pressed.connect(func():OS.create_process(OS.get_executable_path(),["--path",ProjectSettings.globalize_path("res://"),"--fullscreen","res://tests/manual_city_assault.tscn"]);get_tree().quit())
 	action_panel=PanelContainer.new();action_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT);action_panel.position=Vector2(get_viewport().get_visible_rect().size.x-370,86);action_panel.size=Vector2(340,100);layer.add_child(action_panel)
@@ -104,7 +104,7 @@ func _ready()->void:
 	action_note=Label.new();action_note.text="TEST ASSAULT ARMY selected\nTarget: Test River City";actions.add_child(action_note)
 	attack_button=Button.new();attack_button.text="ATTACK TEST RIVER CITY";attack_button.custom_minimum_size.y=46;actions.add_child(attack_button);attack_button.pressed.connect(_attack)
 	action_panel.visible=false
-	get_window().title="NEW BATTLE HUD · CITY ASSAULT TEST — 180 vs %d — NOT YOUR CAMPAIGN" % int(incident.strength)
+	get_window().title="NEW BATTLE HUD · CITY ASSAULT TEST — %d vs %d — NOT YOUR CAMPAIGN" % [fixture_attacker_count,int(incident.strength)]
 	print("MANUAL_ASSAULT_READY ",JSON.stringify({"seed":74017,"attackers":fixture_attacker_count,"defenders":incident.strength,"residents":600,"occupation_required":incident.occupation_required,"paused":terrain.game_speed==0,"battle_started":not MilitaryCampaign.active_engagement.is_empty(),"user_data":OS.get_user_data_dir(),"city":city_id,"army":army_id}))
 	if "--verify-setup" in OS.get_cmdline_user_args() or "--verify-hud" in OS.get_cmdline_user_args():
 		for frame in 15:await get_tree().process_frame

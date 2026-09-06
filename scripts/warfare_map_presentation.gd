@@ -394,6 +394,8 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 	if moving and destination_data.has("x") and destination_data.has("z"):
 		var heading_delta:=Vector2(float(destination_data.get("x",0.0))-float(position_data.get("x",0.0)),float(destination_data.get("z",0.0))-float(position_data.get("z",0.0)))
 		if heading_delta.length_squared()>0.000001: heading=-heading_delta.angle()-PI*0.5
+	if army.has("report_age_days"):
+		label+="\nLAST REPORT · %d DAY%s OLD"%[int(army.report_age_days),"" if int(army.report_age_days)==1 else "S"]
 	return {
 		"id":str(int(army.get("army_id",0))),"owner":"player","owner_label":"YOU","visible":band!="world" and troops>0,
 		"show_label":band in ["ground","local","regional"] or (band=="continental" and (selected or moving)),"label":label,

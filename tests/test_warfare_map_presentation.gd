@@ -352,3 +352,10 @@ func _home()->Dictionary:
 
 func _objective()->Dictionary:
 	return {"id":"region_alpha","position":{"x":180.0,"z":90.0}}
+
+func test_away_army_marker_identifies_dated_report_instead_of_implying_live_state()->void:
+	var army:=_army(7,12500)
+	army.report_age_days=2
+	assert_str(String(PRESENTATION.player_marker(army,48.0,true).label)).contains("LAST REPORT · 2 DAYS OLD")
+	army.erase("report_age_days")
+	assert_str(String(PRESENTATION.player_marker(army,48.0,true).label)).not_contains("LAST REPORT")

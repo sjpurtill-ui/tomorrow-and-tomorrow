@@ -159,7 +159,10 @@ func _refresh()->void:
 	var control:Dictionary=data.get("control",{})
 	alert.text=("Troops present; control unsupported. " if control.has("error") else "Effective garrison in place. ")+"%d residents · %s"%[roundi(float(data.population)),String(data.milestone)]
 	alert.tooltip_text=String(control.get("error","Supplied and ready troops meet the current population and resistance requirement."))
-	metrics.garrison.bar.tooltip_text=String(control.get("error","Current occupation requirement met."))
+	var capacity_text:="%d actual soldiers. Effective capacity adjusts their strength for supply and readiness; it is not a fractional person. %.1f effective / %d required by population and resistance."%[int(control.get("troops",data.garrison)),float(control.get("effective",data.garrison)),int(control.get("required",data.required_garrison))]
+	alert.text+=" · %d soldiers assigned"%int(control.get("troops",data.garrison))
+	metrics.garrison.value.tooltip_text=capacity_text
+	metrics.garrison.bar.tooltip_text=capacity_text
 	metrics.garrison.value.text="%.1f / %d"%[float(control.get("effective",data.garrison)),ceili(float(data.required_garrison))];metrics.garrison.bar.value=100*float(control.get("effective",data.garrison))/maxf(1,float(data.required_garrison))
 	for key:String in metrics:
 		if key=="garrison":continue

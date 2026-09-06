@@ -12221,6 +12221,7 @@ func _refresh_player_field_army_markers()->void:
 			army["status"]=String(report.get("status",army.get("status","stationed")))
 			army["troops"]=int(report.get("troops",army.get("troops",0)))
 			army["supply_level"]=float(report.get("supply_level",army.get("supply_level",1.0)))
+			army["readiness"]=float(report.get("readiness",army.get("readiness",0.0)))
 			army["distance_remaining_km"]=float(report.get("distance_remaining_km",army.get("distance_remaining_km",0.0)))
 			army["report_age_days"]=maxi(0,int(GameState.elapsed_days)-int(report.get("day",GameState.elapsed_days)))
 		reported_armies.append(army)
