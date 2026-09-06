@@ -33,6 +33,16 @@ Keyboard fallback: `=` or `+` zooms in; `-` zooms out, centered on the view. The
 
 After updating the input code, save and exit the running game normally, then relaunch the project to load the new controls. An already-running game retains its old scripts.
 
+### Display, sound and quitting
+
+Open **Menu** (or Escape from the map), then scroll to **Display & Performance**. Text & interface size offers 100–175%; the logical canvas adapts to the window and display density, with a minimum usable canvas so controls remain reachable. The default is 125%, substantially larger than the previous 1920×1080 interface squeezed into a 1280×720 window. Long menus scroll; compact management docks temporarily hide the map toolbar and notification queue to avoid overlap.
+
+3D resolution offers 50%, 75% (default), and 100%. It scales only the 3D image, preserving sharp UI text. Terrain shadows default off and can be enabled. Frame limits of 30, 60 (default), or 120 reduce unnecessary rendering; these are ceilings, not promised frame rates. Map snapshots refresh at ten updates per second while camera input and simulation time remain independent. These changes reduce measured CPU work but do not establish a particular GPU frame rate on every world.
+
+The **Music volume** slider applies immediately to the score, including both tracks. Zero mutes music; effects are unchanged. Display and music preferences are stored locally in `user://display.cfg`, separately from world saves, and persist across launches.
+
+**Quit Game…**, Command-Q, and the window close control open a confirmation with **Save & Quit**, **Keep Playing**, and **Quit Without Saving**. Save & Quit stays open and reports an error if saving fails. Quit Without Saving explicitly discards progress since the last save. Installing these changes requires one relaunch; subsequent settings changes apply immediately.
+
 ## Included and local dependencies
 
 The terrain textures, exported unit assets, opening artwork, Tomorrow.mp3 and War.mp3 are included as regular Git files. No Git LFS objects are currently used. Godot regenerates `.godot/` and import caches. `art_source/.gdignore` keeps the source Blender file out of automatic Godot imports; the game loads the included GLB exports instead. Blender is needed only to rebuild source artwork, not to play.

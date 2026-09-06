@@ -53,12 +53,27 @@ func save_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	payload["reflected_society_model"]=_capture_reflected(DiscoverySystem.society_model,[])
 	for system_name in CURATED_SYSTEMS:
 		payload["curated_%s" % system_name]=get_node("/root/"+system_name).export_state()
-	var file:=FileAccess.open(slot_path(slot),FileAccess.WRITE)
-	if file==null:
-		return {"error":"The save could not be written (%s)." % slot_path(slot)}
-	file.store_string(var_to_str(payload))
-	file.close()
+	var written:=_write_payload(slot_path(slot),payload)
+	if written.has("error"):return written
 	return {"ok":true,"message":"World saved — %s, day %d, population %d." % [GameState.settlement_name if GameState.settlement_name!="" else "the settlement",int(GameState.elapsed_days),GameState.population_total]}
+
+
+func _write_payload(path:String,payload:Dictionary)->Dictionary:
+	# Do not truncate the last good save until the replacement is fully written.
+	var temporary:=path+".tmp"
+	var file:=FileAccess.open(temporary,FileAccess.WRITE)
+	if file==null:
+		return {"error":"The save could not be written (%s)." % path}
+	file.store_string(var_to_str(payload))
+	file.flush()
+	var write_error:=file.get_error()
+	file.close()
+	if write_error!=OK:
+		DirAccess.remove_absolute(temporary)
+		return {"error":"The save could not be completed. The previous save is unchanged."}
+	if DirAccess.rename_absolute(temporary,path)!=OK:
+		return {"error":"The new save could not replace the previous save. The game remains open."}
+	return {"ok":true}
 
 
 ## Restores the saved world into the autoload layer. The caller must reload

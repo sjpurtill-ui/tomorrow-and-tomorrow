@@ -90,6 +90,7 @@ func _layout()->void:
 		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Tokens.DOCK_MARGIN_Y if view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x>time_pill.position.x+time_pill.size.x+12 else 66)
 	if queue_root:
+		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,view.y-Tokens.EDGE_MARGIN-queue_root.size.y)
 	if dock:
 		dock.position=Vector2(Tokens.DOCK_X,72)
@@ -118,6 +119,9 @@ func force_dock_layout()->void:
 func _position_toolbar()->void:
 	if toolbar==null: return
 	var view:=get_viewport().get_visible_rect().size
+	# On a compact enlarged UI, the management dock needs this space. Closing
+	# it restores the map toolbar; keyboard map controls remain available.
+	toolbar.visible=active_section=="" or view.x>=1400
 	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Tokens.RAIL_WIDTH
 	toolbar.position=Vector2(free_left+(view.x-free_left)*0.5-toolbar.size.x*0.5,view.y-Tokens.EDGE_MARGIN-toolbar.size.y)
 

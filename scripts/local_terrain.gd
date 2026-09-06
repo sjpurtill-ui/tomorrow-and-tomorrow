@@ -352,10 +352,18 @@ var active_progression_domain:="demography"
 # aggregate neighborhood conditions from authoritative civilization/settlement state.
 var district_condition_visual_override:=-1
 
+var display_preferences:Node
+var quit_dialog:ConfirmationDialog
+var map_snapshot_elapsed:=0.1
+var map_snapshot_refreshes:=0
 var military_attention_dialog:ConfirmationDialog
 var military_attention_seen:Dictionary={}
 
 func _ready() -> void:
+	display_preferences=preload("res://scripts/display_preferences.gd").new()
+	add_child(display_preferences)
+	get_tree().auto_accept_quit=false
+	get_window().close_requested.connect(_request_quit)
 	var release_version:=String(ProjectSettings.get_setting("application/config/version","development"))
 	get_window().title="Tomorrow and Tomorrow · "+release_version
 	print("GAME_RELEASE: ",release_version)
@@ -909,13 +917,20 @@ func _process(delta: float) -> void:
 	_advance_terrain_patch()
 	_update_scale_lod()
 	_update_convoy_marker_animation()
-	_refresh_contact_encounter_markers()
-	_refresh_foreign_formation_markers()
-	_refresh_player_field_army_markers()
-	_refresh_player_scout_route_markers()
-	_refresh_nomad_sighting_markers()
-	_refresh_settlement_network()
-	_refresh_settlement_convoy_marker()
+	# These rebuild report dictionaries, sort marker snapshots and inspect
+	# settlement morphology. Ten updates/second keep them responsive without
+	# tying that CPU work to Retina refresh rate; camera motion stays per-frame.
+	map_snapshot_elapsed+=maxf(0.0,delta)
+	if map_snapshot_elapsed>=0.1:
+		map_snapshot_elapsed=fmod(map_snapshot_elapsed,0.1)
+		map_snapshot_refreshes+=1
+		_refresh_contact_encounter_markers()
+		_refresh_foreign_formation_markers()
+		_refresh_player_field_army_markers()
+		_refresh_player_scout_route_markers()
+		_refresh_nomad_sighting_markers()
+		_refresh_settlement_network()
+		_refresh_settlement_convoy_marker()
 	if travel_council_notice and travel_council_notice.visible and Time.get_ticks_msec()>travel_council_notice_until_msec:
 		travel_council_notice.visible=false
 	if event_report_button and event_report_button.visible and Time.get_ticks_msec()>event_report_visible_until_msec:
@@ -1611,7 +1626,7 @@ func _build_environment() -> void:
 	sun.rotation_degrees = Vector3(-48, -38, 0)
 	sun.light_color = Color("#dfd1b5")
 	sun.light_energy = 0.82 if SEAMLESS_WORLD else 0.66
-	sun.shadow_enabled = true
+	sun.shadow_enabled = bool(display_preferences.shadows) if display_preferences else true
 	# Oblique satellite views amplify one-pixel cascade stair-steps into bright
 	# kilometre-long bands on ridge crests. A modest penumbra preserves the relief
 	# while removing the low-poly-looking shadow edge.
@@ -10984,6 +10999,7 @@ func _schedule_modal_screen_contract(node:Node)->void:
 
 func _apply_modal_screen_contract(screen:Control)->void:
 	if screen==null or not is_instance_valid(screen): return
+	if screen.has_meta("responsive_scroll_layout"): return
 	# This contract is also exercised on detached screens by the presentation
 	# tests, so do not assume either the renderer or the candidate has entered a
 	# SceneTree yet.
@@ -19222,24 +19238,31 @@ func _open_world_menu()->void:
 	world_menu_previous_speed=game_speed
 	_set_game_speed(0.0)
 	world_menu_panel=Control.new()
-	world_menu_panel.size=get_viewport().get_visible_rect().size
+	world_menu_panel.z_index=100
+	world_menu_panel.set_meta("responsive_scroll_layout",true)
+	world_menu_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	world_menu_panel.mouse_filter=Control.MOUSE_FILTER_STOP
 	interface_layer.add_child(world_menu_panel)
 	var dimmer:=ColorRect.new()
-	dimmer.size=world_menu_panel.size
+	dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dimmer.color=Color(0.006,0.009,0.011,0.88)
 	world_menu_panel.add_child(dimmer)
 	var modal:=PanelContainer.new()
-	modal.size=Vector2(590,610)
-	modal.position=(world_menu_panel.size-modal.size)*0.5
+	modal.name="PauseMenuBody"
+	modal.size=Vector2(680,minf(820,get_viewport().get_visible_rect().size.y-32))
 	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1215"),Color("#817353"),1,4,22))
 	world_menu_panel.add_child(modal)
+	var scroll:=ScrollContainer.new()
+	scroll.name="PauseMenuScroll"
+	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	modal.add_child(scroll)
 	var content:=VBoxContainer.new()
+	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation",8)
-	modal.add_child(content)
+	scroll.add_child(content)
 	var eyebrow:=Label.new()
 	eyebrow.text="GAME MENU · "+String(ProjectSettings.get_setting("application/config/version","development"))
-	eyebrow.add_theme_font_size_override("font_size",11)
+	eyebrow.add_theme_font_size_override("font_size",14)
 	eyebrow.add_theme_color_override("font_color",Color("#b9a56c"))
 	content.add_child(eyebrow)
 	var title:=Label.new()
@@ -19250,20 +19273,20 @@ func _open_world_menu()->void:
 	var explanation:=Label.new()
 	explanation.text="%s • Year %d, Day %d • Population %d" % [_settlement_display_name(),int(GameState.elapsed_days/365.0)+1,int(GameState.elapsed_days)%365+1,GameState.population_total]
 	explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	explanation.add_theme_font_size_override("font_size",12)
+	explanation.add_theme_font_size_override("font_size",15)
 	explanation.add_theme_color_override("font_color",Color("#a6ada8"))
 	content.add_child(explanation)
 	content.add_child(HSeparator.new())
 	var save_title:=Label.new()
 	save_title.text="SAVE, LOAD & CIVICS AI"
-	save_title.add_theme_font_size_override("font_size",11)
+	save_title.add_theme_font_size_override("font_size",14)
 	save_title.add_theme_color_override("font_color",Color("#c8b77e"))
 	content.add_child(save_title)
 	var save_status:=Label.new()
 	var existing_save:Dictionary=SaveSystem.save_metadata()
 	save_status.text="Saved world: %s · day %d · population %d" % [String(existing_save.get("settlement_name","the settlement")),int(existing_save.get("elapsed_days",0)),int(existing_save.get("population",0))] if not existing_save.is_empty() else "No saved world exists yet."
 	save_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	save_status.add_theme_font_size_override("font_size",11)
+	save_status.add_theme_font_size_override("font_size",14)
 	save_status.add_theme_color_override("font_color",Color("#8f9994"))
 	content.add_child(save_status)
 	var save_row:=HBoxContainer.new()
@@ -19295,7 +19318,7 @@ func _open_world_menu()->void:
 	content.add_child(HSeparator.new())
 	var seed_label:=Label.new()
 	seed_label.text="NEW GAME  •  WORLD SEED"
-	seed_label.add_theme_font_size_override("font_size",11)
+	seed_label.add_theme_font_size_override("font_size",14)
 	seed_label.add_theme_color_override("font_color",Color("#c8b77e"))
 	content.add_child(seed_label)
 	world_seed_input=LineEdit.new()
@@ -19307,7 +19330,7 @@ func _open_world_menu()->void:
 	world_seed_status=Label.new()
 	world_seed_status.text="Seed %d defines terrain, resources, founders, and historical possibilities. Starting again permanently erases this civilization." % GameState.world_seed
 	world_seed_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	world_seed_status.add_theme_font_size_override("font_size",11)
+	world_seed_status.add_theme_font_size_override("font_size",14)
 	world_seed_status.add_theme_color_override("font_color",Color("#8f9994"))
 	content.add_child(world_seed_status)
 	var same_seed:=Button.new()
@@ -19328,15 +19351,17 @@ func _open_world_menu()->void:
 	random_seed.pressed.connect(_restart_random_world)
 	content.add_child(random_seed)
 	content.add_child(HSeparator.new())
+	if display_preferences: display_preferences.add_controls(content)
+	content.add_child(HSeparator.new())
 	var controls_title:=Label.new()
 	controls_title.text="CONTROLS"
-	controls_title.add_theme_font_size_override("font_size",11)
+	controls_title.add_theme_font_size_override("font_size",14)
 	controls_title.add_theme_color_override("font_color",Color("#c8b77e"))
 	content.add_child(controls_title)
 	var controls:=Label.new()
-	controls.text="Left-click terrain  •  Inspect land / choose a convoy destination\nMiddle-drag or arrows  •  Move the map    Shift+middle  •  Rotate\nMouse wheel  •  Zoom    0–5  •  Pause and hourly time speeds    Esc  •  Menu"
+	controls.text="Left-click terrain  •  Inspect land / choose a convoy destination\nMiddle-drag or arrows  •  Move the map    Shift+middle  •  Rotate\nPinch / two-finger scroll / + and −  •  Zoom    0–5  •  Pause and hourly time speeds    Esc  •  Menu"
 	controls.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	controls.add_theme_font_size_override("font_size",11)
+	controls.add_theme_font_size_override("font_size",14)
 	controls.add_theme_color_override("font_color",Color("#9fa7a2"))
 	content.add_child(controls)
 	var cancel:=Button.new()
@@ -19344,8 +19369,63 @@ func _open_world_menu()->void:
 	cancel.custom_minimum_size=Vector2(0,42)
 	cancel.pressed.connect(_close_world_menu)
 	content.add_child(cancel)
-	world_seed_input.grab_focus()
-	world_seed_input.select_all()
+	var quit_button:=Button.new()
+	quit_button.text="QUIT GAME…"
+	quit_button.custom_minimum_size.y=42
+	quit_button.pressed.connect(_request_quit)
+	content.add_child(quit_button)
+	# Keep exit and resume discoverable without scrolling through settings.
+	var session_actions:=HBoxContainer.new()
+	session_actions.add_theme_constant_override("separation",8)
+	content.add_child(session_actions)
+	cancel.reparent(session_actions);quit_button.reparent(session_actions)
+	cancel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	quit_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	content.move_child(session_actions,3)
+	if not get_viewport().size_changed.is_connected(_fit_world_menu): get_viewport().size_changed.connect(_fit_world_menu)
+	_fit_world_menu.call_deferred()
+	cancel.grab_focus()
+
+func _fit_world_menu()->void:
+	if not is_instance_valid(world_menu_panel):return
+	var modal:=world_menu_panel.get_node("PauseMenuBody") as Control
+	var view:=get_viewport().get_visible_rect().size
+	modal.size=Vector2(minf(680,view.x-32),minf(820,view.y-32))
+	modal.position=(view-modal.size)*0.5
+
+func _request_quit()->void:
+	_open_world_menu()
+	if is_instance_valid(quit_dialog):
+		quit_dialog.dialog_text="Save your current progress before quitting?"
+		quit_dialog.popup_centered()
+		return
+	quit_dialog=ConfirmationDialog.new()
+	quit_dialog.title="Quit Tomorrow and Tomorrow?"
+	quit_dialog.dialog_text="Save your current progress before quitting?"
+	quit_dialog.ok_button_text="Save & Quit"
+	quit_dialog.cancel_button_text="Keep Playing"
+	quit_dialog.add_button("Quit Without Saving",false,"discard")
+	quit_dialog.confirmed.connect(_save_and_quit)
+	quit_dialog.custom_action.connect(func(action:String):
+		if action=="discard":_finish_quit())
+	quit_dialog.canceled.connect(_close_world_menu)
+	quit_dialog.unresizable=true
+	add_child(quit_dialog)
+	quit_dialog.popup_centered(Vector2i(520,180))
+
+func _save_and_quit()->void:
+	var result:Dictionary=_save_before_quit()
+	if result.has("error"):
+		quit_dialog.dialog_text="Save failed. The game is still open.\n"+String(result.error)
+		quit_dialog.popup_centered()
+		return
+	_finish_quit()
+
+func _save_before_quit()->Dictionary:
+	return SaveSystem.save_game()
+
+func _finish_quit()->void:
+	get_tree().quit()
 
 func _close_world_menu()->void:
 	if world_menu_panel and is_instance_valid(world_menu_panel): world_menu_panel.queue_free()
@@ -19474,6 +19554,10 @@ func _close_topmost_game_screen()->bool:
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.meta_pressed and event.keycode==KEY_Q:
+		_request_quit()
+		get_viewport().set_input_as_handled()
+		return
 	if founding_focus_panel and is_instance_valid(founding_focus_panel):
 		# The full-screen modal stops world mouse input itself. Consume keyboard
 		# shortcuts here, but leave mouse events available to its choice buttons.
