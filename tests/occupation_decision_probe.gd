@@ -11,7 +11,7 @@ func capture(name:String)->void:
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("res://artifacts/occupation-decision-"+name+".png")
 func _ready()->void:
-	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_CityAssault_Test"))
+	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_CityAssault_Test") or OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_FocusedJourney_Test"))
 	assert(not SaveSystem.load_game("city_encounter_review").has("error"))
 	GameState.civic_api_enabled=false
 	terrain=preload("res://local_terrain.tscn").instantiate();add_child(terrain);terrain._set_game_speed(0)

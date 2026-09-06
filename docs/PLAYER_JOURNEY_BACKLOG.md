@@ -62,3 +62,19 @@ copied-save resume exact. See RELEASE_2026_09_05_10.md.
 Remaining: ammunition/transport previews, field orders/provisioning, and continuous
 siege/recovery decision checks. Broader edge cases remain ongoing, not certified
 merely by the three representative journeys.
+
+
+## Verified batch: release .11
+Ammunition/cart/repair previews and real production, first-founding leadership
+availability, reachable time controls, and fractional garrison correction.
+177 passing cases; supply/army/occupation/recovery/shared-world GPU evidence.
+Actual equipped battle victory -> natural capture -> real garrison -> actual
+aftermath -> occupation passed. Coherent fresh-world founding -> ordinary time
+-> Hearth Circle -> water/research direction -> army/scouting actions passed.
+These replace the corresponding pending items above. See release.11 evidence.
+
+Remaining coverage: longer continuous settlement growth and first foreign contact,
+field movement/return across varied terrain and supply disruption, late-unit
+balance, remote civic interpretation, and genuine novice observation. Earlier
+synthetic aftermath fixtures are not evidence of natural occupation; the new full
+victory journey is. Secondary long records can still scroll on small windows.

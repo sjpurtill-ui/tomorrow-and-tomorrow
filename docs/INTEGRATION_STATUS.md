@@ -1,5 +1,23 @@
 # Current integration checkpoint
 
+## Latest: release 2026.09.05.11
+
+Connected founding/time controls, supply order reviews and effective garrison
+assignment. Includes all earlier integrated deliveries through.10.
+See RELEASE_2026_09_05_11.md for exact coverage and limits.
+
+Canonical player: C:/Users/sjpur/TomorrowandTomorrow on main.
+Running PID46888 retains loaded.6; save and exit normally, then launch with
+its tools/launch_game.ps1 or the Play Tomorrow and Tomorrow desktop shortcut.
+The launcher prevents a duplicate player; restarting is never forced.
+Workers: use WORKER_PROMPT.txt and WORKER_HANDOFF.md. Older prototypes remain
+preserved for selective migration, not wholesale replacement.
+
+---
+# Previous checkpoints (historical process IDs and limits follow)
+
+# Current integration checkpoint
+
 ## Latest: release 2026.09.05.10
 
 Founding review, focused civic/government reports and diplomatic conversation /

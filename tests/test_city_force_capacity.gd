@@ -114,7 +114,7 @@ func test_new_garrison_commits_enough_real_soldiers_for_effective_control()->voi
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true));MilitaryCampaign.training_queue.clear()
 	MilitaryCampaign.create_field_army(200)
 	var army:Dictionary=MilitaryCampaign.field_armies[0];army.readiness=.5;army.supply_level=.8
-	var required:=float(CivilizationSystem.occupation_control(cid(),rid()).required)
+	var required:=CivilizationSystem.occupation_requirement(CivilizationSystem.civilizations[0],CivilizationSystem.region_snapshot(cid(),rid()))
 	var result:=MilitaryCampaign.establish_occupation_force(cid(),CivilizationSystem.region_snapshot(cid(),rid()),required,int(army.army_id))
 	assert_bool(result.has("error")).is_false()
 	assert_bool(CivilizationSystem.occupation_control(cid(),rid()).controlled).is_true()

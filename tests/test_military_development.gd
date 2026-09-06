@@ -24,6 +24,7 @@ func before_test()->void:
 		civ.player_relation["home_location_known"]=true
 		civ.player_relation["home_position"]={"x":float(index+1)*1000.0,"z":float(index+1)*750.0}
 		system.civilizations[index]=civ
+		for region:Dictionary in civ.strategic_regions:system.city_intelligence.publish("player",system.city_intelligence.capture("player",String(region.id),.9,0,"returned survey","fixture"),0)
 
 
 func test_military_era_requires_security_and_supporting_research_scale()->void:
@@ -89,6 +90,11 @@ func test_industrial_production_lines_run_in_parallel_and_remain_bounded()->void
 func test_declared_war_gets_a_name_front_and_permanent_closed_record()->void:
 	var civ:Dictionary=system.civilizations[0]
 	var civ_id:=String(civ.id)
+	var target:=String(civ.strategic_regions[0].id)
+	system.city_intelligence.records.clear()
+	assert_bool(system.conduct_player_action(civ_id,"declare_war",true).has("error")).is_true()
+	system.city_intelligence.publish("player",system.city_intelligence.capture("player",target,1.0,0,"returned survey","fixture"),0)
+	civ.player_relation.war_target_region_id=target;system.civilizations[0]=civ
 	var declaration:Dictionary=system.conduct_player_action(civ_id,"declare_war",true)
 	assert_bool(bool(declaration.get("ok",false))).is_true()
 	var records:Array=system.war_history_snapshot()
@@ -121,7 +127,7 @@ func test_battle_ledger_separates_real_military_and_civilian_deaths()->void:
 	assert_bool(bool(system.conduct_player_action(civ_id,"declare_war",true).get("ok",false))).is_true()
 	var target:Dictionary=system.campaign_targets(civ_id).filter(func(region:Dictionary)->bool: return bool(region.available))[0]
 	var population_before:=float(system.civilizations[0].population)
-	var battle:Dictionary={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"target_region_name":String(target.name),"terrain_defense":1.22,"rounds":[{"attacker_casualties":{"killed":100,"wounded":180,"scattered":40},"defender_casualties":{"killed":200,"wounded":320,"scattered":80}}],"attacker":{"name":"HOME HOST","dead":100},"defender":{"name":String(civ.name),"dead":200},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":60}}
+	var battle:Dictionary={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"target_region_name":String(target.name),"terrain_defense":1.22,"rounds":[{"attacker_casualties":{"killed":100,"wounded":180,"scattered":40},"defender_casualties":{"killed":200,"wounded":320,"scattered":80}}],"attacker":{"name":"HOME HOST","dead":100,"remaining_troops":50000,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":200},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":60}}
 	var outcome:Dictionary=system.resolve_player_battle(civ_id,battle)
 	var civilian_dead:=int((outcome.civilian_dead as Dictionary).rival)
 	assert_int(civilian_dead).is_greater(0)
@@ -193,6 +199,8 @@ func test_trained_personnel_form_a_bounded_army_and_move_over_known_geography()-
 	known.player_relation["home_location_known"]=true
 	known.player_relation["home_position"]={"x":1200.0,"z":900.0}
 	CivilizationSystem.civilizations[0]=known
+	CivilizationSystem.set_scout_geography_authority(func(_point:Vector2)->bool:return true)
+	for region:Dictionary in known.strategic_regions:CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(region.id),.9,0,"returned survey","fixture"),0)
 	CivilizationSystem._add_revealed_area(Vector2(1200.0,900.0),300.0,"returned military chart")
 	var created:=MilitaryCampaign.create_field_army(600)
 	assert_bool(bool(created.get("ok",false))).is_true()
@@ -242,6 +250,7 @@ func test_offensive_requires_a_formed_army_at_the_objective()->void:
 	civ.player_relation["at_war"]=true
 	civ.player_relation["treaty"]="war"
 	CivilizationSystem.civilizations[0]=civ
+	for region:Dictionary in civ.strategic_regions:CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(region.id),.9,0,"returned survey","fixture"),0)
 	var target:Dictionary=CivilizationSystem.campaign_targets(String(civ.id)).filter(func(region:Dictionary)->bool: return bool(region.available))[0]
 	var blocked:Dictionary=MilitaryCampaign.offensive_campaign_availability(String(civ.id),String(target.id))
 	assert_bool(blocked.has("error")).is_true()

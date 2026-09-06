@@ -71,6 +71,8 @@ func _ready()->void:
 	_build_decision_queue()
 	_build_toolbar()
 	_build_dock()
+	dock.visibility_changed.connect(_layout)
+	detail_dock.visibility_changed.connect(_layout)
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 	refresh()
@@ -81,20 +83,21 @@ func _layout()->void:
 		rail_panel.position=Vector2.ZERO
 		rail_panel.size=Vector2(Tokens.RAIL_WIDTH,view.y)
 	if time_pill:
-		time_pill.position=Vector2(view.x*0.5-time_pill.size.x*0.5,Tokens.DOCK_MARGIN_Y)
+		time_pill.position=Vector2(Tokens.DOCK_X,Tokens.DOCK_MARGIN_Y)
 	if kpi_strip:
-		kpi_strip.position=Vector2(view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x,Tokens.DOCK_MARGIN_Y)
+		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
+		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Tokens.DOCK_MARGIN_Y if view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x>time_pill.position.x+time_pill.size.x+12 else 66)
 	if queue_root:
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,view.y-Tokens.EDGE_MARGIN-queue_root.size.y)
 	if dock:
-		dock.position=Vector2(Tokens.DOCK_X,Tokens.DOCK_MARGIN_Y)
+		dock.position=Vector2(Tokens.DOCK_X,72)
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.DOCK_MARGIN_Y*2.0))
+		dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-72-Tokens.DOCK_MARGIN_Y))
 	if detail_dock:
-		detail_dock.position=Vector2(Tokens.DOCK_X,Tokens.DOCK_MARGIN_Y)
-		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.DOCK_MARGIN_Y*2.0))
+		detail_dock.position=Vector2(Tokens.DOCK_X,72)
+		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-72-Tokens.DOCK_MARGIN_Y))
 	_position_toolbar()
 
 func force_dock_layout()->void:
@@ -104,7 +107,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.DOCK_MARGIN_Y*2.0)
+		panel.size=Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-72-Tokens.DOCK_MARGIN_Y)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 

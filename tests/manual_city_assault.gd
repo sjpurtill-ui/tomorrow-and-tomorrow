@@ -6,11 +6,14 @@ var army_id:int
 var attack_button:Button
 var action_panel:PanelContainer
 var action_note:Label
+var fixture_attacker_count:=180
+var fixture_population:=10000
+var fixture_equipment:=0
 func _ready()->void:
-	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_CityAssault_Test"))
+	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_CityAssault_Test") or OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_FocusedJourney_Test"))
 	GameState.reset_for_new_world(74017)
 	PeopleDirection.reset_for_new_world();PeopleDirection.choose("military")
-	GameState.ensure_population_total(10000)
+	GameState.ensure_population_total(fixture_population)
 	GameState.settlement_name="TEST HOME"
 	GameState.settlement_site_committed=true
 	GameState.civic_api_enabled=false
@@ -18,11 +21,12 @@ func _ready()->void:
 	CivilizationSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world()
 	ForeignDiplomacy.reset_for_new_world();ForeignDiplomacy.ensure();FoodSystem.reset_for_new_world()
 	GameState.resource_stockpiles["Food"]=1000000.0
-	assert(int(MilitaryCampaign.raise_recruits(180).get("raised",0))==180)
-	var training:=MilitaryCampaign.start_training("levy","improvised",180)
+	MilitaryCampaign.military_inventory.improvised=fixture_equipment
+	assert(int(MilitaryCampaign.raise_recruits(fixture_attacker_count).get("raised",0))==fixture_attacker_count)
+	var training:=MilitaryCampaign.start_training("levy","improvised",fixture_attacker_count)
 	assert(not training.has("error"))
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true));MilitaryCampaign.training_queue.clear()
-	var formed:=MilitaryCampaign.create_field_army(180);assert(not formed.has("error"))
+	var formed:=MilitaryCampaign.create_field_army(fixture_attacker_count);assert(not formed.has("error"))
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
 	civ_id=String(civ.id);civ.name="TEST CITY COUNCIL"
 	civ.population=3000.0;civ.cohorts=CivilizationSystem._scaled_cohorts(civ.cohorts,3000.0)
@@ -101,7 +105,7 @@ func _ready()->void:
 	attack_button=Button.new();attack_button.text="ATTACK TEST RIVER CITY";attack_button.custom_minimum_size.y=46;actions.add_child(attack_button);attack_button.pressed.connect(_attack)
 	action_panel.visible=false
 	get_window().title="NEW BATTLE HUD · CITY ASSAULT TEST — 180 vs %d — NOT YOUR CAMPAIGN" % int(incident.strength)
-	print("MANUAL_ASSAULT_READY ",JSON.stringify({"seed":74017,"attackers":180,"defenders":incident.strength,"residents":600,"occupation_required":incident.occupation_required,"paused":terrain.game_speed==0,"battle_started":not MilitaryCampaign.active_engagement.is_empty(),"user_data":OS.get_user_data_dir(),"city":city_id,"army":army_id}))
+	print("MANUAL_ASSAULT_READY ",JSON.stringify({"seed":74017,"attackers":fixture_attacker_count,"defenders":incident.strength,"residents":600,"occupation_required":incident.occupation_required,"paused":terrain.game_speed==0,"battle_started":not MilitaryCampaign.active_engagement.is_empty(),"user_data":OS.get_user_data_dir(),"city":city_id,"army":army_id}))
 	if "--verify-setup" in OS.get_cmdline_user_args() or "--verify-hud" in OS.get_cmdline_user_args():
 		for frame in 15:await get_tree().process_frame
 		assert(not is_instance_valid(CivilizationSystem.city_intelligence.screen_layer))

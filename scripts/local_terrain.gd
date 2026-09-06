@@ -9977,6 +9977,10 @@ func _toggle_people_panel() -> void:
 		_open_people_panel()
 
 func _open_people_panel() -> void:
+	if hud:
+		_close_people_panel()
+		_on_hud_section_requested("settlement",0)
+		return
 	if settler_panel==null:
 		return
 	settler_panel.visible=true

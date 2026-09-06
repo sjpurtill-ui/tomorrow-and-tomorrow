@@ -414,7 +414,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
-func queue_consumable_production(item:String,count:int)->Dictionary:
+func consumable_production_quote(item:String,count:int)->Dictionary:
 	var line_gate:=_production_line_gate()
 	if line_gate.has("error"): return line_gate
 	var discovery:=String({"arrows":"bow_craft","artillery_rounds":"powder_artillery","small_arms_ammunition":"__military_tier_5__","heavy_shells":"__military_tier_6__"}.get(item,""))
@@ -427,6 +427,12 @@ func queue_consumable_production(item:String,count:int)->Dictionary:
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount
 		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
+	return {"ok":true,"amount":amount,"recipe":recipe}
+
+func queue_consumable_production(item:String,count:int)->Dictionary:
+	var quote:=consumable_production_quote(item,count)
+	if quote.has("error"):return quote
+	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe
 	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
 	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
 	var reserved:Dictionary={}
@@ -435,7 +441,7 @@ func queue_consumable_production(item:String,count:int)->Dictionary:
 	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
-func queue_transport_cart_production(count:int)->Dictionary:
+func transport_cart_quote(count:int)->Dictionary:
 	var line_gate:=_production_line_gate()
 	if line_gate.has("error"): return line_gate
 	var gate:=_knowledge_gate("joinery",0.10)
@@ -446,6 +452,12 @@ func queue_transport_cart_production(count:int)->Dictionary:
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount
 		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
+	return {"ok":true,"amount":amount,"recipe":recipe}
+
+func queue_transport_cart_production(count:int)->Dictionary:
+	var quote:=transport_cart_quote(count)
+	if quote.has("error"):return quote
+	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe
 	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
 	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
 	var reserved:Dictionary={}
@@ -454,7 +466,7 @@ func queue_transport_cart_production(count:int)->Dictionary:
 	return {"id":job_id,"queued":amount,"item":"transport_cart","work_days":float(recipe.days)*amount,"message":"Queued %d transport cart%s; %.1f workshop-days reserved with %d jobs waiting." % [amount,"" if amount==1 else "s",float(recipe.days)*amount,equipment_queue.size()]}
 
 
-func queue_equipment_repair(item:String,count:int)->Dictionary:
+func equipment_repair_quote(item:String,count:int)->Dictionary:
 	if not simulator.WEAPONS.has(item): return {"error":"Unknown equipment type: %s" % item}
 	var line_gate:=_production_line_gate()
 	if line_gate.has("error"): return line_gate
@@ -464,6 +476,12 @@ func queue_equipment_repair(item:String,count:int)->Dictionary:
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount*0.18
 		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s for repairs: need %.1f." % [material,required]}
+	return {"ok":true,"amount":amount,"recipe":recipe,"material_factor":0.18,"work_factor":0.38}
+
+func queue_equipment_repair(item:String,count:int)->Dictionary:
+	var quote:=equipment_repair_quote(item,count)
+	if quote.has("error"):return quote
+	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe
 	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount*0.18
 	damaged_equipment[item]=int(damaged_equipment.get(item,0))-amount
 	var work_per_item:=float(recipe.days)*0.38
@@ -634,7 +652,7 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 	var source:Dictionary=field_armies[source_index] if source_index>=0 else home_army
 	var readiness:=clampf(float(source.get("readiness",.45))*.90,.15,1)
 	var supply:=clampf(float(source.get("supply_level",1)),0,1)
-	var requested:=mini(fielded,maxi(1,ceili(required/maxf(.05,supply*(.5+.5*readiness)))))
+	var requested:=mini(fielded,maxi(1,ceili(ceilf(required)/maxf(.05,supply*(.5+.5*readiness)))))
 	var detached:=_detach_field_army_formations(source_field_army_id,requested) if source_index>=0 else _detach_occupation_formations(requested)
 	var committed:=0
 	for formation in detached: committed+=int(formation.get("count",0))

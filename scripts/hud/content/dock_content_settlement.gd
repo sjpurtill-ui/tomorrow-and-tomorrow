@@ -28,6 +28,12 @@ func meta()->Dictionary:
 func tab(sub:int)->Dictionary:
 	var settlement:=_selected_settlement()
 	var settlement_id:=String(settlement.get("id",""))
+	if settlement_id.is_empty() and sub==0:
+		var committed:=GameState.settlement_site_committed
+		var items:Array=[{"label":"FOOD & MATERIALS","sub":"Water access and current stores","on_press":jump("economy",0)}]
+		if committed:items.append({"label":"FOUNDING WORK","sub":"Progress toward the Hearth Circle","on_press":jump("settlement",1)})
+		else:items.push_front({"label":"FOUND SETTLEMENT","sub":"Commit the convoy’s present site","primary":true,"on_press":terrain._on_settlement_action_pressed})
+		return {"brief":{"title":"A home is taking shape" if committed else "Choose a home for your people","why":"Unpause with the time controls above. The Hearth Circle emerges through ordinary work; local leadership and priorities become available once it is complete." if committed else "Move the convoy across known land and inspect nearby water. Founding commits its current location."},"blocks":[{"type":"actions","items":items}]}
 	var local_population:=maxi(1,int(settlement.get("population",GameState.population_total)))
 	var local_share:=float(local_population)/maxf(1.0,float(GameState.population_total))
 	var management:=GovernmentPeopleSystem.settlement_management(settlement_id)
