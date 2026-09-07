@@ -12143,7 +12143,8 @@ func _refresh_contact_encounter_markers()->void:
 		confirmed.append({"detailed":camera!=null and camera.size<=2.0,"city_id":city.city_id,"civ_id":city.civ_id,"name":city.name,"x":float(location.x),"z":float(location.z),"report":city})
 	if camera!=null:
 		confirmed.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return Vector2(a.x,a.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z))<Vector2(b.x,b.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z)))
-	if confirmed.size()>64: confirmed.resize(64)
+	# Keep the mesh budget separate from known names: labels survive at every distance.
+	for index in range(64,confirmed.size()):confirmed[index].detailed=false
 	var visible_ids:Dictionary={}
 	for site:Dictionary in confirmed:visible_ids[String(site.city_id)]=true
 	for city_id in contact_encounter_markers.keys():
@@ -12158,6 +12159,8 @@ func _refresh_contact_encounter_markers()->void:
 		var population:=preload("res://scripts/foreign_settlement_visual.gd").stable_population(site.report,prior_population)
 		var appearance:Array=[site.detailed,site.civ_id,site.name,site.x,site.z,population if site.detailed else -1,not site.report.get("fields",{}).is_empty()]
 		if is_instance_valid(previous):
+			var existing_label:=previous.get_node_or_null("SettlementLabel") as Label3D
+			if existing_label:existing_label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
 			if previous.get_meta("appearance",[])==appearance:continue
 			# queue_free is deferred; hide the old mesh now to avoid an overlapping frame.
 			previous.hide();previous.queue_free()
@@ -12180,7 +12183,9 @@ func _refresh_contact_encounter_markers()->void:
 			footprint_radius=fabric.footprint_radius
 		var label:=Label3D.new();label.name="SettlementLabel";label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
 		label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-		label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("ded4b5")
+		label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("#e4d7b4")
+		label.outline_modulate=Color(0.018,0.026,0.028,0.97);label.render_priority=11
+		marker.set_meta("footprint_radius",footprint_radius)
 		label.position=Vector3(0,_height_at(site.x,site.z)+.015,-footprint_radius*1.15)
 		marker.add_child(label)
 		var pin:=Label3D.new();pin.name="RegionalCityPin";pin.text="◆";pin.font_size=15;pin.outline_size=5
@@ -12193,14 +12198,24 @@ func _refresh_contact_encounter_markers()->void:
 		var marker:Node3D=marker_variant
 		if marker==null or not is_instance_valid(marker): continue
 		marker.visible=camera!=null # A reported city location is known even when surrounding terrain is not surveyed.
-		var label:=marker.get_node_or_null("SettlementLabel") as Label3D
-		# The discovery map preserves distant locations. A terrain label is useful
-		# only when the player has zoomed into the observed place; keeping fixed-size
-		# names visible at regional scale recreates the giant persistent annotations
-		# the compact world map was introduced to replace.
-		if label: label.visible=camera!=null and camera.size<=2.0
-		var pin:=marker.get_node_or_null("RegionalCityPin") as Label3D
-		if pin:pin.visible=camera!=null and camera.size>2.0
+		_update_foreign_city_annotation(marker)
+
+func _update_foreign_city_annotation(marker:Node3D)->void:
+	var label:=marker.get_node_or_null("SettlementLabel") as Label3D
+	if label:
+		label.visible=camera!=null
+		if camera!=null:
+			var close:=camera.size<=2.4
+			label.font_size=10 if close or camera.size>1600.0 else 12
+			label.outline_size=3 if close else 4
+			var screen_up:=Vector2(camera.global_basis.y.x,camera.global_basis.y.z)
+			if screen_up.length_squared()<.0001:screen_up=Vector2(0,-1)
+			var radius:=float(marker.get_meta("footprint_radius",.065))
+			var offset:=minf(camera.size*.28,maxf(.095,radius*.12)) if close else maxf(camera.size*.030,minf(radius*.36,camera.size*.18))
+			var ground:=Vector2(marker.position.x,marker.position.z)+screen_up.normalized()*offset
+			label.position=Vector3(ground.x-marker.position.x,_height_at(ground.x,ground.y)+.13,ground.y-marker.position.z)
+	var pin:=marker.get_node_or_null("RegionalCityPin") as Label3D
+	if pin:pin.visible=camera!=null and camera.size>2.0
 
 
 func _refresh_foreign_formation_markers()->void:
@@ -13379,8 +13394,33 @@ func _settlement_plot_lens_report(plot:Dictionary)->String:
 	if cause!="": report+="\n[color=#c4aa70]Why it exists[/color]\n%s\n" % cause.capitalize()
 	return report
 
+func _show_city_intel_summary(city_id:String)->void:
+	if hud==null or CivilizationSystem.city_intelligence.known("player",city_id).is_empty():return
+	hud.close_detail()
+	hud.close_dock()
+	hud.open_detail(preload("res://scripts/hud/content/dock_detail_foreign_city.gd").new(self,hud,city_id))
+
 func _city_from_screen(point:Vector2)->Dictionary:
 	if camera==null:return {}
+	# Names and locator pins are clickable even when physical buildings are
+	# subpixel at regional or continental distance.
+	var picked_id:=""
+	var best_distance:=INF
+	for id in contact_encounter_markers:
+		var marker:Node3D=contact_encounter_markers[id]
+		if not is_instance_valid(marker) or not marker.visible:continue
+		for node_name in ["SettlementLabel","RegionalCityPin"]:
+			var label:=marker.get_node_or_null(node_name) as Label3D
+			if label==null or not label.visible or camera.is_position_behind(label.global_position):continue
+			var center:=camera.unproject_position(label.global_position)
+			var font:Font=label.font if label.font!=null else ThemeDB.fallback_font
+			var glyph_size:=font.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.font_size)
+			var projection_scale:=get_viewport().get_visible_rect().size.y/(2.0*tan(deg_to_rad(camera.fov)*.5))
+			var size:=Vector2(glyph_size.x,float(label.font_size)*1.5)*label.pixel_size*projection_scale
+			size=size.max(Vector2(24,24))+Vector2(12,8)
+			if Rect2(center-size*.5,size).has_point(point) and point.distance_squared_to(center)<best_distance:
+				picked_id=String(id);best_distance=point.distance_squared_to(center)
+	if picked_id!="":return CivilizationSystem.city_intelligence.known("player",picked_id)
 	var origin:=camera.project_ray_origin(point);var direction:=camera.project_ray_normal(point)
 	for id in contact_encounter_markers:
 		var marker:Node3D=contact_encounter_markers[id]
@@ -13500,7 +13540,7 @@ func _inspect_location(position: Vector3) -> void:
 func _inspect_location_local(position: Vector3) -> void:
 	var city_report:=_contact_encounter_at(position)
 	if city_report.has("city_id"):
-		CivilizationSystem.city_intelligence.open(String(city_report.city_id)); return
+		_show_city_intel_summary(String(city_report.city_id)); return
 	if lens_panel==null and interface_layer: _build_lens(interface_layer)
 	_show_map_selection(position)
 	if travel_status_label: travel_status_label.text=_map_inspection_summary(position)
@@ -19750,7 +19790,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Pick the actual rendered city geometry, independent of scout counter hit radii.
 		var clicked_city:=_city_from_screen(event.position)
 		if not clicked_city.is_empty():
-			CivilizationSystem.city_intelligence.open(String(clicked_city.city_id));get_viewport().set_input_as_handled();return
+			_show_city_intel_summary(String(clicked_city.city_id));get_viewport().set_input_as_handled();return
 		# Target counters win hit-testing when formations overlap. Otherwise the
 		# player can see a scout or enemy but can only select their own army under
 		# it — precisely the opposite of the action they are trying to take.
