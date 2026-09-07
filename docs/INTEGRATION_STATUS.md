@@ -1,3 +1,9 @@
+## September 7 — foreign city labels and map intelligence
+
+Integrated `824ea64` and `4614b5e` from `codex/foreign-city-labels` by fast-forward. Known foreign cities retain name/population-estimate labels at every distance. Clicking a city opens a compact intelligence dock on the map; the full report remains optional. A live check found a competing font-size refresh that caused shrinking/blinking; the follow-up preserves aerial normalization. Two targeted regression cases pass, including normalization followed by marker refresh at all four distances. The older intelligence AI-target test remains a reproduced baseline failure (see FOREIGN_CITY_LABELS_HANDOFF.md). No save schema changes.
+
+Canonical editor Run Project resumed Seanston, day 2374, population 147, seed 1792946605. Player PID 47271 has the explicit canonical project path and `res://local_terrain.tscn` with `--resume-saved`; startup log confirms restoration with no script errors. Live Region screenshot shows foreign names at readable size matching Seanston. Campaign remains paused. The temporary editor resume argument was removed from project.godot after launch. Click/summary behavior is covered by targeted checks; native automation could inspect the embedded game but redirected coordinate clicks to the editor, so no live mouse-click validation is claimed.
+
 # Compact speed dropdown integrated — September 7, 2026
 
 INTEGRATED 45b24d1 in canonical Mac main by conflict-free fast-forward from
