@@ -2156,8 +2156,8 @@ func _fabric_form_for(use:String,tier:int,current_form:String)->String:
 		return [current_form,"worked_clearance","household_garden_strip","inherited_smallholding","bounded_field_mosaic","consolidated_field_strips","market_garden_mosaic","managed_hinterland_field","regional_supply_field","historic_agricultural_parcel","surveyed_agricultural_block","mechanized_field_system","intensive_regional_foodscape"][clampi(tier,0,12)]
 	return current_form
 
-func _fabric_upgrade_cost(plot:Dictionary,target_tier:int)->Dictionary:
-	var family:=_fabric_material_family_for(plot,target_tier)
+func _fabric_upgrade_cost(plot:Dictionary,target_tier:int,family:String="")->Dictionary:
+	if family.is_empty():family=_fabric_material_family_for(plot,target_tier)
 	var scale:=0.22+float(target_tier)*0.075
 	if String(plot.get("land_use",""))=="field":
 		return {"Timber":scale*0.22,"Fiber Plants":scale*0.18}
@@ -2199,13 +2199,14 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 		var current_tier:=int(plot.get("fabric_generation",0))
 		if current_tier>=target_tier: continue
 		var next_tier:=current_tier+1
-		var cost:=_fabric_upgrade_cost(plot,next_tier)
+		var family:=_fabric_material_family_for(plot,next_tier)
+		var cost:=_fabric_upgrade_cost(plot,next_tier,family)
 		if not _can_pay_fabric_cost(cost): continue
 		var route_access:=float(plot.get("service_access",0.0))
 		var occupancy:=float(plot.get("resident_count",0)+plot.get("worker_count",0))
 		var age:=maxf(0.0,float(day-int(plot.get("created_day",day)))/365.0)
 		var score:=route_access*0.72+occupancy*0.028+age*0.018+float(plot.get("prosperity",0.0))*0.42
-		candidates.append({"plot":plot,"next_tier":next_tier,"cost":cost,"score":score})
+		candidates.append({"plot":plot,"next_tier":next_tier,"cost":cost,"material_family":family,"score":score})
 	if candidates.is_empty(): return
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.score)>float(b.score))
 	var builders:=int(GameState.population_allocations.get("Construction",0))
@@ -2220,11 +2221,13 @@ func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->
 	var chosen_plot:Dictionary=chosen.plot
 	var next_tier:int=chosen.next_tier
 	var cost:Dictionary=chosen.cost
+	# Keep the quoted construction material: spending may drop stores below
+	# the selection threshold, but cannot change an already funded recipe.
+	var target_family:=String(chosen.get("material_family",_fabric_material_family_for(chosen_plot,next_tier)))
 	for resource_name in cost:
 		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(cost[resource_name]))
 	var previous_form:=String(chosen_plot.get("form","inherited_plot"))
 	var use:=String(chosen_plot.get("land_use",""))
-	var target_family:=_fabric_material_family_for(chosen_plot,next_tier)
 	chosen_plot["form"]=_fabric_form_for(use,next_tier,previous_form)
 	if target_family!=String(chosen_plot.get("material_family","organic")):
 		chosen_plot["material_family"]=target_family

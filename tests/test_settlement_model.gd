@@ -795,3 +795,36 @@ func test_population_alone_cannot_found_a_satellite_quarter()->void:
 	assert_array(events).is_empty()
 	assert_int(GameState.settlement_plots.size()).is_equal(original_plots)
 	assert_int(GameState.settlement_nuclei.size()).is_equal(original_nuclei)
+
+func test_funded_material_upgrade_keeps_recipe_after_stock_threshold_crossing()->void:
+	var candidate:Dictionary={}
+	for plot:Dictionary in GameState.settlement_plots:
+		if String(plot.land_use)=="residential_compound":candidate=plot;break
+	candidate.material_family="organic";candidate.seed=10
+	var geometry:PackedVector2Array=candidate.polygon.duplicate()
+	GameState.known_discoveries.append("stone_selection")
+	GameState.resource_stockpiles={"Stone":2.1,"Timber":2.0,"Fiber Plants":2.0}
+	var cost:Dictionary=model._fabric_upgrade_cost(candidate,7)
+	assert_bool(cost.has("Stone")).is_true()
+	var events:Array[Dictionary]=[]
+	model._apply_fabric_upgrade({"plot":candidate,"next_tier":7,"cost":cost},25550,events)
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(2.0)
+	assert_str(String(candidate.material_family)).is_equal("stone")
+	assert_array(candidate.polygon).is_equal(geometry)
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal_approx(2.1-float(cost.Stone),.000001)
+
+func test_quoted_material_survives_other_funded_construction_spending()->void:
+	var candidate:Dictionary={}
+	for plot:Dictionary in GameState.settlement_plots:
+		if String(plot.land_use)=="residential_compound":candidate=plot;break
+	candidate.material_family="organic";candidate.seed=10
+	GameState.known_discoveries.append("stone_selection")
+	GameState.resource_stockpiles={"Stone":2.1,"Timber":2.0}
+	var family:String=model._fabric_material_family_for(candidate,7)
+	var cost:Dictionary=model._fabric_upgrade_cost(candidate,7,family)
+	GameState.resource_stockpiles.Stone=1.9
+	assert_bool(model._can_pay_fabric_cost(cost)).is_true()
+	var events:Array[Dictionary]=[]
+	model._apply_fabric_upgrade({"plot":candidate,"next_tier":7,"cost":cost,"material_family":family},25550,events)
+	assert_str(String(candidate.material_family)).is_equal("stone")
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal_approx(1.9-float(cost.Stone),.000001)
