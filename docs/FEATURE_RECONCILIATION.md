@@ -1,3 +1,19 @@
+# Compact speed dropdown integrated — September 7, 2026
+
+INTEGRATED 45b24d1 in canonical Mac main by conflict-free fast-forward from
+ad943db. Canonical HUD file matches the tested worker exactly; tracked tree clean.
+Five persistent speed buttons become one dropdown plus pause/resume. Actual rates
+and keyboard shortcuts are unchanged. Repeated speed text is removed; checked
+representative width is 380 px. Isolated clean import and all five selection,
+pause/resume and width checks passed. See SPEED_DROPDOWN_HANDOFF.md.
+
+Player PID 42977 remains running and was not restarted. The last native screenshot
+still shows the previous bar; live script application is not claimed. The new
+control appears on HUD recreation/next launch, or supported live script reload.
+No save changes or shared simulation edits; no remote push.
+
+---
+
 # City parity and four-distance controls integrated — September 7, 2026
 
 INTEGRATED in canonical Mac main:
