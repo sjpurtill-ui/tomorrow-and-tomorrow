@@ -7,6 +7,14 @@ Branch: `codex/military-front-graphics`
 Base: `577f8aa5d17310674b9d75454c2f584317c6c7aa` (verified organic-town integration).
 The delivery commit is the commit containing this document.
 
+## Review follow-up
+
+Follow-up to `8ea1a7c73dab231bb46c1b187fcf6511c85f78a2`, committed on the same branch after integrator review. The bounded terrain advance hook now includes occupation markers (`close_army_figures`) and checks `is_visible_in_tree()`, so all front types respect hidden encounter markers/ancestors as well as pause. Siege force caching includes termination and city radius: unchanged force dictionaries no longer suppress a newly reported capture or retain positions from an older city radius.
+
+Two regressions exercise the actual hooks. An occupation front created through `_refresh_close_army_figures` changes from 400 to 200 m² through `_advance_physical_army_fronts`, freezes during pause and hidden-marker/ancestor intervals, and preserves its input. `siege_city_scene.configure` changes a 400 m² defender to 260 m² when only termination adds 35 prisoners, then removes the footprint at 100 prisoners without changing the force ledger or allocating additional actors.
+
+Post-review combined front/general campaign/battle injury/organic town/military development run: **61 passed**, zero errors/failures/skips/orphans, including all 12 front cases. Actual invasion UI/replay probe: **PASS**. Evidence: `/tmp/front-review-fixes-tests.log` and `/tmp/front-review-fixes-ui.log`. No canonical mutation, new simulation authority or save-schema change. Previous baseline siege-withdrawal failure and graphical-signoff limitations remain as documented below.
+
 ## Behavior and entry paths
 
 - `ArmyFrontVisual` draws broad, thin colored occupied-ground sections from combat-capable counts and recorded equipment. Metre geometry uses `.001` in the kilometre terrain. Deployment changes aspect without changing area; real losses shrink area. Map heading uses the existing reported heading/destination. Separate counter glyphs retain readability at distance without enlarging occupied ground.

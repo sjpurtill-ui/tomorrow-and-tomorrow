@@ -74,7 +74,7 @@ func _update_forces(snapshot:Dictionary)->void:
 	var battle:Dictionary=snapshot.get("battle",{})
 	var offensive:=String(snapshot.mode)=="offensive"
 	var forces:Array=[battle.get("attacker",snapshot.own_force if offensive else {}),battle.get("defender",{} if offensive else snapshot.own_force)]
-	var key:=JSON.stringify(forces)
+	var key:=JSON.stringify([forces,battle.get("termination",{}),radius])
 	if key==force_signature:return
 	force_signature=key
 	# Aggregate siege deployment is schematic: blockade fractions are not locations.

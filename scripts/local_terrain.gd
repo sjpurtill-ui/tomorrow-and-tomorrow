@@ -12999,11 +12999,11 @@ func _apply_physical_army_front(marker: Node3D, view: Dictionary) -> void:
 			if close:child.hide()
 
 func _advance_physical_army_fronts(delta: float) -> void:
-	for markers in [player_field_army_markers,foreign_formation_markers]:
+	for markers in [player_field_army_markers,foreign_formation_markers,close_army_figures]:
 		for marker in markers.values():
 			if not is_instance_valid(marker): continue
 			var front: ArmyFrontVisual = marker.get_node_or_null("OccupiedArmyGround")
-			if front != null and front.visible: front.advance(delta,game_speed <= 0.0)
+			if front != null and front.is_visible_in_tree(): front.advance(delta,game_speed <= 0.0)
 
 func _warfare_label_has_clear_space(label:Label3D)->bool:
 	if camera==null: return true

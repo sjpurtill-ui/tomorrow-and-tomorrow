@@ -158,3 +158,51 @@ func test_overflow_cohorts_keep_equipment_area_with_bounded_geometry() -> void:
 	var sections:=FRONT.layout({"troops":10000,"formations":forms})
 	assert_int(sections.size()).is_equal(FRONT.MAX_SECTIONS)
 	assert_float(area(sections)).is_equal_approx(60000,2)
+
+func test_occupation_front_terrain_hook_updates_losses_and_respects_pause_and_parent_visibility() -> void:
+	var renderer:Node3D=auto_free(MAP.new())
+	renderer._configure_seamless_world();renderer._configure_shape();renderer._configure_noise();renderer._prepare_river_course()
+	var revealed:Array=CivilizationSystem.revealed_areas.duplicate(true)
+	CivilizationSystem.revealed_areas.append({"x":0,"z":0,"radius":10})
+	var army:=force(100);army.army_id=-7;army.garrison_visual=true;army.position={"x":0,"z":0}
+	renderer._refresh_close_army_figures([army],-1)
+	var marker:Node3D=renderer.close_army_figures["-7"]
+	# Mount only the created marker, avoiding a full player terrain initialization.
+	var host:Node3D=auto_free(Node3D.new());add_child(host)
+	renderer.remove_child(marker);host.add_child(marker)
+	var front:ArmyFrontVisual=marker.get_node("OccupiedArmyGround")
+	assert_bool(front.is_visible_in_tree()).is_true()
+	assert_float(area(front.displayed_sections())).is_equal_approx(400,0.01)
+	army.troops=50;army.formations[0].count=50
+	var saved:=army.duplicate(true)
+	renderer._refresh_close_army_figures([army],-1)
+	renderer.game_speed=0;renderer._advance_physical_army_fronts(1)
+	assert_float(area(front.displayed_sections())).is_equal_approx(400,0.01)
+	renderer.game_speed=1
+	marker.hide();renderer._advance_physical_army_fronts(1)
+	assert_bool(front.visible).is_true()
+	assert_float(area(front.displayed_sections())).is_equal_approx(400,0.01)
+	marker.show();host.hide();renderer._advance_physical_army_fronts(1)
+	assert_float(area(front.displayed_sections())).is_equal_approx(400,0.01)
+	host.show();renderer._advance_physical_army_fronts(1)
+	assert_float(area(front.displayed_sections())).is_equal_approx(200,0.01)
+	assert_dict(army).is_equal(saved)
+	CivilizationSystem.revealed_areas=revealed
+
+func test_siege_termination_only_change_updates_captured_footprint() -> void:
+	var scene:Node3D=auto_free(load("res://scripts/siege_city_scene.gd").new());add_child(scene)
+	var defender:=force(100);defender.name="Defeated"
+	var snapshot:Dictionary={"id":"capture","population":1000,"defense_stage":3,"damage":0,"mode":"offensive","own_force":force(100),"battle":{"attacker":force(100),"defender":defender},"battle_active":false}
+	scene.configure(snapshot)
+	var front:ArmyFrontVisual=scene.figure_groups[1]
+	assert_float(area(front.displayed_sections())).is_equal_approx(400,0.01)
+	snapshot.battle.termination={"defeated":"Defeated","prisoners":35}
+	var saved:=snapshot.duplicate(true)
+	scene.configure(snapshot)
+	assert_float(area(front.displayed_sections())).is_equal_approx(260,0.01)
+	assert_dict(snapshot).is_equal(saved)
+	snapshot.battle.termination.prisoners=100
+	scene.configure(snapshot)
+	assert_array(front.displayed_sections()).is_empty()
+	assert_int(snapshot.battle.defender.troops).is_equal(100)
+	assert_int(scene.units.get_child_count()).is_equal(2)
