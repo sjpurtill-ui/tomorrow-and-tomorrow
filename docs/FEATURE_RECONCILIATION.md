@@ -1,3 +1,32 @@
+# Citizen production integrated — September 7, 2026
+
+INTEGRATED source `3dbca50` in canonical Mac main, fast-forwarded from `937cd65`.
+The worker was rebased without conflicts to preserve the concurrently integrated
+foreign-settlement refresh and its launch record. Original development base was
+`1e57003`; no foreign-refresh changes were overwritten.
+
+Military / Supply now defaults to persistent stockpile or continuous production.
+Citizen condition, effective Crafting workers, logistics and recorded workplace
+condition determine output. The adjustable military crafting share also governs
+legacy batch orders and leaves the remaining share to existing civilian systems.
+Shortages pause, stock targets replenish after issue, priorities divide capacity,
+and retooling carries an efficiency/WIP cost. Finished goods use existing stocks,
+training and field delivery. Full behavior and limits: CITIZEN_PRODUCTION_HANDOFF.md.
+
+Canonical clean headless import and six-suite 62/62 regression passed, zero errors,
+failures, skips or orphans. Includes 14 new persistent-production and dock-layout
+checks. Logs: /tmp/production-canonical-import.log and
+/tmp/production-canonical-tests.log. Test userdata was isolated by a temporary
+application override with Dummy audio; that override was removed after validation.
+New test UID is included in this integration record; unrelated files are retained.
+
+The canonical player PID 36402 was launched by the foreign-refresh task while this
+work was integrating. It and editor PID 35944 were preserved. The running player
+loaded the prior scripts and needs a normal restart to use production changes.
+No new player/test window was launched by this delivery. No remote push.
+
+---
+
 # Foreign settlement refresh integrated — September 7, 2026
 
 INTEGRATED source 0bb8659068e61cb4f4b3df1b010ed310568160ae by conflict-free

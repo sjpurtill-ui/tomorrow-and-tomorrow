@@ -1,6 +1,8 @@
 # Citizen production lines — September 7, 2026
 
-READY from `/Users/seanpurtill/.codex/worktrees/c2aa/tomorrow-and-tomorrow`,
+INTEGRATED as `3dbca50`, verified canonically by 62/62 tests.
+
+Developed from `/Users/seanpurtill/.codex/worktrees/c2aa/tomorrow-and-tomorrow`,
 branch `codex/citizen-production-lines`, base
 `1e57003ab6fcc34b571036cde6cf8ff78a50d81b`.
 
@@ -50,7 +52,7 @@ shared labor, injuries, damaged workplaces, retooling, ammunition/carts, partial
 save/reload deterministic continuation, billion-item completion and saved pause,
 invalid-state rejection, actual main-dock start/pause callbacks, and 500px layout.
 Headless editor import and git diff --check passed. Headless layout does not certify
-mouse interaction or GPU rendering. Canonical integration and launch recorded separately.
+mouse interaction or GPU rendering. Canonical integration and running-player status are recorded in INTEGRATION_STATUS.md.
 
 ## Compatibility and integration
 
