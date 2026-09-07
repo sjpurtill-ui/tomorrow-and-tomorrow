@@ -1,3 +1,33 @@
+# Foreign settlement refresh integrated — September 7, 2026
+
+INTEGRATED source 0bb8659068e61cb4f4b3df1b010ed310568160ae by conflict-free
+fast-forward from 1e57003 in canonical Mac main:
+/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow.
+The integration-record commit contains this entry.
+
+Foreign settlement visuals now share the authored town house assets, arranged
+around courts with narrow feathered paths. Primitive houses and yard mats are
+removed. Foreign architecture remains representative because city reports lack
+construction records. The city sidebar opens on single-column estimates, with
+separately scrolling Report, Scouting and Military tabs. No simulation/save schema
+or military-order behavior changes. Source scope and limits are documented in
+FOREIGN_SETTLEMENT_REFRESH_HANDOFF.md.
+
+Canonical Godot 4.7.2 headless import passed without errors; the dedicated foreign
+refresh probe passed with zero failures at all three viewport sizes. Combined
+organic-town and city-intelligence regression: 22/23 passed, zero errors, skipped
+cases or orphans. The sole failure is the previously reproduced base-code raid
+expectation at test_city_intelligence.gd:93 (one expected, zero received).
+Logs: /tmp/foreign-integrated-import.log, /tmp/foreign-integrated-probe.log,
+/tmp/foreign-integrated-tests.log. All pre-existing untracked files retain their
+hashes. The temporary isolated test configuration was removed.
+
+No Godot player/editor was running before integration. User authorized integration
+and loading the game; canonical editor/F5 launch follows this verification.
+Graphical sign-off of the foreign view remains pending. No remote push.
+
+---
+
 # Settlement neighborhoods and routine raids — September 7, 2026
 
 INTEGRATED in canonical Mac main by conflict-free fast-forward from 8536c15:
