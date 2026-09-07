@@ -31,47 +31,52 @@ func _box(parent:Node)->VBoxContainer:
 	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=8;style.content_margin_bottom=8;panel.add_theme_stylebox_override("panel",style)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",5);panel.add_child(box);return box
 func _button(parent:Node,text:String,callback:Callable,primary:bool=false)->Button:
-	var button:=Button.new();button.text=text;button.custom_minimum_size.y=36;button.add_theme_font_size_override("font_size",14)
+	var button:=Button.new();button.text=text;button.clip_text=true;button.size_flags_horizontal=SIZE_EXPAND_FILL;button.custom_minimum_size.y=36;button.add_theme_font_size_override("font_size",14)
 	var style:=StyleBoxFlat.new();style.bg_color=T.GOLD_WASH if primary else T.BUTTON_BG;style.border_color=T.GOLD if primary else T.BORDER;style.set_border_width_all(1);style.set_corner_radius_all(4)
 	button.add_theme_stylebox_override("normal",style);button.pressed.connect(callback);parent.add_child(button);return button
+func _page(tabs:TabContainer,caption:String)->VBoxContainer:
+	var scroll:=ScrollContainer.new();scroll.name=caption
+	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(scroll)
+	var box:=VBoxContainer.new();box.size_flags_horizontal=SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation",10);scroll.add_child(box)
+	return box
+
 func _ready()->void:
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	mouse_filter=MOUSE_FILTER_IGNORE
 	var background:=ColorRect.new();background.color=Color("090f11");background.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE);background.offset_left=-420;add_child(background)
 	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE);margin.offset_left=-420;add_child(margin)
-	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,24)
+	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,16)
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",12);margin.add_child(root)
 	var top:=HBoxContainer.new();root.add_child(top)
-	var eyebrow:=_label(top,"CITY ENCOUNTER",13,T.GOLD);eyebrow.size_flags_horizontal=SIZE_EXPAND_FILL
-	_button(top,"RETURN TO MAP",_close)
-	title=_label(root,"Settlement report",28,T.INK)
+	var eyebrow:=_label(top,"SETTLEMENT",13,T.GOLD);eyebrow.size_flags_horizontal=SIZE_EXPAND_FILL
+	_button(top,"Close",_close)
+	title=_label(root,"Settlement report",23,T.INK)
 	selector=OptionButton.new();selector.fit_to_longest_item=false;selector.custom_minimum_size.y=34;root.add_child(selector)
 	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player",civ_id):
 		selector.add_item(String(city.name));selector.set_item_metadata(selector.item_count-1,String(city.city_id))
 		if city.city_id==city_id:selector.select(selector.item_count-1)
 	selector.item_selected.connect(func(_i:int):refresh())
-	var banner:=_box(root);summary=_label(banner,"",18,T.GOLD);provenance=_label(banner,"",13,T.TEXT_SOFT)
-	var body:=HBoxContainer.new();body.add_theme_constant_override("separation",18);body.size_flags_vertical=SIZE_EXPAND_FILL;root.add_child(body)
-	var left:=VBoxContainer.new();left.visible=false;left.size_flags_horizontal=SIZE_EXPAND_FILL;left.add_theme_constant_override("separation",10);body.add_child(left)
-	control_label=_label(left,"",14,T.TEXT_SOFT)
-	var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);left.add_child(grid)
+	var banner:=_box(root);summary=_label(banner,"",14,T.GOLD);provenance=_label(banner,"",12,T.TEXT_SOFT)
+	var tabs:=TabContainer.new();tabs.size_flags_vertical=SIZE_EXPAND_FILL;root.add_child(tabs)
+	var left:=_page(tabs,"Report")
+	control_label=_label(left,"",13,T.TEXT_SOFT)
+	var grid:=VBoxContainer.new();grid.add_theme_constant_override("separation",8);left.add_child(grid)
 	for key:String in INTEL.FIELDS:
 		var card:=_box(grid);_label(card,String(INTEL.FIELDS[key].label).to_upper(),11,T.TEXT_SOFT)
-		cards[key]={"value":_label(card,"Unknown",19,T.INK),"note":_label(card,"Not observed",12,T.MUTED)}
-	var stores:=_box(grid);_label(stores,"DEPOSITS & STORES",11,T.TEXT_SOFT);_label(stores,"Not surveyed",19,T.INK);_label(stores,"Individual stores remain unknown.",12,T.MUTED)
-	var right:=VBoxContainer.new();right.custom_minimum_size.x=0;right.size_flags_horizontal=SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",12);body.add_child(right)
-	_button(right,"SHOW THIS CITY ON MAP",_show_map,true)
-	_button(root,"CITY INTELLIGENCE / ORDERS",func():left.visible=not left.visible;right.visible=not left.visible)
-	var tabs:=TabContainer.new();tabs.size_flags_vertical=SIZE_EXPAND_FILL;right.add_child(tabs)
-	var recon:=VBoxContainer.new();recon.name="Reconnaissance";recon.add_theme_constant_override("separation",12);tabs.add_child(recon)
-	_label(recon,"Bring back better evidence",20,T.INK)
+		cards[key]={"value":_label(card,"Unknown",18,T.INK),"note":_label(card,"Not observed",12,T.MUTED)}
+	_label(left,"Buildings illustrate a representative settlement. Its layout and architecture have not been surveyed.",12,T.MUTED)
+	_button(left,"Focus on map",_show_map)
+	var recon:=_page(tabs,"Scouting")
+	_label(recon,"Request a fresh report",18,T.INK)
 	_label(recon,"Scouts must travel, observe, and return before this report changes.",14,T.TEXT_SOFT)
 	duration=OptionButton.new();duration.custom_minimum_size.y=36;recon.add_child(duration)
 	for days:int in CivilizationSystem.SCOUT_DURATIONS:duration.add_item("%d-day reconnaissance" % days);duration.set_item_metadata(duration.item_count-1,days)
 	duration.item_selected.connect(func(_i:int):refresh())
 	costs=_label(recon,"",14,T.BODY)
 	send=_button(recon,"SEND SCOUTS",_send_scouts,true)
-	var military:=VBoxContainer.new();military.name="Military";military.add_theme_constant_override("separation",10);tabs.add_child(military)
+	var military:=_page(tabs,"Military")
 	_label(military,"Approach this settlement",20,T.INK)
 	army_choice=OptionButton.new();army_choice.fit_to_longest_item=false;army_choice.custom_minimum_size.y=34;military.add_child(army_choice)
 	for force:Dictionary in MilitaryCampaign.field_armies:
@@ -97,7 +102,7 @@ func _ready()->void:
 		var scene:=get_tree().current_scene
 		if scene and scene.has_method("_open_war_planning"):_close();scene._open_war_planning())
 
-	if army_choice.item_count>0 or not MilitaryCampaign.pending_aftermath.is_empty():tabs.current_tab=1
+	tabs.current_tab=0
 	feedback=_label(root,"Estimates describe returned observations. Conditions may have changed.",13,T.TEXT_SOFT)
 	var world:=CityEncounterWorld.terrain(get_tree().root)
 	var known:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
@@ -146,7 +151,7 @@ func refresh()->void:
 	title.text=String(city.name).trim_prefix("Reported home of ").capitalize()
 	var fields:Dictionary=city.fields
 	var age:=int(city.get("age_days",-1))
-	summary.text=("Location reported · interior unobserved" if fields.is_empty() else "%d of 7 city estimates reported" % fields.size())+"  /  "+("Observation date unknown" if age<0 else "%d days since observation" % age)
+	summary.text=("Location reported · interior unobserved" if fields.is_empty() else "%d / 7 estimates" % fields.size())+" · "+("Observation date unknown" if age<0 else "%d days since observation" % age)
 	var source:=String(city.source)
 	if source=="legacy or returned home location":source="Earlier home-location report"
 	provenance.text="%s · Received day %d · %s" % [source,int(city.reported_day),String(city.freshness).capitalize()]

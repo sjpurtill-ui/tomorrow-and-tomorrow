@@ -26,32 +26,39 @@ func build(report:Dictionary,height_at:Callable)->void:
 	var population:=display_population(report)
 	building_count=clampi(roundi(sqrt(float(population))*1.6),12,MAX_BUILDINGS) if population>=0 else 28
 	footprint_radius=framing_size(report)*.27
-	for key in ["EarthAndLanes","WallsAndTimber","PitchedRoofs"]:
-		var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES);surfaces[key]=surface
+	set_meta("representative_layout",true)
+	var lanes:=SurfaceTool.new();lanes.begin(Mesh.PRIMITIVE_TRIANGLES);surfaces["EarthAndLanes"]=lanes
 	var rng:=RandomNumberGenerator.new();rng.seed=hash(String(report.city_id))^GameState.world_seed
-	var main_axis:=rng.randf_range(-.6,.6)
-	var road:Array[Vector2]=[]
-	for i in 17:
-		var t:=float(i)/16.0
-		road.append(Vector2(sin(t*5.0)*footprint_radius*.13,(t-.5)*footprint_radius*2.25).rotated(main_axis))
-	for i in range(1,road.size()):_lane(road[i-1],road[i],.0032,Color("84745c"))
-	for i in building_count:
-		var rows:=ceili(float(building_count)/2)
-		var t:float=(float(i/2)+.5)/maxf(1,rows)
-		var side:float=-1 if i%2==0 else 1
-		var core:=Vector2(sin(t*5.0)*footprint_radius*.13,(t-.5)*footprint_radius*1.95)
-		var lateral:=.014+rng.randf_range(0,.014)+(float(i%3)*.005 if building_count>50 else 0.0)
-		var local:Vector2=(core+Vector2(side*lateral,rng.randf_range(-.002,.002))).rotated(main_axis)
-		var angle:=main_axis+rng.randf_range(-.28,.28)
-		var width:=rng.randf_range(.005,.008);var depth:=rng.randf_range(.007,.011)
-		_lane(core.rotated(main_axis),local,.0013,Color("91836b"))
-		_yard(local,Vector2(width*1.5,depth*1.25),angle,Color("8b8167"))
-		_house(local,width,depth,rng.randf_range(.0028,.0042),angle,rng)
+	var heading:=rng.randf_range(-PI,PI)
+	var plan:Dictionary={"buildings":[],"replaced":{}}
+	var courts:=ceili(float(building_count)/4.0)
+	var columns:=ceili(sqrt(float(courts)))
+	var rows:=ceili(float(courts)/columns)
+	var centers:Array[Vector2]=[]
+	for court in courts:
+		var center:=Vector2((court%columns-(columns-1)*.5)*.038,(court/columns-(rows-1)*.5)*.038)
+		center+=Vector2(rng.randf_range(-.002,.002),rng.randf_range(-.002,.002))
+		center=center.rotated(heading);centers.append(center)
+		if court>0:
+			var previous:=court-columns if court>=columns else court-1
+			_lane(centers[previous],center,.0011,Color("84745c"))
+		for slot in mini(4,building_count-court*4):
+			var direction:=Vector2.from_angle(heading+float(slot)*TAU/4+PI/4)
+			var local:=center+direction*.011
+			footprint_radius=maxf(footprint_radius,local.length()+.006)
+			var forward:=-direction
+			plan.buildings.append({"position":local,"angle":atan2(forward.x,forward.y),"variant":(court+slot)%4,"plot":{}})
+			# Doors share a court; no parcel mats or cross-street ladder paths.
+			_lane(center,local-direction*.0045,.00065,Color("91836b"))
+	# Shared authored assets, at their physical scale. These are representative
+	# households, not fabricated foreign construction records or a hidden census.
+	preload("res://scripts/organic_town_visual.gd").render(plan,Vector3.ZERO,func(x:float,z:float)->float:return _height(Vector2(x,z)),self)
 	# Buildings and earth are batched, with no per-resident nodes or gameplay state.
 	for key:String in surfaces:
 		var surface:SurfaceTool=surfaces[key];surface.generate_normals()
 		var instance:=MeshInstance3D.new();instance.name=key;instance.mesh=surface.commit()
 		var material:=StandardMaterial3D.new();material.vertex_color_use_as_albedo=true
+		material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.roughness=.94;material.cull_mode=BaseMaterial3D.CULL_DISABLED
 		instance.material_override=material;add_child(instance)
 	set_meta("building_count",building_count)
@@ -66,33 +73,11 @@ func _lane(a:Vector2,b:Vector2,width:float,color:Color)->void:
 	var corners:Array[Vector3]=[]
 	for p in points:corners.append(Vector3(p.x,_height(p)+.0016,p.y))
 	_quad(surfaces.EarthAndLanes,corners[0],corners[1],corners[2],corners[3],color)
-func _yard(center:Vector2,size_value:Vector2,angle:float,color:Color)->void:
-	var corners:Array[Vector3]=[]
-	for offset in [Vector2(-1,-1),Vector2(1,-1),Vector2(1,1),Vector2(-1,1)]:
-		var p:Vector2=center+(offset*size_value*.5).rotated(angle)
-		corners.append(Vector3(p.x,_height(p)+.0015,p.y))
-	_quad(surfaces.EarthAndLanes,corners[0],corners[1],corners[2],corners[3],color)
-func _point(center:Vector2,x:float,z:float,y:float,angle:float)->Vector3:
-	var p:=center+Vector2(x,z).rotated(angle);return Vector3(p.x,y,p.y)
-func _house(center:Vector2,width:float,depth:float,height:float,angle:float,rng:RandomNumberGenerator)->void:
-	var base:=_height(center)+.0018
-	var h:=base+height;var peak:=h+width*.35
-	var w:=width*.5;var d:=depth*.5
-	var walls:SurfaceTool=surfaces.WallsAndTimber;var roofs:SurfaceTool=surfaces.PitchedRoofs
-	var color:=Color("b3a083").darkened(rng.randf_range(0,.22))
-	var roof:=Color("897348").darkened(rng.randf_range(0,.23))
-	var corners:Array[Vector2]=[Vector2(-w,-d),Vector2(w,-d),Vector2(w,d),Vector2(-w,d)]
-	for i in 4:
-		var a:Vector2=corners[i];var b:Vector2=corners[(i+1)%4]
-		_quad(walls,_point(center,a.x,a.y,base,angle),_point(center,b.x,b.y,base,angle),_point(center,b.x,b.y,h,angle),_point(center,a.x,a.y,h,angle),color)
-	for z in [-d,d]:
-		_tri(walls,_point(center,-w,z,h,angle),_point(center,w,z,h,angle),_point(center,0,z,peak,angle),color)
-	for side in [-1,1]:
-		_quad(roofs,_point(center,side*(w+.0006),-d-.0005,h-.0002,angle),_point(center,side*(w+.0006),d+.0005,h-.0002,angle),_point(center,0,d+.0005,peak,angle),_point(center,0,-d-.0005,peak,angle),roof)
-		# Fine thatch courses make the roof readable at close aerial zoom.
-		for course in range(1,7):
-			var fraction:=float(course)/7
-			var x:float=side*w*fraction;var y:=lerpf(peak,h,fraction)+.00004
-			_quad(roofs,_point(center,x,-d,y,angle),_point(center,x,d,y,angle),_point(center,x+side*.00010,d,y-.00002,angle),_point(center,x+side*.00010,-d,y-.00002,angle),roof.darkened(.14))
-	# Door and lintel are geometry, not another repeated city symbol.
-	_quad(walls,_point(center,-.00065,-d-.00004,base,angle),_point(center,.00065,-d-.00004,base,angle),_point(center,.00065,-d-.00004,base+.0019,angle),_point(center,-.00065,-d-.00004,base+.0019,angle),Color("463d30"))
+	for edge:int in [-1,1]:
+		var inner_a:=a+side*edge;var inner_b:=b+side*edge
+		var outer_a:=a+side*edge*1.8;var outer_b:=b+side*edge*1.8
+		var points_fade:Array[Vector2]=[inner_a,inner_b,outer_b,inner_a,outer_b,outer_a]
+		for index in 6:
+			var p:=points_fade[index]
+			var tint:=color;tint.a=0.0 if index in [2,4,5] else 1.0
+			surfaces.EarthAndLanes.set_color(tint);surfaces.EarthAndLanes.add_vertex(Vector3(p.x,_height(p)+.0016,p.y))
