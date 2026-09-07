@@ -112,3 +112,25 @@ seven-case suite, reproducible Blender generator, eleven GLBs, manifest/review
 plates/asset README, and this handoff. The cultural studies are assets for later
 work, not an implemented empire/culture system. Canonical integration and in-engine
 visual signoff remain for the designated integrator after review.
+
+## Review correction after a599109
+
+The adapter now accepts explicit early household forms: initial material recipes,
+the legacy timber_household alias, durable_household_cluster, joined_kin_compound
+and courtyard_household_compound. Later and unknown forms are excluded regardless
+of one-storey height, material or inherited roof label. Supported market fallback
+also uses an explicit early-form list. The shared layout receives an unsupported
+roof sentinel on rejected display copies so its broader timber predicate cannot
+accidentally re-admit them; obstacle polygons remain present.
+
+Single identity-transformed imported meshes are now reused directly, preserving
+Godot importer-generated LOD indices and shadow resources. Only genuinely
+multi-mesh or transformed authoring uses the documented flattening fallback,
+which cannot preserve that importer data. A regression checks actual imported
+rubble_household mesh identity, nonempty LOD data and shadow resource retention.
+
+Final follow-up validation: **156/156 cases passed**, zero errors/failures/skips/
+orphans, exit 0, in `/tmp/early-review-final-tests.log`. The nine early cases include
+valid/advanced/unknown form coverage and actual imported LOD retention. An initial
+LOD-test type assumption was corrected from Dictionary to Godot's returned Array
+before the complete successful rerun. No simulation/save schema changes.

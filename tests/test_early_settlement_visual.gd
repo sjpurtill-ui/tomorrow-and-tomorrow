@@ -147,3 +147,28 @@ func test_mixed_resource_town_keeps_inherited_styles_and_bounded_representatives
 		assert_str(unchanged.buildings[i].early_kind).is_equal(plan.buildings[i].early_kind)
 		assert_vector(unchanged.buildings[i].position).is_equal(plan.buildings[i].position)
 	assert_array(plots).is_equal(source)
+
+func test_advanced_and_unknown_forms_cannot_enter_through_either_adapter_path() -> void:
+	for form in ["industrial_age_tenement_block","metropolitan_mixed_block","unrecognized_household","inherited_urban_block"]:
+		for family in ["organic","timber","earth","stone"]:
+			for roof in ["ridge_light_shelter","timber_ridge","round_thatch"]:
+				var data:=fixture(form,family,roof)
+				assert_str(EARLY.kind(data.plots[0])).is_empty()
+				assert_bool(EARLY.supports(data.plots[0])).is_false()
+				assert_array(EARLY.layout(data.plots,data.routes,dry).buildings).is_empty()
+	for form in EARLY.HOUSEHOLD_FORMS:
+		for family in ["organic","earth","stone"]:
+			var data:=fixture(form,family,"ridge_light_shelter")
+			assert_bool(EARLY.supports(data.plots[0])).is_true()
+			assert_int(EARLY.layout(data.plots,data.routes,dry).buildings.size()).is_greater(0)
+
+func test_imported_mesh_identity_and_lod_shadow_resources_are_retained() -> void:
+	var scene:PackedScene=load("res://assets/buildings/early_settlement/rubble_household.glb")
+	var root:Node=auto_free(scene.instantiate())
+	var imported:Mesh=root.find_children("*","MeshInstance3D",true,false)[0].mesh
+	var runtime:Mesh=EARLY.kit_mesh("rubble_household")
+	assert_bool(runtime==imported).is_true()
+	assert_bool(runtime.shadow_mesh==imported.shadow_mesh).is_true()
+	var lods:Array=RenderingServer.mesh_get_surface(imported.get_rid(),0).get("lods",[])
+	assert_int(lods.size()).is_greater(0)
+	assert_array(RenderingServer.mesh_get_surface(runtime.get_rid(),0).get("lods",[])).is_equal(lods)

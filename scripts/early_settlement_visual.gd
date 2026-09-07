@@ -3,6 +3,10 @@ extends RefCounted
 ## No population, calendar, stockpile, or research lookup can restyle an old house.
 const TOWN := preload("res://scripts/organic_town_visual.gd")
 const KIT := ["carried_ridge", "carried_round", "rooted_lean_to", "round_household", "earthen_household", "rubble_household", "raised_store", "covered_workshop"]
+# Only recorded early forms belong in this adapter. Later/unknown forms retain
+# legacy coverage even if their inherited roof/material resembles an early house.
+const HOUSEHOLD_FORMS := ["timber_household", "timber_and_fibre_household", "earthen_household", "dry_stone_household", "durable_household_cluster", "joined_kin_compound", "courtyard_household_compound"]
+const MARKET_FORMS := ["covered_exchange_court", "periodic_market_court", "maintained_gathering_ground", "customary_precinct", "durable_assembly_compound"]
 static var meshes: Dictionary = {}
 static var material: StandardMaterial3D
 
@@ -16,9 +20,10 @@ static func kind(plot: Dictionary) -> String:
 		if form in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment"]:
 			return "carried_round" if roof == "round_light_shelter" else "carried_ridge"
 		if form == "lean_to_household_cluster": return "rooted_lean_to"
-		if family == "earth" and form != "": return "earthen_household"
-		if family == "stone" and form != "": return "rubble_household"
-		if family in ["organic","timber"] and form != "":
+		if form not in HOUSEHOLD_FORMS: return ""
+		if family == "earth": return "earthen_household"
+		if family == "stone": return "rubble_household"
+		if family in ["organic","timber"]:
 			if roof in ["round_thatch","round_light_shelter"]: return "round_household"
 			# Early conversion records retain their founding roof designation. The
 			# recorded completed form takes precedence over that historical label.
@@ -30,7 +35,11 @@ static func kind(plot: Dictionary) -> String:
 	return ""
 
 static func supports(plot: Dictionary) -> bool:
-	return not kind(plot).is_empty() or TOWN.supports(plot)
+	if not kind(plot).is_empty(): return true
+	var form := String(plot.get("form",""))
+	var use := String(plot.get("land_use",""))
+	var eligible := (use in ["residential_compound","mixed_household"] and form in HOUSEHOLD_FORMS) or (use == "market" and form in MARKET_FORMS)
+	return eligible and TOWN.supports(plot)
 
 static func enabled(plots: Array[Dictionary]) -> bool:
 	# Representation budget, not a population/era style gate. Larger fabrics keep
@@ -50,6 +59,11 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 	var originals: Dictionary = {}
 	for plot in plots: originals[int(plot.id)] = plot
 	for plot in proxies:
+		if not supports(plot):
+			# Keep the obstacle polygon, but prevent the older broad timber predicate
+			# from re-admitting a later/unknown form inside the shared solver.
+			plot["roof_plan"] = "unsupported_early_adapter_form"
+			continue
 		if kind(plot).is_empty(): continue
 		# Reuse the checked footprint/road/water solver, retaining plot identity and
 		# reserved future household sites. This is a display copy, not a conversion.
@@ -68,8 +82,20 @@ static func kit_mesh(name: String) -> Mesh:
 	if meshes.has(name): return meshes[name]
 	var scene: PackedScene = load("res://assets/buildings/early_settlement/%s.glb" % name)
 	var root := scene.instantiate()
+	var children := root.find_children("*","MeshInstance3D",true,false)
+	if children.size() == 1:
+		var child: MeshInstance3D = children[0]
+		var transform := child.transform
+		var ancestor: Node = child.get_parent()
+		while ancestor is Node3D:
+			transform = ancestor.transform * transform; ancestor = ancestor.get_parent()
+		if transform.is_equal_approx(Transform3D.IDENTITY):
+			# Preserve importer LOD index buffers and shadow mesh, not just vertices.
+			meshes[name] = child.mesh; root.free(); return meshes[name]
+	# Unusual multi-mesh/nonidentity authored scenes require transform baking.
+	# This fallback flattens the mesh and cannot retain imported LOD/shadow data.
 	var surface := SurfaceTool.new()
-	for child in root.find_children("*","MeshInstance3D",true,false):
+	for child in children:
 		var transform: Transform3D = child.transform
 		var ancestor: Node = child.get_parent()
 		while ancestor is Node3D:
