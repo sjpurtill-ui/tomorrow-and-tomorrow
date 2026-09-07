@@ -172,3 +172,29 @@ func test_imported_mesh_identity_and_lod_shadow_resources_are_retained() -> void
 	var lods:Array=RenderingServer.mesh_get_surface(imported.get_rid(),0).get("lods",[])
 	assert_int(lods.size()).is_greater(0)
 	assert_array(RenderingServer.mesh_get_surface(runtime.get_rid(),0).get("lods",[])).is_equal(lods)
+
+func test_completed_shelters_do_not_spawn_a_duplicate_primitive_camp() -> void:
+	var renderer:Node3D=auto_free(MAP.new())
+	renderer.settlement_visual_root=auto_free(Node3D.new())
+	renderer._spawn_settlement_structure("Lean-to Shelters")
+	assert_int(renderer.settlement_visual_root.get_child_count()).is_equal(0)
+
+func test_no_fit_early_household_never_falls_back_to_legacy_roofs() -> void:
+	var data:=fixture()
+	data.routes.clear()
+	GameState.settlement_plots.assign(data.plots)
+	GameState.settlement_routes.clear()
+	var renderer:Node3D=auto_free(MAP.new())
+	var camera:Camera3D=auto_free(Camera3D.new());renderer.camera=camera
+	var parent:Node3D=auto_free(Node3D.new())
+	renderer._create_plot_fabric(Vector3.ZERO,GameState.settlement_plots,0,parent)
+	assert_bool(parent.has_node("PersistentRoofFabric")).is_false()
+	assert_bool(parent.has_node("PersistentWallFabric")).is_false()
+
+func test_compact_asset_fits_a_parcel_too_narrow_for_old_house_envelope() -> void:
+	var data:=fixture("lean_to_household_cluster")
+	data.plots[0].polygon=PackedVector2Array([Vector2(-.0021,.001),Vector2(.0021,.001),Vector2(.0021,.009),Vector2(-.0021,.009)])
+	var plan:=EARLY.layout(data.plots,data.routes,dry)
+	assert_int(plan.buildings.size()).is_greater(0)
+	for record in plan.buildings:
+		assert_array(Geometry2D.clip_polygons(record.footprint,data.plots[0].polygon)).is_empty()

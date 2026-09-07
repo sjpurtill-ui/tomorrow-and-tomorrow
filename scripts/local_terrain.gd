@@ -9146,7 +9146,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			if status == "under_construction" and float(plot.get("construction_progress", 0.0)) < 0.26:
 				continue
 			var mass_counts: Dictionary = {"roofs": 0, "walls": 0}
-			if not organic_plan.replaced.has(int(plot.get("id", -1))) or status == "under_construction":
+			if not EarlySettlementVisual.supports(plot) and not uses_kit:
 				mass_counts = _append_satellite_roof_fabric(roof_surface,wall_surface,plot,center,lod)
 			roof_count+=int(mass_counts.get("roofs",0))
 			wall_count+=int(mass_counts.get("walls",0))
@@ -9837,6 +9837,8 @@ func _update_settlement_progress_text() -> void:
 	choice_status.text = "EMERGING FROM PRESENT LABOR\n%s  •  %d%%  •  ~%.0f days\n%s" % [String(project.name).to_upper(),percent,days_left,String(project.get("effect",""))]
 
 func _spawn_settlement_structure(structure_name: String) -> void:
+	# Household shelters are rendered from saved plots, never a second camp ring.
+	if structure_name == "Lean-to Shelters": return
 	if settlement_visual_root == null:
 		return
 	if settlement_visual_root.has_node(structure_name.to_snake_case()):
@@ -9878,11 +9880,6 @@ func _spawn_settlement_structure(structure_name: String) -> void:
 		fire_material.emission_energy_multiplier = 1.4
 		fire.material_override = fire_material
 		root.add_child(fire)
-	elif structure_name == "Lean-to Shelters":
-		for entry in [[Vector3(-4.6,0,-2.8),Color("#887657")], [Vector3(4.8,0,-2.4),Color("#75664e")], [Vector3(-3.8,0,3.8),Color("#96805b")], [Vector3(3.9,0,4.2),Color("#806d50")], [Vector3(7.0,0,1.7),Color("#8c7855")]]:
-			var shelter_offset := _settlement_surface_offset(root, entry[0] as Vector3)
-			_create_settlement_path(root, shelter_offset)
-			_create_tent(root, shelter_offset, entry[1] as Color)
 	elif structure_name == "Storage Pits":
 		var storage_center := _settlement_surface_offset(root, Vector3(-6.2,0,5.6))
 		_create_settlement_path(root, storage_center)
@@ -11021,19 +11018,6 @@ func _create_field(parent: Node3D, offset: Vector3, size: Vector2) -> void:
 	material.roughness = 1.0
 	field.material_override = material
 	parent.add_child(field)
-
-func _create_tent(parent: Node3D, offset: Vector3, color: Color) -> void:
-	var tent := MeshInstance3D.new()
-	var mesh := PrismMesh.new()
-	mesh.size = Vector3(2.8, 1.72, 2.35)
-	tent.mesh = mesh
-	tent.position = offset + Vector3(0, 0.86, 0)
-	tent.rotation.y = PI * 0.08
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.95
-	tent.material_override = material
-	parent.add_child(tent)
 
 func _schedule_modal_screen_contract(node:Node)->void:
 	if node is Control: _apply_modal_screen_contract.call_deferred(node as Control)

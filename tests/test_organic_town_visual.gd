@@ -167,7 +167,7 @@ func test_renderer_uses_identical_world_transforms_at_every_camera_distance() ->
 	assert_bool(defense_parent.has_node("PersistentSettlementDefenseGround") or defense_parent.has_node("PersistentSettlementDefenseMassing")).is_true()
 	assert_bool(defense_parent.has_node("PersistentUrbanSystems")).is_false()
 
-func test_no_fit_keeps_legacy_roofs_and_restores_real_extent() -> void:
+func test_no_fit_omits_legacy_roofs_and_restores_real_extent() -> void:
 	GameState.reset_for_new_world(741991)
 	var data := fixture(1)
 	data.plots[0].polygon = PackedVector2Array([Vector2(-0.001,-0.001), Vector2(0.001,-0.001), Vector2(0.001,0.001), Vector2(-0.001,0.001)])
@@ -184,7 +184,7 @@ func test_no_fit_keeps_legacy_roofs_and_restores_real_extent() -> void:
 	renderer.footprint_population = 1000
 	var parent: Node3D = auto_free(Node3D.new())
 	renderer._create_plot_fabric(Vector3.ZERO, data.plots, 0, parent)
-	assert_bool(parent.has_node("PersistentRoofFabric")).is_true()
+	assert_bool(parent.has_node("PersistentRoofFabric")).is_false()
 	var profile: Dictionary = renderer._settlement_expansion_visual_profile({"classification": "village", "population": 1000})
 	var expected: Dictionary = renderer._settlement_stage_visual_layout(profile, 1000, data.plots)
 	renderer._create_settlement_stage_landscape(Vector3.ZERO, profile, data.plots, 0, parent, {"stage": 0, "integrity": 1.0, "construction": {}})
