@@ -1,3 +1,51 @@
+# Organic town integration — September 7, 2026
+
+INTEGRATED in canonical Mac source, with graphical sign-off pending.
+Canonical checkout: `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`, `main`.
+Previous HEAD: `1b9e121f481d1382eb1ecce9e7dde17b66b9e754`.
+Reviewed worker/source commit and integrated gameplay commit:
+`4251a3d98d6ca16af58fc2b102ecb6ecab7f2810` (normal fast-forward, no conflicts).
+The integration-record commit is the commit containing this entry.
+
+Compatible inherited single-storey timber/thatch plots now use metre-scale modular
+homes along saved lanes, with small garden beds in clear leftover household ground.
+Four 24 m² variants, a 12 m² small-parcel derivative and a 120 m² market hall share
+bounded batches (512 buildings maximum). No-fit parcels retain existing roofs;
+portable camps and unsupported traditions remain under their existing renderer.
+The early primary-settlement slice replaces the legacy stage mass/density overlay
+through 5,000 population and 128 recorded plots. Authoritative defenses and the
+computed settlement extent remain. Houses use uniform scale 0.001, saved plot/route
+identities and the same source geometry across camera distances. Inherited kit
+houses persist across later population growth; no new population/economy/save
+owner was added. Full scope and worker evidence: `ORGANIC_TOWN_HANDOFF.md`.
+
+Canonical Godot 4.7.2 headless import: exit 0, no script/import errors. Combined
+`test_organic_town_visual.gd`, `test_settlement_visual_architecture.gd` and
+`test_settlement_model.gd`: **135 cases passed; zero errors, failures, skips or
+orphans; exit 0**. This reruns the complete reviewed delivery on integrated main.
+Checks cover asset dimensions/colors, supplied scale/transforms, camera/population
+stability, supported history/materials, road/water/plot clearance, no-fit fallback,
+condition/construction/reoccupation, preserved extent/defenses and bounded counts.
+Local evidence: `/tmp/organic-canonical-import.log`,
+`/tmp/organic-canonical-tests.log`, and canonical `reports/report_1/`.
+
+A newly created temporary test override used isolated
+`TomorrowAndTomorrow_OrganicTown_Canonical_Test` user data and Dummy audio. It was
+removed after the run; no worktree override was copied, and no pre-existing
+canonical override existed. All 117 original untracked files and all three existing
+save/settings files retained their SHA-256 hashes. No player save was loaded or
+written, no runtime preference changed, and no unrelated sidecar was staged or
+removed. Tests exited; no Godot process was present before or after this integration.
+
+**No graphical in-engine sign-off or FPS claim.** No second graphical game/test
+window, canonical game launch, live-session interruption or remote push occurred.
+The wider mature/continent land-cover transition, foreign towns, later traditions
+and slope-specific foundations remain outside this slice. Headless supplied
+transforms are not rendered-pixel verification. See the handoff's detailed limits.
+Military work has not started; this integration stops for originating-task review.
+
+---
+
 # Final Mac follow-up integration — September 6, 2026
 
 Canonical Mac `main` integrates `60c95ee61e429ce350a1a5be530c794a185d6dfb`
