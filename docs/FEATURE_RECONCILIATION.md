@@ -25,7 +25,11 @@ Scope limits: existing national military/fortification authority remains; distan
 baked imagery and large-scale performance profiling are not delivered. Actual
 completed Lean-to work still converts household forms on monthly synchronization.
 Full details and recovered design provenance: CITY_PARITY_DISTANCE_HANDOFF.md.
-No live game was running during integration. Canonical editor launch follows.
+Canonical player launched through editor Run Project (Command-B), PID 42977.
+Verified command includes --path /Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow
+and --scene res://local_terrain.tscn. Native screenshot confirms the normal opening
+direction screen, day 0; no direction chosen or campaign advanced. Player startup
+log contains no script errors. This verifies launch, not visual signoff of every city.
 
 ---
 
