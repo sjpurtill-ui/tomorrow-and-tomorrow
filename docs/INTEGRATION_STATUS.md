@@ -1,3 +1,31 @@
+# Settlement neighborhoods and routine raids — September 7, 2026
+
+INTEGRATED in canonical Mac main by conflict-free fast-forward from 8536c15:
+settlement neighborhoods d6bc405, routine raid correction 4ef88ea.
+New household courts, actual-footprint shelter density, reserved central hearth,
+feathered doorway paths and human-scale service objects replace early parcel mats,
+old thick paths and oversized central props. New founding claims cluster more
+closely. Existing records are not migrated; later unsupported architecture remains.
+
+Rivals no longer invent three-person raiding parties or knowingly raid overwhelming
+observed defenses. Failed raids delay later attempts. Small, outmatched home raids
+use the real calendar/combat simulation without forced battle screens or pauses.
+Real aftermath policy decisions remain. See SETTLEMENT_NEIGHBORHOODS_HANDOFF.md
+and RAID_ROUTINE_HANDOFF.md for scope, save compatibility and limitations.
+
+Canonical clean headless import and 174/174 selected checks passed, zero errors,
+failures, skips or orphans. Seven suites: early visual 14, organic town 9,
+settlement architecture 83, settlement model 43, raid policy 4, battle injuries 9,
+army front visual 12. Evidence /tmp/neighborhood-canonical-import.log and
+/tmp/neighborhood-canonical-tests.log. A separate broader worker run hit the
+previously documented siege-withdrawal test failure; that issue remains separate.
+The test override was removed. Three new script UID files are tracked with this
+record; pre-existing unrelated untracked files are retained. No live player was
+running at launch preparation. User requested a fresh game after completion;
+canonical fresh launch is the next step. No remote push.
+
+---
+
 # Early primitive removal — September 7, 2026
 
 INTEGRATED source `4f73017` as canonical `06862bc`, without conflicts.
