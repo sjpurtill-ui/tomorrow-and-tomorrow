@@ -23,8 +23,11 @@ Logs: /tmp/foreign-integrated-import.log, /tmp/foreign-integrated-probe.log,
 hashes. The temporary isolated test configuration was removed.
 
 No Godot player/editor was running before integration. User authorized integration
-and loading the game; canonical editor/F5 launch follows this verification.
-Graphical sign-off of the foreign view remains pending. No remote push.
+and loading the game. Canonical editor Run Project (Command-B on this Mac) launched
+PID 36402 at gameplay/integration commit 63ef4fd, using the explicit canonical
+absolute path and res://local_terrain.tscn. Startup log confirms the new-world
+opening at day zero and no script errors. No save was overwritten or live session
+interrupted. Graphical sign-off of the foreign view remains pending. No remote push.
 
 ---
 
