@@ -973,11 +973,11 @@ func _create_founding_plots()->void:
 	# counts are aggregate population cells, never homes backed by person records.
 	var population:=primary_population_exact()
 	var occupied_compound_equivalents:=population/5.2
-	var residential_count:=clampi(roundi(sqrt(occupied_compound_equivalents)*3.0),14,96)
+	var residential_count:=clampi(roundi(sqrt(occupied_compound_equivalents)*3.0),6,96)
 	var total_count:=residential_count+FOUNDING_NONRESIDENTIAL.size()
 	var residents_remaining:=_primary_population()
-	var accepted_centers:Array[Vector2]=[]
-	var accepted_radii:Array[float]=[]
+	var accepted_centers:Array[Vector2]=[Vector2.ZERO]
+	var accepted_radii:Array[float]=[0.009]
 	for index in total_count:
 		var plot_id:=GameState.next_settlement_plot_id
 		GameState.next_settlement_plot_id+=1
@@ -990,12 +990,14 @@ func _create_founding_plots()->void:
 		else:
 			land_use=String(FOUNDING_NONRESIDENTIAL[index-residential_count])
 		var radius:=rng.randf_range(0.0065,0.0105) if index<residential_count else rng.randf_range(0.008,0.013)
+		if land_use=="communal": radius=.008
 		var center:=Vector2.ZERO
 		for attempt in 32:
 			center=_founding_plot_center(index,total_count,land_use,rng,attempt)
+			if land_use=="communal": break # The shared hearth was reserved first.
 			var clear:=true
 			for prior_index in accepted_centers.size():
-				if center.distance_to(accepted_centers[prior_index])<(radius+accepted_radii[prior_index])*1.16:
+				if center.distance_to(accepted_centers[prior_index])<(radius+accepted_radii[prior_index])*1.08:
 					clear=false
 					break
 			if clear: break
@@ -1039,18 +1041,18 @@ func _create_founding_plots()->void:
 func _founding_plot_center(index:int,total_count:int,land_use:String,rng:RandomNumberGenerator,attempt:int)->Vector2:
 	var seed_angle:=float(abs(GameState.world_seed)%6283)*0.001
 	if land_use=="communal":
-		return Vector2(rng.randf_range(-0.004,0.004),rng.randf_range(-0.004,0.004)) if attempt==0 else Vector2.from_angle(seed_angle+attempt*1.77)*float(attempt)*0.0028
+		return Vector2.ZERO
 	if land_use=="water":
 		return Vector2.from_angle(seed_angle+PI*0.82+attempt*0.17)*rng.randf_range(0.066,0.084)
 	if land_use=="waste":
 		return Vector2.from_angle(seed_angle-PI*0.32+attempt*0.19)*rng.randf_range(0.080,0.105)
-	var cluster_count:=4
+	var cluster_count:=3
 	var cluster_index:int=(index*7+absi(GameState.world_seed))%cluster_count
 	var cluster_angle:=seed_angle+float(cluster_index)*TAU/float(cluster_count)+sin(float(cluster_index*19+GameState.world_seed))*0.34
-	var cluster_distance:=0.020+float(cluster_index%2)*0.012+rng.randf_range(-0.003,0.006)
+	var cluster_distance:=0.014+float(cluster_index%2)*0.008+rng.randf_range(-0.002,0.003)
 	var cluster_center:=Vector2.from_angle(cluster_angle)*cluster_distance
 	var local_angle:=seed_angle+float(index)*2.399963229728653+float(attempt)*1.37
-	var local_radius:=rng.randf_range(0.008,0.027)+float(attempt)*0.0012
+	var local_radius:=rng.randf_range(0.004,0.016)+float(attempt)*0.0012
 	if land_use=="storage":
 		cluster_center*=0.45
 		local_radius*=0.48
@@ -1060,8 +1062,8 @@ func _founding_plot_center(index:int,total_count:int,land_use:String,rng:RandomN
 	var position:=cluster_center+Vector2.from_angle(local_angle)*local_radius
 	# Preserve the founding hearth as a real nucleus. Household claims begin beyond
 	# its shared working/meeting clearance instead of accidentally occupying it first.
-	if land_use in ["residential_compound","mixed_household"] and position.length()<0.025:
-		position=position.normalized()*0.025 if position.length()>0.0001 else Vector2.from_angle(local_angle)*0.025
+	if land_use in ["residential_compound","mixed_household"] and position.length()<0.014:
+		position=position.normalized()*0.014 if position.length()>0.0001 else Vector2.from_angle(local_angle)*0.014
 	return position
 
 func _irregular_polygon(center:Vector2,radius:float,plot_seed:int)->PackedVector2Array:

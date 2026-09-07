@@ -78,20 +78,21 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		for segment in segments:
 			if int(segment.id) == int(plot.get("frontage_route_id", -1)): frontage.append(segment)
 		if frontage.is_empty(): continue # No invented street or historical orientation.
-		var target := clampi(floori(float(plot.get("area_ha", 0.0)) * 10000.0 * float(plot.get("roof_coverage", 0.3)) / 24.0), 1, 8)
+		var compact_extent: Vector2 = plot.get("placement_half_extent", Vector2.ZERO)
+		var roof_area := maxf(8.0,compact_extent.x*compact_extent.y*4000000.0) if compact_extent != Vector2.ZERO else 24.0
+		var target := clampi(floori(float(plot.get("area_ha", 0.0)) * 10000.0 * float(plot.get("roof_coverage", 0.3)) / roof_area), 1, 8)
 		if String(plot.land_use) == "market": target = 1
 		var rng := RandomNumberGenerator.new()
 		rng.seed = int(plot.get("seed", plot.id))
 		var accepted := 0
-		var compact_extent: Vector2 = plot.get("placement_half_extent", Vector2.ZERO)
 		for attempt in (1216 if compact_extent != Vector2.ZERO else 192):
 			if accepted >= target or records.size() >= MAX_BUILDINGS: break
 			var variant := 4 if String(plot.land_use) == "market" else (5 if attempt >= 96 else (absi(int(plot.get("seed", 1))) + attempt) % 4)
 			# Circumscribed roof envelope, including overhang and front porch.
 			var dimensions: Vector2 = [Vector2(2.343, 4.196), Vector2(2.679, 3.704), Vector2(2.996, 3.361), Vector2(3.380, 3.044), Vector2(5.940, 6.975), Vector2(2.119, 2.377)][variant] * 0.001 + Vector2.ONE * 0.0003
-			# Preserve existing sites; retry failed compact assets using their actual
-			# authored envelope rather than the larger timber-house reservation.
-			if attempt >= 192: dimensions = compact_extent + Vector2.ONE * .0003
+			# Compact shelters use their authored envelope rather than the larger
+			# timber-house reservation, leaving usable shared space between doors.
+			if compact_extent != Vector2.ZERO: dimensions = compact_extent + Vector2.ONE * .0003
 			var radius := dimensions.length()
 			var segment: Dictionary = frontage[attempt % frontage.size()]
 			var along: Vector2 = (segment.b - segment.a).normalized()
@@ -113,6 +114,16 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 				if nearest_distance < 0.00000001: continue
 				normal = (position - nearest).normalized()
 				along = Vector2(-normal.y, normal.x)
+			if compact_extent != Vector2.ZERO and attempt < 48:
+				# Households share a small court at their inherited path head. Doors
+				# face this common space; later infill uses the same reserved pattern.
+				var court: Vector2 = plot.get("centroid", bounds(polygon).get_center())
+				var heading := float(absi(int(plot.get("seed",1))) % 6283) * .001
+				var slot := attempt % 6
+				var ring := attempt / 6
+				normal = Vector2.from_angle(heading + float(slot)*TAU/6)
+				along = Vector2(-normal.y, normal.x)
+				position = court + normal * (.0045 + float(ring)*.00055)
 			var footprint := PackedVector2Array()
 			for corner in [Vector2(-1,-1), Vector2(1,-1), Vector2(1,1), Vector2(-1,1)]:
 				footprint.append(position + along * corner.x * dimensions.x + normal * corner.y * dimensions.y)

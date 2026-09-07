@@ -198,3 +198,26 @@ func test_compact_asset_fits_a_parcel_too_narrow_for_old_house_envelope() -> voi
 	assert_int(plan.buildings.size()).is_greater(0)
 	for record in plan.buildings:
 		assert_array(Geometry2D.clip_polygons(record.footprint,data.plots[0].polygon)).is_empty()
+
+func test_neighborhood_ground_replaces_parcel_mats_and_service_monuments() -> void:
+	GameState.initialize_population_model();GameState.settlement_completed=["Hearth Circle"]
+	SettlementModel.ensure_founded()
+	var renderer:Node3D=auto_free(MAP.new())
+	renderer._configure_seamless_world();renderer._configure_shape();renderer._configure_noise();renderer._prepare_river_course()
+	var camera:Camera3D=auto_free(Camera3D.new());renderer.camera=camera
+	var parent:Node3D=auto_free(Node3D.new())
+	renderer._create_persistent_settlement_routes(Vector3.ZERO,GameState.settlement_routes,parent)
+	renderer._create_plot_fabric(Vector3.ZERO,GameState.settlement_plots,0,parent)
+	assert_bool(parent.has_node("PersistentPlotGround")).is_false()
+	assert_bool(parent.has_node("PersistentDesirePaths")).is_false()
+	assert_bool(parent.has_node("EarlyWorkingGround")).is_true()
+	assert_bool(parent.has_node("EarlyCommunalObjects")).is_true()
+
+func test_working_ground_respects_water_and_does_not_mutate_history() -> void:
+	var ground:=preload("res://scripts/early_settlement_ground.gd")
+	var data:=fixture();data.plots[0].form="open_hearth_yard";data.plots[0].land_use="communal"
+	var before:=data.duplicate(true)
+	var parent:Node3D=auto_free(Node3D.new())
+	ground.render({"buildings":[]},data.plots,data.routes,Vector3.ZERO,func(_x:float,_y:float)->float:return 0,func(_p:Vector2)->bool:return false,parent)
+	assert_int(parent.get_child_count()).is_equal(0)
+	assert_dict(data).is_equal(before)

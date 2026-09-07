@@ -2,6 +2,7 @@ extends Node3D
 
 const OrganicTownVisual := preload("res://scripts/organic_town_visual.gd")
 const EarlySettlementVisual := preload("res://scripts/early_settlement_visual.gd")
+const EarlySettlementGround = preload("res://scripts/early_settlement_ground.gd")
 var organic_town_cached_state := PackedByteArray()
 var organic_town_cached_plan: Dictionary = {}
 
@@ -2964,7 +2965,7 @@ func _update_scale_lod() -> void:
 	if lens_ring:
 		lens_ring.scale=Vector3.ONE*clampf(camera.size*0.10,1.0,24.0)
 	if settlement_visual_root:
-		settlement_visual_root.visible = settlement_fabric_view
+		settlement_visual_root.visible = settlement_fabric_view and not _organic_town_enabled()
 	if settlement_land_use_root:
 		# Roofs and plots cull at regional scale, but a physical megalopolis can span
 		# hundreds of kilometres and must not disappear at the same threshold as one
@@ -9019,6 +9020,12 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			organic_town_cached_state = state
 		organic_plan = organic_town_cached_plan
 		EarlySettlementVisual.render(organic_plan, center, _close_surface_height_at, parent)
+	if organic_town:
+		EarlySettlementGround.render(organic_plan, GameState.settlement_plots, GameState.settlement_routes, center, _close_surface_height_at, func(point: Vector2) -> bool: return _settlement_stage_land_at(point + Vector2(center.x, center.z)), parent)
+		# Keep genuine cultivated fields and later unsupported forms, but never
+		# paint the household/service parcel polygons over the new working ground.
+		plots = plots.filter(func(plot: Dictionary) -> bool: return not EarlySettlementGround.handles(plot))
+		if plots.is_empty(): return
 	var ground_surface := SurfaceTool.new()
 	ground_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var density_surface:=SurfaceTool.new()
@@ -9188,6 +9195,7 @@ func _settlement_route_join_offset(points:PackedVector2Array,index:int,width:flo
 
 func _create_persistent_settlement_routes(center: Vector3, routes: Array[Dictionary], parent: Node3D) -> void:
 	var early_town := _organic_town_enabled()
+	if early_town: return # The new neighborhood ground owns human-scale routes.
 	var inherited_frontages: Dictionary = {}
 	for plot in GameState.settlement_plots:
 		if int(plot.get("id", 0)) <= OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
