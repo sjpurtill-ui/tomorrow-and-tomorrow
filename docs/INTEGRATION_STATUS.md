@@ -1,3 +1,34 @@
+# City parity and four-distance controls integrated — September 7, 2026
+
+INTEGRATED in canonical Mac main:
+/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow
+Source 3768cbe, fast-forwarded from 06c236c with no conflicts.
+
+Added cities use recorded settlement design and local housing/construction,
+resources, health, economy and demographic updates. HUD keeps overall and selected
+city population together. City map labels use names and known/estimated population.
+Four recovered distances: 10,000 ft, 50,000 ft, Region, Continent; discrete scroll
+steps, slower fine adjustment and bounded transitions. Vacant intact buildings
+remain visible; saved sites prevent maintenance redraws moving existing homes.
+
+Canonical clean headless import and 91/91 targeted cases pass, zero errors,
+failures, skips or orphans. Logs: /tmp/city-parity-canonical-import.log and
+/tmp/city-parity-canonical-tests.log. Worktree real-terrain navigation probe passes;
+shutdown resource warning documented in CITY_PARITY_DISTANCE_HANDOFF.md.
+
+Canonical test override removed. All 118 pre-existing untracked files retain their
+hashes. New optional dictionary data uses existing save serialization; round-trip
+verified. No schema bump or arbitrary reset. The separate READY affordable-infill
+69d9db9 remains outside this integration. No remote push.
+
+Scope limits: existing national military/fortification authority remains; distant
+baked imagery and large-scale performance profiling are not delivered. Actual
+completed Lean-to work still converts household forms on monthly synchronization.
+Full details and recovered design provenance: CITY_PARITY_DISTANCE_HANDOFF.md.
+No live game was running during integration. Canonical editor launch follows.
+
+---
+
 # Consolidated deaths and investigation choices — September 7, 2026
 
 INTEGRATED `28a06ac` in canonical Mac main by fast-forward from f0416ef.
