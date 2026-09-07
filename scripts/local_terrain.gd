@@ -1,5 +1,10 @@
 extends Node3D
 
+const OrganicTownVisual := preload("res://scripts/organic_town_visual.gd")
+var organic_town_cached_state := PackedByteArray()
+var organic_town_cached_plan: Dictionary = {}
+
+
 const ArmyFigureFormationScript:=preload("res://scripts/army_figure_formation.gd")
 const MAX_CLOSE_ARMY_FORMATIONS:=6
 var close_army_figures:Dictionary={}
@@ -6335,7 +6340,20 @@ func _create_settlement_stage_landscape(center:Vector3,profile:Dictionary,plots:
 	var population:=maxi(1,footprint_population if footprint_population>=0 else GameState.population_total)
 	var layout:=_settlement_stage_visual_layout(profile,population,plots)
 	var radius:=float(layout.radius)
-	rendered_settlement_stage_radius=radius
+	rendered_settlement_stage_radius = radius
+	if _organic_town_enabled():
+		var flat := SurfaceTool.new()
+		var mass := SurfaceTool.new()
+		flat.begin(Mesh.PRIMITIVE_TRIANGLES)
+		mass.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var counts := _append_settlement_defense_visuals(flat, mass, center, layout, population, int(defense_profile.stage), float(defense_profile.integrity), 1.0, false, plots)
+		if int(defense_profile.project_stage) > int(defense_profile.stage) and float(defense_profile.project_progress) > 0.0:
+			var construction := _append_settlement_defense_visuals(flat, mass, center, layout, population, int(defense_profile.project_stage), 1.0, float(defense_profile.project_progress), true, plots)
+			counts.flat += construction.flat
+			counts.mass += construction.mass
+		if int(counts.flat) > 0: _commit_settlement_surface(flat, "PersistentSettlementDefenseGround", parent, true)
+		if int(counts.mass) > 0: _commit_settlement_surface(mass, "PersistentSettlementDefenseMassing", parent, false)
+		return
 	var layout_seed:=int(layout.seed)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=layout_seed
@@ -8756,7 +8774,7 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		appended+=1
 	return {"roofs":appended,"walls":walls_appended}
 
-func _append_plot_boundary(surface:SurfaceTool,plot:Dictionary,center:Vector3)->int:
+func _append_plot_boundary(surface:SurfaceTool,plot:Dictionary,center:Vector3,lift:=0.0030)->int:
 	var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
 	if polygon.size()<3: return 0
 	var use:=String(plot.get("land_use",""))
@@ -8801,13 +8819,13 @@ func _append_plot_boundary(surface:SurfaceTool,plot:Dictionary,center:Vector3)->
 			var side:=Vector2(-direction.y,direction.x).normalized()*edge_width
 			for point_2d in [span_start-side,span_finish-side,span_finish+side,span_start-side,span_finish+side,span_start+side]:
 				var world_point:=Vector3(center.x+point_2d.x,0.0,center.z+point_2d.y)
-				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+0.0030
+				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+lift
 				surface.set_color(edge_color)
 				surface.add_vertex(world_point)
 			segments+=1
 	return segments
 
-func _append_yard_variation(surface:SurfaceTool,plot:Dictionary,center:Vector3)->int:
+func _append_yard_variation(surface:SurfaceTool,plot:Dictionary,center:Vector3,lift:=0.0027)->int:
 	var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
 	if polygon.size()<3: return 0
 	var plot_center:=Vector2(plot.get("centroid",Vector2.ZERO))
@@ -8837,7 +8855,7 @@ func _append_yard_variation(surface:SurfaceTool,plot:Dictionary,center:Vector3)-
 		var patch_radius:=rng.randf_range(0.0013,0.0040)
 		if fabric_generation>=9 and use in ["workshop","storage","dirty_industry","civic","sacred"]:
 			patch_radius*=rng.randf_range(1.35,2.10)
-		_append_textured_ground_patch(surface,world_center,patch_radius,color,0.0027,atlas_cell,int(plot.get("seed",1))^((patch_index+5)*0x45d9f3b))
+		_append_textured_ground_patch(surface,world_center,patch_radius,color,lift,atlas_cell,int(plot.get("seed",1))^((patch_index+5)*0x45d9f3b))
 		appended+=1
 	return appended
 
@@ -8983,9 +9001,22 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 			surface.set_uv(Vector2(-1.0,-1.0))
 			surface.add_vertex(world_point)
 
+func _organic_town_enabled() -> bool:
+	return OrganicTownVisual.enabled(GameState.settlement_plots, maxi(1, footprint_population if footprint_population >= 0 else GameState.population_total))
+
 func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
 	if plots.is_empty():
 		return
+	var organic_plan: Dictionary = {"buildings": [], "replaced": {}}
+	var organic_town := _organic_town_enabled()
+	if OrganicTownVisual.has_inherited_kit(GameState.settlement_plots):
+		# Build against the full saved fabric, never a camera-culled subset.
+		var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
+		if state != organic_town_cached_state:
+			organic_town_cached_plan = OrganicTownVisual.layout(GameState.settlement_plots, GameState.settlement_routes, func(point: Vector2) -> bool: return _settlement_stage_land_at(point + Vector2(center.x, center.z)))
+			organic_town_cached_state = state
+		organic_plan = organic_town_cached_plan
+		OrganicTownVisual.render(organic_plan, center, _close_surface_height_at, parent)
 	var ground_surface := SurfaceTool.new()
 	ground_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var density_surface:=SurfaceTool.new()
@@ -9020,6 +9051,8 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		var polygon: PackedVector2Array = plot.get("polygon", PackedVector2Array())
 		if polygon.size() < 3:
 			continue
+		var uses_kit: bool = organic_plan.replaced.has(int(plot.get("id", -1)))
+		var ground_lift := 0.0002 if organic_town or uses_kit else 0.0018
 		var plot_has_detail:=_settlement_plot_has_detail(plot,plot_index,plots.size(),lod)
 		var plot_color := _settlement_plot_color(plot)
 		var status := String(plot.get("status", "active"))
@@ -9027,7 +9060,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		# Occupied plots remain the source of close aerial fabric. The retired photo
 		# atlas must not leave a hole where actual homes and workshops should resolve.
 		var ground_inset:=1.0 if land_use in ["field","water","waste"] else 0.76
-		if _settlement_plot_has_aggregate_density(plot,plot_index,plots.size(),lod):
+		if not organic_town and not uses_kit and _settlement_plot_has_aggregate_density(plot,plot_index,plots.size(),lod):
 			# Middle zoom needs a coherent inhabited footprint, not one dark pixel per
 			# roof. Feathered stains are centred on authoritative occupied plots and
 			# overlap only where the persistent fabric is actually dense.
@@ -9065,20 +9098,20 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			field_ground_count+=1
 		elif land_use in ["water","waste"]:
 			# Service parcels are worn ground, not hard-edged map tokens.
-			_append_textured_plot_polygon(ground_surface,plot,center,plot_color,0.0018,Vector2i(-1,-1),0.08)
+			_append_textured_plot_polygon(ground_surface,plot,center,plot_color,ground_lift,Vector2i(-1,-1),0.08)
 		elif land_use not in ["water","waste","vacant","pasture"] and status!="reclaimed":
-			_append_textured_plot_polygon(ground_surface,plot,center,plot_color,0.0018,_ground_atlas_cell(plot),0.68)
+			_append_textured_plot_polygon(ground_surface,plot,center,plot_color,ground_lift,_ground_atlas_cell(plot),0.68)
 		else:
-			_append_plot_polygon(ground_surface, polygon, center, plot_color, ground_inset, 0.0018)
+			_append_plot_polygon(ground_surface, polygon, center, plot_color, ground_inset, ground_lift)
 		var form:=String(plot.get("form",""))
 		var temporary_camp:=form in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment"]
 		var feature_center:=Vector2(plot.get("centroid",Vector2.ZERO))
 		var feature_world:=Vector3(center.x+feature_center.x,0.0,center.z+feature_center.y)
 		if lod<=1 and not temporary_camp:
-			boundary_count+=_append_plot_boundary(boundary_surface,plot,center)
+			boundary_count+=_append_plot_boundary(boundary_surface,plot,center,0.00035 if organic_town or uses_kit else 0.0030)
 			if plot_has_detail and land_use not in ["water","waste","field"]:
-				variation_count+=_append_yard_variation(variation_surface,plot,center)
-		if lod<=1 and not temporary_camp and land_use in ["communal","civic","sacred","market"]:
+				variation_count+=_append_yard_variation(variation_surface,plot,center,0.0003 if organic_town or uses_kit else 0.0027)
+		if lod<=1 and not organic_plan.replaced.has(int(plot.get("id", -1))) and not temporary_camp and land_use in ["communal","civic","sacred","market"]:
 			var architecture:=_settlement_visual_architecture_profile(_settlement_architecture_profile())
 			var civic_space:=clampf(float(architecture.get("civic_space",0.5)),0.0,1.0)
 			var monumentality:=clampf(float(architecture.get("monumentality",0.5)),0.0,1.0)
@@ -9110,7 +9143,9 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		if lod <= 1 and plot_has_detail and status not in ["vacant", "reclaimed"] and not open_ground_form and land_use not in ["water", "waste", "field", "pasture"]:
 			if status == "under_construction" and float(plot.get("construction_progress", 0.0)) < 0.26:
 				continue
-			var mass_counts:=_append_satellite_roof_fabric(roof_surface,wall_surface,plot,center,lod)
+			var mass_counts: Dictionary = {"roofs": 0, "walls": 0}
+			if not organic_plan.replaced.has(int(plot.get("id", -1))) or status == "under_construction":
+				mass_counts = _append_satellite_roof_fabric(roof_surface,wall_surface,plot,center,lod)
 			roof_count+=int(mass_counts.get("roofs",0))
 			wall_count+=int(mass_counts.get("walls",0))
 		if lod == 0 and status in ["damaged", "ruin"] and land_use!="temporary_encampment":
@@ -9150,6 +9185,10 @@ func _settlement_route_join_offset(points:PackedVector2Array,index:int,width:flo
 
 
 func _create_persistent_settlement_routes(center: Vector3, routes: Array[Dictionary], parent: Node3D) -> void:
+	var early_town := _organic_town_enabled()
+	var inherited_frontages: Dictionary = {}
+	for plot in GameState.settlement_plots:
+		if int(plot.get("id", 0)) <= OrganicTownVisual.MAX_PLOTS and OrganicTownVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var segment_count := 0
@@ -9158,6 +9197,7 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 	var civic_space:=clampf(float(architecture.get("civic_space",0.5)),0.0,1.0)
 	var permeability:=clampf(float(architecture.get("permeability",0.5)),0.0,1.0)
 	for route in routes:
+		var route_lift := 0.0004 if early_town or inherited_frontages.has(int(route.get("id", -2))) else 0.0027
 		if not bool(route.get("active", true)):
 			continue
 		var points: PackedVector2Array = route.get("points", PackedVector2Array())
@@ -9219,7 +9259,7 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 			for vertex_index in route_vertices.size():
 				var point_2d:Vector2=route_vertices[vertex_index]
 				var world_point := Vector3(center.x + point_2d.x, 0.0, center.z + point_2d.y)
-				world_point.y = _close_surface_height_at(world_point.x, world_point.z) + 0.0027
+				world_point.y = _close_surface_height_at(world_point.x, world_point.z) + route_lift
 				surface.set_color(route_color)
 				surface.set_uv(_atlas_uv(Vector2i(3,2),route_uvs[vertex_index]))
 				surface.add_vertex(world_point)

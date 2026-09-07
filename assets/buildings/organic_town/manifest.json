@@ -1,0 +1,149 @@
+{
+  "source": "organic_towns.blend / Organic river market",
+  "units": "metres",
+  "game_world_units": "kilometres",
+  "game_uniform_scale": 0.001,
+  "forward_gltf": [
+    0,
+    0,
+    1
+  ],
+  "up_gltf": [
+    0,
+    1,
+    0
+  ],
+  "components": [
+    {
+      "id": "house_narrow",
+      "file": "house_narrow.glb",
+      "source_object": "market/Homes/71",
+      "floor_area_m2": 24,
+      "wall_width_m": 3.725796729883776,
+      "wall_depth_m": 6.4415752495302305,
+      "triangles": 532,
+      "source_local_bounds_m": {
+        "x": [
+          -2.3429,
+          2.3429
+        ],
+        "y": [
+          -4.19579,
+          3.75079
+        ],
+        "z": [
+          0.0,
+          5.42742
+        ]
+      },
+      "surfaces": 1
+    },
+    {
+      "id": "house_compact",
+      "file": "house_compact.glb",
+      "source_object": "market/Homes/142",
+      "floor_area_m2": 24,
+      "wall_width_m": 4.397337245734879,
+      "wall_depth_m": 5.4578483884260605,
+      "triangles": 532,
+      "source_local_bounds_m": {
+        "x": [
+          -2.67867,
+          2.67867
+        ],
+        "y": [
+          -3.70393,
+          3.25892
+        ],
+        "z": [
+          0.0,
+          5.82611
+        ]
+      },
+      "surfaces": 1
+    },
+    {
+      "id": "house_medium",
+      "file": "house_medium.glb",
+      "source_object": "market/Homes/21",
+      "floor_area_m2": 24,
+      "wall_width_m": 5.030534053987549,
+      "wall_depth_m": 4.770865228707863,
+      "triangles": 532,
+      "source_local_bounds_m": {
+        "x": [
+          -2.99527,
+          2.99527
+        ],
+        "y": [
+          -3.36043,
+          2.91543
+        ],
+        "z": [
+          0.0,
+          6.00348
+        ]
+      },
+      "surfaces": 1
+    },
+    {
+      "id": "house_wide",
+      "file": "house_wide.glb",
+      "source_object": "market/Homes/7",
+      "floor_area_m2": 24,
+      "wall_width_m": 5.7998962474392775,
+      "wall_depth_m": 4.138005056658778,
+      "triangles": 532,
+      "source_local_bounds_m": {
+        "x": [
+          -3.37995,
+          3.37995
+        ],
+        "y": [
+          -3.044,
+          2.599
+        ],
+        "z": [
+          0.0,
+          6.25818
+        ]
+      },
+      "surfaces": 1
+    },
+    {
+      "id": "market_hall",
+      "file": "market_hall.glb",
+      "source_object": "market/Civic and workshops/assembly",
+      "floor_area_m2": 120,
+      "wall_width_m": 10,
+      "wall_depth_m": 12,
+      "triangles": 608,
+      "source_local_bounds_m": {
+        "x": [
+          -5.48,
+          5.94
+        ],
+        "y": [
+          -6.975,
+          6.53
+        ],
+        "z": [
+          0.0,
+          9.70392
+        ]
+      },
+      "surfaces": 1
+    },
+    {
+      "id": "house_small",
+      "file": "house_small.glb",
+      "source_object": "house_medium.glb horizontal dimensions shortened by sqrt(0.5); full height retained",
+      "floor_area_m2": 12,
+      "wall_width_m": 3.55712474256445,
+      "wall_depth_m": 3.373511155346439,
+      "triangles": 532,
+      "surfaces": 1
+    }
+  ],
+  "material_note": "One material with baked per-face palette colors. Procedural Blender noise is not included; modeled roof courses and framing are retained."
+}
