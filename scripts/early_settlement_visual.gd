@@ -65,6 +65,10 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			plot["roof_plan"] = "unsupported_early_adapter_form"
 			continue
 		if kind(plot).is_empty(): continue
+		if kind(plot) in KIT:
+			var envelope := kit_mesh(kind(plot)).get_aabb()
+			var extent := envelope.position.abs().max(envelope.end.abs())
+			plot["placement_half_extent"] = Vector2(extent.x, extent.z) * .001
 		# Reuse the checked footprint/road/water solver, retaining plot identity and
 		# reserved future household sites. This is a display copy, not a conversion.
 		plot.material_family = "organic"; plot.roof_plan = "timber_ridge"

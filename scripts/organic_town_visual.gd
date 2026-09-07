@@ -83,11 +83,15 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		var rng := RandomNumberGenerator.new()
 		rng.seed = int(plot.get("seed", plot.id))
 		var accepted := 0
-		for attempt in 192:
+		var compact_extent: Vector2 = plot.get("placement_half_extent", Vector2.ZERO)
+		for attempt in (1216 if compact_extent != Vector2.ZERO else 192):
 			if accepted >= target or records.size() >= MAX_BUILDINGS: break
 			var variant := 4 if String(plot.land_use) == "market" else (5 if attempt >= 96 else (absi(int(plot.get("seed", 1))) + attempt) % 4)
 			# Circumscribed roof envelope, including overhang and front porch.
 			var dimensions: Vector2 = [Vector2(2.343, 4.196), Vector2(2.679, 3.704), Vector2(2.996, 3.361), Vector2(3.380, 3.044), Vector2(5.940, 6.975), Vector2(2.119, 2.377)][variant] * 0.001 + Vector2.ONE * 0.0003
+			# Preserve existing sites; retry failed compact assets using their actual
+			# authored envelope rather than the larger timber-house reservation.
+			if attempt >= 192: dimensions = compact_extent + Vector2.ONE * .0003
 			var radius := dimensions.length()
 			var segment: Dictionary = frontage[attempt % frontage.size()]
 			var along: Vector2 = (segment.b - segment.a).normalized()
