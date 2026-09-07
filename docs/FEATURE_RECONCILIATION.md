@@ -1,3 +1,69 @@
+# Military front integration — September 7, 2026
+
+INTEGRATED in canonical Mac source; graphical review remains pending.
+Canonical checkout: `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`, `main`.
+Previous HEAD: `577f8aa5d17310674b9d75454c2f584317c6c7aa`.
+Reviewed source: `8ea1a7c73dab231bb46c1b187fcf6511c85f78a2`.
+Reviewed correction and integrated gameplay HEAD: `45ce52f5605ad234a4755e84e7dd1baa4794fd0c`.
+Both commits entered by a normal fast-forward with no conflicts. The commit
+containing this entry records the completed canonical verification.
+
+Bounded physical army fronts now replace soldier/mounted-general actors in the
+field-army map, dated foreign sightings, eligible occupation garrisons, home
+invasion/field battle observation and replay, general campaign map/replay, and
+active siege city view. Metre geometry scales by .001 on kilometre terrain;
+separate informational glyphs retain distant readability. Real active counts,
+equipment and recorded losses determine area; recorded captives are excluded from
+combat footprints without becoming casualties. No new combat, fire, control,
+prisoner or save authority was added. Legacy direct-cohort controls cannot issue
+orders; strategic conversation remains in GeneralCampaignScreen.
+
+The reviewed correction includes occupation fronts in the actual terrain advance
+hook, honors pause and inherited visibility, and invalidates siege geometry when
+termination alone changes. **Deployment is schematic** where current battle
+records lack cohort coordinates and maneuver topology. Optional renderer spatial
+inputs do not constitute implemented encirclement or an independent combat solver.
+Occupation ground is withheld before live communications when no dated strength
+report exists. Full scope and limits: `MILITARY_FRONT_GRAPHICS_HANDOFF.md`.
+
+Canonical Godot 4.7.2 validation, all headless with explicit canonical paths:
+
+- Clean editor import: exit 0, no script/import errors.
+- Combined front (12), general campaign (15), battle injury (9), organic town (9)
+  and military development (16): **61 passed; zero errors, failures, skips or
+  orphans; exit 0**.
+- Actual invasion UI/replay probe: **PASS**, exit 0. Verifies zero soldier/general
+  actors, responsive observation controls, one resolution, unchanged military
+  export/calendar on replay, and pause.
+
+Evidence: `/tmp/military-canonical-import.log`, `/tmp/military-canonical-tests.log`,
+`/tmp/military-canonical-ui.log`, and `/tmp/military-canonical-preservation-result.txt`.
+The existing siege-withdrawal failure in `test_siege_progression.gd:145` remains
+unresolved: expected moving, received stationed. Worker verification reproduced
+it on untouched `577f8aa` (8/9 passed). It was not concealed by graphics changes
+or counted among the 61 passing canonical cases.
+
+Organic town source `4251a3d98d6ca16af58fc2b102ecb6ecab7f2810` and integration
+record `577f8aa` remain ancestors. The earlier 135-case town integration is retained;
+its nine organic-town visual cases pass again alongside military on canonical main.
+
+Temporary test configuration used the isolated
+`TomorrowAndTomorrow_Military_Canonical_45ce52f_Test` user directory and Dummy audio.
+No worktree override was copied. The new override and only the newly generated
+front-test UID were removed after checks. All **117 pre-existing untracked files**
+and all **three existing save/settings files** retain their SHA-256 hashes; the
+original untracked set is exact. No unrelated file was staged, removed or replaced.
+The integration-record commit changes only this document and
+`FEATURE_RECONCILIATION.md`; tracked source is otherwise clean.
+
+No Godot process was present before or after integration. No player/editor was
+interrupted, no graphical test/demo or canonical game was launched, no restart or
+push occurred. This verifies source integration, not rendered appearance, FPS or
+that a player session has loaded these scripts. **Graphical review is pending.**
+Work stops after this integration; no additional phase is started.
+
+---
+
 # Organic town integration — September 7, 2026
 
 INTEGRATED in canonical Mac source, with graphical sign-off pending.
@@ -42,7 +108,7 @@ window, canonical game launch, live-session interruption or remote push occurred
 The wider mature/continent land-cover transition, foreign towns, later traditions
 and slope-specific foundations remain outside this slice. Headless supplied
 transforms are not rendered-pixel verification. See the handoff's detailed limits.
-Military work has not started; this integration stops for originating-task review.
+At this earlier town checkpoint, military work had not started; the reviewed military integration is recorded above.
 
 ---
 
