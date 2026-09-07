@@ -4,10 +4,10 @@ func mouse(point:Vector2,button:int)->void:
 		var event:=InputEventMouseButton.new();event.position=point;event.button_index=button;event.pressed=down;Input.parse_input_event(event);await get_tree().process_frame
 	await frames()
 func wait_for_arrival()->void:
-	hud.close_dock();await frames();await click_control(hud.speed_buttons[5]);assert(terrain.game_speed==5)
+	hud.close_dock();await frames();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames();assert(terrain.game_speed==5)
 	var deadline:=Time.get_ticks_msec()+12000
 	while MilitaryCampaign.field_armies[0].status=="moving" and Time.get_ticks_msec()<deadline:await get_tree().process_frame
-	await click_control(hud.speed_buttons[0]);assert(MilitaryCampaign.field_armies[0].status=="stationed")
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();assert(MilitaryCampaign.field_armies[0].status=="stationed")
 func after_deployment()->void:
 	hud.close_dock();await frames();terrain._refresh_player_field_army_markers();await frames()
 	var army_id:=int(MilitaryCampaign.field_armies[0].army_id)
@@ -34,10 +34,10 @@ func after_deployment()->void:
 	await capture("field-order")
 	await wait_for_arrival();await capture("field-arrived")
 	assert(MilitaryCampaign.field_armies[0].location_id=="field_position")
-	await click_control(hud.speed_buttons[5])
+	hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
 	var report_deadline:=Time.get_ticks_msec()+12000
 	while String(MilitaryCampaign.field_armies[0].last_report.get("location_name",""))!="MARKED GROUND" and Time.get_ticks_msec()<report_deadline:await get_tree().process_frame
-	await click_control(hud.speed_buttons[0])
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames()
 	assert(String(MilitaryCampaign.field_armies[0].last_report.location_name)=="MARKED GROUND")
 	terrain._refresh_player_field_army_markers();await capture("field-arrival-reported")
 	await click_control(hud.rail_buttons.military);await click_label("FIELD ARMIES")

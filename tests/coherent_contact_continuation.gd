@@ -4,13 +4,13 @@ func key(code:int)->void:
 		var event:=InputEventKey.new();event.keycode=code;event.pressed=down;Input.parse_input_event(event);await get_tree().process_frame
 	await frames()
 func wait_return(tag:String)->void:
-	hud.close_dock();await frames();await click_control(hud.speed_buttons[5])
+	hud.close_dock();await frames();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
 	var deadline:=Time.get_ticks_msec()+230000;var report_day:=int(GameState.elapsed_days)
 	while bool(CivilizationSystem.exploration_status().get("active",false)) and Time.get_ticks_msec()<deadline:
 		await get_tree().process_frame
 		if int(GameState.elapsed_days)>report_day+40:
 			report_day=int(GameState.elapsed_days);print(tag," day=",report_day," speed=",terrain.game_speed)
-	await click_control(hud.speed_buttons[0]);assert(not bool(CivilizationSystem.exploration_status().get("active",false)))
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();assert(not bool(CivilizationSystem.exploration_status().get("active",false)))
 	print(tag," RETURN ",JSON.stringify(CivilizationSystem.exploration_status().last_outcome)," contacts=",CivilizationSystem.exploration_status().contacted_count)
 func _ready()->void:
 	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_FocusedJourney_Test"))

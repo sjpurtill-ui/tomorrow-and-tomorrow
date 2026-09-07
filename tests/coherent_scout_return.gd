@@ -3,14 +3,14 @@ func after_scout_departure()->void:
 	if is_instance_valid(terrain.scout_dispatch_panel):
 		for button in terrain.scout_dispatch_panel.find_children("*","Button",true,false):
 			if button.text=="CLOSE":await click_control(button);break
-	hud.close_dock();await frames();await click_control(hud.speed_buttons[5])
+	hud.close_dock();await frames();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
 	var deadline:=Time.get_ticks_msec()+60000
 	var last_day:=int(GameState.elapsed_days)
 	while bool(CivilizationSystem.exploration_status().get("active",false)) and Time.get_ticks_msec()<deadline:
 		await get_tree().process_frame
 		if int(GameState.elapsed_days)>last_day+10:
 			last_day=int(GameState.elapsed_days);print("SCOUT_WAIT day=",last_day," speed=",terrain.game_speed," status=",JSON.stringify(CivilizationSystem.exploration_status()))
-	await click_control(hud.speed_buttons[0])
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames()
 	assert(not bool(CivilizationSystem.exploration_status().get("active",false)),"Scouts must return through ordinary time; inspect a real pause or delay")
 	await click_control(hud.rail_buttons.world);await capture("continuous-first-return-contacts")
 	await click_control(hud.dock.tab_buttons[1]);await capture("continuous-first-return-scouting")
@@ -33,14 +33,14 @@ func after_scout_departure()->void:
 	if is_instance_valid(terrain.scout_dispatch_panel):
 		for button in terrain.scout_dispatch_panel.find_children("*","Button",true,false):
 			if button.text=="CLOSE":await click_control(button);break
-	hud.close_dock();await frames();await click_control(hud.speed_buttons[5])
+	hud.close_dock();await frames();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
 	assert(SaveSystem.save_game("coherent_long_departure").has("ok"))
 	deadline=Time.get_ticks_msec()+230000;last_day=int(GameState.elapsed_days)
 	while bool(CivilizationSystem.exploration_status().get("active",false)) and Time.get_ticks_msec()<deadline:
 		await get_tree().process_frame
 		if int(GameState.elapsed_days)>last_day+30:
 			last_day=int(GameState.elapsed_days);print("LONG_SCOUT_WAIT day=",last_day," speed=",terrain.game_speed," population=",GameState.population_total," days_remaining=",CivilizationSystem.exploration_status().get("days_remaining",-1))
-	await click_control(hud.speed_buttons[0]);await click_control(hud.rail_buttons.world);await capture("continuous-long-return-contacts")
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();await click_control(hud.rail_buttons.world);await capture("continuous-long-return-contacts")
 	print("LONG_SCOUT_RESULT ",JSON.stringify(CivilizationSystem.exploration_status()))
 	assert(not bool(CivilizationSystem.exploration_status().get("active",false)))
 	assert(SaveSystem.save_game("coherent_after_long_return").has("ok"))

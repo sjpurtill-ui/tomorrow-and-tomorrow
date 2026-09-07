@@ -8,7 +8,7 @@ func _ready()->void:
 	assert(is_instance_valid(PeopleDirection.panel))
 	await capture("coherent-first-choice")
 	await click_control(PeopleDirection.panel.ambition_buttons[0]);await click_control(PeopleDirection.panel.pages[0].get_node("ConfirmFocus"));await frames()
-	await click_control(hud.speed_buttons[0]);await capture("coherent-first-map")
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();await capture("coherent-first-map")
 	hud.close_dock();await frames()
 	assert(not hud.toolbar_action_buttons.settle.disabled)
 	await click_control(hud.toolbar_action_buttons.settle);await frames()
@@ -17,10 +17,10 @@ func _ready()->void:
 	await click_control(terrain.settlement_name_confirm);await frames()
 	await capture("coherent-founding-settlement")
 
-	hud.close_dock();await click_control(hud.speed_buttons[5])
+	hud.close_dock();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
 	var deadline:=Time.get_ticks_msec()+15000
 	while GameState.elapsed_days<10 and Time.get_ticks_msec()<deadline:await get_tree().process_frame
-	await click_control(hud.speed_buttons[0])
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames()
 	await click_control(hud.rail_buttons.world);await click_label("SEND SCOUTS")
 	var launched:=false
 	for button in terrain.scout_dispatch_panel.find_children("*","Button",true,false):
@@ -30,10 +30,10 @@ func _ready()->void:
 	if is_instance_valid(terrain.scout_dispatch_panel):
 		for button in terrain.scout_dispatch_panel.find_children("*","Button",true,false):
 			if button.text=="CLOSE":await click_control(button);break
-	hud.close_dock();await click_control(hud.speed_buttons[5])
+	hud.close_dock();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
 	deadline=Time.get_ticks_msec()+90000
 	while CivilizationSystem.exploration_status().get("active",false) and Time.get_ticks_msec()<deadline:await get_tree().process_frame
-	await click_control(hud.speed_buttons[0]);await click_control(hud.rail_buttons.world)
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();await click_control(hud.rail_buttons.world)
 	await capture("coherence-natural-contact")
 	print("NATURAL_RETURN ",JSON.stringify(CivilizationSystem.exploration_status()))
 	print("NATURAL_CONTACTS ",JSON.stringify(CivilizationSystem.contact_encounters_snapshot()))
@@ -46,10 +46,10 @@ func _ready()->void:
 	await click_label("ASK SCOUTS TO FIND THEIR SETTLEMENT")
 	assert(not CivilizationSystem.scout_missions.is_empty())
 	await capture("coherence-investigate-underway")
-	hud.close_detail();hud.close_dock();await click_control(hud.speed_buttons[5])
+	hud.close_detail();hud.close_dock();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
 	deadline=Time.get_ticks_msec()+90000
 	while CivilizationSystem.exploration_status().get("active",false) and Time.get_ticks_msec()<deadline:await get_tree().process_frame
-	await click_control(hud.speed_buttons[0]);await click_control(hud.rail_buttons.world)
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();await click_control(hud.rail_buttons.world)
 	var returned:=CivilizationSystem.contact_encounters_snapshot()
 	var located:=false
 	for contact:Dictionary in returned:

@@ -8,7 +8,7 @@ func _ready()->void:
 	assert(is_instance_valid(PeopleDirection.panel))
 	await capture("coherent-first-choice")
 	await click_control(PeopleDirection.panel.ambition_buttons[0]);await click_control(PeopleDirection.panel.pages[0].get_node("ConfirmFocus"));await frames()
-	await click_control(hud.speed_buttons[0]);await capture("coherent-first-map")
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();await capture("coherent-first-map")
 	hud.close_dock();await frames()
 	assert(not hud.toolbar_action_buttons.settle.disabled)
 	await click_control(hud.toolbar_action_buttons.settle);await frames()
@@ -20,10 +20,10 @@ func _ready()->void:
 	await click_label("WATER ACCESS");await capture("coherent-water-before")
 	var start_day:=GameState.elapsed_days
 	hud.close_dock();await frames()
-	await click_control(hud.speed_buttons[5]);assert(terrain.game_speed==5)
+	hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames();assert(terrain.game_speed==5)
 	var deadline:=Time.get_ticks_msec()+16000
 	while GameState.elapsed_days<start_day+10 and Time.get_ticks_msec()<deadline:await get_tree().process_frame
-	await click_control(hud.speed_buttons[0]);await capture("coherent-water-after-time")
+	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames();await capture("coherent-water-after-time")
 	assert(GameState.elapsed_days>=start_day+1,"Actual time controls must advance the running simulation")
 	assert("Hearth Circle" in GameState.settlement_completed)
 	await click_control(hud.rail_buttons.economy);await click_label("WATER ACCESS");await click_label("PRIORITIZE WATER")

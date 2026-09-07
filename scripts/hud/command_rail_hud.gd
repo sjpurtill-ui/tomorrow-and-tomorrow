@@ -19,7 +19,6 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"military","glyph":"ML","label":"MILITARY","tooltip":"Formations, training, supply · F6"},
 ]
 const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 day/s","3 days/s"]
-const SPEED_GLYPHS:Array[String]=["Ⅱ","1","2","3","4","5"]
 const MAX_QUEUE_CARDS:=3
 
 var city_selector:OptionButton
@@ -36,7 +35,9 @@ var rail_buttons:Dictionary={}
 var rail_badges:Dictionary={}
 var time_pill:PanelContainer
 var time_text:RichTextLabel
-var speed_buttons:Array[Button]=[]
+var pause_button:Button
+var speed_selector:OptionButton
+var last_running_speed:=1
 var kpi_strip:VBoxContainer
 var kpi_chips:Dictionary={}
 var queue_root:VBoxContainer
@@ -276,7 +277,7 @@ func _build_time_pill()->void:
 	time_text.fit_content=true
 	time_text.autowrap_mode=TextServer.AUTOWRAP_OFF
 	time_text.scroll_active=false
-	time_text.custom_minimum_size=Vector2(300,32)
+	time_text.custom_minimum_size=Vector2(210,32)
 	time_text.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	time_text.add_theme_font_size_override("normal_font_size",15)
 	time_text.add_theme_font_size_override("bold_font_size",15)
@@ -284,26 +285,39 @@ func _build_time_pill()->void:
 	var speed_row:=HBoxContainer.new()
 	speed_row.add_theme_constant_override("separation",4)
 	row.add_child(speed_row)
+	pause_button=Button.new()
+	pause_button.name="PauseResume"
+	pause_button.custom_minimum_size=Vector2(30,30)
+	pause_button.add_theme_font_size_override("font_size",11)
+	pause_button.pressed.connect(func()->void:
+		_on_speed_pressed(last_running_speed if terrain and int(terrain.game_speed)==0 else 0))
+	speed_row.add_child(pause_button)
+	speed_selector=OptionButton.new()
+	speed_selector.name="TimeSpeed"
+	speed_selector.fit_to_longest_item=false
+	speed_selector.custom_minimum_size=Vector2(100,30)
+	speed_selector.add_theme_font_size_override("font_size",12)
 	for speed in 6:
-		var speed_button:=Button.new()
-		speed_button.text=SPEED_GLYPHS[speed]
-		speed_button.tooltip_text=SPEED_TOOLTIPS[speed]
-		speed_button.custom_minimum_size=Vector2(30,30)
-		speed_button.add_theme_font_size_override("font_size",11)
-		speed_button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-		speed_button.pressed.connect(_on_speed_pressed.bind(speed))
-		speed_row.add_child(speed_button)
-		speed_buttons.append(speed_button)
-	_style_speed_buttons(0)
+		speed_selector.add_item("Paused" if speed==0 else SPEED_TOOLTIPS[speed],speed)
+		speed_selector.get_popup().set_item_tooltip(speed,"Keyboard: %d" % speed)
+	speed_selector.tooltip_text="Simulation speed · shortcuts 0–5"
+	speed_selector.item_selected.connect(_on_speed_pressed)
+	speed_row.add_child(speed_selector)
+	_style_speed_controls(0)
 
 func _on_speed_pressed(speed:int)->void:
 	if terrain and terrain.has_method("_set_game_speed"):
 		terrain._set_game_speed(float(speed))
 
-func _style_speed_buttons(selected:int)->void:
-	for speed in speed_buttons.size():
-		var button:=speed_buttons[speed]
-		var active:=speed==selected
+func _style_speed_controls(selected:int)->void:
+	selected=clampi(selected,0,5)
+	if selected>0:last_running_speed=selected
+	speed_selector.select(selected)
+	var paused:=selected==0
+	pause_button.text="▶" if paused else "Ⅱ"
+	pause_button.tooltip_text="Resume at %s" % SPEED_TOOLTIPS[last_running_speed] if paused else "Pause · 0"
+	for button:Button in [pause_button,speed_selector]:
+		var active:=paused and button==pause_button
 		var style:=Tokens.flat(Tokens.GOLD if active else Tokens.SPEED_IDLE_BG,Tokens.BORDER_2 if not active else Color(0,0,0,0),0 if active else 1,15)
 		button.add_theme_stylebox_override("normal",style)
 		button.add_theme_stylebox_override("hover",style)
@@ -758,6 +772,12 @@ func refresh()->void:
 	_refresh_toolbar()
 
 func _refresh_time()->void:
+	# Hot script reload can retain an already-built bar from the previous HUD.
+	# Rebuild just this small control, preserving the running campaign.
+	if not is_instance_valid(speed_selector):
+		if is_instance_valid(time_pill):time_pill.queue_free()
+		_build_time_pill()
+		_time_signature=""
 	var absolute_hour:=int(floor(GameState.elapsed_days*24.0))
 	var absolute_day:=absolute_hour/24
 	var year:=absolute_day/365+1
@@ -767,10 +787,9 @@ func _refresh_time()->void:
 	var signature:="%d|%d|%d|%s" % [year,day_of_year,speed,temperature_text]
 	if signature==_time_signature: return
 	_time_signature=signature
-	var speed_text:="paused" if speed==0 else SPEED_TOOLTIPS[clampi(speed,0,5)]
-	time_text.text="[b][color=#f0e6d1]Year %d · Day %d[/color][/b][color=#8a948f] · %s · %s[/color]" % [year,day_of_year,temperature_text,speed_text]
+	time_text.text="[b][color=#f0e6d1]Year %d · Day %d[/color][/b][color=#8a948f] · %s[/color]" % [year,day_of_year,temperature_text]
 	time_pill.tooltip_text="Local air temperature at the settlement. The annual warm–cold cycle drives food yields and cold-season rations; the arrow is the day-to-day trend."
-	_style_speed_buttons(speed)
+	_style_speed_controls(speed)
 	time_pill.reset_size()
 	_layout()
 
