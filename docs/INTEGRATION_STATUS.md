@@ -1,3 +1,22 @@
+# Early primitive removal — September 7, 2026
+
+INTEGRATED source `4f73017` as canonical `06862bc`, without conflicts.
+Removed the duplicate central Lean-to Shelters tent ring and its unused primitive
+mesh helper. Supported early plot forms never fall back to legacy roof/wall
+massing, including when no footprint fits. Compact assets retry placement using
+their authored envelope, retaining road, parcel, obstacle and land checks.
+No-fit parcels can remain visually empty; construction no longer displays legacy
+roof massing. Unsupported later forms and communal/service features remain.
+No simulation or save-format changes. Local terrain is the shared-file hotspot.
+Worker and isolated canonical runs each passed all 104 cases (12 early assets,
+9 organic town, 83 settlement architecture), zero errors/failures/orphans.
+Logs: `/tmp/early-removal-tests.log`, `/tmp/early-removal-canonical-tests.log`.
+The temporary canonical test override was removed. User explicitly requested
+that the running test campaign be discarded and a fresh game relaunched, replacing
+the earlier resume-only instruction. Canonical fresh launch follows verification.
+
+---
+
 # Early settlement assets integrated — September 7, 2026
 
 INTEGRATED in canonical Mac `main` at
