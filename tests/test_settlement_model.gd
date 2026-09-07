@@ -795,3 +795,45 @@ func test_population_alone_cannot_found_a_satellite_quarter()->void:
 	assert_array(events).is_empty()
 	assert_int(GameState.settlement_plots.size()).is_equal(original_plots)
 	assert_int(GameState.settlement_nuclei.size()).is_equal(original_nuclei)
+
+func test_affordable_yard_addition_does_not_require_full_house_materials()->void:
+	GameState.ensure_population_total(2000)
+	GameState.population_allocations.Construction=12
+	GameState.resource_stockpiles={"Timber":1.10,"Fiber Plants":0.72}
+	var inherited:Dictionary={}
+	for plot:Dictionary in GameState.settlement_plots:
+		inherited[int(plot.id)]={"polygon":plot.polygon.duplicate(),"form":plot.form,"capacity":plot.resident_capacity}
+	var plot_count:=GameState.settlement_plots.size()
+	assert_dict(model._available_household_recipe()).is_empty()
+	var events:Array[Dictionary]=[]
+	assert_bool(model._attempt_household_growth(120,events)).is_true()
+	assert_int(GameState.settlement_plots.size()).is_equal(plot_count)
+	var changed:=0
+	for plot:Dictionary in GameState.settlement_plots:
+		assert_array(plot.polygon).is_equal(inherited[int(plot.id)].polygon)
+		assert_str(String(plot.form)).is_equal(String(inherited[int(plot.id)].form))
+		if int(plot.resident_capacity)>int(inherited[int(plot.id)].capacity):changed+=1
+	assert_int(changed).is_equal(1)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(1.10-1.8*.58,.000001)
+	assert_float(float(GameState.resource_stockpiles["Fiber Plants"])).is_equal_approx(.72-1.2*.58,.000001)
+
+func test_infill_skips_unaffordable_compound_and_keeps_research_gate()->void:
+	GameState.ensure_population_total(2000)
+	GameState.population_allocations.Construction=12
+	GameState.resource_stockpiles={"Timber":1.10,"Fiber Plants":0.72}
+	var expensive:Dictionary={}
+	for plot:Dictionary in GameState.settlement_plots:
+		if String(plot.land_use) in ["residential_compound","mixed_household"]:
+			expensive=plot;break
+	expensive.infill_units=2;expensive.service_access=100.0
+	var old_capacity:=int(expensive.resident_capacity)
+	var events:Array[Dictionary]=[]
+	assert_bool(model._attempt_household_growth(120,events)).is_true()
+	assert_int(int(expensive.resident_capacity)).is_equal(old_capacity)
+	GameState.resource_stockpiles={"Clay":2.0,"Fiber Plants":0.4}
+	GameState.known_discoveries.erase("clay_shaping")
+	var before:=GameState.resource_stockpiles.duplicate(true)
+	assert_bool(model._attempt_household_growth(150,events)).is_false()
+	assert_dict(GameState.resource_stockpiles).is_equal(before)
+	GameState.known_discoveries.append("clay_shaping")
+	assert_bool(model._attempt_household_growth(150,events)).is_true()

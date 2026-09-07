@@ -2376,17 +2376,17 @@ func _resident_capacity_for_growth()->int:
 			capacity+=int(plot.get("resident_capacity",0))
 	return capacity
 
-func _available_household_recipe()->Dictionary:
+func _available_household_recipe(cost_scale:float=1.0)->Dictionary:
 	var stocks:=GameState.resource_stockpiles
 	# A stone-housing directive changes which feasible recipe builders choose; it
 	# cannot bypass the material discovery or the delivered stock requirement.
-	if ConsequenceEngine.policy_effect("stone_priority")>0.01 and "stone_selection" in GameState.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
+	if ConsequenceEngine.policy_effect("stone_priority")>0.01 and "stone_selection" in GameState.known_discoveries and float(stocks.get("Stone",0.0))>=4.2*cost_scale and float(stocks.get("Timber",0.0))>=0.8*cost_scale:
 		return {"family":"stone","form":"dry_stone_household","cost":{"Stone":4.2,"Timber":0.8},"mix":{"Stone":0.72,"Timber":0.12,"Fiber Plants":0.06}}
-	if float(stocks.get("Timber",0.0))>=1.8 and float(stocks.get("Fiber Plants",0.0))>=1.2:
+	if float(stocks.get("Timber",0.0))>=1.8*cost_scale and float(stocks.get("Fiber Plants",0.0))>=1.2*cost_scale:
 		return {"family":"organic","form":"timber_and_fibre_household","cost":{"Timber":1.8,"Fiber Plants":1.2},"mix":{"Timber":0.52,"Fiber Plants":0.34,"Clay":0.05}}
-	if "clay_shaping" in GameState.known_discoveries and float(stocks.get("Clay",0.0))>=3.2 and float(stocks.get("Fiber Plants",0.0))>=0.6:
+	if "clay_shaping" in GameState.known_discoveries and float(stocks.get("Clay",0.0))>=3.2*cost_scale and float(stocks.get("Fiber Plants",0.0))>=0.6*cost_scale:
 		return {"family":"earth","form":"earthen_household","cost":{"Clay":3.2,"Fiber Plants":0.6},"mix":{"Clay":0.68,"Fiber Plants":0.16,"Timber":0.08}}
-	if "stone_selection" in GameState.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
+	if "stone_selection" in GameState.known_discoveries and float(stocks.get("Stone",0.0))>=4.2*cost_scale and float(stocks.get("Timber",0.0))>=0.8*cost_scale:
 		return {"family":"stone","form":"dry_stone_household","cost":{"Stone":4.2,"Timber":0.8},"mix":{"Stone":0.72,"Timber":0.12,"Fiber Plants":0.06}}
 	return {}
 
@@ -2396,7 +2396,12 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	if _primary_population()<=roundi(float(capacity)*0.88): return false
 	if int(GameState.population_allocations.get("Construction",0))<4: return false
 	var recipe:=_available_household_recipe()
-	if recipe.is_empty(): return false
+	if recipe.is_empty():
+		# A first yard addition uses 58% of a new household's materials.
+		# Choose a researched recipe affordable at that scale; candidate plots
+		# still recheck their actual (possibly larger) infill cost before spending.
+		var infill_recipe:=_available_household_recipe(0.58)
+		return not infill_recipe.is_empty() and _attempt_household_infill(day,infill_recipe,events,action_index)
 	# Some pressure becomes roofed infill inside a viable inherited compound;
 	# other months still create edge plots. This keeps dense cores and irregular
 	# expansion in tension instead of choosing one morphology forever.
@@ -2427,6 +2432,12 @@ func _attempt_household_infill(day:int,recipe:Dictionary,events:Array[Dictionary
 		var infill_units:=int(plot.get("infill_units",0))
 		if coverage>=0.62 or infill_units>=3: continue
 		if float(plot.get("area_ha",0.0))<0.012: continue
+		var affordable:=true
+		var candidate_scale:=0.58+float(infill_units)*0.12
+		for resource_name in recipe.cost:
+			if float(GameState.resource_stockpiles.get(resource_name,0.0))<float(recipe.cost[resource_name])*candidate_scale:
+				affordable=false;break
+		if not affordable:continue
 		var route:Dictionary=route_by_id.get(int(plot.get("frontage_route_id",-1)),{})
 		var score:=float(plot.get("service_access",0.0))*1.15+float(route.get("traffic",0.0))*0.78+float(plot.get("area_ha",0.0))*4.0-float(plot.get("hazard_exposure",0.0))*0.62-float(infill_units)*0.28
 		if score>best_score:
