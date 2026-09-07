@@ -1,3 +1,51 @@
+# Early settlement assets integrated — September 7, 2026
+
+INTEGRATED in canonical Mac `main` at
+`/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`.
+Previous canonical HEAD: `4f68230a3c9c94064a91b3c2909ae806411f2297`.
+Source: `a59910960ca453516d13432ab0df9521f6885615`.
+Reviewed correction: `5c11d38faf8e716a5f9666f8bf50c9dc42fd9a7b`.
+Both were integrated by conflict-free fast-forwards. The commit containing this
+entry records final canonical verification; prior organic-town and military-front
+sources remain ancestors.
+
+Eight active assets now depict recorded carried shelters, rooted lean-tos,
+round/earthen/rubble households, raised stores and covered workshops. They join
+the earlier timber town kit. Existing resource/research recipes and completed
+work supply the recorded built form; population and calendar do not repaint
+buildings. Later/unknown forms are explicitly excluded from the early adapter,
+including its shared-solver fallback. Identity meshes preserve imported LOD and
+shadow resources. No new simulation/save authority or migration was introduced.
+
+Three authored cultural/political studies remain INACTIVE: crafted household,
+open common hall and enclosed authority hall. They are not unlocked in play.
+Construction-era cultural/patronage records and appropriate public-parcel
+placement are still required; current cultural or political shifts must not
+instantly replace inherited architecture. See `EARLY_SETTLEMENT_PROGRESSION.md`.
+
+Canonical Godot 4.7.2 clean headless import passed (exit 0, no script/import errors).
+Combined **156/156 passed**, zero errors/failures/skips/orphans: early assets 9,
+organic town 9, settlement architecture 83, settlement model 43, military fronts 12.
+Evidence: `/tmp/early-canonical-final-import.log`,
+`/tmp/early-canonical-final-tests.log` (canonical `reports/report_4/`).
+
+Tests used a newly created isolated `Early_Canonical_a599109_Test` application
+name with Dummy audio. That override was removed afterward; none was copied from
+the worktree. All 118 pre-existing untracked files retain their exact set and
+SHA-256 hashes; all three original save/settings files were unchanged after tests.
+See `/tmp/early-canonical-preservation-result.txt`. No unrelated files were staged
+or removed. Integration records are the only additional tracked edits.
+
+The user explicitly requested integration and launch. No game/editor was running
+before integration. Normal canonical saved-game resume is the next launch step;
+no fresh-world/reset/showcase mutation is authorized or required. Offline Blender
+asset plates are not game screenshots or FPS verification. Earlier schematic
+military limits and the pre-existing siege-withdrawal issue remain unchanged.
+No remote push. Further cultural gameplay and later architectural eras are not
+claimed complete by this delivery.
+
+---
+
 # Military front integration — September 7, 2026
 
 INTEGRATED in canonical Mac source; graphical review remains pending.
