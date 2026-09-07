@@ -1,3 +1,20 @@
+# Consolidated deaths and investigation choices — September 7, 2026
+
+INTEGRATED `28a06ac` in canonical Mac main by fast-forward from f0416ef.
+Population views summarize deaths by cause with separate paged dated details.
+Scout dispatch groups destinations by category and repeated accounts by people,
+retaining each exact target and visible evidence. Original records, counts, mission
+behavior and save format are unchanged. See CONSOLIDATED_LISTS_HANDOFF.md.
+
+Canonical clean headless import and 15/15 focused list/rumor tests passed with
+zero errors, failures, skips or orphans. Logs: /tmp/consolidated-canonical-import.log
+and /tmp/consolidated-canonical-tests.log. The broader far-order city-marching case
+failed the same three assertions on unchanged f0416ef; no military fix is included.
+The private test application override was removed. Player PID 36402 and editor
+35944 remain running; restart normally to load this update. No remote push.
+
+---
+
 # Citizen production integrated — September 7, 2026
 
 INTEGRATED source `3dbca50` in canonical Mac main, fast-forwarded from `937cd65`.
