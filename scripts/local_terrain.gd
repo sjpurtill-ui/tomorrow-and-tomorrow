@@ -3089,6 +3089,8 @@ func _update_scale_lod() -> void:
 
 	_normalize_aerial_labels()
 
+var city_banner_identity:Dictionary={}
+
 func _normalize_aerial_labels()->void:
 	if camera==null or camera.projection!=Camera3D.PROJECTION_PERSPECTIVE: return
 	for node in find_children("*","Label3D",true,false):
@@ -3099,6 +3101,30 @@ func _normalize_aerial_labels()->void:
 			label.set_meta("aerial_pixel_size",label.pixel_size)
 		label.font_size=int(label.get_meta("aerial_font_size"))*4
 		label.pixel_size=float(label.get_meta("aerial_pixel_size"))/16.0
+		if label.has_meta("city_civilization_id"):_update_city_flag(label)
+
+func _update_city_flag(label:Label3D)->void:
+	var civ_id:=String(label.get_meta("city_civilization_id",""))
+	var identity:Dictionary
+	if civ_id=="player":
+		if city_banner_identity.get("index",-999)!=GameState.founding_banner_index:
+			var texture:=_founding_banner_texture(GameState.founding_banner_index)
+			city_banner_identity={"index":GameState.founding_banner_index,"texture":texture,"color":preload("res://scripts/city_map_identity.gd").banner_color(texture)}
+		identity=city_banner_identity
+	else:identity=preload("res://scripts/city_map_identity.gd").foreign(civ_id)
+	label.modulate=identity.color
+	var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
+	if flag==null:
+		flag=Sprite3D.new();flag.name="CivilizationFlag";flag.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+		flag.fixed_size=true;flag.no_depth_test=true;flag.render_priority=12
+		label.add_child(flag)
+	flag.texture=identity.texture
+	if flag.texture==null:return
+	var font:Font=label.font if label.font!=null else ThemeDB.fallback_font
+	var width:=font.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.font_size).x
+	var ratio:=float(label.font_size)*1.2/float(flag.texture.get_height())
+	flag.pixel_size=label.pixel_size*ratio
+	flag.offset=Vector2(-(width*.5+float(label.font_size)*.35)/ratio-float(flag.texture.get_width())*.5,0)
 
 func _city_map_label(city_name:String,population:int=-1,estimate:Dictionary={})->String:
 	var count:="Population unknown"
@@ -3691,6 +3717,7 @@ func _refresh_settlement_footprint(force := false) -> void:
 		add_child(settlement_blip)
 		settlement_map_label=Label3D.new()
 		settlement_map_label.name="SettlementMapLabel"
+		settlement_map_label.set_meta("city_civilization_id","player")
 		settlement_map_label.font_size=12
 		settlement_map_label.outline_size=4
 		settlement_map_label.modulate=Color("#e4d7b4")
@@ -6915,6 +6942,7 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 		var position_2d:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
 		var label:=Label3D.new()
 		label.name="SecondarySettlementLabel_%d" % index
+		label.set_meta("city_civilization_id",String(settlement.get("occupied_by","player")))
 		label.text=_city_map_label(String(settlement.get("name","Settlement")),int(settlement.get("population",0)))
 		label.font_size=9 if camera!=null and camera.size>2600.0 else 11
 		label.outline_size=4
@@ -6926,6 +6954,7 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 		label.render_priority=11
 		label.position=Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y)+marker_radius*2.2,position_2d.y)
 		settlement_network_marker_root.add_child(label)
+		_update_city_flag(label)
 
 
 func _secondary_settlement_urban_radius(settlement:Dictionary)->float:
@@ -12160,7 +12189,9 @@ func _refresh_contact_encounter_markers()->void:
 		var appearance:Array=[site.detailed,site.civ_id,site.name,site.x,site.z,population if site.detailed else -1,not site.report.get("fields",{}).is_empty()]
 		if is_instance_valid(previous):
 			var existing_label:=previous.get_node_or_null("SettlementLabel") as Label3D
-			if existing_label:existing_label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
+			if existing_label:
+				existing_label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
+				existing_label.set_meta("city_civilization_id",String(site.report.get("controller","")) if String(site.report.get("controller",""))!="" else String(site.civ_id))
 			if previous.get_meta("appearance",[])==appearance:continue
 			# queue_free is deferred; hide the old mesh now to avoid an overlapping frame.
 			previous.hide();previous.queue_free()
@@ -12182,6 +12213,7 @@ func _refresh_contact_encounter_markers()->void:
 			fabric.position.x=0;fabric.position.z=0;marker.add_child(fabric)
 			footprint_radius=fabric.footprint_radius
 		var label:=Label3D.new();label.name="SettlementLabel";label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
+		label.set_meta("city_civilization_id",String(site.report.get("controller","")) if String(site.report.get("controller",""))!="" else String(site.civ_id))
 		label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 		label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("#e4d7b4")
 		label.outline_modulate=Color(0.018,0.026,0.028,0.97);label.render_priority=11
@@ -12218,8 +12250,11 @@ func _update_foreign_city_annotation(marker:Node3D)->void:
 			var offset:=minf(camera.size*.28,maxf(.095,radius*.12)) if close else maxf(camera.size*.030,minf(radius*.36,camera.size*.18))
 			var ground:=Vector2(marker.position.x,marker.position.z)+screen_up.normalized()*offset
 			label.position=Vector3(ground.x-marker.position.x,_height_at(ground.x,ground.y)+.13,ground.y-marker.position.z)
+		_update_city_flag(label)
 	var pin:=marker.get_node_or_null("RegionalCityPin") as Label3D
-	if pin:pin.visible=camera!=null and camera.size>2.0
+	if pin:
+		pin.visible=camera!=null and camera.size>2.0
+		if label:pin.modulate=label.modulate
 
 
 func _refresh_foreign_formation_markers()->void:
@@ -13422,7 +13457,11 @@ func _city_from_screen(point:Vector2)->Dictionary:
 			var projection_scale:=get_viewport().get_visible_rect().size.y/(2.0*tan(deg_to_rad(camera.fov)*.5))
 			var size:=Vector2(glyph_size.x,float(label.font_size)*1.5)*label.pixel_size*projection_scale
 			size=size.max(Vector2(24,24))+Vector2(12,8)
-			if Rect2(center-size*.5,size).has_point(point) and point.distance_squared_to(center)<best_distance:
+			var bounds:=Rect2(center-size*.5,size)
+			if label.has_meta("city_civilization_id"):
+				var extra:=float(label.font_size)*2.4*label.pixel_size*projection_scale
+				bounds.position.x-=extra;bounds.size.x+=extra
+			if bounds.has_point(point) and point.distance_squared_to(center)<best_distance:
 				picked_id=String(id);best_distance=point.distance_squared_to(center)
 	if picked_id!="":return CivilizationSystem.city_intelligence.known("player",picked_id)
 	var origin:=camera.project_ray_origin(point);var direction:=camera.project_ray_normal(point)
