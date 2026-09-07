@@ -1,3 +1,7 @@
+## September 7 — city civilization flags
+
+INTEGRATED `a0ff5d5` by conflict-free fast-forward into canonical Mac main from `86f2971`. City flags, name colors and pins share reported civilization identity at all four camera distances; owned labels use the founding banner. Three isolated targeted checks pass, including stable refresh sizing and changes of reported control. No save schema changes. See CITY_FLAGS_HANDOFF.md. Player PID 47271 is still running; no restart or receipt of these changes by that process is claimed.
+
 # Compact speed dropdown integrated — September 7, 2026
 
 INTEGRATED 45b24d1 in canonical Mac main by conflict-free fast-forward from
