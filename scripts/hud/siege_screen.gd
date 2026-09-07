@@ -98,6 +98,7 @@ func _ready()->void:
 		scene=preload("res://scripts/city_encounter_scene.gd").new();scene.terrain=terrain
 	else:viewport.own_world_3d=true;scene=CITY.new()
 	viewport.add_child(scene);stage.gui_input.connect(scene.navigate)
+	stage.tooltip_text="Schematic city and deployment. Cohort positions are not recorded; unknown forces have no occupied-ground shape."
 	_build_header();_build_details();_build_commands();_build_bottom();_build_result()
 	canvas.resized.connect(_on_resize);_refresh();_layout();print("SIEGE_UI_OPEN native-siege-v1 id=",siege_id," day=",GameState.elapsed_days)
 func _build_header()->void:
@@ -167,7 +168,7 @@ func _refresh()->void:
 	assault.text="VIEW ASSAULT →" if in_battle else ("BEGIN ASSAULT →" if snapshot.mode=="offensive" else "LAUNCH SORTIE →")
 	if not active and not in_battle:assault.hide()
 	else:assault.show()
-	assault.tooltip_text=reason if not reason.is_empty() else "Fight from the current siege conditions. Combat opens paused for your formation orders."
+	assault.tooltip_text=reason if not reason.is_empty() else "Fight from the current siege conditions. Combat opens paused for general-led observation."
 	for key in time_buttons:time_buttons[key].disabled=not active or not is_instance_valid(terrain);time_buttons[key].modulate=TEAL if is_instance_valid(terrain) and int(terrain.game_speed)==int(key) else TEXT
 	time_label.text="TIME PAUSED · siege advances only when you play" if paused else "TIME RUNNING · %s game hours / second"%str(terrain._speed_hours_per_second())
 	if not active:time_label.text="Siege record · simulation paused" if paused else "Siege record · campaign time is running"

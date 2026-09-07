@@ -1,5 +1,6 @@
 extends Control
 ## Observation only: no troop orders or visible tactical grid.
+var front_cache:Dictionary={}
 func _ready()->void:mouse_filter=MOUSE_FILTER_IGNORE
 func _process(_delta:float)->void:queue_redraw()
 func point(cell:Vector2i)->Vector2:
@@ -15,10 +16,10 @@ func _draw()->void:
 		draw_rect(Rect2(p-Vector2(6,6),Vector2(12,12)),Color("d58964"))
 		draw_string(font,p+Vector2(-55,-13),String(known.name),HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color("f4d8c6"))
 		var observed:=point(known.cell)
-		draw_circle(observed,5,Color("de795e"))
+		_draw_front({"troops":int(known.troops)},observed,Color("de795e"))
 		draw_string(font,observed+Vector2(9,20),"%d seen · day %d"%[int(known.troops),int(known.day)],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e5c6b4"))
 	var here:=point(state.cell)
-	draw_circle(here,8,Color("73ddcc"))
+	_draw_front(GeneralCampaign.army(),here,Color("73ddcc"))
 	draw_arc(here,13,0,TAU,32,Color("c0fff0"),2)
 	draw_string(font,here+Vector2(12,20),"%d fit soldiers"%int(GeneralCampaign.army().get("troops",0)),HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color("b8ffe9"))
 	if not state.mission.is_empty():
@@ -30,3 +31,16 @@ func _draw()->void:
 			var next:=point(cell);draw_line(last,next,Color("c1bc8099"),2);last=next
 	draw_string(font,Vector2(18,size.y-38),"Local terrain • routes chosen by your general",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("c5d1c7"))
 	draw_string(font,Vector2(18,size.y-17),"Enemy counters are dated observations, not live intelligence.",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("a8bfb9"))
+
+func _draw_front(force: Dictionary, at: Vector2, color: Color) -> void:
+	var pixels_per_metre := minf(size.x,size.y)/float(GeneralCampaign.RADIUS*2+4)/GeneralCampaign.STEP/1000.0
+	var key:=hash(var_to_bytes(force))
+	if not front_cache.has(key):
+		if front_cache.size()>=32:front_cache.clear()
+		front_cache[key]=ArmyFrontVisual.layout(force)
+	for section in front_cache[key]:
+		var polygon := PackedVector2Array()
+		for p in section.polygon: polygon.append(at+p*pixels_per_metre)
+		draw_colored_polygon(polygon,color)
+	# Outline is a readable report glyph, explicitly distinct from physical ground.
+	draw_polyline(PackedVector2Array([at+Vector2(0,-5),at+Vector2(5,0),at+Vector2(0,5),at+Vector2(-5,0),at+Vector2(0,-5)]),color,1.0,true)

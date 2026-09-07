@@ -5,7 +5,7 @@ var organic_town_cached_state := PackedByteArray()
 var organic_town_cached_plan: Dictionary = {}
 
 
-const ArmyFigureFormationScript:=preload("res://scripts/army_figure_formation.gd")
+const ArmyFrontVisualScript := preload("res://scripts/army_front_visual.gd")
 const MAX_CLOSE_ARMY_FORMATIONS:=6
 var close_army_figures:Dictionary={}
 
@@ -913,6 +913,7 @@ func _configure_preview_province() -> void:
 	GameState.province_mask = mask
 
 func _process(delta: float) -> void:
+	_advance_physical_army_fronts(delta)
 	_advance_close_terrain_job()
 	_refresh_discovery_mask()
 	_refresh_woodland_visuals()
@@ -11487,6 +11488,7 @@ func _select_army_and_focus(army_id:int)->void:
 		var report:Dictionary=army.get("last_report",{})
 		var position_data:Dictionary=army.get("position",{})
 		var at_home:=String(army.get("status","stationed"))=="stationed" and String(army.get("location_id",""))=="player_home"
+		if not live_reports and not at_home and report.is_empty():continue
 		if not live_reports and not at_home and not report.is_empty():
 			position_data=report.get("position",position_data)
 		var world_position:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0)))
@@ -12293,11 +12295,9 @@ func _refresh_player_field_army_markers()->void:
 	var live_reports:=bool(state.get("live_reports",true))
 	for army_variant in (state.get("armies",[]) as Array):
 		var army:Dictionary=(army_variant as Dictionary).duplicate(true)
-		if int(army.get("troops",0))<=0:
-			if selected_army_id==int(army.get("army_id",0)):_clear_army_selection()
-			continue
 		var at_home:=String(army.get("status","stationed"))=="stationed" and String(army.get("location_id",""))=="player_home"
 		var report:Dictionary=army.get("last_report",{})
+		if not live_reports and not at_home and report.is_empty():continue
 		if not live_reports and not at_home and not report.is_empty():
 			army["position"]=(report.get("position",army.get("position",{})) as Dictionary).duplicate(true)
 			army["status"]=String(report.get("status",army.get("status","stationed")))
@@ -12305,7 +12305,12 @@ func _refresh_player_field_army_markers()->void:
 			army["supply_level"]=float(report.get("supply_level",army.get("supply_level",1.0)))
 			army["readiness"]=float(report.get("readiness",army.get("readiness",0.0)))
 			army["distance_remaining_km"]=float(report.get("distance_remaining_km",army.get("distance_remaining_km",0.0)))
+			army["remaining_troops"]=int(army.troops)
+			army["formations"]=[] # Report gives aggregate strength, not live hidden cohort equipment.
 			army["report_age_days"]=maxi(0,int(GameState.elapsed_days)-int(report.get("day",GameState.elapsed_days)))
+		if int(army.get("troops",0))<=0:
+			if selected_army_id==int(army.get("army_id",0)):_clear_army_selection()
+			continue
 		reported_armies.append(army)
 	var presentation:Dictionary=WarfareMapPresentation.build_snapshot(camera.size if camera else 190.0,reported_armies,[],front_state.get("fronts",[]),state.get("destinations",[]),MilitaryCampaign.engagement_snapshot(),marker_selected_id)
 	var visible_ids:Dictionary={}
@@ -12342,6 +12347,8 @@ func _refresh_player_field_army_markers()->void:
 	# Ground representatives must agree with the same runner report and selection
 	# as the counter. Zooming in must not reveal an away army's live coordinates.
 	for occupation:Dictionary in MilitaryCampaign.occupation_forces:
+		# No dated occupation-strength report exists before live communications.
+		if not live_reports:continue
 		if int(occupation.get("troops",0))<=0:continue
 		var report:Dictionary=CivilizationSystem.city_intelligence.known("player",String(occupation.get("region_id","")))
 		if report.is_empty():continue
@@ -12838,6 +12845,8 @@ func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->vo
 
 
 func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
+	for child in marker.get_children():
+		if child.has_meta("front_symbol_visible"):child.visible=child.get_meta("front_symbol_visible")
 	# Match the presentation floor: a second, larger clamp bloats close counters.
 	var marker_scale:=maxf(0.0005,float(view.get("scale",1.0)))
 	marker.scale=Vector3.ONE*marker_scale
@@ -12960,6 +12969,41 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 		strength_label.visible=bool(view.get("visible",true)) and (label==null or not label.visible)
 		strength_label.modulate=color.lightened(0.34)
 
+
+	_apply_physical_army_front(marker, view)
+
+func _apply_physical_army_front(marker: Node3D, view: Dictionary) -> void:
+	var front: ArmyFrontVisual = marker.get_node_or_null("OccupiedArmyGround")
+	if front == null:
+		front = ArmyFrontVisualScript.new(); front.name = "OccupiedArmyGround"; marker.add_child(front)
+	var at: Dictionary = view.get("position", {})
+	if not at.has_all(["x","z"]):
+		front.hide(); return
+	var origin := Vector3(float(at.get("x",0)),0,float(at.get("z",0)))
+	front.visible = bool(view.get("visible",true)) and (camera == null or (camera.size <= 80.0 and Vector2(origin.x-camera_target.x,origin.z-camera_target.z).length() <= maxf(1.0,camera.size*2.0))) and _world_position_is_revealed(origin)
+	if not front.visible:return
+	origin.y = _close_surface_height_at(origin.x,origin.z)
+	var marker_scale := maxf(0.000001,marker.scale.x)
+	front.position = (origin-marker.position)/marker_scale
+	front.scale = Vector3.ONE*0.001/marker_scale
+	front.ground = func(point: Vector2) -> float: return (_close_surface_height_at(origin.x+point.x*0.001,origin.z+point.y*0.001)-origin.y)*1000.0+0.10
+	front.land = func(point: Vector2) -> bool:
+		var world:=origin+Vector3(point.x,0,point.y)*0.001
+		return _world_position_is_revealed(world) and _settlement_stage_land_at(Vector2(world.x,world.z))
+	front.configure(view.get("front_force",{}),Color(String(view.get("color",WarfareMapPresentation.PLAYER_COLOR))),0.0 if bool(view.get("moving",false)) else 1.0,float(view.get("heading",0)))
+	var close := camera != null and camera.size <= 8.0
+	# Screen-sized informational symbols remain separate from occupied terrain.
+	for child in marker.get_children():
+		if child is GeometryInstance3D and not child is Label3D and child.name != "SelectedRing":
+			child.set_meta("front_symbol_visible",child.visible)
+			if close:child.hide()
+
+func _advance_physical_army_fronts(delta: float) -> void:
+	for markers in [player_field_army_markers,foreign_formation_markers]:
+		for marker in markers.values():
+			if not is_instance_valid(marker): continue
+			var front: ArmyFrontVisual = marker.get_node_or_null("OccupiedArmyGround")
+			if front != null and front.visible: front.advance(delta,game_speed <= 0.0)
 
 func _warfare_label_has_clear_space(label:Label3D)->bool:
 	if camera==null: return true
@@ -13187,6 +13231,9 @@ func _refresh_warfare_front_markers(front_views:Array)->void:
 		var marker_scale:=maxf(0.001,float(view.get("scale",1.0)))
 		marker.position=position; marker.scale=Vector3.ONE*marker_scale; marker.visible=bool(view.get("visible",false)) and _world_position_is_revealed(position)
 		var color:=Color(String(view.get("color",WarfareMapPresentation.FRONT_COLOR)))
+		for decorative in ["FrontPlate","ContactLine","AttackerWing","DefenderWing"]:
+			var part := marker.get_node_or_null(decorative)
+			if part != null: part.hide()
 		var front_core:=marker.get_node("FrontCore") as MeshInstance3D; _set_warfare_part_color(front_core,color)
 		var front_plate:=marker.get_node("FrontPlate") as MeshInstance3D
 		var front_plate_color:=Color("#202526").lerp(color.darkened(0.35),0.34); front_plate_color.a=0.92; _set_warfare_part_color(front_plate,front_plate_color)
@@ -19981,80 +20028,20 @@ func _select_city(settlement_id:String)->void:
 		if hud.dock and hud.dock.visible: hud.dock.rebuild()
 	_refresh_discovered_resource_overlays()
 
-func _refresh_close_army_figures(armies:Array,selected_army_id:int)->void:
-	# Counters remain the single label/selection surface at every visible scale.
-	# Ground figures add bounded detail in the city inspection view.
-	var candidates:Array[Dictionary]=[]
-	if camera and camera.size<8.0:
-		for army:Dictionary in armies:
-			var point:Dictionary=army.get("position",{})
-			if not point.has("x") or not point.has("z"): continue
-			var world:=Vector3(float(point.x),0.0,float(point.z))
-			var distance:=Vector2(world.x-camera_target.x,world.z-camera_target.z).length()
-			if distance>camera.size*1.4+0.25 or not _world_position_is_revealed(world): continue
-			var counts:Dictionary=ArmyFigureFormationScript.composition(army)
-			var supported:=0
-			for count in counts.values(): supported+=int(count)
-			if supported<=0: continue
-			candidates.append({"army":army,"counts":counts,"world":world,"distance":distance,"selected":int(army.get("army_id",0))==selected_army_id})
-	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
-		if bool(a.selected)!=bool(b.selected): return bool(a.selected)
-		return float(a.distance)<float(b.distance))
-	if candidates.size()>MAX_CLOSE_ARMY_FORMATIONS: candidates.resize(MAX_CLOSE_ARMY_FORMATIONS)
-	var keep:Dictionary={}
-	var occupied:Array[Vector3]=[]
-	for candidate:Dictionary in candidates:
-		var army:Dictionary=candidate.army
-		var id:=str(int(army.get("army_id",0))); keep[id]=true
-		var figures:Node3D=close_army_figures.get(id,null)
-		if figures==null:
-			figures=ArmyFigureFormationScript.new(); figures.name="CloseArmy_"+id
-			add_child(figures); close_army_figures[id]=figures
-			figures.scale=Vector3.ONE*SETTLEMENT_DETAIL_SCALE
-		var world:Vector3=candidate.world
-		# Multiple hosts can share one simulation location. Separate the bounded
-		# visual blocks without changing their authoritative army coordinates.
-		for attempt in MAX_CLOSE_ARMY_FORMATIONS:
-			var overlaps:=false
-			for other:Vector3 in occupied:
-				if Vector2(world.x-other.x,world.z-other.z).length()<0.24: overlaps=true
-			if not overlaps: break
-			world.x+=0.25
-		occupied.append(world)
-		world.y=_close_surface_height_at(world.x,world.z)
-		var destination:Dictionary=army.get("destination_position",{})
-		var direction:=Vector2(float(destination.get("x",world.x))-world.x,float(destination.get("z",world.z))-world.z)
-		var facing:=atan2(direction.x,direction.y) if direction.length()>0.001 else 0.0
-		var ground_signature:="%s/%s/%s/%s" % [candidate.counts,world,facing,bool(candidate.selected)]
-		var needs_ground:=String(figures.get_meta("ground_signature",""))!=ground_signature
-		var previous_visual_position:Vector3=figures.position
-		var had_ground:=figures.has_meta("ground_signature")
-		if needs_ground: figures.position=world
-		figures.rotation.y=facing
-		var garrison_label:=figures.get_node_or_null("GarrisonLabel") as Label3D
-		if bool(army.get("garrison_visual",false)) and garrison_label==null:
-			garrison_label=Label3D.new();garrison_label.name="GarrisonLabel";garrison_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;garrison_label.fixed_size=true;garrison_label.no_depth_test=true;garrison_label.font_size=9;figures.add_child(garrison_label);garrison_label.scale=Vector3.ONE/SETTLEMENT_DETAIL_SCALE;garrison_label.position.y=4
-		if garrison_label:garrison_label.text="YOUR GARRISON · %d SOLDIERS" % int(army.troops)
-
-		figures.configure(candidate.counts,Color(WarfareMapPresentation.PLAYER_COLOR))
-		figures.visible=int(get_meta("city_encounter_army",-1))!=int(army.get("army_id",0))
-		figures.set_animation("walk" if String(army.get("status",""))=="moving" else "idle")
-		figures.animation_speed=1.0 if game_speed>0.0 else 0.0
-		if needs_ground:
-			figures.fit_to_ground(Callable(self,"_close_surface_height_at")); figures.set_meta("ground_signature",ground_signature)
-			# Smooth between authoritative route samples; simulation positions and
-			# arrival times remain unchanged. Bound tweens to one per visible army.
-			var previous_tween:Tween=figures.get_meta("movement_tween") if figures.has_meta("movement_tween") else null
-			if previous_tween!=null and previous_tween.is_valid(): previous_tween.kill()
-			if had_ground and game_speed>0.0 and String(army.get("status",""))=="moving" and previous_visual_position.distance_to(world)>0.00001:
-				figures.position=previous_visual_position
-				var movement:=figures.create_tween()
-				movement.tween_property(figures,"position",world,0.35).set_trans(Tween.TRANS_SINE)
-				figures.set_meta("movement_tween",movement)
+func _refresh_close_army_figures(armies:Array,_selected_army_id:int)->void:
+	# Field armies now have physical fronts on their main marker. Only occupation
+	# garrisons need a separate bounded ground representation here.
+	var keep: Dictionary = {}
+	for army: Dictionary in armies:
+		if not bool(army.get("garrison_visual",false)) or keep.size() >= MAX_CLOSE_ARMY_FORMATIONS: continue
+		var id := str(army.get("army_id",0)); keep[id] = true
+		var root: Node3D = close_army_figures.get(id)
+		if root == null:
+			root = Node3D.new(); root.name = "GarrisonFront_"+id; add_child(root); close_army_figures[id] = root
+		_apply_physical_army_front(root,{"position":army.get("position",{}),"front_force":army,"color":WarfareMapPresentation.PLAYER_COLOR})
 	for id in close_army_figures.keys():
 		if keep.has(id): continue
-		var stale:Node3D=close_army_figures[id]
-		remove_child(stale); stale.queue_free(); close_army_figures.erase(id)
+		close_army_figures[id].queue_free(); close_army_figures.erase(id)
 
 func _focus_known_city(city_id:String)->void:
 	var report:=CivilizationSystem.city_intelligence.known("player",city_id)

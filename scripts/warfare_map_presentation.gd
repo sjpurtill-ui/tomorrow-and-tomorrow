@@ -402,7 +402,7 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 		# Selection is the gold outer ring, never a temporary change of faction color.
 		# Keeping the counter blue makes ownership stable while orders are being issued.
 		"selected":selected,"moving":moving,"color":PLAYER_COLOR,"selection_color":PLAYER_SELECTED_COLOR,
-		"troops":troops,"echelon":formation_echelon(troops),"formation_role":formation_role(army),"formation_unit":dominant_unit(army),"formation_era":formation_era(army),"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
+		"front_force":army.duplicate(true),"troops":troops,"echelon":formation_echelon(troops),"formation_role":formation_role(army),"formation_unit":dominant_unit(army),"formation_era":formation_era(army),"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
 		"order_state":visual_state.order_state,"damage_state":visual_state.damage_state,"damage_ratio":visual_state.damage_ratio,"scatter":visual_state.scatter,"missing_elements":visual_state.missing_elements,"visual_element_budget":visual_state.element_budget,
 		"position":position_data,"destination_id":String(army.get("destination_id","")),"heading":heading,
 		"destination_name":destination,
@@ -438,11 +438,13 @@ static func foreign_marker(sighting:Dictionary,camera_size:float)->Dictionary:
 		label="%s · ~%s–%s SOLDIERS%s\n%s" % [(owner.to_upper()+" · SCOUT PARTY" if identified else "FOREIGN SCOUTS") if scout else owner.to_upper()+" · FIELD ARMY",compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
 	elif band=="regional":
 		label="%s · ~%s–%s SOLDIERS%s\n%s" % [(owner.to_upper()+" · SCOUT PARTY" if identified else "FOREIGN SCOUTS") if scout else owner.to_upper()+" · FIELD ARMY",compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
+	var observed_day := int(sighting.get("last_seen_day",sighting.get("observed_day",sighting.get("day",-1))))
+	label += "\nOBSERVED DAY %d" % observed_day if observed_day >= 0 else "\nOBSERVATION DATE UNKNOWN"
 	return {
-		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["ground","local","regional"],
+		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["ground","local","regional"] and bool(sighting.get("visible",true)),
 		"show_label":band in ["ground","local","regional"],"label":label,"selected":false,"moving":moving,"heading":float(sighting.get("heading",0.0)),
 		"color":HOSTILE_COLOR if hostile else (SCOUT_COLOR if scout else FOREIGN_COLOR),"hostile":hostile,"scout":scout,"identified":identified,
-		"strength_low":low,"strength_high":high,"echelon":formation_echelon(high),"readiness_low":readiness_low,"readiness_high":readiness_high,
+		"front_force":{"troops":roundi((low+high)*0.5),"formation_role":observed_role,"status":"moving" if moving else "observed","position":sighting.get("position",{}).duplicate(true)},"observed_day":sighting.get("last_seen_day",sighting.get("observed_day",sighting.get("day",-1))),"strength_low":low,"strength_high":high,"echelon":formation_echelon(high),"readiness_low":readiness_low,"readiness_high":readiness_high,
 		"formation_role":observed_role,"formation_unit":String(sighting.get("formation_unit",observed_role)),"formation_era":observed_era,
 		"order_state":order_state,"damage_state":damage_state,"damage_ratio":damage_ratio,"scatter":clampf(1.0-readiness_mid,0.0,0.78),"missing_elements":clampi(floori(damage_ratio*4.0),0,3),"visual_element_budget":7,
 		"readiness_color":readiness_color(readiness_mid),"position":(sighting.get("position",{}) as Dictionary).duplicate(true),"scale":marker_scale(camera_size)

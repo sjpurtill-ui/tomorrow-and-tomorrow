@@ -113,9 +113,9 @@ func _watch()->void:
 	GeneralCampaign.terrain._set_camera_target(Vector3(at.x,0,at.y))
 	GeneralCampaign.terrain.camera.size=.22
 	diorama.set_landscape({"threat":{"target_position":{"x":at.x,"z":at.y}}})
-	diorama.reset(s.battle_initial[0],s.battle_initial[1]);diorama.target=Vector3(0,1,0);diorama.zoom=85;diorama._camera_update()
+	diorama.reset(s.battle_initial[0],s.battle_initial[1]);diorama.target=Vector3(0,1,0);diorama._camera_update()
 	last_battle_seed=int(s.battle.seed);playback_round=0;playback_clock=0
-	status.text="Recorded battle · simulation losses and retreats. Drag to pan, right-drag to orbit, wheel to zoom at the pointer. Viewing does not resolve it twice."
+	status.text="Recorded battle · schematic deployment; cohort positions are not recorded. Drag to pan, right-drag to orbit, wheel to zoom at the pointer. Viewing does not resolve it twice."
 
 func _process(delta:float)->void:
 	if not GeneralCampaign.active:return
@@ -137,7 +137,9 @@ func _process(delta:float)->void:
 		for side in 2:
 			var prefix:="attacker" if side==0 else "defender"
 			forces[side].troops=int(row.get(prefix+"_remaining",0));forces[side].morale=float(row.get(prefix+"_morale",1))
-		diorama.apply_snapshot(forces[0],forces[1],row,String(battle.outcome) if playback_round==battle.rounds.size() else "")
+		var visual_row:=row.duplicate(true)
+		if playback_round==battle.rounds.size():visual_row["termination"]=battle.get("termination",{})
+		diorama.apply_snapshot(forces[0],forces[1],visual_row,String(battle.outcome) if playback_round==battle.rounds.size() else "")
 
 func _camera_input(event:InputEvent)->void:
 	if event is InputEventMouseMotion and event.button_mask&MOUSE_BUTTON_MASK_LEFT:diorama.pan(event.position-event.relative,event.position)

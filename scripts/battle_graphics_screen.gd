@@ -233,6 +233,7 @@ func _initialize()->void:
 		for r:Dictionary in context.get("rounds",[]):
 			var losses:Array=r.get(("attacker" if side==0 else "defender")+"_cohort_losses",[])
 			for i in mini(losses.size(),initial_forces[side].get("formations",[]).size()):initial_forces[side].formations[i]["count"]+=int(losses[i])
+	for force in initial_forces:_recount_display_force(force)
 	view.faction_colors=[Color("67b4cf"),Color("de513d")] if home_side==0 else [Color("de513d"),Color("67b4cf")]
 	view.set_landscape(context);view.reset(initial_forces[0],initial_forces[1])
 	if view.live_terrain!=null:view.live_terrain.set_meta("city_encounter_army",int(context.get("home_force_id",-1)))
@@ -247,7 +248,9 @@ func _initialize()->void:
 
 func present(attacker:Dictionary,defender:Dictionary,record:Dictionary={},outcome:String="",records:Array=[])->void:
 	cached_forces=[attacker.duplicate(true),defender.duplicate(true)];current_record=record.duplicate(true);final_outcome=outcome;round_records=records.duplicate(true)
-	view.apply_snapshot(attacker,defender,record,outcome)
+	var visual_record:=record.duplicate(true)
+	if not outcome.is_empty():visual_record["termination"]=context.get("termination",{})
+	view.apply_snapshot(attacker,defender,visual_record,outcome)
 	for group in view.groups:group.banner.visible=false
 	_refresh_armies();_refresh_log();_rebuild_plates()
 func _round()->int:return round_records.size()
@@ -266,15 +269,9 @@ func _unordered()->int:
 		if order.is_empty() or not BattleRoundOrders.validate(_forms(home_side),_forms(1-home_side),i,String(order.get("kind","")),int(order.get("target",-1))).is_empty():missing+=1
 	return missing
 func _hold_all()->void:
-	if phase!="orders":return
-	for i in _forms(home_side).size():
-		if int(_forms(home_side)[i].get("count",0))>0:MilitaryCampaign.set_battle_formation_order(i,"hold")
-	_rebuild_orders();_phase_ui()
-func _choose_order(kind:String)->void:
-	if phase!="orders":return
-	var result:Dictionary=MilitaryCampaign.set_battle_formation_order(selected_index,kind,target_index if kind in ["advance","charge"] else -1)
-	if not result.get("ok",false):order_note.text=String(result.get("error","Select a living enemy formation first."));return
-	_rebuild_orders();_phase_ui()
+	pass # Observation never submits legacy cohort or retreat orders.
+func _choose_order(_kind:String)->void:
+	pass # Observation never submits legacy cohort or retreat orders.
 func _select(index:int)->void:
 	selected_index=index;formation_page=index/_roster_capacity();_rebuild_orders()
 func _target(index:int)->void:
@@ -319,6 +316,7 @@ func _refresh_armies()->void:
 		var force:Dictionary=cached_forces[side];var losses:Dictionary=BattleLossSummary.from_rounds(round_records,side,_count(force))
 		force_labels[side].title.text=String(force.get("name","Your army" if side==home_side else "Enemy army")).to_upper()+(" · YOURS" if side==home_side else "")
 		force_labels[side].values.text="%d FIGHTING    %d OUT    %d%% MORALE"%[_count(force),int(losses.get("out_of_action",0)),roundi(float(force.get("morale",1))*100)]
+		force_labels[side].title.tooltip_text="Commander: %s" % String(force.get("commander",{}).get("name","Not recorded"))
 		force_labels[side].values.tooltip_text="Out of action: %d dead · %d wounded · %d fled / scattered. Lasting disabilities: %d. Unclassified: %d. Fighting is the remaining active personnel, not the number of decorative figures."%[int(losses.get("dead",0)),int(losses.get("wounded",0)),int(losses.get("scattered",0)),int(losses.get("disabled",0)),int(losses.get("unclassified",0))]
 	var a:Dictionary=MilitaryCampaign.combat_summary(cached_forces[0],cached_forces[1]);var d:Dictionary=MilitaryCampaign.combat_summary(cached_forces[1],cached_forces[0],float(context.get("terrain_defense",1)))
 	var av:=float(a.get("effective_strength",0));var dv:=float(d.get("effective_strength",0));momentum_value=100*av/(av+dv) if av+dv>0 else 50;strength_history[_round()]=momentum_value;previous_momentum=float(strength_history.get(_round()-1,momentum_value))
@@ -328,7 +326,7 @@ func _refresh_armies()->void:
 	momentum_label.add_theme_color_override("font_color",TEAL if momentum_value>=50 else ORANGE)
 	momentum_note.text="Strength share, not odds · Morale breaks at 15%" if current_record.is_empty() else "%s · Morale breaks at 15%%"%String(current_record.get("intensity","Contact"))
 func _resolve()->void:
-	if phase!="orders" or _unordered()>0 or MilitaryCampaign.active_engagement.is_empty():return
+	if phase!="orders" or MilitaryCampaign.active_engagement.is_empty():return
 	phase="resolving";resolve_count+=1
 	var committed:Dictionary=MilitaryCampaign.advance_engagement("hold")
 	_capture_round(committed);_start_presentation()
@@ -412,6 +410,11 @@ func _open_aftermath()->void:
 	var home_won:=String(pending.get("captor",""))==String(pending.get("home_force_name",""))
 	result_text.text="%d captives · %s\n%s"%[int(pending.get("prisoners",0)),"Your army controls the captives and property." if home_won else "The enemy holds these prisoners.","Choose their treatment. Decisions enter the campaign record." if home_won else "Acknowledge the outcome to record your captured personnel."]
 	policy_box.visible=home_won;general_choice.disabled=not bool(pending.get("captured_general",false));replay_button.hide();history_choice.hide();result_primary.text="CONFIRM DECISIONS →" if home_won else "ACKNOWLEDGE →";_phase_ui()
+func _recount_display_force(force:Dictionary)->void:
+	if force.get("formations",[]).is_empty():return
+	var total:=0
+	for formation in force.formations:total+=int(formation.get("count",0))
+	force["troops"]=total;force["remaining_troops"]=total
 func _replay()->void:
 	if phase not in ["result","ended"] or round_records.is_empty():return
 	replay_return=phase;replaying=true
@@ -430,11 +433,11 @@ func _replay()->void:
 	for side in 2:
 		var losses:Array=record.get(("attacker" if side==0 else "defender")+"_cohort_losses",[])
 		for i in mini(losses.size(),before[side].get("formations",[]).size()):before[side].formations[i]["count"]+=int(losses[i])
+	for force in before:_recount_display_force(force)
 	view.reset(before[0],before[1]);present(historical[0],historical[1],record,final_outcome if index==round_records.size()-1 else "",round_records.slice(0,index+1))
 	_start_presentation();headline_title.text="ROUND %d REPLAY"%(index+1)
 func _retreat()->void:
-	if phase!="orders" or MilitaryCampaign.active_engagement.is_empty():return
-	phase="resolving";resolve_count+=1;var committed:Dictionary=MilitaryCampaign.advance_engagement("retreat");_capture_round(committed);_start_presentation()
+	pass # Observation never submits legacy cohort or retreat orders.
 func _city_report()->void:
 	CivilizationSystem.city_intelligence.open(String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))))
 func _close()->void:queue_free()
@@ -469,14 +472,14 @@ func _refresh_log()->void:
 	for i in range(finish-1,maxi(-1,finish-5),-1):
 		var r:Dictionary=round_records[i];var own:="attacker" if home_side==0 else "defender";var enemy:="defender" if home_side==0 else "attacker"
 		lines.append("[color=#f2c14e]ROUND %d[/color] · %s\nYour losses: %d · Enemy losses: %d"%[i+1,String(r.get("intensity","Contact")),int(r.get(own+"_losses",0)),int(r.get(enemy+"_losses",0))])
-	log_text.text="\n\n".join(lines) if not lines.is_empty() else "Contact has not begun.\nGive your formations orders."
+	log_text.text="\n\n".join(lines) if not lines.is_empty() else "Contact has not begun.\nThe general commands the next exchange."
 func _phase_ui()->void:
-	phase_label.text="● ROUND %d · "%(_round()+1 if phase=="orders" else _round())+{"orders":"GIVING ORDERS","resolving":"REPLAY" if replaying else "RESOLVING","result":"ROUND RESULT","ended":"BATTLE ENDED","aftermath":"AFTERMATH"}.get(phase,phase.to_upper())
-	resolve_button.visible=phase=="orders";resolve_button.disabled=_unordered()>0;resolve_button.text="RESOLVE ROUND %d →"%(_round()+1)
-	progress.visible=phase=="resolving";skip_button.visible=phase=="resolving";retreat_button.visible=phase=="orders"
+	phase_label.text="● ROUND %d · "%(_round()+1 if phase=="orders" else _round())+{"orders":"GENERAL IN COMMAND","resolving":"REPLAY" if replaying else "RESOLVING","result":"ROUND RESULT","ended":"BATTLE ENDED","aftermath":"AFTERMATH"}.get(phase,phase.to_upper())+" · SCHEMATIC DEPLOYMENT"
+	resolve_button.visible=phase=="orders";resolve_button.disabled=false;resolve_button.text="WATCH NEXT EXCHANGE →"
+	progress.visible=phase=="resolving";skip_button.visible=phase=="resolving";retreat_button.visible=false
 	result_panel.visible=phase in ["result","ended","aftermath"];log_panel.visible=phase in ["resolving","result","ended"]
 	vignette.visible=phase=="resolving";headline.hide();pause_button.text="Resume" if playback_paused else "Pause"
-	progress_note.text="%d %s · Hold all to keep position"%[_unordered(),"formation needs an order" if _unordered()==1 else "formations need orders"] if _unordered()>0 else "Orders ready · combat starts when you resolve"
+	progress_note.text="General-led combat · schematic deployment; cohort positions are not recorded"
 	if phase!="orders" and phase!="resolving":progress_note.text="Simulation paused · every number comes from the battle record"
 	_layout()
 func _layout()->void:
@@ -495,9 +498,9 @@ func _layout()->void:
 	var top:=test_top+(218 if compact else 154);var available:=maxf(240,h-top-144)
 	left_panel.position=Vector2(16,top);left_panel.size=Vector2(230 if compact else 256,0)
 	right_panel.position=Vector2(w-(276 if compact else 316),top);right_panel.size=Vector2(260 if compact else 300,0)
-	left_panel.visible=phase=="orders" and (not narrow or not narrow_orders);right_panel.visible=phase=="orders" and (not narrow or narrow_orders)
+	left_panel.visible=false;right_panel.visible=false
 	if narrow:right_panel.position.x=16
-	small_toggle.visible=narrow and phase=="orders"
+	small_toggle.visible=false
 	log_panel.position=Vector2(w-296,top);log_panel.size=Vector2(280,minf(available,300))
 	headline.position=Vector2(w*.15,h*.63);headline.size=Vector2(w*.70,100);headline_title.add_theme_font_size_override("font_size",30 if compact else 42)
 	result_panel.size=Vector2(minf(520,w-32),0)
@@ -511,7 +514,7 @@ func _formation_point(side:int,index:int)->Vector2:
 	if index<0 or index>=forms.size():return Vector2(-1000,-1000)
 	var model:=UnitVisualCatalog.model(forms[index],"equipment",index)
 	for group in view.groups:
-		if int(group.side)==side and String(group.id)==model:
+		if int(group.side)==side and int(group.get("index",-1))==index:
 			var world:Vector3=view.armies[side].to_global(group.center+Vector3(0,3,0))
 			if view.camera.is_position_behind(world):return Vector2(-1000,-1000)
 			return view.camera.unproject_position(world)*stage.size/Vector2(viewport.size)
@@ -551,7 +554,7 @@ func _update_markers()->void:
 		if b.visible and headline.visible and Rect2(b.position,b.size).intersects(Rect2(headline.position,headline.size)):b.visible=false
 		if b.visible:occupied.append(Rect2(b.position,b.size))
 	var a:=_formation_point(home_side,selected_index);var t:=_formation_point(1-home_side,target_index)
-	selected_ring.visible=phase=="orders" and a.x>0;target_ring.visible=phase=="orders" and t.x>0;arrow.visible=phase=="orders" and a.x>0 and t.x>0
+	selected_ring.visible=false;target_ring.visible=false;arrow.visible=false
 	for pair in [[selected_ring,a],[target_ring,t]]:
 		var points:=PackedVector2Array()
 		for i in 33:points.append(pair[1]+Vector2(cos(i*TAU/32)*35,sin(i*TAU/32)*12))
