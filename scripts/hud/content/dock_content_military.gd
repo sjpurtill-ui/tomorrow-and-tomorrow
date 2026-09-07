@@ -9,6 +9,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 var template_page:=0
 var equipment_page:=0
 var equipment_batch:=5
+var production_mode:=0
 
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 
@@ -309,8 +310,8 @@ func _supply_blocks(army:Dictionary,capabilities:Dictionary)->Array:
 	for job_variant in (army.get("equipment_queue",[]) as Array):
 		var job:Dictionary=job_variant
 		job_items.append({
-			"name":"%s ×%d" % [String(job.get("item","gear")).replace("_"," ").capitalize(),int(job.get("count",0))],
-			"sub":"%d / %d finished · %.2f / %.2f workshop work-days" % [int(job.get("completed",0)),int(job.get("count",0)),float(job.get("progress_days",0)),float(job.get("required_days",1))],
+			"name":String(job.item).replace("_"," ").capitalize() if bool(job.get("persistent",false)) else "%s ×%d" % [String(job.get("item","gear")).replace("_"," ").capitalize(),int(job.get("count",0))],
+			"sub":("%s · %d finished · %.0f%% efficiency" % [MilitaryCampaign.PersistentProduction.state(MilitaryCampaign,job),int(job.completed),float(job.efficiency)*100]) if bool(job.get("persistent",false)) else "%d / %d finished · %.2f / %.2f workshop work-days" % [int(job.get("completed",0)),int(job.get("count",0)),float(job.get("progress_days",0)),float(job.get("required_days",1))],
 			"value":"","accent":Tokens.GOLD,
 			"tip":"Work-days measure production effort, not elapsed calendar time. Click to review the line.","on_click":func():_open_workshop_job(int(job.id)),
 		})
@@ -341,7 +342,7 @@ func signature()->Array:
 	for template_variant in MilitaryCampaign.army_templates:
 		var template:Dictionary=template_variant
 		template_state.append([int(template.get("template_id",0)),(template.get("entries",[]) as Array).duplicate(true)])
-	return [int(army.get("troops",0)),int(army.get("recruits",0)),MilitaryCampaign.field_armies.size(),(army.get("training_queue",[]) as Array).size(),template_state,terrain.selected_army_id,MilitaryCampaign._mobilized_count(),MilitaryCampaign.training_program.duplicate(true),MilitaryCampaign.training_queue.duplicate(true),MilitaryCampaign.command_development.duplicate(true),MilitaryCampaign.military_inventory.duplicate(true),MilitaryCampaign.military_consumables.duplicate(true),MilitaryCampaign.damaged_equipment.duplicate(true),MilitaryCampaign.equipment_queue.duplicate(true),GameState.resource_stockpiles.duplicate(true),equipment_batch,equipment_page,int(GameState.elapsed_days)]
+	return [int(army.get("troops",0)),int(army.get("recruits",0)),MilitaryCampaign.field_armies.size(),(army.get("training_queue",[]) as Array).size(),template_state,terrain.selected_army_id,MilitaryCampaign._mobilized_count(),MilitaryCampaign.training_program.duplicate(true),MilitaryCampaign.training_queue.duplicate(true),MilitaryCampaign.command_development.duplicate(true),MilitaryCampaign.military_inventory.duplicate(true),MilitaryCampaign.military_consumables.duplicate(true),MilitaryCampaign.damaged_equipment.duplicate(true),MilitaryCampaign.equipment_queue.duplicate(true),GameState.resource_stockpiles.duplicate(true),equipment_batch,equipment_page,production_mode,MilitaryCampaign.production_labor_share,int(GameState.elapsed_days)]
 
 func _deploy_build(template_id:int)->void:
 	var result:=MilitaryCampaign.deploy_army_from_template(template_id)
@@ -454,7 +455,7 @@ func _force_report(kind:String)->Dictionary:
 func _supply_overview()->Array:
 	var ammunition:=focused_action("MAKE AMMUNITION",_ammunition_access_text(),_ammunition_catalog)
 	ammunition.merge({"disabled":not _ammunition_known(),"tip":_ammunition_access_text(),"live_disabled":func()->bool:return not _ammunition_known(),"live_sub":_ammunition_access_text,"live_tip":_ammunition_access_text})
-	return [{"type":"text","heading":"KEEP THE FORCE EQUIPPED","text":"Training and deployment draw on real equipment and provisions. Workshop orders reserve materials now and finish over time; a queued order is not usable gear."},{"type":"actions","items":[focused_action("MAKE EQUIPMENT","Choose a type, quantity and material cost",_equipment_catalog),ammunition,focused_action("WORKSHOP & TRANSPORT","Existing jobs, repairs and carrying capacity",func()->Dictionary:return {"blocks":_supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())}),focused_action("CONDUCT IN WAR","Mercy, fear and grievance explained",_reputation_report),{"label":"CIVILIAN STORES","sub":"Materials available for production","on_press":jump("economy",1)}]}]
+	return [{"type":"text","heading":"KEEP THE FORCE EQUIPPED","text":"Training and deployment draw on real equipment and provisions. Persistent lines use citizen crafting labor and consume materials as work proceeds. Health, workplace condition and logistics affect output. Finished goods enter home stores."},{"type":"actions","items":[focused_action("PRODUCTION LINES","Maintain stockpiles or produce continuously",_equipment_catalog),focused_action("CRAFTING ALLOCATION","Balance military production and civilian work",_production_labor_report),ammunition,focused_action("WORKSHOP & TRANSPORT","Existing jobs, repairs and carrying capacity",func()->Dictionary:return {"blocks":_supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())}),focused_action("CONDUCT IN WAR","Mercy, fear and grievance explained",_reputation_report),{"label":"CIVILIAN STORES","sub":"Materials available for production","on_press":jump("economy",1)}]}]
 
 func _ammunition_known()->bool:
 	for item:String in MilitaryCampaign.CONSUMABLE_KNOWLEDGE:
@@ -482,6 +483,7 @@ func _ammunition_catalog()->Dictionary:
 		items.append(action)
 	return {"blocks":[{"type":"actions","heading":"CHOOSE AMMUNITION","items":items}]}
 func _supply_order_report(kind:String,item:String)->Dictionary:
+	if kind!="repair" and production_mode<2:return _persistent_order_report(item)
 	var quote:Dictionary
 	match kind:
 		"ammunition":quote=MilitaryCampaign.consumable_production_quote(item,equipment_batch)
@@ -498,7 +500,7 @@ func _supply_order_report(kind:String,item:String)->Dictionary:
 		if kind=="repair":cost+="\n%d damaged sets enter the workshop; they become usable only as repairs finish."%count
 	var quantities:Array=[]
 	for amount:int in [1,5,20,100]:quantities.append({"label":"%d %s"%[amount,unit.trim_suffix("S") if amount==1 else unit],"primary":equipment_batch==amount,"on_press":func():equipment_batch=amount;hud.request_immediate_dock_refresh()})
-	return {"blocks":[{"type":"actions","heading":"QUANTITY PER ORDER","items":quantities},{"type":"text","heading":"BEFORE YOU ORDER","text":cost},{"type":"actions","items":[{"label":("REPAIR" if kind=="repair" else "MAKE")+" %d %s"%[count,unit.trim_suffix("S") if count==1 else unit],"sub":"Reserve materials and queue work","primary":true,"disabled":quote.has("error"),"tip":String(quote.get("error",cost)),"on_press":func():_queue_supply_order(kind,item,equipment_batch)},{"label":"MATERIAL STORES","sub":"Understand a shortage","on_press":jump("economy",1)}]},{"type":"text","text":"Finished items enter home stores. Queueing creates no usable equipment or ammunition; supplies still have to reach field armies."}]}
+	return {"blocks":[_production_mode_block(),{"type":"actions","heading":"QUANTITY PER ORDER","items":quantities},{"type":"text","heading":"BEFORE YOU ORDER","text":cost},{"type":"actions","items":[{"label":("REPAIR" if kind=="repair" else "MAKE")+" %d %s"%[count,unit.trim_suffix("S") if count==1 else unit],"sub":"Reserve materials and queue work","primary":true,"disabled":quote.has("error"),"tip":String(quote.get("error",cost)),"on_press":func():_queue_supply_order(kind,item,equipment_batch)},{"label":"MATERIAL STORES","sub":"Understand a shortage","on_press":jump("economy",1)}]},{"type":"text","text":"Finished items enter home stores. Queueing creates no usable equipment or ammunition; supplies still have to reach field armies."}]}
 func _queue_supply_order(kind:String,item:String,count:int)->void:
 	var result:Dictionary
 	match kind:
@@ -512,6 +514,7 @@ func _open_workshop_job(id:int)->void:
 func _workshop_job_report(id:int)->Dictionary:
 	for job:Dictionary in MilitaryCampaign.equipment_queue:
 		if int(job.id)!=id:continue
+		if bool(job.get("persistent",false)):return _persistent_job_report(job)
 		return {"blocks":[{"type":"text","heading":String(job.item).replace("_"," ").to_upper(),"text":"%d of %d items finished. %.2f of %.2f work-days completed. Work-days are production effort, not calendar days."%[int(job.get("completed",0)),int(job.count),float(job.progress_days),float(job.required_days)]},{"type":"actions","items":[{"label":"CANCEL REMAINING WORK","sub":"Completed items stay in stores","on_press":func():terrain._report_military_action(MilitaryCampaign.cancel_equipment_job(id));hud.request_immediate_dock_refresh()}]},{"type":"text","text":"Cancellation returns unused reserved materials and unfinished damaged items. A partially worked item consumes up to 35% of its materials; finished items are retained."}]}
 	return {"blocks":[{"type":"text","text":"This workshop order has finished or was cancelled. Finished items are in home stores."}]}
 
@@ -540,3 +543,54 @@ func _campaign_entry()->Array:
 		var result:=SaveSystem.load_game("river_war")
 		if not result.has("error"):terrain.get_tree().reload_current_scene()
 	}]}]
+
+func _production_mode_block()->Dictionary:
+	var actions:Array=[]
+	for mode:int in 3:
+		actions.append({"label":["MAINTAIN STOCKPILE","CONTINUOUS","ONE-TIME BATCH"][mode],"primary":production_mode==mode,"on_press":func():production_mode=mode;hud.request_immediate_dock_refresh()})
+	return {"type":"actions","heading":"PRODUCTION MODE","items":actions}
+
+func _production_labor_report()->Dictionary:
+	var data:=MilitaryCampaign.production_lines_snapshot()
+	var workers:Dictionary=data.workforce
+	var actions:Array=[]
+	for share:float in [0.0,.25,.5,.75,1.0]:
+		actions.append({"label":"%d%% MILITARY"%roundi(share*100),"on_press":func():_production_result(MilitaryCampaign.set_production_labor_share(share))})
+	return {"blocks":[{"type":"text","heading":"ONE CITIZEN WORKFORCE","text":"%.1f effective craftspeople · %.0f%% health · %.0f%% workplace condition · %.0f%% logistics.\nMilitary lines may use %.0f%% of crafting labor. Currently %.0f%% remains for civilian work; idle lines release their allocation. Civic leaders still assign citizens to occupations."%[float(workers.workers),float(workers.health)*100,float(workers.workplace_condition)*100,float(workers.logistics)*100,MilitaryCampaign.production_labor_share*100,MilitaryCampaign.civilian_crafting_fraction()*100]},{"type":"actions","heading":"CRAFTING SHARE","items":actions}]}
+
+func _production_result(result:Dictionary)->void:
+	terrain._report_military_action(result);hud.request_immediate_dock_refresh()
+
+func _persistent_order_report(item:String)->Dictionary:
+	var recipe:=MilitaryCampaign.PersistentProduction.recipe(MilitaryCampaign,item)
+	var gate:=MilitaryCampaign._production_line_gate()
+	var reason:=String(recipe.get("error",gate.get("error","")))
+	var costs:Array[String]=[]
+	for material:String in recipe.get("materials",{}):costs.append("%.2f %s"%[float(recipe.materials[material]),ResourceSystem.display_name(material)])
+	var quantities:Array=[]
+	for amount:int in [5,20,100,500]:quantities.append({"label":str(amount),"primary":equipment_batch==amount,"on_press":func():equipment_batch=amount;hud.request_immediate_dock_refresh()})
+	var blocks:Array=[_production_mode_block()]
+	if production_mode==0:blocks.append({"type":"actions","heading":"READY STOCK TARGET","items":quantities})
+	blocks.append({"type":"text","heading":item.replace("_"," ").to_upper(),"text":reason if not reason.is_empty() else "Per finished item: "+", ".join(costs)+". Materials are consumed gradually. Shortages pause work; deliveries resume it. A stockpile target pauses when home stores are full and resumes when equipment is used."})
+	blocks.append({"type":"actions","items":[{"label":"START PRODUCTION LINE","primary":true,"disabled":not reason.is_empty(),"tip":reason,"on_press":func():_production_result(MilitaryCampaign.start_production_line(item,equipment_batch if production_mode==0 else 0))},focused_action("CRAFTING ALLOCATION","Share labor with civilian needs",_production_labor_report)]})
+	return {"blocks":blocks}
+
+func _persistent_job_report(job:Dictionary)->Dictionary:
+	var id:=int(job.id)
+	var line:Dictionary={}
+	for candidate:Dictionary in MilitaryCampaign.production_lines_snapshot().lines:
+		if int(candidate.id)==id:line=candidate;break
+	var targets:Array=[]
+	for target:int in [0,5,20,100,500]:targets.append({"label":"CONTINUOUS" if target==0 else "STOCK %d"%target,"primary":int(job.target_stock)==target,"on_press":func():_production_result(MilitaryCampaign.configure_production_line(id,target,bool(job.paused)))})
+	var priorities:Array=[]
+	for weight:float in [.5,1.0,2.0,4.0]:priorities.append({"label":"%.1f×"%weight,"primary":is_equal_approx(float(job.allocation),weight),"on_press":func():_production_result(MilitaryCampaign.set_production_line_allocation(id,weight))})
+	return {"blocks":[{"type":"text","heading":String(job.item).replace("_"," ").to_upper(),"text":"%s · %d in stores · %d finished by this line.\n%.0f%% efficiency · %.0f%% of next item complete. Potential output %.2f/day; last day %d completed. Materials and stock target can limit actual output."%[String(line.get("state","")),int(line.get("stock",0)),int(job.completed),float(job.efficiency)*100,float(job.progress_days)/float(job.work_per_item)*100,float(line.get("output_per_day",0)),int(job.get("last_output",0))]},{"type":"actions","heading":"TARGET","items":targets},{"type":"actions","heading":"RELATIVE PRIORITY","items":priorities},{"type":"actions","items":[{"label":"RESUME" if bool(job.paused) else "PAUSE","on_press":func():_production_result(MilitaryCampaign.configure_production_line(id,int(job.target_stock),not bool(job.paused)))},focused_action("RETOOL LINE","Changes item; loses some practice and unfinished work",_retool_report.bind(id)),{"label":"CLOSE LINE","sub":"Finished items stay; consumed materials are not refunded","on_press":func():_production_result(MilitaryCampaign.cancel_equipment_job(id))},focused_action("CRAFTING ALLOCATION","Balance military and civilian work",_production_labor_report)]}]}
+
+func _retool_report(id:int)->Dictionary:
+	var actions:Array=[]
+	var products:Array=MilitaryCampaign.EQUIPMENT_KNOWLEDGE.keys()+MilitaryCampaign.CONSUMABLE_KNOWLEDGE.keys()+["transport_cart"]
+	for item:String in products:
+		var recipe:=MilitaryCampaign.PersistentProduction.recipe(MilitaryCampaign,item)
+		if recipe.has("error"):continue
+		actions.append({"label":item.replace("_"," ").to_upper(),"on_press":func():_production_result(MilitaryCampaign.retool_production_line(id,item))})
+	return {"blocks":[{"type":"text","text":"Retooling keeps finished stocks and the line's target and priority. It discards unfinished work and retains 65% efficiency for the same production category, 35% across categories (minimum 10%)."},{"type":"actions","heading":"KNOWN PRODUCTS","items":actions}]}

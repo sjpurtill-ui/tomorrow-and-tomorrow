@@ -1,0 +1,141 @@
+extends RefCounted
+## Persistent workshop lines share the existing Crafting pool with civilian work.
+## This adapter owns no citizens, stockpiles, clock, or separate save authority.
+const MAX_TARGET := 1000000000
+
+static func recipe(host: Node, item: String) -> Dictionary:
+	var gate: Dictionary
+	var definition: Dictionary
+	var kind := "production"
+	if item=="transport_cart":
+		gate=host._knowledge_gate("joinery",.10);definition=host._transport_recipe();kind="transport"
+	elif host.CONSUMABLE_KNOWLEDGE.has(item):
+		gate=host.consumable_knowledge_availability(item);definition=host._consumable_recipe(item);kind="consumable"
+	elif host.simulator.WEAPONS.has(item):
+		gate=host._knowledge_gate(String(host.EQUIPMENT_KNOWLEDGE.get(item,"")),.08);definition=host._equipment_recipe(item)
+	else: return {"error":"Unknown production item: %s" % item}
+	if not bool(gate.get("unlocked",false)): return {"error":String(gate.get("reason","Adopt the required production practice first."))}
+	return {"item":item,"job_type":kind,"materials":definition.materials.duplicate(true),"work_per_item":float(definition.days)}
+
+static func start(host: Node, item: String, target: int) -> Dictionary:
+	if target<0 or target>MAX_TARGET: return {"error":"Choose a stockpile target from 0 to 1 billion; 0 means continuous production."}
+	var gate: Dictionary=host._production_line_gate()
+	if gate.has("error"): return gate
+	var definition:=recipe(host,item)
+	if definition.has("error"): return definition
+	var id: int=host.next_equipment_job_id;host.next_equipment_job_id+=1
+	var job:=definition.duplicate(true)
+	job.merge({"id":id,"persistent":true,"target_stock":target,"paused":false,"allocation":1.0,"efficiency":.20,"progress_days":0.0,"completed":0,"count":1,"required_days":float(definition.work_per_item),"reserved_materials":{},"last_output":0,"last_consumed":{},"last_work":0.0})
+	host.equipment_queue.append(job)
+	return {"ok":true,"job_id":id,"message":"Production line established. Materials are used as work proceeds; output enters stores."}
+
+static func configure(host: Node, id: int, target: int, paused: bool) -> Dictionary:
+	if target<0 or target>MAX_TARGET: return {"error":"Invalid stockpile target."}
+	for job in host.equipment_queue:
+		if int(job.id)==id and bool(job.get("persistent",false)):
+			job.target_stock=target;job.paused=paused
+			return {"ok":true,"message":"Production line updated."}
+	return {"error":"Select a persistent production line."}
+
+static func retool(host: Node, id: int, item: String) -> Dictionary:
+	var definition:=recipe(host,item)
+	if definition.has("error"): return definition
+	for job in host.equipment_queue:
+		if int(job.id)!=id or not bool(job.get("persistent",false)): continue
+		if String(job.item)==item: return {"ok":true,"message":"This line already makes that item."}
+		var retention:=.65 if String(job.job_type)==String(definition.job_type) else .35
+		job.efficiency=maxf(.10,float(job.efficiency)*retention)
+		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
+		job.required_days=job.work_per_item
+		return {"ok":true,"message":"Line retooled. Some efficiency is retained; unfinished work is discarded without refunding consumed materials."}
+	return {"error":"Select a persistent production line."}
+
+static func stock(host: Node, job: Dictionary) -> int:
+	if String(job.job_type)=="consumable": return int(host.military_consumables.get(String(job.item),0))
+	if String(job.job_type)=="transport": return int(GameState.resource_stockpiles.get("Transport Carts",0))
+	return int(host.military_inventory.get(String(job.item),0))
+
+static func state(host: Node, job: Dictionary) -> String:
+	if bool(job.get("paused",false)): return "Paused"
+	if not bool(job.get("persistent",false)): return "Batch"
+	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
+	for resource in job.materials:
+		if float(job.materials[resource])>0 and float(GameState.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+ResourceSystem.display_name(String(resource))
+	return "Working"
+
+static func eligible(host: Node, job: Dictionary) -> bool:
+	return state(host,job) in ["Working","Batch"]
+
+static func workforce() -> Dictionary:
+	var workers:=GameState.effective_workers("Crafting")
+	var health:=clampf(GameState.population_health,0.0,1.0)
+	var labor:=clampf(float(GameState.simulation_metrics.get("labor_efficiency",.72)),0.0,1.45)
+	var carrying:=GameState.effective_workers("Logistics")
+	var logistics:=clampf(.35+carrying/maxf(1.0,workers*.3)*.65,.35,1.0)
+	var weight:=0.0;var usable:=0.0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use","")) not in ["workshop","mixed_household"]: continue
+		var size:=maxf(1.0,float(plot.get("worker_capacity",1)))
+		weight+=size
+		if String(plot.get("status","active")) in ["ruin","vacant","reclaimed","under_construction"]: continue
+		var damage: Dictionary=plot.get("damage",{})
+		usable+=size*clampf(float(plot.get("condition",1)),0,1)*(1-clampf(float(damage.get("structural",0)),0,1))
+	# Mobile crafts are possible with carried tools; founded workplace damage
+	# reduces the real recorded productive fabric rather than a decorative score.
+	var facilities:=usable/weight if weight>0 else .5
+	return {"workers":workers,"health":health,"labor_efficiency":labor,"logistics":logistics,"workplace_condition":facilities,"condition_factor":health*labor*logistics*facilities}
+
+static func advance(host: Node, job: Dictionary, work: float) -> void:
+	job.last_output=0;job.last_work=0.0;job.last_consumed={}
+	if not eligible(host,job) or work<=0:
+		return
+	var per_item:=float(job.work_per_item)
+	var units:=work/per_item
+	if int(job.target_stock)>0:
+		units=minf(units,maxf(0.0,int(job.target_stock)-stock(host,job)-float(job.progress_days)/per_item))
+	var possible:=units
+	for resource in job.materials:
+		var cost:=float(job.materials[resource])
+		if cost>0: possible=minf(possible,maxf(0,float(GameState.resource_stockpiles.get(resource,0)))/cost)
+	possible=maxf(0,possible)
+	for resource in job.materials:
+		var consumed:=float(job.materials[resource])*possible
+		GameState.resource_stockpiles[resource]=maxf(0,float(GameState.resource_stockpiles.get(resource,0))-consumed)
+		job.last_consumed[resource]=consumed
+	var progress:=float(job.progress_days)+possible*per_item
+	var produced:=maxi(0,floori(progress/per_item+.000000001))
+	job.progress_days=maxf(0,progress-produced*per_item)
+	job.completed=int(job.completed)+produced;job.last_output=produced;job.last_work=possible*per_item
+	if String(job.job_type)=="consumable": host.military_consumables[String(job.item)]=stock(host,job)+produced
+	elif String(job.job_type)=="transport": GameState.resource_stockpiles["Transport Carts"]=stock(host,job)+produced
+	else: host.military_inventory[String(job.item)]=stock(host,job)+produced
+	if possible>0: job.efficiency=move_toward(float(job.efficiency),1.0,.0025*(.65+host._adoption("workshop_standards"))*minf(1,possible/maxf(.000001,units)))
+
+static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> Dictionary:
+	var result:=job.duplicate(true)
+	result["state"]=state(host,job);result["stock"]=stock(host,job);result["share"]=share
+	result["daily_work"]=rate*share*float(job.efficiency)
+	if result.state=="Working" and float(result.daily_work)<=0:result.state="Waiting for labor or workplaces"
+	result["output_per_day"]=float(result.daily_work)/float(job.work_per_item)
+	result["inputs_per_day"]={}
+	for resource in job.materials: result.inputs_per_day[resource]=float(job.materials[resource])*float(result.output_per_day)
+	return result
+
+static func validate_saved(payload: Dictionary) -> String:
+	var share: Variant=payload.get("production_labor_share",.35)
+	if not (share is float or share is int) or not is_finite(float(share)) or float(share)<0 or float(share)>1: return "Invalid production labor share."
+	if not payload.get("equipment_queue",[]) is Array:return "Invalid production queue."
+	for job in payload.get("equipment_queue",[]):
+		if not job is Dictionary: return "Invalid production line."
+		if not bool(job.get("persistent",false)): continue
+		for key in ["target_stock","progress_days","work_per_item","allocation","efficiency","completed"]:
+			var value: Variant=job.get(key,null)
+			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid persistent production value: "+key
+		if float(job.target_stock)>MAX_TARGET or float(job.target_stock)!=floorf(float(job.target_stock)) or float(job.completed)!=floorf(float(job.completed)): return "Invalid production counts."
+		if float(job.work_per_item)<=0 or float(job.progress_days)>=float(job.work_per_item)+.000001: return "Invalid production work in progress."
+		if float(job.allocation)<.05 or float(job.allocation)>4 or float(job.efficiency)<.10 or float(job.efficiency)>1: return "Invalid production priority or efficiency."
+		if String(job.get("job_type","")) not in ["production","consumable","transport"] or String(job.get("item","")).is_empty(): return "Invalid production recipe."
+		if not job.get("materials",null) is Dictionary or not job.get("reserved_materials",{}) is Dictionary or not job.get("reserved_materials",{}).is_empty(): return "Invalid production materials."
+		for value in job.materials.values():
+			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid material cost."
+	return ""

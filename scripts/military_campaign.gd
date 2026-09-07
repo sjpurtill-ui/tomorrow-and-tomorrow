@@ -1,5 +1,8 @@
 extends Node
 
+const PersistentProduction = preload("res://scripts/persistent_production.gd")
+var production_labor_share:float = .35
+
 signal army_changed(army: Dictionary)
 signal battle_resolved(result: Dictionary)
 signal battle_started(engagement: Dictionary)
@@ -142,6 +145,7 @@ func reset_for_new_world()->void:
 	command_development={"command":0.0,"tactics":0.0,"logistics":0.0,"resolve":0.0}
 	training_program_cycles=0
 	equipment_queue.clear()
+	production_labor_share=.35
 	foreign_prisoners=0
 	held_generals.clear()
 	next_training_order_id=1
@@ -503,6 +507,9 @@ func cancel_equipment_job(job_id:int)->Dictionary:
 	for index in equipment_queue.size():
 		var job:Dictionary=equipment_queue[index]
 		if int(job.get("id",-1))!=job_id: continue
+		if bool(job.get("persistent",false)):
+			equipment_queue.remove_at(index)
+			return {"cancelled":true,"job_id":job_id,"message":"Line closed. Finished goods remain in stores; consumed work in progress is not refunded."}
 		var count:=int(job.get("count",0))
 		var completed:=clampi(int(job.get("completed",0)),0,count)
 		var remaining:=maxi(0,count-completed)
@@ -523,6 +530,21 @@ func cancel_equipment_job(job_id:int)->Dictionary:
 	return {"error":"Equipment job %d was not found." % job_id}
 
 
+func start_production_line(item:String,target_stock:int=0)->Dictionary:
+	return PersistentProduction.start(self,item,target_stock)
+
+func configure_production_line(job_id:int,target_stock:int,paused:bool)->Dictionary:
+	return PersistentProduction.configure(self,job_id,target_stock,paused)
+
+func retool_production_line(job_id:int,item:String)->Dictionary:
+	return PersistentProduction.retool(self,job_id,item)
+
+func set_production_labor_share(value:float)->Dictionary:
+	if not is_finite(value) or value<0 or value>1: return {"error":"Production share must be between 0 and 100%."}
+	production_labor_share=value
+	return {"ok":true,"message":"Military workshops receive up to %d%% of crafting labor; unused capacity remains civilian." % roundi(value*100)}
+
+
 func production_line_capacity()->int:
 	return clampi(int(military_development_snapshot().get("production_lines",1)),1,ABSOLUTE_MAX_PRODUCTION_LINES)
 
@@ -535,6 +557,7 @@ func _production_line_gate()->Dictionary:
 
 
 func set_production_line_allocation(job_id:int,allocation:float)->Dictionary:
+	if not is_finite(allocation):return {"error":"Invalid production priority."}
 	for index in equipment_queue.size():
 		var job:Dictionary=equipment_queue[index]
 		if int(job.get("id",-1))!=job_id: continue
@@ -547,16 +570,20 @@ func set_production_line_allocation(job_id:int,allocation:float)->Dictionary:
 func production_lines_snapshot()->Dictionary:
 	var lines:Array[Dictionary]=[]
 	var weight_total:=0.0
-	for job in equipment_queue: weight_total+=maxf(0.05,float(job.get("allocation",1.0)))
+	for job in equipment_queue:
+		if PersistentProduction.eligible(self,job): weight_total+=maxf(0.05,float(job.get("allocation",1.0)))
 	var total_rate:=_production_rate()
 	for job_variant in equipment_queue:
 		var job:Dictionary=job_variant
 		var weight:=maxf(0.05,float(job.get("allocation",1.0)))
-		var share:=weight/maxf(0.05,weight_total)
+		var share:=weight/maxf(0.05,weight_total) if PersistentProduction.eligible(self,job) else 0.0
+		if bool(job.get("persistent",false)):
+			lines.append(PersistentProduction.snapshot(self,job,total_rate,share))
+			continue
 		var efficiency:=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
 		var remaining:=maxf(0.0,float(job.get("required_days",0.0))-float(job.get("progress_days",0.0)))
 		lines.append({"id":int(job.get("id",0)),"item":String(job.get("item","equipment")),"job_type":String(job.get("job_type","production")),"ordered":int(job.get("count",0)),"completed":int(job.get("completed",0)),"allocation":weight,"share":share,"efficiency":efficiency,"daily_work":total_rate*share*efficiency,"remaining_work":remaining})
-	return {"capacity":production_line_capacity(),"active":lines.size(),"idle":maxi(0,production_line_capacity()-lines.size()),"total_daily_work":total_rate,"lines":lines}
+	return {"capacity":production_line_capacity(),"active":lines.size(),"idle":maxi(0,production_line_capacity()-lines.size()),"total_daily_work":total_rate,"labor_share":production_labor_share,"workforce":PersistentProduction.workforce(),"lines":lines}
 
 
 func recruitment_capacity()->int:
@@ -2511,6 +2538,7 @@ func export_state()->Dictionary:
 		"command_development":command_development.duplicate(true),
 		"training_program_cycles":training_program_cycles,
 		"equipment_queue":equipment_queue.duplicate(true),
+		"production_labor_share":production_labor_share,
 		"foreign_prisoners":foreign_prisoners,
 		"held_generals":held_generals.duplicate(true),
 		"next_training_order_id":next_training_order_id,
@@ -2538,6 +2566,8 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	var production_error:=PersistentProduction.validate_saved(payload)
+	if not production_error.is_empty(): return {"error":production_error}
 	if not payload.get("siege_recovery",{}) is Dictionary:return {"error":"Invalid siege recovery state."}
 	var recovery_errors:Array[String]=preload("res://scripts/siege_recovery.gd").validate(payload.get("siege_recovery",{}))
 	if not recovery_errors.is_empty():return {"error":"Invalid siege recovery state.","details":recovery_errors}
@@ -2775,7 +2805,7 @@ func validate_state()->Array[String]:
 		var job_work_per_item:=float(job.get("work_per_item",0.0))
 		var line_allocation:=float(job.get("allocation",1.0))
 		var line_efficiency:=float(job.get("efficiency",0.20))
-		if job_count<=0 or job_completed<0 or job_completed>=job_count: errors.append("Equipment job completion is outside its order size.")
+		if (not bool(job.get("persistent",false)) and (job_count<=0 or job_completed>=job_count)) or job_completed<0: errors.append("Equipment job completion is outside its order size.")
 		if not is_finite(job_progress) or not is_finite(job_work_per_item) or job_progress<0.0 or job_work_per_item<=0.0: errors.append("Equipment job work values must be finite and positive.")
 		if not is_finite(line_allocation) or line_allocation<0.05 or line_allocation>4.0: errors.append("Production line allocation is outside its bounded range.")
 		if not is_finite(line_efficiency) or line_efficiency<0.10 or line_efficiency>1.0: errors.append("Production line efficiency is outside its bounded range.")
@@ -2823,6 +2853,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 		if command_skill in command_development: command_development[command_skill]=clampf(float(payload.command_development[command_skill]),0.0,0.30)
 	training_program_cycles=maxi(0,int(payload.get("training_program_cycles",0)))
 	_ensure_training_program_state()
+	production_labor_share=float(payload.get("production_labor_share",.35))
 	equipment_queue.assign(payload.get("equipment_queue",[]))
 	_normalize_equipment_jobs()
 	foreign_prisoners=maxi(0,int(payload.get("foreign_prisoners",0)))
@@ -2927,6 +2958,9 @@ func _normalize_equipment_jobs()->void:
 		if not job.has("job_type"): job["job_type"]="production"
 		job["allocation"]=clampf(float(job.get("allocation",1.0)),0.05,4.0)
 		job["efficiency"]=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
+		if bool(job.get("persistent",false)):
+			equipment_queue[index]=job
+			continue
 		if not job.has("reserved_materials"):
 			var job_type:=String(job.get("job_type","production"))
 			var recipe:Dictionary
@@ -3687,13 +3721,20 @@ func _rejoin_recovered_population(_pool_name:String,_count:int)->void:
 func _process_equipment_production_day()->void:
 	if equipment_queue.is_empty(): return
 	var crafting:=_production_rate()
-	if crafting<=0.0: return
 	var weight_total:=0.0
-	for job in equipment_queue: weight_total+=maxf(0.05,float(job.get("allocation",1.0)))
+	for job in equipment_queue:
+		if PersistentProduction.eligible(self,job): weight_total+=maxf(0.05,float(job.get("allocation",1.0)))
+	# Scarce shared inputs go to higher-priority lines first, then oldest line.
+	var ordered:Array=equipment_queue.filter(func(job:Dictionary)->bool:return bool(job.get("persistent",false)))
+	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.allocation)>float(b.allocation) if not is_equal_approx(float(a.allocation),float(b.allocation)) else int(a.id)<int(b.id))
+	for job:Dictionary in ordered:
+		PersistentProduction.advance(self,job,crafting*float(job.allocation)/maxf(.05,weight_total)*float(job.efficiency))
 	for index in range(equipment_queue.size()-1,-1,-1):
 		var job:Dictionary=equipment_queue[index]
+		if bool(job.get("persistent",false)):continue
 		var allocation:=maxf(0.05,float(job.get("allocation",1.0)))
 		var efficiency:=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
+		if not PersistentProduction.eligible(self,job) or crafting<=0: continue
 		job["progress_days"]=float(job.get("progress_days",0.0))+crafting*allocation/maxf(0.05,weight_total)*efficiency
 		job["efficiency"]=move_toward(efficiency,1.0,0.0025*(0.65+_adoption("workshop_standards")))
 		var work_per_item:=maxf(0.01,float(job.get("work_per_item",float(job.get("required_days",1.0))/maxf(1.0,float(job.get("count",1))))))
@@ -4168,7 +4209,7 @@ func _production_rate()->float:
 
 
 func _base_production_rate()->float:
-	var crafting:=float(GameState.population_allocations.get("Crafting",0))*0.16
+	var crafting:=GameState.effective_workers("Crafting")*0.16*float(PersistentProduction.workforce().condition_factor)
 	if crafting<=0.0: return 0.0
 	var industrial_scale:=ProgressionSystem.domain_factor("production",0.18)
 	var logistics_scale:=ProgressionSystem.domain_factor("logistics",0.07)
@@ -4182,11 +4223,9 @@ func _equipment_backlog_work()->float:
 
 
 func workshop_utilization()->float:
-	if equipment_queue.is_empty(): return 0.0
-	var base_rate:=_base_production_rate()
-	if base_rate<=0.0: return 0.0
-	var backlog_days:=_equipment_backlog_work()/base_rate
-	return clampf(0.20+backlog_days/30.0,0.20,0.75)
+	for job in equipment_queue:
+		if PersistentProduction.eligible(self,job):return production_labor_share
+	return 0.0
 
 
 func civilian_crafting_fraction()->float:

@@ -47,6 +47,7 @@ var training_program_button:Button
 var raise_recruits_button:Button
 var begin_training_button:Button
 var queue_production_button:Button
+var production_mode:OptionButton
 var produce_count:SpinBox
 var equipment_choice:OptionButton
 var aftermath_row:HBoxContainer
@@ -156,7 +157,8 @@ func _build_interface()->void:
 	var situation_tab:=VBoxContainer.new(); situation_tab.name="SITUATION"; situation_tab.add_theme_constant_override("separation",7); command_tabs.add_child(situation_tab)
 	var armies_tab:=VBoxContainer.new(); armies_tab.name="ARMIES"; armies_tab.add_theme_constant_override("separation",7); command_tabs.add_child(armies_tab)
 	var training_tab:=VBoxContainer.new(); training_tab.name="TRAINING"; training_tab.add_theme_constant_override("separation",7); command_tabs.add_child(training_tab)
-	var supply_tab:=VBoxContainer.new(); supply_tab.name="SUPPLY"; supply_tab.add_theme_constant_override("separation",7); command_tabs.add_child(supply_tab)
+	var supply_scroll:=ScrollContainer.new(); supply_scroll.name="SUPPLY"; command_tabs.add_child(supply_scroll)
+	var supply_tab:=VBoxContainer.new(); supply_tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL; supply_tab.add_theme_constant_override("separation",7); supply_scroll.add_child(supply_tab)
 	var orders_tab:=VBoxContainer.new(); orders_tab.name="FRONTS & ORDERS"; orders_tab.add_theme_constant_override("separation",7); command_tabs.add_child(orders_tab)
 	command_tabs.set_tab_tooltip(TAB_SITUATION,"Current readiness, armies, active front or order, and the recommended next decision.")
 	command_tabs.set_tab_tooltip(TAB_ARMIES,"Recruitment, home formations, commanders, field armies, movement, and settlement defense.")
@@ -225,10 +227,15 @@ func _build_interface()->void:
 	inventory=_body_label(supply_box)
 	equipment_choice=OptionButton.new(); supply_box.add_child(equipment_choice)
 	var production_row:=HBoxContainer.new(); supply_box.add_child(production_row)
-	produce_count=_counter(production_row,1,1_000_000_000,10)
-	produce_count.tooltip_text="Aggregate quantity placed on one bounded military production line. Materials are reserved when the order begins."
-	queue_production_button=_action_button(production_row,"BUILD SELECTED SUPPLY",_queue_production)
+	production_mode=OptionButton.new();production_row.add_child(production_mode)
+	for mode in ["Maintain stockpile","Continuous","One-time batch"]:production_mode.add_item(mode)
+	produce_count=_counter(production_row,1,1_000_000_000,100)
+	produce_count.tooltip_text="Stockpile target for a persistent line, or quantity for a one-time batch. Continuous mode ignores this number."
+	queue_production_button=_action_button(production_row,"START PRODUCTION",_queue_production)
 	_action_button(production_row,"REPAIR DAMAGED EQUIPMENT",_queue_repair)
+	var production_panel:=preload("res://scripts/production_lines_panel.gd").new()
+	production_panel.product_choice=equipment_choice
+	supply_box.add_child(production_panel)
 
 	front_control_row=HBoxContainer.new(); front_control_row.add_theme_constant_override("separation",6); front_control_row.visible=false; orders_tab.add_child(front_control_row)
 	var front_caption:=Label.new(); front_caption.text="ACTIVE FRONT"; front_caption.add_theme_font_size_override("font_size",10); front_caption.add_theme_color_override("font_color",GOLD); front_control_row.add_child(front_caption)
@@ -667,7 +674,7 @@ func _refresh_overview_status(army:Dictionary,combat:Dictionary,mobilization_cap
 		primary_action_button.text="FORM A FIELD ARMY"
 	elif float((combat.get("readiness_components",{}) as Dictionary).get("equipment",1.0))<0.45 and int(line_state.get("active",0))<int(line_state.get("capacity",1)):
 		primary_action_mode="supply"
-		primary_action_label.text="NEXT DECISION  Equipment is the immediate readiness bottleneck. Queue a bounded production order using real materials and workshop capacity."
+		primary_action_label.text="NEXT DECISION  Equipment is the immediate readiness bottleneck. Assign crafting labor to a production line using real materials and workshop capacity."
 		primary_action_button.text="OPEN MILITARY PRODUCTION"
 	else:
 		primary_action_mode="armies"
@@ -708,9 +715,9 @@ func _refresh_primary_action_guidance(army:Dictionary,line_state:Dictionary,mobi
 		var lines_full:=active_lines>=line_capacity
 		queue_production_button.disabled=lines_full or not _choice_is_available(equipment_choice)
 		queue_production_button.tooltip_text=(
-			"CURRENT  %d / %d production lines assigned.\nACTION  Reserve materials and build %s of the selected item.\nCONSEQUENCE  Output enters aggregate military stores as work completes."
+			"CURRENT  %d / %d production lines assigned.\nACTION  Start a persistent line with a stock target of %s, or choose continuous/batch mode.\nCONSEQUENCE  Output enters aggregate military stores as work completes."
 			% [active_lines,line_capacity,_compact_count(int(produce_count.value))]
-		) if not lines_full else "BLOCKED  Every military production line is assigned.\nNEXT  Wait for a line to finish, cancel or reallocate one, or improve security, production, logistics, and institutions to expand capacity."
+		) if not lines_full else "BLOCKED  Every military production line is assigned.\nNEXT  Close or retool an existing line, or develop more workshop capacity."
 	if settlement_defense_button!=null and settlement_defense_button.disabled:
 		var blocker:=settlement_defense_button.tooltip_text
 		settlement_defense_button.tooltip_text="BLOCKED  %s\nNEXT  Satisfy the listed settlement, material, and Defense-labor requirement; this button will unlock automatically." % blocker
@@ -772,7 +779,11 @@ func _queue_summary(army:Dictionary)->String:
 		var last_program:Dictionary=program_state.last_completed
 		lines.append("LAST EXERCISE  %s  •  readiness reserve %d%%" % [String(last_program.get("label","PROGRAM")).capitalize(),roundi(float(program_state.get("readiness_bonus",0.0))*100.0)])
 	for order in (army.get("training_queue",[]) as Array): lines.append("TRAIN  %s %s  %d/%d days" % [_compact_count(int(order.get("count",0))),String(order.get("unit","unit")).replace("_"," "),roundi(float(order.get("progress_days",0.0))),roundi(float(order.get("required_days",1.0)))])
-	for job in (army.get("equipment_queue",[]) as Array): lines.append("LINE %d  %s %s  %d%%  •  EFF %d%%" % [int(job.get("id",0)),_compact_count(int(job.get("count",0))),String(job.get("item","item")).replace("_"," "),roundi(100.0*float(job.get("progress_days",0.0))/maxf(0.01,float(job.get("required_days",1.0)))),roundi(float(job.get("efficiency",0.20))*100.0)])
+	for job in (army.get("equipment_queue",[]) as Array):
+		if bool(job.get("persistent",false)):
+			lines.append("LINE %d · %s · %s · efficiency %d%%" % [int(job.id),String(job.item).replace("_"," "),"continuous" if int(job.target_stock)==0 else "stock target %d" % int(job.target_stock),roundi(float(job.efficiency)*100)])
+		else:
+			lines.append("LINE %d  %s %s  %d%%  •  EFF %d%%" % [int(job.get("id",0)),_compact_count(int(job.get("count",0))),String(job.get("item","item")).replace("_"," "),roundi(100.0*float(job.get("progress_days",0.0))/maxf(0.01,float(job.get("required_days",1.0)))),roundi(float(job.get("efficiency",0.20))*100.0)])
 	return "\n".join(lines.slice(0,6))
 
 
@@ -818,7 +829,8 @@ func _training_program_action()->void:
 func _queue_production()->void:
 	if equipment_choice.selected<0: return
 	var item:=String(equipment_choice.get_item_metadata(equipment_choice.selected)); var count:=int(produce_count.value); var result:Dictionary
-	if item=="transport_cart": result=MilitaryCampaign.queue_transport_cart_production(count)
+	if production_mode!=null and production_mode.selected<2: result=MilitaryCampaign.start_production_line(item,count if production_mode.selected==0 else 0)
+	elif item=="transport_cart": result=MilitaryCampaign.queue_transport_cart_production(count)
 	elif item in ["arrows","artillery_rounds","small_arms_ammunition","heavy_shells"]: result=MilitaryCampaign.queue_consumable_production(item,count)
 	else: result=MilitaryCampaign.queue_equipment_production(item,count)
 	_report(result)
