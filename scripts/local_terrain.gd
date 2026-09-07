@@ -1,6 +1,7 @@
 extends Node3D
 
 const OrganicTownVisual := preload("res://scripts/organic_town_visual.gd")
+const EarlySettlementVisual := preload("res://scripts/early_settlement_visual.gd")
 var organic_town_cached_state := PackedByteArray()
 var organic_town_cached_plan: Dictionary = {}
 
@@ -9003,21 +9004,21 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 			surface.add_vertex(world_point)
 
 func _organic_town_enabled() -> bool:
-	return OrganicTownVisual.enabled(GameState.settlement_plots, maxi(1, footprint_population if footprint_population >= 0 else GameState.population_total))
+	return EarlySettlementVisual.enabled(GameState.settlement_plots)
 
 func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
 	if plots.is_empty():
 		return
 	var organic_plan: Dictionary = {"buildings": [], "replaced": {}}
 	var organic_town := _organic_town_enabled()
-	if OrganicTownVisual.has_inherited_kit(GameState.settlement_plots):
+	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
 		# Build against the full saved fabric, never a camera-culled subset.
 		var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
 		if state != organic_town_cached_state:
-			organic_town_cached_plan = OrganicTownVisual.layout(GameState.settlement_plots, GameState.settlement_routes, func(point: Vector2) -> bool: return _settlement_stage_land_at(point + Vector2(center.x, center.z)))
+			organic_town_cached_plan = EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, func(point: Vector2) -> bool: return _settlement_stage_land_at(point + Vector2(center.x, center.z)))
 			organic_town_cached_state = state
 		organic_plan = organic_town_cached_plan
-		OrganicTownVisual.render(organic_plan, center, _close_surface_height_at, parent)
+		EarlySettlementVisual.render(organic_plan, center, _close_surface_height_at, parent)
 	var ground_surface := SurfaceTool.new()
 	ground_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var density_surface:=SurfaceTool.new()
@@ -9189,7 +9190,7 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 	var early_town := _organic_town_enabled()
 	var inherited_frontages: Dictionary = {}
 	for plot in GameState.settlement_plots:
-		if int(plot.get("id", 0)) <= OrganicTownVisual.MAX_PLOTS and OrganicTownVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
+		if int(plot.get("id", 0)) <= OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var segment_count := 0
