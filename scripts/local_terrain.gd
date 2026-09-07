@@ -17390,16 +17390,10 @@ func _open_scout_dispatch_panel()->void:
 		var capacity_note:=Label.new(); capacity_note.text="Every party this population can organize is away. New parties become possible as the population grows or a party returns."; capacity_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; capacity_note.size_flags_vertical=Control.SIZE_EXPAND_FILL; capacity_note.add_theme_font_size_override("font_size",12); capacity_note.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(capacity_note)
 	else:
 		var target_options:=CivilizationSystem.scout_target_options()
-		var target_selector:=OptionButton.new(); target_selector.custom_minimum_size=Vector2(0,38); target_selector.tooltip_text="Choose open exploration, a known encounter site, or a confirmed foreign settlement."; root.add_child(target_selector)
-		var selected_target_index:=0
-		for target_index in target_options.size():
-			var target:Dictionary=target_options[target_index]
-			target_selector.add_item(String(target.label))
-			target_selector.set_item_metadata(target_index,String(target.id))
-			target_selector.set_item_tooltip(target_index,String(target.description))
-			if String(target.id)==pending_scout_target_id: selected_target_index=target_index
-		target_selector.select(selected_target_index)
-		pending_scout_target_id=String(target_selector.get_item_metadata(selected_target_index))
+		var target_picker:=preload("res://scripts/hud/scout_target_picker.gd").new()
+		root.add_child(target_picker);target_picker.setup(target_options,pending_scout_target_id)
+		var target_selector:OptionButton=target_picker.selector
+		pending_scout_target_id=String(target_selector.get_item_metadata(target_selector.selected))
 		var heading_selector:=OptionButton.new(); heading_selector.custom_minimum_size=Vector2(0,34); heading_selector.tooltip_text="Dictate the party's outward heading, or let it choose. Blocked ground still bends the route."; root.add_child(heading_selector)
 		heading_selector.add_item("HEADING · LET THE PARTY CHOOSE"); heading_selector.set_item_metadata(0,"")
 		var heading_index:=1
@@ -17956,6 +17950,8 @@ func _build_population_detail_pages(tabs:TabContainer,pregnancy_summary:Dictiona
 	demographic_page.add_theme_constant_override("separation",6)
 	tabs.add_child(demographic_page)
 	_build_population_history_page(demographic_page,"demographic")
+	var deaths_page:=VBoxContainer.new();deaths_page.name="DATED DEATHS";tabs.add_child(deaths_page)
+	_build_population_history_page(deaths_page,"death_details")
 
 	var consequence_page:=VBoxContainer.new()
 	consequence_page.name="CONSEQUENCES"
@@ -17996,11 +17992,13 @@ func _build_population_history_page(page:VBoxContainer,kind:String)->void:
 
 func _population_history_records(kind:String)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	if kind=="demographic":
-		var grouped:=preload("res://scripts/hud/content/dock_detail_population_ledger.gd").grouped_deaths(GameState.demographic_ledger)
-		for row:Dictionary in grouped:result.append({"kind":"death","compact":true,"title":String(row.name),"description":String(row.sub),"count_label":String(row.value),"detail":String(row.tip)})
+	if kind in ["demographic","death_details"]:
+		var model:=preload("res://scripts/hud/content/dock_detail_population_ledger.gd")
+		var grouped:Array=model.death_summary(GameState.demographic_ledger) if kind=="demographic" else model.grouped_deaths(GameState.demographic_ledger)
+		if kind=="death_details":grouped.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.last_day)>int(b.last_day))
+		for row:Dictionary in grouped:result.append({"kind":"death","compact":true,"title":String(row.name),"description":String(row.sub),"count_label":String(row.value),"detail":String(row.get("tip","Totals cover retained records; open Dated Deaths for places and dates."))})
 		for record_variant in GameState.demographic_ledger:
-			if String(record_variant.get("kind",""))!="death":result.append(record_variant.duplicate(true))
+			if kind=="demographic" and String(record_variant.get("kind",""))!="death":result.append(record_variant.duplicate(true))
 
 	else:
 		for event_variant in GameState.simulation_events:

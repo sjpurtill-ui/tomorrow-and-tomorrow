@@ -3,11 +3,15 @@ const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 ## Detail dock: the population ledger — births, deaths, causes, and the
 ## demographic record. Replaces the full-screen population ledger modal.
 
+var death_page:=0
+var summary_page:=0
+const PAGE_SIZE:=8
+
 func meta()->Dictionary:
 	return {
 		"eyebrow":"SETTLEMENT · FULL RECORD",
 		"title":"Population Ledger",
-		"subtabs":["THE RECORD"],
+		"subtabs":["OVERVIEW","DEATH RECORDS"],
 	}
 
 func tab(_sub:int)->Dictionary:
@@ -37,7 +41,10 @@ func tab(_sub:int)->Dictionary:
 		{"type":"tiles","heading":"MATERNITY & INFANCY","items":maternity_items},
 	]
 	var records:=grouped_deaths(GameState.demographic_ledger)
-	blocks.append({"type":"rows","heading":"RECORDED DEATHS","items":records} if not records.is_empty() else {"type":"text","heading":"RECORDED DEATHS","text":"No deaths have been recorded."})
+	if _sub==1:
+		records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.last_day)>int(b.last_day))
+		return {"kpis":kpis,"brief":{},"blocks":_death_pages(records,false)}
+	blocks.append_array(_death_pages(death_summary(GameState.demographic_ledger),true))
 	if not mortality_items.is_empty():
 		blocks.append({"type":"bars","heading":"CURRENT MORTALITY RISK","note":"annual pressure now · not historical totals","items":mortality_items})
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
@@ -52,7 +59,7 @@ func tab(_sub:int)->Dictionary:
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:
-	return [GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]
+	return [death_page,summary_page,GameState.demographic_ledger.size(),GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]
 
 static func grouped_deaths(ledger:Array)->Array:
 	var groups:Dictionary={}
@@ -65,5 +72,38 @@ static func grouped_deaths(ledger:Array)->Array:
 		var group:Dictionary=groups[key];group.first=mini(int(group.first),day);group.last=maxi(int(group.last),day);group.count+=int(record.get("count",0));group.records+=1
 	var result:Array=[]
 	for group:Dictionary in groups.values():
-		result.append({"name":group.place,"value":"%d death%s" % [int(group.count),"" if int(group.count)==1 else "s"],"sub":"%s · %s" % [String(group.cause),"Day %d" % int(group.first) if group.first==group.last else "Days %d–%d" % [int(group.first),int(group.last)]],"tip":"%d original records retained; grouped within 30-day periods." % int(group.records),"accent":Tokens.RED})
+		result.append({"last_day":int(group.last),"name":group.place,"value":"%d death%s" % [int(group.count),"" if int(group.count)==1 else "s"],"sub":"%s · %s" % [String(group.cause),"Day %d" % int(group.first) if group.first==group.last else "Days %d–%d" % [int(group.first),int(group.last)]],"tip":"%d original records retained; grouped within 30-day periods." % int(group.records),"accent":Tokens.RED})
 	return result
+
+static func death_summary(ledger:Array)->Array:
+	var groups:Dictionary={}
+	for record:Dictionary in ledger:
+		if String(record.get("kind",""))!="death":continue
+		var cause:=String(record.get("cause","Unknown cause"))
+		if not groups.has(cause):groups[cause]={"count":0,"places":{},"records":0}
+		var group:Dictionary=groups[cause]
+		group.count+=int(record.get("count",0));group.records+=1
+		group.places[String(record.get("target_id",record.get("location","Location unrecorded")))]=true
+	var rows:Array=[]
+	for cause:String in groups:
+		var group:Dictionary=groups[cause]
+		rows.append({"name":cause,"value":"%d deaths"%int(group.count),"count":int(group.count),"sub":"%d locations · %d retained records"%[group.places.size(),int(group.records)],"accent":Tokens.RED})
+	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.count)>int(b.count) if a.count!=b.count else String(a.name)<String(b.name))
+	return rows
+
+func _death_pages(rows:Array,summary:bool)->Array:
+	var page:=summary_page if summary else death_page
+	var pages:=maxi(1,ceili(rows.size()/float(PAGE_SIZE)))
+	page=clampi(page,0,pages-1)
+	if summary:summary_page=page
+	else:death_page=page
+	var heading:="DEATHS BY CAUSE" if summary else "DATED DEATH RECORDS"
+	if rows.is_empty():return [{"type":"text","heading":heading,"text":"No deaths have been recorded."}]
+	var blocks:Array=[{"type":"rows","heading":heading,"items":rows.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE)},{"type":"text","text":"Totals here cover retained records. Lifetime deaths remain above. Open Death Records for dates and places." if summary else "Grouped by place, cause and 30-day period; newest first. Original records are retained."}]
+	if pages>1:blocks.append({"type":"actions","heading":"PAGE %d / %d"%[page+1,pages],"items":[{"label":"PREVIOUS","disabled":page==0,"on_press":func():_change_death_page(summary,-1)},{"label":"NEXT","disabled":page==pages-1,"on_press":func():_change_death_page(summary,1)}]})
+	return blocks
+
+func _change_death_page(summary:bool,delta:int)->void:
+	if summary:summary_page+=delta
+	else:death_page+=delta
+	hud.request_immediate_dock_refresh()
