@@ -9,6 +9,9 @@ func meta()->Dictionary:
 	}
 
 func tab(_sub:int)->Dictionary:
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(_city_health))
+
+func _city_health()->Dictionary:
 	var expectancy:=GameState.projected_life_expectancy()
 	var history:Array[Dictionary]=GameState.health_history_snapshot()
 	var prior:=expectancy

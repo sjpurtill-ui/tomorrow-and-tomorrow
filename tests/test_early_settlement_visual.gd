@@ -221,3 +221,20 @@ func test_working_ground_respects_water_and_does_not_mutate_history() -> void:
 	ground.render({"buildings":[]},data.plots,data.routes,Vector3.ZERO,func(_x:float,_y:float)->float:return 0,func(_p:Vector2)->bool:return false,parent)
 	assert_int(parent.get_child_count()).is_equal(0)
 	assert_dict(data).is_equal(before)
+
+func test_vacant_intact_buildings_stay_visible_and_saved_sites_survive_road_changes()->void:
+	var data:=fixture()
+	var plan:=EARLY.layout(data.plots,data.routes,func(_p:Vector2)->bool:return true)
+	assert_int(plan.buildings.size()).is_greater(0)
+	EARLY.remember_layout(plan,data.plots)
+	var sites:Dictionary={}
+	for record in plan.buildings:sites[record.id]=record.position
+	for plot in data.plots:plot.status="vacant";plot.condition=.6
+	for route in data.routes:route.width_m=float(route.get("width_m",1))+.6
+	var next:=EARLY.layout(data.plots,data.routes,func(_p:Vector2)->bool:return true)
+	for record in next.buildings:
+		if sites.has(record.id):assert_vector(record.position).is_equal(sites[record.id])
+	assert_int(next.buildings.size()).is_greater_equal(sites.size())
+	var parent:Node3D=auto_free(Node3D.new())
+	EARLY.render(next,Vector3.ZERO,func(_x:float,_z:float)->float:return 0.0,parent)
+	assert_int(parent.get_child_count()).is_greater(0)

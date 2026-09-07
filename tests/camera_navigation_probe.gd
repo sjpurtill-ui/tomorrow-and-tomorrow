@@ -16,11 +16,11 @@ func _ready()->void:
 	var initial:Dictionary=terrain._terrain_hit(pointer)
 	terrain._queue_camera_zoom(pointer,-1.0)
 	terrain._queue_camera_zoom(pointer,-1.0)
-	var target:=5.0/(1.4*1.4)
+	var target:=5.0/(1.12*1.12)
 	assert(absf(terrain.zoom_target_size-target)<0.0001,"Wheel inputs must accumulate")
 	assert(terrain.camera.size==5.0,"Input itself must not jump the camera")
 	var previous:float=terrain.camera.size
-	for frame in 50:
+	for frame in 120:
 		terrain._process_smooth_camera(1.0/60.0)
 		assert(terrain.camera.size<=previous and terrain.camera.size>=target-0.0001,"Smooth zoom must never overshoot")
 		previous=terrain.camera.size
@@ -30,11 +30,11 @@ func _ready()->void:
 	for yaw in [-2.8,-0.5,0.0,2.9]:
 		terrain.camera_yaw=yaw
 		terrain._reset_camera_north()
-		for frame in 50: terrain._process_smooth_camera(1.0/60.0)
+		for frame in 120: terrain._process_smooth_camera(1.0/60.0)
 		assert(terrain._north_screen_arrow()=="↑","NORTH must point up after reset")
 	assert(terrain.hud.compass_label is Button)
 	terrain._queue_camera_zoom(pointer,-1.0,true)
-	assert(terrain.zoom_target_size<terrain.camera.size/1.4,"Shift wheel must be faster")
+	assert(terrain.zoom_target_size<terrain.camera.size/1.12,"Shift wheel must be faster")
 	terrain.zoom_target_size=-1.0
 	var old_patch:Node=terrain.regional_terrain_patch
 	for frame in 2000:

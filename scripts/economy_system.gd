@@ -53,8 +53,13 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 		if float(GameState.resource_stockpiles[resource_name_variant])>0.001:
 			GameState.economy_known_goods[String(resource_name_variant)]=true
 	var day:=int(GameState.elapsed_days)
-	if day==last_processed_day: return []
-	last_processed_day=day
+	if GameState.resource_settlement_id=="":
+		if day==last_processed_day: return []
+		last_processed_day=day
+	else:
+		var city:=SettlementModel.settlement_record(GameState.resource_settlement_id)
+		if int(city.get("last_economy_day",-1))==day: return []
+		city["last_economy_day"]=day
 	var events:Array[Dictionary]=[]
 	_update_benchmarks(events)
 	var previous_index:=float(GameState.economy_metrics.get("price_index",0.0))
@@ -707,6 +712,8 @@ func _fiscal_outlook_for(days:float,trade_volume:float,monetization:float,milita
 	return {"active":GameState.economy_stage==STAGE_CURRENCY,"days":horizon,"status":status,"warning":warning,"spending_priority":normalized_priority,"daily_revenue":daily_revenue,"tax_compliance":tax_capacity.compliance,"effective_tax_rate":tax_capacity.effective_rate,"tax_noncompliance_gap":tax_capacity.noncompliance_gap,"tax_liquidity_gap":tax_capacity.liquidity_gap,"daily_civil":daily_civil,"daily_military":daily_military,"daily_interest":daily_interest,"existing_arrears":existing_arrears,"projected_civil_due":projected_civil_due,"projected_military_due":projected_military_due,"projected_civil_paid":projected_allocation.civil_paid,"projected_military_paid":projected_allocation.military_paid,"civil_coverage":projected_allocation.civil_coverage,"military_coverage":projected_allocation.military_coverage,"projected_due":projected_due,"projected_revenue":projected_revenue,"projected_cash_before_borrowing":cash_available-projected_due,"borrowing_headroom":borrowing_headroom,"coverage_ratio":coverage_ratio,"unfunded":unfunded,"protected_buffer":protected_buffer,"discretionary_headroom":discretionary_headroom,"runway_days":runway_days,"debt_capacity":debt_capacity,"annual_interest_rate":annual_interest_rate}
 
 func _military_burden_snapshot()->Dictionary:
+	# National standing-army costs are charged once, through the home treasury.
+	if GameState.resource_settlement_id!="": return {}
 	var campaign:=get_node_or_null("/root/MilitaryCampaign")
 	if campaign==null or not campaign.has_method("economic_burden_snapshot"): return {}
 	var snapshot_variant:Variant=campaign.call("economic_burden_snapshot")

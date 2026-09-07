@@ -88,6 +88,12 @@ var camera_target := Vector3.ZERO
 var camera_yaw := -0.72
 var camera_pitch := -0.98
 var camera_distance := 92.0
+# Agreed four-distance design, recovered from “Set Up Godot Project”.
+# Altitudes use a fixed 50-degree horizontal field of view, looking down.
+const CAMERA_DISTANCE_LEVELS:=[{"name":"10,000 ft","width_km":2.842611486},{"name":"50,000 ft","width_km":14.21305743},{"name":"Region","width_km":150.0},{"name":"Continent","width_km":3000.0}]
+var distance_input_msec:=-1000
+var distance_gesture_steps:=0.0
+var zoom_preset_active:=false
 var zoom_target_size:float=-1.0
 var zoom_pointer:=Vector2.ZERO
 var north_reset_active:=false
@@ -618,7 +624,7 @@ func _capture_preview_if_requested() -> void:
 			DiscoverySystem.process_day(daily_context)
 			ResourceSystem.process_day(daily_context)
 			_process_population_day(daily_context)
-			EconomySystem.process_day(daily_context)
+			SettlementModel.with_local_population(func()->void:EconomySystem.process_day(daily_context))
 			_evaluate_travel_survival()
 			_process_settlement_day()
 			_process_other_city_resources()
@@ -962,9 +968,11 @@ func _process(delta: float) -> void:
 func advance_world_time(days_advanced:float)->void:
 	# Stop at the calendar boundary; never simulate part of an unchosen century.
 	GameState.elapsed_days = minf(GameState.elapsed_days+days_advanced,float(PeopleDirection.next_century_day()))
-	var current_discovery_day := int(floor(GameState.elapsed_days))
+	var requested_world_day:=GameState.elapsed_days
+	var current_discovery_day := int(floor(requested_world_day))
 	while last_discovery_day < current_discovery_day and (game_speed>0.0 or GeneralCampaign.active):
 		last_discovery_day += 1
+		GameState.elapsed_days=float(last_discovery_day)
 		GameState.convoy_traveling=travel_active
 		CivilizationSystem.advance_to_day(last_discovery_day)
 		if MilitaryCampaign.recovery.home_unavailable():
@@ -977,7 +985,7 @@ func advance_world_time(days_advanced:float)->void:
 		if not discoveries.is_empty() or not resource_events.is_empty():
 			footprint_population = -1
 		var simulation_events := _process_population_day(daily_context)
-		var economy_events := EconomySystem.process_day(daily_context)
+		var economy_events:Array[Dictionary] = SettlementModel.with_local_population(func()->Array[Dictionary]:return EconomySystem.process_day(daily_context))
 		simulation_events.append_array(economy_events)
 		simulation_events.append_array(GovernmentPeopleSystem.process_day(last_discovery_day))
 		_refresh_event_report()
@@ -990,7 +998,7 @@ func advance_world_time(days_advanced:float)->void:
 		_process_settlement_day()
 		_process_other_city_resources()
 		preload("res://scripts/strategic_history.gd").sample()
-		_settlement_model().process_month(_settlement_spatial_context(daily_context))
+		SettlementModel.with_local_population(func()->void:_settlement_model().process_month(_settlement_spatial_context(daily_context)))
 		var progression_events:=ProgressionSystem.process_day(last_discovery_day)
 		_refresh_discovered_resource_overlays()
 		_refresh_settlement_footprint()
@@ -1003,6 +1011,7 @@ func advance_world_time(days_advanced:float)->void:
 		elif not simulation_events.is_empty() and travel_status_label:
 			travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
 		_evaluate_travel_survival()
+	GameState.elapsed_days=requested_world_day
 	if travel_active:
 		var travel_speed_factor:=clampf(float(GameState.simulation_metrics.get("travel_speed_factor",1.0)),0.12,1.0)
 		travel_days_elapsed += days_advanced*travel_speed_factor
@@ -3091,12 +3100,15 @@ func _normalize_aerial_labels()->void:
 		label.font_size=int(label.get_meta("aerial_font_size"))*4
 		label.pixel_size=float(label.get_meta("aerial_pixel_size"))/16.0
 
-func _settlement_map_label_text(zoom:float)->String:
-	var name:=_settlement_display_name().to_upper()
-	if zoom>1600.0: return "HOME  •  %s" % name
-	var classification:String=String(_settlement_model().classification()).to_upper()
-	if zoom<=2.4: return "%s  •  %s" % [name,classification]
-	return "%s  •  %s  •  %s" % [name,classification,_compact_population(roundi(_settlement_model().primary_population_exact()))]
+func _city_map_label(city_name:String,population:int=-1,estimate:Dictionary={})->String:
+	var count:="Population unknown"
+	if not estimate.is_empty():
+		count="est. %s–%s" % [_compact_population(roundi(float(estimate.get("low",0)))),_compact_population(roundi(float(estimate.get("high",0))))]
+	elif population>=0: count=_compact_population(population)
+	return "%s  •  %s" % [city_name.to_upper(),count]
+
+func _settlement_map_label_text(_zoom:float)->String:
+	return _city_map_label(_settlement_display_name(),roundi(_settlement_model().primary_population_exact()))
 
 func _update_resource_overlay_lod()->void:
 	if resource_overlay_root and is_instance_valid(resource_overlay_root):
@@ -3214,7 +3226,7 @@ func _process_camera_navigation(delta: float) -> void:
 	if turn!=0.0:
 		north_reset_active=false
 		camera_input_msec=Time.get_ticks_msec()
-		camera_yaw=wrapf(camera_yaw+turn*1.8*delta,-PI,PI)
+		camera_yaw=wrapf(camera_yaw+turn*0.8*delta,-PI,PI)
 		_update_camera()
 	var input:=Input.get_vector("ui_left","ui_right","ui_up","ui_down")
 	# Godot's built-in UI actions reliably cover the arrow keys. Add physical
@@ -3229,7 +3241,7 @@ func _process_camera_navigation(delta: float) -> void:
 		return
 	var screen_right:=_camera_ground_screen_right()
 	var screen_up:=_camera_ground_screen_up()
-	var movement:=_camera_keyboard_movement(input,screen_right,screen_up,camera.size*0.72*delta)
+	var movement:=_camera_keyboard_movement(input,screen_right,screen_up,camera.size*0.28*delta)
 	_set_camera_target(camera_target+movement)
 
 
@@ -3647,15 +3659,9 @@ func _able_population() -> int:
 
 func _process_population_day(context := {}) -> Array[Dictionary]:
 	GameState.synchronize_population_allocations()
-	var events := ConsequenceEngine.process_day(context)
+	var events:Array[Dictionary] = SettlementModel.with_local_population(func()->Array[Dictionary]:return ConsequenceEngine.process_day(context),true)
 	events.append_array(CivicImplementationSystem.process_day(int(GameState.elapsed_days)))
 	AdvisorSystem.refresh_pronouncement_statuses()
-	if "Lean-to Shelters" in GameState.settlement_completed and GameState.population_total > int(GameState.housing_capacity * 0.80):
-		var builders := float(GameState.population_allocations.get("Construction", 0))
-		GameState.housing_progress += builders / 8.0*float(GameState.simulation_metrics.get("labor_efficiency",0.72))
-		if GameState.housing_progress >= 28.0:
-			GameState.housing_progress -= 28.0
-			GameState.housing_capacity += maxi(24, roundi(GameState.population_total * 0.12))
 	_refresh_population_allocations()
 	return events
 
@@ -4011,7 +4017,7 @@ func _settlement_network_view_key()->String:
 	# every frame.
 	var zoom_bucket:=roundi(log(maxf(0.10,camera.size))/log(1.8))
 	var bucket_span:=maxf(0.25,pow(1.8,float(zoom_bucket))*0.70)
-	return "%d:%d:%d:%d" % [band,zoom_bucket,floori(camera_target.x/bucket_span),floori(camera_target.z/bucket_span)]
+	return "%d:%d:%d:%d:%s" % [band,zoom_bucket,floori(camera_target.x/bucket_span),floori(camera_target.z/bucket_span),camera.size<=3.0]
 
 func _settlement_boundary_in_current_view(settlement:Dictionary)->bool:
 	if camera==null: return true
@@ -6909,7 +6915,7 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 		var position_2d:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
 		var label:=Label3D.new()
 		label.name="SecondarySettlementLabel_%d" % index
-		label.text=("%s  •  %s" % [String(settlement.get("name","SETTLEMENT")),String(settlement.get("classification","outpost")).to_upper()]) if camera!=null and camera.size>2600.0 else ("%s  •  %s  •  %s" % [String(settlement.get("name","SETTLEMENT")),String(settlement.get("classification","outpost")).to_upper(),_compact_population(int(settlement.get("population",0)))])
+		label.text=_city_map_label(String(settlement.get("name","Settlement")),int(settlement.get("population",0)))
 		label.font_size=9 if camera!=null and camera.size>2600.0 else 11
 		label.outline_size=4
 		label.modulate=Color("#e3d5a9")
@@ -6973,90 +6979,30 @@ func _secondary_settlement_footprint_patch_allocations(settlements:Array[Diction
 	return allocations
 
 
+func _create_secondary_city_design(settlement:Dictionary,parent:Node3D)->bool:
+	var record:Dictionary=SettlementModel.settlement_record(String(settlement.get("id","")))
+	if record.is_empty() or bool(record.get("primary",false)): return false
+	SettlementModel._ensure_city_resources(record)
+	var point:Vector2=record.position
+	var center:=Vector3(point.x,0,point.y)
+	var fabric:=Node3D.new();fabric.name="CityDesign_"+String(record.id);parent.add_child(fabric)
+	# Run the same recorded-plot renderer used by the original city, including
+	# inherited early buildings, later forms, fields, lanes and damage.
+	SettlementModel.with_city_resources(String(record.id),func()->void:
+		var lod:=_settlement_morphology_lod()
+		var plots:Array[Dictionary]=SettlementModel.plots_for_lod(lod)
+		_create_plot_fabric(center,plots,lod,fabric)
+		_create_persistent_settlement_routes(center,GameState.settlement_routes,fabric)
+	)
+	return true
+
 func _create_secondary_settlement_footprints(settlements:Array[Dictionary])->void:
-	var footprint_parent:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
-	if settlements.is_empty() or footprint_parent==null: return
-	# Cull physical fabric by the same stage-aware horizon as the primary place. At
-	# wider views the single marker batch takes over; cities never become screen-sized
-	# glowing tokens merely because their detailed fabric has culled.
-	var visible:Array[Dictionary]=[]
+	var parent:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
+	if parent==null:return
 	for settlement in settlements:
 		var profile:=_settlement_expansion_visual_profile(settlement)
-		if camera!=null and camera.size>_settlement_stage_landscape_max_zoom(profile): continue
-		visible.append(settlement)
-	if visible.is_empty(): return
-	var allocations:=_secondary_settlement_footprint_patch_allocations(visible)
-	var surface:=SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var appended:=0
-	var architecture:=_settlement_architecture_profile()
-	var visual_architecture:=_settlement_visual_architecture_profile(architecture)
-	var axiality:=clampf(float(visual_architecture.get("axiality",0.5)),0.0,1.0)
-	var terrain_conformity:=clampf(float(visual_architecture.get("terrain_conformity",0.5)),0.0,1.0)
-	var formal_weight:=lerpf(0.04,0.94,axiality)*lerpf(1.0,0.68,terrain_conformity)
-	# Every place in this player network shares an inherited construction culture.
-	# Compute its aggregate palette once; never rescan up to 2,048 plots per marker.
-	var network_palette:=_settlement_stage_material_palette(GameState.settlement_plots,5,architecture)
-	var network_base:Color=network_palette.periphery
-	for settlement_index in visible.size():
-		var settlement:Dictionary=visible[settlement_index]
-		var profile:=_settlement_expansion_visual_profile(settlement)
-		var stage:=clampi(int(profile.get("stage",0)),0,6)
-		var position_value:Variant=settlement.get("position",Vector2.ZERO)
-		var position_2d:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
-		var center:=Vector3(position_2d.x,0.0,position_2d.y)
-		var radius:=_secondary_settlement_urban_radius(settlement)
-		var settlement_seed:=absi(hash("%d:%s:secondary_urban_system" % [GameState.world_seed,String(settlement.get("id",settlement_index))]))
-		var rng:=RandomNumberGenerator.new()
-		rng.seed=settlement_seed
-		var cultural_axis:=_settlement_civic_axis()
-		var organic_axis:=cultural_axis+rng.randf_range(-1.1,1.1)
-		var formal_axis:=cultural_axis+PI*0.25*float(settlement_index%4)
-		var axis:=lerp_angle(organic_axis,formal_axis,formal_weight)
-		var tone:Color=network_base.lerp(Color(profile.color),0.08+float(stage)*0.012)
-		tone.a=0.23+float(stage)*0.022
-		var patch_count:=allocations[settlement_index]
-		for patch_index in patch_count:
-			var local_center:=Vector2.ZERO
-			var patch_radius:=radius*float([0.38,0.36,0.34,0.32,0.29,0.27,0.25][stage])
-			if patch_index>0:
-				var radial_t:=sqrt(float(patch_index)/maxf(1.0,float(patch_count-1)))
-				var organic_angle:=axis+2.39996323*float(patch_index)+rng.randf_range(-0.16,0.16)
-				var formal_angle:=axis+PI*0.25*float(patch_index%8)
-				var angle:=lerp_angle(organic_angle,formal_angle,formal_weight*0.74)
-				local_center=Vector2.from_angle(angle)*radius*lerpf(0.22,0.78,radial_t)*rng.randf_range(0.88,1.08)
-				local_center=_settlement_stage_resolve_land_offset(center,local_center)
-				patch_radius=radius*rng.randf_range(0.095,0.17)*lerpf(1.10,0.78,radial_t)
-			elif not _settlement_stage_land_at(position_2d):
-				continue
-			var patch_tone:Color=tone.lerp(Color("#95836c"),float(patch_index)/maxf(1.0,float(patch_count))*0.09)
-			patch_tone.a*=lerpf(1.0,0.70,float(patch_index)/maxf(1.0,float(patch_count)))
-			appended+=_append_settlement_stage_patch(surface,Vector3(center.x+local_center.x,0.0,center.z+local_center.y),maxf(0.025,patch_radius),patch_tone,0.00230,Vector2i(1,0),settlement_seed+patch_index*109,8)
-	# Only real route/river/work access axes earn a strategic corridor. They share the
-	# same surface and are globally capped, so this evidence cannot become road spam.
-	var corridor_candidates:=visible.duplicate(true)
-	corridor_candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.get("population",0))>int(b.get("population",0)))
-	var corridor_count:=0
-	for settlement in corridor_candidates:
-		if corridor_count>=SECONDARY_SETTLEMENT_CORRIDOR_BUDGET: break
-		var profile:=_settlement_expansion_visual_profile(settlement)
-		if int(profile.get("stage",0))<2: continue
-		var drivers:Dictionary=settlement.get("territory_drivers",{})
-		var axes:Array=drivers.get("access_axes",[])
-		if axes.is_empty(): continue
-		var direction_value:Variant=(axes[0] as Dictionary).get("direction",Vector2.ZERO)
-		var direction:Vector2=direction_value if direction_value is Vector2 else Vector2.ZERO
-		if direction.length_squared()<0.000001: continue
-		direction=direction.normalized()
-		var position_value:Variant=settlement.get("position",Vector2.ZERO)
-		var position_2d:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
-		var radius:=_secondary_settlement_urban_radius(settlement)
-		var corridor_color:=Color("#928b7d")
-		corridor_color.a=0.34
-		appended+=_append_settlement_system_ribbon(surface,Vector3(position_2d.x,0.0,position_2d.y),PackedVector2Array([-direction*radius*0.34,Vector2.ZERO,direction*radius*0.74]),clampf(radius*0.006,0.0022,0.085),corridor_color,0.00272,6)
-		corridor_count+=1
-	if appended>0: _commit_settlement_surface(surface,"SecondaryUrbanSystems",footprint_parent,true)
-
+		if camera!=null and camera.size>_settlement_stage_landscape_max_zoom(profile):continue
+		_create_secondary_city_design(settlement,parent)
 
 func _secondary_settlement_label_limit()->int:
 	if camera==null: return 24
@@ -9017,7 +8963,8 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
 		if state != organic_town_cached_state:
 			organic_town_cached_plan = EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, func(point: Vector2) -> bool: return _settlement_stage_land_at(point + Vector2(center.x, center.z)))
-			organic_town_cached_state = state
+			EarlySettlementVisual.remember_layout(organic_town_cached_plan,GameState.settlement_plots)
+			organic_town_cached_state = var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
 		organic_plan = organic_town_cached_plan
 		EarlySettlementVisual.render(organic_plan, center, _close_surface_height_at, parent)
 	if organic_town:
@@ -9766,8 +9713,14 @@ func _process_settlement_day() -> void:
 	SettlementModel.with_local_population(_process_local_settlement_day)
 
 func _process_local_settlement_day() -> void:
-	if travel_active or not GameState.settlement_site_committed or settler_marker == null:
-		return
+	if not GameState.settlement_site_committed: return
+	if GameState.resource_settlement_id=="" and (travel_active or settler_marker==null): return
+	if "Lean-to Shelters" in GameState.settlement_completed and GameState.population_total > int(GameState.housing_capacity * 0.80):
+		var builders := float(GameState.population_allocations.get("Construction", 0))
+		GameState.housing_progress += builders / 8.0*float(GameState.simulation_metrics.get("labor_efficiency",0.72))
+		if GameState.housing_progress >= 28.0:
+			GameState.housing_progress -= 28.0
+			GameState.housing_capacity += maxi(24, roundi(GameState.population_total * 0.12))
 	var project := _current_settlement_project()
 	if project.is_empty():
 		_update_settlement_progress_text()
@@ -12225,7 +12178,7 @@ func _refresh_contact_encounter_markers()->void:
 			fabric.build(visual_report,_close_surface_height_at)
 			fabric.position.x=0;fabric.position.z=0;marker.add_child(fabric)
 			footprint_radius=fabric.footprint_radius
-		var label:=Label3D.new();label.name="SettlementLabel";label.text=String(site.name).to_upper()
+		var label:=Label3D.new();label.name="SettlementLabel";label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
 		label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 		label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("ded4b5")
 		label.position=Vector3(0,_height_at(site.x,site.z)+.015,-footprint_radius*1.15)
@@ -19704,22 +19657,22 @@ func _input(event: InputEvent) -> void:
 		# macOS sends precise two-finger scrolling as pan gestures, not wheel
 		# clicks. Keep fractional deltas so slow trackpad motion stays smooth.
 		if not _pointer_over_ui() and is_finite(event.delta.y) and not is_zero_approx(event.delta.y):
-			_queue_camera_zoom(event.position,event.delta.y,event.shift_pressed)
+			_queue_camera_zoom(event.position,clampf(event.delta.y*.18,-.6,.6)) if event.shift_pressed else _step_camera_distance(event.position,clampf(event.delta.y*.18,-.6,.6),true)
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMagnifyGesture:
 		if not _pointer_over_ui() and is_finite(event.factor) and event.factor>0.0 and not is_equal_approx(event.factor,1.0):
 			# A spread magnifies the map: reduce the visible camera span. Convert
 			# the native ratio to steps in the existing accumulated zoom curve.
-			_queue_camera_zoom(event.position,-log(event.factor)/log(1.4))
+			_step_camera_distance(event.position,-log(event.factor)*.55/log(1.12),true)
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
 			dragging = event.pressed and not _pointer_over_ui()
 			rotating_camera = event.shift_pressed
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed and not _pointer_over_ui():
-			_queue_camera_zoom(event.position,-maxf(0.05,event.factor),event.shift_pressed)
+			_queue_camera_zoom(event.position,-maxf(0.05,event.factor)) if event.shift_pressed else _step_camera_distance(event.position,-1.0)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed and not _pointer_over_ui():
-			_queue_camera_zoom(event.position,maxf(0.05,event.factor),event.shift_pressed)
+			_queue_camera_zoom(event.position,maxf(0.05,event.factor)) if event.shift_pressed else _step_camera_distance(event.position,1.0)
 	elif event is InputEventMouseMotion and dragging:
 		if rotating_camera:
 			north_reset_active=false
@@ -19756,7 +19709,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if event.keycode in [KEY_PLUS,KEY_EQUAL,KEY_KP_ADD]: zoom_step=-1.0
 			elif event.keycode in [KEY_MINUS,KEY_KP_SUBTRACT]: zoom_step=1.0
 			if zoom_step!=0.0:
-				_queue_camera_zoom(get_viewport().get_visible_rect().size*0.5,zoom_step,event.shift_pressed)
+				_queue_camera_zoom(get_viewport().get_visible_rect().size*0.5,zoom_step) if event.shift_pressed else _step_camera_distance(get_viewport().get_visible_rect().size*0.5,zoom_step)
 				get_viewport().set_input_as_handled()
 				return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_N:
@@ -19846,7 +19799,7 @@ func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: b
 		# A double-click advances one legible scale instead of teleporting from a
 		# regional map directly into a parcel. Repeated input can still reach the
 		# site view while every intermediate landscape remains understandable.
-		camera.size=maxf(0.18,camera.size/4.0)
+		set_camera_distance_level(camera_distance_level()-1)
 	_update_camera()
 	_update_scale_lod()
 	_inspect_location(center)
@@ -19871,17 +19824,60 @@ func _update_camera() -> void:
 	# horizon and left half the screen empty; real globe viewers also relax toward a
 	# top-down map as the footprint approaches continental scale.
 	var continental_nadir:=smoothstep(1300.0,6200.0,camera.size)
-	var display_pitch:=lerpf(camera_pitch,-1.555,continental_nadir)
+	var display_pitch:=lerpf(camera_pitch,-1.555,continental_nadir) if camera_pitch> -1.56 else camera_pitch
 	var horizontal := cos(display_pitch) * effective_distance
 	camera.position = camera_target + Vector3(cos(camera_yaw) * horizontal, -sin(display_pitch) * effective_distance, sin(camera_yaw) * horizontal)
 	camera.look_at(camera_target, Vector3.UP)
 
 func _queue_camera_zoom(pointer:Vector2,steps:float,fast:bool=false)->void:
 	if camera==null: return
-	var start:=zoom_target_size if zoom_target_size>0.0 else camera.size
-	zoom_target_size=clampf(start*pow(1.8 if fast else 1.4,steps),0.035,18000.0 if SEAMLESS_WORLD else 128.0)
+	var start:=zoom_target_size if zoom_target_size>0.0 and not zoom_preset_active else camera.size
+	zoom_preset_active=false
+	# Keep rapid wheel/gesture bursts from banking a large invisible zoom jump.
+	var requested:=start*pow(1.22 if fast else 1.12,clampf(steps,-2.0,2.0))
+	zoom_target_size=clampf(requested,maxf(.035,camera.size/1.6),minf(camera.size*1.6,18000.0 if SEAMLESS_WORLD else 128.0))
 	zoom_pointer=pointer
 	camera_input_msec=Time.get_ticks_msec()
+
+func _distance_camera_size(index:int)->float:
+	var viewport_size:=get_viewport().get_visible_rect().size if is_inside_tree() else Vector2(1280,720)
+	return float(CAMERA_DISTANCE_LEVELS[clampi(index,0,3)].width_km)/maxf(.1,viewport_size.x/maxf(1.0,viewport_size.y))
+
+func set_camera_distance_level(index:int)->void:
+	if camera==null: return
+	var viewport_size:=get_viewport().get_visible_rect().size if is_inside_tree() else Vector2(1280,720)
+	var aspect:=viewport_size.x/maxf(1.0,viewport_size.y)
+	camera.keep_aspect=Camera3D.KEEP_HEIGHT
+	camera.fov=rad_to_deg(2.0*atan(tan(deg_to_rad(25.0))/aspect))
+	camera_pitch=-PI*.5+.0001
+	zoom_target_size=clampf(_distance_camera_size(index),.035,18000.0 if SEAMLESS_WORLD else 128.0)
+	zoom_preset_active=true
+	zoom_pointer=viewport_size*.5
+	camera_input_msec=Time.get_ticks_msec()
+
+func camera_distance_level()->int:
+	if camera==null:return 0
+	var distance:=zoom_target_size if zoom_preset_active and zoom_target_size>0 else camera.size
+	var best:=0
+	for index in range(1,CAMERA_DISTANCE_LEVELS.size()):
+		if absf(log(distance/_distance_camera_size(index)))<absf(log(distance/_distance_camera_size(best))):best=index
+	return best
+
+func _step_camera_distance(pointer:Vector2,steps:float,precise:bool=false)->void:
+	if camera==null:return
+	var now:=Time.get_ticks_msec()
+	# A wheel burst or one trackpad gesture advances only one distance. No queue
+	# of unseen steps can carry the player all the way across the map.
+	if now-distance_input_msec<650:return
+	if precise:
+		distance_gesture_steps+=steps
+		if absf(distance_gesture_steps)<.8:return
+		steps=distance_gesture_steps
+	distance_gesture_steps=0.0
+	var next:=clampi(camera_distance_level()+(1 if steps>0.0 else -1),0,3)
+	set_camera_distance_level(next)
+	zoom_pointer=pointer
+	distance_input_msec=now
 
 func _reset_camera_north()->void:
 	north_reset_active=true
@@ -19892,12 +19888,14 @@ func _camera_in_motion()->bool:
 
 func _process_smooth_camera(delta:float)->void:
 	if camera==null: return
-	var blend:=1.0-exp(-18.0*maxf(0.0,delta))
+	var blend:=1.0-exp(-8.0*maxf(0.0,delta))
 	if zoom_target_size>0.0:
-		var next:=exp(lerpf(log(camera.size),log(zoom_target_size),blend))
+		var log_step:=clampf((log(zoom_target_size)-log(camera.size))*blend,-2.8*delta,2.8*delta)
+		var next:=exp(log(camera.size)+log_step)
 		if absf(log(next/zoom_target_size))<0.001:
 			next=zoom_target_size
 			zoom_target_size=-1.0
+			zoom_preset_active=false
 		_zoom_camera_at_screen(zoom_pointer,next,false)
 	if north_reset_active:
 		camera_yaw=lerp_angle(camera_yaw,PI*0.5,blend)
@@ -19990,6 +19988,9 @@ func _process_other_city_resources()->void:
 		var context:={"origin":Vector3(point.x,0.0,point.y),"traveling":false,"settled":true,"surface_water_distance_km":_river_distance_at(point.x,point.y)*KM_PER_WORLD_UNIT,"tools":ConsequenceEngine.tools_factor()}
 		context["surface_material_catchments"]=_surface_material_catchments(Vector3(point.x,0.0,point.y))
 		context["woodland_catchment"]=context.surface_material_catchments.Timber
+		context["settlement_origin"]=Vector3(point.x,0,point.y)
+		context["terrain_height_at"]=_height_at
+		context["terrain_land_at"]=func(offset:Vector2)->bool:return _settlement_stage_land_at(point+offset)
 		_settlement_model().process_city_resources(city_id,context,_process_settlement_day)
 	_settlement_model().process_city_trade(_city_trade_route_assessment)
 
@@ -20008,11 +20009,10 @@ func _select_city(settlement_id:String)->void:
 	var destination:=Vector3(point.x,_height_at(point.x,point.y),point.y)
 	if settlement_camera_tween and settlement_camera_tween.is_running(): settlement_camera_tween.kill()
 	var start:=camera_target
-	var start_size:=camera.size
+	set_camera_distance_level(0)
 	settlement_camera_tween=create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	settlement_camera_tween.tween_method(func(weight:float)->void:
 		_set_camera_target(start.lerp(destination,weight))
-		camera.size=lerpf(start_size,4.0,weight)
 		_update_camera()
 		_update_scale_lod()
 	,0.0,1.0,0.65)
@@ -20043,6 +20043,6 @@ func _focus_known_city(city_id:String)->void:
 	if hud:hud.close_detail();hud.close_dock()
 	if is_instance_valid(CivilizationSystem.city_intelligence.screen_layer):CivilizationSystem.city_intelligence.screen_layer.queue_free()
 	_close_civilizations_panel();zoom_target_size=-1
-	camera.size=preload("res://scripts/foreign_settlement_visual.gd").framing_size(report)
+	set_camera_distance_level(0)
 	_set_camera_target(Vector3(float(report.position.x),0,float(report.position.z)))
 	_refresh_contact_encounter_markers()

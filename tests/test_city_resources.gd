@@ -36,7 +36,7 @@ func test_secondary_daily_food_and_water_cannot_consume_capital_stores()->void:
 	SettlementModel.process_city_resources("dawngate",{"origin":Vector3(10,0,0),"traveling":false,"surface_water_distance_km":1.0})
 	var snapshot:=SettlementModel.city_resource_snapshot("dawngate")
 	assert_dict(GameState.resource_stockpiles).is_equal(before)
-	assert_float(GameState.population_exact).is_equal(population)
+	assert_float(SettlementModel.primary_population_exact()).is_equal_approx(population*.75,.00001)
 	assert_dict(GameState.population_allocations).is_equal(allocations)
 	assert_float(float(snapshot.water.required_today)).is_equal(population*0.25)
 	assert_int(snapshot.food_history.size()).is_equal(1)

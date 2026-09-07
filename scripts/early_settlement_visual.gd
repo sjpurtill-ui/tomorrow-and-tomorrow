@@ -64,6 +64,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			# from re-admitting a later/unknown form inside the shared solver.
 			plot["roof_plan"] = "unsupported_early_adapter_form"
 			continue
+		plot["visual_form"]=kind(plot)
 		if kind(plot).is_empty(): continue
 		if kind(plot) in KIT:
 			var envelope := kit_mesh(kind(plot)).get_aabb()
@@ -81,6 +82,20 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		if String(record.early_kind) in KIT:
 			record.erase("garden")
 	return plan
+
+static func remember_layout(plan:Dictionary,plots:Array[Dictionary])->void:
+	# Called explicitly by the live renderer. Saved plot geometry owns these sites;
+	# the pure layout function used by previews/tests never changes simulation data.
+	var by_plot:Dictionary={}
+	for record:Dictionary in plan.buildings:
+		var site:=record.duplicate(true);site.erase("plot");site.erase("garden");site.erase("early_kind")
+		var id:=int(record.plot_id)
+		if not by_plot.has(id):by_plot[id]=[]
+		by_plot[id].append(site)
+	for plot in plots:
+		if by_plot.has(int(plot.id)):
+			plot["visual_building_sites"]=by_plot[int(plot.id)]
+			plot["visual_sites_form"]=kind(plot) if not kind(plot).is_empty() else String(plot.get("form",""))
 
 static func kit_mesh(name: String) -> Mesh:
 	if meshes.has(name): return meshes[name]
@@ -121,7 +136,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		for record in plan.buildings:
 			if String(record.get("early_kind","")) != name: continue
 			var plot: Dictionary = record.plot
-			if String(plot.get("status","active")) in ["ruin","vacant","reclaimed","under_construction"]: continue
+			if String(plot.get("status","active")) in ["ruin","reclaimed","under_construction"]: continue
 			if float(plot.get("damage",{}).get("structural",0)) > .65: continue
 			visible.append(record)
 		if visible.is_empty(): continue

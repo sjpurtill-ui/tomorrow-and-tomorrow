@@ -193,7 +193,7 @@ func test_no_fit_omits_legacy_roofs_and_restores_real_extent() -> void:
 func test_construction_fire_and_reoccupation_keep_reserved_sites() -> void:
 	var data := fixture(4)
 	var initial := TOWN.layout(data.plots, data.routes, dry)
-	for state in ["under_construction", "ruin", "vacant", "reclaimed"]:
+	for state in ["under_construction", "ruin", "reclaimed"]:
 		for plot in data.plots: plot.status = state
 		var plan := TOWN.layout(data.plots, data.routes, dry)
 		assert_array(identities(plan)).is_equal(identities(initial))

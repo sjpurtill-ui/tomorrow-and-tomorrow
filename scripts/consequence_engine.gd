@@ -561,7 +561,7 @@ func _council_support()->float:
 
 func process_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
-	refresh_policy_lifecycle()
+	if GameState.resource_settlement_id=="": refresh_policy_lifecycle()
 	GameState.synchronize_population_allocations()
 	var previous: Dictionary = GameState.simulation_metrics.duplicate(true)
 	var traveling:=bool(context.get("traveling",GameState.convoy_traveling))
@@ -746,7 +746,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var reproduction:=GameState.process_reproduction_day({
 		"health":GameState.population_health,"food_security":GameState.food_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
-		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0)),
+		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(SettlementModel.national_population())),
 		"conception_support":DiscoverySystem.effect("conception_support")+policy_effect("conception_support")+GameState.founding_effect("conception_support")+ProgressionSystem.effect("conception_support"),
 		"maternal_safety":DiscoverySystem.effect("maternal_safety"),"neonatal_survival":DiscoverySystem.effect("neonatal_survival")
 	})
@@ -866,7 +866,7 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 	var title:="%d %s%s at %s" % [count,noun,"" if count==1 else "s",location]
 	var record:={
 		"id":"demographic_%s_%d_%d" % [kind,day,GameState.demographic_ledger.size()],
-		"day":day,"start_day":day,"end_day":day,"title":title,"description":description,
+		"settlement_id":SettlementModel._primary_settlement_id(),"day":day,"start_day":day,"end_day":day,"title":title,"description":description,
 		"domain":"population","severity":"demographic","kind":kind,"count":count,
 		"cause":cause,"location":location,"food_days":food_days,"production_ratio":production_ratio,"water_intake_ratio":water_intake,"water_source_distance_km":water_distance,
 		"health":GameState.population_health,"housing_ratio":housing_ratio,"population_after":GameState.population_total,"affected_cohorts":affected_cohorts.duplicate(true),
@@ -876,7 +876,7 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 	# episode while preserving its first and last day.
 	if not GameState.demographic_ledger.is_empty():
 		var recent:Dictionary=GameState.demographic_ledger[0]
-		if String(recent.get("kind",""))==kind and String(recent.get("cause",""))==cause and String(recent.get("location",""))==location and day-int(recent.get("end_day",day))<=14:
+		if String(recent.get("settlement_id",""))==String(record.settlement_id) and String(recent.get("kind",""))==kind and String(recent.get("cause",""))==cause and String(recent.get("location",""))==location and day-int(recent.get("end_day",day))<=14:
 			recent["count"]=int(recent.get("count",0))+count
 			recent["end_day"]=day
 			recent["day"]=day

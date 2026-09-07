@@ -68,6 +68,15 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			obstacles.append({"polygon": polygon, "bounds": bounds(polygon)})
 	var road_bounds: Array[Rect2] = []
 	for road in road_envelopes: road_bounds.append(bounds(road))
+	# Reserve saved physical buildings before attempting any new sites. Growth,
+	# road maintenance and changes in occupancy cannot relocate an existing home.
+	for plot in ordered:
+		if not supports(plot) or int(plot.get("id",0))>MAX_PLOTS:continue
+		if String(plot.get("visual_sites_form",""))!=String(plot.get("visual_form",plot.get("form",""))):continue
+		for site:Dictionary in plot.get("visual_building_sites",[]):
+			if records.size()>=MAX_BUILDINGS:break
+			var retained:=site.duplicate(true);retained["plot"]=plot
+			records.append(retained);replaced[int(plot.id)]=true
 	for plot in ordered:
 		if int(plot.get("id", 0)) > MAX_PLOTS or not supports(plot): continue
 		var polygon: PackedVector2Array = plot.get("polygon", PackedVector2Array())
@@ -85,6 +94,8 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		var rng := RandomNumberGenerator.new()
 		rng.seed = int(plot.get("seed", plot.id))
 		var accepted := 0
+		for retained in records:
+			if int(retained.plot_id)==int(plot.id):accepted+=1
 		for attempt in (1216 if compact_extent != Vector2.ZERO else 192):
 			if accepted >= target or records.size() >= MAX_BUILDINGS: break
 			var variant := 4 if String(plot.land_use) == "market" else (5 if attempt >= 96 else (absi(int(plot.get("seed", 1))) + attempt) % 4)
@@ -212,7 +223,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		for record in plan.buildings:
 			if int(record.variant) != variant: continue
 			var plot: Dictionary = record.plot
-			if String(plot.get("status", "active")) in ["ruin", "vacant", "reclaimed"]: continue
+			if String(plot.get("status", "active")) in ["ruin", "reclaimed"]: continue
 			if String(plot.get("status", "")) == "under_construction": continue
 			if float(plot.get("damage", {}).get("structural", 0.0)) > 0.65: continue
 			visible.append(record)

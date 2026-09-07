@@ -554,13 +554,13 @@ func _build_toolbar()->void:
 	compass_label.pressed.connect(func()->void: terrain._reset_camera_north())
 	compass_label.tooltip_text="Click to reset north-up (N). Rotate with Q/E or Shift + middle-drag; drag vertically to tilt."
 	scale_row.add_child(compass_label)
-	var aerial_button:=Button.new()
-	aerial_button.name="AerialAltitudeButton"
-	aerial_button.text="10,000 FT"
-	aerial_button.tooltip_text="Descend to 10,000 feet above the land under the camera. F7. Scroll to continue zooming."
-	aerial_button.add_theme_font_size_override("font_size",10)
-	aerial_button.pressed.connect(func()->void: terrain._inspect_aerial_altitude())
-	scale_row.add_child(aerial_button)
+	distance_selector=OptionButton.new();distance_selector.name="MapDistanceLevel"
+	distance_selector.fit_to_longest_item=false
+	distance_selector.custom_minimum_size.x=130
+	for level:Dictionary in terrain.CAMERA_DISTANCE_LEVELS:distance_selector.add_item(String(level.name))
+	distance_selector.tooltip_text="10,000 ft · 50,000 ft · Region · Continent. Scroll or pinch changes one level; Shift-scroll makes gentle fine adjustments."
+	distance_selector.item_selected.connect(func(index:int)->void:terrain.set_camera_distance_level(index))
+	scale_row.add_child(distance_selector)
 
 	toolbar.reset_size()
 	_position_toolbar()
@@ -774,7 +774,13 @@ func _refresh_time()->void:
 	time_pill.reset_size()
 	_layout()
 
+var _overall_population:=0
+var _overall_vitals:Dictionary={}
+var distance_selector:OptionButton
+
 func _refresh_kpis()->void:
+	_overall_population=GameState.population_total
+	_overall_vitals=GameState.rolling_vital_balance(365)
 	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: SettlementModel.with_local_population(_refresh_local_kpis))
 
 func _refresh_local_kpis()->void:
@@ -784,7 +790,7 @@ func _refresh_local_kpis()->void:
 	var health:=roundi(GameState.population_health*100.0)
 	var food_days:=float(metrics.get("food_days",0.0))
 	var food_balance:=float(metrics.get("food_balance",0.0))
-	var vital_balance:Dictionary=GameState.rolling_vital_balance(365)
+	var vital_balance:Dictionary=_overall_vitals
 	var births:=int(vital_balance.get("births",0))
 	var deaths:=int(vital_balance.get("deaths",0))
 	var vital_net:=int(vital_balance.get("net",births-deaths))
@@ -797,11 +803,12 @@ func _refresh_local_kpis()->void:
 	var water_days:=float(water.get("days",0.0))
 	var water_intake:=roundi(float(water.get("intake_ratio",1.0))*100.0)
 	var signature:="%d|%d|%.1f|%.1f|%d|%d|%d|%d|%.1f|%d" % [population,health,food_days,food_balance,births,deaths,efficiency,idle,water_days,water_intake]
+	signature+="|%d|%s" % [_overall_population,GameState.selected_player_settlement_id]
 	if signature==_kpi_signature: return
 	_kpi_signature=signature
-	var vital_text:="B %d − D %d = %+d · 12M" % [births,deaths,vital_net]
-	var vital_color:=Tokens.GREEN if vital_net>0 else (Tokens.RED if vital_net<0 else Tokens.MUTED)
-	_update_kpi("population",str(population),vital_text,vital_color,"Population %d · trailing 12 months: %d births − %d deaths = %+d natural change. Click for people and labor." % [population,births,deaths,vital_net])
+	var selected:Dictionary=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	var city_name:=String(selected.get("name","Selected city"))
+	_update_kpi("population","%d overall" % _overall_population,"%d · %s" % [population,city_name.left(18)],Tokens.MUTED,"Overall population: %d. Selected city — %s: %d.\nOverall trailing 12 months: %d births − %d deaths = %+d natural change. Click for people and labor." % [_overall_population,city_name,population,births,deaths,vital_net])
 	var projected:=float(metrics.get("food_projected_days",food_days))
 	if food_balance<0.0:
 		_update_kpi("food","%.1f d" % food_days,"▼ shortage %dd" % roundi(projected),Tokens.RED,"Days of adult-equivalent rations in store. Net %.1f/day." % food_balance)
@@ -856,6 +863,7 @@ func _refresh_queue()->void:
 	_rebuild_queue(items)
 
 func _refresh_toolbar()->void:
+	if distance_selector: distance_selector.select(terrain.camera_distance_level())
 	var settle:Button=toolbar_action_buttons.get("settle")
 	var scouts:Button=toolbar_action_buttons.get("scouts")
 	var diplomat:Button=toolbar_action_buttons.get("diplomat")
