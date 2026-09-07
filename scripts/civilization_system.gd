@@ -3422,7 +3422,8 @@ func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->
 	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
 	if not bool(known_player.known) and _recapture_target(civ).is_empty(): return
 	var projection:=float(civ.military_population)*0.42
-	var strength:=maxi(3,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
+	var strength:=maxi(0,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
+	if not preload("res://scripts/raid_policy.gd").worthwhile(strength,float(civ.military_readiness),float(known_player.get("power",0.0))): return
 	var incident_readiness:=clampf(float(civ.military_readiness)*0.82+float(civ.get("command_readiness",0.4))*0.18,0.1,1.0)
 	var incident:Dictionary={"id":"campaign_%s_%d" % [String(civ.id),day],"source_civ_id":String(civ.id),"source_name":String(civ.name),"strength":strength,"technology":float(civ.knowledge),"readiness":incident_readiness,"aggression":float(civ.aggression),"created_day":day}
 	var recapture_target:=_recapture_target(civ)
@@ -3439,7 +3440,7 @@ func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->
 func _queue_player_raid_if_due(civ:Dictionary,relation:Dictionary,day:int,civ_index:int)->void:
 	if not bool(city_intelligence.player_estimate(String(civ.id),true).known): return
 	if pending_player_incidents.size()>=INCIDENT_LIMIT: return
-	if day-int(relation.get("last_raid_day",-9999))<180: return
+	if day-int(relation.get("last_raid_day",-9999))<mini(720,180*(1+int(relation.get("failed_home_raids",0)))): return
 	if int(relation.get("rival_contact_level",0))<2: return
 	var intelligence:=clampf(float(relation.get("rival_player_intelligence",0.0)),0.0,1.0)
 	if intelligence<0.10: return
@@ -3453,7 +3454,8 @@ func _queue_player_raid_if_due(civ:Dictionary,relation:Dictionary,day:int,civ_in
 	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
 	if not bool(known_player.known): return
 	var projection:=float(civ.military_population)*0.16
-	var strength:=maxi(3,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
+	var strength:=maxi(0,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
+	if not preload("res://scripts/raid_policy.gd").worthwhile(strength,float(civ.military_readiness),float(known_player.get("power",0.0))): return
 	pending_player_incidents.append({"id":"raid_%s_%d" % [String(civ.id),day],"incident_kind":"raid","field_encounter":true,"source_civ_id":String(civ.id),"source_name":String(civ.name),"strength":strength,"technology":float(civ.knowledge),"readiness":clampf(float(civ.military_readiness),0.1,1.0),"aggression":float(civ.aggression),"created_day":day})
 	relation["last_raid_day"]=day
 	relation["border_tension"]=clampf(float(relation.get("border_tension",0.0))+0.08,0.0,1.0)
@@ -4039,6 +4041,7 @@ func resolve_player_battle(civ_id:String,result:Dictionary)->Dictionary:
 			player_territory_balance-=transfer
 		relation["border_tension"]=clampf(float(relation.border_tension)+0.08,0.0,1.0)
 	if is_raid and decisive:
+		if campaign_mode=="defensive": relation["failed_home_raids"]=mini(3,int(relation.get("failed_home_raids",0))+1) if player_won else 0
 		relation["opinion"]=clampf(float(relation.get("opinion",0.0))-0.18,-1.0,1.0)
 		relation["border_tension"]=clampf(float(relation.get("border_tension",0.0))+0.22,0.0,1.0)
 		if player_won and campaign_mode=="offensive":

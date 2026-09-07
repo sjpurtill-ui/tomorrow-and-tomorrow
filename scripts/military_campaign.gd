@@ -1764,6 +1764,7 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	pending_aftermath=termination.duplicate(true) if home_won else {}
 	if not pending_aftermath.is_empty(): pending_aftermath["home_force_name"]=home_force_name
 	if String(pending_aftermath.get("type","continued"))=="continued": pending_aftermath.clear()
+	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)) and int(pending_aftermath.get("prisoners",0))==0 and not bool(pending_aftermath.get("captured_general",false)) and not preload("res://scripts/raid_policy.gd").has_spoils(pending_aftermath.get("spoils",{})): pending_aftermath.clear()
 	_record_council_battle(result)
 	battle_resolved.emit(result.duplicate(true))
 	if not pending_aftermath.is_empty():
@@ -1943,6 +1944,7 @@ func begin_threat_engagement()->Dictionary:
 	if available_home_troops<=0: return {"error":"No local watch or trained force is available for this campaign."}
 	_refresh_readiness()
 	var threat:=active_threat.duplicate(true)
+	threat["routine_raid"]=preload("res://scripts/raid_policy.gd").routine(threat,local_defense)
 	var home_force:Dictionary=occupation_forces[occupation_index].duplicate(true) if defending_occupation else (field_armies[field_army_index].duplicate(true) if field_army_index>=0 else local_defense)
 	var attacker:Dictionary=home_force if offensive else threat.enemy_force.duplicate(true)
 	var defender:Dictionary=threat.enemy_force.duplicate(true) if offensive else home_force
@@ -2317,7 +2319,9 @@ func _create_civilization_threat(incident:Dictionary,campaign_mode:String="defen
 	var threat_title:="Raid on %s" % target_name if is_raid and offensive else ("%s raiders approaching" % source_name if is_raid else ("Campaign for %s" % target_name if offensive and target_name!="" else ("Campaign against %s" % source_name if offensive else ("%s moves to recapture %s" % [source_name,target_name] if target_name!="" else "%s campaign approaching" % source_name))))
 	var report_text:="The raiding column is committed against %s: scouts estimate about %d defenders. Victory may seize portable stores but will not occupy the region." % [target_name,strength] if is_raid and offensive else ("Watchers report roughly %d %s raiders moving toward local stores. Muster the garrison, pay them off, or yield before they arrive." % [strength,source_name] if is_raid else ("The field host is committed against %s: scouts estimate an aggregate defending capacity of %d." % [target_name if target_name!="" else source_name,strength] if offensive else ("%s is moving roughly %d personnel to retake %s. Its occupation force will defend within seven days." % [source_name,strength,target_name] if target_name!="" else "Scouts identify an organized %s field host of roughly %d. A response is required within seven days." % [source_name,strength])))
 	active_threat={"id":"threat_%d_%d" % [int(GameState.elapsed_days),threats_resolved],"title":threat_title,"incident_kind":String(incident.get("incident_kind","campaign")),"campaign_mode":campaign_mode,"source_civ_id":String(incident.get("source_civ_id","")),"source_name":source_name,"field_encounter":bool(incident.get("field_encounter",false)),"formation_id":String(incident.get("formation_id","")),"target_region_id":String(incident.get("target_region_id","")),"target_position":incident.get("target_position",{}).duplicate(true),"target_region_name":String(incident.get("target_region_name","")),"target_region_role":String(incident.get("target_region_role","")),"target_population":float(incident.get("target_population",0.0)),"occupation_required":float(incident.get("occupation_required",0.0)),"recapture_campaign":bool(incident.get("recapture_campaign",false)),"field_army_id":int(incident.get("field_army_id",0)),"discovered_day":int(GameState.elapsed_days),"deadline_day":int(GameState.elapsed_days)+(9999 if offensive else 7),"terrain_defense":float(incident.get("terrain_defense",_terrain_defense())),"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
-	GameState.council_inbox.push_front({"id":String(active_threat.id),"advisor":"MARSHAL'S OFFICE","office":"Marshal","topic":"security","act":{"type":"report"},"text":report_text,"urgency":0.96,"day":int(GameState.elapsed_days),"status":"unread"})
+	active_threat["routine_raid"]=preload("res://scripts/raid_policy.gd").routine(active_threat,_home_defense_force(false))
+	if bool(active_threat.routine_raid): report_text="Watchers report roughly %d %s raiders. The local defense has the advantage and will handle their approach; you can inspect the report in War Planning." % [strength,source_name]
+	GameState.council_inbox.push_front({"id":String(active_threat.id),"advisor":"MARSHAL'S OFFICE","office":"Marshal","topic":"security","act":{"type":"report"},"text":report_text,"urgency":0.35 if bool(active_threat.get("routine_raid",false)) else 0.96,"day":int(GameState.elapsed_days),"status":"unread"})
 	threat_changed.emit(active_threat.duplicate(true))
 
 

@@ -11404,6 +11404,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 
 
 func _on_city_battle_started(_engagement:Dictionary)->void:
+	if bool((_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): return
 	_set_game_speed(0)
 	MilitaryCampaign.active_engagement["awaiting_player_view"]=true
 	MilitaryCommandUI.call_deferred("_open_battle_graphics")
@@ -11418,16 +11419,18 @@ func _restore_military_attention()->void:
 		_pause_for_military_attention("saved_aftermath","BATTLE AFTERMATH AWAITS","The last battle ended. Review surviving soldiers, occupation assignments and scattered personnel in Military before issuing another operation.",false)
 		return
 	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat,false)
-	elif not MilitaryCampaign.active_engagement.is_empty(): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.",false)
+	elif not MilitaryCampaign.active_engagement.is_empty() and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.",false)
 
 func _on_military_threat_attention(threat:Dictionary,truncate_batch:bool=true)->void:
 	if threat.is_empty(): return
+	if bool(threat.get("routine_raid",false)): return
 	if String(threat.get("campaign_mode","defensive"))=="offensive": return
 	var location:=String(threat.get("target_region_name",GameState.settlement_name))
 	if location.is_empty(): location=GameState.settlement_name
 	_pause_for_military_attention(String(threat.get("id","threat")),"ATTACK APPROACHING", "%s is approaching %s with roughly %d personnel. A response is due by day %d. Time is paused so you can review the threat before battle. If you resume without choosing a response, the garrison will defend or yield when the deadline passes." % [String(threat.get("source_name","An unidentified force")),location,int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",GameState.elapsed_days))],truncate_batch)
 
 func _on_battle_attention(result:Dictionary)->void:
+	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)): return
 	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:
 		_set_game_speed(0);return
 	_pause_for_military_attention("battle_%s" % str(result.get("seed",GameState.elapsed_days)),"BATTLE REPORT",MilitaryCampaign.battle_report_text(result))
