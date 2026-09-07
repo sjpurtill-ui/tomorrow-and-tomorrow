@@ -29,6 +29,9 @@ func test_known_names_visible_and_clickable_at_every_distance()->void:
 		assert_bool(label.text.contains(String(city.name).to_upper())).is_true()
 		assert_bool(label.text.contains("est.")).is_true()
 		assert_int(label.render_priority).is_equal(11)
+		map._normalize_aerial_labels()
+		map._refresh_contact_encounter_markers()
+		assert_int(label.font_size).is_equal(40 if map.camera.size>1600.0 or map.camera.size<=2.4 else 48)
 		var hit:Dictionary=map._city_from_screen(map.camera.unproject_position(label.global_position))
 		assert_str(String(hit.get("city_id",""))).is_equal(String(city.city_id))
 

@@ -12206,7 +12206,11 @@ func _update_foreign_city_annotation(marker:Node3D)->void:
 		label.visible=camera!=null
 		if camera!=null:
 			var close:=camera.size<=2.4
-			label.font_size=10 if close or camera.size>1600.0 else 12
+			var base_font_size:=10 if close or camera.size>1600.0 else 12
+			if label.has_meta("aerial_font_size"):
+				label.set_meta("aerial_font_size",base_font_size)
+				label.font_size=base_font_size*4
+			else:label.font_size=base_font_size
 			label.outline_size=3 if close else 4
 			var screen_up:=Vector2(camera.global_basis.y.x,camera.global_basis.y.z)
 			if screen_up.length_squared()<.0001:screen_up=Vector2(0,-1)

@@ -34,3 +34,9 @@ Player is already closed; current quicksave metadata records Seanston, 147 peopl
 day 2374.288, seed 1792946605. Resume this save through canonical editor Run Project
 with --resume-saved; do not create or advance a new campaign as verification.
 Integration and live verification are recorded separately.
+
+Live verification caught a second label-size writer: the foreign refresh reset
+normalized aerial font sizes, producing tiny text between LOD passes. The follow-up
+preserves the four-times raster font size and updates its base metadata. The
+four-distance test now normalizes then refreshes, asserting the size stays stable.
+Two targeted cases pass again; /tmp/foreign-label-steady-tests.log.
