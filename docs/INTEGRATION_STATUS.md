@@ -1,3 +1,9 @@
+## September 8 — whole-service training overview
+
+INTEGRATED `a3f1300` by conflict-free fast-forward from `8871aed`. Navy/Air strategy views show four colored counts and proportion bars for Training, On assignment, Target met and Paused, plus crew attendance and grouped pause reasons. Summaries include all owned forces in the selected service and no longer depend on which force was processed last. Base/equipment failures clear stale attendance, target completion clears the old exercise message, and repairs expose their actual status.
+
+All **79 canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-service-overview-canonical.log`), covering mixed-service summaries, read-only/order-independent counts, recovery, target completion, stable UI/layout and existing military operations/accounting/map checks. No save schema or rate changes. See SERVICE_TRAINING_OVERVIEW_HANDOFF.md. Native visual interaction is not claimed; no player/editor interruption. Test overrides removed. Next normal launch receives the integrated changes.
+
 ## September 8 — scout route previews and local surveys
 
 INTEGRATED `77049fc` by conflict-free fast-forward from `ce45a15`. Automatic headings now receive the same validated route preview as ordered headings, search the full compass and permit nearby surveys when long routes are blocked. Departure follows the quoted route and validates it before spending. Cards show planned outward distance, include surveying/return travel and no longer label unknown country generally low-risk. Route-only reuse prevents repeated toolbar planning; supplies and people remain current.

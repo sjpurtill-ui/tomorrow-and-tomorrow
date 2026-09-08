@@ -1,3 +1,7 @@
+## September 8 — service-wide training indicators
+
+Integrated `a3f1300`; all 79 relevant canonical tests pass. Navy/Air training now reports the entire service with four visual counts, actual crew attendance and grouped pause reasons. Stale activity clears after base/equipment failures and proficiency-target completion. No save migration, rate changes or player restart. See SERVICE_TRAINING_OVERVIEW_HANDOFF.md.
+
 ## September 8 — scout route planning
 
 Integrated `77049fc`; all 60 focused canonical checks pass. Automatic route selection validates before departure, searches all compass sectors and allows local surveys. Cards show actual planned outward distance with return/survey time included. No live discoveries, unearned safety rating or quoted-route reroll. The existing peace-incident fixture failure is documented separately in SCOUT_ROUTE_PLANNING_HANDOFF.md. Saves and ongoing missions remain compatible; no player restart or graphical probe.
