@@ -1,3 +1,13 @@
+## September 8 — settlement water guidance and neighbor resentment
+
+INTEGRATED `e434bc8` by conflict-free fast-forward from `bd1992c` into the canonical Mac checkout. Review Founding Site now previews actual known water, carrying distance and household coverage before the first commitment. First/later founding rechecks exact dry ground and confirmed water within the existing 6 km collection limit. The main-map card marks nearby suitable sites and their water; clicking a numbered site uses the agreed 50,000-foot view. Ground inspection and later convoy confirmation carry the same water and neighbor warnings.
+
+Returned foreign-city reports predict stronger resentment at shorter distances. When neighbors observe or learn of the founded city, a quadratic penalty inside 30 km changes real opinion and border tension. Each player city creates at most one current grievance per affected civilization; repeated reports and days do not repeatedly charge it. Nearby cities use their established 12 km sight radius; distant cities wait for reports. Optional grievance dictionaries persist in the existing relations save data. Existing observed cities may acquire their first grievance on update. No hidden cities are exposed by preview.
+
+All **107 canonical tests pass**, zero errors/failures/skips/orphans across seven suites (`/tmp/tt-founding-water-canonical.log`); canonical headless editor import passes (`/tmp/tt-founding-water-canonical-import.log`). Includes real founding, later-city checks, existing city management and intelligence, exact water-limit boundaries, known-only suggestions, 1024×640 controls and warnings, distance ordering, observation delays, multi-city penalties and serialized deduplication. Owned test overrides removed. No player/editor was stopped or campaign save overwritten. See FOUNDING_SITE_GUIDANCE_HANDOFF.md for scope, limits and logs.
+
+At integration, canonical editor PID 2812 is open and the prior player has already exited. Native inspection and the updated player launch are being verified separately; passing tests alone do not establish live receipt.
+
 ## September 8 — latest integrated build running after reopening
 
 At the user's launch request, opened the canonical project in Godot. Editor PID **2812** and new player PID **3034** run `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`; the player command line names `res://local_terrain.tscn` and its canonical editor parent. The checkout at launch is **d9aeec5**, including command-panel layout `7a1310c` and exact command-selection refresh `41a97ff` (40 canonical tests passed before launch).
