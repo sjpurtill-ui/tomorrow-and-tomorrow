@@ -276,3 +276,48 @@ func test_commission_quote_is_read_only_and_matches_actual_equipment_blocker()->
 	var possible:Dictionary=op.commission_quote(airfield,"fighter",1)
 	assert_bool(possible.has("ok")).is_true()
 	assert_int(int(possible.crew)).is_equal(int(C.UNITS.fighter.crew))
+
+func test_rebase_cancels_pending_carrier_ferry_and_reaches_selected_airbase()->void:
+	var carrier:=_ready_force("aircraft_carrier");carrier.position={"x":100.0,"z":-10.0}
+	var wing:=_ready_force("fighter")
+	assert_bool(op.attach_carrier(int(wing.id),int(carrier.id)).has("ok")).is_true()
+	assert_bool(op.rebase(int(wing.id),airfield).has("ok")).is_true()
+	assert_int(int(wing.pending_carrier_id)).is_equal(0)
+	op.advance(1)
+	assert_int(int(wing.carrier_id)).is_equal(0)
+	assert_float(op.force_position(wing).distance_to(op.point(op.base(airfield)))).is_less(.001)
+
+func test_carrier_wing_stand_down_stays_on_deck_and_preserves_equipment()->void:
+	var carrier:=_ready_force("aircraft_carrier");carrier.position={"x":100.0,"z":-10.0}
+	var wing:=_ready_force("fighter",2)
+	wing.carrier_id=carrier.id;wing.mission="air_superiority"
+	var people:=MilitaryCampaign._mobilized_count()
+	assert_bool(op.assign(int(wing.id),{},"hold").has("ok")).is_true()
+	assert_int(int(wing.carrier_id)).is_equal(int(carrier.id))
+	assert_array(wing.route).is_empty()
+	op.advance(1)
+	assert_str(String(wing.status)).is_equal("Standing by on carrier deck")
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(people)
+	assert_int(op.hardware(wing)).is_equal(2)
+
+func test_disband_cannot_teleport_distant_hulls_to_reserve_or_orphan_deck_wings()->void:
+	var carrier:=_ready_force("aircraft_carrier")
+	var wing:=_ready_force("fighter");wing.carrier_id=carrier.id
+	var before:Dictionary=op.export_state()
+	assert_bool(op.disband(int(carrier.id)).has("error")).is_true()
+	assert_bool(op.disband(int(wing.id)).has("error")).is_true()
+	assert_dict(op.export_state()).is_equal(before)
+	wing.carrier_id=0
+	carrier.position={"x":100.0,"z":-10.0}
+	assert_bool(op.disband(int(carrier.id)).has("error")).is_true()
+
+func test_merging_carriers_redirects_incoming_wings_and_keeps_save_valid()->void:
+	var first:=_ready_force("aircraft_carrier")
+	var second:=_ready_force("aircraft_carrier")
+	var wing:=_ready_force("fighter")
+	assert_bool(op.attach_carrier(int(wing.id),int(second.id)).has("ok")).is_true()
+	assert_bool(op.merge_forces(int(first.id),int(second.id)).has("ok")).is_true()
+	assert_int(int(wing.pending_carrier_id)).is_equal(int(first.id))
+	assert_str(op.validate(op.export_state())).is_empty()
+	op.advance(1)
+	assert_int(int(wing.carrier_id)).is_equal(int(first.id))

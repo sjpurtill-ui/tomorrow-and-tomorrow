@@ -1,0 +1,7 @@
+# Carrier and force order transitions
+
+Base c53a964. Worktree /Users/seanpurtill/Documents/Codex/tt-main-map-services, branch codex/main-map-services. Primary agent is worker and integrator; owned files are scripts/joint_operations.gd and tests/test_joint_campaign_loop.gd.
+
+READY: rebasing explicitly clears pending carrier transfers and obsolete region assignments; a deck wing's stand-down stops sorties while retaining its carrier. Disbanding, merging and splitting require physical arrival at an operational home base. Carrier task forces cannot be disbanded while wings are attached or incoming. Carrier merges retarget both attached and incoming wings, preserving valid save references. Carrier transfers reject ongoing transport operations. Existing main-map Navy/Air entry points are unchanged.
+
+Validation: 38 cases passed across joint campaign loop, joint operations and main-map services; zero errors/failures/orphans. Four new cases verify rebasing cancellation and actual arrival, carrier stand-down and crew/equipment conservation, transactional rejection of remote disband/orphaning, and merge/ferry save validity. /tmp/tt-carrier-transitions.log. No new save fields or migration required; old valid saves remain accepted. No shared-file conflicts. Running player must not be restarted during this scheduled pass; availability in a new player process follows its next normal launch. This is order correctness, not a claim of full HOI4 parity.

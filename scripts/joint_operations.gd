@@ -156,7 +156,7 @@ func assign(id:int,region:Dictionary,mission:String)->Dictionary:
 	if mission not in missions_for(record):return {"error":"This force is not equipped for that mission."}
 	if logistics.busy(id):return {"error":"This force is carrying a convoy. Complete or recall that operation first."}
 	if mission=="transport":return {"error":"Choose a destination and cargo through Transport; crews need a concrete embarkation order."}
-	if not _valid_position(region.get("position",{})) and mission!="hold":return {"error":"Choose a valid region on the operations map."}
+	if not _valid_position(region.get("position",{})) and mission!="hold":return {"error":"Choose a valid region on the world map."}
 	if mission!="hold":
 		if region.get("domain","")!=record.domain or not region.has("position"):return {"error":"Choose the matching sea or air region."}
 		var origin:=base(int(record.base_id))
@@ -165,6 +165,11 @@ func assign(id:int,region:Dictionary,mission:String)->Dictionary:
 		var carrier:=force(int(record.get("carrier_id",0)))
 		var launch:=point(origin) if carrier.is_empty() else force_position(carrier)
 		if R.coverage(region,launch,range_km(record))<=0:return {"error":"This area is outside the force's range from its base or carrier."}
+	# Standing down a deck wing stops sorties without silently moving it to land.
+	if mission=="hold" and record.domain=="air" and int(record.get("carrier_id",0))>0:
+		record.mission="hold";record.region={};record.regions=[];record.route=[];record.pending_carrier_id=0
+		record.status="Standing by on carrier deck"
+		return {"ok":true,"message":"Sorties stopped. The wing remains aboard its carrier; use Rebase to transfer ashore."}
 	var destination:=point(base(int(record.base_id)))
 	if mission!="hold":
 		destination=point(region)
@@ -193,10 +198,18 @@ func configure(id:int,replace:bool,threshold:float)->Dictionary:
 	if record.is_empty() or record.owner!="player":return {"error":"Select your force."}
 	record.auto_replace=replace;record.repair_threshold=clampf(threshold,.2,.9)
 	return {"ok":true,"message":"Replacement and repair policy updated."}
+func organized_at_home(record:Dictionary)->bool:
+	if record.is_empty() or record.mission!="hold" or not record.get("route",[]).is_empty() or logistics.busy(int(record.id)):return false
+	if int(record.get("carrier_id",0))>0 or int(record.get("pending_carrier_id",0))>0:return false
+	var home:=base(int(record.base_id))
+	return base_ready(home) and base_owned(home,String(record.owner)) and force_position(record).distance_to(point(home))<2
+
 func disband(id:int)->Dictionary:
 	var record:=force(id)
 	if record.is_empty() or record.owner!="player":return {"error":"Select your force."}
-	if record.mission!="hold" or not record.get("route",[]).is_empty() or logistics.busy(id):return {"error":"Return to base and stand down before disbanding."}
+	if not organized_at_home(record):return {"error":"Return to an operational home base and stand down before disbanding. Carrier wings must rebase ashore."}
+	for wing:Dictionary in state.forces:
+		if int(wing.get("carrier_id",0))==id or int(wing.get("pending_carrier_id",0))==id:return {"error":"Transfer the attached or incoming air wings before disbanding this carrier task force."}
 	for type_id:String in record.units:
 		var item:=String(C.UNITS[type_id].equipment);host.military_inventory[item]=int(host.military_inventory.get(item,0))+int(record.units[type_id])
 	state.forces.erase(record)
@@ -274,7 +287,7 @@ func rebase(id:int,base_id:int)->Dictionary:
 	if force_position(record).distance_to(point(destination))>range_km(record):return {"error":"The new base is beyond this force's ferry range."}
 	var result:=set_route(record,point(destination))
 	if result.has("error"):return result
-	record.base_id=base_id;record.carrier_id=0;record.mission="hold";record.region={};record.status="Rebasing"
+	record.base_id=base_id;record.carrier_id=0;record.pending_carrier_id=0;record.mission="hold";record.region={};record.regions=[];record.status="Rebasing"
 	return {"ok":true,"message":"Crews are moving the force to its new home base."}
 
 func attach_carrier(wing_id:int,carrier_id:int)->Dictionary:
@@ -288,10 +301,11 @@ func attach_carrier(wing_id:int,carrier_id:int)->Dictionary:
 	for other:Dictionary in state.forces:
 		if (int(other.get("carrier_id",0))==carrier_id or int(other.get("pending_carrier_id",0))==carrier_id) and int(other.id)!=wing_id:occupied+=hardware(other)
 	if capacity<occupied+hardware(wing):return {"error":"Carrier deck capacity is %d; %d aircraft places are free." % [capacity,maxi(0,capacity-occupied)]}
+	if logistics.busy(wing_id):return {"error":"Finish or recall this wing's transport before ferrying to a carrier."}
 	if force_position(wing).distance_to(force_position(carrier))>range_km(wing):return {"error":"The carrier is beyond ferry range."}
 	var transfer:=set_route(wing,force_position(carrier))
 	if transfer.has("error"):return transfer
-	wing.pending_carrier_id=carrier_id;wing.carrier_id=0;wing.mission="hold";wing.region={}
+	wing.pending_carrier_id=carrier_id;wing.carrier_id=0;wing.mission="hold";wing.region={};wing.regions=[]
 	return {"ok":true,"message":"Wing is ferrying to the carrier. Missions operate from the deck after arrival."}
 
 func carrier_capacity(record:Dictionary)->int:
@@ -306,7 +320,7 @@ func hardware(record:Dictionary)->int:
 func merge_forces(first_id:int,second_id:int)->Dictionary:
 	var first:=force(first_id);var second:=force(second_id)
 	if first.is_empty() or second.is_empty() or first_id==second_id or first.owner!="player" or second.owner!="player" or first.domain!=second.domain:return {"error":"Choose two different owned forces of the same service."}
-	if first.mission!="hold" or second.mission!="hold" or first.base_id!=second.base_id or not first.get("route",[]).is_empty() or not second.get("route",[]).is_empty() or logistics.busy(first_id) or logistics.busy(second_id):return {"error":"Both forces must be standing down at the same base."}
+	if not organized_at_home(first) or not organized_at_home(second) or first.base_id!=second.base_id:return {"error":"Both forces must be standing down at the same base."}
 	if first.domain=="air" and first.units.keys()!=second.units.keys():return {"error":"An air wing uses one compatible aircraft type."}
 	for id:String in second.units:
 		if int(first.authorized.get(id,0))+int(second.authorized[id])>100:return {"error":"Split this larger force into additional task forces or wings."}
@@ -315,6 +329,7 @@ func merge_forces(first_id:int,second_id:int)->Dictionary:
 	first.training=minf(float(first.training),float(second.training));first.condition=minf(float(first.condition),float(second.condition))
 	for wing:Dictionary in state.forces:
 		if int(wing.get("carrier_id",0))==second_id:wing.carrier_id=first_id
+		if int(wing.get("pending_carrier_id",0))==second_id:wing.pending_carrier_id=first_id
 	state.forces.erase(second)
 	return {"ok":true,"message":"Forces combined; personnel and equipment totals are unchanged."}
 
@@ -472,7 +487,7 @@ func advance(day:int)->void:
 			if destination.distance_to(force_position(record))>2:
 				var route:=set_route(record,destination)
 				if route.has("error"):record.status=String(route.error);continue
-		if record.mission=="hold" and record.get("route",[]).is_empty():record.status="Standing by at base";continue
+		if record.mission=="hold" and record.get("route",[]).is_empty():record.status="Standing by on carrier deck" if not carrier.is_empty() else "Standing by at base";continue
 		if not pay_fuel(record):record.status="No fuel · produce fuel or stand down other missions";continue
 		if int(record.get("pending_carrier_id",0))>0:
 			var target:=force(int(record.pending_carrier_id))
@@ -564,7 +579,7 @@ func open_service(domain:String)->void:
 
 func split_force(id:int)->Dictionary:
 	var original:=force(id)
-	if original.is_empty() or original.owner!="player" or original.mission!="hold" or not original.get("route",[]).is_empty() or logistics.busy(id):return {"error":"Stand the force down at base before splitting it."}
+	if original.is_empty() or original.owner!="player" or not organized_at_home(original):return {"error":"Stand the force down at base before splitting it."}
 	if hardware(original)<2 or state.forces.size()>=MAX_FORCES:return {"error":"At least two craft and a free command record are required."}
 	var copy:=original.duplicate(true);copy.id=_id();copy.name=String(original.name)+" Detachment"
 	for type_id:String in original.units:
