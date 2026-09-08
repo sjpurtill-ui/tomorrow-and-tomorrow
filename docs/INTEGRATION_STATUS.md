@@ -1,3 +1,11 @@
+## September 8 — automatic service training and broad military roster
+
+INTEGRATED `ab0c4b4` by conflict-free fast-forward from `17da40a`. Army, Navy and Air now have independent saved Suspend/Maintain/Regular/Intensive training policies. Staff choose eligible rotations, fund exercises, protect civilian food reserves and pause for shortages; repeated orders grant no progress. Army exercises are six times longer with four times the per-participant daily ration/wear rates. Initial land and crew instruction use longer durations and real recurring costs. Rival training uses the shared policy/course limits and paid resource rules instead of its prior faster land formula.
+
+Military/F6 opens the broad visual roster and training strategy view. Separate naval/air map commands remain available; Close, Escape and exposed-map clicks dismiss the roster. New army reports carry dated formation data. Optional save fields migrate existing course completion fractions once and preserve service policies and paid progress.
+
+All **80 canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-training-canonical.log`), including 15 new strategy/UI cases and existing accounting, defense, operations, campaign, catalog and dismissal suites. Headless checks cover controls, layout width and dismissal/state behavior; native visual interaction is not claimed. See TRAINING_STRATEGY_HANDOFF.md. Both temporary test-userdata overrides were removed. The running game/editor were not interrupted or relaunched; the next normal launch receives the integrated scripts.
+
 ## September 8 — click map to dismiss panels and help
 
 INTEGRATED `e493ab5` from base 889199f. Bare-map clicks close ordinary/detail docks and map-help tips together, consuming the click before world orders. Supported report/menu/dispatch backdrops close on clicks outside their bodies. Military drawing and actual marker/region selection retain their input; otherwise blank map dismisses command mode. Mandatory decision dialogs keep explicit controls. Opening map-help copy now describes real pan, four-distance zoom, city inspection and map-click dismissal, with a clearer Close button.
