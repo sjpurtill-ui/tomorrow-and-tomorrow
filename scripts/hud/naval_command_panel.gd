@@ -17,7 +17,7 @@ func _build_service()->void:
 	_button(ports,"Disband task force in port",func():_report(op.disband(selected_id)))
 	var transport:=_page("Convoys")
 	_transport_controls(transport,"Sea transport uses cargo capacity and a navigable sea route. Assemble troops at the port. Hostile landings need preparation and naval control; the general commands troops ashore.")
-	reports=_label(transport,"",13)
+	reports=_label(_page("Reports"),"",13)
 
 func _force_summary(force:Dictionary)->String:
 	var base:Dictionary=op.base(int(force.base_id))

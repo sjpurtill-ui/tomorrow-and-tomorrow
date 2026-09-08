@@ -191,3 +191,88 @@ func test_split_with_casualties_preserves_authorized_replacement_targets()->void
 	assert_int(int(original.authorized.destroyer)+int(other.authorized.destroyer)).is_equal(100)
 	assert_int(int(original.authorized.light_cruiser)+int(other.authorized.light_cruiser)).is_equal(100)
 	assert_int(op.hardware(original)+op.hardware(other)).is_equal(2)
+
+func test_wooden_hulls_repair_from_wood_and_fiber_without_iron()->void:
+	var boat:=_ready_force("war_canoe",2)
+	boat.condition=.5;boat.repairing=true
+	GameState.resource_stockpiles["Iron Ore"]=0.0
+	var before:=float(GameState.resource_stockpiles.Timber)
+	var costs:Dictionary=op.repair_costs(boat)
+	assert_bool(costs.has("Iron Ore")).is_false()
+	var receipt:Dictionary=op.repair_at_base(boat,op.base(port))
+	assert_bool(receipt.has("ok")).is_true()
+	assert_float(float(boat.condition)).is_equal_approx(.54,.0001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(before-float(costs.Timber),.0001)
+
+func test_repair_shortage_does_not_partially_pay_or_heal()->void:
+	var boat:=_ready_force("war_canoe",2);boat.condition=.5;boat.repairing=true
+	GameState.resource_stockpiles["Fiber Plants"]=0.0
+	var before:Dictionary=GameState.resource_stockpiles.duplicate(true)
+	var receipt:Dictionary=op.repair_at_base(boat,op.base(port))
+	assert_bool(receipt.has("error")).is_true()
+	assert_str(String(receipt.error)).contains("Repairs waiting for")
+	assert_dict(GameState.resource_stockpiles).is_equal(before)
+	assert_float(float(boat.condition)).is_equal(.5)
+
+func test_airbase_crowding_reduces_sorties_but_not_ships_at_sea()->void:
+	var ships:=_ready_force("war_canoe",30)
+	var wing:=_ready_force("fighter",30)
+	op.base(port).capacity=10;op.base(airfield).capacity=10
+	var air_region:Dictionary=op.create_region("air",op.R.rectangle(Vector2(0,0),20),"Flight area").region
+	var sea_region:Dictionary=op.create_region("navy",op.R.rectangle(Vector2(0,-20),20),"Sea area").region
+	var air:Dictionary=op.mission_factors(wing,air_region,1)
+	var sea:Dictionary=op.mission_factors(ships,sea_region,1)
+	assert_float(float(air.crowding)).is_equal_approx(1.0/3,.0001)
+	assert_float(float(sea.crowding)).is_equal(1.0)
+
+func test_readiness_explains_training_fuel_and_range_without_mutation()->void:
+	var wing:=_ready_force("fighter");wing.training=.5
+	MilitaryCampaign.military_consumables.fuel=0
+	var region:Dictionary=op.create_region("air",op.R.rectangle(Vector2(9000,0),20),"Distant area").region
+	var before:Dictionary=op.export_state()
+	var ready:Dictionary=op.readiness(int(wing.id),region)
+	var reasons:=str(ready.blockers)
+	assert_str(reasons).contains("Training:").contains("beyond operating range").contains("Insufficient fuel")
+	assert_dict(op.export_state()).is_equal(before)
+
+func test_air_superiority_does_not_attack_grounded_wings_and_interception_targets_raids()->void:
+	var fighter:=_ready_force("fighter");fighter.mission="air_superiority"
+	var bomber:=_ready_force("tactical_bomber");bomber.mission="hold";bomber.efficiency=0.0
+	assert_bool(op.can_attack(fighter,bomber)).is_false()
+	bomber.mission="strategic_bombing";bomber.efficiency=1.0
+	assert_bool(op.can_attack(fighter,bomber)).is_true()
+	fighter.mission="interception"
+	assert_bool(op.can_attack(fighter,bomber)).is_true()
+	bomber.mission="air_superiority"
+	assert_bool(op.can_attack(fighter,bomber)).is_false()
+
+func test_port_strikes_and_naval_strikes_use_physical_port_location()->void:
+	var bomber:=_ready_force("naval_bomber");bomber.mission="port_strike"
+	var ship:=_ready_force("war_canoe");ship.mission="strike_force"
+	assert_bool(op.can_attack(bomber,ship)).is_true()
+	ship.position={"x":100.0,"z":-100.0}
+	assert_bool(op.can_attack(bomber,ship)).is_false()
+	bomber.mission="naval_strike"
+	assert_bool(op.can_attack(bomber,ship)).is_true()
+
+func test_surface_ships_cannot_fire_across_an_entire_player_drawn_region()->void:
+	var first:=_ready_force("war_canoe");first.mission="patrol";first.position={"x":0.0,"z":-20.0}
+	var second:=_ready_force("war_canoe");second.mission="patrol";second.position={"x":100.0,"z":-20.0}
+	assert_bool(op.can_attack(first,second)).is_false()
+	second.position.x=1.0
+	assert_bool(op.can_attack(first,second)).is_true()
+	first.repairing=true
+	assert_bool(op.can_attack(first,second)).is_false()
+
+func test_commission_quote_is_read_only_and_matches_actual_equipment_blocker()->void:
+	MilitaryCampaign.military_inventory.fighter_equipment=1
+	var before:Dictionary=op.export_state()
+	var people:=MilitaryCampaign._mobilized_count()
+	var quote:Dictionary=op.commission_quote(airfield,"fighter",2)
+	assert_str(String(quote.error)).contains("only 1 in reserve")
+	assert_dict(op.commission(airfield,"fighter",2)).is_equal(quote)
+	assert_dict(op.export_state()).is_equal(before)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(people)
+	var possible:Dictionary=op.commission_quote(airfield,"fighter",1)
+	assert_bool(possible.has("ok")).is_true()
+	assert_int(int(possible.crew)).is_equal(int(C.UNITS.fighter.crew))

@@ -29,6 +29,11 @@ var panel:PanelContainer
 var terrain:Node
 var area_name:LineEdit
 var pages:TabContainer
+var readiness_label:Label
+var assign_button:Button
+var commission_button:Button
+var commission_status:Label
+var base_status:Label
 
 func _ready()->void:
 	layer=82;op=MilitaryCampaign.joint_operations
@@ -47,7 +52,7 @@ func _ready()->void:
 	var style:=StyleBoxFlat.new();style.bg_color=Color("101e29");style.border_color=Color("527183");style.set_border_width_all(1);style.set_content_margin_all(12);panel.add_theme_stylebox_override("panel",style)
 	panel.add_theme_font_size_override("font_size",15)
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",8);panel.add_child(root)
-	var heading:=_row(root);_label(heading,"NAVAL COMMAND" if domain=="navy" else "AIR COMMAND",21);_button(heading,"×",queue_free)
+	var heading:=_row(root);_label(heading,"NAVAL COMMAND" if domain=="navy" else "AIR COMMAND",21);var close:=_button(heading,"×",queue_free);close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.custom_minimum_size.x=32
 	pages=TabContainer.new();pages.size_flags_vertical=Control.SIZE_EXPAND_FILL;root.add_child(pages)
 	_build_service()
 	feedback=_label(root,"",13)
@@ -81,7 +86,8 @@ func _force_controls(column:Node,stand_down:String)->void:
 	force_picker=_option(column);force_picker.item_selected.connect(func(_index:int):selected_id=int(_selected(force_picker));_select_force())
 	status=_label(column,"",14)
 	mission_picker=_option(column)
-	_button(column,"Assign mission to selected region",_assign)
+	assign_button=_button(column,"Assign mission to selected region",_assign)
+	readiness_label=_label(column,"",13)
 	_button(column,stand_down,func():_report(op.assign(selected_id,{},"hold")))
 	replacement=CheckBox.new();replacement.text="Reinforce from equipment reserve";column.add_child(replacement)
 	replacement.toggled.connect(func(value:bool):if selected_id>0:_report(op.configure(selected_id,value,.6)))
@@ -90,15 +96,17 @@ func _force_controls(column:Node,stand_down:String)->void:
 func _production_controls(column:Node,base_word:String,creation_word:String)->void:
 	base_picker=_option(column)
 	base_picker.item_selected.connect(func(_index:int):_refresh_status())
+	base_status=_label(column,"",13)
 	_button(column,"Rebase selected force",func():_report(op.rebase(selected_id,int(_selected(base_picker)))))
 	city_picker=_option(column)
 	_button(column,"Build "+base_word+" in selected city",func():_report(op.build_base(String(_selected(city_picker)),domain)))
 	type_picker=_option(column);type_picker.item_selected.connect(func(_index:int):_refresh_status())
 	_label(column,"Equipment reserve target / new craft",13)
-	quantity=SpinBox.new();quantity.min_value=1;quantity.max_value=100;quantity.value=1;column.add_child(quantity)
+	quantity=SpinBox.new();quantity.min_value=1;quantity.max_value=100;quantity.value=1;column.add_child(quantity);quantity.value_changed.connect(func(_amount:float):_refresh_status())
 	recipe=_label(column,"",13)
 	_button(column,"Start equipment production",_produce)
-	_button(column,creation_word,_commission)
+	commission_button=_button(column,creation_word,_commission)
+	commission_status=_label(column,"",13)
 
 func _transport_controls(column:Node,description:String)->void:
 	_label(column,description,13)
@@ -184,6 +192,7 @@ func _select_force()->void:
 	_refresh_status()
 func _region(region:Dictionary)->void:
 	map.selected=region
+	_refresh_status()
 	region_label.text=String(region.name)+" · control %d%%" % roundi(float(op.effects.control("player",region))*100)
 func _assign()->void:
 	_report(op.assign(selected_id,map.selected,String(_selected(mission_picker))))
@@ -204,10 +213,30 @@ func _report(result:Dictionary)->void:
 	_refresh_choices();map.queue_redraw()
 func _refresh_status()->void:
 	var force:Dictionary=op.force(selected_id)
-	if force.is_empty():status.text="No force selected. Produce equipment, then commission crews at a ready base."
+	if force.is_empty():status.text="No task forces yet. Open Ports to build a port, produce ships and commission crews." if domain=="navy" else "No air wings yet. Open Airbases to build an airbase, produce aircraft and form a wing."
 	else:
 		status.text=_force_summary(force)
+	assign_button.disabled=force.is_empty() or map.selected.is_empty()
+	if not force.is_empty():
+		var ready:Dictionary=op.readiness(selected_id,map.selected)
+		var lines:Array[String]=[]
+		for reason:String in ready.blockers:lines.append(reason)
+		if lines.is_empty():lines.append("Ready for orders · projected efficiency %d%%" % roundi(float(ready.efficiency)*100))
+		if domain=="air":lines.append("Coverage %d%% · airbase capacity %d%% · weather %d%%" % [roundi(float(ready.coverage)*100),roundi(float(ready.crowding)*100),roundi(float(ready.weather)*100)])
+		if int(ready.missing_equipment)>0:lines.append("%d replacement craft needed from reserve." % int(ready.missing_equipment))
+		readiness_label.text="\n".join(lines)
+	else:readiness_label.text=""
+	var selected_base:Dictionary=op.base(int(_selected(base_picker)))
+	if selected_base.is_empty():base_status.text="No base yet. Choose a city below to begin construction."
+	else:
+		var stationed:=0
+		for other:Dictionary in op.state.forces:
+			if int(other.base_id)==int(selected_base.id):stationed+=op.hardware(other)
+		base_status.text="%s · %d / %d %s\nConstruction %.1f / %.1f work-days" % [selected_base.name,stationed,selected_base.capacity,"aircraft spaces" if domain=="air" else "repair berths",selected_base.construction_work,selected_base.required_work]
 	var type_id:=String(_selected(type_picker))
+	var quote:Dictionary=op.commission_quote(int(_selected(base_picker)),type_id,int(quantity.value))
+	commission_button.disabled=quote.has("error")
+	commission_status.text=String(quote.error) if quote.has("error") else "%d crew · %d days training after formation" % [quote.crew,quote.training_days]
 	if C.UNITS.has(type_id):
 		var unit:Dictionary=C.UNITS[type_id];var materials:Array[String]=[]
 		for resource:String in unit.materials:materials.append("%.1f %s" % [unit.materials[resource],ResourceSystem.display_name(resource)])
@@ -218,7 +247,8 @@ func _refresh_status()->void:
 		if String(job.get("item",""))==String(C.UNITS.get(type_id,{}).get("equipment","")):lines.append(String(job.get("state","")))
 	if not lines.is_empty():recipe.text+="\nProduction: "+", ".join(lines)
 	var latest:Array[String]=[]
-	for event:Dictionary in op.state.events.slice(0,3):latest.append("Day %d · %s" % [event.day,event.text])
+	for event:Dictionary in op.state.events:
+		if String(event.get("domain","")) in ["",domain]:latest.append("Day %d · %s" % [event.day,event.text])
 	for convoy:Dictionary in op.state.convoys:
-		if convoy.status in ["preparing","outbound","returning"]:latest.append("Convoy %d · %s · %.0f food remaining" % [convoy.id,convoy.status,convoy.food])
-	reports.text="\n".join(latest.slice(0,6))
+		if String(op.force(int(convoy.force_id)).get("domain",""))==domain and convoy.status in ["preparing","outbound","returning"]:latest.append("Convoy %d · %s · %.0f food remaining" % [convoy.id,convoy.status,convoy.food])
+	reports.text="\n\n".join(latest.slice(0,12)) if not latest.is_empty() else "No combat or transport reports yet."

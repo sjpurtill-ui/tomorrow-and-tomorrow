@@ -17,7 +17,7 @@ func _build_service()->void:
 	_button(bases,"Disband wing at base",func():_report(op.disband(selected_id)))
 	var airlift:=_page("Airlift")
 	_transport_controls(airlift,"Transport aircraft carry supplies or eligible airborne troops. Hostile drops require air control, preparation and range. Air supply missions sustain field armies in the assigned region.")
-	reports=_label(airlift,"",13)
+	reports=_label(_page("Reports"),"",13)
 
 func _force_summary(force:Dictionary)->String:
 	var base:Dictionary=op.base(int(force.base_id))

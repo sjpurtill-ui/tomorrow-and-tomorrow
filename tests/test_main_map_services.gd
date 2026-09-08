@@ -28,7 +28,7 @@ func test_services_have_distinct_controls_and_no_secondary_map_camera()->void:
 	assert_str(_text(navy)).contains("Join selected companion's fleet").not_contains("Ferry wing")
 	assert_str(_text(air)).contains("Ferry wing to selected carrier").not_contains("Join selected companion's fleet")
 	assert_str(navy.domain).is_equal("navy");assert_str(air.domain).is_equal("air")
-	assert_int(navy.pages.get_tab_count()).is_equal(3)
+	assert_int(navy.pages.get_tab_count()).is_equal(4)
 	assert_str(air.pages.get_tab_title(1)).is_equal("Airbases")
 	assert_int(air.map.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 	assert_bool("camera" in air.map).is_false()

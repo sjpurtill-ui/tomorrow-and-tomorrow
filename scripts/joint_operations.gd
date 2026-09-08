@@ -110,7 +110,7 @@ func available_base(domain:String)->bool:
 	for record:Dictionary in state.bases:
 		if record.domain==domain and base_ready(record) and base_owned(record):return true
 	return false
-func commission(base_id:int,type_id:String,count:int,name:String="")->Dictionary:
+func commission_quote(base_id:int,type_id:String,count:int)->Dictionary:
 	if not C.UNITS.has(type_id) or count<=0 or count>100:return {"error":"Select a valid hull or aircraft count (1–100)."}
 	if state.forces.size()>=MAX_FORCES:return {"error":"The force command limit is reached."}
 	var record:=base(base_id);var unit:Dictionary=C.UNITS[type_id]
@@ -120,6 +120,12 @@ func commission(base_id:int,type_id:String,count:int,name:String="")->Dictionary
 	if int(host.military_inventory.get(String(unit.equipment),0))<count:return {"error":"Produce %d %s first; only %d in reserve." % [count,unit.label,int(host.military_inventory.get(String(unit.equipment),0))]}
 	var needed:=count*int(unit.crew)
 	if needed>maxi(0,host.recruitment_capacity()-host._mobilized_count()):return {"error":"This force needs %d crew; %d military service places are free." % [needed,maxi(0,host.recruitment_capacity()-host._mobilized_count())]}
+	return {"ok":true,"crew":needed,"reserve":int(host.military_inventory.get(String(unit.equipment),0)),"training_days":int(unit.training_days)}
+
+func commission(base_id:int,type_id:String,count:int,name:String="")->Dictionary:
+	var quote:=commission_quote(base_id,type_id,count)
+	if quote.has("error"):return quote
+	var record:=base(base_id);var unit:Dictionary=C.UNITS[type_id]
 	host.military_inventory[String(unit.equipment)]-=count
 	var groups:Dictionary={};groups[type_id]=count
 	var entry:={"id":_id(),"owner":"player","name":name if name!="" else String(unit.label)+(" Task Force" if unit.domain=="navy" else " Wing"),"domain":unit.domain,"base_id":base_id,"units":groups,"authorized":groups.duplicate(true),"mission":"hold","region":{},"status":"Training crews","training":0.0,"condition":1.0,"experience":0.0,"efficiency":0.0,"auto_replace":true,"repair_threshold":.6,"fuel_used":0,"loss_fraction":0.0,"damage":0.0}
@@ -206,8 +212,8 @@ func _power(record:Dictionary,key:String)->float:
 	var value:=0.0
 	for id:String in record.units:value+=float(C.UNITS[id].get(key,0))*int(record.units[id])
 	return value*float(record.condition)*(.5+.5*float(record.training))*float(record.efficiency)
-func _event(message:String)->void:
-	state.events.push_front({"day":int(state.last_day),"text":message})
+func _event(message:String,domain:String="")->void:
+	state.events.push_front({"day":int(state.last_day),"text":message,"domain":domain})
 	if state.events.size()>80:state.events.resize(80)
 func _losses(record:Dictionary,damage:float)->void:
 	record.damage=float(record.damage)+maxf(0,damage)
@@ -222,7 +228,7 @@ func _losses(record:Dictionary,damage:float)->void:
 		else:
 			var index:=CivilizationSystem._civilization_index(String(record.owner))
 			if index>=0:CivilizationSystem.civilizations[index]=CivilizationSystem._remove_foreign_scout_population(CivilizationSystem.civilizations[index],deaths,true)
-		_event("%s lost %d %s." % [record.name,lost,C.UNITS[id].label])
+		if record.owner=="player" or state.contacts.has("player:%d" % int(record.id)):_event("%s lost %d %s." % [record.name,lost,C.UNITS[id].label],String(record.domain))
 func _replace(record:Dictionary)->void:
 	if record.owner!="player" or not bool(record.auto_replace):return
 	for id:String in record.authorized:
@@ -326,6 +332,79 @@ func pay_fuel(record:Dictionary)->bool:
 	record.fuel_used=fuel
 	return true
 
+func mission_factors(record:Dictionary,region:Dictionary,day:int)->Dictionary:
+	var origin:=base(int(record.base_id))
+	var carrier:=force(int(record.get("carrier_id",0)))
+	var origin_point:=point(origin) if carrier.is_empty() else force_position(carrier)
+	var coverage:=R.coverage(region,origin_point,range_km(record)) if not region.is_empty() else 0.0
+	var stationed:=0
+	for other:Dictionary in state.forces:
+		if carrier.is_empty() and other.base_id==record.base_id and int(other.get("carrier_id",0))==0:stationed+=hardware(other)
+		elif not carrier.is_empty() and int(other.get("carrier_id",0))==int(carrier.id):stationed+=hardware(other)
+	var capacity:=float(origin.get("capacity",0)) if carrier.is_empty() else float(carrier_capacity(carrier))
+	# Airbase/deck capacity limits sorties. A crowded port limits repair berths,
+	# not the fighting efficiency of a fleet already at sea.
+	var crowding:=minf(1,capacity/maxf(1,stationed)) if record.domain=="air" else 1.0
+	var climate:=PlanetEnvironment.profile_at(point(region)) if not region.is_empty() else PlanetEnvironment.profile_at(origin_point)
+	var weather:=clampf(FoodSystem._weather_yield_factor(climate,float(day)),.52,1.0)
+	var base_condition:=float(origin.get("condition",0)) if carrier.is_empty() else float(carrier.condition)
+	return {"coverage":coverage,"crowding":crowding,"weather":weather,"base_condition":base_condition,"condition":float(record.condition),"stationed":stationed,"capacity":int(capacity),"efficiency":coverage*crowding*weather*base_condition*float(record.condition)}
+
+func readiness(id:int,region:Dictionary={})->Dictionary:
+	var record:=force(id)
+	if record.is_empty():return {"blockers":["Select a task force or air wing."],"efficiency":0.0}
+	var area:Dictionary=region if not region.is_empty() else record.get("region",{})
+	var result:=mission_factors(record,area,maxi(0,int(state.last_day)))
+	var blockers:Array[String]=[]
+	var origin:=base(int(record.base_id))
+	if not base_ready(origin) or not base_owned(origin,String(record.owner)):blockers.append("Home base unavailable — rebase to an operational friendly base.")
+	var missing:=0
+	for type_id:String in record.authorized:missing+=maxi(0,int(record.authorized[type_id])-int(record.units.get(type_id,0)))
+	result.missing_equipment=missing
+	if hardware(record)==0:blockers.append("No equipment — produce replacements for this force.")
+	var training_days:=1.0
+	for type_id:String in record.units:training_days=maxf(training_days,float(C.UNITS[type_id].training_days))
+	result.training_days=ceili((1.0-float(record.training))*training_days)
+	if int(result.training_days)>0:blockers.append("Training: %d days remaining." % int(result.training_days))
+	if bool(record.get("repairing",false)) or float(record.condition)<float(record.repair_threshold):blockers.append("Repairs required at home base before resuming the mission.")
+	if not record.get("route",[]).is_empty():blockers.append("Under way — mission starts after arrival.")
+	if area.is_empty():blockers.append("No region assigned — draw or select a region on the map.")
+	elif float(result.coverage)<=0:blockers.append("Selected region is beyond operating range.")
+	if record.owner=="player" and fuel_cost(record)>int(host.military_consumables.get("fuel",0)):blockers.append("Insufficient fuel: %d/day required, %d available." % [fuel_cost(record),int(host.military_consumables.get("fuel",0))])
+	result.fuel_per_day=fuel_cost(record);result.blockers=blockers
+	return result
+
+func repair_costs(record:Dictionary,rate:float=.04)->Dictionary:
+	var costs:Dictionary={}
+	for type_id:String in record.units:
+		for material:String in C.UNITS[type_id].materials:
+			costs[material]=float(costs.get(material,0))+float(C.UNITS[type_id].materials[material])*int(record.units[type_id])*.005*(rate/.04)
+	return costs
+
+func repair_at_base(record:Dictionary,origin:Dictionary)->Dictionary:
+	var waiting:=0
+	for other:Dictionary in state.forces:
+		if other.base_id==record.base_id and (bool(other.get("repairing",false)) or float(other.condition)<float(other.repair_threshold)) and force_position(other).distance_to(point(origin))<2:waiting+=hardware(other)
+	var rate:=minf(1.0-float(record.condition),.04*minf(1,float(origin.capacity)/maxi(1,waiting)))
+	var costs:=repair_costs(record,rate)
+	var paid:Dictionary
+	if record.owner=="player":
+		paid=SettlementModel.with_city_resources(String(origin.city_id),func():
+			var shortages:Array[String]=[]
+			for material:String in costs:
+				var available:=float(GameState.resource_stockpiles.get(material,0))
+				if available<float(costs[material]):shortages.append("%.1f %s (%.1f available)" % [costs[material],ResourceSystem.display_name(material),available])
+			if not shortages.is_empty():return {"error":"Repairs waiting for "+", ".join(shortages)+" at "+String(origin.name)}
+			for material:String in costs:GameState.resource_stockpiles[material]-=costs[material]
+			return {"ok":true})
+	else:
+		var total:=0.0
+		for amount in costs.values():total+=float(amount)
+		paid={"ok":true} if rival.spend(String(record.owner),total) else {"error":"Repairs waiting for supplies"}
+	if paid.has("error"):return paid
+	record.condition=minf(1,float(record.condition)+rate)
+	return {"ok":true,"message":"Repairing at %s · %d%% condition" % [origin.name,roundi(float(record.condition)*100)]}
+
 func advance(day:int)->void:
 	if day<=int(state.last_day):return
 	state.last_day=day
@@ -368,20 +447,25 @@ func advance(day:int)->void:
 		if float(record.condition)<float(record.repair_threshold):record["repairing"]=true
 		if bool(record.get("repairing",false)) and not logistics.busy(int(record.id)):
 			if not at_base:
-				if record.get("route",[]).is_empty():set_route(record,point(origin))
+				if record.get("route",[]).is_empty() or preload("res://scripts/joint_geography.gd").unpack(record.route.back()).distance_to(point(origin))>1:set_route(record,point(origin))
 			else:
-				var cost:=maxf(.1,float(hardware(record))*.2)
-				if record.owner=="player" and float(GameState.resource_stockpiles.get("Iron Ore",0))>=cost:
-					GameState.resource_stockpiles["Iron Ore"]-=cost;record.condition=minf(1,float(record.condition)+.04)
-				elif record.owner!="player" and rival.spend(String(record.owner),cost):record.condition=minf(1,float(record.condition)+.04)
+				var repaired:=repair_at_base(record,origin)
 				if float(record.condition)>=.98:record.repairing=false
-				record.status="Repairing at base · materials and time required";continue
+				record.status=String(repaired.get("error",repaired.get("message","Repairing at base")));continue
+
 		if logistics.busy(int(record.id)):
 			if not pay_fuel(record):record.status="Transport halted · no fuel";continue
 			record.efficiency=float(record.condition);record.status="Transporting";continue
+		if record.domain=="navy" and not at_base and not bool(record.get("repairing",false)) and record.mission in ["patrol","strike_force","convoy_raiding"]:
+			var contact:=latest_naval_contact(record)
+			if not contact.is_empty():
+				var destination:=preload("res://scripts/joint_geography.gd").unpack(contact.position)
+				if force_position(record).distance_to(destination)>1 and (record.get("route",[]).is_empty() or preload("res://scripts/joint_geography.gd").unpack(record.route.back()).distance_to(destination)>1):set_route(record,destination)
+			elif record.mission=="strike_force" and (record.get("route",[]).is_empty() or preload("res://scripts/joint_geography.gd").unpack(record.route.back()).distance_to(point(origin))>1):set_route(record,point(origin))
 		if record.mission=="strike_force" and at_base:
 			if not _has_contact(record):record.status="In port · waiting for a patrol contact";continue
-			var route:=set_route(record,preload("res://scripts/joint_geography.gd").unpack(record.get("mission_destination",record.region.position)))
+			var contact:=latest_naval_contact(record)
+			var route:=set_route(record,preload("res://scripts/joint_geography.gd").unpack(contact.position))
 			if route.has("error"):record.status=String(route.error);continue
 		if record.domain=="navy" and at_base and record.mission not in ["hold","strike_force"] and not record.region.is_empty():
 			var destination:=preload("res://scripts/joint_geography.gd").unpack(record.get("mission_destination",record.region.position))
@@ -398,20 +482,12 @@ func advance(day:int)->void:
 			if not record.route.is_empty():record.status="Under way";continue
 		if int(record.get("pending_carrier_id",0))>0:
 			record.carrier_id=int(record.pending_carrier_id);record.pending_carrier_id=0;record.status="Arrived on carrier deck";continue
+		if bool(record.get("repairing",false)):record.status="Returning for repairs";continue
 		if record.mission=="hold":record.status="Arrived at base";continue
 		if record.region.is_empty():record.status="Choose an operating region";continue
-		var origin_point:=point(origin) if carrier.is_empty() else force_position(carrier)
-		var coverage:=R.coverage(record.region,origin_point,range_km(record))
-		if coverage<=0:record.status="Area outside current base range";continue
-		var stationed:=0
-		for other:Dictionary in state.forces:
-			if carrier.is_empty() and other.base_id==record.base_id and int(other.get("carrier_id",0))==0:stationed+=hardware(other)
-			elif not carrier.is_empty() and int(other.get("carrier_id",0))==int(carrier.id):stationed+=hardware(other)
-		var capacity:=float(origin.capacity) if carrier.is_empty() else float(carrier_capacity(carrier))
-		var crowding:=minf(1,capacity/maxf(1,stationed))
-		var climate:=PlanetEnvironment.profile_at(point(record.region))
-		var weather:=clampf(FoodSystem._weather_yield_factor(climate,float(day)),.52,1.0)
-		record.efficiency=crowding*coverage*weather*float(origin.condition)*float(record.condition)
+		var factors:=mission_factors(record,record.region,day)
+		if float(factors.coverage)<=0:record.status="Area outside current base range";continue
+		record.efficiency=float(factors.efficiency)
 		record.status="On mission · %d%% efficiency" % roundi(float(record.efficiency)*100)
 		record.experience=minf(1,float(record.experience)+.001)
 	_detect_and_fight()
@@ -419,10 +495,37 @@ func advance(day:int)->void:
 	logistics.advance(day)
 	for key in state.contacts.keys():
 		if day-int(state.contacts[key].day)>5:state.contacts.erase(key)
-func _has_contact(record:Dictionary)->bool:
+func latest_naval_contact(record:Dictionary)->Dictionary:
+	var newest:Dictionary={}
 	for contact:Dictionary in state.contacts.values():
-		if contact.observer==record.owner and R.contains(record.region,preload("res://scripts/joint_geography.gd").unpack(contact.get("position",{}))) and int(state.last_day)-int(contact.day)<=2:return true
-	return false
+		if contact.observer!=record.owner or contact.get("domain","")!="navy" or int(state.last_day)-int(contact.day)>2:continue
+		if not _hostile(String(record.owner),String(contact.get("owner",""))) or not R.contains(record.region,preload("res://scripts/joint_geography.gd").unpack(contact.get("position",{}))):continue
+		if newest.is_empty() or int(contact.day)>int(newest.day):newest=contact
+	return newest
+func _has_contact(record:Dictionary)->bool:
+	return not latest_naval_contact(record).is_empty()
+
+func docked(record:Dictionary)->bool:
+	return record.domain=="navy" and force_position(record).distance_to(point(base(int(record.base_id))))<2 and record.get("route",[]).is_empty()
+
+func can_attack(observer:Dictionary,target:Dictionary)->bool:
+	if observer.mission in ["hold","reconnaissance","air_supply","invasion_support","transport"]:return false
+	if observer.domain=="air":
+		if target.domain=="air":
+			# Air superiority and interception engage flying aircraft, not parked
+			# wings across the map. Ground attacks are a different mission chain.
+			if float(target.efficiency)<=0 or target.mission=="hold":return false
+			if observer.mission not in ["air_superiority","interception"]:return false
+			return observer.mission!="interception" or target.mission not in ["air_superiority","interception"]
+		return (observer.mission=="port_strike" and docked(target)) or (observer.mission=="naval_strike" and not docked(target))
+	if target.domain!="navy" or docked(target) or bool(observer.get("repairing",false)):return false
+	var reach:=2.0
+	for type_id:String in observer.units:
+		if int(observer.units[type_id])<=0:continue
+		if type_id in ["missile_patrol","missile_destroyer","nuclear_submarine"]:reach=maxf(reach,120)
+		elif type_id in ["destroyer","light_cruiser","heavy_cruiser","battleship","submarine","ironclad","torpedo_boat"]:reach=maxf(reach,30)
+	return force_position(observer).distance_to(force_position(target))<=reach
+
 func _detect_and_fight()->void:
 	var damage:Dictionary={}
 	for observer:Dictionary in state.forces:
@@ -433,18 +536,12 @@ func _detect_and_fight()->void:
 			if target.domain=="air" and float(target.efficiency)>0 and not target.region.is_empty():target_position=point(target.region)
 			var overlap:=R.overlap(observer.region,target.region) if target.domain=="air" and observer.domain=="air" and float(target.efficiency)>0 else (1.0 if R.contains(observer.region,target_position) else 0.0)
 			if overlap<=0:continue
-			if observer.domain=="navy" and target.domain=="air":continue
+			if observer.domain=="navy" and (target.domain=="air" or force_position(observer).distance_to(target_position)>maxf(20,minf(150,speed(observer)*.25))):continue
 			var rng:=RandomNumberGenerator.new();rng.seed=GameState.world_seed^int(state.last_day)*104729^int(observer.id)*32452843^int(target.id)*49979687
 			var detected:=_power(observer,"detection")/(5.0+_power(target,"defense"))*B.detection_multiplier(observer,target)*overlap
 			if rng.randf()>clampf(detected,.08,.98):continue
 			state.contacts["%s:%d" % [observer.owner,target.id]]={"observer":observer.owner,"target":target.id,"region":observer.region.id,"day":state.last_day,"name":target.name,"position":preload("res://scripts/joint_geography.gd").pack(target_position),"owner":target.owner,"domain":target.domain}
-			if observer.mission in ["reconnaissance","air_supply","invasion_support","transport"]:continue
-			if observer.domain=="air":
-				if target.domain=="navy" and observer.mission not in ["naval_strike","port_strike"]:continue
-				if target.domain=="navy" and target.mission=="hold" and observer.mission!="port_strike":continue
-				if target.domain=="air" and observer.mission not in ["air_superiority","interception"]:continue
-				if observer.mission=="interception" and target.mission in ["hold","air_superiority","interception"]:continue
-			elif target.mission=="hold" or target.mission=="strike_force" and float(target.efficiency)<=0:continue
+			if not can_attack(observer,target):continue
 			var defense:=maxf(1,_power(target,"defense")/maxi(1,hardware(target)))
 			damage[target.id]=float(damage.get(target.id,0))+_power(observer,"attack")/defense*.12*rng.randf_range(.7,1.3)*overlap*B.damage_multiplier(observer,target)
 	for id in damage:
