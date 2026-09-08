@@ -137,6 +137,7 @@ func missions_for(record:Dictionary)->Array[String]:
 	var result:Array[String]=["hold"]
 	if record.is_empty():return result
 	for id:String in record.units:
+		if int(record.units[id])<=0:continue
 		var preferred:=String(C.UNITS[id].mission)
 		if preferred not in result:result.append(preferred)
 		var extra:Array=[]
@@ -575,6 +576,7 @@ func _detect_and_fight()->void:
 
 var screen:CanvasLayer
 func open_service(domain:String)->void:
+	if domain=="army":open_hierarchy(domain);return
 	if domain not in ["navy","air"]:return
 	var terrain:Node=host.get_tree().current_scene
 	if terrain==null or not terrain.has_method("_terrain_hit"):return
@@ -585,6 +587,16 @@ func open_service(domain:String)->void:
 		terrain.hud.close_detail();terrain.hud.close_dock()
 	screen=preload("res://scripts/hud/naval_command_panel.gd").new() if domain=="navy" else preload("res://scripts/hud/air_command_panel.gd").new()
 	screen.terrain=terrain
+	host.get_tree().root.add_child(screen)
+
+func open_hierarchy(domain:String)->void:
+	if domain not in ["army","navy","air"]:return
+	var terrain:Node=host.get_tree().current_scene
+	if terrain==null or not terrain.has_method("_terrain_hit"):return
+	if is_instance_valid(screen):screen.free()
+	if terrain.hud:terrain.hud.close_detail();terrain.hud.close_dock()
+	screen=load("res://scripts/hud/command_hierarchy_panel.gd").new()
+	screen.domain=domain;screen.terrain=terrain
 	host.get_tree().root.add_child(screen)
 
 func split_force(id:int)->Dictionary:

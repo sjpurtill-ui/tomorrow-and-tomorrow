@@ -4,6 +4,7 @@ const PersistentProduction = preload("res://scripts/persistent_production.gd")
 var training_staff=preload("res://scripts/military_training_staff.gd").new(self)
 var production_labor_share:float = .35
 var joint_operations=preload("res://scripts/joint_operations.gd").new(self)
+var command_hierarchy=preload("res://scripts/command_hierarchy.gd").new(self)
 
 signal army_changed(army: Dictionary)
 signal battle_resolved(result: Dictionary)
@@ -16,7 +17,7 @@ const COMBAT_SIMULATOR_SCRIPT:=preload("res://scripts/combat_simulator.gd")
 const MILITARY_DEVELOPMENT:=preload("res://scripts/military_development_catalog.gd")
 const SAVE_VERSION:=7
 const MAX_OCCUPATION_FORCES:=40
-const ABSOLUTE_MAX_FIELD_ARMIES:=12
+const ABSOLUTE_MAX_FIELD_ARMIES:=256
 const RUNNER_INTERVAL_DAYS:=5
 const RUNNER_SPEED_KM_DAY:=30.0
 const RUNNERS_PER_ARMY:=2
@@ -139,6 +140,7 @@ func _process(_delta:float)->void:
 
 
 func reset_for_new_world()->void:
+	command_hierarchy.reset()
 	training_staff.reset()
 	joint_operations.reset()
 	recovery.reset()
@@ -876,7 +878,7 @@ func evacuate_occupation(civ_id:String,region_id:String)->Dictionary:
 
 
 func field_army_capacity()->int:
-	return clampi(int(military_development_snapshot().get("fronts",1)),1,ABSOLUTE_MAX_FIELD_ARMIES)
+	return ABSOLUTE_MAX_FIELD_ARMIES
 
 
 func field_armies_snapshot()->Dictionary:
@@ -968,7 +970,7 @@ func _movement_destination(destination_id:String)->Dictionary:
 
 func create_field_army(personnel:int,custom_name:String="")->Dictionary:
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
-	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d field armies. Broader security, logistics, production, and institutions expand it." % [field_armies.size(),field_army_capacity()]}
+	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d independent land commands. Return and stand down a detachment before creating another." % [field_armies.size(),field_army_capacity()]}
 	var requested:=maxi(0,personnel)
 	var available:=maxi(0,int(home_army.get("troops",0)))
 	if requested<=0: return {"error":"Choose a positive number of trained personnel."}
@@ -1057,6 +1059,7 @@ func _field_supply_advice(army:Dictionary)->String:
 	return " Supply %d%%: the march is slowed. Return home or improve food and carrying capacity in Military > Supply."%roundi(supply*100) if supply<.5 else ""
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
+	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is in battle. Its commander will act on a new objective after disengaging."}
 	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
@@ -1096,6 +1099,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
+	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is in battle. Its commander will act on a new objective after disengaging."}
 	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	## Map-order movement to a free position on scouted ground. The caller (the
@@ -1138,6 +1142,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 
 
 func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
+	if command_hierarchy.battle.engaged(army_id):return {"can_order":false,"can_engage":false,"error":"This command is already in battle."}
 	if not active_siege.is_empty():return {"can_order":false,"can_engage":false,"error":"Resolve the current siege first."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"can_order":false,"can_engage":false,"error":"Select one field army first."}
@@ -1207,6 +1212,7 @@ func return_field_army(army_id:int)->Dictionary:
 
 
 func disband_field_army(army_id:int)->Dictionary:
+	if command_hierarchy.battle.engaged(army_id):return {"error":"This command must disengage before its soldiers can be reassigned."}
 	if recovery.home_unavailable():return {"error":"The home settlement is occupied. Reach a free settlement before dissolving the army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
@@ -1519,6 +1525,7 @@ func _rebuild_home_army_with(additions:Array)->void:
 func _process_field_army_movement_day()->void:
 	for index in field_armies.size():
 		var army:Dictionary=field_armies[index]
+		if command_hierarchy.controls_army(int(army.army_id)) or command_hierarchy.battle.engaged(int(army.army_id)):continue
 		if String(army.get("status","stationed"))!="moving": continue
 		var intercept_target_id:=String(army.get("target_formation_id",""))
 		if not intercept_target_id.is_empty():
@@ -1615,6 +1622,8 @@ func _army_report_snapshot(army:Dictionary)->Dictionary:
 		"distance_remaining_km":float(army.get("distance_remaining_km",0.0)),
 		"arrival_day":int(army.get("arrival_day",-1)),
 		"movement_block_reason":String(army.get("movement_block_reason","")),
+		"command_status":String(army.get("command_status","")),
+		"command_route":army.get("command_route",[]).duplicate(true),
 	}
 
 
@@ -1786,7 +1795,9 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	var home_side:=String(result.get("home_side","attacker"))
 	var home_result:Dictionary=result.get(home_side,result.get("attacker",{}))
 	var home_force_kind:=String(result.get("home_force_kind","field"))
-	if home_force_kind=="occupation":
+	if not result.get("command_participants",[]).is_empty():
+		command_hierarchy.battle.commit(result)
+	elif home_force_kind=="occupation":
 		_apply_occupation_result(String(result.get("home_force_civ_id","")),String(result.get("home_force_region_id","")),home_result,result.rounds,int(result.seed),home_side)
 	elif home_force_kind=="field_army":
 		_apply_field_army_result(int(result.get("home_force_id",0)),home_result,result.rounds,int(result.seed),home_side)
@@ -1799,7 +1810,9 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	var home_force_name:=String(home_result.get("name",home_army.get("name","")))
 	var home_won:=String(termination.get("captor",""))==home_force_name
 	var home_lost:=String(termination.get("defeated",""))==home_force_name and not home_won
-	if home_lost and int(termination.get("prisoners",0))>0:
+	if home_lost and int(termination.get("prisoners",0))>0 and not result.get("command_participants",[]).is_empty():
+		command_hierarchy.battle.capture_survivors(result,int(termination.prisoners))
+	elif home_lost and int(termination.get("prisoners",0))>0:
 		_mark_engaged_force_prisoners(
 			home_force_kind,
 			int(result.get("home_force_id",0)),
@@ -1820,7 +1833,8 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	_record_council_battle(result)
 	battle_resolved.emit(result.duplicate(true))
 	if not pending_aftermath.is_empty():
-		aftermath_required.emit(pending_aftermath.duplicate(true))
+		if bool(result.get("commander_managed",false)):resolve_aftermath("hold","army stores","hold")
+		else:aftermath_required.emit(pending_aftermath.duplicate(true))
 	army_changed.emit(home_army.duplicate(true))
 	return result
 
@@ -2002,6 +2016,8 @@ func begin_threat_engagement()->Dictionary:
 	var defender:Dictionary=threat.enemy_force.duplicate(true) if offensive else home_force
 	var battle_ground:=float(threat.get("terrain_defense",1.0)) if offensive or defending_occupation else _terrain_defense()
 	active_engagement={"threat":threat,"campaign_mode":String(threat.get("campaign_mode","defensive")),"home_side":"attacker" if offensive else "defender","home_force_kind":"occupation" if defending_occupation else ("field_army" if field_army_index>=0 else "field"),"home_force_id":field_army_id if field_army_index>=0 else 0,"home_force_civ_id":target_civ_id if defending_occupation else "","home_force_region_id":target_region_id if defending_occupation else "","attacker":attacker,"defender":defender,"attacker_initial":int(attacker.troops),"defender_initial":int(defender.troops),"round":0,"rounds":[],"seed":int(threat.seed),"terrain_defense":battle_ground,"status":"active","last_order":"hold"}
+	active_engagement["commander_managed"]=command_hierarchy.executing
+	if command_hierarchy.executing:command_hierarchy.battle.attach(active_engagement,command_hierarchy.battle_candidates)
 	active_threat.clear(); threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
 	battle_started.emit(active_engagement.duplicate(true))
 	return engagement_snapshot()
@@ -2095,7 +2111,15 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	var final_result:Dictionary={"seed":int(engagement.seed),"outcome":outcome,"winner":String((engagement[enemy_side] as Dictionary).name) if retreated else String(last_result.get("winner","")),"round_count":int(engagement.round),"rounds":engagement.rounds.duplicate(true),"attacker":attacker_result,"defender":defender_result,"home_side":home_side,"home_force_kind":String(engagement.get("home_force_kind","field")),"home_force_id":int(engagement.get("home_force_id",0)),"home_force_civ_id":String(engagement.get("home_force_civ_id","")),"home_force_region_id":String(engagement.get("home_force_region_id","")),"campaign_mode":String(engagement.get("campaign_mode","defensive")),"field_encounter":bool(threat.get("field_encounter",false)),"formation_id":String(threat.get("formation_id","")),"target_region_id":String(threat.get("target_region_id","")),"target_region_name":String(threat.get("target_region_name","")),"threat":threat,"terrain_defense":float(engagement.terrain_defense),"effective_terrain_defense":float(last_result.get("effective_terrain_defense",engagement.terrain_defense)),"termination":termination,"orders":{"retreated":retreated}}
 	var source_civ_id:=String((engagement.get("threat",{}) as Dictionary).get("source_civ_id",""))
 	active_engagement.clear(); threats_resolved+=1
+	final_result["commander_managed"]=bool(engagement.get("commander_managed",false))
+	final_result["command_participants"]=engagement.get("command_participants",[]).duplicate(true)
 	var committed:=_commit_campaign_battle(final_result)
+	if retreated and bool(final_result.commander_managed):
+		var recovering:Array=final_result.get("command_participants",[])
+		if recovering.is_empty():recovering=[{"army_id":final_result.home_force_id}]
+		for member:Dictionary in recovering:
+			var recovering_index:=_field_army_index(int(member.army_id))
+			if recovering_index>=0:field_armies[recovering_index]["command_recover_until"]=int(GameState.elapsed_days)+14
 	_apply_home_siege_damage(final_result)
 	if source_civ_id!="":
 		var strategic_outcome:Dictionary=CivilizationSystem.resolve_player_battle(source_civ_id,final_result)
@@ -2107,6 +2131,7 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 			CivilizationSystem.resolve_foreign_formation_after_battle(String(final_result.get("formation_id","")),final_result)
 		if bool(strategic_outcome.get("region_captured",false)):
 			var garrison:=establish_occupation_force(source_civ_id,strategic_outcome.get("region",{}),float(strategic_outcome.get("occupation_required",0.0)),int(final_result.get("home_force_id",0)))
+			command_hierarchy.battle.reinforce_occupation(source_civ_id,String(strategic_outcome.get("region",{}).get("id","")),final_result.get("command_participants",[]))
 			strategic_outcome["occupation_force"]=garrison
 		elif bool(strategic_outcome.get("region_recaptured",false)):
 			strategic_outcome["occupation_force_loss"]=remove_occupation_force(source_civ_id,String(strategic_outcome.get("target_region_id",final_result.target_region_id)),false)
@@ -2239,6 +2264,9 @@ func offensive_campaign_availability(civ_id:String,region_id:String="",army_id:i
 			maneuver_army=force; break
 	if maneuver_army.is_empty(): return {"error":"Move a field army to the selected region before launching this campaign. Army movement is no longer instantaneous."}
 	var committed_strength:=int(maneuver_army.get("troops",0))
+	if command_hierarchy.executing and not command_hierarchy.battle_candidates.is_empty():
+		committed_strength=0
+		for participant:Dictionary in command_hierarchy.battle_candidates:committed_strength+=int(participant.get("troops",0))
 	var incident:=CivilizationSystem.offensive_campaign_data(civ_id,committed_strength,region_id)
 	if incident.has("error"): return incident
 	incident["field_army_id"]=int(maneuver_army.get("army_id",0))
@@ -2260,6 +2288,7 @@ func city_force_summary(region_id:String)->String:
 	return text
 
 func city_operation_quote(army_id:int,civ_id:String,region_id:String)->Dictionary:
+	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is already in battle."}
 	if not active_engagement.is_empty() or not active_siege.is_empty() or not active_threat.is_empty() or not pending_aftermath.is_empty():return {"error":"Resolve the current battle, siege or aftermath first."}
 	var index:=_field_army_index(army_id)
 	if index<0 or int(field_armies[index].get("troops",0))<=0:return {"error":"No active soldiers in the selected army. Choose another army."}
@@ -2332,7 +2361,7 @@ func _process_threat_day()->void:
 	if not active_siege.is_empty(): return
 	if not active_engagement.is_empty():
 		if bool(active_engagement.get("awaiting_player_view",false)):return
-		advance_engagement("hold")
+		advance_engagement(command_hierarchy.land.battle_order() if bool(active_engagement.get("commander_managed",false)) else "hold")
 		return
 	if not active_threat.is_empty():
 		if int(GameState.elapsed_days)>int(active_threat.get("deadline_day",GameState.elapsed_days)) and pending_aftermath.is_empty():
@@ -2551,6 +2580,7 @@ func export_state()->Dictionary:
 	return {
 		"version":SAVE_VERSION,
 		"joint_operations":joint_operations.export_state(),
+		"command_hierarchy":command_hierarchy.export_state(),
 		"world_seed":GameState.world_seed,
 		"historical_figures":HistoricalFigures.export_state(),
 		"people_direction":PeopleDirection.export_state(),
@@ -2600,6 +2630,8 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	var command_error:=String(command_hierarchy.validate(payload.get("command_hierarchy",{})))
+	if command_error!="":return {"error":command_error}
 	var strategy:Variant=payload.get("training_strategy",{})
 	if not strategy is Dictionary:return {"error":"Invalid training strategy."}
 	for key in ["policies","food_spent","materials_spent"]:
@@ -2607,6 +2639,8 @@ func import_state(payload:Dictionary)->Dictionary:
 	if payload.has("joint_operations"):
 		var joint_error:=String(joint_operations.validate(payload.joint_operations))
 		if joint_error!="":return {"error":joint_error}
+	command_error=command_hierarchy.validate_links(payload)
+	if command_error!="":return {"error":command_error}
 	var production_error:=PersistentProduction.validate_saved(payload)
 	if not production_error.is_empty(): return {"error":production_error}
 	if not payload.get("siege_recovery",{}) is Dictionary:return {"error":"Invalid siege recovery state."}
@@ -2807,7 +2841,7 @@ func validate_state()->Array[String]:
 			if formation.has("soldier_ids"): errors.append("Occupation formation contains forbidden individual soldier records.")
 		if occupation_formation_total!=int(force.get("troops",0)): errors.append("Occupation formation manpower does not equal its troop total.")
 		if int(force.get("troops",0))<0 or not is_finite(float(force.get("required",0.0))) or float(force.get("required",0.0))<0.0: errors.append("Occupation force strength or requirement is invalid.")
-	if field_armies.size()>ABSOLUTE_MAX_FIELD_ARMIES: errors.append("Field armies exceed the fixed command bound.")
+	if field_armies.size()>command_hierarchy.MAX_LAND_FORCES: errors.append("Field armies exceed the fixed command bound.")
 	var field_army_ids:Dictionary={}
 	var greatest_field_army_id:=0
 	for force_variant in field_armies:
@@ -2865,6 +2899,7 @@ func validate_state()->Array[String]:
 	return errors
 
 func _apply_imported_state(payload:Dictionary)->void:
+	command_hierarchy.import_state(payload.get("command_hierarchy",{}))
 	training_staff.load_state(payload.get("training_strategy",{}))
 	joint_operations.reset()
 	if payload.has("joint_operations"):joint_operations.import_state(payload.joint_operations)
@@ -3489,6 +3524,7 @@ func _reconcile_external_military_mortality()->Dictionary:
 
 
 func _process_military_day()->void:
+	command_hierarchy.advance(last_processed_day)
 	joint_operations.advance(last_processed_day)
 	recovery.advance(last_processed_day)
 	if recovery.home_unavailable():
@@ -3824,7 +3860,7 @@ func _training_program_gate(program_id:String,include_campaign_state:bool=true)-
 func _exercise_forces()->Array[Dictionary]:
 	var forces:Array[Dictionary]=[home_army]
 	for force in field_armies:
-		if String(force.get("status",""))=="stationed" and String(force.get("location_id",""))=="player_home": forces.append(force)
+		if not command_hierarchy.battle.engaged(int(force.army_id)) and String(force.get("status",""))=="stationed" and String(force.get("location_id",""))=="player_home": forces.append(force)
 	return forces
 
 
@@ -4516,6 +4552,9 @@ func _demobilize_disabled(requested:int)->int:
 
 func _siege_capacity_for(threat:Dictionary,force:Dictionary,offensive:bool=true)->Dictionary:
 	var inputs:={"population":float(threat.get("target_population",1000)) if offensive else SettlementModel.primary_population_exact(),"defenders":int(threat.get("strength",threat.get("enemy_force",{}).get("troops",0))) if offensive else int(_home_defense_force().get("troops",0)),"besiegers":int(force.get("troops",0)),"besieger_supply":float(force.get("provision_ratio",force.get("supply_level",1.0))),"fortification":clampf(float(threat.get("terrain_defense",1))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
+	if command_hierarchy.executing and not command_hierarchy.battle_candidates.is_empty():
+		inputs.besiegers=0
+		for candidate:Dictionary in command_hierarchy.battle_candidates:inputs.besiegers+=int(candidate.troops)
 	var capacity:=SiegeModel.capacity(inputs)
 	if not bool(capacity.viable):capacity.error="Too few supplied troops to hold the approaches: %.1f effective, about %d required for this settlement. Bring more soldiers and provisions; a patrol cannot maintain a siege."%[float(capacity.effective),int(capacity.required)]
 	return capacity
@@ -4631,6 +4670,9 @@ func _process_siege_day()->void:
 	var threat:Dictionary=active_siege.threat
 	var enemy_force:Dictionary=threat.get("enemy_force",{})
 	var own_strength:=int(field_armies[army_index].get("troops",0)) if offensive else int(settlement_defense_snapshot().get("garrison_personnel",0))
+	if offensive and bool(active_siege.get("commander_managed",false)):
+		own_strength=0
+		for member:Dictionary in command_hierarchy.battle.siege_members():own_strength+=int(member.troops)
 	var enemy_strength:=int(enemy_force.get("troops",0))
 	var enemy_supply:=clampf(float(enemy.get("food_days",0))/10,0,1)*clampf(.35+float(enemy.get("logistics",.3)),0,1)
 	var besieger_relief:=0.0; var defender_relief:=0.0
@@ -4649,6 +4691,12 @@ func _process_siege_day()->void:
 	if not bool(SiegeModel.capacity(inputs).viable):
 		_end_siege("The force can no longer cover the settlement approaches. The siege is lifted; surviving soldiers return.");return
 	active_siege=SiegeModel.advance(active_siege,day,inputs)
+	if bool(active_siege.get("commander_managed",false)) and float(active_siege.pressure)>=.72 and float(active_siege.fatigue)<.75:
+		command_hierarchy.executing=true;command_hierarchy.battle_candidates=command_hierarchy.battle.siege_members()
+		siege_order(String(active_siege.id),"assault")
+		command_hierarchy.executing=false;command_hierarchy.battle_candidates=[]
+		command_hierarchy.battle.archive_active()
+		return
 	if float(active_siege.fatigue)>=.98 or int(active_siege.starving_days)>=7: _end_siege("The besiegers abandon the investment as their supply and endurance fail."); return
 	army_changed.emit(home_army.duplicate(true))
 

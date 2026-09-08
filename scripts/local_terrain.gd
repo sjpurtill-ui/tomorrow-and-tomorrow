@@ -11396,6 +11396,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 
 
 func _on_city_battle_started(_engagement:Dictionary)->void:
+	if bool(_engagement.get("commander_managed",false)):return
 	if bool((_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): return
 	_set_game_speed(0)
 	MilitaryCampaign.active_engagement["awaiting_player_view"]=true
@@ -11411,7 +11412,7 @@ func _restore_military_attention()->void:
 		_pause_for_military_attention("saved_aftermath","BATTLE AFTERMATH AWAITS","The last battle ended. Review surviving soldiers, occupation assignments and scattered personnel in Military before issuing another operation.",false)
 		return
 	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat,false)
-	elif not MilitaryCampaign.active_engagement.is_empty() and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.",false)
+	elif not MilitaryCampaign.active_engagement.is_empty() and not bool(MilitaryCampaign.active_engagement.get("commander_managed",false)) and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.",false)
 
 func _on_military_threat_attention(threat:Dictionary,truncate_batch:bool=true)->void:
 	if threat.is_empty(): return

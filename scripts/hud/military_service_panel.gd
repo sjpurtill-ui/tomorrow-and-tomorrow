@@ -86,6 +86,7 @@ func _region_tools(column:Node)->void:
 		_report(result))
 
 func _force_controls(column:Node,stand_down:String)->void:
+	_button(column,"Command hierarchy · whole forces & detachments",func():op.open_hierarchy(domain))
 	force_picker=_option(column);force_picker.item_selected.connect(func(_index:int):selected_id=int(_selected(force_picker));_select_force(true))
 	status=_label(column,"",14)
 	setup_button=_button(column,"Open Ports" if domain=="navy" else "Open Airbases",func():pages.current_tab=1)

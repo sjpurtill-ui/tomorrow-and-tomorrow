@@ -1,4 +1,9 @@
 extends "res://tests/test_surprise_hostilities.gd"
+func before_test()->void:
+	super.before_test()
+	CivilizationSystem.set_scout_geography_authority(func(_position:Vector2)->bool:return true)
+func after_test()->void:
+	CivilizationSystem.set_scout_geography_authority(Callable())
 func test_nearby_order_attacks_without_registration_and_preserves_personnel()->void:
 	var f:=_peace_fixture()
 	MilitaryCampaign.field_armies[0].location_id="field_position"

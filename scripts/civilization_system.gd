@@ -1695,6 +1695,9 @@ func _process_foreign_player_rumors(day:int)->void:
 
 
 func _foreign_formation_position(formation:Dictionary,day:float)->Vector2:
+	if formation.has("command_position"):
+		var commanded:Dictionary=formation.command_position
+		return Vector2(float(commanded.get("x",0)),float(commanded.get("z",0)))
 	var a:=Vector2(formation.get("point_a",Vector2.ZERO)); var b:=Vector2(formation.get("point_b",a))
 	var leg:=maxf(1.0,float(formation.get("leg_days",90.0)))
 	var cycle:=fposmod(maxf(0.0,day-float(formation.get("depart_day",0))),leg*2.0)
@@ -5413,6 +5416,9 @@ func validate_state()->Array[String]:
 			var point:Variant=formation.get(point_key,null)
 			if not point is Vector2 or not is_finite((point as Vector2).x) or not is_finite((point as Vector2).y): errors.append("Foreign formation route coordinates must be finite vectors.")
 		var leg_days:=float(formation.get("leg_days",0.0)); var share:=float(formation.get("strength_share",-1.0)); var readiness:=float(formation.get("readiness",-1.0))
+		if formation.has("command_position"):
+			var commanded:Variant=formation.command_position
+			if not commanded is Dictionary or not is_finite(float(commanded.get("x",NAN))) or not is_finite(float(commanded.get("z",NAN))):errors.append("Invalid foreign command position.")
 		if not is_finite(leg_days) or leg_days<=0.0: errors.append("Foreign formation travel duration must be finite and positive.")
 		if not is_finite(share) or share<=0.0 or share>1.0: errors.append("Foreign formation strength share must be normalized and positive.")
 		if not is_finite(readiness) or readiness<0.0 or readiness>1.0: errors.append("Foreign formation readiness must be normalized.")

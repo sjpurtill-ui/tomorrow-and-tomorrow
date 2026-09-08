@@ -36,7 +36,7 @@ func _ready()->void:
 	_button(nav,"Supply",func():_management(3))
 	var map_button:=_button(nav,"Command on map",func():
 		queue_free()
-		if service!="army":MilitaryCampaign.joint_operations.open_service(service))
+		MilitaryCampaign.joint_operations.open_hierarchy(service))
 	map_button.tooltip_text="Close this overview and return to the actual world map. Navy and Air retain their distinct command controls."
 	scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
 	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",12);scroll.add_child(body)

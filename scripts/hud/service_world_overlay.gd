@@ -29,7 +29,7 @@ func undo_vertex()->void:
 	if not vertices.is_empty():vertices.pop_back();queue_redraw()
 func finish_boundary(title:String)->void:
 	if not drawing:return
-	var result:Dictionary=op.create_region(domain,vertices,title)
+	var result:Dictionary=MilitaryCampaign.command_hierarchy.create_region(domain,vertices,title)
 	if result.has("ok"):
 		selected=result.region;cancel_boundary();region_selected.emit(selected)
 	boundary_feedback.emit(result)
@@ -47,6 +47,8 @@ func force_screen_position(force:Dictionary)->Vector2:
 	# Deck wings follow their carrier in the simulation; their stored position
 	# is only updated during independent travel. Render and picking share this.
 	return world_to_screen(op.force_position(force))
+func army_report(force:Dictionary)->Dictionary:
+	return force if MilitaryCampaign._army_is_home(force) or MilitaryCampaign._live_army_reporting() else force.get("last_report",{})
 
 func screen_to_world(point:Vector2)->Dictionary:
 	if not is_instance_valid(terrain):return {}
@@ -66,6 +68,11 @@ func handle_map_input(event:InputEvent)->bool:
 		if vertices.is_empty() or Vector2(vertex.x,vertex.z).distance_to(Vector2(vertices[-1].x,vertices[-1].z))>.001:vertices.append(vertex)
 		queue_redraw();return true
 	if event.button_index==MOUSE_BUTTON_LEFT:
+		if domain=="army":
+			for force:Dictionary in MilitaryCampaign.field_armies:
+				var shown:=army_report(force)
+				if not shown.get("position",{}).is_empty() and world_to_screen(op.point(shown)).distance_to(event.position)<18:
+					selected_force=int(force.army_id);force_selected.emit(selected_force);return true
 		for force:Dictionary in op.state.forces:
 			if force.owner=="player" and force.domain==domain and force_screen_position(force).distance_to(event.position)<18:
 				selected_force=int(force.id);force_selected.emit(selected_force);return true
@@ -74,7 +81,7 @@ func handle_map_input(event:InputEvent)->bool:
 				base_selected.emit(int(base.id));return true
 	var hit:=screen_to_world(event.position)
 	if not hit.is_empty():
-		for region:Dictionary in op.known_regions(domain):
+		for region:Dictionary in MilitaryCampaign.command_hierarchy.known_regions(domain):
 			if R.contains(region,Vector2(hit.x,hit.z)):
 				selected=region;region_selected.emit(region)
 				if event.button_index==MOUSE_BUTTON_RIGHT:order_region.emit(region)
@@ -104,8 +111,8 @@ func _label_style()->StyleBoxFlat:
 
 func _draw()->void:
 	if op==null or not is_instance_valid(terrain) or terrain.camera==null:return
-	var color:=Color("64bcd9") if domain=="navy" else Color("b8d68c")
-	for region:Dictionary in op.known_regions(domain):
+	var color:=Color("ddbc78") if domain=="army" else Color("64bcd9") if domain=="navy" else Color("b8d68c")
+	for region:Dictionary in MilitaryCampaign.command_hierarchy.known_regions(domain):
 		var active:bool=String(region.id)==String(selected.get("id",""))
 		var fill:=PackedVector2Array()
 		for vertex:Dictionary in region.vertices:
@@ -123,6 +130,7 @@ func _draw()->void:
 		if not vertices.is_empty():
 			var a:=world_to_screen(Vector2(vertices[-1].x,vertices[-1].z))
 			if a.is_finite():draw_line(a,get_local_mouse_position(),Color(1,.83,.46,.55),1,true)
+	if domain=="army":_draw_land();return
 	for base:Dictionary in op.state.bases:
 		if base.owner!="player" or base.domain!=domain:continue
 		var at:=world_to_screen(op.point(base))
@@ -156,3 +164,27 @@ func _draw()->void:
 		if at.is_finite():
 			draw_circle(at,6,Color("ed927d"),false,2)
 			_caption(at,"Last sighting · "+String(contact.get("name","Contact")),Color("ed927d"))
+
+func _draw_land()->void:
+	var command=MilitaryCampaign.command_hierarchy
+	for claim:Dictionary in command.land.claims:
+		if claim.owner!="player" and CivilizationSystem.city_intelligence.known("player",String(claim.city_id)).is_empty():continue
+		var boundary:Array=[]
+		for vertex:Vector2 in claim.boundary:boundary.append({"x":vertex.x,"z":vertex.y})
+		_line(boundary,Color("849e82") if claim.owner=="player" else Color("a77971") if command.land.hostile(String(claim.owner)) else Color("888b90"),true)
+	for front:Dictionary in command.data.fronts:
+		_line(front.points,Color("ed806e"))
+		if front.zone_id==selected.get("id",""):
+			_caption(world_to_screen(op.point({"position":front.points[1]})),"Front · %d%% escape routes covered" % roundi(float(front.encirclement)*100),Color("ed806e"))
+	for actual:Dictionary in MilitaryCampaign.field_armies:
+		if int(actual.get("troops",0))<=0:continue
+		var shown:=army_report(actual)
+		if shown.get("position",{}).is_empty():continue
+		var at:=world_to_screen(op.point(shown))
+		if not at.is_finite():continue
+		var chosen:bool=int(actual.army_id)==selected_force
+		var color:=Color("ffd477") if chosen else Color("b9cba0")
+		draw_rect(Rect2(at-Vector2(9,6),Vector2(18,12)),Color("0f211e"));draw_rect(Rect2(at-Vector2(9,6),Vector2(18,12)),color,false,2)
+		_caption(at,String(actual.name)+" · "+str(shown.get("troops",0)),color)
+		if chosen:
+			var route:Array=[shown.position];route.append_array(shown.get("command_route",[]));_line(route,Color(color,.65))
