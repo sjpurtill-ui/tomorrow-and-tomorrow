@@ -16,7 +16,7 @@ Status: READY for integrator validation. Worktree `/Users/seanpurtill/Documents/
 
 ## Verification
 
-Worktree Godot 4.7.2 headless: 120 tests across 11 suites passed before final battle refinements; the expanded joint loop and city intelligence suites cover subsequent screening, replacement, production/base loss, transport saves and manpower fixes. Integrator records the final combined total.
+Worktree Godot 4.7.2 headless: 120 tests across 11 suites passed before final battle refinements; the expanded joint loop passes 16 tests and city intelligence passes 14 tests. The intelligence raid fixture now specifies viable military strength, fixing its documented baseline failure while retaining the unknown-target and stale-intelligence assertions. Integrator records the final combined total.
 
 The real current campaign was saved through its game UI and loaded into isolated test userdata: day 25512, population 777. Joint state validated; the original save was not modified by the compatibility check. Existing saves without joint state initialize empty joint forces. Polygon and transport payload corruption is rejected before joint-state mutation.
 
