@@ -1,3 +1,11 @@
+## September 8 — command tree mouse expansion and live inspection
+
+INTEGRATED `388ae88` by fast-forward from `17eb240`. Native mouse expansion now defers row creation until Godot releases its Tree selection lock. Deferred work uses an instance ID and ignores rows removed by a refresh. This fixes the runtime pause found while showing the actual Army Command UI; the earlier direct-method/headless checks did not cover that native event path.
+
+All **35 canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-command-tree-canonical.log`), including a native viewport mouse-event regression and a pending-expansion/rebuild case. No simulation/save changes. Test overrides removed. See COMMAND_TREE_CLICK_HANDOFF.md.
+
+Live verification: canonical editor Run Project launched player **PID 95563** from code commit `388ae88`; its command line contains `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow` and `res://local_terrain.tscn`. Loaded the existing Seanston save at day 29337/population 1047, opened Military → Command on map, expanded the 10-person squad and selected it without the previous error. The game remains paused in Army Command. No objective was issued or saved campaign overwritten.
+
 ## September 8 — military hierarchy and autonomous battle zones
 
 INTEGRATED `d220fa1` by conflict-free fast-forward from `41d410b` into the canonical Mac checkout. Military → Army Command, or Forces → Command on map, now opens a real-force command tree on the main terrain. Select an Army down to a Team, or a separate naval/air command, and assign its subtree a drawn zone and objective. Land commanders execute movement, observed contact, flanking, city assaults, siege assaults and occupation detachments. Neutral borders halt unauthorized advances; hostile contact creates dynamic front ribbons. Separate commander battles progress concurrently without duplicating participants or forcing a battle/aftermath screen.
