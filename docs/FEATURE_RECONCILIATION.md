@@ -585,3 +585,8 @@ Integrated 24d2d18 and fixture correction ec1cd9c. Carrier-wing drawing, selecti
 ## September 8 — military order selection
 
 Integrated 6145949. Region and mission choices survive command-panel refreshes and failed orders, while explicit force selection follows the existing assignment. Current order is labelled separately. All 36 canonical checks pass; no save changes or player restart. See MILITARY_ORDER_SELECTION_HANDOFF.md.
+
+
+## September 8 — easier panel closing
+
+Integrated e493ab5; 11 canonical checks pass. Bare map dismisses docks/help without issuing world orders; report backdrops dismiss supported screens. Military drawing remains functional. Map-help text and close label clarified. Running new campaign left untouched after user activity was detected; next launch receives the change. See MAP_DISMISSAL_HANDOFF.md.

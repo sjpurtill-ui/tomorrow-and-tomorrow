@@ -1,3 +1,9 @@
+## September 8 — click map to dismiss panels and help
+
+INTEGRATED `e493ab5` from base 889199f. Bare-map clicks close ordinary/detail docks and map-help tips together, consuming the click before world orders. Supported report/menu/dispatch backdrops close on clicks outside their bodies. Military drawing and actual marker/region selection retain their input; otherwise blank map dismisses command mode. Mandatory decision dialogs keep explicit controls. Opening map-help copy now describes real pan, four-distance zoom, city inspection and map-click dismissal, with a clearer Close button.
+
+All **11 canonical tests pass**, zero errors/failures/orphans (/tmp/tt-map-dismiss-canonical.log), including no accidental settler movement after dismissal, content/backdrop distinction, service input and distance controls. No save changes. See MAP_DISMISSAL_HANDOFF.md. Native control reported user activity; a read-only screenshot shows an actively running new campaign, Year 6/population 162. No save/quit/relaunch was performed. The next normal launch receives this change; live application is not claimed. Test userdata override removed.
+
 ## September 8 — latest integrated game launched
 
 At the user's request, saved and quit player PID 67340 normally and launched canonical editor Run Project from code commit **be55da7**. New player **PID 74514** has the explicit canonical project path, res://local_terrain.tscn and --resume-saved. Startup log confirms day 29337, population 1047, Seanston, seed 1792946605, with no script errors. This launch includes the carrier transitions, carrier-map position correction and stable command selection fixes. Displayed release remains 2026.09.07.2. Temporary resume arguments removed; editor preserved.
