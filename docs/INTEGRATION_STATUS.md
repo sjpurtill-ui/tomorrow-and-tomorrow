@@ -1,3 +1,7 @@
+## September 8 — carrier wing map positions
+
+INTEGRATED `24d2d18` plus fixture correction `ec1cd9c`. Carrier-wing markers, click targets and route origins now use the authoritative carrier-following position. Detaching restores independent positioning; stored coordinates and save format are unchanged. Canonical main-map/campaign checks: **34 passed**, zero errors/failures/orphans (/tmp/tt-carrier-markers-canonical-fixed.log). The initial fixture omitted required display/base data and failed during rendering; the corrected run supersedes it. Running player/editor not touched; next normal launch receives this change. See CARRIER_MAP_HANDOFF.md.
+
 ## September 7 — carrier and force order transitions
 
 INTEGRATED `947ad09` by fast-forward from c53a964. Carrier ferries are cancelled by rebase orders; deck-wing stand-down preserves the carrier assignment; reorganization/disbanding requires physical arrival at an operational home base; carrier removal cannot orphan attached or incoming wings; carrier merges redirect incoming wings as well as attached ones. No new save fields. All **38 canonical tests pass**, zero errors/failures/orphans, including four new transition/conservation/save-reference cases. Log: /tmp/tt-carrier-transitions-canonical.log. See CARRIER_TRANSITIONS_HANDOFF.md.

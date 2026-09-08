@@ -575,3 +575,8 @@ Integrated 7fb5dc2, fecf99f, ff2f02b and 5ae5714; release 2026.09.07.2. Navy and
 ## September 7 — carrier order correctness
 
 Integrated 947ad09 on canonical main: rebase cancels obsolete carrier ferries; carrier-wing stand-down stays on deck; force reorganization and disbanding require actual home-base arrival; carrier merges preserve pending wing references and carrier removal cannot orphan wings. All 38 relevant canonical tests pass; no save migration. Running player/editor untouched; next normal launch receives this pass. See CARRIER_TRANSITIONS_HANDOFF.md.
+
+
+## September 8 — carrier wing markers
+
+Integrated 24d2d18 and fixture correction ec1cd9c. Carrier-wing drawing, selection and route origins follow actual carrier positions; detachment restores independent position. Corrected canonical run passes 34 tests; no save changes, no player/editor interruption. See CARRIER_MAP_HANDOFF.md.
