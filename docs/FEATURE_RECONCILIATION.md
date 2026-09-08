@@ -1,3 +1,11 @@
+## September 8 — compact military command panels
+
+INTEGRATED `7a1310c` by conflict-free fast-forward from `241e532`. Army, Fleet and Air Force command panels keep Give objective and Cancel orders outside the scrolling form, give the hierarchy more room, put objective selection first and collapse optional names/briefs. Drawing-only actions appear during a draft. Personnel/craft headers fit; single-line headings and scrollable reports keep the panel within the minimum logical canvas.
+
+All **37 canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-command-panel-canonical.log`). Layout checks cover all three services at explicit logical sizes of 1280×720 and 1024×640 with expanded details, long feedback and scrolling; existing hierarchy, native expansion and map-dismissal checks pass. No simulation/save changes or shared-file conflicts. Temporary test overrides removed. See COMMAND_PANEL_LAYOUT_HANDOFF.md.
+
+The existing player PID 95563 remains running; this integration does not claim that its already-open panel has rebuilt. No player/editor restart was performed. Native inspection of the new layout is pending.
+
 ## September 8 — command tree mouse expansion and live inspection
 
 INTEGRATED `388ae88` by fast-forward from `17eb240`. Native mouse expansion now defers row creation until Godot releases its Tree selection lock. Deferred work uses an instance ID and ignores rows removed by a refresh. This fixes the runtime pause found while showing the actual Army Command UI; the earlier direct-method/headless checks did not cover that native event path.

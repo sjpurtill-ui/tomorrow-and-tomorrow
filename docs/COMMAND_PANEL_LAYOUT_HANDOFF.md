@@ -1,6 +1,6 @@
 # Command panel layout
 
-READY for integration. Worktree `/Users/seanpurtill/Documents/Codex/tt-command-panel-layout`, branch `codex/command-panel-layout`, base `241e5327a408ac3a8341f88e2f34efa8688c1ba5`.
+INTEGRATED as `7a1310c`; all 37 canonical checks pass (`/tmp/tt-command-panel-canonical.log`). Worktree `/Users/seanpurtill/Documents/Codex/tt-command-panel-layout`, branch `codex/command-panel-layout`, base `241e5327a408ac3a8341f88e2f34efa8688c1ba5`.
 
 The Army, Fleet and Air Force hierarchy panels keep Give objective and Cancel orders outside the scrolling form. The hierarchy receives more vertical room; the objective selector comes first, while optional zone names and briefing notes start collapsed. Finish and Cancel drawing appear only during a draft. Personnel/craft headers receive font-measured width. Long feedback is bounded to two lines with its complete text in a tooltip. Single-line headings and scrollable staff status prevent the Air Force panel from extending below the minimum logical canvas.
 
