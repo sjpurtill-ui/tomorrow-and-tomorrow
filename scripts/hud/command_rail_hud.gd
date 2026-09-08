@@ -636,6 +636,7 @@ func has_provider(id:String)->bool:
 
 func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	if not providers.has(section): return
+	if is_instance_valid(MilitaryCampaign.joint_operations.screen):MilitaryCampaign.joint_operations.screen.queue_free()
 	if expanded and providers[section].has_method("open_expanded_tab") and providers[section].open_expanded_tab(sub):
 		close_dock();return
 	var was_open:=dock.visible

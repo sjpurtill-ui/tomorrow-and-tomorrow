@@ -74,3 +74,14 @@ func test_failed_boundary_stays_editable_and_does_not_save_invalid_region()->voi
 	assert_bool(overlay.drawing).is_true()
 	assert_int(MilitaryCampaign.joint_operations.state.regions.size()).is_equal(0)
 	overlay.undo_vertex();assert_int(overlay.vertices.size()).is_equal(1)
+
+func test_empty_service_guides_setup_without_showing_unusable_mission_controls()->void:
+	var navy:CanvasLayer=auto_free(Navy.new());add_child(navy)
+	assert_bool(navy.mission_controls.visible).is_false()
+	assert_bool(navy.setup_button.visible).is_true()
+	navy.setup_button.pressed.emit()
+	assert_int(navy.pages.current_tab).is_equal(1)
+	assert_bool(navy.commission_button.disabled).is_true()
+	var draw:=InputEventKey.new();draw.keycode=KEY_D;draw.pressed=true
+	assert_bool(navy.handle_early_input(draw)).is_true()
+	assert_bool(navy.map.drawing).is_true()

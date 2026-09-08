@@ -102,6 +102,12 @@ func _draw()->void:
 	var color:=Color("64bcd9") if domain=="navy" else Color("b8d68c")
 	for region:Dictionary in op.known_regions(domain):
 		var active:bool=String(region.id)==String(selected.get("id",""))
+		var fill:=PackedVector2Array()
+		for vertex:Dictionary in region.vertices:
+			var projected:=world_to_screen(Vector2(vertex.x,vertex.z))
+			if not projected.is_finite():fill.clear();break
+			fill.append(projected)
+		if fill.size()>=3 and not Geometry2D.triangulate_polygon(fill).is_empty():draw_colored_polygon(fill,Color(Color("ffd477") if active else color,.10 if active else .025))
 		_line(region.vertices,Color("ffd477") if active else color,true)
 		_caption(world_to_screen(op.point(region)),String(region.name),Color("ffd477") if active else color)
 	if drawing:
