@@ -8,7 +8,7 @@ signal force_selected(id:int)
 signal order_region(region:Dictionary)
 var domain:String="navy"
 var center:=Vector2.ZERO
-var spans:Array[float]=[500,1000,4000,16000]
+var spans:Array[float]=[50,200,1000,8000]
 var zoom_level:=1
 var selected:Dictionary={}
 var selected_force:=0
@@ -89,12 +89,42 @@ func _draw()->void:
 		if points.size()>1:draw_polyline(points,Color("f1c46b"),2)
 		if points.size()>2:draw_line(points[-1],points[0],Color(.95,.75,.4,.35),1)
 
-	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",false):
+	var city_reports:Array=CivilizationSystem.city_intelligence.known_cities("player","",false).duplicate(true)
+	for city:Dictionary in GameState.player_settlements:
+		var position:Vector2=city.get("position",Vector2.ZERO)
+		var snapshot:Dictionary=SettlementModel.city_resource_snapshot(String(city.id))
+		city_reports.push_front({"name":city.name,"civ_id":"player","position":G.pack(position),"population_label":str(roundi(float(snapshot.get("population",0))))})
+	var labels:Array[Rect2]=[]
+	for city:Dictionary in city_reports:
 		var position:=to_screen(op.point(city))
 		if not Rect2(Vector2.ZERO,size).has_point(position):continue
 		var identity:=Identity.foreign(String(city.get("civ_id","")))
-		draw_texture_rect(identity.texture,Rect2(position+Vector2(4,-22),Vector2(24,15)),false)
-		draw_circle(position,3,identity.color);draw_string(font,position+Vector2(30,-8),String(city.name),HORIZONTAL_ALIGNMENT_LEFT,160,13,identity.color)
+		if String(city.get("civ_id",""))=="player":
+			var scene:=get_tree().current_scene
+			if scene!=null and scene.has_method("_founding_banner_texture"):
+				var banner:Texture2D=scene._founding_banner_texture(GameState.founding_banner_index)
+				identity={"texture":banner,"color":Identity.banner_color(banner)}
+		var population:=String(city.get("population_label",""))
+		var estimate:Dictionary=city.get("fields",{}).get("population",{})
+		if population=="":population="est. %d–%d" % [roundi(float(estimate.low)),roundi(float(estimate.high))] if not estimate.is_empty() else "pop. unknown"
+		var title:=String(city.name)+" · "+population
+		var label_size:=Vector2(minf(280,font.get_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,-1,13).x+30),21)
+		var label:=Rect2(position+Vector2(8,-22),label_size)
+		for attempt in 24:
+			label.position.x=clampf(label.position.x,4,maxf(4,size.x-label.size.x-4))
+			label.position.y=clampf(label.position.y,4,maxf(4,size.y-label.size.y-28))
+			var overlaps:=false
+			for occupied:Rect2 in labels:
+				if label.intersects(occupied):overlaps=true;break
+			if not overlaps:break
+			label.position=position+Vector2(8,24*(attempt+1)-22)
+		labels.append(label)
+		draw_line(position,label.get_center(),Color(identity.color, .35),1)
+		draw_rect(label,Color(.035,.08,.10,.9))
+		draw_texture_rect(identity.texture,Rect2(label.position+Vector2(2,2),Vector2(24,15)),false)
+		draw_circle(position,3,identity.color)
+		draw_string(font,label.position+Vector2(29,15),title,HORIZONTAL_ALIGNMENT_LEFT,label.size.x-30,13,identity.color)
+
 	for base:Dictionary in op.state.bases:
 		if base.owner!="player" or base.domain!=domain:continue
 		var position:=to_screen(op.point(base))

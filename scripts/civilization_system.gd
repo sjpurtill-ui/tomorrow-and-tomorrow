@@ -1928,7 +1928,7 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 	var civ:Dictionary=civilizations[civ_index]
 	var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
 	var position:Dictionary=public_sighting.get("position",{})
-	var strength:=maxi(1,roundi(float(civ.get("military_population",1.0))*float(formation.get("strength_share",0.06))))
+	var strength:=maxi(1,roundi(land_military_population(civ)*float(formation.get("strength_share",0.06))))
 	return {
 		"id":"field_contact_%s_%d" % [formation_id,int(GameState.elapsed_days)],
 		"source_civ_id":String(civ.id),"source_name":String(civ.name),
@@ -2102,7 +2102,7 @@ func resolve_foreign_scout_interception(formation_id:String,action:String,roll_o
 	var civ_index:=_civilization_index(String(formation.get("civ_id","")))
 	if civ_index<0: return {"error":"The scouts' polity record no longer exists."}
 	var civ:Dictionary=civilizations[civ_index]
-	var count:=maxi(1,roundi(float(civ.get("military_population",1.0))*float(formation.get("strength_share",0.01))))
+	var count:=maxi(1,roundi(land_military_population(civ)*float(formation.get("strength_share",0.01))))
 	var relation:=_relation_with_strategy_defaults(civ.player_relation,civ)
 	var message:=""
 	var direct_contact_began:=false
@@ -2716,7 +2716,7 @@ func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->
 		relation["contact_intelligence"]=maxf(float(relation.get("contact_intelligence",0.0)),0.08)
 		civ["player_relation"]=relation
 		civilizations[civ_index]=civ
-		var strength:=maxf(1.0,float(civ.get("military_population",0.0))*float(formation.get("strength_share",0.08)))
+		var strength:=maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))
 		var sighting_index:=_formation_sighting_index(formation_id)
 		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.get("kind","formation")),"last_seen_day":day,"position":{"x":closest_point.x,"z":closest_point.y},"distance_km":player_world_origin.distance_to(closest_point),"strength":strength,"readiness":float(formation.get("readiness",0.5)),"visible":false,"source":"returned_scout_report"}
 		if sighting_index<0:
