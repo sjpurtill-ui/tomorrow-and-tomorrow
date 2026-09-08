@@ -1,0 +1,11 @@
+# Current strength and exact command selection
+
+READY for integration. Worktree `/Users/seanpurtill/Documents/Codex/tt-command-refresh`, branch `codex/command-refresh`, base `f0b0fe48a07e9f643ce0b2d481de2e582b8158e5`.
+
+Previously, a row could display its new strength while retaining old click metadata. Re-selecting a resized subdivision therefore failed the same strength-change check repeatedly. A structural refresh also retained only the force ID, selecting the entire parent force instead of the chosen virtual subdivision, and could use the first selected row rather than the most recently chosen command.
+
+Rows now refresh their click metadata with the displayed strength/order. Existing virtual rows remain in place during ordinary updates; only added or vanished subdivisions change. Losing the active subdivision clears the panel's order target. Structural refreshes preserve the exact ID/path of the active command and the other selected rows used for headquarters grouping. Placeholder rows do not become order targets. The existing requirement to reselect a detachment after its strength changes before issuing an order remains in force.
+
+All 40 worktree tests pass with zero errors/failures/orphans: command hierarchy, main-map services and map-panel dismissal. Log: `/tmp/tt-command-refresh-tests-final.log`. New cases cover a resized team successfully receiving an order after reselection with conserved assets, removal/reappearance without accidental parent selection, placeholder input, and preservation of the active subdivision plus multi-selection and draft fields across structural changes in Army, Navy and Air. Existing native mouse expansion, stable row identity, layout and command execution checks pass. Headless editor import passes (`/tmp/tt-command-refresh-import.log`).
+
+Owned files: `scripts/hud/command_tree.gd`, `scripts/hud/command_hierarchy_panel.gd`, `tests/test_command_hierarchy.gd` and this handoff. No simulation/save schema changes or shared integration hotspot conflicts. Test data is isolated and the temporary override is removed before commit. No actual game/editor interaction or restart was performed in this pass. Native visual verification is not claimed; already-open controls require recreation after script reload or the next normal launch.

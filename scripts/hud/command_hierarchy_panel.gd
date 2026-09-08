@@ -92,6 +92,9 @@ func _button(parent:Node,text:String,callback:Callable)->Button:
 	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(result);return result
 func _selected(entry:Dictionary)->void:
 	selected=entry
+	if entry.is_empty():
+		selected_label.text="Select a command in the hierarchy";selected_label.tooltip_text=""
+		map.selected_force=0;status.text="";status.hide();return
 	selected_label.text="%s · %d %s" % [entry.name,int(entry.count),"personnel" if domain=="army" else "ships" if domain=="navy" else "aircraft"]
 	selected_label.tooltip_text=selected_label.text+"\n"+String(entry.leader)
 	map.selected_force=int(command.node(String(entry.id)).get("force_id",0))

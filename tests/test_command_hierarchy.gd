@@ -381,3 +381,62 @@ func test_optional_command_names_start_collapsed_and_drawing_controls_follow_dra
 	assert_float(float(panel.tree.get_column_width(1))).is_greater_equal(title_width+16)
 	# Already-open pre-update panels do not contain the new drawing controls.
 	panel.finish_button=null;panel.cancel_boundary_button=null;panel._process(.1)
+
+func test_reselecting_resized_team_uses_displayed_strength_and_allows_order()->void:
+	var id:=_home(10)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	var unit:TreeItem=panel.tree.get_root().get_first_child().get_first_child();unit.collapsed=false;panel.tree._expanded(unit)
+	var team:TreeItem=unit.get_first_child();team.select(0);panel.tree.multi_selected.emit(team,0,true)
+	assert_int(int(panel.selected.count)).is_equal(3)
+	_home(6);panel.tree.refresh()
+	assert_str(team.get_text(1)).is_equal("2")
+	assert_int(int(team.get_metadata(0).count)).is_equal(2)
+	assert_int(unit.get_child_count()).is_equal(3)
+	var before:=_totals();panel._region(_zone())
+	# A changed detachment still requires a fresh selection before committing.
+	panel._assign();assert_str(panel.feedback.text).contains("strength changed")
+	assert_dict(_totals()).is_equal(before);assert_int(MilitaryCampaign.field_armies.size()).is_equal(0)
+	unit=panel.tree.get_root().get_first_child().get_first_child();team=unit.get_first_child()
+	team.select(0);panel.tree.multi_selected.emit(team,0,true)
+	assert_int(int(panel.selected.count)).is_equal(2)
+	panel._assign();assert_bool(command.order_for(String(panel.selected.id)).has("mission")).is_true()
+	assert_array(panel.selected.path).is_empty();assert_int(int(panel.selected.count)).is_equal(2)
+	assert_dict(_totals()).is_equal(before)
+
+func test_disappearing_team_clears_active_order_target_without_selecting_parent()->void:
+	_home(10)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	var unit:TreeItem=panel.tree.get_root().get_first_child().get_first_child()
+	panel.tree.multi_selected.emit(unit.get_first_child(),1,true)
+	assert_dict(panel.selected).is_empty()
+	unit.collapsed=false;panel.tree._expanded(unit)
+	var team:TreeItem=unit.get_child(3);team.select(0);panel.tree.multi_selected.emit(team,0,true)
+	_home(2);panel.tree.refresh()
+	assert_int(unit.get_child_count()).is_equal(2)
+	assert_dict(panel.selected).is_empty();assert_str(panel.selected_label.text).contains("Select a command")
+	panel._assign();assert_str(panel.feedback.text).contains("Select a command")
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(0)
+	_home(10);panel.tree.refresh()
+	assert_int(unit.get_child_count()).is_equal(4)
+	assert_dict(panel.selected).is_empty()
+
+func test_structure_refresh_keeps_exact_active_subdivision_for_each_service()->void:
+	_home(10);_craft("navy",12);_craft("air",12)
+	for service:String in ["army","navy","air"]:
+		var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain=service;add_child(panel)
+		var root:TreeItem=panel.tree.get_root().get_first_child()
+		var unit:TreeItem=root.get_first_child();unit.collapsed=false;panel.tree._expanded(unit)
+		# The active selection is the most recently chosen command, even when
+		# the parent remains selected for headquarters organization.
+		unit.select(0);panel.tree.multi_selected.emit(unit,0,true)
+		var child:TreeItem=unit.get_first_child();child.select(0);panel.tree.multi_selected.emit(child,0,true)
+		var chosen:Dictionary=panel.selected.duplicate(true)
+		panel.mission.select(1);panel.vision.text="Keep this draft"
+		command._add(service,service,command.LEVELS[service].size()-1,"New headquarters")
+		panel.tree.refresh()
+		assert_str(panel.selected.id).is_equal(String(chosen.id));assert_array(panel.selected.path).is_equal(chosen.path)
+		assert_int(int(panel.selected.count)).is_equal(int(chosen.count))
+		assert_int(panel.mission.selected).is_equal(1);assert_str(panel.vision.text).is_equal("Keep this draft")
+		assert_array(panel.tree.active_selection.path).is_equal(chosen.path)
+		assert_int(panel.tree.selections().size()).is_equal(2)
+		panel.queue_free();await get_tree().process_frame

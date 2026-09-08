@@ -5,6 +5,7 @@ var service:="army"
 var command:RefCounted
 var structure_signature:=""
 var expanded:Dictionary={}
+var active_selection:Dictionary={}
 func _ready()->void:
 	command=MilitaryCampaign.command_hierarchy
 	columns=3;column_titles_visible=true;hide_root=true;select_mode=Tree.SELECT_MULTI
@@ -19,17 +20,30 @@ func _ready()->void:
 	# Native Tree locks its items while dispatching a mouse selection. Populate
 	# the expanded branch after that event, including when it came from a click.
 	item_collapsed.connect(func(item:TreeItem):_expand_deferred.call_deferred(item.get_instance_id()))
-	multi_selected.connect(func(item:TreeItem,_column:int,selected:bool):if selected:command_selected.emit(item.get_metadata(0)))
+	multi_selected.connect(_selection_changed)
 	rebuild()
-func rebuild(retain:String="")->void:
+func _selection_changed(item:TreeItem,_column:int,selected:bool)->void:
+	var entry:Dictionary=item.get_metadata(0)
+	if not entry.has("id"):return
+	if selected:_emit_selection(entry)
+	elif active_selection.get("id","")==entry.get("id","") and active_selection.get("path",[])==entry.get("path",[]):_emit_selection({})
+func _emit_selection(entry:Dictionary)->void:
+	active_selection={} if entry.is_empty() else {"id":entry.id,"path":entry.path.duplicate()}
+	command_selected.emit(entry)
+func rebuild(retain:String="",path:Array=[])->void:
 	_remember(get_root());command.sync();clear();var root:=create_item()
 	var branch:=_actual(root,command.node(service));branch.collapsed=false
-	if retain!="":_select_id(branch,retain)
+	if retain=="" or not _select_id(branch,retain,path):_emit_selection({})
 	structure_signature=_structure()
-func _select_id(item:TreeItem,id:String)->void:
+func _select_id(item:TreeItem,id:String,path:Array=[],notify:bool=true)->bool:
 	var meta:Dictionary=item.get_metadata(0)
-	if meta.get("id","")==id and meta.get("path",[]).is_empty():item.select(0);command_selected.emit(meta)
-	for child:TreeItem in item.get_children():_select_id(child,id)
+	if meta.get("id","")==id and meta.get("path",[])==path:
+		item.select(0)
+		if notify:_emit_selection(meta)
+		return true
+	for child:TreeItem in item.get_children():
+		if _select_id(child,id,path,notify):return true
+	return false
 func _actual(parent:TreeItem,record:Dictionary)->TreeItem:
 	var item:=_row(parent,command.preview(String(record.id)))
 	for child:Dictionary in command.children(String(record.id)):_actual(item,child)
@@ -71,8 +85,11 @@ func refresh()->void:
 	var signature:=_structure()
 	if signature!=structure_signature:
 		var selected:=get_next_selected(null)
-		var retain:=String((selected.get_metadata(0) as Dictionary).get("id","")) if selected!=null else ""
-		rebuild(retain);return
+		var selected_rows:=selections()
+		var retain:Dictionary=active_selection if not active_selection.is_empty() else selected.get_metadata(0) if selected!=null else {}
+		rebuild(String(retain.get("id","")),retain.get("path",[]))
+		for previous:Dictionary in selected_rows:_select_id(get_root().get_first_child(),String(previous.id),previous.path,false)
+		return
 	_update_counts(get_root())
 func _structure()->String:
 	var records:Array=[]
@@ -85,10 +102,35 @@ func _update_counts(item:TreeItem)->void:
 	if entry is Dictionary and entry.has("id"):
 		var current:Dictionary=command.preview(String(entry.id),entry.get("path",[]))
 		if not current.is_empty():
+			# Clicks must use the same strength and order that the row displays.
+			item.set_metadata(0,current)
 			item.set_text(1,str(current.count))
 			var mission:=String(current.order.get("mission",""))
 			item.set_text(2,"Unassigned" if mission=="" else "Holding" if mission=="cancelled" else mission.replace("_"," ").capitalize())
+			if int(command.node(String(current.id)).get("force_id",-1))>=0:_refresh_parts(item,current)
 	for child:TreeItem in item.get_children():_update_counts(child)
+func _refresh_parts(item:TreeItem,current:Dictionary)->void:
+	# Adjust only this force's virtual children; ordinary count changes keep
+	# existing rows, expansion and scroll position instead of rebuilding.
+	var children:=item.get_children();var expected:int=current.parts.size()
+	if not children.is_empty() and (children[0].get_metadata(0) as Dictionary).get("placeholder",false):
+		if expected==0:children[0].free()
+		return
+	while children.size()>expected:
+		var removed:TreeItem=children.pop_back()
+		if _contains_active(removed):_emit_selection({})
+		removed.free()
+	if children.is_empty() and expected>0 and item.collapsed:
+		var placeholder:=create_item(item);placeholder.set_metadata(0,{"placeholder":true});placeholder.set_selectable(0,false);return
+	for index in range(children.size(),expected):
+		var path:Array=current.path.duplicate();path.append(index)
+		_row(item,command.preview(String(current.id),path))
+func _contains_active(item:TreeItem)->bool:
+	var meta:Dictionary=item.get_metadata(0)
+	if not active_selection.is_empty() and meta.get("id","")==active_selection.id and meta.get("path",[])==active_selection.path:return true
+	for child:TreeItem in item.get_children():
+		if _contains_active(child):return true
+	return false
 func _remember(item:TreeItem)->void:
 	if item==null:return
 	var entry:Variant=item.get_metadata(0)
