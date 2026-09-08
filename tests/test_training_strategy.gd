@@ -296,7 +296,7 @@ func test_initial_intensive_staff_report_describes_instruction_not_overfull_rota
 	MilitaryCampaign.training_staff.set_policy("air","intensive");op.advance(1)
 	assert_int(int(unit.training_attending)).is_equal(op.crew(unit))
 	assert_str(String(unit.training_status)).contains("Staff instruction").contains("days at current policy")
-	assert_str(String(MilitaryCampaign.training_staff.snapshot("air").status)).is_equal(String(unit.status))
+	assert_int(int(MilitaryCampaign.training_staff.snapshot("air").attending)).is_equal(op.crew(unit))
 
 func test_roster_keeps_operational_activity_and_repair_shortages_visible()->void:
 	var unit:=_craft("navy");unit.training=1.0;unit.condition=.90;unit.repairing=true
@@ -310,3 +310,93 @@ func test_roster_keeps_operational_activity_and_repair_shortages_visible()->void
 	op.advance(2)
 	assert_str(String(screen._rows()[0].activity)).is_equal("Under way")
 	assert_str(String(screen._rows()[0].training_note)).contains("return to home base")
+
+func _additional_service_force(original:Dictionary)->Dictionary:
+	var type_id:String=original.units.keys()[0]
+	MilitaryCampaign.military_inventory[op.C.UNITS[type_id].equipment]=2
+	var created:Dictionary=op.commission(int(original.base_id),type_id,2)
+	assert_bool(created.has("ok")).override_failure_message(str(created)).is_true()
+	return op.force(int(created.id))
+
+func test_service_overview_counts_every_owned_force_and_is_independent_of_processing_order()->void:
+	var training:=_craft("navy")
+	var ready:=_additional_service_force(training);ready.training=1.0;ready.proficiency=.9
+	var assigned:=_additional_service_force(training);assigned.training=1.0
+	assert_bool(op.set_route(assigned,op.point(op.base(int(training.base_id)))+Vector2(1000,-100)).has("error")).is_false()
+	var repairing:=_additional_service_force(training);repairing.training=1.0;repairing.condition=.6;repairing.repairing=true
+	var stranded:=_additional_service_force(training);stranded.base_id=999
+	_craft("air")
+	var rival:=training.duplicate(true);rival.id=op._id();rival.owner="unrelated_rival";op.state.forces.append(rival)
+	op.advance(1)
+	var overview:Dictionary=MilitaryCampaign.training_staff.snapshot("navy")
+	assert_dict(overview.groups).is_equal({"training":1,"assigned":1,"target":1,"paused":2})
+	assert_int(int(overview.forces)).is_equal(5)
+	assert_int(int(overview.attending)).is_equal(op.crew(training))
+	assert_int(int(overview.personnel)).is_equal(op.crew(training)*5)
+	assert_str(String(overview.status)).contains("5 task forces").contains("Home base unavailable").contains("Repairing")
+	var before:Dictionary=op.export_state()
+	MilitaryCampaign.training_staff.snapshot("navy")
+	assert_dict(op.export_state()).is_equal(before)
+	op.state.forces.reverse()
+	assert_dict(MilitaryCampaign.training_staff.snapshot("navy")).is_equal(overview)
+
+func test_reaching_target_stops_the_rotation_and_clears_the_old_exercise_report()->void:
+	var unit:=_craft("air");unit.training=1.0;unit.proficiency=.54999
+	MilitaryCampaign.training_staff.set_policy("air","maintain")
+	op.advance(1)
+	assert_int(int(MilitaryCampaign.training_staff.snapshot("air").groups.training)).is_equal(1)
+	var food:=FoodSystem.total_stored()
+	op.advance(2)
+	var overview:Dictionary=MilitaryCampaign.training_staff.snapshot("air")
+	assert_int(int(overview.groups.training)).is_equal(0)
+	assert_int(int(overview.groups.target)).is_equal(1)
+	assert_int(int(overview.attending)).is_equal(0)
+	assert_str(String(unit.training_status)).is_equal("Training target met")
+	assert_float(FoodSystem.total_stored()).is_equal(food)
+
+func test_base_failure_or_missing_equipment_clears_yesterdays_training_indicators()->void:
+	for domain in ["navy","air"]:
+		var unit:=_craft(domain);var base:Dictionary=op.base(int(unit.base_id))
+		var first_day:=int(op.state.last_day)+1
+		op.advance(first_day)
+		assert_int(int(unit.training_attending)).is_greater(0)
+		base.condition=0.0;op.advance(first_day+1)
+		assert_int(int(unit.training_attending)).is_equal(0)
+		assert_str(String(unit.training_status)).contains("Home base unavailable")
+		assert_int(int(MilitaryCampaign.training_staff.snapshot(domain).groups.paused)).is_equal(1)
+		base.condition=1.0;op.advance(first_day+2)
+		assert_int(int(unit.training_attending)).is_greater(0)
+		unit.auto_replace=false
+		for type_id in unit.units:unit.units[type_id]=0
+		op.advance(first_day+3)
+		assert_int(int(unit.training_attending)).is_equal(0)
+		assert_str(String(unit.training_status)).contains("replacement equipment and crew")
+		assert_int(int(MilitaryCampaign.training_staff.snapshot(domain).groups.training)).is_equal(0)
+
+func test_empty_service_has_no_stale_report_and_policy_changes_do_not_fabricate_training()->void:
+	MilitaryCampaign.training_staff.data.status.navy="Staff exercises · 50% of crews rotating"
+	var empty:Dictionary=MilitaryCampaign.training_staff.snapshot("navy")
+	assert_str(String(empty.status)).contains("No task forces commissioned")
+	assert_dict(empty.groups).is_equal({"training":0,"assigned":0,"target":0,"paused":0})
+	var unit:=_craft("navy")
+	MilitaryCampaign.training_staff.set_policy("navy","intensive")
+	var waiting:Dictionary=MilitaryCampaign.training_staff.snapshot("navy")
+	assert_int(int(waiting.groups.paused)).is_equal(1)
+	assert_int(int(waiting.attending)).is_equal(0)
+	assert_float(float(unit.training)).is_equal(0.0)
+	assert_str(String(waiting.status)).contains("next staff review")
+
+func test_visual_training_indicators_update_in_place_and_fit_the_policy_panel()->void:
+	var unit:=_craft("air");unit.training=1.0;unit.proficiency=.9
+	op.advance(1)
+	var screen:CanvasLayer=auto_free(Roster.new());screen.service="air";screen.training_view=true;add_child(screen)
+	await get_tree().process_frame
+	assert_int(screen.service_indicators.size()).is_equal(4)
+	assert_str(String(screen.service_indicators.target.value.text)).is_equal("1")
+	var indicator:Label=screen.service_indicators.target.value
+	MilitaryCampaign.training_staff.set_policy("air","suspended");op.advance(2);screen._update_policy()
+	assert_object(screen.service_indicators.target.value).is_same(indicator)
+	assert_str(String(screen.service_indicators.target.value.text)).is_equal("0")
+	assert_str(String(screen.service_indicators.paused.value.text)).is_equal("1")
+	assert_str(String(screen.service_indicators.paused.card.tooltip_text)).contains("suspended")
+	assert_float(screen.body.get_combined_minimum_size().x).is_less_equal(screen.panel.size.x-36.0)

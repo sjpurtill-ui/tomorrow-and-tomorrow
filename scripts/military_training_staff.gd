@@ -49,6 +49,55 @@ func snapshot(service:String)->Dictionary:
 	result.food_spent=float(data.food_spent.get(service,0.0))
 	result.materials_spent=float(data.materials_spent.get(service,0.0))
 	result.active=host.training_program.duplicate(true) if service=="army" else {}
+	if service in ["navy","air"]:result.merge(service_overview(service),true)
+	return result
+func service_overview(service:String)->Dictionary:
+	var op=host.joint_operations
+	var forces:Array[Dictionary]=[]
+	var day:=int(op.state.last_day)
+	for record:Dictionary in op.state.forces:
+		if record.owner!="player" or record.domain!=service:continue
+		forces.append(record);day=maxi(day,int(record.get("staff_training_day",-1)))
+	var overview:Dictionary={"groups":{"training":0,"assigned":0,"target":0,"paused":0},"forces":forces.size(),"personnel":0,"attending":0,"report_day":day,"pause_reasons":{}}
+	for record:Dictionary in forces:
+		var report:=service_force_report(record,day)
+		overview.groups[report.group]+=1
+		overview.personnel+=op.crew(record);overview.attending+=int(report.attending)
+		if report.group=="paused":overview.pause_reasons[report.reason]=int(overview.pause_reasons.get(report.reason,0))+1
+	var unit_name:="task forces" if service=="navy" else "air wings"
+	if forces.is_empty():
+		overview.status="No %s commissioned. Staff will apply your policy when crews enter service." % unit_name
+	else:
+		overview.status="%d %s · %d crew · %d attending training." % [forces.size(),unit_name,overview.personnel,overview.attending]
+		var reasons:Array=overview.pause_reasons.keys();reasons.sort()
+		var lines:Array[String]=[]
+		for reason in reasons:lines.append("%d · %s" % [overview.pause_reasons[reason],reason])
+		overview.pause_details="\n".join(lines)
+		if not lines.is_empty():overview.status+="\n"+"\n".join(lines.slice(0,3))
+		if lines.size()>3:overview.status+="\nMore reasons in the Paused indicator."
+	return overview
+func service_force_report(record:Dictionary,day:int)->Dictionary:
+	var op=host.joint_operations
+	var result:Dictionary={"group":"paused","attending":0,"reason":"Awaiting the next staff review"}
+	var origin:Dictionary=op.base(int(record.base_id))
+	if not op.base_ready(origin) or not op.base_owned(origin,String(record.owner)):
+		result.reason="Home base unavailable";return result
+	if op.crew(record)<=0:result.reason="Replacement equipment and crew needed";return result
+	var fresh:=day>=0 and int(record.get("staff_training_day",-1))==day
+	if bool(record.get("repairing",false)) or float(record.condition)<maxf(.8,float(record.get("repair_threshold",.6))):
+		result.reason=String(record.get("training_status","Repairs before training")) if fresh else "Repairs before training"
+		if result.reason=="":result.reason="Repairs before training"
+		return result
+	if fresh and int(record.get("training_attending",0))>0:
+		result.group="training";result.attending=mini(op.crew(record),int(record.training_attending));return result
+	var at_base:bool=op.force_position(record).distance_to(op.point(origin))<2 and record.get("route",[]).is_empty()
+	if not at_base or op.logistics.busy(int(record.id)) or String(record.mission)!="hold":
+		result.group="assigned";return result
+	var current:=policy(String(record.domain))
+	if current.id!="suspended" and float(record.training)>=1 and float(record.get("proficiency",.45))>=float(current.target):
+		result.group="target";return result
+	if current.id=="suspended":result.reason="Training suspended by policy"
+	elif fresh and String(record.get("training_status",""))!="":result.reason=String(record.training_status)
 	return result
 func army_rotation()->Dictionary:
 	var current:=policy("army")
@@ -98,6 +147,9 @@ func record_food(service:String,amount:float)->void:data.food_spent[service]=flo
 func report_service_training(record:Dictionary,message:String)->void:
 	record.training_status=message
 	if record.owner=="player":data.status[String(record.domain)]=message
+func pause_service_training(record:Dictionary,day:int,message:String)->void:
+	record.training_attending=0;record.staff_training_day=day
+	report_service_training(record,message)
 func service_training(record:Dictionary,origin:Dictionary,day:int)->bool:
 	var op=host.joint_operations
 	var initial:=float(record.get("training",0))<1.0
@@ -116,7 +168,8 @@ func service_training(record:Dictionary,origin:Dictionary,day:int)->bool:
 	if needs_repairs:reason="Staff prioritizing repairs before training"
 	elif current.id=="suspended":reason="Staff training suspended by policy"
 	elif not at_base:reason="Training waits for return to home base"
-	elif not initial and float(record.get("proficiency",.45))>=float(current.target):return false
+	elif not initial and float(record.get("proficiency",.45))>=float(current.target):
+		report_service_training(record,"Training target met");return false
 	elif op.logistics.busy(int(record.id)):reason="Crew committed to transport duty"
 	if reason!="":
 		report_service_training(record,reason)

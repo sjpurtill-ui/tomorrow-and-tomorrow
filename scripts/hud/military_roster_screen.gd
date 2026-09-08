@@ -6,6 +6,7 @@ var panel:PanelContainer
 var body:VBoxContainer
 var policy_status:Label
 var policy_buttons:Dictionary={}
+var service_indicators:Dictionary={}
 var bindings:Array[Dictionary]=[]
 var rows_signature:=""
 var timer:=0.0
@@ -69,7 +70,7 @@ func _bar(parent:Node,color:Color)->ProgressBar:
 	var track:=StyleBoxFlat.new();track.bg_color=Color("35464b");bar.add_theme_stylebox_override("background",track);parent.add_child(bar);return bar
 func _clear()->void:
 	for child in body.get_children():body.remove_child(child);child.queue_free()
-	bindings.clear();policy_buttons.clear()
+	bindings.clear();policy_buttons.clear();service_indicators.clear()
 func _build_body()->void:
 	_clear();heading.text=service.to_upper()+" · "+("TRAINING STRATEGY" if training_view else "FORCES")
 	management_button.text="Army builds" if service=="army" else "Ports & shipbuilding" if service=="navy" else "Airbases & aircraft"
@@ -150,7 +151,8 @@ func _rows()->Array[Dictionary]:
 			var authorized:=0
 			for amount in unit.authorized.values():authorized+=int(amount)
 			var staff_status:=String(unit.get("training_status",""))
-			var exercising:=int(unit.get("training_attending",0))>0 and float(unit.training)>=1.0
+			var staff_report:Dictionary=campaign.training_staff.service_force_report(unit,maxi(int(op.state.last_day),int(unit.get("staff_training_day",-1))))
+			var exercising:bool=staff_report.group=="training" and float(unit.training)>=1.0
 			var activity:=staff_status if exercising else String(unit.status)
 			var note:=String(unit.status) if exercising else staff_status
 			if note==activity or note=="":note="Policy: "+String(campaign.training_staff.policy(service).label)
@@ -179,6 +181,15 @@ func _policy()->void:
 		var bar:=_bar(card,Color("dfb967"));bar.value=float(definition.share)*100
 		_label(card,"Drill target: %d%%" % roundi(float(definition.target)*100),14)
 		var description:=_label(card,String(definition.description),13);description.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;description.custom_minimum_size.x=135
+	if service!="army":
+		var overview:=GridContainer.new();overview.columns=4;overview.add_theme_constant_override("h_separation",12);body.add_child(overview)
+		for definition in [["training","TRAINING","88c5a6"],["assigned","ON ASSIGNMENT","88b6ce"],["target","TARGET MET","dfb967"],["paused","PAUSED","dc9a7e"]]:
+			var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(card)
+			var value:=_label(card,"0",28);value.add_theme_color_override("font_color",Color(definition[2]))
+			_label(card,String(definition[1]),12)
+			var bar:=_bar(card,Color(definition[2]))
+			service_indicators[definition[0]]={"value":value,"bar":bar,"card":card}
+		var report_note:=_label(body,"Counts are task forces or air wings. Staff apply policy changes at their next daily review.",12);report_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	policy_status=_label(body,"",16);policy_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	_label(body,"TRAINING INVESTMENT",17)
 	var costs:=_label(body,"Initial instruction: at least 45 effective days for land forces; naval and air crews require at least 90 effective days of full-time instruction. Army exercises run 72–252 effective days. Higher commitments consume more food, training materials and fuel, and leave fewer personnel on immediate duty.",14);costs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -187,5 +198,11 @@ func _policy()->void:
 func _update_policy()->void:
 	var state:Dictionary=MilitaryCampaign.training_staff.snapshot(service)
 	for id in policy_buttons:policy_buttons[id].set_pressed_no_signal(id==state.id)
-	policy_status.text=String(state.status)+"\nTraining spent: %.1f extra rations · %.1f base materials" % [state.food_spent,state.materials_spent]
+	for group in service_indicators:
+		var indicator:Dictionary=service_indicators[group]
+		indicator.value.text=str(state.groups[group]);indicator.bar.value=float(state.groups[group])/maxf(1,state.forces)*100
+		var tips:Dictionary={"training":"Crews in initial instruction or training rotations; other qualified crews may still operate.","assigned":"Forces committed to missions or travel without a training rotation.","target":"Crews at home whose proficiency meets the selected training target.","paused":String(state.get("pause_details","No paused training."))}
+		indicator.card.tooltip_text=tips[group]
+		indicator.value.tooltip_text=tips[group];indicator.bar.tooltip_text=tips[group]
+	policy_status.text=String(state.status)+"\nTraining spent to date: %.1f extra rations · %.1f base materials" % [state.food_spent,state.materials_spent]
 	if service=="army" and not state.active.is_empty():policy_status.text+="\n%s · %.0f / %.0f effective days · %.1f extra rations used" % [state.active.label,state.active.progress_days,state.active.duration_days,state.active.food_consumed_total]

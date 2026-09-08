@@ -456,12 +456,17 @@ func advance(day:int)->void:
 		var carrier:=force(int(record.get("carrier_id",0)))
 		if int(record.get("carrier_id",0))>0 and (carrier.is_empty() or carrier_capacity(carrier)<=0):
 			record.carrier_id=0;record.mission="hold";record.region={};record.status="Carrier lost · diverting to land base"
+			host.training_staff.pause_service_training(record,day,String(record.status))
 			set_route(record,point(origin));continue
-		if not base_ready(origin) or not base_owned(origin,String(record.owner)):record.status="Home base unavailable · rebase to a friendly port or airfield";continue
+		if not base_ready(origin) or not base_owned(origin,String(record.owner)):
+			record.status="Home base unavailable · rebase to a friendly port or airfield"
+			host.training_staff.pause_service_training(record,day,String(record.status));continue
 		var at_base:bool=force_position(record).distance_to(point(origin))<2 and record.get("route",[]).is_empty()
 		if hardware(record)==0:record.position=origin.position.duplicate(true);record.route=[]
 		if at_base or hardware(record)==0:_replace(record)
-		if crew(record)<=0:record.status="Waiting for replacement equipment and crew";continue
+		if crew(record)<=0:
+			record.status="Waiting for replacement equipment and crew"
+			host.training_staff.pause_service_training(record,day,String(record.status));continue
 		if host.training_staff.service_training(record,origin,day):continue
 		if float(record.condition)<float(record.repair_threshold):record["repairing"]=true
 		if bool(record.get("repairing",false)) and not logistics.busy(int(record.id)):
@@ -470,7 +475,8 @@ func advance(day:int)->void:
 			else:
 				var repaired:=repair_at_base(record,origin)
 				if float(record.condition)>=.98:record.repairing=false
-				record.status=String(repaired.get("error",repaired.get("message","Repairing at base")));continue
+				record.status=String(repaired.get("error",repaired.get("message","Repairing at base")))
+				host.training_staff.report_service_training(record,String(record.status));continue
 
 		if logistics.busy(int(record.id)):
 			if not pay_fuel(record):record.status="Transport halted · no fuel";continue
