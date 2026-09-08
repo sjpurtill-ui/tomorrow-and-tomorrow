@@ -7,7 +7,10 @@ static func recipe(host: Node, item: String) -> Dictionary:
 	var gate: Dictionary
 	var definition: Dictionary
 	var kind := "production"
-	if item=="transport_cart":
+	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
+	if not joint.is_empty():
+		gate=host._knowledge_gate(String(joint.gate),.10);definition={"materials":joint.materials,"days":float(joint.work_days)}
+	elif item=="transport_cart":
 		gate=host._knowledge_gate("joinery",.10);definition=host._transport_recipe();kind="transport"
 	elif host.CONSUMABLE_KNOWLEDGE.has(item):
 		gate=host.consumable_knowledge_availability(item);definition=host._consumable_recipe(item);kind="consumable"
@@ -18,9 +21,13 @@ static func recipe(host: Node, item: String) -> Dictionary:
 	return {"item":item,"job_type":kind,"materials":definition.materials.duplicate(true),"work_per_item":float(definition.days)}
 
 static func product_name(item:String)->String:
+	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
+	if not joint.is_empty():return String(joint.label)
 	return {"improvised":"Simple levy weapons","spear":"Spears","bow":"Bows","sword_shield":"Sword & shield sets","siege_kit":"Siege engineer kits"}.get(item,item.replace("_"," ").capitalize())
 
 static func product_description(item:String)->String:
+	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
+	if not joint.is_empty():return "%s equipment. %d crew per hull or aircraft; commission through %s operations." % [String(joint.purpose),int(joint.crew),String(joint.domain)]
 	if item=="improvised":return "Basic wooden clubs and makeshift hand weapons for levies. One set equips one levy; this produces equipment, not a trained unit."
 	var users:Array[String]=[]
 	for unit:Dictionary in preload("res://scripts/military_unit_catalog.gd").ARCHETYPES.values():
@@ -37,6 +44,8 @@ static func startup_blockers(host:Node,item:String)->Array[String]:
 	var result:Array[String]=[]
 	var definition:=recipe(host,item)
 	if definition.has("error"):return [String(definition.error)]
+	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
+	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):result.append("Build an operational naval base or airfield for this production branch first.")
 	var staff:=workforce()
 	if host.production_labor_share<=0:result.append("No crafting labor assigned to military production. Increase the military crafting share.")
 	if float(staff.workers)<=0:result.append("No available craftspeople. Assign crafting work in your cities.")

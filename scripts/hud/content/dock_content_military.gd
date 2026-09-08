@@ -51,7 +51,7 @@ func tab(sub:int)->Dictionary:
 		1: return {"kpis":[kpis[0],kpis[1]],"blocks":_builds_blocks(capabilities)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_training_blocks()}
 		3: return {"kpis":[kpis[3]],"blocks":_supply_overview()}
-	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":_campaign_entry()+_forces_overview()}
+	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"UNITS & EQUIPMENT MAP","sub":"50 land archetypes and the separate naval and air chains","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))}]}]+_campaign_entry()+_forces_overview()}
 
 func _command_brief()->Dictionary:
 	if not MilitaryCampaign.pending_aftermath.is_empty() and not MilitaryCampaign.battle_history.is_empty():
@@ -353,7 +353,7 @@ func _personnel_block()->Dictionary:
 
 func _personnel_text()->String:
 	var ledger:=MilitaryCampaign.personnel_ledger()
-	return "%d total = %d home reserve + %d in field armies + %d occupation + %d recruits + %d in training + %d recovering + %d missing or captured.\nDefense workers are a labor allocation, not additional soldiers." % [ledger.total,ledger.home,ledger.field,ledger.occupation,ledger.recruits,ledger.training,ledger.recovering,ledger.missing]
+	return "%d total = %d home reserve + %d in field armies + %d occupation + %d recruits + %d in training + %d recovering + %d missing or captured + %d naval and air crew.\nDefense workers are a labor allocation, not additional soldiers." % [ledger.total,ledger.home,ledger.field,ledger.occupation,ledger.recruits,ledger.training,ledger.recovering,ledger.missing,ledger.naval_air]
 
 func _training_blocks()->Array:
 	var state:=MilitaryCampaign.training_program_snapshot()

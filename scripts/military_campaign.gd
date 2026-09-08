@@ -2,6 +2,7 @@ extends Node
 
 const PersistentProduction = preload("res://scripts/persistent_production.gd")
 var production_labor_share:float = .35
+var joint_operations=preload("res://scripts/joint_operations.gd").new(self)
 
 signal army_changed(army: Dictionary)
 signal battle_resolved(result: Dictionary)
@@ -111,7 +112,7 @@ func _empty_equipment_inventory()->Dictionary:
 
 
 func _empty_consumable_inventory()->Dictionary:
-	return {"arrows":0,"artillery_rounds":0,"small_arms_ammunition":0,"heavy_shells":0}
+	return {"arrows":0,"artillery_rounds":0,"small_arms_ammunition":0,"heavy_shells":0,"fuel":0}
 
 
 func _process(_delta:float)->void:
@@ -125,6 +126,7 @@ func _process(_delta:float)->void:
 
 
 func reset_for_new_world()->void:
+	joint_operations.reset()
 	recovery.reset()
 	occupation_transfers.reset()
 	last_world_seed=GameState.world_seed
@@ -323,7 +325,7 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 	var vacancies:=maxi(0,int(formation.get("authorized_count",formation.count))-int(formation.count))
 	var accepted:=mini(mini(maxi(0,count),aggregate_recruits),vacancies)
 	if accepted<=0: return {"error":"The formation has no open authorized positions or no recruits are available."}
-	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(String(formation.unit),21))
+	var base_days:=UnitCatalog.training_days(String(formation.unit))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	var required_days:=maxf(3.0,base_days*0.58)
 	aggregate_recruits-=accepted
@@ -349,7 +351,7 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 	if returned_ammunition>0: military_consumables[ammunition_type]=int(military_consumables.get(ammunition_type,0))+returned_ammunition
 	(home_army.formations as Array).remove_at(formation_index)
 	home_army["troops"]=maxi(0,int(home_army.get("troops",0))-personnel_count)
-	var base_days:=float({"levy":7,"line_infantry":30,"skirmisher":21,"cavalry":45,"siege_engineer":48,"field_artillery":60}.get(unit,21))
+	var base_days:=UnitCatalog.training_days(unit)
 	var required_days:=maxf(3.0,base_days*(0.72-retained_experience*0.24))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":personnel_count,"experience":retained_experience,"progress_days":0.0,"start_day":int(GameState.elapsed_days),"required_days":required_days,"injury_accumulator":0.0})
@@ -376,7 +378,7 @@ func cancel_training(order_id:int)->Dictionary:
 
 
 func equipment_production_quote(item:String,count:int)->Dictionary:
-	if not simulator.WEAPONS.has(item): return {"error":"Unknown equipment type: %s" % item}
+	if not EQUIPMENT_KNOWLEDGE.has(item): return {"error":"Unknown equipment type: %s" % item}
 	var line_gate:=_production_line_gate()
 	if line_gate.has("error"): return line_gate
 	var gate:=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE.get(item,"")),0.08)
@@ -418,7 +420,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
-const CONSUMABLE_KNOWLEDGE:Dictionary={"arrows":"bow_craft","artillery_rounds":"powder_artillery","small_arms_ammunition":"__military_tier_5__","heavy_shells":"__military_tier_6__"}
+const CONSUMABLE_KNOWLEDGE:Dictionary={"arrows":"bow_craft","artillery_rounds":"powder_artillery","small_arms_ammunition":"metallic_cartridges","heavy_shells":"indirect_fire","fuel":"fuel_refining"}
 
 func consumable_knowledge_availability(item:String)->Dictionary:
 	var discovery:=String(CONSUMABLE_KNOWLEDGE.get(item,""))
@@ -478,7 +480,7 @@ func queue_transport_cart_production(count:int)->Dictionary:
 
 
 func equipment_repair_quote(item:String,count:int)->Dictionary:
-	if not simulator.WEAPONS.has(item): return {"error":"Unknown equipment type: %s" % item}
+	if not EQUIPMENT_KNOWLEDGE.has(item): return {"error":"Unknown equipment type: %s" % item}
 	var line_gate:=_production_line_gate()
 	if line_gate.has("error"): return line_gate
 	var amount:=mini(maxi(0,count),int(damaged_equipment.get(item,0)))
@@ -596,7 +598,7 @@ func recruitment_capacity()->int:
 
 
 func _mobilized_count()->int:
-	return aggregate_recruits+_queued_trainees()+training_injury_pool+int(home_army.get("troops",0))+int(home_army.get("wounded_pool",0))+int(home_army.get("scattered_pool",0))+int(home_army.get("captured_pool",0))+_field_army_force_total()+_occupation_force_total()
+	return joint_operations.personnel()+aggregate_recruits+_queued_trainees()+training_injury_pool+int(home_army.get("troops",0))+int(home_army.get("wounded_pool",0))+int(home_army.get("scattered_pool",0))+int(home_army.get("captured_pool",0))+_field_army_force_total()+_occupation_force_total()
 
 
 # Fixed aggregate categories only. This is the authoritative bridge between
@@ -610,7 +612,7 @@ func personnel_ledger()->Dictionary:
 		absent+=maxi(0,int(force.get("scattered_pool",0)))+maxi(0,int(force.get("captured_pool",0)))
 	var occupation:=0
 	for force in occupation_forces: occupation+=maxi(0,int(force.get("troops",0)))
-	return {"total":_mobilized_count(),"home":int(home_army.get("troops",0)),"field":field_army_active_personnel(),"occupation":occupation,"recruits":aggregate_recruits,"training":_queued_trainees(),"recovering":wounded,"missing":absent,"capacity":recruitment_capacity()}
+	return {"total":_mobilized_count(),"naval_air":joint_operations.personnel(),"home":int(home_army.get("troops",0)),"field":field_army_active_personnel(),"occupation":occupation,"recruits":aggregate_recruits,"training":_queued_trainees(),"recovering":wounded,"missing":absent,"capacity":recruitment_capacity()}
 
 
 func population_commitment_snapshot()->Dictionary:
@@ -618,7 +620,8 @@ func population_commitment_snapshot()->Dictionary:
 	var home:=maxi(0,int(home_army.get("troops",0)))+maxi(0,int(home_army.get("wounded_pool",0)))+maxi(0,int(home_army.get("scattered_pool",0)))+maxi(0,int(home_army.get("captured_pool",0)))
 	var field:=maxi(0,_field_army_force_total())
 	var occupation:=maxi(0,_occupation_force_total())
-	var total:=training_and_reserve+home+field+occupation
+	var naval_air:=joint_operations.personnel()
+	var total:=training_and_reserve+home+field+occupation+naval_air
 	var allocated_defense:=maxi(0,int(GameState.population_allocations.get("Defense",0)))
 	return {
 		"total":total,"allocated_defense":allocated_defense,"excess_beyond_defense":maxi(0,total-allocated_defense),
@@ -626,7 +629,8 @@ func population_commitment_snapshot()->Dictionary:
 			{"id":"training_and_reserve","label":"TRAINING & RECRUIT RESERVE","personnel":training_and_reserve},
 			{"id":"home_forces","label":"HOME FORCES","personnel":home},
 			{"id":"field_armies","label":"FIELD ARMIES","personnel":field},
-			{"id":"occupation_forces","label":"OCCUPATION FORCES","personnel":occupation}
+			{"id":"occupation_forces","label":"OCCUPATION FORCES","personnel":occupation},
+			{"id":"naval_air","label":"NAVAL & AIR CREWS","personnel":naval_air}
 		],
 		"bounded":true
 	}
@@ -1014,6 +1018,7 @@ func _field_army_speed(force:Dictionary)->float:
 		if count==0: continue
 		var unit:=String(formation.get("unit","levy"))
 		var pace:=float({"levy":24.0,"line_infantry":26.0,"skirmisher":32.0,"cavalry":55.0,"siege_engineer":14.0,"field_artillery":18.0,"rifle_infantry":28.0,"machine_gun_company":22.0,"motorized_infantry":140.0,"armored_formation":95.0,"modern_artillery":80.0}.get(unit,24.0))
+		pace=float(UnitCatalog.archetype(unit).get("pace_km_day",pace))
 		slowest=minf(slowest,pace)
 		quality+=count*(0.65+0.20*clampf(float(formation.get("training",0.5)),0.0,1.0)+0.15*clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0))
 		personnel+=count
@@ -2519,6 +2524,7 @@ func _mobilization_cost()->Dictionary:
 func export_state()->Dictionary:
 	return {
 		"version":SAVE_VERSION,
+		"joint_operations":joint_operations.export_state(),
 		"world_seed":GameState.world_seed,
 		"historical_figures":HistoricalFigures.export_state(),
 		"people_direction":PeopleDirection.export_state(),
@@ -2566,6 +2572,9 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if payload.has("joint_operations"):
+		var joint_error:=String(joint_operations.validate(payload.joint_operations))
+		if joint_error!="":return {"error":joint_error}
 	var production_error:=PersistentProduction.validate_saved(payload)
 	if not production_error.is_empty(): return {"error":production_error}
 	if not payload.get("siege_recovery",{}) is Dictionary:return {"error":"Invalid siege recovery state."}
@@ -2824,6 +2833,8 @@ func validate_state()->Array[String]:
 	return errors
 
 func _apply_imported_state(payload:Dictionary)->void:
+	joint_operations.reset()
+	if payload.has("joint_operations"):joint_operations.import_state(payload.joint_operations)
 	recovery.reset()
 	recovery.data.merge(payload.get("siege_recovery",{}).duplicate(true),true)
 	occupation_transfers.reset()
@@ -3437,6 +3448,7 @@ func _reconcile_external_military_mortality()->Dictionary:
 
 
 func _process_military_day()->void:
+	joint_operations.advance(last_processed_day)
 	recovery.advance(last_processed_day)
 	if recovery.home_unavailable():
 		_process_field_army_movement_day()
@@ -3621,7 +3633,7 @@ func _daily_delivery_capacity()->float:
 
 
 func _equipment_delivery_load(item:String)->float:
-	return maxf(0.05,float(EQUIPMENT_DELIVERY_LOAD.get(item,1.0)))
+	return maxf(0.05,float(preload("res://scripts/military_equipment_extension.gd").ITEMS.get(item,{}).get("delivery",EQUIPMENT_DELIVERY_LOAD.get(item,1.0))))
 
 
 func _ammunition_delivery_load(item:String)->float:
@@ -4012,6 +4024,7 @@ func _ammunition_required_for(weapon:String,equipment_required:int)->int:
 
 
 func _ammunition_type_for(weapon:String)->String:
+	if preload("res://scripts/military_equipment_extension.gd").ITEMS.has(weapon):return String(preload("res://scripts/military_equipment_extension.gd").ITEMS[weapon].ammo)
 	return String({"bow":"arrows","field_gun":"artillery_rounds","service_rifle":"small_arms_ammunition","machine_gun":"small_arms_ammunition","motorized_kit":"small_arms_ammunition","armored_vehicle":"heavy_shells","modern_field_gun":"heavy_shells"}.get(weapon,""))
 
 
@@ -4065,6 +4078,10 @@ func _complete_training(training:Dictionary)->void:
 
 
 func _equipment_recipe(item:String)->Dictionary:
+	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
+	if not joint.is_empty():return {"materials":joint.materials.duplicate(true),"days":float(joint.work_days)}
+	var extension:Dictionary=preload("res://scripts/military_equipment_extension.gd").ITEMS.get(item,{})
+	if not extension.is_empty():return {"materials":extension.materials.duplicate(true),"days":float(extension.days)}
 	return {
 		"improvised":{"materials":{"Timber":0.35},"days":0.25},
 		"spear":{"materials":{"Timber":0.65,"Stone":0.10},"days":0.55},
@@ -4083,6 +4100,7 @@ func _equipment_recipe(item:String)->Dictionary:
 
 func _consumable_recipe(item:String)->Dictionary:
 	return {
+		"fuel":{"materials":{"Coal":1.0},"days":.25},
 		"arrows":{"materials":{"Timber":0.08,"Fiber Plants":0.025,"Stone":0.015},"days":0.055},
 		"artillery_rounds":{"materials":{"Sulfur":0.12,"Nitrates":0.18,"Iron Ore":0.20,"Timber":0.08},"days":0.18},
 		"small_arms_ammunition":{"materials":{"Sulfur":0.025,"Nitrates":0.04,"Iron Ore":0.035,"Copper Ore":0.012},"days":0.018},
