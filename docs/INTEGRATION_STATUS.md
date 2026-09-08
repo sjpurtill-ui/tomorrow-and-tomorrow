@@ -1,3 +1,13 @@
+## September 7 — separate main-map military commands and operational iteration
+
+INTEGRATED `7fb5dc2`, `fecf99f`, `ff2f02b` by sequential fast-forwards into canonical Mac main. This replaces the previous Naval & Air secondary screen completely: Navy and Air each have separate command panels, tabs and operational controls over the real world map. Draw/select regions there; Shift+F5 Navy, Shift+F6 Air, D draw, Enter finish, Escape cancel/close. Existing camera and four distances remain in use. The obsolete independent operations map is deleted.
+
+Military follow-up: visible readiness and read-only commissioning quotes; local recipe-funded repairs and explicit shortages; separate naval repair capacity versus air sortie crowding; airborne-only superiority/interception targets; physical port strikes; bounded naval contact/fire ranges and dated-contact pursuit. Reports separate service-specific losses. Empty services lead directly to setup; unusable mission controls stay hidden. Full numerical HOI4 parity is not claimed; combat remains daily and aggregate with simplified ranges and doctrine.
+
+Combined canonical checks: **63 tests pass**, zero errors/failures/orphans across main-map services, joint campaign loop, joint operations, force catalog, land combat simulator and camera distances. Log: /tmp/tt-services-delivery-canonical.log. No new required save fields. Both service panels were visually inspected over the original terrain in the actual resumed campaign at fecf99f. Native pointer drawing remains unverified because embedded-window coordinate automation redirects clicks to the editor; projection, boundary persistence and input handling have headless behavioral checks. Source details: docs/MAIN_MAP_SERVICES_HANDOFF.md.
+
+Release 2026.09.07.2 is prepared; canonical editor Run Project relaunch verification follows. Ongoing military iteration heartbeat `iterate-military-gameplay-and-ui` is active in this task every 30 minutes; the existing settlement-development task remains separate.
+
 ## September 7 — joint operations and modern architecture integrated
 
 INTEGRATED source `f4a7d78` / `f466f20` from `codex/fifty-units` through merge `f996fa6`; integration fixes `2b2e3ea` and `f66bfcb`. This supersedes the held `33ab016` milestone. Canonical Mac checkout is `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`.
