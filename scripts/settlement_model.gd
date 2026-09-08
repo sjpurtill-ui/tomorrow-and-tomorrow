@@ -1374,7 +1374,7 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 	if day%360!=0 or _settlement_age_years(day)<4.0: return
 	var population:=_primary_population()
 	if population<1800: return
-	var builders:=int(GameState.population_allocations.get("Construction",0))
+	var builders:=GameState.effective_workers("Construction")
 	var logisticians:=int(GameState.population_allocations.get("Logistics",0))
 	var administrators:=int(GameState.population_allocations.get("Administration",0))
 	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.0)),0.0,1.0)
@@ -2191,7 +2191,7 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 	# A quarterly bounded conversion keeps centuries affordable and ensures that an
 	# era remains a heterogeneous accretion of old and new fabric. Population never
 	# repaints the whole settlement in one frame.
-	if day%90!=0 or int(GameState.population_allocations.get("Construction",0))<4: return
+	if day%90!=0 or GameState.effective_workers("Construction")<4: return
 	var target_tier:=_supported_fabric_tier(day)
 	if target_tier<=0: return
 	var candidates:Array[Dictionary]=[]
@@ -2210,7 +2210,7 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 		candidates.append({"plot":plot,"next_tier":next_tier,"cost":cost,"score":score})
 	if candidates.is_empty(): return
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.score)>float(b.score))
-	var builders:=int(GameState.population_allocations.get("Construction",0))
+	var builders:=GameState.effective_workers("Construction")
 	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.0)),0.0,1.0)
 	var upgrade_slots:=clampi(1+floori(float(builders)/80.0)+floori(logistics*2.0),1,12)
 	for candidate_index in mini(upgrade_slots,candidates.size()):
@@ -2322,7 +2322,7 @@ func _available_functional_recipe(land_use:String)->Dictionary:
 
 func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
-	if _has_active_construction() or int(GameState.population_allocations.get("Construction",0))<4: return
+	if _has_active_construction() or GameState.effective_workers("Construction")<4: return
 	var candidates:Array[Dictionary]=[]
 	if "Open Work Area" in GameState.settlement_completed:
 		var crafting:=int(GameState.population_allocations.get("Crafting",0))
@@ -2504,7 +2504,7 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	if not _can_add_plots(): return false
 	var capacity:=_resident_capacity_for_growth()
 	if _primary_population()<=roundi(float(capacity)*0.88): return false
-	if int(GameState.population_allocations.get("Construction",0))<4: return false
+	if GameState.effective_workers("Construction")<4: return false
 	var recipe:=_available_household_recipe()
 	if recipe.is_empty(): return false
 	# Some pressure becomes roofed infill inside a viable inherited compound;
