@@ -1,5 +1,7 @@
 # Funded construction material consistency — September 7, 2026
 
+Delivery status: superseded by the combined READY branch in SETTLEMENT_READY_BUNDLE.md; original history below is retained.
+
 READY. Worktree /Users/seanpurtill/.codex/worktrees/c2aa/tomorrow-and-tomorrow,
 branch codex/settlement-construction-check, base 45b24d1.
 

@@ -1,5 +1,7 @@
 # Affordable household infill — September 7, 2026
 
+Delivery status: superseded by the combined READY branch in SETTLEMENT_READY_BUNDLE.md; original history below is retained.
+
 READY for integration. Worker:
 /Users/seanpurtill/.codex/worktrees/c2aa/tomorrow-and-tomorrow
 Branch: codex/settlement-growth-followup. Base: 06c236c.
