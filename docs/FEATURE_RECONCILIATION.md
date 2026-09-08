@@ -1,3 +1,9 @@
+## September 8 — latest integrated build running after reopening
+
+At the user's launch request, opened the canonical project in Godot. Editor PID **2812** and new player PID **3034** run `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`; the player command line names `res://local_terrain.tscn` and its canonical editor parent. The checkout at launch is **d9aeec5**, including command-panel layout `7a1310c` and exact command-selection refresh `41a97ff` (40 canonical tests passed before launch).
+
+Native inspection shows the actual main map in a new world, Year 1/Day 1, population 120, with the founding convoy and ground inspection visible. The startup log has no script errors and reports seed 1788281429. The displayed release string remains 2026.09.07.2. The earlier embedded-view capture problem is no longer present in this reopened session. No further restart or save load was performed after observing the active game. A temporary editor resume argument was removed; it was not present in this player's command line. The proposed current-order summary follow-up has no source changes and is not part of this build.
+
 ## September 8 — exact military selection during refresh
 
 INTEGRATED `41a97ff` by conflict-free fast-forward from `f0b0fe4`. Hierarchy clicks now use the displayed strength and order. Resized detachments can receive orders after the required reselection instead of repeatedly failing a stale-strength check. Vanished subdivisions clear the active order target. Structural refreshes retain the exact active subdivision and other selected commands, preventing an unnoticed switch from a small detachment to its whole parent force. Ordinary count updates preserve existing rows and expansion.
