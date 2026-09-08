@@ -1,6 +1,6 @@
 # Current strength and exact command selection
 
-READY for integration. Worktree `/Users/seanpurtill/Documents/Codex/tt-command-refresh`, branch `codex/command-refresh`, base `f0b0fe48a07e9f643ce0b2d481de2e582b8158e5`.
+INTEGRATED as `41a97ff`; all 40 canonical checks pass (`/tmp/tt-command-refresh-canonical.log`). Worktree `/Users/seanpurtill/Documents/Codex/tt-command-refresh`, branch `codex/command-refresh`, base `f0b0fe48a07e9f643ce0b2d481de2e582b8158e5`.
 
 Previously, a row could display its new strength while retaining old click metadata. Re-selecting a resized subdivision therefore failed the same strength-change check repeatedly. A structural refresh also retained only the force ID, selecting the entire parent force instead of the chosen virtual subdivision, and could use the first selected row rather than the most recently chosen command.
 

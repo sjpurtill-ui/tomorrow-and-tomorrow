@@ -1,3 +1,11 @@
+## September 8 — exact military selection during refresh
+
+INTEGRATED `41a97ff` by conflict-free fast-forward from `f0b0fe4`. Hierarchy clicks now use the displayed strength and order. Resized detachments can receive orders after the required reselection instead of repeatedly failing a stale-strength check. Vanished subdivisions clear the active order target. Structural refreshes retain the exact active subdivision and other selected commands, preventing an unnoticed switch from a small detachment to its whole parent force. Ordinary count updates preserve existing rows and expansion.
+
+All **40 canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-command-refresh-canonical.log`). New cases cover strength changes, reselection and real asset conservation, disappeared/reappearing teams, placeholder input, and exact subdivision/multi-selection/draft retention in all three services. Native expansion and existing layout/map/command regressions pass. No simulation/save schema changes or shared-file conflicts. See COMMAND_REFRESH_HANDOFF.md. Temporary test overrides removed.
+
+No game/editor UI actions or restart in this pass; player PID 95563 and editor PID 93974 remain running. Native visual verification and receipt by already-open controls are not claimed. Recreated controls after script reload or the next normal launch receive this code.
+
 ## September 8 — compact military command panels
 
 INTEGRATED `7a1310c` by conflict-free fast-forward from `241e532`. Army, Fleet and Air Force command panels keep Give objective and Cancel orders outside the scrolling form, give the hierarchy more room, put objective selection first and collapse optional names/briefs. Drawing-only actions appear during a draft. Personnel/craft headers fit; single-line headings and scrollable reports keep the panel within the minimum logical canvas.
