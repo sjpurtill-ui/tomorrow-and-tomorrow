@@ -227,7 +227,8 @@ func test_rival_response_moves_real_existing_force_without_creating_soldiers()->
 	assert_int(CivilizationSystem.foreign_formations.size()).is_equal(count)
 func test_panel_fits_a_1280_by_720_view_with_close_button_accessible()->void:
 	_home()
-	var original_size:=get_tree().root.size;get_tree().root.size=Vector2i(1280,720)
+	var original_size:=get_tree().root.size;var original_scale:=get_tree().root.content_scale_size
+	get_tree().root.size=Vector2i(1280,720);get_tree().root.content_scale_size=Vector2i(1280,720)
 	var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain="army";add_child(panel)
 	await get_tree().process_frame
 	panel._process(0)
@@ -235,7 +236,7 @@ func test_panel_fits_a_1280_by_720_view_with_close_button_accessible()->void:
 	var bounds:Rect2=panel.panel.get_global_rect()
 	assert_float(bounds.end.y).is_less_equal(float(get_viewport().get_visible_rect().size.y))
 	assert_float(bounds.position.x).is_greater_equal(0.0)
-	get_tree().root.size=original_size
+	get_tree().root.size=original_size;get_tree().root.content_scale_size=original_scale
 func test_service_subdivision_rejects_a_mission_unsupported_by_its_actual_craft_atomically()->void:
 	var actual:=_craft("air",12)
 	actual.units={"fighter":6,"observation_balloon":6};actual.authorized=actual.units.duplicate(true)
@@ -333,3 +334,50 @@ func test_native_mouse_expansion_creates_teams_after_tree_unlocks()->void:
 	squad.collapsed=true;squad.collapsed=false;tree.rebuild()
 	await get_tree().process_frame
 	assert_int(tree.get_root().get_first_child().get_first_child().get_child_count()).is_equal(4)
+
+func test_order_action_stays_reachable_when_optional_details_and_feedback_are_long()->void:
+	_home(10);_craft("navy",12);_craft("air",12)
+	var original_size:=get_tree().root.size;var original_scale:=get_tree().root.content_scale_size
+	for dimensions:Vector2i in [Vector2i(1280,720),Vector2i(1024,640)]:
+		get_tree().root.size=dimensions;get_tree().root.content_scale_size=dimensions
+		assert_int(int(get_viewport().get_visible_rect().size.y)).is_equal(dimensions.y)
+		for service:String in ["army","navy","air"]:
+			var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain=service;add_child(panel)
+			panel._selected(command.preview(service))
+			panel.details_toggle.pressed.emit()
+			panel._draw_zone()
+			panel._report({"error":"Supply and route information with enough detail to wrap across several lines. ".repeat(8)})
+			await get_tree().process_frame
+			panel._process(0)
+			await get_tree().process_frame
+			assert_bool(panel.orders_scroll.get_global_rect().encloses(panel.mission.get_global_rect())).is_true()
+			panel.orders_scroll.scroll_vertical=10000
+			await get_tree().process_frame
+			var button:Rect2=panel.apply_button.get_global_rect();var bounds:Rect2=panel.panel.get_global_rect()
+			assert_bool(panel.apply_button.is_visible_in_tree()).is_true()
+			assert_bool(panel.orders_scroll.is_ancestor_of(panel.apply_button)).is_false()
+			assert_bool(bounds.encloses(button)).is_true()
+			assert_float(bounds.end.y).is_less_equal(float(dimensions.y)-16.0)
+			assert_float(bounds.position.x).is_greater_equal(0.0)
+			assert_float(bounds.end.x).is_less_equal(float(dimensions.x))
+			assert_float(panel.tree.size.y).is_greater_equal(180.0)
+			panel.queue_free();await get_tree().process_frame
+	get_tree().root.size=original_size;get_tree().root.content_scale_size=original_scale
+
+func test_optional_command_names_start_collapsed_and_drawing_controls_follow_draft()->void:
+	_home(10)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	assert_bool(panel.details.visible).is_false()
+	assert_bool(panel.finish_button.visible).is_false()
+	panel._draw_zone();panel._process(0)
+	assert_bool(panel.finish_button.visible).is_true()
+	assert_bool(panel.cancel_boundary_button.visible).is_true()
+	assert_bool(panel.feedback.visible).is_true()
+	panel.details_toggle.pressed.emit();assert_bool(panel.details.visible).is_true()
+	panel.cancel_boundary_button.pressed.emit();panel._process(0)
+	assert_bool(panel.finish_button.visible).is_false()
+	assert_bool(panel.cancel_boundary_button.visible).is_false()
+	var title_width:float=panel.tree.get_theme_font("title_button_font").get_string_size(panel.tree.get_column_title(1),HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
+	assert_float(float(panel.tree.get_column_width(1))).is_greater_equal(title_width+16)
+	# Already-open pre-update panels do not contain the new drawing controls.
+	panel.finish_button=null;panel.cancel_boundary_button=null;panel._process(.1)

@@ -21,6 +21,11 @@ var group_level:OptionButton
 var group_name:LineEdit
 var tick:=0.0
 var orders_scroll:ScrollContainer
+var apply_button:Button
+var details:VBoxContainer
+var details_toggle:Button
+var finish_button:Button
+var cancel_boundary_button:Button
 func _ready()->void:
 	layer=82;command=MilitaryCampaign.command_hierarchy
 	if domain=="army":command.land.refresh_claims()
@@ -32,17 +37,16 @@ func _ready()->void:
 	panel.offset_top=76;panel.offset_right=-12;panel.offset_left=-472
 	var skin:=StyleBoxFlat.new();skin.bg_color=Color("101e29");skin.border_color=Color("637b86");skin.set_border_width_all(1);skin.set_content_margin_all(12);panel.add_theme_stylebox_override("panel",skin);panel.add_theme_font_size_override("font_size",14)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",9);panel.add_child(column)
-	var heading:=_row(column);_label(heading,"ARMY COMMAND" if domain=="army" else "FLEET COMMAND" if domain=="navy" else "AIR FORCE COMMAND",21)
+	var heading:=_row(column);var title:=_label(heading,"ARMY COMMAND" if domain=="army" else "FLEET COMMAND" if domain=="navy" else "AIR FORCE COMMAND",21)
+	title.autowrap_mode=TextServer.AUTOWRAP_OFF;title.clip_text=true;title.tooltip_text=title.text
 	_button(heading,"Close ×",queue_free)
 	var tabs:=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(tabs)
 	var orders:=VBoxContainer.new();orders.name="Orders";orders.add_theme_constant_override("separation",8);tabs.add_child(orders)
-	tree=CommandTree.new();tree.service=domain;orders.add_child(tree);tree.custom_minimum_size.y=140;tree.command_selected.connect(_selected)
-	var scroll:=ScrollContainer.new();orders_scroll=scroll;scroll.custom_minimum_size.y=140;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;orders.add_child(scroll)
+	tree=CommandTree.new();tree.service=domain;orders.add_child(tree);tree.custom_minimum_size.y=200;tree.size_flags_stretch_ratio=2;tree.command_selected.connect(_selected)
+	var scroll:=ScrollContainer.new();orders_scroll=scroll;scroll.custom_minimum_size.y=100;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;orders.add_child(scroll)
 	var controls:=VBoxContainer.new();controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_theme_constant_override("separation",8);scroll.add_child(controls)
-	selected_label=_label(controls,"Select a command · expand to choose a subordinate",16)
-	region_label=_label(controls,"1  Draw a zone on the map, or click an existing zone.")
-	area_name=LineEdit.new();area_name.placeholder_text="Battle zone name" if domain=="army" else "Sea operating area" if domain=="navy" else "Air operating area";controls.add_child(area_name)
-	var drawing:=_row(controls);_button(drawing,"Draw · D",_draw_zone);_button(drawing,"Finish",func():map.finish_boundary(area_name.text));_button(drawing,"Cancel",func():map.cancel_boundary())
+	selected_label=_label(controls,"Select a command in the hierarchy",16)
+	selected_label.autowrap_mode=TextServer.AUTOWRAP_OFF;selected_label.clip_text=true
 	mission=OptionButton.new();mission.clip_text=true;controls.add_child(mission)
 	var catalog:Dictionary=command.LAND_MISSIONS if domain=="army" else MilitaryCampaign.joint_operations.MISSIONS[domain]
 	for id:String in catalog:
@@ -50,9 +54,22 @@ func _ready()->void:
 		mission.add_item(String(catalog[id]));mission.set_item_metadata(mission.item_count-1,id)
 	mission.item_selected.connect(func(_index:int):_refresh_targets())
 	cities=OptionButton.new();cities.clip_text=true;controls.add_child(cities)
-	vision=LineEdit.new();vision.placeholder_text="Commander's brief / objective name (optional)";vision.tooltip_text="A note attached to the supported objective selected above. It does not create additional mechanics.";controls.add_child(vision)
-	var action:=_row(controls);_button(action,"Give objective",_assign);_button(action,"Cancel orders",func():if not selected.is_empty():_report(command.cancel(String(selected.id))))
-	status=_label(controls,"");feedback=_label(column,"")
+	region_label=_label(controls,"Zone: select on map or draw below")
+	region_label.max_lines_visible=1
+	var drawing:=_row(controls);_button(drawing,"Draw zone · D",_draw_zone)
+	finish_button=_button(drawing,"Finish",func():map.finish_boundary(area_name.text))
+	cancel_boundary_button=_button(drawing,"Cancel drawing",func():map.cancel_boundary())
+	finish_button.hide();cancel_boundary_button.hide()
+	details_toggle=_button(controls,"Names & brief ▸",func():details.visible=not details.visible;details_toggle.text="Names & brief ▾" if details.visible else "Names & brief ▸")
+	details=VBoxContainer.new();details.add_theme_constant_override("separation",6);controls.add_child(details);details.hide()
+	area_name=LineEdit.new();area_name.placeholder_text="New battle zone name (optional)" if domain=="army" else "New operating area name (optional)";details.add_child(area_name)
+	vision=LineEdit.new();vision.placeholder_text="Commander's brief (optional)";vision.tooltip_text="A note attached to the supported objective selected above. It does not create additional mechanics.";details.add_child(vision)
+	status=_label(controls,"");status.max_lines_visible=2;status.hide()
+	# The primary action stays outside the scrolling details, at every scroll
+	# position and regardless of optional text or the selected city objective.
+	var action:=_row(orders);apply_button=_button(action,"Give objective",_assign)
+	_button(action,"Cancel orders",func():if not selected.is_empty():_report(command.cancel(String(selected.id))))
+	feedback=_label(column,"");feedback.max_lines_visible=2;feedback.hide()
 	var organization:=VBoxContainer.new();organization.name="Organization";organization.add_theme_constant_override("separation",10);tabs.add_child(organization)
 	_label(organization,"Build the chain of command",19)
 	_label(organization,"Use Command-click to select multiple commands in Orders. Choose a higher headquarters below; its orders will include every subordinate.")
@@ -75,7 +92,8 @@ func _button(parent:Node,text:String,callback:Callable)->Button:
 	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(result);return result
 func _selected(entry:Dictionary)->void:
 	selected=entry
-	selected_label.text="%s · %d %s\n%s" % [entry.name,int(entry.count),"personnel" if domain=="army" else "ships" if domain=="navy" else "aircraft",entry.leader]
+	selected_label.text="%s · %d %s" % [entry.name,int(entry.count),"personnel" if domain=="army" else "ships" if domain=="navy" else "aircraft"]
+	selected_label.tooltip_text=selected_label.text+"\n"+String(entry.leader)
 	map.selected_force=int(command.node(String(entry.id)).get("force_id",0))
 	_update_status()
 func _select_force(id:int)->void:
@@ -83,9 +101,9 @@ func _select_force(id:int)->void:
 	for entry:Dictionary in command.data.nodes.values():
 		if entry.service==domain and int(entry.force_id)==id:tree.rebuild(String(entry.id));return
 func _region(region:Dictionary)->void:
-	map.selected=region;region_label.text=String(region.name);_refresh_targets()
+	map.selected=region;region_label.text="Zone: "+String(region.name);region_label.tooltip_text=region_label.text;_refresh_targets()
 func _draw_zone()->void:
-	map.begin_boundary();feedback.text="Click boundary points on the main map. Enter finishes; right-click undoes; Escape cancels."
+	map.begin_boundary();_report({"message":"Click boundary points on the main map. Enter finishes; right-click undoes; Escape cancels."})
 func _mission()->String:return String(mission.get_item_metadata(mission.selected))
 func _refresh_targets()->void:
 	if cities==null:return
@@ -115,6 +133,7 @@ func _group()->void:
 	if not result.has("error"):tree.rebuild(String(result.id))
 func _report(result:Dictionary)->void:
 	feedback.text=String(result.get("error",result.get("message","Order updated.")))
+	feedback.tooltip_text=feedback.text;feedback.visible=feedback.text!=""
 	feedback.modulate=Color("efa092") if result.has("error") else Color("a7d8c2")
 	map.queue_redraw()
 func _management()->void:
@@ -133,11 +152,15 @@ func _update_status()->void:
 			var report:Dictionary=actual if MilitaryCampaign._army_is_home(actual) or MilitaryCampaign._live_army_reporting() else actual.get("last_report",{})
 			lines.append("%s: %s" % [leaf.name,report.get("command_status","Awaiting commander's report")])
 		else:lines.append("%s: %s" % [leaf.name,actual.get("status","Awaiting staff report")])
-	status.text="\n".join(lines.slice(0,3));status.tooltip_text="\n".join(lines)
+	status.text="\n".join(lines.slice(0,2));status.tooltip_text="\n".join(lines);status.visible=not lines.is_empty()
 func _process(delta:float)->void:
 	if panel==null:return
 	var view:=get_viewport().get_visible_rect().size
 	panel.offset_left=-minf(460,view.x*.48)-12;panel.offset_bottom=view.y-16
+	# An editor hot reload can leave an older, already-open panel without these
+	# new controls. It remains usable until the player closes and reopens it.
+	if is_instance_valid(finish_button):finish_button.visible=map.drawing
+	if is_instance_valid(cancel_boundary_button):cancel_boundary_button.visible=map.drawing
 	tick+=delta
 	if tick>=1:tick=0;tree.refresh();_update_status()
 func handle_early_input(event:InputEvent)->bool:

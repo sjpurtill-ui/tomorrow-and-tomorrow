@@ -9,7 +9,10 @@ func _ready()->void:
 	command=MilitaryCampaign.command_hierarchy
 	columns=3;column_titles_visible=true;hide_root=true;select_mode=Tree.SELECT_MULTI
 	set_column_title(0,"COMMAND");set_column_title(1,"PEOPLE" if service=="army" else "CRAFT");set_column_title(2,"ORDER")
-	set_column_expand(1,false);set_column_custom_minimum_width(1,64);set_column_custom_minimum_width(2,95)
+	add_theme_font_size_override("title_button_font_size",14)
+	var title_font:=get_theme_font("title_button_font")
+	var title_width:=title_font.get_string_size(get_column_title(1),HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+24
+	set_column_expand(1,false);set_column_custom_minimum_width(1,maxi(84,ceili(title_width)));set_column_custom_minimum_width(2,95)
 	set_column_clip_content(0,true);set_column_clip_content(2,true)
 	add_theme_font_size_override("font_size",14);add_theme_constant_override("v_separation",9)
 	custom_minimum_size.y=220;size_flags_vertical=Control.SIZE_EXPAND_FILL
