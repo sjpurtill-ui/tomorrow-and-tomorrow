@@ -1,3 +1,11 @@
+## September 8 — military hierarchy and autonomous battle zones
+
+INTEGRATED `d220fa1` by conflict-free fast-forward from `41d410b` into the canonical Mac checkout. Military → Army Command, or Forces → Command on map, now opens a real-force command tree on the main terrain. Select an Army down to a Team, or a separate naval/air command, and assign its subtree a drawn zone and objective. Land commanders execute movement, observed contact, flanking, city assaults, siege assaults and occupation detachments. Neutral borders halt unauthorized advances; hostile contact creates dynamic front ribbons. Separate commander battles progress concurrently without duplicating participants or forcing a battle/aftermath screen.
+
+All **163 canonical tests pass**, zero errors/failures/orphans across 12 suites (`/tmp/tt-command-delivery-canonical.log`); the canonical headless editor import also passes (`/tmp/tt-command-canonical-import.log`). Tests include real personnel/equipment conservation, simultaneous battles and save/load, parent/child orders, automatic city outcomes, terrain routing, border/contact behavior, separate service orders, stable hierarchy refresh and 1280×720 panel bounds. New optional hierarchy/battle data is backward compatible with older saves. Temporary test overrides removed; no player/editor interruption or native visual verification. The running game needs a normal project restart to load this structural change.
+
+Limits: local aggregate fronts, not full HOI4 province/supply simulation; the existing siege system still allows one active siege and gates new land engagements during it. Occupation detachments remain in their existing ledger. No future mech catalog is added in this change. See [COMMAND_HIERARCHY_HANDOFF.md](COMMAND_HIERARCHY_HANDOFF.md) for scope, accounting and exact validation.
+
 ## September 8 — whole-service training overview
 
 INTEGRATED `a3f1300` by conflict-free fast-forward from `8871aed`. Navy/Air strategy views show four colored counts and proportion bars for Training, On assignment, Target met and Paused, plus crew attendance and grouped pause reasons. Summaries include all owned forces in the selected service and no longer depend on which force was processed last. Base/equipment failures clear stale attendance, target completion clears the old exercise message, and repairs expose their actual status.

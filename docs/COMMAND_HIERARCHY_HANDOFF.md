@@ -1,6 +1,6 @@
 # Command hierarchy and autonomous land objectives
 
-READY for integrator review. Base `41d410bcd89a32cd173073a118f217cfc765a498`; branch `codex/command-hierarchy`; worktree `/Users/seanpurtill/Documents/Codex/tt-command-hierarchy`. The integration record supplies the delivery commit and canonical verification.
+INTEGRATED as `d220fa1`; all 163 canonical checks also pass in `/tmp/tt-command-delivery-canonical.log`. Base `41d410bcd89a32cd173073a118f217cfc765a498`; branch `codex/command-hierarchy`; worktree `/Users/seanpurtill/Documents/Codex/tt-command-hierarchy`. The integration record supplies the delivery commit and canonical verification.
 
 ## Player behavior
 
@@ -9,7 +9,7 @@ READY for integrator review. Base `41d410bcd89a32cd173073a118f217cfc765a498`; br
 - Draw a boundary on the main map, select a command and give a defend/patrol, encircle, defeat, capture-city, besiege/occupy, raze-infrastructure or withdrawal objective. Leaders move on calendar time, seek observed opponents, attempt flanks, hold contested approaches and withdraw when supply/morale fail. Explicit city attacks authorize crossing that target civilization's border; other orders respect neutral borders.
 - Existing rival aggregate formations physically react to nearby hostile armies. Contact front ribbons depend on actual opposing positions/frontage; a drawn zone grants no territory. Encirclement samples 24 escape directions and requires supplied forces to cover them.
 - Nearby commands with the same objective can fight together. Cohort losses, disability, prisoners and equipment changes return to each original force without duplicating people. Up to 32 independent commander battles advance daily and persist across saves. Engaged commands cannot march, subdivide, disband or join training through legacy controls.
-- Commanded city assaults and siege assaults do not force open a battle/aftermath screen. Siege staff choose when pressure supports an assault. Captured cities receive real occupation detachments; razing follows the existing paid/control-gated infrastructure policy, not automatic deletion of city population.
+- Commanded city assaults and siege assaults do not force open a battle/aftermath screen. Siege staff choose when pressure supports an assault. Captured cities receive real occupation detachments; razing follows the existing control-gated infrastructure policy, not automatic deletion of city population.
 - The hierarchy refreshes counts in place, preserves expanded branches and supports bare-map/Escape/Close dismissal. Remote markers and picking share dated runner reports; modern communication retains live reporting.
 
 ## Validation
