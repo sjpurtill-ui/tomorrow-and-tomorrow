@@ -51,7 +51,7 @@ func tab(sub:int)->Dictionary:
 		1: return {"kpis":[kpis[0],kpis[1]],"blocks":_builds_blocks(capabilities)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_training_blocks()}
 		3: return {"kpis":[kpis[3]],"blocks":_supply_overview()}
-	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"UNITS & EQUIPMENT MAP","sub":"50 land archetypes and the separate naval and air chains","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},{"label":"NAVAL & AIR COMMAND","sub":"Bases, fleets, wings and drawn operating areas · Shift+F6","on_press":func():MilitaryCampaign.joint_operations.open_screen()}]}]+_campaign_entry()+_forces_overview()}
+	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"UNITS & EQUIPMENT MAP","sub":"50 land archetypes and the separate naval and air chains","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},{"label":"NAVAL COMMAND","sub":"Fleets, ports and sea missions on the world map · Shift+F5","on_press":func():MilitaryCampaign.joint_operations.open_service("navy")},{"label":"AIR COMMAND","sub":"Airbases, wings and air regions on the world map · Shift+F6","on_press":func():MilitaryCampaign.joint_operations.open_service("air")}]}]+_campaign_entry()+_forces_overview()}
 
 func _command_brief()->Dictionary:
 	if not MilitaryCampaign.pending_aftermath.is_empty() and not MilitaryCampaign.battle_history.is_empty():

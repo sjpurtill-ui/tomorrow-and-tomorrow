@@ -722,8 +722,8 @@ func _refresh_active_dock_after_action()->void:
 func _unhandled_key_input(event:InputEvent)->void:
 	var key:=event as InputEventKey
 	if key==null or not key.pressed or key.echo: return
-	if key.keycode==KEY_F6 and key.shift_pressed:
-		MilitaryCampaign.joint_operations.open_screen()
+	if key.keycode in [KEY_F5,KEY_F6] and key.shift_pressed:
+		MilitaryCampaign.joint_operations.open_service("navy" if key.keycode==KEY_F5 else "air")
 		get_viewport().set_input_as_handled();return
 	var keys:={KEY_F1:"settlement",KEY_F2:"economy",KEY_F3:"civ",KEY_F4:"inquiry",KEY_F5:"world",KEY_F6:"military"}
 	if keys.has(key.keycode):

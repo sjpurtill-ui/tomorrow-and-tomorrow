@@ -452,9 +452,17 @@ func _detect_and_fight()->void:
 		if not target.is_empty():_losses(target,float(damage[id]))
 
 var screen:CanvasLayer
-func open_screen()->void:
-	if is_instance_valid(screen):return
-	screen=preload("res://scripts/hud/joint_operations_screen.gd").new()
+func open_service(domain:String)->void:
+	if domain not in ["navy","air"]:return
+	var terrain:Node=host.get_tree().current_scene
+	if terrain==null or not terrain.has_method("_terrain_hit"):return
+	if is_instance_valid(screen):
+		if screen.domain==domain:return
+		screen.free()
+	if terrain.hud:
+		terrain.hud.close_detail();terrain.hud.close_dock()
+	screen=preload("res://scripts/hud/naval_command_panel.gd").new() if domain=="navy" else preload("res://scripts/hud/air_command_panel.gd").new()
+	screen.terrain=terrain
 	host.get_tree().root.add_child(screen)
 
 func split_force(id:int)->Dictionary:

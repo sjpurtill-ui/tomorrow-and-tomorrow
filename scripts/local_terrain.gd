@@ -19682,9 +19682,10 @@ func _close_topmost_game_screen()->bool:
 
 func _input(event: InputEvent) -> void:
 	if is_instance_valid(MilitaryCampaign.joint_operations.screen):
-		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
-			MilitaryCampaign.joint_operations.screen.queue_free();get_viewport().set_input_as_handled()
-		return
+		if MilitaryCampaign.joint_operations.screen.handle_early_input(event):
+			get_viewport().set_input_as_handled();return
+		# Let text controls receive typing without activating map/speed shortcuts.
+		if event is InputEventKey and get_viewport().gui_get_focus_owner() is LineEdit:return
 	if event is InputEventKey and event.pressed and not event.echo and event.meta_pressed and event.keycode==KEY_Q:
 		_request_quit()
 		get_viewport().set_input_as_handled()
@@ -19797,7 +19798,8 @@ func _pointer_over_ui()->bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_instance_valid(MilitaryCampaign.joint_operations.screen):return
+	if is_instance_valid(MilitaryCampaign.joint_operations.screen) and MilitaryCampaign.joint_operations.screen.handle_map_input(event):
+		get_viewport().set_input_as_handled();return
 	if event is InputEventKey and event.pressed and not event.alt_pressed and not event.ctrl_pressed and not event.meta_pressed:
 		if world_menu_panel and is_instance_valid(world_menu_panel): return
 		# GUI gets first refusal; typing +/- in an editor must not move the map.

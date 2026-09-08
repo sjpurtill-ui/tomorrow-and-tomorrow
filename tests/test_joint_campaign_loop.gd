@@ -108,7 +108,7 @@ func test_airlift_food_is_credited_only_to_receiving_army_and_spent_once()->void
 	assert_float(float(MilitaryCampaign.draw_delivered_field_rations(20).total)).is_equal(0.0)
 
 func test_operations_screen_instantiates_and_offers_only_researched_production()->void:
-	var screen:CanvasLayer=auto_free(preload("res://scripts/hud/joint_operations_screen.gd").new())
+	var screen:CanvasLayer=auto_free(preload("res://scripts/hud/naval_command_panel.gd").new())
 	add_child(screen)
 	assert_int(screen.type_picker.item_count).is_greater(0)
 	for i in screen.type_picker.item_count:
