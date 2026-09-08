@@ -312,3 +312,24 @@ func test_separate_commands_fight_concurrently_and_resume_without_duplicate_pers
 	assert_int(command.data.battles.size()+MilitaryCampaign.battle_history.size()-before).is_equal(2)
 	for engagement:Dictionary in command.data.battles:assert_int(int(engagement.round)).is_equal(1)
 	assert_dict(MilitaryCampaign.active_engagement).is_empty()
+
+func test_native_mouse_expansion_creates_teams_after_tree_unlocks()->void:
+	_home(10)
+	var tree:Tree=auto_free(TreeUI.new());tree.size=Vector2(500,400);add_child(tree)
+	await get_tree().process_frame
+	var squad:TreeItem=tree.get_root().get_first_child().get_first_child()
+	assert_bool(squad.collapsed).is_true()
+	var row:Rect2=tree.get_item_area_rect(squad)
+	var at:=tree.global_position+Vector2(row.position.x+8,row.get_center().y)
+	var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;get_viewport().push_input(motion,true)
+	for pressed in [true,false]:
+		var event:=InputEventMouseButton.new();event.button_index=MOUSE_BUTTON_LEFT;event.position=at;event.global_position=at;event.pressed=pressed;get_viewport().push_input(event,true)
+	await get_tree().process_frame
+	assert_bool(squad.collapsed).is_false()
+	assert_int(squad.get_child_count()).is_equal(4)
+	assert_str(squad.get_first_child().get_text(0)).contains("Team")
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(0)
+	# A rebuild can free a row before its deferred expansion is delivered.
+	squad.collapsed=true;squad.collapsed=false;tree.rebuild()
+	await get_tree().process_frame
+	assert_int(tree.get_root().get_first_child().get_first_child().get_child_count()).is_equal(4)

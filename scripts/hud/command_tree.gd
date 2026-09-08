@@ -13,7 +13,10 @@ func _ready()->void:
 	set_column_clip_content(0,true);set_column_clip_content(2,true)
 	add_theme_font_size_override("font_size",14);add_theme_constant_override("v_separation",9)
 	custom_minimum_size.y=220;size_flags_vertical=Control.SIZE_EXPAND_FILL
-	item_collapsed.connect(_expanded);multi_selected.connect(func(item:TreeItem,_column:int,selected:bool):if selected:command_selected.emit(item.get_metadata(0)))
+	# Native Tree locks its items while dispatching a mouse selection. Populate
+	# the expanded branch after that event, including when it came from a click.
+	item_collapsed.connect(func(item:TreeItem):_expand_deferred.call_deferred(item.get_instance_id()))
+	multi_selected.connect(func(item:TreeItem,_column:int,selected:bool):if selected:command_selected.emit(item.get_metadata(0)))
 	rebuild()
 func rebuild(retain:String="")->void:
 	_remember(get_root());command.sync();clear();var root:=create_item()
@@ -39,8 +42,12 @@ func _row(parent:TreeItem,entry:Dictionary)->TreeItem:
 		if bool(expanded.get(String(entry.id)+str(entry.path),false)):
 			item.collapsed=false;_expanded(item)
 	return item
+func _expand_deferred(item_id:int)->void:
+	# A refresh may have freed this row since the native click was dispatched.
+	var item:=instance_from_id(item_id)
+	if is_instance_valid(item) and item is TreeItem and item.get_tree()==self:_expanded(item)
 func _expanded(item:TreeItem)->void:
-	if item.collapsed:return
+	if not is_instance_valid(item) or item.collapsed:return
 	var first:=item.get_first_child()
 	if first==null or not (first.get_metadata(0) as Dictionary).get("placeholder",false):return
 	first.free()
