@@ -1,3 +1,7 @@
+## September 8 — stable military order selection
+
+INTEGRATED `6145949` by fast-forward from 48d860b. Command-panel refreshes and failed orders preserve the selected region and proposed mission. Explicit force selection restores that force's actual order; current orders are labelled separately, and region control text updates. No simulation/save changes. All **36 canonical tests pass**, zero errors/failures/orphans (/tmp/tt-order-selection-canonical.log). See MILITARY_ORDER_SELECTION_HANDOFF.md. Running player untouched; next normal launch receives this change. Temporary test userdata override removed.
+
 ## September 8 — carrier wing map positions
 
 INTEGRATED `24d2d18` plus fixture correction `ec1cd9c`. Carrier-wing markers, click targets and route origins now use the authoritative carrier-following position. Detaching restores independent positioning; stored coordinates and save format are unchanged. Canonical main-map/campaign checks: **34 passed**, zero errors/failures/orphans (/tmp/tt-carrier-markers-canonical-fixed.log). The initial fixture omitted required display/base data and failed during rendering; the corrected run supersedes it. Running player/editor not touched; next normal launch receives this change. See CARRIER_MAP_HANDOFF.md.

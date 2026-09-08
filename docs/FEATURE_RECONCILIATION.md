@@ -580,3 +580,8 @@ Integrated 947ad09 on canonical main: rebase cancels obsolete carrier ferries; c
 ## September 8 — carrier wing markers
 
 Integrated 24d2d18 and fixture correction ec1cd9c. Carrier-wing drawing, selection and route origins follow actual carrier positions; detachment restores independent position. Corrected canonical run passes 34 tests; no save changes, no player/editor interruption. See CARRIER_MAP_HANDOFF.md.
+
+
+## September 8 — military order selection
+
+Integrated 6145949. Region and mission choices survive command-panel refreshes and failed orders, while explicit force selection follows the existing assignment. Current order is labelled separately. All 36 canonical checks pass; no save changes or player restart. See MILITARY_ORDER_SELECTION_HANDOFF.md.
