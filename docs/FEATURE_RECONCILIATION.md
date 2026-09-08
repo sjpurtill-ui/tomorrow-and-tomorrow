@@ -1,22 +1,16 @@
-## September 7 — production clarity integrated; expanded forces held
+## September 7 — joint operations and modern architecture integrated
 
-INTEGRATED `da9f917`: finite default production targets, concrete material/worker
-blockers, forecast/stock/target visibility, known-equipment selectors, clear
-simple-levy weapon naming and all valid army equipment choices. Source worktree
-`tt-production-clarity`; 25 unique production/quote checks passed. Fast-forward
-integration preserved the validated source. See PRODUCTION_CLARITY_HANDOFF.md.
-No new player launch or live-session receipt is claimed.
+INTEGRATED source `f4a7d78` / `f466f20` from `codex/fifty-units` through merge `f996fa6`; integration fixes `2b2e3ea` and `f66bfcb`. This supersedes the held `33ab016` milestone. Canonical Mac checkout is `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`.
 
-HELD `33ab016`, branch `codex/fifty-units`, worktree
-`/Users/seanpurtill/Documents/Codex/tt-fifty-units`, base `da9f917`.
-User scope is **50 land units PLUS full naval and air chains**. This checkpoint
-has the 50-land catalog/combat/equipment/research foundation, a progression view,
-and experimental naval/air state. 81 unique focused/regression checks pass.
-It is not merged or player-ready: convoy effects, carriers, transport missions,
-rival operations, geographic operating controls and labor/economic integration
-remain incomplete. See that worktree's docs/FIFTY_UNITS_HANDOFF.md for the exact
-roster, tests, compatibility and release blockers. Do not report catalog counts
-as complete HOI4 naval/air functionality.
+The player build now contains 50 neutral land archetypes, 21 naval types and 16 air types; researched production, city-funded bases, aggregate crews, carriers, transport, geography-checked sea routes, player-drawn operating polygons, mission effects, rival industrial/combat operations, fleet screening and submarine detection. Detailed settlement architecture adds 24 masonry/industrial/modern building families through the shared saved-parcel placement system, named construction research and paid upgrades. Historic districts retain their built form.
+
+Combined canonical validation: **139 tests passed**, zero errors/failures/orphans, across 12 suites. After the final keyboard/map/manpower integration refinements, all **30 joint campaign and city-intelligence tests passed** again. The documented baseline raid-intelligence fixture now provides viable military strength explicitly, preserving all hidden/stale-intelligence assertions. Actual current-save compatibility restored day 25512, population 777, seed 1792946605 in isolated test userdata.
+
+Canonical editor Run Project launched version **2026.09.07.1**, player **PID 60507**, from code commit `f66bfcb`. Process command line explicitly contains the canonical absolute project path, `res://local_terrain.tscn` and `--resume-saved`. Startup log confirms the saved world and contains no script errors. Previous player sessions were saved and quit through their own UI. No worker/test scene was shown as the player game. Temporary test-userdata and editor-resume settings were removed.
+
+Live checks: city flags/colors and Military entry cards visible; **Shift+F6** opens Naval & Air Command; **Escape** returns directly to the map. The operations screen shows the home city, foreign names/estimated populations, separate labels, the researched War Canoes choice, base/production controls and polygon-drawing controls. The final player remains paused on that screen. Polygon drawing and mission execution have headless behavioral checks; native mouse drawing was not verified because embedded-window coordinate automation is unreliable. Modern mesh/placement behavior is tested; the current early-era campaign was not artificially advanced to modern architecture for a visual claim.
+
+Limits: HOI4 numerical/combat-system parity is **not complete**. Combat remains aggregate and daily, with simplified fleet screening, detection and air performance. Rival overseas invasions/supply convoys, full doctrine and component-design simulation remain outside this integrated iteration. See `docs/FIFTY_UNITS_HANDOFF.md` for exact behavior and scope. Prior production clarity `da9f917`, flags `a0ff5d5`, staffing `fab7843`, and foreign-label/intel fixes are included in this relaunched player.
 
 ## September 7 — army staffing clarity
 
