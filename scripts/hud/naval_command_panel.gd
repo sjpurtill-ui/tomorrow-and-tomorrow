@@ -4,14 +4,15 @@ func _init()->void:
 	domain="navy"
 
 func _build_service()->void:
-	var task_forces:=_page("Task forces")
+	var task_forces:=_page("Fleets")
 	_label(task_forces,"FLEETS & SEA MISSIONS",17)
 	_force_controls(task_forces,"Return to home port")
 	_label(task_forces,"Patrols find hostile ships. Strike forces wait in port for contact; escorts protect convoys. Repairs require returning to port.",13)
-	companion_picker=_option(task_forces)
-	_button(task_forces,"Join selected companion's fleet",func():_report(op.group_fleet(selected_id,int(_selected(companion_picker)))))
-	_button(task_forces,"Merge task forces in port",func():_report(op.merge_forces(selected_id,int(_selected(companion_picker)))))
-	_button(task_forces,"Split task force in port",func():_report(op.split_force(selected_id)))
+	organization_controls=VBoxContainer.new();task_forces.add_child(organization_controls)
+	companion_picker=_option(organization_controls)
+	_button(organization_controls,"Join selected companion's fleet",func():_report(op.group_fleet(selected_id,int(_selected(companion_picker)))))
+	_button(organization_controls,"Merge task forces in port",func():_report(op.merge_forces(selected_id,int(_selected(companion_picker)))))
+	_button(organization_controls,"Split task force in port",func():_report(op.split_force(selected_id)))
 	var ports:=_page("Ports")
 	_production_controls(ports,"port","Commission ships and crews")
 	_button(ports,"Disband task force in port",func():_report(op.disband(selected_id)))

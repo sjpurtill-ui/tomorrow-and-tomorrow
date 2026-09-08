@@ -34,6 +34,7 @@ var commission_button:Button
 var commission_status:Label
 var base_status:Label
 var mission_controls:VBoxContainer
+var organization_controls:VBoxContainer
 var setup_button:Button
 
 func _ready()->void:
@@ -74,7 +75,7 @@ func _region_tools(column:Node)->void:
 	region_label=_label(column,"Select an area on the world map, or draw a new boundary.",14)
 	area_name=LineEdit.new();area_name.placeholder_text="Sea area name" if domain=="navy" else "Air region name";column.add_child(area_name)
 	var row:=_row(column)
-	_button(row,"Draw region · D",func():map.begin_boundary();feedback.text="Click boundary points on the world map. Enter finishes; Backspace undoes; Escape cancels. Middle-drag and zoom still work.")
+	_button(row,"Draw · D",func():map.begin_boundary();feedback.text="Click boundary points on the world map. Enter finishes; Backspace undoes; Escape cancels. Middle-drag and zoom still work.")
 	_button(row,"Finish",func():map.finish_boundary(area_name.text))
 	_button(row,"Cancel",func():map.cancel_boundary())
 	_button(column,"Delete selected region",func():
@@ -221,6 +222,7 @@ func _refresh_status()->void:
 		status.text=_force_summary(force)
 	force_picker.visible=not force.is_empty()
 	mission_controls.visible=not force.is_empty()
+	organization_controls.visible=not force.is_empty()
 	setup_button.visible=force.is_empty()
 	assign_button.disabled=force.is_empty() or map.selected.is_empty()
 	if not force.is_empty():
