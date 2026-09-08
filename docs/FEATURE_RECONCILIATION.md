@@ -1,3 +1,7 @@
+## September 8 — automatic crew training recovery
+
+Integrated `1683ba1`; all 74 relevant canonical tests pass. Navy/Air repairs finish before training resumes, training suspension permits essential repairs, and repeated daily checks preserve attendance. Rival messages no longer overwrite player staff reports; roster activity exposes actual repair shortages and travel. Existing saves remain compatible. No player restart or graphical probe. See SERVICE_TRAINING_RECOVERY_HANDOFF.md.
+
 ## September 7 — joint operations and modern architecture integrated
 
 INTEGRATED source `f4a7d78` / `f466f20` from `codex/fifty-units` through merge `f996fa6`; integration fixes `2b2e3ea` and `f66bfcb`. This supersedes the held `33ab016` milestone. Canonical Mac checkout is `/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow`.

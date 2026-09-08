@@ -1,3 +1,9 @@
+## September 8 — crew repair and training recovery
+
+INTEGRATED `1683ba1` by conflict-free fast-forward from `06798ef`. Initial and qualified Navy/Air crews finish repairs before training resumes; suspending instruction still permits essential repairs. Repair shortages spend nothing until funded. Same-day calls preserve attendance/status, rival messages stay out of player staff reports, and the roster shows actual travel and repair shortages. Initial instruction reports completion/time instead of a misleading rotation percentage.
+
+All **74 canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-service-training-canonical.log`), across training strategy, accounting, operations, campaign, main-map services and dismissal. No save schema changes. See SERVICE_TRAINING_RECOVERY_HANDOFF.md. Test overrides removed. Running player/editor left uninterrupted; next normal launch receives these scripts.
+
 ## September 8 — automatic service training and broad military roster
 
 INTEGRATED `ab0c4b4` by conflict-free fast-forward from `17da40a`. Army, Navy and Air now have independent saved Suspend/Maintain/Regular/Intensive training policies. Staff choose eligible rotations, fund exercises, protect civilian food reserves and pause for shortages; repeated orders grant no progress. Army exercises are six times longer with four times the per-participant daily ration/wear rates. Initial land and crew instruction use longer durations and real recurring costs. Rival training uses the shared policy/course limits and paid resource rules instead of its prior faster land formula.
