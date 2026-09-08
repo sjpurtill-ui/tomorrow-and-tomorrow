@@ -1,3 +1,13 @@
+## September 8 — live founding-overlay correction
+
+INTEGRATED `bd247db` by conflict-free fast-forward from `465390d`. Native inspection of player PID 6076 found the full-size map overlay was incorrectly captured by the global modal fitting contract, collapsing the card. The overlay now opts into its own existing responsive-layout convention. The regression invokes that actual shared contract, verifies the card remains unwrapped and visible, and still checks small-window bounds.
+
+All **16 focused canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-founding-live-layout-canonical.log`). The preceding feature integration passed 107 canonical tests. Owned test overrides are removed. No simulation/save changes in this correction; see FOUNDING_SITE_LIVE_LAYOUT_HANDOFF.md.
+
+Launch verification: canonical editor Run Project launched player **6076** from **465390d**, using the absolute canonical path and `res://local_terrain.tscn`, parent editor **2812**. Native inspection saw the real main map and new water readout, source line and site markers. Startup log has no script errors. The release display remains 2026.09.07.2. This new world used seed 1788457137 and was subsequently running at Year 2; no settlement was committed by the agent.
+
+The corrected card's final native appearance is **not verified**. The desktop-control tool repeatedly focused the editor instead of the embedded game, then returned `windowNotFoundAtPosition` on fresh game-view coordinates. The game window remains running; it was not forcibly stopped or saved over another campaign. Reopening the card after effective script synchronization, or a normal project restart, is required for the final UI correction. The active process command line verifies its checkout, not receipt of this later hotfix.
+
 ## September 8 — settlement water guidance and neighbor resentment
 
 INTEGRATED `e434bc8` by conflict-free fast-forward from `bd1992c` into the canonical Mac checkout. Review Founding Site now previews actual known water, carrying distance and household coverage before the first commitment. First/later founding rechecks exact dry ground and confirmed water within the existing 6 km collection limit. The main-map card marks nearby suitable sites and their water; clicking a numbered site uses the agreed 50,000-foot view. Ground inspection and later convoy confirmation carry the same water and neighbor warnings.
