@@ -1,3 +1,7 @@
+## September 8 — latest integrated game launched
+
+At the user's request, saved and quit player PID 67340 normally and launched canonical editor Run Project from code commit **be55da7**. New player **PID 74514** has the explicit canonical project path, res://local_terrain.tscn and --resume-saved. Startup log confirms day 29337, population 1047, Seanston, seed 1792946605, with no script errors. This launch includes the carrier transitions, carrier-map position correction and stable command selection fixes. Displayed release remains 2026.09.07.2. Temporary resume arguments removed; editor preserved.
+
 ## September 8 — stable military order selection
 
 INTEGRATED `6145949` by fast-forward from 48d860b. Command-panel refreshes and failed orders preserve the selected region and proposed mission. Explicit force selection restores that force's actual order; current orders are labelled separately, and region control text updates. No simulation/save changes. All **36 canonical tests pass**, zero errors/failures/orphans (/tmp/tt-order-selection-canonical.log). See MILITARY_ORDER_SELECTION_HANDOFF.md. Running player untouched; next normal launch receives this change. Temporary test userdata override removed.
