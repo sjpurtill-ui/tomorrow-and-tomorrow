@@ -17,17 +17,48 @@ static func recipe(host: Node, item: String) -> Dictionary:
 	if not bool(gate.get("unlocked",false)): return {"error":String(gate.get("reason","Adopt the required production practice first."))}
 	return {"item":item,"job_type":kind,"materials":definition.materials.duplicate(true),"work_per_item":float(definition.days)}
 
+static func product_name(item:String)->String:
+	return {"improvised":"Simple levy weapons","spear":"Spears","bow":"Bows","sword_shield":"Sword & shield sets","siege_kit":"Siege engineer kits"}.get(item,item.replace("_"," ").capitalize())
+
+static func product_description(item:String)->String:
+	if item=="improvised":return "Basic wooden clubs and makeshift hand weapons for levies. One set equips one levy; this produces equipment, not a trained unit."
+	var users:Array[String]=[]
+	for unit:Dictionary in preload("res://scripts/military_unit_catalog.gd").ARCHETYPES.values():
+		if item in unit.equipment:users.append(String(unit.label))
+	return "Equipment for "+", ".join(users)+". Train and deploy those units through Prepare an Army." if not users.is_empty() else "Ammunition or transport supply used by your forces."
+
+static func available_products(host:Node)->Array[String]:
+	var result:Array[String]=[]
+	for item:String in host.EQUIPMENT_KNOWLEDGE.keys()+host.CONSUMABLE_KNOWLEDGE.keys()+["transport_cart"]:
+		if not recipe(host,item).has("error"):result.append(item)
+	return result
+
+static func startup_blockers(host:Node,item:String)->Array[String]:
+	var result:Array[String]=[]
+	var definition:=recipe(host,item)
+	if definition.has("error"):return [String(definition.error)]
+	var staff:=workforce()
+	if host.production_labor_share<=0:result.append("No crafting labor assigned to military production. Increase the military crafting share.")
+	if float(staff.workers)<=0:result.append("No available craftspeople. Assign crafting work in your cities.")
+	elif float(staff.condition_factor)<=0:result.append("Workforce or workplaces cannot operate. Restore health and usable workshops.")
+	for resource:String in definition.materials:
+		var needed:=float(definition.materials[resource]);var stored:=float(GameState.resource_stockpiles.get(resource,0))
+		if stored<needed:result.append("%s: %.2f in stores; %.2f needed for one item." % [ResourceSystem.display_name(resource),stored,needed])
+	return result
+
 static func start(host: Node, item: String, target: int) -> Dictionary:
 	if target<0 or target>MAX_TARGET: return {"error":"Choose a stockpile target from 0 to 1 billion; 0 means continuous production."}
 	var gate: Dictionary=host._production_line_gate()
 	if gate.has("error"): return gate
 	var definition:=recipe(host,item)
 	if definition.has("error"): return definition
+	var blockers:=startup_blockers(host,item)
+	if not blockers.is_empty():return {"error":"Cannot start production: "+" ".join(blockers)}
 	var id: int=host.next_equipment_job_id;host.next_equipment_job_id+=1
 	var job:=definition.duplicate(true)
 	job.merge({"id":id,"persistent":true,"target_stock":target,"paused":false,"allocation":1.0,"efficiency":.20,"progress_days":0.0,"completed":0,"count":1,"required_days":float(definition.work_per_item),"reserved_materials":{},"last_output":0,"last_consumed":{},"last_work":0.0})
 	host.equipment_queue.append(job)
-	return {"ok":true,"job_id":id,"message":"Production line established. Materials are used as work proceeds; output enters stores."}
+	return {"ok":true,"job_id":id,"message":product_name(item)+(" — continuous production: no limit; runs until paused or supplies run out." if target==0 else " — maintain %d in stores; pauses at target and replenishes after issue." % target)}
 
 static func configure(host: Node, id: int, target: int, paused: bool) -> Dictionary:
 	if target<0 or target>MAX_TARGET: return {"error":"Invalid stockpile target."}
@@ -58,6 +89,8 @@ static func stock(host: Node, job: Dictionary) -> int:
 static func state(host: Node, job: Dictionary) -> String:
 	if bool(job.get("paused",false)): return "Paused"
 	if not bool(job.get("persistent",false)): return "Batch"
+	var gate:=recipe(host,String(job.item))
+	if gate.has("error"):return "Research unavailable: "+String(gate.error)
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
 	for resource in job.materials:
 		if float(job.materials[resource])>0 and float(GameState.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+ResourceSystem.display_name(String(resource))
@@ -115,10 +148,22 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	var result:=job.duplicate(true)
 	result["state"]=state(host,job);result["stock"]=stock(host,job);result["share"]=share
 	result["daily_work"]=rate*share*float(job.efficiency)
-	if result.state=="Working" and float(result.daily_work)<=0:result.state="Waiting for labor or workplaces"
+	if result.state=="Working" and float(result.daily_work)<=0:
+		var staff:=workforce()
+		if host.production_labor_share<=0:result.state="No military crafting share"
+		elif float(staff.workers)<=0:result.state="No available craftspeople"
+		elif float(staff.workplace_condition)<=0:result.state="No usable workplaces"
+		else:result.state="Workforce unable to work"
 	result["output_per_day"]=float(result.daily_work)/float(job.work_per_item)
 	result["inputs_per_day"]={}
 	for resource in job.materials: result.inputs_per_day[resource]=float(job.materials[resource])*float(result.output_per_day)
+	result["forecast_output_per_day"]=float(result.output_per_day) if result.state=="Working" else 0.0
+	result["materials_status"]=[]
+	for resource:String in job.materials:
+		var cost:=float(job.materials[resource]);var stored:=float(GameState.resource_stockpiles.get(resource,0))
+		if cost>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),stored/cost)
+		result.materials_status.append({"resource":resource,"name":ResourceSystem.display_name(resource),"stored":stored,"per_item":cost,"per_day":float(result.inputs_per_day[resource])})
+	if int(job.target_stock)>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),maxf(0,int(job.target_stock)-int(result.stock)-float(job.progress_days)/float(job.work_per_item)))
 	return result
 
 static func validate_saved(payload: Dictionary) -> String:

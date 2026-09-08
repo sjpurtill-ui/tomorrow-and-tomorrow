@@ -530,7 +530,7 @@ func cancel_equipment_job(job_id:int)->Dictionary:
 	return {"error":"Equipment job %d was not found." % job_id}
 
 
-func start_production_line(item:String,target_stock:int=0)->Dictionary:
+func start_production_line(item:String,target_stock:int=5)->Dictionary:
 	return PersistentProduction.start(self,item,target_stock)
 
 func configure_production_line(job_id:int,target_stock:int,paused:bool)->Dictionary:

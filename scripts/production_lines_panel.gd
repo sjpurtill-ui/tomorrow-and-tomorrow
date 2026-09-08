@@ -19,8 +19,8 @@ func _ready() -> void:
 	add_child(labor);labor.value_changed.connect(func(value:float):MilitaryCampaign.set_production_labor_share(value/100);refresh())
 	line_choice=OptionButton.new();line_choice.fit_to_longest_item=false;add_child(line_choice);line_choice.item_selected.connect(func(_index:int):refresh(true))
 	var controls:=HBoxContainer.new();add_child(controls)
-	var caption:=Label.new();caption.text="Stock target";controls.add_child(caption)
-	target=SpinBox.new();target.min_value=0;target.max_value=1000000000;target.step=1;target.custom_minimum_size.x=110;target.tooltip_text="0 runs continuously. A positive target pauses work when that many usable items are in stock, and resumes after they are issued.";controls.add_child(target)
+	var caption:=Label.new();caption.text="Stock target (0 = no limit)";controls.add_child(caption)
+	target=SpinBox.new();target.min_value=0;target.max_value=1000000000;target.step=1;target.value=5;target.custom_minimum_size.x=110;target.tooltip_text="0 runs continuously. A positive target pauses work when that many usable items are in stock, and resumes after they are issued.";controls.add_child(target)
 	caption=Label.new();caption.text="Priority";controls.add_child(caption)
 	priority=SpinBox.new();priority.min_value=.05;priority.max_value=4;priority.step=.05;priority.value=1;priority.custom_minimum_size.x=80;controls.add_child(priority)
 	button(controls,"Apply",apply_settings)
@@ -83,7 +83,7 @@ func refresh(editors:bool=false)->void:
 	if next_signature!=signature:
 		var selected:=selected_id();line_choice.clear()
 		for line in data.lines:
-			line_choice.add_item("%d · %s" % [int(line.id),String(line.item).replace("_"," ").capitalize()]);line_choice.set_item_metadata(line_choice.item_count-1,int(line.id))
+			line_choice.add_item("%d · %s" % [int(line.id),MilitaryCampaign.PersistentProduction.product_name(String(line.item))]);line_choice.set_item_metadata(line_choice.item_count-1,int(line.id))
 			if int(line.id)==selected:line_choice.select(line_choice.item_count-1)
 		signature=next_signature;editors=true
 	var line:Dictionary={}
@@ -97,7 +97,7 @@ func refresh(editors:bool=false)->void:
 	pause_button.text="Resume" if bool(line.get("paused",false)) else "Pause"
 	if not persistent:details.text="Existing batch · %.0f%% efficiency · %.2f work/day. Its prepaid materials and completion rules are preserved." % [float(line.efficiency)*100,float(line.daily_work)];return
 	var inputs:Array[String]=[]
-	for resource in line.inputs_per_day:inputs.append("%s %.2f/day" % [ResourceSystem.display_name(String(resource)),float(line.inputs_per_day[resource])])
+	for resource in line.inputs_per_day:inputs.append("%s: %.2f stored / %.2f per item / %.2f per day" % [ResourceSystem.display_name(String(resource)),float(GameState.resource_stockpiles.get(resource,0)),float(line.materials[resource]),float(line.inputs_per_day[resource])])
 	var condition:=String(line.state)
 	if condition=="Working" and float(line.daily_work)<=0:condition="Waiting for labor or usable workplaces"
-	details.text="%s · stock %d · %s\nEfficiency %.0f%% · potential %.2f/day · last day %d completed\nInputs at this rate: %s\nWork in progress %.0f%% · %.0f%% of military workshop effort" % [condition,int(line.stock),"continuous" if int(line.target_stock)==0 else "maintain %d" % int(line.target_stock),float(line.efficiency)*100,float(line.output_per_day),int(line.last_output),", ".join(inputs),float(line.progress_days)/float(line.work_per_item)*100,float(line.share)*100]
+	details.text="%s · stock %d · %s\nEfficiency %.0f%% · forecast %.2f/day · last day %d completed\nInputs at this rate: %s\nWork in progress %.0f%% · %.0f%% of military workshop effort" % [condition,int(line.stock),"CONTINUOUS — NO LIMIT" if int(line.target_stock)==0 else "maintain %d" % int(line.target_stock),float(line.efficiency)*100,float(line.forecast_output_per_day),int(line.last_output),", ".join(inputs),float(line.progress_days)/float(line.work_per_item)*100,float(line.share)*100]

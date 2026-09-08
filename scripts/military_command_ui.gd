@@ -422,12 +422,8 @@ func _populate_choices()->void:
 	_restore_choice_id(unit_choice,selected_unit)
 	_populate_training_weapons()
 	_restore_choice_id(weapon_choice,selected_weapon)
-	for item in (capabilities.get("equipment",{}) as Dictionary):
-		_add_choice(equipment_choice,String(item),capabilities.equipment[item])
-	var development:Dictionary=capabilities.get("development",{})
-	var military_tier:=int(development.get("tier",0))
-	var consumables:Dictionary={"arrows":{"unlocked":MilitaryCampaign._adoption("bow_craft")>=0.08,"reason":"Requires Bow Craft adoption."},"artillery_rounds":{"unlocked":MilitaryCampaign._adoption("powder_artillery")>=0.08,"reason":"Requires Powder Artillery adoption."},"small_arms_ammunition":{"unlocked":military_tier>=5,"reason":"Requires industrial military development from security research supported by production, logistics, and institutions."},"heavy_shells":{"unlocked":military_tier>=6,"reason":"Requires national military development and its supporting industrial-logistics system."},"transport_cart":capabilities.transport_carts}
-	for item in consumables: _add_choice(equipment_choice,String(item),consumables[item])
+	for item:String in MilitaryCampaign.PersistentProduction.available_products(MilitaryCampaign):
+		_add_choice(equipment_choice,item,{"unlocked":true,"reason":MilitaryCampaign.PersistentProduction.product_description(item)})
 	_restore_choice_id(equipment_choice,selected_equipment)
 	for program_id in (capabilities.get("training_programs",{}) as Dictionary):
 		var program:Dictionary=capabilities.training_programs[program_id]
@@ -489,7 +485,7 @@ func _update_training_program_choice()->void:
 
 func _add_choice(choice:OptionButton,id:String,gate:Dictionary)->void:
 	var unlocked:=bool(gate.get("unlocked",false))
-	choice.add_item(("✓ " if unlocked else "🔒 ")+id.replace("_"," ").capitalize())
+	choice.add_item(("✓ " if unlocked else "🔒 ")+MilitaryCampaign.PersistentProduction.product_name(id))
 	var index:=choice.item_count-1; choice.set_item_metadata(index,id); choice.set_item_disabled(index,not unlocked); choice.set_item_tooltip(index,String(gate.get("reason","Available")))
 
 

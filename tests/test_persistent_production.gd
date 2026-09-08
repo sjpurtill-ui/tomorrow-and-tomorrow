@@ -24,8 +24,8 @@ func start(target:int=0)->Dictionary:
 	return MilitaryCampaign.equipment_queue.back()
 
 func test_shortage_waits_then_consumes_only_actual_fractional_work()->void:
-	GameState.resource_stockpiles.Timber=0.0
 	var job:=start()
+	GameState.resource_stockpiles.Timber=0.0
 	Production.advance(MilitaryCampaign,job,100)
 	assert_float(float(job.progress_days)).is_equal(0.0)
 	assert_int(int(job.completed)).is_equal(0)
@@ -166,7 +166,7 @@ func test_main_supply_dock_defaults_to_persistent_controls()->void:
 	provider=null;terrain.free();hud.free()
 	var panel:=preload("res://scripts/production_lines_panel.gd").new()
 	add_child(panel);panel.refresh(true)
-	assert_str(panel.details.text).contains("potential")
+	assert_str(panel.details.text).contains("forecast")
 	panel.free()
 	assert_object(load("res://scripts/military_command_ui.gd")).is_not_null()
 
@@ -212,4 +212,51 @@ func test_supply_controls_fit_the_main_dock_width()->void:
 		await get_tree().process_frame
 		assert_float(container.get_combined_minimum_size().x).is_less_equal(500.0)
 		container.free()
+	provider=null;terrain.free();hud.free()
+
+func test_unknown_products_are_hidden_and_cannot_start()->void:
+	assert_bool("service_rifle" in Production.available_products(MilitaryCampaign)).is_false()
+	assert_bool(MilitaryCampaign.start_production_line("service_rifle",5).has("error")).is_true()
+	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(0)
+
+func test_new_line_requires_materials_and_workforce_with_actionable_reason()->void:
+	GameState.resource_stockpiles.Timber=0.0
+	assert_str(String(MilitaryCampaign.start_production_line("improvised",5).error)).contains("Timber")
+	GameState.resource_stockpiles.Timber=100.0
+	MilitaryCampaign.production_labor_share=0
+	assert_str(String(MilitaryCampaign.start_production_line("improvised",5).error)).contains("crafting share")
+	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(0)
+
+func test_material_limited_forecast_and_default_finite_target()->void:
+	assert_bool(MilitaryCampaign.start_production_line("improvised").has("ok")).is_true()
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	assert_int(job.target_stock).is_equal(5)
+	GameState.resource_stockpiles.Timber=.175
+	var view:=Production.snapshot(MilitaryCampaign,job,100,1)
+	assert_float(float(view.forecast_output_per_day)).is_equal_approx(.5,.000001)
+	GameState.resource_stockpiles.Timber=0
+	view=Production.snapshot(MilitaryCampaign,job,100,1)
+	assert_float(float(view.forecast_output_per_day)).is_equal(0.0)
+	assert_str(String(view.state)).contains("Missing")
+
+func test_existing_line_rechecks_research_before_consuming_materials()->void:
+	GameState.known_discoveries.append("hafted_weapons");GameState.discovery_adoption.hafted_weapons=1.0
+	GameState.resource_stockpiles.Stone=100.0
+	assert_bool(MilitaryCampaign.start_production_line("spear",5).has("ok")).is_true()
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	GameState.known_discoveries.erase("hafted_weapons")
+	var stores:=GameState.resource_stockpiles.duplicate(true)
+	Production.advance(MilitaryCampaign,job,100)
+	assert_str(Production.state(MilitaryCampaign,job)).contains("Research unavailable")
+	assert_dict(GameState.resource_stockpiles).is_equal(stores)
+	assert_int(job.completed).is_equal(0)
+
+func test_army_composition_offers_newly_known_equipment_for_existing_unit()->void:
+	GameState.known_discoveries.append("hafted_weapons");GameState.discovery_adoption.hafted_weapons=1.0
+	MilitaryCampaign.army_templates=[{"template_id":1,"name":"Levy band","entries":[{"unit":"levy","weapon":"improvised","count":1}]}]
+	var terrain:=DockTerrain.new();var hud:=DockHud.new()
+	var provider:=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
+	var blocks:Array=provider._builds_blocks(MilitaryCampaign.military_capabilities(),1,0)
+	assert_str(str(blocks)).contains("Spears")
+	assert_str(str(provider._equipment_catalog())).not_contains("Service rifle")
 	provider=null;terrain.free();hud.free()
