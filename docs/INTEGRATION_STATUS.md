@@ -1,3 +1,9 @@
+## September 8 — scout route previews and local surveys
+
+INTEGRATED `77049fc` by conflict-free fast-forward from `ce45a15`. Automatic headings now receive the same validated route preview as ordered headings, search the full compass and permit nearby surveys when long routes are blocked. Departure follows the quoted route and validates it before spending. Cards show planned outward distance, include surveying/return travel and no longer label unknown country generally low-risk. Route-only reuse prevents repeated toolbar planning; supplies and people remain current.
+
+All **60 focused canonical tests pass**, zero errors/failures/orphans (`/tmp/tt-scout-planning-canonical.log`), covering new route/preview cases and existing scouting, reports, rumor, findings, onboarding and return-speed checks. Generated terrain from the latest logged world seed has valid proposals for all four durations. No save migration or travel-rate rebalance. A broader unrelated peace-incident fixture failure was reproduced on the unchanged base; no full civilization-suite pass is claimed. See SCOUT_ROUTE_PLANNING_HANDOFF.md. Test overrides and baseline fixture removed. Player/editor remain uninterrupted; next normal launch receives the changes.
+
 ## September 8 — crew repair and training recovery
 
 INTEGRATED `1683ba1` by conflict-free fast-forward from `06798ef`. Initial and qualified Navy/Air crews finish repairs before training resumes; suspending instruction still permits essential repairs. Repair shortages spend nothing until funded. Same-day calls preserve attendance/status, rival messages stay out of player staff reports, and the roster shows actual travel and repair shortages. Initial instruction reports completion/time instead of a misleading rotation percentage.

@@ -1,3 +1,7 @@
+## September 8 — scout route planning
+
+Integrated `77049fc`; all 60 focused canonical checks pass. Automatic route selection validates before departure, searches all compass sectors and allows local surveys. Cards show actual planned outward distance with return/survey time included. No live discoveries, unearned safety rating or quoted-route reroll. The existing peace-incident fixture failure is documented separately in SCOUT_ROUTE_PLANNING_HANDOFF.md. Saves and ongoing missions remain compatible; no player restart or graphical probe.
+
 ## September 8 — automatic crew training recovery
 
 Integrated `1683ba1`; all 74 relevant canonical tests pass. Navy/Air repairs finish before training resumes, training suspension permits essential repairs, and repeated daily checks preserve attendance. Rival messages no longer overwrite player staff reports; roster activity exposes actual repair shortages and travel. Existing saves remain compatible. No player restart or graphical probe. See SERVICE_TRAINING_RECOVERY_HANDOFF.md.
