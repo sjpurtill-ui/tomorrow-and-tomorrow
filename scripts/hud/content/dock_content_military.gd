@@ -204,6 +204,9 @@ func _builds_blocks(capabilities:Dictionary,template_filter:int=-1,step:int=0)->
 			var blockers:Array=quote.get("blockers",[])
 			if not blockers.is_empty():requirements+="\n"+String(blockers[0])+ (" Additional shortages: %d."%(blockers.size()-1) if blockers.size()>1 else "")
 			blocks.append({"type":"text","heading":"BEFORE RECRUITMENT","text":requirements})
+			blocks.append(_recruitment_people_block(quote))
+			if int(quote.get("required",0))>int(quote.get("training_places",0)):
+				blocks.append({"type":"actions","items":_training_staff_actions()})
 			blocks.append({"type":"text","heading":"YOUR ORDER","text":("Recruitment ordered. " if bool(template.get("recruitment_requested",false)) else "Recruitment not ordered. ")+("Recruit & Train starts this class now." if bool(quote.get("can_start",false)) else "Recruit & Train records a waiting order; no new soldiers enter until the shortages are resolved.")})
 		elif step==2:
 			var availability:=MilitaryCampaign.template_deployment_availability(template_id)
@@ -342,7 +345,7 @@ func signature()->Array:
 	for template_variant in MilitaryCampaign.army_templates:
 		var template:Dictionary=template_variant
 		template_state.append([int(template.get("template_id",0)),(template.get("entries",[]) as Array).duplicate(true)])
-	return [int(army.get("troops",0)),int(army.get("recruits",0)),MilitaryCampaign.field_armies.size(),(army.get("training_queue",[]) as Array).size(),template_state,terrain.selected_army_id,MilitaryCampaign._mobilized_count(),MilitaryCampaign.training_program.duplicate(true),MilitaryCampaign.training_queue.duplicate(true),MilitaryCampaign.command_development.duplicate(true),MilitaryCampaign.military_inventory.duplicate(true),MilitaryCampaign.military_consumables.duplicate(true),MilitaryCampaign.damaged_equipment.duplicate(true),MilitaryCampaign.equipment_queue.duplicate(true),GameState.resource_stockpiles.duplicate(true),equipment_batch,equipment_page,production_mode,MilitaryCampaign.production_labor_share,int(GameState.elapsed_days)]
+	return [int(army.get("troops",0)),int(army.get("recruits",0)),MilitaryCampaign.field_armies.size(),(army.get("training_queue",[]) as Array).size(),template_state,terrain.selected_army_id,MilitaryCampaign._mobilized_count(),MilitaryCampaign.training_program.duplicate(true),MilitaryCampaign.training_queue.duplicate(true),MilitaryCampaign.command_development.duplicate(true),MilitaryCampaign.military_inventory.duplicate(true),MilitaryCampaign.military_consumables.duplicate(true),MilitaryCampaign.damaged_equipment.duplicate(true),MilitaryCampaign.equipment_queue.duplicate(true),GameState.resource_stockpiles.duplicate(true),equipment_batch,equipment_page,production_mode,MilitaryCampaign.production_labor_share,int(GameState.elapsed_days),GovernmentPeopleSystem.revision,GameState.population_allocations.duplicate(true)]
 
 func _deploy_build(template_id:int)->void:
 	var result:=MilitaryCampaign.deploy_army_from_template(template_id)
@@ -523,6 +526,30 @@ func _reputation_report()->Dictionary:
 	for key:String in ["mercy","fear","grievance"]:items.append({"name":key.capitalize(),"value":"%d / 100"%roundi(float(reputation.get(key,0))*100),"sub":{"mercy":"Remembered humane treatment","fear":"Intimidation from wartime conduct","grievance":"Resentment from wartime harm"}[key]})
 	return {"blocks":[{"type":"text","text":"These are remembered conduct scores, not chances of success or a count of people."},{"type":"rows","heading":"CONDUCT SCORES","items":items}]}
 
+func _recruitment_people_block(quote:Dictionary)->Dictionary:
+	return {"type":"rows","heading":"PEOPLE & TRAINING PLACES","items":[
+		{"name":"People available for this army","value":"%d available / %d needed" % [int(quote.get("people_room",0)),int(quote.get("missing",0))],"sub":"Unassigned recruits plus room for new soldiers. Soldiers at home, deployed, training or recovering already count against your service limit."},
+		{"name":"Training places available now","value":"%d free / %d needed" % [int(quote.get("training_places",0)),int(quote.get("required",0))],"sub":"%d total places; %d already occupied. The whole class must fit before it starts." % [MilitaryCampaign.training_capacity(),MilitaryCampaign._queued_trainees()]},
+		{"name":"Watch & training work allocation","value":"%d people" % int(GameState.population_allocations.get("Defense",0)),"sub":"This work allocation supports training capacity. It is not an additional pool of recruits; changing it does not enlist anyone."}
+	]}
+
+func _training_staff_actions()->Array:
+	var actions:Array=[]
+	for city:Dictionary in GameState.player_settlements:
+		var id:=String(city.get("id",""))
+		if id=="":continue
+		var occupied:=not String(city.get("occupied_by","")).is_empty()
+		var requested:=not bool(city.get("auto_manage",true)) and String(city.get("management_focus",""))=="defense"
+		actions.append({"label":("TRAINING PRIORITY REQUESTED" if requested else "PRIORITIZE WATCH & TRAINING")+" · "+String(city.get("name","City")),"sub":"Unavailable while occupied" if occupied else ("Staffing is reassessed as game days advance; food and water needs still come first." if requested else "Shift this city's work toward watch and training. This replaces its current work priority."),"disabled":occupied or requested,"on_press":_prioritize_training_staff.bind(id)})
+	return actions
+
+func _prioritize_training_staff(city_id:String)->void:
+	var result:=GovernmentPeopleSystem.set_settlement_focus(city_id,"defense")
+	if bool(result.get("ok",false)):
+		terrain._report_military_action({"message":"Watch and training prioritized. The city's leader will reassess staffing as game days advance, while protecting food and water. This can expand training places; it does not enlist soldiers or raise the military service limit."})
+	else:terrain._report_military_action({"error":String(result.get("reason","Could not change this city's work priority."))})
+	hud.request_immediate_dock_refresh()
+
 func _recruitment_requirements(template_id:int)->Dictionary:
 	var quote:=MilitaryCampaign.template_training_quote(template_id)
 	var blockers:Array=quote.get("blockers",[])
@@ -531,12 +558,12 @@ func _recruitment_requirements(template_id:int)->Dictionary:
 		actions.append(focused_action("PERSONNEL ACCOUNT","See where existing military places are used",func()->Dictionary:return {"blocks":[_personnel_block()]}))
 		actions.append({"label":"SECURITY PRACTICES","sub":"Review watch and levy development","on_press":func():hud.providers["inquiry"].open_domain("security")})
 	if int(quote.get("required",0))>int(quote.get("training_places",0)):
-		actions.append({"label":"LOCAL WORK PRIORITY","sub":"Leaders allocate Defense instructors; no instant capacity","on_press":jump("settlement",0)})
+		actions.append_array(_training_staff_actions())
 	for weapon:String in quote.get("equipment",{}):
 		if int(quote.equipment[weapon])>int(MilitaryCampaign.military_inventory.get(weapon,0)):
 			actions.append(focused_action("MAKE "+weapon.replace("_"," ").to_upper(),"Review materials and workshop time",_equipment_order_report.bind(weapon)))
 	if float(quote.get("food",0))>FoodSystem.total_stored():actions.append({"label":"FOOD & RESERVES","sub":"Review supply and local work priority","on_press":jump("economy",0)})
-	return {"blocks":[{"type":"text","heading":"CURRENT REQUIREMENTS","text":"\n\n".join(blockers) if not blockers.is_empty() else "Requirements met. Return to Recruit & Train to issue the order."},{"type":"actions","items":actions},{"type":"text","heading":"WHAT HAPPENS NEXT","text":"A waiting order is checked as game days advance. It starts only when the full class meets every requirement. Stop Recruitment cancels future intake; already enrolled soldiers continue. If another army uses all military places, you must change that commitment or develop greater capacity; simply waiting does not guarantee recruitment."}]}
+	return {"blocks":[{"type":"text","heading":"CURRENT REQUIREMENTS","text":"\n\n".join(blockers) if not blockers.is_empty() else "Requirements met. Return to Recruit & Train to issue the order."},_recruitment_people_block(quote),{"type":"actions","items":actions},{"type":"text","heading":"WHAT HAPPENS NEXT","text":"A waiting order is checked as game days advance. It starts only when the full class meets every requirement. Stop Recruitment cancels future intake; already enrolled soldiers continue. If another army uses all military places, you must change that commitment or develop greater capacity; simply waiting does not guarantee recruitment."}]}
 
 func _campaign_entry()->Array:
 	return [{"type":"text","heading":"THE ALDERFORD WAR · PLAYABLE CAMPAIGN","text":"Two rivals, one war. Command through your general. Starting preserves this world separately and opens an early campaign with its own save slot."},{"type":"actions","items":[{"label":"PLAY GENERAL CAMPAIGN","on_press":func():GeneralCampaign.launch()},{"label":"RESUME GENERAL CAMPAIGN","on_press":func():

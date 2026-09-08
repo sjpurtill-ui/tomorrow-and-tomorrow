@@ -1336,7 +1336,7 @@ func template_training_quote(template_id:int)->Dictionary:
 			if String(formation.get("unit",""))==unit and String(formation.get("weapon",""))==weapon:held+=int(formation.get("equipment",0))
 		equipment[weapon]=int(equipment.get(weapon,0))+maxi(0,_equipment_required_for(unit,count)-held)
 	if active>0:blockers.append("%d people are already training; the next full intake waits for their outcome." % active)
-	if required>training_capacity()-_queued_trainees():blockers.append("Full-build class needs %d places; %d available. More Defense instructors or established training practices expand capacity." % [required,maxi(0,training_capacity()-_queued_trainees())])
+	if required>training_capacity()-_queued_trainees():blockers.append("This class needs %d training places; only %d are free. Prioritize watch and training in a city, wait for an existing class to finish, or reduce this army design." % [required,maxi(0,training_capacity()-_queued_trainees())])
 	var people_room:=aggregate_recruits+maxi(0,recruitment_capacity()-_mobilized_count())
 	if missing>people_room:blockers.append("%d recruits needed; %d available. Military service already uses %d of %d places, including field armies and recovering soldiers. More able adults or established watch/levy practices raise this limit; waiting alone does not." % [missing,people_room,_mobilized_count(),recruitment_capacity()])
 	for weapon:String in equipment:
