@@ -203,7 +203,10 @@ func test_review_fits_small_canvas_and_map_click_closes_without_moving()->void:
 	map.settler_marker=Area3D.new();map.settler_marker.position=Vector3(6,1,0);map.add_child(map.settler_marker)
 	var guide:Control=auto_free(Guide.new());viewport.add_child(guide);map.founding_site_guide=guide
 	guide.setup(map,map.settler_marker.position,false)
+	map._apply_modal_screen_contract(guide)
 	await await_idle_frame();await await_idle_frame()
+	assert_bool(guide.panel.has_meta("viewport_fit_hosted")).is_false()
+	assert_bool(guide.heading.is_visible_in_tree()).is_true()
 	assert_float(guide.panel.get_global_rect().end.x).is_less_equal(1024.0)
 	assert_float(guide.panel.get_global_rect().end.y).is_less_equal(584.0)
 	assert_float(guide.action.get_global_rect().end.y).is_less_equal(guide.panel.get_global_rect().end.y)

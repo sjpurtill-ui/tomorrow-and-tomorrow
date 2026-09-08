@@ -23,6 +23,9 @@ var drawn_labels:Array[Rect2]=[]
 func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	terrain=world;later_city=is_later
 	name="FoundingSiteGuide";mouse_filter=Control.MOUSE_FILTER_IGNORE
+	# The full-size root projects markers onto the map; it is not a modal report.
+	# Opt out of the shared report fitter before its deferred layer callback runs.
+	set_meta("responsive_scroll_layout",true)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel=PanelContainer.new();panel.name="SiteReview";panel.mouse_filter=Control.MOUSE_FILTER_STOP
 	var style:=StyleBoxFlat.new();style.bg_color=Color("101e23f5");style.border_color=Color("618e87");style.set_border_width_all(1);style.set_corner_radius_all(6);style.set_content_margin_all(16)
