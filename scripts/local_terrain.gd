@@ -17417,7 +17417,7 @@ func _open_scout_dispatch_panel()->void:
 	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;shell.add_child(scroll)
 	var root:=VBoxContainer.new();root.size_flags_horizontal=Control.SIZE_EXPAND_FILL;root.add_theme_constant_override("separation",9);scroll.add_child(root)
 	var heading:=Label.new(); heading.text="DISPATCH SCOUT PARTY"; heading.add_theme_font_size_override("font_size",22); heading.add_theme_color_override("font_color",Color("#d9c99e")); root.add_child(heading)
-	var explanation:=Label.new(); explanation.text="Choose a target, heading and planned duration. People and food are committed only when you send. Routes can bend around terrain and return dates can slip; discoveries become known when scouts bring their report home." ; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
+	var explanation:=Label.new(); explanation.text="Choose the total time away, including surveying and the return journey. Let the party choose a route, or give a heading. Scouts use nearby land when longer routes are blocked. Distances show the planned outward route; dangers ahead remain unknown." ; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
 	var exploration:=CivilizationSystem.exploration_status()
 	if bool(exploration.get("active",false)):
 		# Several parties can range at once; list each without blocking new ones.
@@ -17468,6 +17468,7 @@ func _close_scout_dispatch_panel()->void:
 
 
 func _select_scout_target(index:int,selector:OptionButton,duration_grid:GridContainer,heading_selector:OptionButton)->void:
+	if is_instance_valid(scout_dispatch_status):scout_dispatch_status.text=""
 	pending_scout_target_id=String(selector.get_item_metadata(index))
 	var directional_target:=pending_scout_target_id in ["open_world","recruit_people"]
 	heading_selector.disabled=not directional_target
@@ -17477,6 +17478,7 @@ func _select_scout_target(index:int,selector:OptionButton,duration_grid:GridCont
 
 
 func _select_scout_heading(index:int,selector:OptionButton,duration_grid:GridContainer,target_selector:OptionButton)->void:
+	if is_instance_valid(scout_dispatch_status):scout_dispatch_status.text=""
 	pending_scout_heading=String(selector.get_item_metadata(index))
 	for child in duration_grid.get_children(): child.queue_free()
 	_populate_scout_duration_buttons(duration_grid,String(target_selector.get_item_metadata(target_selector.selected)))
@@ -17490,12 +17492,17 @@ func _populate_scout_duration_buttons(duration_grid:GridContainer,target_id:Stri
 		mission.text=_scout_mission_card_text(int(duration),quote)
 		mission.disabled=not bool(quote.get("can_dispatch",false))
 		var heading_note:=" toward %s" % pending_scout_heading.to_upper() if directional_target and pending_scout_heading!="" else ""
-		mission.tooltip_text=("BLOCKED  %s" % String(quote.get("blocker","This mission cannot depart."))) if mission.disabled else "ACTION  Dispatch %d fast scouts for %d days%s.\nCOST  %.1f Food and %d absent people are committed at departure.\nMAP  The ordered search corridor remains visible while the party is away.\nCONSEQUENCE  No terrain, contact, recruits, or sightings become known unless the party physically returns." % [int(quote.get("personnel",0)),int(duration),heading_note,float(quote.get("provisions",0.0)),int(quote.get("personnel",0))]
+		mission.tooltip_text=("BLOCKED  %s" % String(quote.get("blocker","This mission cannot depart."))) if mission.disabled else "Dispatch %d scouts for %d days%s, including surveying and return travel.\n%.1f Food and %d absent people are committed at departure. A shorter route leaves more time to survey nearby land.\nThe planned route remains visible while the party is away. Unknown terrain and patrols can delay or endanger the party; this is not a guarantee of safe passage. Findings become known only on return." % [int(quote.get("personnel",0)),int(duration),heading_note,float(quote.get("provisions",0.0)),int(quote.get("personnel",0))]
 		mission.pressed.connect(_dispatch_scout_from_actions.bind(int(duration),target_id)); duration_grid.add_child(mission)
 
 
 func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
-	var text:="SEND FOR %d DAYS\n%d PEOPLE  •  %.1f FOOD\nREACH ~%s KM  •  RISK %s" % [duration,int(quote.get("personnel",0)),float(quote.get("provisions",0.0)),_compact_population(roundi(float(quote.get("one_way_range_km",0.0)))),String((quote.get("risk",{}) as Dictionary).get("label","UNKNOWN"))]
+	var text:="SEND FOR %d DAYS\n%d SCOUTS  •  %.1f FOOD" % [duration,int(quote.get("personnel",0)),float(quote.get("provisions",0.0))]
+	var plan:Dictionary=quote.get("route_plan",{})
+	if bool(plan.get("ok",false)):
+		text+="\nOUTWARD ROUTE ~%s KM" % _compact_population(roundi(float(quote.get("planned_outward_km",plan.get("distance_km",0.0)))))
+		if String(plan.get("planned_heading",""))!="":text+="  •  "+String(plan.planned_heading).to_upper()
+		text+="\nSURVEYING + RETURN INCLUDED  •  DANGERS UNKNOWN"
 	if String(quote.get("ordered_heading",""))!="": text+="\nORDERED %s" % String(quote.ordered_heading).to_upper()
 	if not bool(quote.get("can_dispatch",false)):
 		var blocker:=String(quote.get("blocker",quote.get("error","Mission unavailable."))).replace("\n"," ")

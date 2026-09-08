@@ -49,8 +49,9 @@ func test_first_use_help_names_one_contextual_next_action_without_a_control_glos
 	assert_str(String(targeting.body)).contains("red")
 	assert_str(String(targeting.body)).contains("Right-click")
 	var settled:Dictionary=renderer._map_help_presentation(true,false,false)
-	assert_str(String(settled.body)).contains("Click a known place")
-	assert_str(String(settled.body)).contains("Double-click")
+	assert_str(String(settled.body)).contains("Click a city")
+	assert_str(String(settled.body)).contains("double-click")
+	assert_str(String(settled.body)).contains("Click the map to close")
 
 
 func test_action_presentations_put_blockers_and_next_steps_on_the_action()->void:

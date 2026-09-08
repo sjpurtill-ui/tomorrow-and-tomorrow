@@ -113,6 +113,7 @@ var next_war_id:=1
 var neighborhood_generated:=false
 var chronicle:=preload("res://scripts/campaign_chronicle.gd").new()
 var scout_land_authority:Callable=Callable()
+var open_scout_plan_cache:Dictionary={}
 ## Reads the rendered ground (woodland density, river distance, height) so
 ## returned reports describe what the map actually shows there.
 var ground_survey_authority:Callable=Callable()
@@ -135,6 +136,7 @@ func initialize()->void:
 
 
 func reset_for_new_world()->void:
+	open_scout_plan_cache.clear()
 	chronicle.reset()
 	neighborhood_generated=false
 	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
@@ -840,6 +842,7 @@ func set_ground_survey_authority(survey_query:Callable)->void:
 
 func set_scout_geography_authority(land_query:Callable)->void:
 	scout_land_authority=land_query
+	open_scout_plan_cache.clear()
 	_audit_active_scout_land_route()
 
 
@@ -1000,28 +1003,61 @@ func _plan_scout_land_route(start:Vector2,finish:Vector2)->Dictionary:
 
 const SCOUT_HEADINGS:Dictionary={"east":0.0,"southeast":45.0,"south":90.0,"southwest":135.0,"west":180.0,"northwest":225.0,"north":270.0,"northeast":315.0}
 
+func _quoted_open_scout_route(one_way_range:float,seed_value:int,heading:String)->Dictionary:
+	# Toolbar refreshes need a current resource quote, not another terrain search.
+	# Geography is immutable between world/authority changes; day, origin, range,
+	# watercraft and mission identity also invalidate the bounded route cache.
+	var key:=var_to_str([last_world_seed,int(GameState.elapsed_days),player_world_origin,one_way_range,seed_value,heading,_scout_water_crossing_allowance_km()])
+	if open_scout_plan_cache.has(key):return open_scout_plan_cache[key].duplicate(true)
+	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
+	var plan:=_plan_open_scout_route(one_way_range,rng,heading)
+	if open_scout_plan_cache.size()>=32:open_scout_plan_cache.clear()
+	open_scout_plan_cache[key]=plan.duplicate(true)
+	return plan
+
 func _plan_open_scout_route(one_way_range:float,rng:RandomNumberGenerator,heading:String="")->Dictionary:
 	if not scout_land_authority.is_valid():
 		return {"ok":false,"reason":"No terrain survey is available. Unknown ground cannot be assumed to be land."}
+	if not _scout_land_at(player_world_origin):
+		return {"ok":false,"reason":"Scouts need a departure point on land. The settlement's current map position is not traversable."}
 	var ordered_heading:=heading.to_lower().strip_edges()
 	# A dictated heading is an order, not a vague preference. Keep the endpoint
 	# inside that compass sector. The land route may bend around terrain, but an
 	# order to go north can no longer quietly produce an eastbound expedition.
 	var has_ordered_heading:=SCOUT_HEADINGS.has(ordered_heading)
 	var base_angle:=deg_to_rad(float(SCOUT_HEADINGS[ordered_heading])) if has_ordered_heading else rng.randf_range(-PI,PI)
-	var angle_offsets:Array=[0.0,0.16,-0.16,0.31,-0.31] if has_ordered_heading else [0.0,0.42,-0.42,0.84,-0.84,1.26,-1.26]
-	for range_share in [1.0,0.82,0.64,0.46,0.30]:
+	var angle_offsets:Array=[0.0,0.16,-0.16,0.31,-0.31] if has_ordered_heading else []
+	if not has_ordered_heading:
+		for sector in 16:angle_offsets.append(float(sector)*TAU/16.0)
+	# Duration is an allowance, not a minimum distance. A long expedition may
+	# survey nearby connected ground instead of rejecting every local route.
+	var ranges:Array[float]=[one_way_range,one_way_range*.82,one_way_range*.64,one_way_range*.46,one_way_range*.30]
+	var nearby:=one_way_range*.15
+	while nearby>4.0:
+		ranges.append(nearby);nearby*=.5
+	ranges.append(minf(4.0,one_way_range))
+	var detour_attempts:=0
+	for search_range in ranges:
+		var detour_targets:Array[Vector2]=[]
 		for angle_offset in angle_offsets:
-			var endpoint:=player_world_origin+Vector2.RIGHT.rotated(base_angle+float(angle_offset))*one_way_range*float(range_share)
+			var endpoint:=player_world_origin+Vector2.RIGHT.rotated(base_angle+float(angle_offset))*search_range
 			if not _scout_land_at(endpoint): continue
+			if not _scout_segment_is_land(player_world_origin,endpoint):
+				detour_targets.append(endpoint);continue
+			return {"ok":true,"route":_scout_route_dictionaries([player_world_origin,endpoint]),"distance_km":player_world_origin.distance_to(endpoint),"travel_mode":"land","target_reachable":true,"ordered_heading":ordered_heading if has_ordered_heading else "","planned_heading":_compass_phrase(player_world_origin,endpoint)}
+		# Keep repeated duration previews bounded on islands and complex coasts.
+		# Simple routes in every sector are still checked at every shorter range.
+		for endpoint in detour_targets:
+			if detour_attempts>=8:break
+			detour_attempts+=1
 			var plan:=_plan_scout_land_route(player_world_origin,endpoint)
-			if not bool(plan.get("ok",false)) or float(plan.get("distance_km",INF))>one_way_range: continue
+			if not bool(plan.get("ok",false)) or float(plan.get("distance_km",INF))>one_way_range+.001: continue
 			plan["target_reachable"]=true
 			plan["ordered_heading"]=ordered_heading if has_ordered_heading else ""
 			plan["planned_heading"]=_compass_phrase(player_world_origin,endpoint)
 			return plan
-	var direction_note:=" toward %s" % ordered_heading.to_upper() if has_ordered_heading else ""
-	return {"ok":false,"reason":"No land corridor%s supports this search. Try a shorter expedition or another heading; no party was sent." % direction_note}
+	var reason:="Scouts could not find a walkable route %s from home, even for a nearby survey. Choose another heading or let the party choose." % ordered_heading.to_upper() if has_ordered_heading else "Scouts could not find a walkable route from home, even for a nearby survey. Open water requires established river or coastal craft."
+	return {"ok":false,"reason":reason}
 
 
 func _audit_active_scout_land_route()->void:
@@ -1183,10 +1219,9 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 		target_position=route_plan.get("search_position",{}).duplicate(true)
 		target["position"]=target_position
 		target_distance=player_world_origin.distance_to(rumor_network.vector(target_position)) if not target_position.is_empty() else 0.0
-	elif directional_search and ordered_heading!="":
-		var quote_rng:=RandomNumberGenerator.new()
-		quote_rng.seed=last_world_seed^duration_days*8191^String(target.id).hash()
-		route_plan=_plan_open_scout_route(one_way_range,quote_rng,ordered_heading)
+	elif directional_search:
+		var quote_seed:=last_world_seed^duration_days*8191^String(target.id).hash()^next_scout_mission_id*2654435761
+		route_plan=_quoted_open_scout_route(one_way_range,quote_seed,ordered_heading)
 	elif not directional_search and target_position.has("x") and target_position.has("z"):
 		route_plan=_plan_scout_land_route(player_world_origin,Vector2(float(target_position.x),float(target_position.z)))
 	var planning_mission:={"duration_days":duration_days,"concealment":clampf(0.72+clampf(float(GameState.combined_intelligence),0.0,1.0)*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93),"evasion":clampf(0.76+logistics*0.14+clampf(float(GameState.combined_intelligence),0.0,1.0)*0.08,0.74,0.95)}
@@ -1200,9 +1235,9 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 	elif FoodSystem.total_stored()+0.0001<provisions: blocker="Requires %.1f Food; only %.1f is stored." % [provisions,FoodSystem.total_stored()]
 	elif target_distance>one_way_range: blocker="This mission can reach about %.0f km, but the target is %.0f km away. Choose a longer expedition." % [one_way_range,target_distance]
 	elif not route_plan.is_empty() and not bool(route_plan.get("ok",false)): blocker=String(route_plan.get("reason","No continuous land-only route reaches this target."))
-	elif not route_plan.is_empty() and float(route_plan.get("distance_km",INF))>one_way_range: blocker="The land route is %.0f km after following the coastline, beyond this party's %.0f km range. Choose a longer expedition." % [float(route_plan.get("distance_km",0.0)),one_way_range]
-	var charted_distance:=one_way_range*2.0 if directional_search else float(route_plan.get("distance_km",target_distance))*2.0
-	return {"duration_days":duration_days,"personnel":personnel,"provisions":provisions,"one_way_range_km":one_way_range,"charted_route_km":charted_distance,"target_distance_km":target_distance,"target":target,"risk":risk,"route_plan":route_plan,"ordered_heading":ordered_heading,"travel_mode":"land","can_dispatch":blocker=="","blocker":blocker}
+	elif not route_plan.is_empty() and float(route_plan.get("distance_km",INF))>one_way_range+.001: blocker="The land route is %.0f km after following the coastline, beyond this party's %.0f km range. Choose a longer expedition." % [float(route_plan.get("distance_km",0.0)),one_way_range]
+	var planned_distance:=float(route_plan.get("distance_km",0.0)) if bool(route_plan.get("ok",false)) else 0.0
+	return {"duration_days":duration_days,"personnel":personnel,"provisions":provisions,"one_way_range_km":one_way_range,"planned_outward_km":planned_distance,"charted_route_km":planned_distance*2.0,"target_distance_km":target_distance,"target":target,"risk":risk,"route_plan":route_plan,"ordered_heading":ordered_heading,"travel_mode":"land","can_dispatch":blocker=="","blocker":blocker}
 
 
 func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:String="")->Dictionary:
@@ -1215,12 +1250,9 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	var personnel:=int(quote.personnel)
 	var provisions:=float(quote.provisions)
 	var target_option:Dictionary=quote.target
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^int(GameState.elapsed_days)*104729^duration_days*8191^scout_reports.size()*65537^String(target_option.id).hash()^next_scout_mission_id*2654435761
 	var one_way_range:=scout_one_way_range(duration_days)
 	var target_position:Dictionary=target_option.get("position",{})
 	var route_plan:Dictionary=quote.get("route_plan",{})
-	if String(target_option.get("kind","explore")) in ["explore","recruit_people"] and route_plan.is_empty(): route_plan=_plan_open_scout_route(one_way_range,rng,normalized_heading)
 	if not bool(route_plan.get("ok",false)):
 		return {"error":String(route_plan.get("reason","No terrain-authoritative land route can support this expedition."))}
 	var route:Array[Dictionary]=[]
@@ -1256,7 +1288,7 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	scout_missions.append(mission)
 	var direction_clause:=" on a %s search corridor" % planned_heading.to_upper()
 	if normalized_heading!="": direction_clause=" under orders to search %s; its traversable corridor runs %s" % [normalized_heading.to_upper(),planned_heading.to_upper()]
-	var message:="A %d-person aggregate scout party departs for %d days to %s%s with %.1f Food. Its planned corridor is now marked on the map. Every observation remains aboard the party and is lost if it cannot return. Estimated route risk: %s." % [personnel,duration_days,String(target_option.label).capitalize(),direction_clause,issued_provisions,String(risk.label)]
+	var message:="%d scouts depart for a %d-day expedition to %s%s with %.1f Food. The planned outward route is %.0f km; the time and food allowance includes surveying and the return journey. The route is marked on the map. Discoveries become known when the party returns. Estimated patrol exposure: %s; other dangers ahead are unknown." % [personnel,duration_days,String(target_option.label).capitalize(),direction_clause,issued_provisions,distance,String(risk.label)]
 	_record_world_event("Scout party departs",message,"diplomacy",start_day)
 	# Callers that commissioned this physical expedition need a durable identity
 	# for its eventual return report. The mission remains the authoritative state;

@@ -838,7 +838,9 @@ func test_excess_mobilization_is_withheld_from_civilian_functions_and_labor()->v
 	MilitaryCampaign.aggregate_recruits=allocated_defense+4_000
 	var military_commitment:Dictionary=MilitaryCampaign.population_commitment_snapshot()
 	assert_int(int(military_commitment.excess_beyond_defense)).is_equal(4_000)
-	assert_int((military_commitment.records as Array).size()).is_equal(4)
+	var recorded_personnel:=0
+	for record:Dictionary in military_commitment.records:recorded_personnel+=int(record.personnel)
+	assert_int(recorded_personnel).is_equal(allocated_defense+4_000)
 	var commitments:Dictionary=system.player_population_commitments()
 	assert_int(int(commitments.mobilized_total)).is_equal(allocated_defense+4_000)
 	var profile:Dictionary=system.player_population_function_profile()
