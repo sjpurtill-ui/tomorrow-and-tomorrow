@@ -149,7 +149,12 @@ func _rows()->Array[Dictionary]:
 			if unit.owner!="player" or unit.domain!=service:continue
 			var authorized:=0
 			for amount in unit.authorized.values():authorized+=int(amount)
-			result.append({"name":unit.name,"glyph":"⚓" if service=="navy" else "✈","location":op.base(int(unit.base_id)).get("name","Base unavailable"),"count":op.hardware(unit),"authorized":authorized,"condition":float(unit.condition),"equipment":float(op.hardware(unit))/maxf(1,authorized),"equipment_note":"%d crew" % op.crew(unit),"skill":float(unit.get("proficiency",.45 if float(unit.training)>=1 else 0)),"experience":float(unit.experience),"activity":String(unit.get("training_status","")) if String(unit.get("training_status",""))!="" else String(unit.status),"progress":float(unit.training),"training_note":String(unit.status)})
+			var staff_status:=String(unit.get("training_status",""))
+			var exercising:=int(unit.get("training_attending",0))>0 and float(unit.training)>=1.0
+			var activity:=staff_status if exercising else String(unit.status)
+			var note:=String(unit.status) if exercising else staff_status
+			if note==activity or note=="":note="Policy: "+String(campaign.training_staff.policy(service).label)
+			result.append({"name":unit.name,"glyph":"⚓" if service=="navy" else "✈","location":op.base(int(unit.base_id)).get("name","Base unavailable"),"count":op.hardware(unit),"authorized":authorized,"condition":float(unit.condition),"equipment":float(op.hardware(unit))/maxf(1,authorized),"equipment_note":"%d crew" % op.crew(unit),"skill":float(unit.get("proficiency",.45 if float(unit.training)>=1 else 0)),"experience":float(unit.experience),"activity":activity,"progress":float(unit.training),"training_note":note})
 	return result
 func _inspection()->void:
 	var box:=HBoxContainer.new();body.add_child(box)

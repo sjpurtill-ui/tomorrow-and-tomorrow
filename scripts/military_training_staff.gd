@@ -95,29 +95,38 @@ func prepare_army_day()->bool:
 	data.status.army="%d of %d soldiers in staff-managed training rotations." % [rotation.attending,rotation.total]
 	return true
 func record_food(service:String,amount:float)->void:data.food_spent[service]=float(data.food_spent.get(service,0.0))+amount
+func report_service_training(record:Dictionary,message:String)->void:
+	record.training_status=message
+	if record.owner=="player":data.status[String(record.domain)]=message
 func service_training(record:Dictionary,origin:Dictionary,day:int)->bool:
 	var op=host.joint_operations
 	var initial:=float(record.get("training",0))<1.0
-	record["training_attending"]=0;record["training_status"]=""
 	if int(record.get("staff_training_day",-1))==day:return initial
+	record["training_attending"]=0;record["training_status"]=""
 	record.staff_training_day=day
 	var service:=String(record.domain)
 	var current:=policy(service,String(record.owner))
 	var at_base:bool=op.force_position(record).distance_to(op.point(origin))<2 and record.get("route",[]).is_empty()
+	# A repair spell ends at the same readiness threshold as normal operations.
+	# Suspending instruction does not suspend maintenance or return travel.
+	if float(record.condition)>=.98:record["repairing"]=false
+	var needs_repairs:=bool(record.get("repairing",false)) or float(record.condition)<maxf(.8,float(record.get("repair_threshold",.6)))
+	if needs_repairs:record["repairing"]=true
 	var reason:=""
-	if current.id=="suspended":reason="Staff training suspended by policy"
+	if needs_repairs:reason="Staff prioritizing repairs before training"
+	elif current.id=="suspended":reason="Staff training suspended by policy"
 	elif not at_base:reason="Training waits for return to home base"
-	elif float(record.condition)<.8:
-		reason="Staff prioritizing repairs before training";record["repairing"]=true
 	elif not initial and float(record.get("proficiency",.45))>=float(current.target):return false
 	elif op.logistics.busy(int(record.id)):reason="Crew committed to transport duty"
 	if reason!="":
-		record.training_status=reason;data.status[service]=reason
+		report_service_training(record,reason)
 		if initial:
 			record.status=reason
-			if at_base and float(record.condition)<.8:
+			if at_base and needs_repairs and not op.logistics.busy(int(record.id)):
 				var repair:Dictionary=op.repair_at_base(record,origin)
+				if float(record.condition)>=.98:record.repairing=false
 				record.status=String(repair.get("error",repair.get("message",reason)))
+				report_service_training(record,String(record.status))
 			if not at_base and not record.get("route",[]).is_empty() and op.pay_fuel(record):op.geography.travel(record,op.speed(record))
 		return initial
 	var capacity:=float(origin.get("capacity",0))
@@ -160,22 +169,21 @@ func service_training(record:Dictionary,origin:Dictionary,day:int)->bool:
 				paid=op.rival.spend(String(record.owner),bill)
 				if paid:civ.food_days=float(civ.food_days)-food_days
 	if not paid:
-		record.training_status="Staff waiting for "+", ".join(shortages) if not shortages.is_empty() else "Training paused: food reserve, fuel or training materials unavailable"
-		data.status[service]=record.training_status
+		report_service_training(record,"Staff waiting for "+", ".join(shortages) if not shortages.is_empty() else "Training paused: food reserve, fuel or training materials unavailable")
 		if initial:record.status=record.training_status
 		return initial
 	record.training_fuel_fraction=fuel_exact-fuel
 	record.training_attending=ceili(op.crew(record)*minf(1,share))
-	record.training_status="Staff exercises · %d%% of crews rotating" % roundi(share*100)
 	if record.owner=="player":
 		record_food(service,food)
 		for amount in costs.values():data.materials_spent[service]=float(data.materials_spent.get(service,0))+float(amount)
-		data.status[service]=record.training_status
 	if initial:
 		record.training=minf(1.0,float(record.training)+share/duration)
 		record.proficiency=maxf(float(record.get("proficiency",0)),float(record.training)*.45)
 		record.status="Staff instruction · %d%% · %d days at current policy" % [roundi(float(record.training)*100),ceili((1-float(record.training))*duration/maxf(.001,share))]
+		report_service_training(record,String(record.status))
 	else:
 		record.proficiency=minf(float(current.target),float(record.get("proficiency",.45))+.065/84.0*share)
 		record.condition=maxf(0,float(record.condition)-.0003*share)
+		report_service_training(record,"Staff exercises · %d%% of crews rotating" % roundi(share*100))
 	return initial

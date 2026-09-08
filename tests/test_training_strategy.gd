@@ -208,3 +208,105 @@ func test_roster_policy_layout_fits_the_game_and_map_click_closes_it()->void:
 	screen._input(click)
 	assert_bool(screen.is_queued_for_deletion()).is_true()
 	await get_tree().process_frame
+
+func test_service_repair_spell_finishes_before_initial_or_qualified_training_resumes()->void:
+	for domain:String in ["navy","air"]:
+		var unit:=_craft(domain)
+		for initial:bool in [true,false]:
+			unit.training=0.0 if initial else 1.0;unit.proficiency=.25;unit.condition=.75;unit.repairing=false
+			var first_day:=int(op.state.last_day)+1
+			var food:=FoodSystem.total_stored()
+			for day in range(first_day,first_day+6):
+				var costs:Dictionary=op.repair_costs(unit)
+				var timber:=float(GameState.resource_stockpiles.Timber)
+				var proficiency:=float(unit.proficiency)
+				op.advance(day)
+				assert_float(float(unit.training)).is_equal(0.0 if initial else 1.0)
+				assert_float(float(unit.proficiency)).is_equal(proficiency)
+				assert_int(int(unit.training_attending)).is_equal(0)
+				assert_float(FoodSystem.total_stored()).is_equal(food)
+				assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(timber-float(costs.Timber),.00001)
+				assert_str(String(unit.status)).contains("Repairing")
+			assert_float(float(unit.condition)).is_greater_equal(.98)
+			assert_bool(bool(unit.repairing)).is_false()
+			op.advance(first_day+6)
+			assert_int(int(unit.training_attending)).is_greater(0)
+			assert_float(FoodSystem.total_stored()).is_less(food)
+			if initial:assert_float(float(unit.training)).is_greater(0.0)
+			else:assert_float(float(unit.proficiency)).is_greater(.25)
+		# Avoid charging this service's later rotations during the next fixture.
+		MilitaryCampaign.training_staff.set_policy(domain,"suspended")
+
+func test_suspended_instruction_still_repairs_and_shortages_recover_without_orders()->void:
+	var unit:=_craft("air");unit.condition=.90;unit.repairing=true
+	MilitaryCampaign.training_staff.set_policy("air","suspended")
+	GameState.resource_stockpiles.Timber=0.0
+	var food:=FoodSystem.total_stored();var fiber:=float(GameState.resource_stockpiles["Fiber Plants"])
+	op.advance(1)
+	assert_float(float(unit.condition)).is_equal(.90)
+	assert_float(float(GameState.resource_stockpiles["Fiber Plants"])).is_equal(fiber)
+	assert_str(String(unit.training_status)).contains("Repairs waiting for").contains("Timber")
+	GameState.resource_stockpiles.Timber=1000.0
+	for day in range(2,6):op.advance(day)
+	assert_float(float(unit.condition)).is_greater_equal(.98)
+	assert_bool(bool(unit.repairing)).is_false()
+	assert_float(float(unit.training)).is_equal(0.0)
+	assert_float(FoodSystem.total_stored()).is_equal(food)
+	assert_str(String(unit.training_status)).contains("suspended")
+	MilitaryCampaign.training_staff.set_policy("air","regular");op.advance(6)
+	assert_float(float(unit.training)).is_greater(0.0)
+
+func test_same_day_reentry_preserves_paid_attendance_and_status_even_at_graduation()->void:
+	var unit:=_craft("air");var base:Dictionary=op.base(int(unit.base_id))
+	unit.training=.999
+	MilitaryCampaign.training_staff.set_policy("air","intensive")
+	for day in [1,2]:
+		MilitaryCampaign.training_staff.service_training(unit,base,day)
+		var after:=unit.duplicate(true)
+		var report:Dictionary=MilitaryCampaign.training_staff.snapshot("air")
+		var food:=FoodSystem.total_stored()
+		for _repeat in 5:MilitaryCampaign.training_staff.service_training(unit,base,day)
+		assert_dict(unit).is_equal(after)
+		assert_dict(MilitaryCampaign.training_staff.snapshot("air")).is_equal(report)
+		assert_float(FoodSystem.total_stored()).is_equal(food)
+		assert_int(int(unit.training_attending)).is_greater(0)
+
+func test_rival_crew_training_cannot_overwrite_player_staff_reports_or_spending()->void:
+	var unit:=_craft("navy");var base:Dictionary=op.base(int(unit.base_id))
+	MilitaryCampaign.training_staff.service_training(unit,base,1)
+	var report:Dictionary=MilitaryCampaign.training_staff.snapshot("navy")
+	var other:=unit.duplicate(true);other.owner="staff_report_test";other.training=0.0
+	var civ:Dictionary={"id":other.owner,"population":2000.0,"food_days":1.0,"military_stockpile":10000.0,"strategy":"sustenance","player_relation":{"at_war":false}}
+	CivilizationSystem.civilizations.append(civ)
+	MilitaryCampaign.training_staff.service_training(other,base,2)
+	assert_str(String(other.training_status)).contains("suspended")
+	assert_dict(MilitaryCampaign.training_staff.snapshot("navy")).is_equal(report)
+	civ.food_days=100.0;civ.military_stockpile=0.0
+	MilitaryCampaign.training_staff.service_training(other,base,3)
+	assert_str(String(other.training_status)).contains("unavailable")
+	assert_dict(MilitaryCampaign.training_staff.snapshot("navy")).is_equal(report)
+	civ.military_stockpile=10000.0
+	MilitaryCampaign.training_staff.service_training(other,base,4)
+	assert_float(float(other.training)).is_greater(0.0)
+	assert_dict(MilitaryCampaign.training_staff.snapshot("navy")).is_equal(report)
+	CivilizationSystem.civilizations.erase(civ)
+
+func test_initial_intensive_staff_report_describes_instruction_not_overfull_rotations()->void:
+	var unit:=_craft("air")
+	MilitaryCampaign.training_staff.set_policy("air","intensive");op.advance(1)
+	assert_int(int(unit.training_attending)).is_equal(op.crew(unit))
+	assert_str(String(unit.training_status)).contains("Staff instruction").contains("days at current policy")
+	assert_str(String(MilitaryCampaign.training_staff.snapshot("air").status)).is_equal(String(unit.status))
+
+func test_roster_keeps_operational_activity_and_repair_shortages_visible()->void:
+	var unit:=_craft("navy");unit.training=1.0;unit.condition=.90;unit.repairing=true
+	GameState.resource_stockpiles.Timber=0.0
+	op.advance(1)
+	var screen:CanvasLayer=auto_free(Roster.new());screen.service="navy";add_child(screen)
+	assert_str(String(screen._rows()[0].activity)).contains("Repairs waiting for").contains("Timber")
+	unit.condition=1.0;unit.repairing=false
+	var destination:Vector2=op.point(op.base(int(unit.base_id)))+Vector2(1000,-100)
+	assert_bool(op.set_route(unit,destination).has("error")).is_false()
+	op.advance(2)
+	assert_str(String(screen._rows()[0].activity)).is_equal("Under way")
+	assert_str(String(screen._rows()[0].training_note)).contains("return to home base")
