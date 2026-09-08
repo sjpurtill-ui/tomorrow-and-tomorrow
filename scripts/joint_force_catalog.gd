@@ -16,12 +16,14 @@ const UNITS:Dictionary={
 		"detection": 0.8,
 		"training_days": 60,
 		"materials": {
-			"Timber": 40.0,
-			"Fiber Plants": 10.0
+			"Timber": 40,
+			"Fiber Plants": 10
 		},
 		"work_days": 8,
 		"carrier_capacity": 0,
-		"purpose": "Patrol"
+		"purpose": "Patrol",
+		"carrier_capable": false,
+		"cargo_capacity": 8
 	},
 	"galley": {
 		"label": "Ram Galleys",
@@ -39,12 +41,14 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 60,
 		"materials": {
-			"Timber": 40.0,
-			"Fiber Plants": 10.0
+			"Timber": 800.0,
+			"Fiber Plants": 200.0
 		},
 		"work_days": 48.0,
 		"carrier_capacity": 0,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 30
 	},
 	"heavy_galley": {
 		"label": "Heavy Boarding Galleys",
@@ -62,12 +66,14 @@ const UNITS:Dictionary={
 		"detection": 0.7,
 		"training_days": 60,
 		"materials": {
-			"Timber": 40.0,
-			"Fiber Plants": 10.0
+			"Timber": 1400.0,
+			"Fiber Plants": 350.0
 		},
 		"work_days": 84.0,
 		"carrier_capacity": 0,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"sailing_warship": {
 		"label": "Sailing Warships",
@@ -85,12 +91,14 @@ const UNITS:Dictionary={
 		"detection": 1.4,
 		"training_days": 60,
 		"materials": {
-			"Timber": 40.0,
-			"Fiber Plants": 10.0
+			"Timber": 800.0,
+			"Fiber Plants": 200.0
 		},
 		"work_days": 48.0,
 		"carrier_capacity": 0,
-		"purpose": "Patrol"
+		"purpose": "Patrol",
+		"carrier_capable": false,
+		"cargo_capacity": 60
 	},
 	"sailing_frigate": {
 		"label": "Sailing Frigates",
@@ -108,12 +116,14 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 60,
 		"materials": {
-			"Timber": 40.0,
-			"Fiber Plants": 10.0
+			"Timber": 1800.0,
+			"Fiber Plants": 450.0
 		},
 		"work_days": 108.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy escort"
+		"purpose": "Convoy escort",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"ship_of_line": {
 		"label": "Ships of the Line",
@@ -131,12 +141,14 @@ const UNITS:Dictionary={
 		"detection": 0.6,
 		"training_days": 60,
 		"materials": {
-			"Timber": 40.0,
-			"Fiber Plants": 10.0
+			"Timber": 5000.0,
+			"Fiber Plants": 1250.0
 		},
 		"work_days": 300.0,
 		"carrier_capacity": 0,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"steam_corvette": {
 		"label": "Steam Corvettes",
@@ -154,13 +166,15 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 33.0,
-			"Copper Ore": 6.0,
-			"Fiber Plants": 3.0
+			"Iron Ore": 200,
+			"Copper Ore": 20.0,
+			"Graphite": 5.0
 		},
 		"work_days": 60.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy escort"
+		"purpose": "Convoy escort",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"ironclad": {
 		"label": "Ironclads",
@@ -178,13 +192,15 @@ const UNITS:Dictionary={
 		"detection": 0.7,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 83.0,
-			"Copper Ore": 16.0,
-			"Fiber Plants": 8.0
+			"Iron Ore": 500,
+			"Copper Ore": 50.0,
+			"Graphite": 12.5
 		},
 		"work_days": 150.0,
 		"carrier_capacity": 0,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"torpedo_boat": {
 		"label": "Torpedo Boats",
@@ -202,13 +218,15 @@ const UNITS:Dictionary={
 		"detection": 1.8,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 6.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 40,
+			"Copper Ore": 4,
+			"Graphite": 1
 		},
 		"work_days": 12.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy raiding"
+		"purpose": "Convoy raiding",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"destroyer": {
 		"label": "Destroyers",
@@ -226,13 +244,15 @@ const UNITS:Dictionary={
 		"detection": 3,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 50.0,
-			"Copper Ore": 10.0,
-			"Fiber Plants": 5.0
+			"Iron Ore": 300,
+			"Copper Ore": 30.0,
+			"Graphite": 7.5
 		},
 		"work_days": 90.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy escort"
+		"purpose": "Convoy escort",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"light_cruiser": {
 		"label": "Light Cruisers",
@@ -250,13 +270,15 @@ const UNITS:Dictionary={
 		"detection": 3,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 116.0,
-			"Copper Ore": 23.0,
-			"Fiber Plants": 11.0
+			"Iron Ore": 700,
+			"Copper Ore": 70.0,
+			"Graphite": 17.5
 		},
 		"work_days": 210.0,
 		"carrier_capacity": 0,
-		"purpose": "Patrol"
+		"purpose": "Patrol",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"heavy_cruiser": {
 		"label": "Heavy Cruisers",
@@ -274,13 +296,15 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 200.0,
-			"Copper Ore": 40.0,
-			"Fiber Plants": 20.0
+			"Iron Ore": 1200,
+			"Copper Ore": 120.0,
+			"Graphite": 30.0
 		},
 		"work_days": 360.0,
 		"carrier_capacity": 0,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"battleship": {
 		"label": "Battleships",
@@ -298,13 +322,15 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 366.0,
-			"Copper Ore": 73.0,
-			"Fiber Plants": 36.0
+			"Iron Ore": 2200,
+			"Copper Ore": 220.0,
+			"Graphite": 55.0
 		},
 		"work_days": 660.0,
 		"carrier_capacity": 0,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"submarine": {
 		"label": "Submarines",
@@ -322,13 +348,15 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 15.0,
-			"Copper Ore": 3.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 90,
+			"Copper Ore": 9.0,
+			"Graphite": 2.25
 		},
 		"work_days": 27.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy raiding"
+		"purpose": "Convoy raiding",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"aircraft_carrier": {
 		"label": "Aircraft Carriers",
@@ -346,13 +374,15 @@ const UNITS:Dictionary={
 		"detection": 3,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 300.0,
-			"Copper Ore": 60.0,
-			"Fiber Plants": 30.0
+			"Iron Ore": 1800,
+			"Copper Ore": 180.0,
+			"Graphite": 45.0
 		},
 		"work_days": 540.0,
 		"carrier_capacity": 60,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"amphibious_ship": {
 		"label": "Amphibious Assault Ships",
@@ -370,13 +400,15 @@ const UNITS:Dictionary={
 		"detection": 1.5,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 83.0,
-			"Copper Ore": 16.0,
-			"Fiber Plants": 8.0
+			"Iron Ore": 500,
+			"Copper Ore": 50.0,
+			"Graphite": 12.5
 		},
 		"work_days": 150.0,
 		"carrier_capacity": 0,
-		"purpose": "Invasion support"
+		"purpose": "Invasion support",
+		"carrier_capable": false,
+		"cargo_capacity": 600
 	},
 	"missile_patrol": {
 		"label": "Missile Patrol Boats",
@@ -394,13 +426,15 @@ const UNITS:Dictionary={
 		"detection": 2.5,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 8.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 50,
+			"Copper Ore": 5.0,
+			"Graphite": 1.25
 		},
 		"work_days": 15.0,
 		"carrier_capacity": 0,
-		"purpose": "Strike force"
+		"purpose": "Strike force",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"missile_destroyer": {
 		"label": "Missile Destroyers",
@@ -418,13 +452,15 @@ const UNITS:Dictionary={
 		"detection": 5,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 73.0,
-			"Copper Ore": 14.0,
-			"Fiber Plants": 7.0
+			"Iron Ore": 440,
+			"Copper Ore": 44.0,
+			"Graphite": 11.0
 		},
 		"work_days": 132.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy escort"
+		"purpose": "Convoy escort",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"nuclear_submarine": {
 		"label": "Nuclear Submarines",
@@ -442,13 +478,16 @@ const UNITS:Dictionary={
 		"detection": 5,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 40.0,
-			"Copper Ore": 8.0,
-			"Fiber Plants": 4.0
+			"Iron Ore": 240,
+			"Copper Ore": 24.0,
+			"Graphite": 6.0,
+			"Uranium Ore": 8.0
 		},
 		"work_days": 72.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy raiding"
+		"purpose": "Convoy raiding",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"fleet_support": {
 		"label": "Fleet Support Ships",
@@ -466,13 +505,15 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 60,
 		"materials": {
-			"Iron Ore": 43.0,
-			"Copper Ore": 8.0,
-			"Fiber Plants": 4.0
+			"Iron Ore": 260,
+			"Copper Ore": 26.0,
+			"Graphite": 6.5
 		},
 		"work_days": 78.0,
 		"carrier_capacity": 0,
-		"purpose": "Convoy escort"
+		"purpose": "Convoy escort",
+		"carrier_capable": false,
+		"cargo_capacity": 800
 	},
 	"observation_balloon": {
 		"label": "Observation Balloons",
@@ -490,13 +531,15 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Fiber Plants": 20.0,
+			"Timber": 5.0,
+			"Bitumen": 2.0
 		},
 		"work_days": 24,
 		"carrier_capacity": 0,
-		"purpose": "Reconnaissance"
+		"purpose": "Reconnaissance",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"airship": {
 		"label": "Patrol Airships",
@@ -514,13 +557,16 @@ const UNITS:Dictionary={
 		"detection": 3,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 24,
+			"Copper Ore": 12,
+			"Fiber Plants": 18,
+			"Graphite": 6
 		},
-		"work_days": 60,
+		"work_days": 120,
 		"carrier_capacity": 0,
-		"purpose": "Reconnaissance"
+		"purpose": "Reconnaissance",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"recon_plane": {
 		"label": "Reconnaissance Aircraft",
@@ -538,13 +584,16 @@ const UNITS:Dictionary={
 		"detection": 4,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 4,
+			"Copper Ore": 2,
+			"Fiber Plants": 3,
+			"Graphite": 1
 		},
 		"work_days": 20,
 		"carrier_capacity": 0,
-		"purpose": "Reconnaissance"
+		"purpose": "Reconnaissance",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"fighter": {
 		"label": "Fighters",
@@ -562,13 +611,16 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 4,
+			"Copper Ore": 2,
+			"Fiber Plants": 3,
+			"Graphite": 1
 		},
-		"work_days": 16,
+		"work_days": 20,
 		"carrier_capacity": 0,
-		"purpose": "Air superiority"
+		"purpose": "Air superiority",
+		"carrier_capable": true,
+		"cargo_capacity": 0
 	},
 	"heavy_fighter": {
 		"label": "Heavy Fighters",
@@ -586,13 +638,16 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 8,
+			"Copper Ore": 4,
+			"Fiber Plants": 6,
+			"Graphite": 2
 		},
-		"work_days": 20,
+		"work_days": 40,
 		"carrier_capacity": 0,
-		"purpose": "Interception"
+		"purpose": "Interception",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"close_air_support": {
 		"label": "Ground-Attack Aircraft",
@@ -610,13 +665,16 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 4.4,
+			"Copper Ore": 2.2,
+			"Fiber Plants": 3.3000000000000003,
+			"Graphite": 1.1
 		},
-		"work_days": 16,
+		"work_days": 22.0,
 		"carrier_capacity": 0,
-		"purpose": "Close air support"
+		"purpose": "Close air support",
+		"carrier_capable": true,
+		"cargo_capacity": 0
 	},
 	"tactical_bomber": {
 		"label": "Tactical Bombers",
@@ -634,13 +692,16 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 12,
+			"Copper Ore": 6,
+			"Fiber Plants": 9,
+			"Graphite": 3
 		},
-		"work_days": 28,
+		"work_days": 60,
 		"carrier_capacity": 0,
-		"purpose": "Logistics strike"
+		"purpose": "Logistics strike",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"strategic_bomber": {
 		"label": "Strategic Bombers",
@@ -658,13 +719,16 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 28,
+			"Copper Ore": 14,
+			"Fiber Plants": 21,
+			"Graphite": 7
 		},
-		"work_days": 40,
+		"work_days": 140,
 		"carrier_capacity": 0,
-		"purpose": "Strategic bombing"
+		"purpose": "Strategic bombing",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"naval_bomber": {
 		"label": "Naval Bombers",
@@ -682,13 +746,16 @@ const UNITS:Dictionary={
 		"detection": 3,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 8,
+			"Copper Ore": 4,
+			"Fiber Plants": 6,
+			"Graphite": 2
 		},
-		"work_days": 24,
+		"work_days": 40,
 		"carrier_capacity": 0,
-		"purpose": "Naval strike"
+		"purpose": "Naval strike",
+		"carrier_capable": true,
+		"cargo_capacity": 0
 	},
 	"transport_aircraft": {
 		"label": "Transport Aircraft",
@@ -706,13 +773,16 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 16,
+			"Copper Ore": 8,
+			"Fiber Plants": 12,
+			"Graphite": 4
 		},
-		"work_days": 28,
+		"work_days": 80,
 		"carrier_capacity": 0,
-		"purpose": "Air supply"
+		"purpose": "Air supply",
+		"carrier_capable": false,
+		"cargo_capacity": 40
 	},
 	"jet_fighter": {
 		"label": "Jet Fighters",
@@ -730,13 +800,16 @@ const UNITS:Dictionary={
 		"detection": 3,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 12,
+			"Copper Ore": 6,
+			"Fiber Plants": 9,
+			"Graphite": 3
 		},
-		"work_days": 16,
+		"work_days": 60,
 		"carrier_capacity": 0,
-		"purpose": "Air superiority"
+		"purpose": "Air superiority",
+		"carrier_capable": true,
+		"cargo_capacity": 0
 	},
 	"jet_bomber": {
 		"label": "Jet Bombers",
@@ -754,13 +827,16 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 36,
+			"Copper Ore": 18,
+			"Fiber Plants": 27,
+			"Graphite": 9
 		},
-		"work_days": 24,
+		"work_days": 180,
 		"carrier_capacity": 0,
-		"purpose": "Strategic bombing"
+		"purpose": "Strategic bombing",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"transport_helicopter": {
 		"label": "Transport Helicopters",
@@ -778,13 +854,16 @@ const UNITS:Dictionary={
 		"detection": 1,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 8,
+			"Copper Ore": 4,
+			"Fiber Plants": 6,
+			"Graphite": 2
 		},
-		"work_days": 20,
+		"work_days": 40,
 		"carrier_capacity": 0,
-		"purpose": "Air supply"
+		"purpose": "Air supply",
+		"carrier_capable": false,
+		"cargo_capacity": 16
 	},
 	"attack_helicopter": {
 		"label": "Attack Helicopters",
@@ -802,13 +881,16 @@ const UNITS:Dictionary={
 		"detection": 2,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 12,
+			"Copper Ore": 6,
+			"Fiber Plants": 9,
+			"Graphite": 3
 		},
-		"work_days": 20,
+		"work_days": 60,
 		"carrier_capacity": 0,
-		"purpose": "Close air support"
+		"purpose": "Close air support",
+		"carrier_capable": false,
+		"cargo_capacity": 0
 	},
 	"recon_drone": {
 		"label": "Reconnaissance Drones",
@@ -826,13 +908,16 @@ const UNITS:Dictionary={
 		"detection": 8,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 6.0,
+			"Copper Ore": 3.0,
+			"Fiber Plants": 4.5,
+			"Graphite": 1.5
 		},
-		"work_days": 20,
+		"work_days": 30.0,
 		"carrier_capacity": 0,
-		"purpose": "Reconnaissance"
+		"purpose": "Reconnaissance",
+		"carrier_capable": true,
+		"cargo_capacity": 0
 	},
 	"strike_drone": {
 		"label": "Strike Drones",
@@ -850,13 +935,41 @@ const UNITS:Dictionary={
 		"detection": 5,
 		"training_days": 90,
 		"materials": {
-			"Iron Ore": 4.0,
-			"Copper Ore": 1.0,
-			"Fiber Plants": 1.0
+			"Iron Ore": 8,
+			"Copper Ore": 4,
+			"Fiber Plants": 6,
+			"Graphite": 2
 		},
-		"work_days": 20,
+		"work_days": 40,
 		"carrier_capacity": 0,
-		"purpose": "Close air support"
+		"purpose": "Close air support",
+		"carrier_capable": true,
+		"cargo_capacity": 0
+	},
+	"convoy_transport": {
+		"label": "Convoy Transports",
+		"domain": "navy",
+		"gate": "ocean_sailing",
+		"lineage": "sailing_warship",
+		"equipment": "convoy_transport_equipment",
+		"crew": 12,
+		"range_km": 4000,
+		"speed_km_day": 180,
+		"fuel_per_day": 0,
+		"mission": "transport",
+		"attack": 0.1,
+		"defense": 0.8,
+		"detection": 0.3,
+		"training_days": 60,
+		"materials": {
+			"Timber": 200.0,
+			"Fiber Plants": 40.0
+		},
+		"work_days": 60,
+		"carrier_capacity": 0,
+		"purpose": "Carry supplies and troops along escorted sea routes.",
+		"carrier_capable": false,
+		"cargo_capacity": 250
 	}
 }
 

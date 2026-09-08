@@ -88,6 +88,7 @@ func initialize() -> void:
 	rng.seed = GameState.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
 	catalog.append_array(SocietyKnowledgeCatalog.entries())
+	catalog.append_array(preload("res://scripts/settlement_architecture_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/joint_force_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())

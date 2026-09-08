@@ -6103,13 +6103,13 @@ func _settlement_district_tile_index(modern:bool,stage:int,land_use:int,architec
 
 func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],damage_ratio:float,parent:Node3D,stage:int,architecture:Dictionary,center:=Vector3.ZERO,radius:=0.0,coastal_profile:Dictionary={},palette:Dictionary={})->bool:
 	var modernization_tier:=maxi(clampi(int(ProgressionSystem.domain_tier("infrastructure")),0,8),clampi(int(ProgressionSystem.domain_tier("production")),0,8))
-	var modern:=stage>=3 and modernization_tier>=4
+	var modern:=stage>=3 and modernization_tier>=4 and preload("res://scripts/settlement_architecture_knowledge.gd").ceiling()>=11
 	var atlas_path:="res://assets/textures/settlement_district_atlas_early_v2.png" if stage<=2 else ("res://assets/textures/settlement_district_atlas_modern_v1.png" if modern else "res://assets/textures/settlement_district_atlas_mature_v1.png")
 	var atlas:Texture2D=load(atlas_path)
 	if atlas==null: return false
 	var companion_path:="res://assets/textures/settlement_district_atlas_modern_v2.png" if modern else "res://assets/textures/settlement_district_atlas_mature_v2.png"
 	var companion_atlas:Texture2D=load(companion_path) if stage>=3 else null
-	var vernacular_atlas:Texture2D=load("res://assets/textures/settlement_district_atlas_vernacular_v1.png") if stage>=3 and not modern else null
+	var vernacular_atlas:Texture2D=load("res://assets/textures/settlement_district_atlas_mature_v1.png" if modern else "res://assets/textures/settlement_district_atlas_vernacular_v1.png") if stage>=3 else null
 	var inherited_early_atlas:Texture2D=load("res://assets/textures/settlement_district_atlas_early_v2.png") if stage>=3 else null
 	var multi:=MultiMesh.new()
 	multi.transform_format=MultiMesh.TRANSFORM_3D
@@ -6134,6 +6134,16 @@ func _create_settlement_district_atlas_clipmap(candidates:Array[Dictionary],dama
 		# Condition changes the life inside a grid, never the grid's identity or parcel
 		# extent. Roads, roofs, rubble and surface wear carry the eight-state ladder while
 		# the same aggregate footprint remains geographically stable from GREAT to DESTROYED.
+		if modern and not is_historic_core and not is_waterfront:
+			var inherited_generation:=12
+			var nearest:=INF
+			for plot:Dictionary in GameState.settlement_plots:
+				var distance:=Vector2(plot.get("centroid",Vector2.ZERO)).distance_squared_to(point-Vector2(center.x,center.z))
+				if distance<nearest:
+					nearest=distance;inherited_generation=int(plot.get("fabric_generation",0))
+			if inherited_generation<11:
+				var historic_options:=_settlement_district_tile_options(false,stage,land_use,architecture)
+				tile_index=32+historic_options[posmod(seed,historic_options.size())]
 		var condition_scale:=1.0
 		# Mature plates nearly meet their cell edges; the transparent gutter and actual
 		# street ribbons provide separation. A smaller fill left a green moat around every

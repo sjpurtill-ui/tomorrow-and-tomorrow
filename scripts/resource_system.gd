@@ -48,6 +48,7 @@ var catalog := {
 	"Deep Aquifer":{"family":"Water","renewable":true,"recognition_year":85,"access":["well_siting","lifting","specialists"],"processing":["clean_water"],"signals":["infrastructure","nature"],"base":0.0015},
 	"Refractory Clay":{"family":"Earth","renewable":false,"recognition_year":95,"access":["tools","specialists"],"processing":["pit_firing"],"signals":["materials","crafting"],"base":0.0012},
 	"Phosphate Rock":{"family":"Mineral","renewable":false,"recognition_year":125,"access":["mine","specialists","logistics"],"processing":["standard_measures"],"signals":["sustenance","nature"],"base":0.0009},
+	"Uranium Ore":{"family":"Metal Ore","renewable":false,"recognition_year":250,"access":["mine","specialists","logistics"],"processing":["atomic_physics","reactor_engineering"],"signals":["materials","knowledge"],"base":0.0006},
 	"Graphite":{"family":"Mineral","renewable":false,"recognition_year":145,"access":["mine","specialists"],"processing":["standard_measures"],"signals":["materials","information"],"base":0.0008}
 }
 

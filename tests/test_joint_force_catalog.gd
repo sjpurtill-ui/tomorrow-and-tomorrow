@@ -27,7 +27,7 @@ func test_air_and_naval_chains_are_additional_to_land_and_have_production()->voi
 		GameState.discovery_adoption[unit.gate]=1.0
 		assert_bool(Production.recipe(MilitaryCampaign,unit.equipment).has("error")).is_false()
 		assert_bool(unit.lineage=="" or Joint.UNITS.has(unit.lineage)).is_true()
-	assert_int(domains.navy).is_equal(20)
+	assert_int(domains.navy).is_equal(21)
 	assert_int(domains.air).is_equal(16)
 
 func test_all_land_equipment_recipes_produce_exact_stock_after_research()->void:
@@ -70,7 +70,7 @@ func test_progression_view_keeps_fifty_land_separate_from_naval_and_air()->void:
 	var world:Node=auto_free(Node.new());var shell:Control=auto_free(Control.new())
 	var view:=preload("res://scripts/hud/content/military_unit_map.gd").new(world,shell)
 	assert_int(view.tab(0).blocks[1].items.size()).is_equal(50)
-	assert_int(view.tab(1).blocks[1].items.size()).is_equal(20)
+	assert_int(view.tab(1).blocks[1].items.size()).is_equal(21)
 	assert_int(view.tab(2).blocks[1].items.size()).is_equal(16)
 
 func _check_dependencies(id:String,ancestors:Array)->void:

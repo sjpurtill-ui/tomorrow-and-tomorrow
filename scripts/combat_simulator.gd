@@ -352,7 +352,7 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 	var commander:Dictionary=force.get("commander",{})
 	var tactics:=clampf(float(commander.get("tactics",0.5)),0.0,1.0)
 	var result: Array[Dictionary] = []
-	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))
+	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))*(1+clampf(float(force.get("joint_air_support",0)),0,.3))*(1-clampf(float(force.get("joint_air_pressure",0)),0,.25))
 	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))
 	for formation in formations:
 		var unit_id := String(formation.get("unit", "levy"))

@@ -680,7 +680,7 @@ static func entries()->Array:
 			"day": 97000,
 			"chance": 0.001,
 			"requires": [
-				"naval_missiles",
+				"reactor_engineering",
 				"submersible_hulls"
 			],
 			"signals": [
@@ -852,6 +852,44 @@ static func entries()->Array:
 			"observation": "Reliable armor-piercing weapons allow standardized military equipment and specialist training.",
 			"effects": {
 				"warfare_readiness": 0.035
+			}
+		},
+		{
+			"id": "atomic_physics",
+			"name": "Atomic Physics",
+			"direction": "Warfare",
+			"day": 90000,
+			"chance": 0.001,
+			"requires": [
+				"precision_machinery",
+				"naval_fire_control"
+			],
+			"signals": [
+				"knowledge",
+				"information"
+			],
+			"observation": "Measurements reveal nuclear reactions and the energy bound in matter.",
+			"effects": {
+				"task_coordination": 0.01
+			}
+		},
+		{
+			"id": "reactor_engineering",
+			"name": "Controlled Nuclear Reactors",
+			"direction": "Warfare",
+			"day": 95000,
+			"chance": 0.001,
+			"requires": [
+				"atomic_physics",
+				"steam_propulsion"
+			],
+			"signals": [
+				"crafting",
+				"information"
+			],
+			"observation": "Controlled reactors turn nuclear heat into reliable power.",
+			"effects": {
+				"task_coordination": 0.02
 			}
 		}
 	]

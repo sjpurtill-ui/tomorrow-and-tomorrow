@@ -1045,6 +1045,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
+	if bool(field_armies[index].get("embarked",false)):return {"error":"This army is embarked. Recall or complete its transport before issuing a land order."}
 	if int(field_armies[index].get("troops",0))<=0:return {"error":"This force has no active soldiers. Its remaining recovery and occupation records are available in Military."}
 	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
 	var destination:=_movement_destination(destination_id)
@@ -1086,6 +1087,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	## this guard re-checks so a stray order can never march into the unknown.
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
+	if bool(field_armies[index].get("embarked",false)):return {"error":"This army is embarked. Recall or complete its transport before issuing a land order."}
 	if int(field_armies[index].get("troops",0))<=0:return {"error":"This force has no active soldiers. Its remaining recovery and occupation records are available in Military."}
 	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
 	var target:=Vector2(x,z)
@@ -1192,6 +1194,7 @@ func disband_field_army(army_id:int)->Dictionary:
 	if recovery.home_unavailable():return {"error":"The home settlement is occupied. Reach a free settlement before dissolving the army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
+	if bool(field_armies[index].get("embarked",false)):return {"error":"This army is embarked. Recall or complete its transport before issuing a land order."}
 	var army:Dictionary=field_armies[index]
 	if String(army.get("status","stationed"))!="stationed" or String(army.get("location_id",""))!="player_home": return {"error":"Return the army home before releasing it to the unassigned field pool."}
 	var additions:Array=(army.get("formations",[]) as Array).duplicate(true)
@@ -2390,17 +2393,19 @@ func field_provision_delivery_ratio()->float:
 	return clampf(0.08+labor_coverage*0.42+commander_logistics*0.20+_adoption("supply_groups")*0.20+cart_coverage*0.10,0.0,1.0)
 
 
-func record_daily_provisions(required:float,delivered:float)->void:
+func record_daily_provisions(required:float,delivered:float,air_delivery:Dictionary={})->void:
 	if home_army.is_empty() and occupation_forces.is_empty() and field_armies.is_empty(): return
 	var need:=maxf(0.0,required)
 	var received:=clampf(delivered,0.0,need)
 	var prepaid:=int(GeneralCampaign.army().get("troops",0)) if GeneralCampaign.active else 0
 	var total_active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-prepaid)
-	var provision_ratio:=received/maxf(0.01,need) if need>0.0 else 1.0
+	var credited:=float(air_delivery.get("total",0))
+	var delivery_ratio:=clampf(received/maxf(.01,need-credited),0,1) if need>credited else 1.0
+	var provision_ratio:=delivery_ratio
 	if not home_army.is_empty():
 		var home_share:=float(maxi(0,int(home_army.get("troops",0))))/float(total_active)
 		var home_need:=need*home_share
-		var home_received:=received*home_share
+		var home_received:=home_need*delivery_ratio
 		home_army["provisions_required_today"]=home_need
 		home_army["provisions_delivered_today"]=home_received
 		home_army["provision_ratio"]=provision_ratio
@@ -2416,8 +2421,11 @@ func record_daily_provisions(required:float,delivered:float)->void:
 		var force:Dictionary=field_armies[force_index]
 		if bool(force.get("general_managed",false)) and GeneralCampaign.active:continue
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
+		var field_credit:=float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0))
+		var field_received:=field_credit+maxf(0,need*share-field_credit)*delivery_ratio
+		provision_ratio=clampf(field_received/maxf(.01,need*share),0,1) if need*share>0 else 1.0
 		force["provisions_required_today"]=need*share
-		force["provisions_delivered_today"]=received*share
+		force["provisions_delivered_today"]=field_received
 		force["provision_ratio"]=provision_ratio
 		force["provision_day"]=int(GameState.elapsed_days)
 		force["supply_level"]=move_toward(float(force.get("supply_level",0.5)),provision_ratio,0.055 if String(force.get("status","stationed"))=="stationed" else 0.025)
@@ -2429,8 +2437,9 @@ func record_daily_provisions(required:float,delivered:float)->void:
 	for force_index in occupation_forces.size():
 		var force:Dictionary=occupation_forces[force_index]
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
+		provision_ratio=delivery_ratio
 		force["provisions_required_today"]=need*share
-		force["provisions_delivered_today"]=received*share
+		force["provisions_delivered_today"]=need*share*delivery_ratio
 		force["provision_ratio"]=provision_ratio
 		force["provision_day"]=int(GameState.elapsed_days)
 		force["supply_level"]=move_toward(float(force.get("supply_level",0.5)),provision_ratio,0.08)
@@ -4100,7 +4109,7 @@ func _equipment_recipe(item:String)->Dictionary:
 
 func _consumable_recipe(item:String)->Dictionary:
 	return {
-		"fuel":{"materials":{"Coal":1.0},"days":.25},
+		"fuel":{"materials":{"Bitumen":1.0},"days":.25},
 		"arrows":{"materials":{"Timber":0.08,"Fiber Plants":0.025,"Stone":0.015},"days":0.055},
 		"artillery_rounds":{"materials":{"Sulfur":0.12,"Nitrates":0.18,"Iron Ore":0.20,"Timber":0.08},"days":0.18},
 		"small_arms_ammunition":{"materials":{"Sulfur":0.025,"Nitrates":0.04,"Iron Ore":0.035,"Copper Ore":0.012},"days":0.018},
@@ -4782,3 +4791,29 @@ func _complete_ready_build_batches()->void:
 			var order:Dictionary=training_queue[index]
 			if int(order.get("build_batch",-1))==int(id):
 				_complete_training(order);training_queue.remove_at(index)
+
+
+func apply_transport_casualties(army_id:int,fraction:float)->int:
+	var index:=_field_army_index(army_id)
+	if index<0:return 0
+	var army:Dictionary=field_armies[index]
+	var losses:=0
+	for formation:Dictionary in army.get("formations",[]):
+		var count:=int(formation.get("count",0));var lost:=mini(count,ceili(count*clampf(fraction,0,1)))
+		formation.count=count-lost;losses+=lost
+		for key in ["equipment","ammunition"]:formation[key]=floori(float(formation.get(key,0))*(1-clampf(fraction,0,1)))
+	army.troops=maxi(0,int(army.get("troops",0))-losses)
+	if losses>0:GameState.register_population_deaths(losses,"Killed in battle")
+	if int(army.troops)==0:army.embarked=false;army.status="stationed"
+	return losses
+
+func draw_delivered_field_rations(required:float)->Dictionary:
+	var result:={"total":0.0,"by_army":{}}
+	var active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-(int(GeneralCampaign.army().get("troops",0)) if GeneralCampaign.active else 0))
+	for army:Dictionary in field_armies:
+		if GeneralCampaign.active and bool(army.get("general_managed",false)):continue
+		var needed:=maxf(0,required)*int(army.get("troops",0))/active
+		var amount:=minf(needed,maxf(0,float(army.get("delivered_field_food",0))))
+		army.delivered_field_food=maxf(0,float(army.get("delivered_field_food",0))-amount)
+		result.by_army[int(army.get("army_id",0))]=amount;result.total+=amount
+	return result

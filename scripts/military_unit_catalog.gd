@@ -885,7 +885,8 @@ const EQUIPMENT_GATES:Dictionary={
 	"transport_helicopter_equipment": "rotary_wing",
 	"attack_helicopter_equipment": "guided_weapons",
 	"recon_drone_equipment": "remote_aircraft",
-	"strike_drone_equipment": "remote_aircraft"
+	"strike_drone_equipment": "remote_aircraft",
+	"convoy_transport_equipment": "ocean_sailing"
 }
 
 ## Fielding-readiness bands (§18.4) derived from a formation's continuous

@@ -71,7 +71,7 @@ func truth(city_id:String)->Dictionary:
 		var controller_index:int=system._civilization_index(String(region.controller))
 		if controller_index>=0: civ=system.civilizations[controller_index]
 		var fort:=float(region.fortification)*(1.0-float(region.damage)*.65)
-		values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":float(civ.military_population)*float(region.strategic_weight)*(.72+fort)*(.82+float(civ.logistics)*.36),"production":float(civ.production)*(1-float(region.damage)*.5),"logistics":float(civ.logistics)*(1-float(region.damage)*.3),"supply":float(civ.food_days)}
+		values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":system.land_military_population(civ)*float(region.strategic_weight)*(.72+fort)*(.82+float(civ.logistics)*.36),"production":float(civ.production)*(1-float(region.damage)*.5),"logistics":float(civ.logistics)*(1-float(region.damage)*.3),"supply":float(civ.food_days)}
 		if String(region.controller)=="player":
 			for key in ["garrison","production","logistics","supply"]: values.erase(key)
 		place["controller"]=String(region.controller)

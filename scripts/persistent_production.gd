@@ -100,6 +100,8 @@ static func state(host: Node, job: Dictionary) -> String:
 	if not bool(job.get("persistent",false)): return "Batch"
 	var gate:=recipe(host,String(job.item))
 	if gate.has("error"):return "Research unavailable: "+String(gate.error)
+	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(String(job.item))
+	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
 	for resource in job.materials:
 		if float(job.materials[resource])>0 and float(GameState.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+ResourceSystem.display_name(String(resource))
