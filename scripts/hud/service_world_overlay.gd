@@ -43,6 +43,11 @@ func world_to_screen(point:Vector2)->Vector2:
 	if terrain.camera.is_position_behind(world):return Vector2(INF,INF)
 	return terrain.camera.unproject_position(world)
 
+func force_screen_position(force:Dictionary)->Vector2:
+	# Deck wings follow their carrier in the simulation; their stored position
+	# is only updated during independent travel. Render and picking share this.
+	return world_to_screen(op.force_position(force))
+
 func screen_to_world(point:Vector2)->Dictionary:
 	if not is_instance_valid(terrain):return {}
 	var hit:Dictionary=terrain._terrain_hit(point)
@@ -62,7 +67,7 @@ func handle_map_input(event:InputEvent)->bool:
 		queue_redraw();return true
 	if event.button_index==MOUSE_BUTTON_LEFT:
 		for force:Dictionary in op.state.forces:
-			if force.owner=="player" and force.domain==domain and world_to_screen(op.point(force)).distance_to(event.position)<18:
+			if force.owner=="player" and force.domain==domain and force_screen_position(force).distance_to(event.position)<18:
 				selected_force=int(force.id);force_selected.emit(selected_force);return true
 		for base:Dictionary in op.state.bases:
 			if base.owner=="player" and base.domain==domain and world_to_screen(op.point(base)).distance_to(event.position)<18:
@@ -126,13 +131,14 @@ func _draw()->void:
 		_caption(at+Vector2(0,20),String(base.name),color)
 	for force:Dictionary in op.state.forces:
 		if force.owner!="player" or force.domain!=domain:continue
-		var at:=world_to_screen(op.point(force))
+		var at:=force_screen_position(force)
 		if not at.is_finite():continue
 		var chosen:bool=int(force.id)==selected_force
 		draw_circle(at,8 if chosen else 5,Color("ffd477") if chosen else color)
 		_caption(at,String(force.name)+" · "+str(op.hardware(force)),color)
 		if chosen:
-			var route:Array=[force.position];route.append_array(force.get("route",[]));_line(route,color)
+			var location:Vector2=op.force_position(force)
+			var route:Array=[{"x":location.x,"z":location.y}];route.append_array(force.get("route",[]));_line(route,color)
 			if domain=="air":
 				var origin:Dictionary=op.force(int(force.get("carrier_id",0)))
 				if origin.is_empty():origin=op.base(int(force.base_id))

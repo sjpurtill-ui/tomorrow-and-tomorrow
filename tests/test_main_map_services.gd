@@ -85,3 +85,28 @@ func test_empty_service_guides_setup_without_showing_unusable_mission_controls()
 	var draw:=InputEventKey.new();draw.keycode=KEY_D;draw.pressed=true
 	assert_bool(navy.handle_early_input(draw)).is_true()
 	assert_bool(navy.map.drawing).is_true()
+
+func test_deck_wing_marker_and_click_target_follow_carrier_without_rewriting_saved_position()->void:
+	var terrain:TestTerrain=auto_free(TestTerrain.new());add_child(terrain)
+	terrain.camera=Camera3D.new();terrain.add_child(terrain.camera)
+	terrain.camera.projection=Camera3D.PROJECTION_ORTHOGONAL;terrain.camera.size=100
+	terrain.camera.position=Vector3(0,100,50);terrain.camera.look_at(Vector3.ZERO)
+	var overlay:Control=auto_free(Overlay.new());overlay.terrain=terrain;overlay.domain="air";add_child(overlay)
+	var carrier:Dictionary={"id":1,"name":"Test carrier","owner":"player","domain":"navy","base_id":0,"carrier_id":0,"position":{"x":20.0,"z":0.0},"units":{"aircraft_carrier":1}}
+	var wing:Dictionary={"id":2,"name":"Deck wing","owner":"player","domain":"air","base_id":0,"carrier_id":1,"position":{"x":-20.0,"z":0.0},"units":{"fighter":2}}
+	MilitaryCampaign.joint_operations.state.forces=[carrier,wing]
+	var stored:Dictionary=wing.position.duplicate(true)
+	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
+	click.position=overlay.world_to_screen(Vector2(-20,0))
+	overlay.handle_map_input(click)
+	assert_int(overlay.selected_force).is_equal(0)
+	click.position=overlay.world_to_screen(Vector2(20,0))
+	overlay.handle_map_input(click)
+	assert_int(overlay.selected_force).is_equal(2)
+	var previous:Vector2=overlay.force_screen_position(wing)
+	carrier.position.x=40.0
+	assert_bool(previous.distance_to(overlay.force_screen_position(wing))>18).is_true()
+	assert_bool(overlay.force_screen_position(wing).is_equal_approx(overlay.world_to_screen(Vector2(40,0)))).is_true()
+	assert_dict(wing.position).is_equal(stored)
+	wing.carrier_id=0
+	assert_bool(overlay.force_screen_position(wing).is_equal_approx(overlay.world_to_screen(Vector2(-20,0)))).is_true()
