@@ -1,3 +1,23 @@
+## September 7 — production clarity integrated; expanded forces held
+
+INTEGRATED `da9f917`: finite default production targets, concrete material/worker
+blockers, forecast/stock/target visibility, known-equipment selectors, clear
+simple-levy weapon naming and all valid army equipment choices. Source worktree
+`tt-production-clarity`; 25 unique production/quote checks passed. Fast-forward
+integration preserved the validated source. See PRODUCTION_CLARITY_HANDOFF.md.
+No new player launch or live-session receipt is claimed.
+
+HELD `33ab016`, branch `codex/fifty-units`, worktree
+`/Users/seanpurtill/Documents/Codex/tt-fifty-units`, base `da9f917`.
+User scope is **50 land units PLUS full naval and air chains**. This checkpoint
+has the 50-land catalog/combat/equipment/research foundation, a progression view,
+and experimental naval/air state. 81 unique focused/regression checks pass.
+It is not merged or player-ready: convoy effects, carriers, transport missions,
+rival operations, geographic operating controls and labor/economic integration
+remain incomplete. See that worktree's docs/FIFTY_UNITS_HANDOFF.md for the exact
+roster, tests, compatibility and release blockers. Do not report catalog counts
+as complete HOI4 naval/air functionality.
+
 ## September 7 — army staffing clarity
 
 INTEGRATED `fab7843` by conflict-free fast-forward from `1589e37`. Recruit & Train shows available recruits, training places and work allocation separately. Per-city watch/training priority actions replace the vague allocation detour and retain GovernmentPeopleSystem authority and occupation guards. Eleven targeted and existing recruitment tests pass; no save or calculation changes. See ARMY_STAFFING_HANDOFF.md. The city flag update `a0ff5d5` is included in this base. Player PID 47271 has not been restarted; receipt by the live session is not claimed.
