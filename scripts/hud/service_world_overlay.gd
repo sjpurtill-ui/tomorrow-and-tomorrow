@@ -79,8 +79,8 @@ func handle_map_input(event:InputEvent)->bool:
 				selected=region;region_selected.emit(region)
 				if event.button_index==MOUSE_BUTTON_RIGHT:order_region.emit(region)
 				return true
-	# Command mode must never move settlers or issue a land-army order by accident.
-	return true
+	# Bare-map clicks are handled by the terrain controller as dismissal.
+	return false
 
 func _process(_delta:float)->void:
 	queue_redraw()

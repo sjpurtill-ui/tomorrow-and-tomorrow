@@ -11599,8 +11599,8 @@ func _build_map_help(layer:CanvasLayer)->void:
 	map_help_title.add_theme_color_override("font_color",Color("#e7d8b8"))
 	heading_row.add_child(map_help_title)
 	var hide:=Button.new()
-	hide.text="GOT IT"
-	hide.tooltip_text="Dismiss this tip. Reopen it at any time with MAP HELP."
+	hide.text="CLOSE ×"
+	hide.tooltip_text="Close this tip, or click the map. Reopen with MAP HELP."
 	hide.custom_minimum_size=Vector2(72,30)
 	hide.add_theme_font_size_override("font_size",9)
 	hide.pressed.connect(_dismiss_map_help)
@@ -11610,7 +11610,7 @@ func _build_map_help(layer:CanvasLayer)->void:
 	map_help_body.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	map_help_body.add_theme_font_size_override("font_size",11)
 	map_help_body.add_theme_color_override("font_color",Color("#c5cbc5"))
-	map_help_body.tooltip_text="Camera: wheel to zoom; Shift + wheel for fast zoom; Q/E or Shift + middle-drag to rotate and tilt; N or click NORTH to reset north-up; WASD/arrows to pan."
+	map_help_body.tooltip_text="Camera: scroll or pinch between four distances. Middle-drag to pan; Shift-scroll adjusts zoom gently. N resets north-up."
 	root.add_child(map_help_body)
 	# The founding-focus screen is deferred until after the interface is built.  Do
 	# not flash map controls underneath that mandatory, mouse-stopping modal.
@@ -11639,7 +11639,7 @@ func _map_help_presentation(site_committed:bool,targeting:bool,settlement_convoy
 		}
 	return {
 		"title":"USE THE MAP",
-		"body":"Click a known place to inspect it. Double-click to move closer.\nThe toolbar below scouts, settles, and negotiates; the left rail opens every system."
+		"body":"Middle-drag to move. Scroll or pinch to change distance.\nClick a city for details; double-click to move closer.\nClick the map to close panels and this tip."
 	}
 
 
@@ -19681,6 +19681,8 @@ func _close_topmost_game_screen()->bool:
 
 
 func _input(event: InputEvent) -> void:
+	if _dismiss_report_backdrop(event):
+		get_viewport().set_input_as_handled();return
 	if is_instance_valid(MilitaryCampaign.joint_operations.screen):
 		if MilitaryCampaign.joint_operations.screen.handle_early_input(event):
 			get_viewport().set_input_as_handled();return
@@ -19785,6 +19787,35 @@ func _input(event: InputEvent) -> void:
 			var movement:=_camera_grab_movement(event.relative,screen_right,screen_up,units_per_pixel)
 			_set_camera_target(camera_target+movement)
 
+func _dismiss_map_panels()->bool:
+	# Called after GUI handling: controls keep their clicks; bare map dismisses.
+	var dismissed:=false
+	if map_help_panel and map_help_panel.visible:
+		_dismiss_map_help();dismissed=true
+	if hud and ((hud.dock and hud.dock.visible) or (hud.detail_dock and hud.detail_dock.visible)):
+		hud.close_dock();dismissed=true
+	return dismissed
+
+func _outside_report_body(panel:Control,point:Vector2)->bool:
+	if not is_instance_valid(panel) or not panel.is_visible_in_tree():return false
+	# Full-screen dimmers are not content. A click beside the actual report
+	# should dismiss it even when that dimmer stops ordinary GUI propagation.
+	for child:Node in panel.get_children():
+		if child is PanelContainer and child.is_visible_in_tree():
+			return not child.get_global_rect().has_point(point)
+	return false
+
+func _dismiss_report_backdrop(event:InputEvent)->bool:
+	if not (event is InputEventMouseButton) or not event.pressed or event.button_index!=MOUSE_BUTTON_LEFT:return false
+	# Decision dialogs keep their explicit confirm/cancel controls.
+	if is_instance_valid(founding_focus_panel) or is_instance_valid(settlement_convoy_confirm_panel):return false
+	if _outside_report_body(world_menu_panel,event.position):_close_world_menu();return true
+	if _outside_report_body(scout_dispatch_panel,event.position):_close_scout_dispatch_panel();return true
+	if _outside_report_body(diplomat_dispatch_panel,event.position):_close_diplomat_dispatch_panel();return true
+	for panel:Control in [civilization_report_panel,settlement_dashboard_panel,provisions_panel,materials_panel,population_ledger_panel,knowledge_panel,council_panel,government_panel,society_panel,progression_panel,systems_hub_panel,civilizations_panel]:
+		if _outside_report_body(panel,event.position):return _close_topmost_game_screen()
+	return false
+
 func _pointer_over_ui()->bool:
 	# Scrolling a dock must not also zoom the map beneath it. A hovered control
 	# counts as UI only when it or an ancestor actually stops mouse events;
@@ -19798,7 +19829,14 @@ func _pointer_over_ui()->bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_instance_valid(MilitaryCampaign.joint_operations.screen) and MilitaryCampaign.joint_operations.screen.handle_map_input(event):
+	if is_instance_valid(MilitaryCampaign.joint_operations.screen):
+		if MilitaryCampaign.joint_operations.screen.handle_map_input(event):
+			get_viewport().set_input_as_handled();return
+		if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_LEFT,MOUSE_BUTTON_RIGHT]:
+			if event.button_index==MOUSE_BUTTON_LEFT:
+				MilitaryCampaign.joint_operations.screen.queue_free();_dismiss_map_panels()
+			get_viewport().set_input_as_handled();return
+	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and _dismiss_map_panels():
 		get_viewport().set_input_as_handled();return
 	if event is InputEventKey and event.pressed and not event.alt_pressed and not event.ctrl_pressed and not event.meta_pressed:
 		if world_menu_panel and is_instance_valid(world_menu_panel): return
