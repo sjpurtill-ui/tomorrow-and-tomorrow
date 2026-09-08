@@ -570,3 +570,8 @@ Zoom streaming `1142441` → `42595fb` cancels obsolete work, fills geography be
 ## September 7, 2026 — main-map Navy and Air correction
 
 Integrated 7fb5dc2, fecf99f, ff2f02b and 5ae5714; release 2026.09.07.2. Navy and Air have separate panels and service-specific operational rules over the actual terrain camera. The secondary map is removed. Readiness, commissioning quotes, recipe-funded local repairs, airbase crowding, airborne versus port targeting and physical naval contact/fire ranges are implemented and tested. All 63 combined checks passed; the final layout refinement passed 34 relevant cases again. Canonical player PID 67340 runs code 5ae5714 with the explicit project path and resumed campaign; both final panels checked live, paused on Air Command. No new required save fields. Native pointer drawing remains unverified; headless tests cover projection and input behavior. Exact HOI4 numerical parity remains unfinished. See MAIN_MAP_SERVICES_HANDOFF.md and INTEGRATION_STATUS.md.
+
+
+## September 7 — carrier order correctness
+
+Integrated 947ad09 on canonical main: rebase cancels obsolete carrier ferries; carrier-wing stand-down stays on deck; force reorganization and disbanding require actual home-base arrival; carrier merges preserve pending wing references and carrier removal cannot orphan wings. All 38 relevant canonical tests pass; no save migration. Running player/editor untouched; next normal launch receives this pass. See CARRIER_TRANSITIONS_HANDOFF.md.

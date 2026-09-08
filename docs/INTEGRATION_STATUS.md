@@ -1,3 +1,9 @@
+## September 7 — carrier and force order transitions
+
+INTEGRATED `947ad09` by fast-forward from c53a964. Carrier ferries are cancelled by rebase orders; deck-wing stand-down preserves the carrier assignment; reorganization/disbanding requires physical arrival at an operational home base; carrier removal cannot orphan attached or incoming wings; carrier merges redirect incoming wings as well as attached ones. No new save fields. All **38 canonical tests pass**, zero errors/failures/orphans, including four new transition/conservation/save-reference cases. Log: /tmp/tt-carrier-transitions-canonical.log. See CARRIER_TRANSITIONS_HANDOFF.md.
+
+The scheduled pass did not restart or interact with the player/editor session. New-process availability is at the next normal launch; live receipt is not claimed. Temporary test userdata override was removed. This is a bounded order-correctness improvement, not full HOI4 mechanics parity.
+
 ## September 7 — separate main-map military commands and operational iteration
 
 INTEGRATED `7fb5dc2`, `fecf99f`, `ff2f02b`, `5ae5714` by sequential fast-forwards into canonical Mac main. This replaces the previous Naval & Air secondary screen completely: Navy and Air each have separate command panels, tabs and operational controls over the real world map. Draw/select regions there; Shift+F5 Navy, Shift+F6 Air, D draw, Enter finish, Escape cancel/close. Existing camera and four distances remain in use. The obsolete independent operations map is deleted.
