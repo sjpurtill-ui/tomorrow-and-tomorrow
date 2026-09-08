@@ -92,8 +92,9 @@ func test_deck_wing_marker_and_click_target_follow_carrier_without_rewriting_sav
 	terrain.camera.projection=Camera3D.PROJECTION_ORTHOGONAL;terrain.camera.size=100
 	terrain.camera.position=Vector3(0,100,50);terrain.camera.look_at(Vector3.ZERO)
 	var overlay:Control=auto_free(Overlay.new());overlay.terrain=terrain;overlay.domain="air";add_child(overlay)
-	var carrier:Dictionary={"id":1,"name":"Test carrier","owner":"player","domain":"navy","base_id":0,"carrier_id":0,"position":{"x":20.0,"z":0.0},"units":{"aircraft_carrier":1}}
-	var wing:Dictionary={"id":2,"name":"Deck wing","owner":"player","domain":"air","base_id":0,"carrier_id":1,"position":{"x":-20.0,"z":0.0},"units":{"fighter":2}}
+	var carrier:Dictionary={"id":1,"name":"Test carrier","owner":"player","domain":"navy","base_id":3,"carrier_id":0,"position":{"x":20.0,"z":0.0},"units":{"aircraft_carrier":1}}
+	var wing:Dictionary={"id":2,"name":"Deck wing","owner":"player","domain":"air","base_id":4,"carrier_id":1,"position":{"x":-20.0,"z":0.0},"units":{"fighter":2}}
+	MilitaryCampaign.joint_operations.state.bases=[{"id":3,"name":"Port","owner":"player","domain":"navy","position":{"x":-20.0,"z":0.0}},{"id":4,"name":"Airfield","owner":"player","domain":"air","position":{"x":-20.0,"z":0.0}}]
 	MilitaryCampaign.joint_operations.state.forces=[carrier,wing]
 	var stored:Dictionary=wing.position.duplicate(true)
 	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
