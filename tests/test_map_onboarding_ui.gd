@@ -7,6 +7,8 @@ var renderer:Node3D
 
 func before_test()->void:
 	GameState.reset_for_new_world(741991)
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.register_player_origin(Vector2.ZERO)
 	renderer=auto_free(RENDERER.new())
 	renderer._configure_shape()
 	renderer._configure_noise()

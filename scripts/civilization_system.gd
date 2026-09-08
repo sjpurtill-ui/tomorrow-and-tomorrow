@@ -75,6 +75,7 @@ const REGION_VALUE_TEXT:={
 
 var civilizations:Array[Dictionary]=[]
 var city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
+var settlement_siting=preload("res://scripts/settlement_siting_relations.gd").new(self)
 var rumor_network=preload("res://scripts/rumor_network.gd").new(self)
 var world_events:Array[Dictionary]=[]
 var pending_player_incidents:Array[Dictionary]=[]
@@ -3343,6 +3344,7 @@ func _process_player_relations(day:int)->void:
 		var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id))
 		var player_power:=float(known_player.power) if float(known_player.power)>0 else _military_power(civ)
 		var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
+		relation=settlement_siting.apply_observed(civ,relation,day)
 		var opinion:=float(relation.get("opinion",0.0))
 		if int(relation.get("contact_level",0))<2:
 			relation["trade"]=0.0

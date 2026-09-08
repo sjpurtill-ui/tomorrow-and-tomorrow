@@ -905,8 +905,8 @@ func _refresh_toolbar()->void:
 	var settle_tooltip:String
 	var settle_disabled:=false
 	if not GameState.settlement_site_committed:
-		settle_text="FOUND SETTLEMENT"
-		settle_tooltip="Halt the founding convoy at its exact current location and establish the first settlement."
+		settle_text="REVIEW FOUNDING SITE"
+		settle_tooltip="Check drinking water and nearby suitable ground on the map before committing to a settlement."
 	elif terrain.settlement_convoy_targeting:
 		settle_text="CANCEL SITE SELECTION"
 		settle_tooltip="Leave destination-selection mode without paying any cost."

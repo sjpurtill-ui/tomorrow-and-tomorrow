@@ -1057,6 +1057,7 @@ func complete_settlement_convoy(destination:Vector2)->Dictionary:
 	})
 	GameState.settlement_convoy={}
 	GameState.settlement_network_revision+=1
+	CivilizationSystem.settlement_siting.founded(String(record.id),String(record.name),planned_destination,int(GameState.elapsed_days))
 	return {"ok":true,"settlement":record.duplicate(true),"population":roundi(_settlement_population(record))}
 
 func _create_founding_nucleus()->void:

@@ -14,6 +14,10 @@ var close_army_figures:Dictionary={}
 const FIT_CONTENT_PANEL:=preload("res://scripts/viewport_fit_panel.gd")
 const FoodSystemScript := preload("res://scripts/food_system.gd")
 const SettlementModelScript:=preload("res://scripts/settlement_model.gd")
+const FoundingSiteAdvice:=preload("res://scripts/founding_site_advice.gd")
+const FoundingSiteGuide:=preload("res://scripts/hud/founding_site_guide.gd")
+var founding_site_advisor:RefCounted
+var founding_site_guide:Control
 const SocietalValuesModel:=preload("res://scripts/societal_values_model.gd")
 const WorldDiscoveryMapScript:=preload("res://scripts/world_discovery_map.gd")
 const WarfareMapPresentation:=preload("res://scripts/warfare_map_presentation.gd")
@@ -1527,15 +1531,17 @@ func _local_drainage_distance_at(x:float,z:float)->float:
 	var spacing:=2.40
 	var offset:=(phase-0.5)*spacing
 	var channel_index:=roundi((x-offset)/spacing)
-	var channel_x:=float(channel_index)*spacing+offset
-	channel_x+=sin(z*1.34+float(channel_index)*2.17+phase*TAU)*0.22
-	channel_x+=sin(z*3.71-float(channel_index)*0.83+phase*17.0)*0.055
+	var channel_x:=_local_drainage_channel_x(channel_index,z)
 	var activation_raw:=0.50+sin(z*1.11+float(channel_index)*1.73+phase*31.0)*0.31+sin(z*0.37-float(channel_index)*2.41+phase*67.0)*0.19
 	var activation:=smoothstep(0.29,0.72,activation_raw)
 	if activation<0.28: return INF
 	# Weak reaches report a larger effective distance, naturally fading their
 	# influence on siting and cultivation without binary on/off seams.
 	return absf(x-channel_x)+lerpf(0.075,0.0,activation)
+
+func _local_drainage_channel_x(channel_index:int,z:float)->float:
+	var phase:=float(posmod(GameState.world_seed,10007))/10007.0
+	return float(channel_index)*2.4+(phase-.5)*2.4+sin(z*1.34+float(channel_index)*2.17+phase*TAU)*.22+sin(z*3.71-float(channel_index)*.83+phase*17.0)*.055
 
 func _drainage_tangent_at(x:float,z:float)->Vector2:
 	# Return the along-water direction in world X/Z space. Fields, tracks and
@@ -9351,6 +9357,60 @@ func _settlement_surface_assessment(destination:Vector3)->Dictionary:
 		}
 	return {"valid":true,"kind":"land","river_distance_km":minf(main_distance,tributary_distance)}
 
+func _founding_advisor()->RefCounted:
+	if not is_instance_valid(founding_site_advisor):founding_site_advisor=FoundingSiteAdvice.new(self)
+	return founding_site_advisor
+
+func _founding_site_advice(position:Vector3,fresh:bool=false)->Dictionary:
+	return _founding_advisor().assess(position,fresh)
+
+func _founding_water_sources(origin:Vector3)->Array[Dictionary]:
+	# Project onto the same authored sources used by daily water collection.
+	# No point deposits, sea water, hidden wells or invented rivers are substituted.
+	var sources:Array[Dictionary]=[]
+	var river_x:=_world_river_x(origin.z)
+	if is_finite(river_x) and absf(origin.x-river_x)<=6.0:
+		var height:=_height_at(river_x,origin.z)
+		if height>SEA_LEVEL:sources.append({"position":Vector3(river_x,height,origin.z),"distance_km":absf(origin.x-river_x),"kind":"River"})
+	if world_tributary_courses.is_empty():world_tributary_courses=_seeded_world_tributaries()
+	var point:=Vector2(origin.x,origin.z)
+	for course:Array in world_tributary_courses:
+		var nearest:=Vector2.INF
+		var distance:=INF
+		for i:int in course.size()-1:
+			var start:Vector3=course[i];var finish:Vector3=course[i+1]
+			var sample:=Geometry2D.get_closest_point_to_segment(point,Vector2(start.x,start.z),Vector2(finish.x,finish.z))
+			var candidate_distance:=point.distance_to(sample)
+			if candidate_distance<minf(distance,6.001) and _world_position_is_revealed(Vector3(sample.x,0,sample.y)):
+				distance=candidate_distance;nearest=sample
+		if distance<=6.0:
+			var height:=_height_at(nearest.x,nearest.y)
+			if height>SEA_LEVEL:sources.append({"position":Vector3(nearest.x,height,nearest.y),"distance_km":distance,"kind":"Tributary"})
+	var drainage_distance:=_local_drainage_distance_at(origin.x,origin.z)
+	if drainage_distance<=6.0:
+		var phase:=float(posmod(GameState.world_seed,10007))/10007.0
+		var index:=roundi((origin.x-(phase-.5)*2.4)/2.4)
+		var channel_x:=_local_drainage_channel_x(index,origin.z)
+		var height:=_height_at(channel_x,origin.z)
+		if height>SEA_LEVEL:
+			sources.append({"position":Vector3(channel_x,height,origin.z),"distance_km":drainage_distance,"kind":"Surface drainage"})
+	return sources
+
+func _open_founding_site_guide(position:Vector3,later_city:bool=false)->void:
+	if not interface_layer:return
+	_close_founding_site_guide()
+	if hud:hud.close_dock()
+	if lens_panel:lens_panel.visible=false
+	if map_help_panel:map_help_panel.visible=false
+	founding_site_guide=FoundingSiteGuide.new()
+	interface_layer.add_child(founding_site_guide)
+	founding_site_guide.setup(self,position,later_city)
+
+func _close_founding_site_guide()->void:
+	if is_instance_valid(founding_site_guide):
+		founding_site_guide.hide();founding_site_guide.queue_free()
+	founding_site_guide=null
+
 func _terrain_slope_at(x: float, z: float, sample_radius := 0.45) -> float:
 	var east_west := absf(_height_at(x + sample_radius, z) - _height_at(x - sample_radius, z))
 	var north_south := absf(_height_at(x, z + sample_radius) - _height_at(x, z - sample_radius))
@@ -10064,6 +10124,10 @@ func _move_settlers_to_screen(screen_position: Vector2) -> void:
 	if hit.is_empty():
 		return
 	var destination: Vector3 = hit.position + Vector3.UP * 0.002
+	_move_settlers_to(destination)
+
+func _move_settlers_to(destination:Vector3)->void:
+	if settler_marker==null:return
 	var surface_assessment:=_settlement_surface_assessment(destination)
 	if not bool(surface_assessment.get("valid",false)):
 		_inspect_location(destination)
@@ -10111,7 +10175,7 @@ func _move_settlers_to_screen(screen_position: Vector2) -> void:
 
 func _on_settlement_action_pressed()->void:
 	if not GameState.settlement_site_committed:
-		_start_settlement_here()
+		if settler_marker:_open_founding_site_guide(settler_marker.position)
 		return
 	if bool(GameState.settlement_convoy.get("active",false)):
 		var position_value:Variant=GameState.settlement_convoy.get("position",Vector2.ZERO)
@@ -10154,16 +10218,10 @@ func _refresh_actions_menu()->void:
 		return
 	actions_menu_settlement_button.disabled=false
 	if not GameState.settlement_site_committed:
-		var site_assessment:=_settlement_surface_assessment(settler_marker.position) if settler_marker else {"valid":false,"reason":"FOUNDING CONVOY UNAVAILABLE"}
-		if bool(site_assessment.get("valid",false)):
-			actions_menu_status.text="NEXT  Inspect the current land, then establish the first permanent settlement when ready."
-			actions_menu_settlement_button.text="START SETTLEMENT HERE"
-			actions_menu_settlement_button.tooltip_text="Halt the founding convoy at its exact current location and establish the first settlement."
-		else:
-			actions_menu_status.text="BLOCKED  %s" % String(site_assessment.get("reason","Choose dry land."))
-			actions_menu_settlement_button.text="CANNOT SETTLE IN WATER"
-			actions_menu_settlement_button.tooltip_text="Move the founding convoy onto dry land beyond the visible river bank."
-			actions_menu_settlement_button.disabled=true
+		var advice:=_founding_site_advice(settler_marker.position) if settler_marker else {"title":"CONVOY UNAVAILABLE","reason":"Locate the founding convoy."}
+		actions_menu_status.text="%s  •  %s" % [String(advice.title),String(advice.reason)]
+		actions_menu_settlement_button.text="REVIEW FOUNDING SITE"
+		actions_menu_settlement_button.tooltip_text="Review drinking water and nearby suitable ground on the map before founding."
 	elif bool(GameState.settlement_convoy.get("active",false)):
 		actions_menu_status.text="IN PROGRESS  A paid founding convoy is physically traveling to its selected site."
 		actions_menu_settlement_button.text="FOCUS SETTLEMENT CONVOY"
@@ -10265,9 +10323,11 @@ func _enter_settlement_convoy_targeting()->void:
 	_ensure_settlement_convoy_preview()
 	if settlement_convoy_instruction_panel: settlement_convoy_instruction_panel.visible=true
 	_set_settlement_convoy_feedback("MOVE OVER THE MAP  •  LEFT-CLICK CHARTED LAND TO REVIEW ROUTE + COST  •  RIGHT-CLICK OR ESC CANCELS",Color("#ead078"))
+	_open_founding_site_guide(camera_target,true)
 	_update_time_interface()
 
 func _cancel_settlement_convoy_targeting()->void:
+	_close_founding_site_guide()
 	settlement_convoy_targeting=false
 	settlement_convoy_hover_valid=false
 	if settlement_convoy_preview:
@@ -10305,12 +10365,14 @@ func _set_settlement_convoy_feedback(message:String,color:Color)->void:
 		settlement_convoy_instruction_label.text=message
 		settlement_convoy_instruction_label.add_theme_color_override("font_color",color)
 
-func _settlement_convoy_site_assessment(destination:Vector3)->Dictionary:
+func _settlement_convoy_site_assessment(destination:Vector3,fresh:bool=false)->Dictionary:
+	if not _world_position_is_revealed(destination):
+		return {"valid":false,"reason":"UNCHARTED LAND  •  a scout must return with this ground before a convoy can use it"}
 	var surface_assessment:=_settlement_surface_assessment(destination)
 	if not bool(surface_assessment.get("valid",false)):
 		return surface_assessment
-	if not _world_position_is_revealed(destination):
-		return {"valid":false,"reason":"UNCHARTED LAND  •  a scout must return with this ground before a convoy can use it"}
+	var water:=_founding_site_advice(destination,fresh)
+	if not bool(water.valid):return water
 	var network:Dictionary=_settlement_model().settlement_network_snapshot()
 	var settlements:Array=network.get("settlements",[])
 	if settlements.is_empty():
@@ -10338,7 +10400,8 @@ func _settlement_convoy_site_assessment(destination:Vector3)->Dictionary:
 			return {"valid":false,"reason":"INSIDE %s'S PRESENT TERRITORY  •  choose land at least %.1f km from its centre" % [String(existing.get("name","A SETTLEMENT")).to_upper(),required_clearance]}
 	return {
 		"valid":true,"origin":origin,"distance_km":origin_distance,
-		"reason":"CHARTED LAND  •  %.1f km from %s  •  LEFT-CLICK TO REVIEW ROUTE + COST" % [origin_distance,String(origin.get("name","THE NEAREST SETTLEMENT")).to_upper()]
+		"water":water,"recommended":water.recommended,
+		"reason":"%s  •  %s  •  LEFT-CLICK TO REVIEW CONVOY" % [String(water.title),String(water.source_text)]
 	}
 
 func _update_settlement_convoy_preview(screen_position:Vector2)->void:
@@ -10352,6 +10415,7 @@ func _update_settlement_convoy_preview(screen_position:Vector2)->void:
 		return
 	settlement_convoy_hover_position=hit.position+Vector3.UP*0.006
 	var assessment:=_settlement_convoy_site_assessment(settlement_convoy_hover_position)
+	if is_instance_valid(founding_site_guide):founding_site_guide.update_site(settlement_convoy_hover_position,false,assessment)
 	settlement_convoy_hover_valid=bool(assessment.get("valid",false))
 	settlement_convoy_preview.visible=true
 	settlement_convoy_preview.position=settlement_convoy_hover_position
@@ -10359,8 +10423,9 @@ func _update_settlement_convoy_preview(screen_position:Vector2)->void:
 	var preview_radius:=clampf(camera.size/viewport_height*24.0,0.28,220.0)
 	settlement_convoy_preview.scale=Vector3(preview_radius,1.0,preview_radius)
 	var color:=Color(0.30,0.84,0.59,0.52) if settlement_convoy_hover_valid else Color(0.92,0.30,0.23,0.55)
+	if settlement_convoy_hover_valid and not bool(assessment.get("recommended",false)):color=Color(.91,.71,.35,.55)
 	settlement_convoy_preview_material.albedo_color=color
-	_set_settlement_convoy_feedback(String(assessment.get("reason","Choose another point.")),Color("#b9dda7") if settlement_convoy_hover_valid else Color("#e08b77"))
+	_set_settlement_convoy_feedback(String(assessment.get("reason","Choose another point.")),Color(color.r,color.g,color.b))
 
 func _select_settlement_convoy_site(screen_position:Vector2)->void:
 	_update_settlement_convoy_preview(screen_position)
@@ -10370,7 +10435,7 @@ func _select_settlement_convoy_site(screen_position:Vector2)->void:
 	_begin_settlement_convoy(settlement_convoy_hover_position)
 
 func _begin_settlement_convoy(destination:Vector3)->void:
-	var assessment:=_settlement_convoy_site_assessment(destination)
+	var assessment:=_settlement_convoy_site_assessment(destination,true)
 	if not bool(assessment.get("valid",false)):
 		_set_settlement_convoy_feedback(String(assessment.get("reason","SITE NOT VALID")),Color("#e08b77"))
 		return
@@ -10400,7 +10465,7 @@ func _founding_material_summary(materials:Dictionary)->String:
 
 func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,quote:Dictionary)->void:
 	if settlement_convoy_confirm_panel and is_instance_valid(settlement_convoy_confirm_panel): return
-	var site_assessment:=_settlement_convoy_site_assessment(destination)
+	var site_assessment:=_settlement_convoy_site_assessment(destination,true)
 	if not bool(site_assessment.get("valid",false)):
 		_set_settlement_convoy_feedback(String(site_assessment.get("reason","SITE NOT VALID")),Color("#e08b77"))
 		return
@@ -10436,13 +10501,23 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	title.add_theme_font_size_override("font_size",24)
 	title.add_theme_color_override("font_color",Color("#eee2cc"))
 	root.add_child(title)
+	var scroll:=ScrollContainer.new()
+	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size.y=100
+	root.add_child(scroll)
+	var body:=VBoxContainer.new()
+	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation",10)
+	scroll.add_child(body)
 	var explanation:=Label.new()
-	explanation.text="Nothing has been spent. Sending commits one aggregate founding party and its stores; people are never created as individual runtime entities."
+	explanation.text="Nothing has been spent. Review the water supply, journey and supplies before sending people to a permanent home."
 	explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	explanation.add_theme_font_size_override("font_size",12)
 	explanation.add_theme_color_override("font_color",Color("#aeb4ae"))
-	explanation.custom_minimum_size=Vector2(0,42)
-	root.add_child(explanation)
+	explanation.custom_minimum_size=Vector2(modal.size.x-64.0,42)
+	explanation.size.x=modal.size.x-64.0
+	body.add_child(explanation)
 	settlement_convoy_name_input=LineEdit.new()
 	settlement_convoy_name_input.name="NewSettlementName"
 	settlement_convoy_name_input.max_length=32
@@ -10450,26 +10525,32 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	settlement_convoy_name_input.text=String(quote.get("suggested_name",_settlement_model().suggested_settlement_name(Vector2(destination.x,destination.z),String(quote.get("origin_name","")))))
 	settlement_convoy_name_input.custom_minimum_size=Vector2(0,40)
 	settlement_convoy_name_input.tooltip_text="This is the permanent map and history name. It can be changed later from the selected settlement."
-	root.add_child(settlement_convoy_name_input)
-	root.add_child(HSeparator.new())
+	body.add_child(settlement_convoy_name_input)
+	body.add_child(HSeparator.new())
 	var origin_name:=String(quote.get("origin_name","NEAREST SETTLEMENT")).to_upper()
 	var distance_km:=float(route.get("distance_km",quote.get("distance_km",0.0)))
 	var duration_days:=float(quote.get("duration_days",0.0))
 	var founding_materials:Dictionary=quote.get("materials",{})
 	var details:=Label.new()
-	details.text="FROM  %s\nDESTINATION  CHARTED LAND • %.1f km away\nTRAVEL  %s\nFOUNDING PARTY  %s aggregate residents\nTRAVEL RATIONS  %s\nFOUNDING SUPPLIES  %s" % [origin_name,distance_km,_format_game_duration(duration_days),_compact_population(int(quote.get("population",0))),_compact_population(roundi(float(quote.get("food",0.0)))),_founding_material_summary(founding_materials)]
+	details.text="FROM  %s\nDESTINATION  CHARTED LAND • %.1f km away\nWATER  %s\nTRAVEL  %s\nFOUNDING PARTY  %s people\nTRAVEL RATIONS  %s\nFOUNDING SUPPLIES  %s" % [origin_name,distance_km,String((site_assessment.water as Dictionary).source_text),_format_game_duration(duration_days),_compact_population(int(quote.get("population",0))),_compact_population(roundi(float(quote.get("food",0.0)))),_founding_material_summary(founding_materials)]
+	details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	details.tooltip_text="Founding supplies cover portable shelter, cordage, containers, and tools. Timber, plant fiber, clay, and stone can substitute; heavier materials require more carrying capacity."
 	details.add_theme_font_size_override("font_size",14)
 	details.add_theme_color_override("font_color",Color("#ded5c0"))
-	details.custom_minimum_size=Vector2(0,150)
-	root.add_child(details)
+	details.custom_minimum_size=Vector2(modal.size.x-64.0,150)
+	details.size.x=modal.size.x-64.0
+	body.add_child(details)
 	settlement_convoy_confirm_status=Label.new()
 	var ready:=bool(quote.get("ok",false))
-	settlement_convoy_confirm_status.text="READY  •  route and provisions can support this convoy" if ready else "CANNOT SEND  •  %s" % String(quote.get("reason","requirements are not met"))
+	settlement_convoy_confirm_status.text=String((site_assessment.water as Dictionary).reason) if ready else "CANNOT SEND  •  %s" % String(quote.get("reason","requirements are not met"))
+	var neighbors:Dictionary=(site_assessment.water as Dictionary).neighbors
+	if ready and float(neighbors.penalty)>0:
+		settlement_convoy_confirm_status.text+="\n%s" % String(neighbors.text)
 	settlement_convoy_confirm_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	settlement_convoy_confirm_status.add_theme_font_size_override("font_size",12)
-	settlement_convoy_confirm_status.add_theme_color_override("font_color",Color("#9dcc94") if ready else Color("#e08b77"))
-	settlement_convoy_confirm_status.custom_minimum_size=Vector2(0,38)
+	settlement_convoy_confirm_status.add_theme_color_override("font_color",(site_assessment.water as Dictionary).color if ready else Color("#e08b77"))
+	settlement_convoy_confirm_status.custom_minimum_size=Vector2(modal.size.x-48.0,38)
+	settlement_convoy_confirm_status.size.x=modal.size.x-48.0
 	root.add_child(settlement_convoy_confirm_status)
 	var footer:=HBoxContainer.new()
 	footer.alignment=BoxContainer.ALIGNMENT_END
@@ -10501,7 +10582,7 @@ func _dismiss_settlement_convoy_confirmation()->void:
 
 func _confirm_settlement_convoy()->void:
 	var destination:=settlement_convoy_pending_destination
-	var site_assessment:=_settlement_convoy_site_assessment(destination)
+	var site_assessment:=_settlement_convoy_site_assessment(destination,true)
 	if not bool(site_assessment.get("valid",false)):
 		if settlement_convoy_confirm_status:
 			settlement_convoy_confirm_status.text="CANNOT SEND  •  %s" % String(site_assessment.get("reason","the destination is no longer viable"))
@@ -10520,6 +10601,7 @@ func _confirm_settlement_convoy()->void:
 	var origin_2d:Vector2=started.get("origin",Vector2.ZERO)
 	var origin_3d:=Vector3(origin_2d.x,_height_at(origin_2d.x,origin_2d.y)+0.002,origin_2d.y)
 	_dismiss_settlement_convoy_confirmation()
+	_close_founding_site_guide()
 	settlement_convoy_targeting=false
 	settlement_convoy_hover_valid=false
 	if settlement_convoy_preview:
@@ -10581,6 +10663,12 @@ func _start_settlement_here() -> void:
 			travel_status_label.text="SETTLEMENT NOT STARTED  •  %s" % String(site_assessment.get("reason","choose dry land"))
 		_refresh_actions_menu()
 		return
+	var water:=_founding_site_advice(settler_marker.position,true)
+	if not bool(water.valid):
+		if travel_status_label:travel_status_label.text="SETTLEMENT NOT STARTED  •  %s" % String(water.reason)
+		if is_instance_valid(founding_site_guide):founding_site_guide.update_site(settler_marker.position)
+		return
+	_close_founding_site_guide()
 	var route_progress:=0.0
 	if travel_active:
 		route_progress=clampf(travel_days_elapsed/maxf(0.001,travel_days_total),0.0,1.0)
@@ -10591,6 +10679,7 @@ func _start_settlement_here() -> void:
 	GameState.simulation_metrics["travel_speed_factor"]=0.0
 	GameState.settlement_site_committed=true
 	GameState.settlement_founded_at=settler_marker.position
+	CivilizationSystem.settlement_siting.founded("settlement_%03d" % GameState.next_player_settlement_id,_settlement_display_name(),Vector2(settler_marker.position.x,settler_marker.position.z),int(GameState.elapsed_days))
 	_retire_founding_expedition_visuals()
 	if route_mesh:
 		route_mesh.visible=false
@@ -10824,6 +10913,7 @@ func _arbitrate_notification_overlays()->void:
 
 
 func _blocking_modal_or_report_open()->bool:
+	if is_instance_valid(founding_site_guide) and founding_site_guide.is_visible_in_tree():return true
 	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,diplomat_dispatch_panel,founding_focus_panel,world_menu_panel,settlement_dashboard_panel,systems_hub_panel,provisions_panel,materials_panel,knowledge_panel,council_panel,government_panel,population_ledger_panel,society_panel,progression_panel,civilizations_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
 	if leader_panel and is_instance_valid(leader_panel) and leader_panel.visible: return true
@@ -11498,6 +11588,8 @@ func _report_military_action(result:Dictionary)->void:
 		hud.live_refresh_dock()
 
 func _on_hud_section_requested(section:String,sub:int)->void:
+	if settlement_convoy_targeting:_cancel_settlement_convoy_targeting()
+	else:_close_founding_site_guide()
 	# Sections with a dock provider open in the slide-out dock beside the rail;
 	# the rest still route to their legacy destinations until they migrate.
 	if section=="":
@@ -11721,26 +11813,10 @@ func _camera_scale_band() -> String:
 
 func _convoy_water_readout()->String:
 	if settler_marker==null: return "WATER: UNKNOWN"
-	var position:=settler_marker.position
-	var distance_units:=_river_distance_at(position.x,position.z)
-	if is_inf(distance_units):
-		return "WATER: NONE RECOGNIZED IN CHARTED LAND  •  CARRIED %.1f D" % float(GameState.water_metrics.get("days",0.0))
-	var distance_km:=distance_units*KM_PER_WORLD_UNIT
-	# Bearing comes from resampling actual hydrology around the convoy, so the
-	# arrow always points at the water the collection model would really use.
-	var best_direction:=""
-	var best_distance:=distance_units
-	var step:=maxf(0.4,distance_units*0.35)
-	for entry:Array in [["N",Vector2(0,-1)],["NE",Vector2(0.707,-0.707)],["E",Vector2(1,0)],["SE",Vector2(0.707,0.707)],["S",Vector2(0,1)],["SW",Vector2(-0.707,0.707)],["W",Vector2(-1,0)],["NW",Vector2(-0.707,-0.707)]]:
-		var offset:Vector2=(entry[1] as Vector2)*step
-		var sample:=_river_distance_at(position.x+offset.x,position.z+offset.y)
-		if sample<best_distance:
-			best_distance=sample
-			best_direction=String(entry[0])
-	var direction_text:=" %s" % best_direction if best_direction!="" else ""
-	if distance_km<=6.0:
-		return "WATER %.1f KM%s  •  IN COLLECTION RANGE" % [distance_km,direction_text]
-	return "WATER %.1f KM%s  •  BEYOND 6 KM RANGE  •  CARRIED %.1f D" % [distance_km,direction_text,float(GameState.water_metrics.get("days",0.0))]
+	var advice:=_founding_site_advice(settler_marker.position)
+	if not advice.has("source_text"):
+		return "%s  •  REVIEW FOUNDING SITE" % String(advice.title)
+	return "%s  •  %s" % [String(advice.source_text).to_upper(),"NEARBY WATER" if bool(advice.water_recommended) else "LONG DAILY CARRY"]
 
 
 func _north_screen_arrow() -> String:
@@ -13670,7 +13746,14 @@ func _inspect_location_local(position: Vector3) -> void:
 				report += "  • %s\n" % String(blocker).capitalize()
 			report += "\n"
 		lens_body.text = report
-	if revealed and contact_context.is_empty(): lens_body.text=_surface_resource_report(position)+lens_body.text
+	if revealed and contact_context.is_empty():
+		lens_body.text=_surface_resource_report(position)+lens_body.text
+		if settlement_context.is_empty() or not bool(settlement_context.get("inside_border",false)):
+			var advice:=_founding_site_advice(position)
+			var water_text:="[color=#%s][b]%s[/b][/color]\n%s\n%s\n\n" % [(advice.color as Color).to_html(false),String(advice.title),String(advice.get("source_text","No confirmed drinking source")),String(advice.reason)]
+			var neighbors:Dictionary=advice.neighbors
+			water_text+="[color=#e9bf70]%s[/color]\n%s\n\n" % [String(neighbors.title),String(neighbors.text)]
+			lens_body.text=water_text+lens_body.text
 
 
 func _retire_primary_screen(panel)->void:
@@ -19719,6 +19802,9 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_ESCAPE:
+			if is_instance_valid(founding_site_guide) and not settlement_convoy_targeting:
+				_close_founding_site_guide()
+				get_viewport().set_input_as_handled();return
 			if selected_army_id!=-1:
 				_clear_army_selection()
 				get_viewport().set_input_as_handled()
@@ -19798,6 +19884,8 @@ func _input(event: InputEvent) -> void:
 func _dismiss_map_panels()->bool:
 	# Called after GUI handling: controls keep their clicks; bare map dismisses.
 	var dismissed:=false
+	if is_instance_valid(founding_site_guide) and not settlement_convoy_targeting:
+		_close_founding_site_guide();dismissed=true
 	if map_help_panel and map_help_panel.visible:
 		_dismiss_map_help();dismissed=true
 	if hud and ((hud.dock and hud.dock.visible) or (hud.detail_dock and hud.detail_dock.visible)):
