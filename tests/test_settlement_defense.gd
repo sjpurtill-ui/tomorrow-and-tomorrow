@@ -72,8 +72,9 @@ func test_camp_drill_spends_rations_and_improves_field_army_readiness()->void:
 	var food_before:=FoodSystem.total_stored()
 	var started:Dictionary=MilitaryCampaign.start_training_program("camp_drill")
 	assert_bool(bool(started.get("ok",false))).is_true()
-	for _day in 40:
+	for _day in 260:
 		if MilitaryCampaign.training_program.is_empty(): break
+		MilitaryCampaign.last_processed_day=_day+1
 		MilitaryCampaign._process_training_program_day()
 	assert_bool(MilitaryCampaign.training_program.is_empty()).is_true()
 	assert_int(MilitaryCampaign.training_program_cycles).is_equal(1)
@@ -91,8 +92,9 @@ func test_staff_exercise_develops_the_command_institution_and_round_trips()->voi
 	var command_before:=float(MilitaryCampaign.campaign_army_snapshot().commander.command)
 	var started:Dictionary=MilitaryCampaign.start_training_program("staff_exercise")
 	assert_bool(bool(started.get("ok",false))).is_true()
-	for _day in 50:
+	for _day in 360:
 		if MilitaryCampaign.training_program.is_empty(): break
+		MilitaryCampaign.last_processed_day=_day+1
 		MilitaryCampaign._process_training_program_day()
 	var command_after:=float(MilitaryCampaign.campaign_army_snapshot().commander.command)
 	assert_float(float(MilitaryCampaign.command_development.command)).is_greater(0.03)

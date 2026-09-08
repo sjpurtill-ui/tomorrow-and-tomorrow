@@ -59,6 +59,7 @@ func _ready()->void:
 	pages=TabContainer.new();pages.size_flags_vertical=Control.SIZE_EXPAND_FILL;root.add_child(pages)
 	pages.get_tab_bar().add_theme_font_size_override("font_size",13)
 	_build_service()
+	_button(root,"All forces & training strategy",func():MilitaryCampaign.open_roster(domain,true))
 	feedback=_label(root,"",13)
 	_refresh_choices();_select_force()
 
@@ -250,6 +251,7 @@ func _refresh_status()->void:
 	var quote:Dictionary=op.commission_quote(int(_selected(base_picker)),type_id,int(quantity.value))
 	commission_button.disabled=quote.has("error")
 	commission_status.text=String(quote.error) if quote.has("error") else "%d crew · %d days training after formation" % [quote.crew,quote.training_days]
+	if not quote.has("error") and int(quote.training_days)<0:commission_status.text="%d crew · initial instruction suspended by training policy" % int(quote.crew)
 	if C.UNITS.has(type_id):
 		var unit:Dictionary=C.UNITS[type_id];var materials:Array[String]=[]
 		for resource:String in unit.materials:materials.append("%.1f %s" % [unit.materials[resource],ResourceSystem.display_name(resource)])

@@ -1,6 +1,7 @@
 extends Node
 
 const PersistentProduction = preload("res://scripts/persistent_production.gd")
+var training_staff=preload("res://scripts/military_training_staff.gd").new(self)
 var production_labor_share:float = .35
 var joint_operations=preload("res://scripts/joint_operations.gd").new(self)
 
@@ -31,14 +32,14 @@ const AMMUNITION_DELIVERY_LOAD:Dictionary={"arrows":0.08,"artillery_rounds":0.65
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 const EQUIPMENT_KNOWLEDGE:Dictionary=UnitCatalog.EQUIPMENT_GATES
 const TRAINING_PROGRAMS:Dictionary={
-	"route_rehearsal":{"label": "ROUTE & SUPPLY PRACTICE", "duration_days": 18.0, "food_per_participant": 0.07, "training_gain": 0.03, "experience_gain": 0.0, "readiness_gain": 0.04, "fatigue_per_day": 0.00045, "wear_rate": 0.00012, "command_gain": {"logistics": 0.04, "resolve": 0.01}, "description": "Practice load distribution, route finding, and resupply. Builds logistics and resolve across unit types.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
-	"reconnaissance_drill":{"label": "RECONNAISSANCE & TERRAIN", "duration_days": 20.0, "food_per_participant": 0.08, "training_gain": 0.045, "experience_gain": 0.01, "readiness_gain": 0.035, "fatigue_per_day": 0.0005, "wear_rate": 0.00015, "command_gain": {"tactics": 0.04, "logistics": 0.01}, "description": "Practice observation, cover, and interpreting terrain. Builds tactics for every type of formation.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
-	"rally_drill":{"label": "RALLY & DISCIPLINE", "duration_days": 12.0, "food_per_participant": 0.04, "training_gain": 0.035, "experience_gain": 0.0, "readiness_gain": 0.05, "fatigue_per_day": 0.00025, "wear_rate": 4e-05, "command_gain": {"resolve": 0.04, "command": 0.01}, "description": "Rehearse regrouping and maintaining order under pressure. Builds resolve and command.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
-	"signal_drill":{"label": "SIGNALS & COORDINATION", "duration_days": 16.0, "food_per_participant": 0.05, "training_gain": 0.045, "experience_gain": 0.0, "readiness_gain": 0.04, "fatigue_per_day": 0.0002, "wear_rate": 5e-05, "command_gain": {"command": 0.04, "tactics": 0.01}, "description": "Practice messengers, agreed calls, and coordinated movements. Builds command without requiring modern communications.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
-	"camp_drill":{"label":"CAMP DRILL","scope":"army","duration_days":14.0,"required_discovery":"","minimum_adoption":0.0,"food_per_participant":0.035,"training_gain":0.065,"experience_gain":0.0,"readiness_gain":0.055,"fatigue_per_day":0.00025,"wear_rate":0.00004,"command_gain":{"resolve":0.008},"description":"Repeated musters, signals, and formation changes. Low cost; improves formation training and short-term readiness."},
-	"field_exercise":{"label":"FIELD EXERCISE","scope":"army","duration_days":28.0,"required_discovery":"formation_drill","minimum_adoption":0.08,"food_per_participant":0.12,"training_gain":0.10,"experience_gain":0.025,"readiness_gain":0.085,"fatigue_per_day":0.00065,"wear_rate":0.00028,"command_gain":{"command":0.018,"tactics":0.030,"resolve":0.010},"description":"The field army practices movement, contact, and recovery. Strong army and tactical gains, but higher ration use, fatigue, and equipment wear."},
-	"staff_exercise":{"label":"STAFF EXERCISE","scope":"command","duration_days":21.0,"required_discovery":"military_staffs","minimum_adoption":0.08,"food_per_participant":0.09,"training_gain":0.018,"experience_gain":0.0,"readiness_gain":0.035,"fatigue_per_day":0.00008,"wear_rate":0.0,"command_gain":{"command":0.045,"logistics":0.055,"tactics":0.018},"description":"Command cadres rehearse maps, orders, reserves, and supply schedules. Develops command and logistics with little equipment wear."},
-	"war_games":{"label":"WAR GAMES","scope":"army","duration_days":42.0,"required_discovery":"professional_corps","minimum_adoption":0.12,"food_per_participant":0.18,"training_gain":0.12,"experience_gain":0.045,"readiness_gain":0.11,"fatigue_per_day":0.00090,"wear_rate":0.00055,"command_gain":{"command":0.035,"tactics":0.060,"logistics":0.025,"resolve":0.025},"description":"Opposed maneuvers test the whole command system. Broadest preparation gains; consumes the most food and wears equipment fastest."}
+	"route_rehearsal":{"label": "ROUTE & SUPPLY PRACTICE", "duration_days": 108.0, "food_per_participant": 0.28, "training_gain": 0.03, "experience_gain": 0.0, "readiness_gain": 0.04, "fatigue_per_day": 0.00045, "wear_rate": 0.00048, "command_gain": {"logistics": 0.04, "resolve": 0.01}, "description": "Practice load distribution, route finding, and resupply. Builds logistics and resolve across unit types.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
+	"reconnaissance_drill":{"label": "RECONNAISSANCE & TERRAIN", "duration_days": 120.0, "food_per_participant": 0.32, "training_gain": 0.045, "experience_gain": 0.01, "readiness_gain": 0.035, "fatigue_per_day": 0.0005, "wear_rate": 0.0006, "command_gain": {"tactics": 0.04, "logistics": 0.01}, "description": "Practice observation, cover, and interpreting terrain. Builds tactics for every type of formation.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
+	"rally_drill":{"label": "RALLY & DISCIPLINE", "duration_days": 72.0, "food_per_participant": 0.16, "training_gain": 0.035, "experience_gain": 0.0, "readiness_gain": 0.05, "fatigue_per_day": 0.00025, "wear_rate": 0.00016, "command_gain": {"resolve": 0.04, "command": 0.01}, "description": "Rehearse regrouping and maintaining order under pressure. Builds resolve and command.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
+	"signal_drill":{"label": "SIGNALS & COORDINATION", "duration_days": 96.0, "food_per_participant": 0.2, "training_gain": 0.045, "experience_gain": 0.0, "readiness_gain": 0.04, "fatigue_per_day": 0.0002, "wear_rate": 0.0002, "command_gain": {"command": 0.04, "tactics": 0.01}, "description": "Practice messengers, agreed calls, and coordinated movements. Builds command without requiring modern communications.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
+	"camp_drill":{"label":"CAMP DRILL","scope":"army","duration_days":84.0,"required_discovery":"","minimum_adoption":0.0,"food_per_participant":0.14,"training_gain":0.065,"experience_gain":0.0,"readiness_gain":0.055,"fatigue_per_day":0.00025,"wear_rate":0.00016,"command_gain":{"resolve":0.008},"description":"Repeated musters, signals, and formation changes. Low cost; improves formation training and short-term readiness."},
+	"field_exercise":{"label":"FIELD EXERCISE","scope":"army","duration_days":168.0,"required_discovery":"formation_drill","minimum_adoption":0.08,"food_per_participant":0.48,"training_gain":0.10,"experience_gain":0.025,"readiness_gain":0.085,"fatigue_per_day":0.00065,"wear_rate":0.00112,"command_gain":{"command":0.018,"tactics":0.030,"resolve":0.010},"description":"The field army practices movement, contact, and recovery. Strong army and tactical gains, but higher ration use, fatigue, and equipment wear."},
+	"staff_exercise":{"label":"STAFF EXERCISE","scope":"command","duration_days":126.0,"required_discovery":"military_staffs","minimum_adoption":0.08,"food_per_participant":0.36,"training_gain":0.018,"experience_gain":0.0,"readiness_gain":0.035,"fatigue_per_day":0.00008,"wear_rate":0.0,"command_gain":{"command":0.045,"logistics":0.055,"tactics":0.018},"description":"Command cadres rehearse maps, orders, reserves, and supply schedules. Develops command and logistics with little equipment wear."},
+	"war_games":{"label":"WAR GAMES","scope":"army","duration_days":252.0,"required_discovery":"professional_corps","minimum_adoption":0.12,"food_per_participant":0.72,"training_gain":0.12,"experience_gain":0.045,"readiness_gain":0.11,"fatigue_per_day":0.00090,"wear_rate":0.0022,"command_gain":{"command":0.035,"tactics":0.060,"logistics":0.025,"resolve":0.025},"description":"Opposed maneuvers test the whole command system. Broadest preparation gains; consumes the most food and wears equipment fastest."}
 }
 const SETTLEMENT_DEFENSE_STAGES:=[
 	{"name":"OPEN SETTLEMENT","short":"Open ground","work":0.0,"materials":{},"defense_bonus":0.0,"observation_km":28.0,"store_protection":0.0,"description":"No prepared perimeter. Defenders rely on terrain and their field formations."},
@@ -97,6 +98,18 @@ var next_army_template_id:=1
 var settlement_defense:Dictionary={}
 
 
+var roster_screen:CanvasLayer
+func open_roster(service:String="army",training:bool=false)->void:
+	if is_instance_valid(roster_screen):roster_screen.queue_free()
+	if is_instance_valid(joint_operations.screen):joint_operations.screen.queue_free()
+	var scene:=get_tree().current_scene
+	if scene!=null and "hud" in scene and scene.hud:
+		scene.hud.close_detail();scene.hud.close_dock()
+	roster_screen=load("res://scripts/hud/military_roster_screen.gd").new()
+	roster_screen.service=service;roster_screen.training_view=training
+	get_tree().root.add_child(roster_screen)
+
+
 func _ready()->void:
 	simulator=COMBAT_SIMULATOR_SCRIPT.new()
 	if military_inventory.is_empty(): military_inventory=_empty_equipment_inventory()
@@ -126,6 +139,7 @@ func _process(_delta:float)->void:
 
 
 func reset_for_new_world()->void:
+	training_staff.reset()
 	joint_operations.reset()
 	recovery.reset()
 	occupation_transfers.reset()
@@ -282,6 +296,7 @@ func training_program_snapshot()->Dictionary:
 
 
 func start_training_program(program_id:String)->Dictionary:
+	if training_staff.policy("army").id=="suspended":return {"error":"Army training is suspended. Choose a standing training policy."}
 	_ensure_training_program_state()
 	if not training_program.is_empty():
 		return {"error":"%s is already under way; complete or cancel it before choosing another program." % String(training_program.get("label","A training program"))}
@@ -310,6 +325,7 @@ func start_training_program(program_id:String)->Dictionary:
 func cancel_training_program()->Dictionary:
 	if training_program.is_empty(): return {"error":"No army or command exercise is active."}
 	var cancelled:=training_program.duplicate(true)
+	training_staff.set_policy("army","suspended")
 	training_program.clear()
 	army_changed.emit(home_army.duplicate(true))
 	return {"cancelled":true,"program":cancelled,"message":"%s cancelled after %.1f of %.0f effective days. Gains already earned remain; spent provisions and equipment wear are not recovered." % [String(cancelled.get("label","Training program")),float(cancelled.get("progress_days",0.0)),float(cancelled.get("duration_days",1.0))]}
@@ -1586,6 +1602,7 @@ func _army_report_snapshot(army:Dictionary)->Dictionary:
 		CivilizationSystem.city_intelligence.stage(carried,"player",CivilizationSystem.city_intelligence.vector(position),.65,int(GameState.elapsed_days),"army:%s" % str(army.get("army_id",0)))
 	return {
 		"city_observations":carried.get("city_observations",{}),
+		"formations":(army.get("formations",[]) as Array).duplicate(true),
 		"day":int(GameState.elapsed_days),
 		"position":(army.get("position",{}) as Dictionary).duplicate(true),
 		"status":String(army.get("status","stationed")),
@@ -2546,6 +2563,8 @@ func export_state()->Dictionary:
 		"damaged_equipment":damaged_equipment.duplicate(true),
 		"aggregate_recruits":aggregate_recruits,
 		"training_queue":training_queue.duplicate(true),
+		"training_strategy":training_staff.data.duplicate(true),
+		"training_timing_version":1,
 		"training_injury_pool":training_injury_pool,
 		"training_injury_recovery_accumulator":training_injury_recovery_accumulator,
 		"training_program":training_program.duplicate(true),
@@ -2581,6 +2600,10 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	var strategy:Variant=payload.get("training_strategy",{})
+	if not strategy is Dictionary:return {"error":"Invalid training strategy."}
+	for key in ["policies","food_spent","materials_spent"]:
+		if not strategy.get(key,{}) is Dictionary:return {"error":"Invalid training strategy: "+key}
 	if payload.has("joint_operations"):
 		var joint_error:=String(joint_operations.validate(payload.joint_operations))
 		if joint_error!="":return {"error":joint_error}
@@ -2842,6 +2865,7 @@ func validate_state()->Array[String]:
 	return errors
 
 func _apply_imported_state(payload:Dictionary)->void:
+	training_staff.load_state(payload.get("training_strategy",{}))
 	joint_operations.reset()
 	if payload.has("joint_operations"):joint_operations.import_state(payload.joint_operations)
 	recovery.reset()
@@ -2863,10 +2887,18 @@ func _apply_imported_state(payload:Dictionary)->void:
 	for item in (payload.get("damaged_equipment",{}) as Dictionary): damaged_equipment[item]=int(payload.damaged_equipment[item])
 	aggregate_recruits=maxi(0,int(payload.get("aggregate_recruits",0)))
 	training_queue.assign(payload.get("training_queue",[]))
-	for order in training_queue: order.erase("soldier_ids")
+	for order in training_queue:
+		order.erase("soldier_ids")
+		if not payload.has("training_timing_version"):
+			var old_duration:=maxf(1,float(order.get("required_days",1)))
+			order.required_days=training_staff.initial_days(old_duration)
+			order.progress_days=float(order.get("progress_days",0))/old_duration*float(order.required_days)
 	training_injury_pool=maxi(0,int(payload.get("training_injury_pool",0)))
 	training_injury_recovery_accumulator=maxf(0.0,float(payload.get("training_injury_recovery_accumulator",0.0)))
 	training_program=(payload.get("training_program",{}) as Dictionary).duplicate(true)
+	if not payload.has("training_timing_version") and not training_program.is_empty():
+		training_program.duration_days=float(training_program.get("duration_days",1))*6.0
+		training_program.progress_days=float(training_program.get("progress_days",0))*6.0
 	last_training_program=(payload.get("last_training_program",{}) as Dictionary).duplicate(true)
 	command_development={"command":0.0,"tactics":0.0,"logistics":0.0,"resolve":0.0}
 	for command_skill in (payload.get("command_development",{}) as Dictionary):
@@ -3805,7 +3837,10 @@ func exercise_personnel()->int:
 func _training_program_participants(definition:Dictionary)->int:
 	if String(definition.get("scope","army"))=="command":
 		return mini(maxi(0,int(GameState.population_allocations.get("Defense",0))),maxi(1,ceili(float(exercise_personnel())*0.012)))
-	return exercise_personnel()
+	var total:=0
+	for force in _exercise_forces():
+		for formation:Dictionary in force.get("formations",[]):total+=int(formation.get("training_attending",0))
+	return total
 
 
 func _ensure_training_program_state()->void:
@@ -3816,10 +3851,16 @@ func _ensure_training_program_state()->void:
 
 
 func _process_training_program_day()->void:
+	if int(training_staff.data.army_last_day)==last_processed_day:return
+	training_staff.data.army_last_day=last_processed_day
 	_ensure_training_program_state()
+	var can_train:bool=training_staff.prepare_army_day()
 	for force in [home_army]+field_armies:
 		var decay:=0.00010 if not training_program.is_empty() and force in _exercise_forces() else 0.00045
 		force["exercise_readiness_bonus"]=move_toward(float(force.get("exercise_readiness_bonus",0.0)),0.0,decay)
+	if not can_train:
+		_refresh_readiness()
+		return
 	if training_program.is_empty(): return
 	var program_id:=String(training_program.get("id",""))
 	if not TRAINING_PROGRAMS.has(program_id):
@@ -3840,7 +3881,7 @@ func _process_training_program_day()->void:
 		_refresh_readiness()
 		return
 	var required_food:=float(participants)*float(definition.food_per_participant)
-	var available_food:=FoodSystem.total_stored()
+	var available_food:=training_staff.spendable_food()
 	var food_taken:=FoodSystem.issue_for_obligation(minf(required_food,available_food),"military_training","%s â€¢ %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
 	var ration_coverage:=clampf(food_taken/maxf(0.001,required_food),0.0,1.0) if required_food>0.0 else 1.0
 	var supply_coverage:=field_provision_delivery_ratio() if String(definition.scope)=="army" else clampf(0.45+float(GameState.society_capacities.get("institutions",0.25))*0.30+float(GameState.society_capacities.get("logistics",0.16))*0.25,0.0,1.0)
@@ -3849,6 +3890,7 @@ func _process_training_program_day()->void:
 	var efficiency:=clampf(instruction*ration_coverage*(0.45+supply_coverage*0.55),0.0,1.20)
 	training_program["food_required_total"]=float(training_program.get("food_required_total",0.0))+required_food
 	training_program["food_consumed_total"]=float(training_program.get("food_consumed_total",0.0))+food_taken
+	training_staff.record_food("army",food_taken)
 	training_program["last_efficiency"]=efficiency
 	training_program["paused_reason"]="" if efficiency>=0.05 else "Paused by an acute ration or delivery shortfall."
 	if efficiency<0.05:
@@ -3862,9 +3904,10 @@ func _process_training_program_day()->void:
 		var force_formations:Array=force.get("formations",[])
 		for formation_index in force_formations.size():
 			var formation:Dictionary=force_formations[formation_index]
-			formation["training"]=clampf(float(formation.get("training",0.4))+float(definition.training_gain)*progress_fraction,0.0,1.15)
-			formation["experience"]=clampf(float(formation.get("experience",0.0))+float(definition.experience_gain)*progress_fraction,0.0,1.0)
-			formation["personnel_condition"]=clampf(float(formation.get("personnel_condition",1.0))-float(definition.fatigue_per_day)*efficiency,0.0,1.0)
+			var attendance:=float(formation.get("training_attending",0))/maxf(1,int(formation.get("count",0)))
+			formation["training"]=minf(maxf(float(formation.get("training",0.4)),float(training_staff.policy("army").target)),float(formation.get("training",0.4))+float(definition.training_gain)*progress_fraction*attendance)
+			formation["experience"]=clampf(float(formation.get("experience",0.0))+float(definition.experience_gain)*progress_fraction*attendance,0.0,1.0)
+			formation["personnel_condition"]=clampf(float(formation.get("personnel_condition",1.0))-float(definition.fatigue_per_day)*efficiency*attendance,0.0,1.0)
 			force_formations[formation_index]=formation
 		force["formations"]=force_formations
 		force["exercise_readiness_bonus"]=clampf(float(force.get("exercise_readiness_bonus",0.0))+float(definition.readiness_gain)*progress_fraction,0.0,0.20)
@@ -3873,7 +3916,7 @@ func _process_training_program_day()->void:
 	for skill in (definition.get("command_gain",{}) as Dictionary):
 		command_development[skill]=clampf(float(command_development.get(skill,0.0))+float(definition.command_gain[skill])*progress_fraction*command_focus_multiplier,0.0,0.30)
 	var issued_equipment:=0
-	for formation in formations: issued_equipment+=maxi(0,int(formation.get("equipment",0)))
+	for formation in formations: issued_equipment+=roundi(maxi(0,int(formation.get("equipment",0)))*float(formation.get("training_attending",0))/maxf(1,int(formation.get("count",0))))
 	training_program["wear_accumulator"]=float(training_program.get("wear_accumulator",0.0))+float(issued_equipment)*float(definition.wear_rate)*efficiency
 	var worn:=floori(float(training_program.wear_accumulator))
 	if worn>0:
@@ -3892,7 +3935,7 @@ func _apply_exercise_equipment_wear(requested:int)->int:
 		for formation_index in formations.size():
 			if remaining<=0: break
 			var formation:Dictionary=formations[formation_index]
-			var damaged:=mini(remaining,maxi(0,int(formation.get("equipment",0))))
+			var damaged:=mini(remaining,mini(int(formation.get("training_attending",0)),maxi(0,int(formation.get("equipment",0)))))
 			if damaged<=0: continue
 			formation["equipment"]=int(formation.get("equipment",0))-damaged
 			var weapon:=String(formation.get("weapon","improvised"))
@@ -3920,7 +3963,12 @@ func _complete_training_program(definition:Dictionary)->void:
 
 func _process_training_day()->void:
 	if training_queue.is_empty(): return
-	var training_rate:=_effective_training_rate(_queued_trainees())
+	var policy:Dictionary=training_staff.policy("army")
+	if float(policy.intake)<=0 or training_staff.spendable_food()<=0:return
+	var rations:=float(_queued_trainees())*.18*float(policy.intake)
+	var paid:=FoodSystem.issue_for_obligation(minf(rations,training_staff.spendable_food()),"military_training","Initial army instruction",1.0,_queued_trainees())
+	training_staff.record_food("army",paid)
+	var training_rate:=_effective_training_rate(_queued_trainees())*float(policy.intake)*clampf(paid/maxf(.001,rations),0,1)
 	var training_equipment_budget:=military_inventory.duplicate(true)
 	for index in range(training_queue.size()-1,-1,-1):
 		var training:Dictionary=training_queue[index]
@@ -4686,6 +4734,10 @@ func training_progress_snapshot()->Dictionary:
 	var trainees:=_queued_trainees()
 	var capacity:=training_capacity()
 	var base_rate:=_effective_training_rate(trainees)
+	var policy:Dictionary=training_staff.policy("army")
+	var ration_bill:=float(trainees)*.18*float(policy.intake)
+	var funding:=clampf(training_staff.spendable_food()/maxf(.001,ration_bill),0,1)
+	base_rate*=float(policy.intake)*funding
 	for index in range(training_queue.size()-1,-1,-1):
 		var order:Dictionary=training_queue[index]
 		var weapon:=String(order.get("weapon","improvised"))
@@ -4697,6 +4749,8 @@ func training_progress_snapshot()->Dictionary:
 		var rate:=base_rate*(floor_access+(1-floor_access)*access)
 		var progress:=float(order.get("progress_days",0)); var required:=maxf(1,float(order.get("required_days",1)))
 		var reasons:Array[String]=[]
+		if policy.id=="suspended":reasons.append("Instruction suspended by training policy")
+		elif funding<1:reasons.append("Staff protecting civilian food reserves")
 		if trainees>capacity: reasons.append("Crowded classes: %d trainees / %d places" % [trainees,capacity])
 		if access<.999: reasons.append("Limited practice equipment: %d of %d" % [examples,needed])
 		if reasons.is_empty(): reasons.append("Normal instruction pace")

@@ -914,7 +914,7 @@ static func equipment_for(unit:String)->Array:
 	return (archetype(unit).get("equipment",["improvised"]) as Array)
 
 static func training_days(unit:String)->float:
-	return float(archetype(unit).get("training_days",21))
+	return maxf(45.0,float(archetype(unit).get("training_days",21))*3.0)
 
 static func lineage_for(unit:String)->String:
 	return String(archetype(unit).get("lineage",""))

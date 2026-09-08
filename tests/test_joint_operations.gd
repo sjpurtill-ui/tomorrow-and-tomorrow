@@ -58,6 +58,9 @@ func test_joint_save_round_trip_and_corruption_rejection_are_transactional()->vo
 	assert_bool(operations.state.has("next_id")).is_true()
 
 func test_training_daily_clock_does_not_repeat_same_day()->void:
+	GameState.food_stocks={"Preserved food":10000.0}
+	GameState.resource_stockpiles["Fiber Plants"]=1000.0
+	GameState.resource_stockpiles["Bitumen"]=1000.0
 	var receipt:Dictionary=operations.commission(base_id,"observation_balloon",1)
 	operations.advance(1)
 	var trained:=float(operations.force(receipt.id).training)

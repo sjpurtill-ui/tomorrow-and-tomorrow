@@ -79,16 +79,19 @@ func test_exercises_include_assembled_home_armies_and_exclude_marching_armies()-
 	var deployed:=MilitaryCampaign.create_field_army(25)
 	assert_bool(deployed.has("ok")).is_true()
 	assert_int(MilitaryCampaign.exercise_personnel()).is_equal(40)
+	MilitaryCampaign.field_armies[0].formations[0].training=.20
 	var field_before:=float(MilitaryCampaign.field_armies[0].formations[0].training)
 	assert_bool(MilitaryCampaign.start_training_program("reconnaissance_drill").has("ok")).is_true()
+	MilitaryCampaign.last_processed_day=1
 	MilitaryCampaign._process_training_program_day()
 	assert_float(float(MilitaryCampaign.field_armies[0].formations[0].training)).is_greater(field_before)
-	assert_int(int(MilitaryCampaign.training_program.participants)).is_equal(40)
+	assert_int(int(MilitaryCampaign.training_program.participants)).is_equal(10)
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(40)
 	MilitaryCampaign.field_armies[0]["status"]="moving"
 	field_before=float(MilitaryCampaign.field_armies[0].formations[0].training)
+	MilitaryCampaign.last_processed_day=2
 	MilitaryCampaign._process_training_program_day()
-	assert_int(int(MilitaryCampaign.training_program.participants)).is_equal(15)
+	assert_int(int(MilitaryCampaign.training_program.participants)).is_equal(3)
 	assert_float(float(MilitaryCampaign.field_armies[0].formations[0].training)).is_equal(field_before)
 
 func test_shared_skill_transfer_is_idempotent_and_works_for_all_archetypes()->void:

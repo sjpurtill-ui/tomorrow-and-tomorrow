@@ -2971,11 +2971,8 @@ func _advance_rival_military_training(civ:Dictionary,allocations:Dictionary,war_
 	# This remains one fixed record per civilization, never an officer or unit list.
 	var focus:=_rival_training_focus(civ)
 	var military_allocation:=clampf(float(allocations.get("military",0.0)),0.0,1.0)
-	var food_coverage:=clampf(float(civ.get("food_days",0.0))/30.0,0.0,1.0)
 	var logistics:=clampf(float(civ.get("logistics",0.2)),0.0,1.0)
 	var institutions:=clampf(float(civ.get("institutions",0.2)),0.0,1.0)
-	var intensity:=clampf(military_allocation*(0.48+food_coverage*0.27+logistics*0.15+institutions*0.10),0.0,0.65)
-	var founding_effects:Dictionary=GameState.founding_focus_definition(String(civ.get("founding_focus","provision"))).get("effects",{})
 	var tiers:Dictionary=civ.get("progression_tiers",{})
 	var era:Dictionary=MILITARY_DEVELOPMENT.era_for_tiers(int(tiers.get("security",0)),int(tiers.get("production",0)),int(tiers.get("logistics",0)),int(tiers.get("institutions",0)))
 	var production_lines:=int(era.get("production_lines",1))
@@ -2983,21 +2980,40 @@ func _advance_rival_military_training(civ:Dictionary,allocations:Dictionary,war_
 	var replacement_demand:=float(civ.get("military_population",0.0))*(0.0025+war_pressure*0.0035)
 	var stockpile:=maxf(0.0,float(civ.get("military_stockpile",0.0))+military_output-replacement_demand)
 	var equipment_coverage:=clampf((military_output+stockpile*0.08)/maxf(1.0,replacement_demand+float(civ.get("military_population",0.0))*0.0015),0.0,1.0)
-	intensity=clampf(intensity*(1.0+float(founding_effects.get("training_rate",0.0))+ProgressionSystem.rival_effect(civ,"warfare_readiness")),0.0,0.84)
-	var profile:Dictionary={
-		"camp_drill":{"readiness":0.032,"command":0.010,"food_days":0.20,"wear":0.00020},
-		"field_exercise":{"readiness":0.044,"command":0.022,"food_days":0.55,"wear":0.00055},
-		"staff_exercise":{"readiness":0.024,"command":0.050,"food_days":0.16,"wear":0.00018},
-		"war_games":{"readiness":0.055,"command":0.042,"food_days":0.82,"wear":0.00085}
-	}.get(focus,{})
-	var readiness_gain:=float(profile.get("readiness",0.0))*intensity
-	var command_gain:=float(profile.get("command",0.0))*intensity
-	civ["military_readiness"]=clampf(float(civ.get("military_readiness",0.38))+readiness_gain+float(civ.get("production",0.1))*0.0010+equipment_coverage*0.0015-war_pressure*0.002-0.0015,0.08,1.0)
-	civ["command_readiness"]=clampf(float(civ.get("command_readiness",0.35))+command_gain-war_pressure*0.0015-0.0008,0.08,1.0)
-	civ["food_days"]=maxf(0.0,float(civ.get("food_days",0.0))-float(profile.get("food_days",0.0))*intensity)
-	civ["production"]=clampf(float(civ.get("production",0.1))-float(profile.get("wear",0.0))*intensity,0.02,1.0)
+	# Both sides use the same standing-policy share, course duration, gain and
+	# resource rates. Rival economy is aggregate, so food is charged in days of
+	# civilian consumption and equipment wear against its military stores.
+	var staff=MilitaryCampaign.training_staff
+	var policy_id:=String(staff.rival_policy(civ))
+	var policy:Dictionary=staff.POLICIES[policy_id]
+	var definition:Dictionary=MilitaryCampaign.TRAINING_PROGRAMS.get(focus,MilitaryCampaign.TRAINING_PROGRAMS.camp_drill)
+	var known:Array=civ.get("discovery_profile",{}).get("technologies",[])
+	if String(definition.get("required_discovery",""))!="" and String(definition.required_discovery) not in known:
+		focus="camp_drill";definition=MilitaryCampaign.TRAINING_PROGRAMS.camp_drill
+	var proficiency:=float(civ.get("military_proficiency",civ.get("military_readiness",.38)))
+	var participants:=land_military_population(civ)*float(policy.share)
+	if proficiency>=float(policy.target):participants=0
+	var food_bill:=participants*float(definition.food_per_participant)*STRATEGIC_TURN_DAYS/maxf(1,float(civ.population)*.9)
+	var wear_bill:=participants*float(definition.wear_rate)*STRATEGIC_TURN_DAYS
+	var instruction:=clampf((.48+float(civ.get("command_readiness",.35))*.22+institutions*.20)*(.45+logistics*.55),0,1.2)
+	var funded:bool=participants>0 and float(civ.get("food_days",0))-food_bill>=staff.RESERVE_DAYS and stockpile>=wear_bill
+	if funded:
+		var progress:=STRATEGIC_TURN_DAYS*instruction/float(definition.duration_days)
+		var gain:=float(definition.training_gain)*progress*float(policy.share)
+		proficiency=minf(float(policy.target),proficiency+gain)
+		civ["food_days"]=float(civ.food_days)-food_bill
+		stockpile-=wear_bill
+		civ["training_progress"]=float(civ.get("training_progress",0))+STRATEGIC_TURN_DAYS*instruction
+		var duration:=float(definition.duration_days)
+		if float(civ.training_progress)>=duration:
+			civ["training_cycles"]=int(civ.get("training_cycles",0))+1
+			civ.training_progress=fmod(float(civ.training_progress),duration)
+		var command_gain:=float(definition.get("command_gain",{}).get("command",0))*progress
+		civ["command_readiness"]=clampf(float(civ.get("command_readiness",.35))+command_gain,0.08,1.0)
+	civ["military_proficiency"]=proficiency
+	civ["military_readiness"]=clampf(move_toward(float(civ.get("military_readiness",.38)),proficiency*equipment_coverage,.005)-war_pressure*.002,0.08,1.0)
+	civ["training_policy"]=policy_id
 	civ["training_focus"]=focus
-	civ["training_cycles"]=maxi(0,int(civ.get("training_cycles",0)))+1
 	civ["military_era"]=String(era.get("id","founding"))
 	civ["military_era_tier"]=int(era.get("tier",0))
 	civ["military_production_lines"]=production_lines

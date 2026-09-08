@@ -120,7 +120,8 @@ func commission_quote(base_id:int,type_id:String,count:int)->Dictionary:
 	if int(host.military_inventory.get(String(unit.equipment),0))<count:return {"error":"Produce %d %s first; only %d in reserve." % [count,unit.label,int(host.military_inventory.get(String(unit.equipment),0))]}
 	var needed:=count*int(unit.crew)
 	if needed>maxi(0,host.recruitment_capacity()-host._mobilized_count()):return {"error":"This force needs %d crew; %d military service places are free." % [needed,maxi(0,host.recruitment_capacity()-host._mobilized_count())]}
-	return {"ok":true,"crew":needed,"reserve":int(host.military_inventory.get(String(unit.equipment),0)),"training_days":int(unit.training_days)}
+	var policy:Dictionary=host.training_staff.policy(String(unit.domain))
+	return {"ok":true,"crew":needed,"reserve":int(host.military_inventory.get(String(unit.equipment),0)),"training_days":ceili(host.training_staff.service_days(float(unit.training_days))/maxf(.001,float(policy.intake))) if policy.id!="suspended" else -1}
 
 func commission(base_id:int,type_id:String,count:int,name:String="")->Dictionary:
 	var quote:=commission_quote(base_id,type_id,count)
@@ -224,7 +225,7 @@ func _hostile(a:String,b:String)->bool:
 func _power(record:Dictionary,key:String)->float:
 	var value:=0.0
 	for id:String in record.units:value+=float(C.UNITS[id].get(key,0))*int(record.units[id])
-	return value*float(record.condition)*(.5+.5*float(record.training))*float(record.efficiency)
+	return value*float(record.condition)*(.5+.5*float(record.training))*(.7+.3*float(record.get("proficiency",.45)))*float(record.efficiency)
 func _event(message:String,domain:String="")->void:
 	state.events.push_front({"day":int(state.last_day),"text":message,"domain":domain})
 	if state.events.size()>80:state.events.resize(80)
@@ -324,6 +325,10 @@ func merge_forces(first_id:int,second_id:int)->Dictionary:
 	if first.domain=="air" and first.units.keys()!=second.units.keys():return {"error":"An air wing uses one compatible aircraft type."}
 	for id:String in second.units:
 		if int(first.authorized.get(id,0))+int(second.authorized[id])>100:return {"error":"Split this larger force into additional task forces or wings."}
+	var first_crew:=crew(first);var second_crew:=crew(second)
+	first.proficiency=(float(first.get("proficiency",.45))*first_crew+float(second.get("proficiency",.45))*second_crew)/maxf(1,first_crew+second_crew)
+	first.staff_training_day=maxi(int(first.get("staff_training_day",-1)),int(second.get("staff_training_day",-1)))
+	first.training_fuel_fraction=float(first.get("training_fuel_fraction",0))+float(second.get("training_fuel_fraction",0))
 	for id:String in second.units:
 		first.units[id]=int(first.units.get(id,0))+int(second.units[id]);first.authorized[id]=int(first.authorized.get(id,0))+int(second.authorized[id])
 	first.training=minf(float(first.training),float(second.training));first.condition=minf(float(first.condition),float(second.condition))
@@ -378,9 +383,11 @@ func readiness(id:int,region:Dictionary={})->Dictionary:
 	result.missing_equipment=missing
 	if hardware(record)==0:blockers.append("No equipment — produce replacements for this force.")
 	var training_days:=1.0
-	for type_id:String in record.units:training_days=maxf(training_days,float(C.UNITS[type_id].training_days))
+	for type_id:String in record.units:training_days=maxf(training_days,host.training_staff.service_days(float(C.UNITS[type_id].training_days))/maxf(.001,float(host.training_staff.policy(String(record.domain),String(record.owner)).intake)))
 	result.training_days=ceili((1.0-float(record.training))*training_days)
-	if int(result.training_days)>0:blockers.append("Training: %d days remaining." % int(result.training_days))
+	if float(record.training)<1 and host.training_staff.policy(String(record.domain),String(record.owner)).id=="suspended":
+		result.training_days=-1;blockers.append("Initial instruction is suspended by service policy.")
+	elif int(result.training_days)>0:blockers.append("Training: about %d days before supply and base-capacity delays." % int(result.training_days))
 	if bool(record.get("repairing",false)) or float(record.condition)<float(record.repair_threshold):blockers.append("Repairs required at home base before resuming the mission.")
 	if not record.get("route",[]).is_empty():blockers.append("Under way — mission starts after arrival.")
 	if area.is_empty():blockers.append("No region assigned — draw or select a region on the map.")
@@ -455,10 +462,7 @@ func advance(day:int)->void:
 		if hardware(record)==0:record.position=origin.position.duplicate(true);record.route=[]
 		if at_base or hardware(record)==0:_replace(record)
 		if crew(record)<=0:record.status="Waiting for replacement equipment and crew";continue
-		if float(record.training)<1.0:
-			var days:=1.0
-			for id:String in record.units:days=maxf(days,float(C.UNITS[id].training_days))
-			record.training=minf(1,float(record.training)+1.0/days);record.status="Training crews · %d%%" % roundi(float(record.training)*100);continue
+		if host.training_staff.service_training(record,origin,day):continue
 		if float(record.condition)<float(record.repair_threshold):record["repairing"]=true
 		if bool(record.get("repairing",false)) and not logistics.busy(int(record.id)):
 			if not at_base:
@@ -502,7 +506,7 @@ func advance(day:int)->void:
 		if record.region.is_empty():record.status="Choose an operating region";continue
 		var factors:=mission_factors(record,record.region,day)
 		if float(factors.coverage)<=0:record.status="Area outside current base range";continue
-		record.efficiency=float(factors.efficiency)
+		record.efficiency=float(factors.efficiency)*(1.0-float(record.get("training_attending",0))/maxf(1,crew(record))*.5)
 		record.status="On mission · %d%% efficiency" % roundi(float(record.efficiency)*100)
 		record.experience=minf(1,float(record.experience)+.001)
 	_detect_and_fight()
@@ -650,7 +654,7 @@ func validate(payload:Variant)->String:
 		for id in record.units:
 			if not C.UNITS.has(id) or C.UNITS[id].domain!=record.domain or not _whole_number(record.units[id],0):return "Invalid joint-force equipment."
 			if not _whole_number(record.authorized.get(id,-1),0) or int(record.authorized[id])<int(record.units[id]) or int(record.authorized[id])>100:return "Invalid authorized equipment."
-		for field in ["training","condition","efficiency","experience","damage"]:
+		for field in ["training","condition","efficiency","experience","damage","proficiency"]:
 			var value:Variant=record.get(field,0)
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0:return "Invalid joint-force condition."
 			if field!="damage" and float(value)>1:return "Invalid joint-force readiness."

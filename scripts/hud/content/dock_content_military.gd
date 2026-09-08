@@ -28,6 +28,11 @@ func meta()->Dictionary:
 		"subtabs":["FORCES","RECRUIT & DEPLOY","TRAINING","SUPPLY"],
 	}
 
+func open_expanded_tab(sub:int)->bool:
+	if GeneralCampaign.active or sub not in [0,2]:return false
+	MilitaryCampaign.open_roster("army",sub==2)
+	return true
+
 func tab(sub:int)->Dictionary:
 	if GeneralCampaign.active:
 		return {"kpis":[],"blocks":[{"type":"text","heading":"YOUR GENERAL HAS THE FIELD","text":"Set objectives in conversation. Your general handles movement, camps, supply and battle execution."},{"type":"actions","items":[{"label":"TALK TO YOUR GENERAL","on_press":func():GeneralCampaign.open_screen()}]}]}
@@ -51,7 +56,7 @@ func tab(sub:int)->Dictionary:
 		1: return {"kpis":[kpis[0],kpis[1]],"blocks":_builds_blocks(capabilities)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_training_blocks()}
 		3: return {"kpis":[kpis[3]],"blocks":_supply_overview()}
-	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"UNITS & EQUIPMENT MAP","sub":"50 land archetypes and the separate naval and air chains","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},{"label":"NAVAL COMMAND","sub":"Fleets, ports and sea missions on the world map · Shift+F5","on_press":func():MilitaryCampaign.joint_operations.open_service("navy")},{"label":"AIR COMMAND","sub":"Airbases, wings and air regions on the world map · Shift+F6","on_press":func():MilitaryCampaign.joint_operations.open_service("air")}]}]+_campaign_entry()+_forces_overview()}
+	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"ALL FORCES & TRAINING STRATEGY","sub":"Large roster, skills and staff-managed training","on_press":func():MilitaryCampaign.open_roster()},{"label":"UNITS & EQUIPMENT MAP","sub":"50 land archetypes and the separate naval and air chains","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},{"label":"NAVAL COMMAND","sub":"Fleets, ports and sea missions on the world map · Shift+F5","on_press":func():MilitaryCampaign.joint_operations.open_service("navy")},{"label":"AIR COMMAND","sub":"Airbases, wings and air regions on the world map · Shift+F6","on_press":func():MilitaryCampaign.joint_operations.open_service("air")}]}]+_campaign_entry()+_forces_overview()}
 
 func _command_brief()->Dictionary:
 	if not MilitaryCampaign.pending_aftermath.is_empty() and not MilitaryCampaign.battle_history.is_empty():
@@ -155,7 +160,7 @@ func _formation_blocks(army:Dictionary)->Array:
 	blocks.append({"type":"tiles","heading":"SETTLEMENT DEFENSE","items":[
 		{"label":"WORKS","value":String(defense.get("short","Open ground")),"note":"integrity %d%%" % roundi(float(defense.get("integrity",0.0))*100.0),"note_color":Tokens.RED if float(defense.get("integrity",0.0))<0.4 else Tokens.MUTED,"tip":String(defense.get("description",""))},
 		{"label":"LOOKOUT","value":"%.0f km" % float(defense.get("observation_radius_km",0.0)),"note":"observation reach","note_color":Tokens.MUTED,"tip":"How far approaching forces are seen"},
-		{"label":"GARRISON","value":"%d/%d" % [int(defense.get("garrison_personnel",0)),int(defense.get("garrison_required",0))],"note":"%d trained · %d militia" % [int(defense.get("garrison_trained",0)),int(defense.get("garrison_militia",0))],"note_color":Tokens.GREEN if float(defense.get("garrison_coverage",0.0))>=1.0 else Tokens.AMBER,"tip":"The local Defense allocation always mans the watch and receives automatic basic training. Advanced formations and exercises remain under your control."},
+		{"label":"GARRISON","value":"%d/%d" % [int(defense.get("garrison_personnel",0)),int(defense.get("garrison_required",0))],"note":"%d trained · %d militia" % [int(defense.get("garrison_trained",0)),int(defense.get("garrison_militia",0))],"note_color":Tokens.GREEN if float(defense.get("garrison_coverage",0.0))>=1.0 else Tokens.AMBER,"tip":"The local Defense allocation always mans the watch and receives automatic basic training. Army builds set the desired force; staff manage exercises under your training policy."},
 		{"label":"STORES","value":"%d%%" % roundi(float(MilitaryCampaign.store_protection().get("total",MilitaryCampaign.store_protection().get("protection",0.0)))*100.0),"note":"protected share","note_color":Tokens.MUTED,"tip":"Share of the food reserve protected from raids"},
 	]})
 	return blocks
@@ -356,28 +361,13 @@ func _personnel_text()->String:
 	return "%d total = %d home reserve + %d in field armies + %d occupation + %d recruits + %d in training + %d recovering + %d missing or captured + %d naval and air crew.\nDefense workers are a labor allocation, not additional soldiers." % [ledger.total,ledger.home,ledger.field,ledger.occupation,ledger.recruits,ledger.training,ledger.recovering,ledger.missing,ledger.naval_air]
 
 func _training_blocks()->Array:
-	var state:=MilitaryCampaign.training_program_snapshot()
-	var active:Dictionary=state.active
-	var participants:=MilitaryCampaign.exercise_personnel()
-	var blocks:Array=[_personnel_block(),{"type":"text","heading":"IMPROVE EXISTING SOLDIERS","text":"%d trained soldiers can exercise here: home reserves and field armies stationed at home. Marching and distant armies do not attend. Exercises improve skills; they do not recruit more people. Command practice is shared across unit types and future formations." % participants}]
-	var skills:Array=[]
-	var descriptions:Dictionary={"command":"coordination and orders","tactics":"combat decisions","logistics":"supply and recovery","resolve":"holding morale under pressure"}
-	for skill in descriptions:
-		skills.append({"name":String(skill).capitalize(),"sub":descriptions[skill],"value":"+%.1f / 30" % (float(state.command_development.get(skill,0.0))*100.0),"live_value":func()->String: return "+%.1f / 30" % (float(MilitaryCampaign.command_development.get(skill,0))*100),"accent":Tokens.TEAL})
-	blocks.append({"type":"rows","heading":"SHARED COMMAND SKILLS","items":skills})
-	# Live text updates in place even while hover/focus protects the dock from
-	# structural rebuilds. Keep a status target through start and completion.
-	blocks.append({"type":"text","heading":"CURRENT EXERCISE","text":_exercise_progress_text(),"live_text":_exercise_progress_text})
-	blocks.append({"type":"actions","items":[{"label":"CANCEL EXERCISE","disabled":active.is_empty(),"live_disabled":func()->bool:return MilitaryCampaign.training_program.is_empty(),"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.cancel_training_program())}]})
-	for id in state.catalog:
-		var program:Dictionary=state.catalog[id]
-		var gains:Array[String]=[]
-		for skill in program.command_gain: gains.append("%s +%.1f" % [String(skill).capitalize(),float(program.command_gain[skill])*100.0])
-		var attendees:=MilitaryCampaign._training_program_participants(program)
-		blocks.append({"type":"text","heading":String(program.label),"text":"%s\n%s · formation training +%.1f points.\n%d attending · %.0f effective days · %.2f extra rations/day · fatigue and equipment wear apply.%s" % [program.description,", ".join(gains),float(program.training_gain)*100.0,attendees,float(program.duration_days),attendees*float(program.food_per_participant),"" if bool(program.unlocked) else "\n"+String(program.reason)]})
-		var program_id:=String(id)
-		blocks.append({"type":"actions","items":[{"label":"START "+String(program.label),"disabled":not active.is_empty() or not bool(program.unlocked),"live_disabled":func()->bool:return not MilitaryCampaign.training_program.is_empty() or MilitaryCampaign._training_program_gate(program_id,true).has("error"),"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.start_training_program(program_id))}]})
-	return blocks
+	var policy:Dictionary=MilitaryCampaign.training_staff.snapshot("army")
+	var choices:Array=[]
+	for id:String in MilitaryCampaign.training_staff.POLICIES:
+		var definition:Dictionary=MilitaryCampaign.training_staff.POLICIES[id]
+		var choice:=id
+		choices.append({"label":String(definition.label).to_upper(),"sub":"%d%% rotating · %d%% drill target" % [definition.share*100,definition.target*100],"on_press":func():terrain._report_military_action(MilitaryCampaign.training_staff.set_policy("army",choice))})
+	return [{"type":"actions","items":[{"label":"OPEN TRAINING STRATEGY","sub":"Large policy view and all-unit roster","on_press":func():MilitaryCampaign.open_roster("army",true)}]},{"type":"text","heading":"HOW MUCH SHOULD WE TRAIN?","text":"Army staff choose and rotate units automatically. Training is a sustained investment in food, equipment and time. Current policy: "+String(policy.label)},{"type":"actions","items":choices},{"type":"text","heading":"STAFF REPORT","text":String(policy.status),"live_text":func()->String:return String(MilitaryCampaign.training_staff.snapshot("army").status)},{"type":"text","heading":"CURRENT EXERCISE","text":_exercise_progress_text(),"live_text":_exercise_progress_text}]
 
 func _exercise_progress_text()->String:
 	var active:Dictionary=MilitaryCampaign.training_program
@@ -385,7 +375,7 @@ func _exercise_progress_text()->String:
 		return "%s\n%d attending · %.1f / %.0f effective days · %.1f extra rations used. %s" % [String(active.label),int(active.participants),float(active.progress_days),float(active.duration_days),float(active.food_consumed_total),String(active.paused_reason)]
 	var completed:Dictionary=MilitaryCampaign.last_training_program
 	if not completed.is_empty():return "No exercise is active. Last completed: %s on day %d." % [String(completed.get("label","Exercise")),int(completed.get("completed_day",0))]
-	return "No exercise is active. Choose an available exercise for trained soldiers at home."
+	return String(MilitaryCampaign.training_staff.snapshot("army").status)
 
 func _build_status(template_id:int)->String:
 	for item:Dictionary in MilitaryCampaign.army_template_snapshot().templates:

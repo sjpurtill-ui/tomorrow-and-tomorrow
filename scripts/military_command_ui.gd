@@ -468,19 +468,11 @@ func _training_program_tooltip(program:Dictionary)->String:
 
 
 func _update_training_program_choice()->void:
-	if training_program_choice==null or training_program_button==null or training_program_choice.selected<0: return
-	var active:Dictionary=(MilitaryCampaign.training_program_snapshot().get("active",{}) as Dictionary)
-	if not active.is_empty():
-		training_program_button.text="CANCEL EXERCISE"
-		training_program_button.disabled=false
-		training_program_button.tooltip_text="Cancel the active program. Earned preparation remains, but spent food and equipment wear are not recovered."
-		return
-	var program_id:=String(training_program_choice.get_item_metadata(training_program_choice.selected))
-	var catalog:Dictionary=MilitaryCampaign.training_program_catalog()
-	var program:Dictionary=catalog.get(program_id,{})
-	training_program_button.text="START PROGRAM"
-	training_program_button.disabled=not bool(program.get("unlocked",false))
-	training_program_button.tooltip_text=_training_program_tooltip(program)
+	if training_program_choice==null or training_program_button==null:return
+	training_program_choice.visible=false
+	training_program_button.text="TRAINING STRATEGY"
+	training_program_button.disabled=false
+	training_program_button.tooltip_text="Set a standing policy. Army staff choose exercises and rotate units automatically."
 
 
 func _add_choice(choice:OptionButton,id:String,gate:Dictionary)->void:
@@ -814,12 +806,7 @@ func _start_training()->void:
 
 
 func _training_program_action()->void:
-	var active:Dictionary=(MilitaryCampaign.training_program_snapshot().get("active",{}) as Dictionary)
-	if not active.is_empty():
-		_report(MilitaryCampaign.cancel_training_program())
-		return
-	if training_program_choice.selected<0: return
-	_report(MilitaryCampaign.start_training_program(String(training_program_choice.get_item_metadata(training_program_choice.selected))))
+	MilitaryCampaign.open_roster("army",true)
 
 
 func _queue_production()->void:

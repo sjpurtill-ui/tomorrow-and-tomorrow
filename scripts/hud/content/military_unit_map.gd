@@ -21,7 +21,7 @@ func tab(sub:int)->Dictionary:
 		if not parent.is_empty():description+="\nDevelops from "+String(entries[parent].label)+"."
 		description+="\n"+" · ".join(stocks)
 		if not bool(gate.unlocked):description+="\n"+String(gate.reason)
-		elif sub==0:description+="\n%d days of training; fielding also requires people and equipment." % int(unit.training_days)
+		elif sub==0:description+="\n%d days of training; fielding also requires people and equipment." % int(Land.training_days(id))
 		else:description+="\n%d crew per craft · %d km range · %d fuel per day." % [unit.crew,unit.range_km,unit.fuel_per_day]
 		rows.append({"name":String(unit.label),"sub":description,"value":"KNOWN" if bool(gate.unlocked) else "LOCKED","value_color":Tokens.TEAL if bool(gate.unlocked) else Tokens.MUTED})
 	return {"kpis":[],"blocks":[{"type":"text","text":"50 land archetypes plus separate naval and air branches. Any civilization can develop these capabilities. Older forms remain available; a new discovery does not replace an existing force."},{"type":"rows","items":rows}]}
