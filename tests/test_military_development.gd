@@ -36,6 +36,11 @@ func test_military_era_requires_security_and_supporting_research_scale()->void:
 	for domain in ["security","production","logistics","institutions"]: ProgressionSystem.domain_levels[domain]=6
 	var capabilities:=MilitaryCampaign.military_capabilities()
 	assert_str(String(capabilities.development.id)).is_equal("national")
+	assert_bool(bool(capabilities.units.armored_formation.unlocked)).is_false()
+	assert_bool(bool(capabilities.equipment.modern_field_gun.unlocked)).is_false()
+	for id:String in ["armored_vehicles","indirect_fire"]:
+		GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
+	capabilities=MilitaryCampaign.military_capabilities()
 	assert_bool(bool(capabilities.units.armored_formation.unlocked)).is_true()
 	assert_bool(bool(capabilities.equipment.modern_field_gun.unlocked)).is_true()
 
@@ -72,6 +77,7 @@ func test_rival_military_industry_uses_the_same_supporting_domain_cap()->void:
 
 func test_industrial_production_lines_run_in_parallel_and_remain_bounded()->void:
 	for domain in ["security","production","logistics","institutions"]: ProgressionSystem.domain_levels[domain]=6
+	GameState.known_discoveries.append("metallic_cartridges");GameState.discovery_adoption["metallic_cartridges"]=1.0
 	GameState.population_allocations["Crafting"]=10
 	var first:=MilitaryCampaign.queue_equipment_production("service_rifle",1000)
 	var second:=MilitaryCampaign.queue_consumable_production("small_arms_ammunition",10_000)

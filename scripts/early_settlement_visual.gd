@@ -1,6 +1,7 @@
 extends RefCounted
 ## Built-form adapter: observes completed plot records, never unlocks construction.
 ## No population, calendar, stockpile, or research lookup can restyle an old house.
+const LATE := preload("res://scripts/settlement_architecture_kit.gd")
 const TOWN := preload("res://scripts/organic_town_visual.gd")
 const KIT := ["carried_ridge", "carried_round", "rooted_lean_to", "round_household", "earthen_household", "rubble_household", "raised_store", "covered_workshop"]
 # Only recorded early forms belong in this adapter. Later/unknown forms retain
@@ -11,6 +12,8 @@ static var meshes: Dictionary = {}
 static var material: StandardMaterial3D
 
 static func kind(plot: Dictionary) -> String:
+	var late:=LATE.kind(plot)
+	if late!="":return late
 	if int(plot.get("storeys",1)) != 1: return ""
 	var form := String(plot.get("form",""))
 	var use := String(plot.get("land_use",""))
@@ -66,12 +69,13 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			continue
 		plot["visual_form"]=kind(plot)
 		if kind(plot).is_empty(): continue
-		if kind(plot) in KIT:
-			var envelope := kit_mesh(kind(plot)).get_aabb()
+		if kind(plot) in KIT or LATE.kind(plot)!="":
+			var envelope := (LATE.mesh_for(LATE.kind(plot),LATE.floors(plot)) if LATE.kind(plot)!="" else kit_mesh(kind(plot))).get_aabb()
 			var extent := envelope.position.abs().max(envelope.end.abs())
 			plot["placement_half_extent"] = Vector2(extent.x, extent.z) * .001
 		# Reuse the checked footprint/road/water solver, retaining plot identity and
 		# reserved future household sites. This is a display copy, not a conversion.
+		plot.storeys=1
 		plot.material_family = "organic"; plot.roof_plan = "timber_ridge"
 		plot.form = "timber_household"; plot.land_use = "residential_compound"
 	var plan := TOWN.layout(proxies,routes,land)
@@ -126,8 +130,9 @@ static func kit_mesh(name: String) -> Mesh:
 static func render(plan: Dictionary, center: Vector3, height: Callable, parent: Node3D) -> void:
 	var inherited := {"buildings":[],"replaced":plan.replaced}
 	for record in plan.buildings:
-		if String(record.get("early_kind","")) not in KIT: inherited.buildings.append(record)
+		if String(record.get("early_kind","")) not in KIT and LATE.kind(record.plot)=="": inherited.buildings.append(record)
 	TOWN.render(inherited,center,height,parent)
+	LATE.render(plan,center,height,parent)
 	if material == null:
 		material = StandardMaterial3D.new(); material.vertex_color_use_as_albedo = true
 		material.roughness = .95; material.cull_mode = BaseMaterial3D.CULL_DISABLED

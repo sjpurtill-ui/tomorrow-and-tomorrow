@@ -63,7 +63,10 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var preserved:=_preserve(logistics,makers,traveling)
 	var spoilage:=_spoil(traveling)
 	var demand:=float(demand_breakdown.total)
-	var army_required:=float(demand_breakdown.get("army_field",0.0))
+	var army_original:=float(demand_breakdown.get("army_field",0.0))
+	var credited:Dictionary=military_campaign.draw_delivered_field_rations(army_original) if military_campaign!=null else {"total":0.0,"by_army":{}}
+	demand=maxf(0,demand-float(credited.total))
+	var army_required:=maxf(0,army_original-float(credited.total))
 	var provision_delivery_ratio:=1.0
 	if military_campaign!=null and military_campaign.has_method("field_provision_delivery_ratio"):
 		provision_delivery_ratio=clampf(float(military_campaign.field_provision_delivery_ratio()),0.0,1.0)
@@ -81,7 +84,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var accessible_intake:=clampf(eaten/maxf(0.01,accessible_demand),0.0,1.0)
 	var army_delivered:=army_accessible*accessible_intake
 	if military_campaign!=null and military_campaign.has_method("record_daily_provisions"):
-		military_campaign.record_daily_provisions(army_required,army_delivered)
+		military_campaign.record_daily_provisions(army_original,army_delivered,credited)
 	var diet_quality:=_diet_quality(consumed,eaten)
 	_update_nutrition(intake_ratio,diet_quality)
 	_update_source_health(harvest,workers,traveling)

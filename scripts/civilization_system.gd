@@ -1843,7 +1843,7 @@ func _process_local_observation(day:int,force:bool=false)->void:
 				relation["rival_player_intelligence"]=maxf(0.18,float(relation.get("rival_player_intelligence",0.0)))
 				if int(relation.get("rival_met_day",-1))<0: relation["rival_met_day"]=day
 		civ["player_relation"]=relation; civilizations[civ_index]=civ
-		var strength:=maxf(1.0,float(civ.military_population)*float(formation.get("strength_share",0.08)))
+		var strength:=maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))
 		var sighting_index:=_formation_sighting_index(formation_id)
 		var first_sighting:=sighting_index<0 or day-int(foreign_sightings[sighting_index].get("last_seen_day",-9999))>30
 		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.kind),"last_seen_day":day,"position":{"x":position.x,"z":position.y},"distance_km":distance,"strength":strength,"readiness":float(formation.readiness),"visible":true}
@@ -3421,7 +3421,7 @@ func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->
 		if String(incident.get("source_civ_id",""))==String(civ.id): return
 	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
 	if not bool(known_player.known) and _recapture_target(civ).is_empty(): return
-	var projection:=float(civ.military_population)*0.42
+	var projection:=land_military_population(civ)*0.42
 	var strength:=maxi(0,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
 	if not preload("res://scripts/raid_policy.gd").worthwhile(strength,float(civ.military_readiness),float(known_player.get("power",0.0))): return
 	var incident_readiness:=clampf(float(civ.military_readiness)*0.82+float(civ.get("command_readiness",0.4))*0.18,0.1,1.0)
@@ -3453,7 +3453,7 @@ func _queue_player_raid_if_due(civ:Dictionary,relation:Dictionary,day:int,civ_in
 	if rng.randf()>clampf(0.025+hostility*0.085,0.0,0.12): return
 	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
 	if not bool(known_player.known): return
-	var projection:=float(civ.military_population)*0.16
+	var projection:=land_military_population(civ)*0.16
 	var strength:=maxi(0,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
 	if not preload("res://scripts/raid_policy.gd").worthwhile(strength,float(civ.military_readiness),float(known_player.get("power",0.0))): return
 	pending_player_incidents.append({"id":"raid_%s_%d" % [String(civ.id),day],"incident_kind":"raid","field_encounter":true,"source_civ_id":String(civ.id),"source_name":String(civ.name),"strength":strength,"technology":float(civ.knowledge),"readiness":clampf(float(civ.military_readiness),0.1,1.0),"aggression":float(civ.aggression),"created_day":day})
@@ -3665,7 +3665,7 @@ func offensive_campaign_data(civ_id:String,fielded_strength:int,region_id:String
 	var fortification:=float(region.get("fortification",0.25))*(1.0-float(region.get("damage",0.0))*0.65)
 	# The defender is drawn from the rival's actual aggregate armed capacity.
 	# It is never resized to make the player's current army artificially viable.
-	var garrison:=float(civ.military_population)*region_weight*(0.72+fortification)*(0.82+float(civ.logistics)*0.36)
+	var garrison:=land_military_population(civ)*region_weight*(0.72+fortification)*(0.82+float(civ.logistics)*0.36)
 	return {"id":"%s_%s_%s_%d" % ["raid" if raid else "offensive",civ_id,String(region.id),int(GameState.elapsed_days)],"incident_kind":"raid" if raid else "campaign","field_encounter":raid,"source_civ_id":civ_id,"source_name":String(civ.name),"target_region_id":String(region.id),"target_region_name":String(region.name),"target_region_role":String(region.role),"target_population":float(region.population),"target_original_civ_id":String(owner.id),"liberation_campaign":foreign_holding,"occupation_required":0.0 if raid else occupation_requirement(owner,region),"strength":maxi(3,roundi(garrison*(0.72 if raid else 1.0))),"technology":float(civ.knowledge),"readiness":clampf(float(civ.military_readiness)*0.82+float(civ.get("command_readiness",0.4))*0.18,0.1,1.0),"aggression":float(civ.aggression),"terrain_defense":clampf(1.03+fortification*0.34+float(civ.logistics)*0.07+float(civ.institutions)*0.05,1.04,1.38),"created_day":int(GameState.elapsed_days),"campaign_mode":"offensive","front_stance":String(relation.get("front_stance","balanced")),"war_id":String(relation.get("war_id",""))}
 
 
@@ -4531,7 +4531,7 @@ func _public_profile(civ:Dictionary)->Dictionary:
 	var intelligence:=clampf(float(relation.get("contact_intelligence",0.0)),0.0,1.0)
 	var estimate_error:=lerpf(0.42,0.04,intelligence)
 	var controlled_population:=maxf(1.0,float(civ.population)-occupied_population+foreign_controlled_population)
-	var military_population:=float(civ.military_population)*float(control.home_control)
+	var military_population:=land_military_population(civ)*float(control.home_control)
 	var assessment_known:=intelligence>=0.32 or bool(relation.get("at_war",false))
 	return {"id":String(civ.id),"name":String(civ.name),"population":float(civ.population),"controlled_population":controlled_population,"occupied_population":occupied_population,"foreign_controlled_population":foreign_controlled_population,"population_estimate_low":maxf(1.0,controlled_population*(1.0-estimate_error)),"population_estimate_high":controlled_population*(1.0+estimate_error),"cohorts":civ.cohorts.duplicate(true),"knowledge":float(civ.knowledge)*float(control.knowledge_factor),"production":float(civ.production)*float(control.production_factor),"logistics":float(civ.logistics)*float(control.logistics_factor),"health":float(civ.health),"cohesion":float(civ.cohesion),"institutions":float(civ.institutions)*float(control.institutions_factor),"territory":float(civ.territory),"military_population":military_population,"military_estimate_low":maxf(0.0,military_population*(1.0-estimate_error)),"military_estimate_high":military_population*(1.0+estimate_error),"military_readiness":float(civ.military_readiness),"command_readiness":float(civ.get("command_readiness",0.4)),"military_era_tier":int(civ.get("military_era_tier",0)),"military_era":String(civ.get("military_era","founding")),"military_production_lines":int(civ.get("military_production_lines",1)),"military_replacement_coverage":float(civ.get("military_replacement_coverage",0.5)),"training_focus":String(civ.get("training_focus","camp_drill")),"training_cycles":int(civ.get("training_cycles",0)),"founding_focus":String(civ.get("founding_focus","provision")),"food_days":float(civ.food_days),"strategy":String(civ.strategy),"score":float(civ.score),"rank":int(civ.rank),"player_relation":relation,"intel_confidence":intelligence,"strategic_regions":_public_regions(civ),"home_regions_controlled":home_regions_controlled,"home_regions_total":STRATEGIC_REGIONS_PER_CIV,"strategic_status":strategic_status,"home_control":float(control.home_control),"wars":_war_count(civ),"trade_total":float(civ.trade_total),"births_last_turn":float(civ.get("births_last_turn",0.0)),"deaths_last_turn":float(civ.get("deaths_last_turn",0.0)),"relative_military_power":relative_power,"rival_intent":_rival_intent(civ,relation,relative_power) if assessment_known else "Insufficient returned intelligence","threat_level":_threat_level(civ,relation,relative_power) if assessment_known else "UNCERTAIN","diplomatic_partners":int(network.partners) if intelligence>=0.48 else -1,"diplomatic_rivals":int(network.rivals) if intelligence>=0.48 else -1,"war_opponents":network.war_opponents if intelligence>=0.48 else [],"societal_identity":SOCIETAL_VALUES_MODEL.identity_snapshot(civ.get("societal_values",{})) if intelligence>=0.58 else {},"progression_tiers":(civ.get("progression_tiers",{}) as Dictionary).duplicate(true) if intelligence>=0.70 else {},"research_profile":_public_rival_research_profile(civ) if intelligence>=0.70 else {},"world_reach":float(civ.get("world_reach",0.0)) if intelligence>=0.70 else -1.0}
 
@@ -5439,3 +5439,7 @@ func _strip_retired_landmarks(record:Dictionary)->void:
 		record["windfalls"]=(record.windfalls as Array).filter(func(line:Variant)->bool: return not (String(line).begins_with("They name ") and "waymark" in String(line)))
 	if record.has("journal"):
 		record["journal"]=(record.journal as Array).filter(func(line:Variant)->bool: return not String(line).begins_with("They steered by "))
+
+func land_military_population(civ:Dictionary)->float:
+	var afloat:int=MilitaryCampaign.joint_operations.rival.personnel(String(civ.id)) if MilitaryCampaign.joint_operations!=null else 0
+	return maxf(0,float(civ.get("military_population",0))-afloat)

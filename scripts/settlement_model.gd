@@ -2141,7 +2141,7 @@ func _supported_fabric_tier(day:int)->int:
 	if craftspeople>=200 and logisticians>=120 and administrators>=60 and construction_effect+route_effect+craft_effect+standardization>=0.22: support=10
 	if craftspeople>=350 and logisticians>=220 and administrators>=120 and construction_effect+route_effect+craft_effect+standardization+tool_quality>=0.34: support=11
 	if craftspeople>=600 and logisticians>=400 and administrators>=250 and construction_effect+route_effect+craft_effect+standardization+tool_quality+state_capacity>=0.50: support=12
-	return mini(age_ceiling,support)
+	return mini(mini(age_ceiling,support),preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
 
 func _fabric_form_for(use:String,tier:int,current_form:String)->String:
 	if use in ["residential_compound","mixed_household"]:
@@ -2159,6 +2159,8 @@ func _fabric_form_for(use:String,tier:int,current_form:String)->String:
 func _fabric_upgrade_cost(plot:Dictionary,target_tier:int)->Dictionary:
 	var family:=_fabric_material_family_for(plot,target_tier)
 	var scale:=0.22+float(target_tier)*0.075
+	if target_tier>=11 and String(plot.get("land_use",""))!="field":
+		return {"Iron Ore":scale*2.0,"Limestone":scale*3.0,"Fine Sand":scale*2.0,"Timber":scale*.5}
 	if String(plot.get("land_use",""))=="field":
 		return {"Timber":scale*0.22,"Fiber Plants":scale*0.18}
 	if family=="stone": return {"Stone":scale*2.4,"Timber":scale*0.48}
@@ -2240,6 +2242,8 @@ func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->
 		var new_storeys:=1
 		if durable and next_tier>=5: new_storeys=2
 		if durable and next_tier>=8 and DiscoverySystem.effect("construction_rate")>=0.025: new_storeys=3
+		if next_tier>=11:new_storeys=4+posmod(int(chosen_plot.get("seed",1)),3)
+		if next_tier>=12:new_storeys=6+posmod(int(chosen_plot.get("seed",1)),7)
 		chosen_plot["storeys"]=maxi(int(chosen_plot.get("storeys",1)),new_storeys)
 		var capacity_gain:=2+next_tier+maxi(0,int(chosen_plot.storeys)-1)*4
 		chosen_plot["resident_capacity"]=int(chosen_plot.get("resident_capacity",0))+capacity_gain

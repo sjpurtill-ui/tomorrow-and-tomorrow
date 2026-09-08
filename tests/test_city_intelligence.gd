@@ -78,6 +78,8 @@ func test_reciprocal_observation_uses_same_thresholds_and_only_nearby_player_cit
 	assert_bool(intel().known("player",region()).fields.has("garrison")).is_false()
 
 func test_ai_cannot_target_unknown_home_or_read_changed_live_player_strength()->void:
+	# Keep this an intelligence test, independent of randomized raid viability.
+	civ().military_population=1000.0; civ().military_readiness=.8
 	var relation:Dictionary=civ().player_relation
 	relation.at_war=true; relation.treaty="war"; relation.rival_contact_level=2; relation.rival_player_intelligence=1
 	CivilizationSystem._queue_player_incident_if_due(civ(),relation,30)

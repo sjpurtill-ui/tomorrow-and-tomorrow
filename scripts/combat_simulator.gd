@@ -21,7 +21,46 @@ const UNIT_TYPES := {
 	"machine_gun_company":{"name":"Machine-Gun Company","attack":1.72,"defense":1.88,"organization":1.02},
 	"motorized_infantry":{"name":"Motorized Infantry","attack":1.65,"defense":1.30,"organization":1.12},
 	"armored_formation":{"name":"Armored Formation","attack":2.35,"defense":1.78,"organization":1.08},
-	"modern_artillery":{"name":"Modern Artillery","attack":2.20,"defense":0.68,"organization":0.92}
+	"modern_artillery":{"name":"Modern Artillery","attack":2.20,"defense":0.68,"organization":0.92},
+	"spearman":{"name": "Spearmen", "attack": 0.85, "defense": 1.18, "organization": 0.88},
+	"axeman":{"name": "Axemen", "attack": 1.25, "defense": 0.65, "organization": 0.75},
+	"slinger":{"name": "Slingers", "attack": 0.83, "defense": 0.48, "organization": 0.76},
+	"javelineer":{"name": "Javelineers", "attack": 0.94, "defense": 0.57, "organization": 0.84},
+	"archer":{"name": "Massed Archers", "attack": 1.12, "defense": 0.43, "organization": 0.78},
+	"pikeman":{"name": "Pikemen", "attack": 0.9, "defense": 1.48, "organization": 1.18},
+	"crossbowman":{"name": "Crossbowmen", "attack": 1.26, "defense": 0.66, "organization": 0.84},
+	"heavy_swordsman":{"name": "Armored Swordsmen", "attack": 1.28, "defense": 1.32, "organization": 1.1},
+	"light_infantry":{"name": "Light Infantry", "attack": 1.06, "defense": 0.71, "organization": 0.96},
+	"mountain_infantry":{"name": "Mountain Infantry", "attack": 1.32, "defense": 1.43, "organization": 1.15},
+	"light_cavalry":{"name": "Light Cavalry", "attack": 1.05, "defense": 0.6, "organization": 0.83},
+	"horse_archer":{"name": "Horse Archers", "attack": 1.14, "defense": 0.68, "organization": 1.02},
+	"chariot":{"name": "War Chariots", "attack": 1.45, "defense": 0.83, "organization": 0.8},
+	"armored_cavalry":{"name": "Armored Cavalry", "attack": 1.68, "defense": 1.28, "organization": 0.94},
+	"war_elephant":{"name": "War Elephants", "attack": 1.85, "defense": 1.35, "organization": 0.62},
+	"dragoon":{"name": "Dragoons", "attack": 1.32, "defense": 0.99, "organization": 1.03},
+	"ram_crew":{"name": "Battering Ram Crews", "attack": 0.48, "defense": 0.83, "organization": 0.82},
+	"catapult_crew":{"name": "Catapult Crews", "attack": 1.17, "defense": 0.34, "organization": 0.76},
+	"trebuchet_crew":{"name": "Trebuchet Crews", "attack": 1.4, "defense": 0.31, "organization": 0.82},
+	"bombard_crew":{"name": "Bombard Crews", "attack": 1.52, "defense": 0.32, "organization": 0.76},
+	"horse_artillery":{"name": "Horse Artillery", "attack": 1.4, "defense": 0.44, "organization": 0.88},
+	"mortar_crew":{"name": "Mortar Teams", "attack": 1.58, "defense": 0.57, "organization": 0.91},
+	"rocket_artillery":{"name": "Rocket Artillery", "attack": 2.35, "defense": 0.51, "organization": 0.8},
+	"hand_cannoneer":{"name": "Hand Cannoneers", "attack": 1.15, "defense": 0.51, "organization": 0.65},
+	"musketeer":{"name": "Musketeers", "attack": 1.35, "defense": 0.82, "organization": 1.05},
+	"grenadier":{"name": "Grenadiers", "attack": 1.53, "defense": 0.91, "organization": 1.12},
+	"sharpshooter":{"name": "Sharpshooters", "attack": 1.38, "defense": 0.71, "organization": 1.07},
+	"assault_infantry":{"name": "Assault Infantry", "attack": 1.75, "defense": 1.05, "organization": 1.2},
+	"marines":{"name": "Marines", "attack": 1.48, "defense": 1.24, "organization": 1.24},
+	"paratrooper":{"name": "Airborne Infantry", "attack": 1.44, "defense": 1.17, "organization": 1.3},
+	"combat_engineer":{"name": "Combat Engineers", "attack": 1.18, "defense": 1.39, "organization": 1.16},
+	"anti_tank":{"name": "Antitank Teams", "attack": 1.22, "defense": 1.21, "organization": 1.02},
+	"anti_air":{"name": "Antiaircraft Batteries", "attack": 0.74, "defense": 1.12, "organization": 0.99},
+	"armored_car":{"name": "Armored Reconnaissance", "attack": 1.28, "defense": 1.2, "organization": 1.06},
+	"light_tank":{"name": "Light Tanks", "attack": 1.87, "defense": 1.43, "organization": 0.98},
+	"heavy_tank":{"name": "Heavy Tanks", "attack": 2.62, "defense": 2.24, "organization": 0.97},
+	"tank_destroyer":{"name": "Tank Destroyers", "attack": 2.08, "defense": 1.5, "organization": 1.03},
+	"mechanized_infantry":{"name": "Mechanized Infantry", "attack": 1.98, "defense": 1.82, "organization": 1.22},
+	"air_assault":{"name": "Air Assault Infantry", "attack": 1.63, "defense": 1.2, "organization": 1.27}
 }
 
 const WEAPONS := {
@@ -36,11 +75,45 @@ const WEAPONS := {
 	"machine_gun":{"name":"Machine Guns","attack":4.20,"defense":2.25,"armor":0.08,"penetration":1.05},
 	"motorized_kit":{"name":"Motorized Equipment","attack":1.88,"defense":1.32,"armor":0.28,"penetration":1.02},
 	"armored_vehicle":{"name":"Armored Vehicles","attack":4.80,"defense":3.70,"armor":2.10,"penetration":2.35},
-	"modern_field_gun":{"name":"Modern Field Artillery","attack":7.20,"defense":0.72,"armor":0.18,"penetration":2.10}
+	"modern_field_gun":{"name":"Modern Field Artillery","attack":7.20,"defense":0.72,"armor":0.18,"penetration":2.10},
+	"axe":{"name": "Axemen equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"sling":{"name": "Slingers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"javelin":{"name": "Javelineers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"pike":{"name": "Pikemen equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"crossbow":{"name": "Crossbowmen equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"mountain_kit":{"name": "Mountain Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"mounted_bow":{"name": "Horse Archers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"chariot_kit":{"name": "War Chariots equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"armored_lance":{"name": "Armored Cavalry equipment", "attack": 1.05, "defense": 1.0, "armor": 0.6, "penetration": 0.65},
+	"elephant_kit":{"name": "War Elephants equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"dragoon_kit":{"name": "Dragoons equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"ram":{"name": "Battering Ram Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"catapult":{"name": "Catapult Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"trebuchet":{"name": "Trebuchet Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"bombard":{"name": "Bombard Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"horse_gun":{"name": "Horse Artillery equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"mortar":{"name": "Mortar Teams equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"rocket_launcher":{"name": "Rocket Artillery equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
+	"hand_cannon":{"name": "Hand Cannoneers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"musket":{"name": "Musketeers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"grenadier_kit":{"name": "Grenadiers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
+	"marksman_rifle":{"name": "Sharpshooters equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"assault_kit":{"name": "Assault Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"marine_kit":{"name": "Marines equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"airborne_kit":{"name": "Airborne Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"engineering_kit":{"name": "Combat Engineers equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"anti_tank_kit":{"name": "Antitank Teams equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 3.0},
+	"anti_air_gun":{"name": "Antiaircraft Batteries equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
+	"armored_car_kit":{"name": "Armored Reconnaissance equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
+	"light_tank_kit":{"name": "Light Tanks equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
+	"heavy_tank_kit":{"name": "Heavy Tanks equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
+	"tank_destroyer_kit":{"name": "Tank Destroyers equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 3.0},
+	"mechanized_kit":{"name": "Mechanized Infantry equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
+	"air_assault_kit":{"name": "Air Assault Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4}
 }
 
-const CREW_PER_EQUIPMENT:Dictionary={"field_gun":5,"machine_gun":8,"motorized_kit":4,"armored_vehicle":5,"modern_field_gun":8}
-const AMMUNITION_PER_ELEMENT:Dictionary={"bow":6,"field_gun":8,"service_rifle":30,"machine_gun":220,"motorized_kit":24,"armored_vehicle":18,"modern_field_gun":28}
+const CREW_PER_EQUIPMENT:Dictionary={"field_gun":5,"machine_gun":8,"motorized_kit":4,"armored_vehicle":5,"modern_field_gun":8,"axe":1,"sling":1,"javelin":1,"pike":1,"crossbow":1,"mountain_kit":1,"mounted_bow":1,"chariot_kit":2,"armored_lance":1,"elephant_kit":1,"dragoon_kit":1,"ram":8,"catapult":8,"trebuchet":8,"bombard":8,"horse_gun":8,"mortar":8,"rocket_launcher":5,"hand_cannon":1,"musket":1,"grenadier_kit":1,"marksman_rifle":1,"assault_kit":1,"marine_kit":1,"airborne_kit":1,"engineering_kit":1,"anti_tank_kit":1,"anti_air_gun":8,"armored_car_kit":5,"light_tank_kit":5,"heavy_tank_kit":5,"tank_destroyer_kit":5,"mechanized_kit":5,"air_assault_kit":1}
+const AMMUNITION_PER_ELEMENT:Dictionary={"bow":6,"field_gun":8,"service_rifle":30,"machine_gun":220,"motorized_kit":24,"armored_vehicle":18,"modern_field_gun":28,"crossbow":24,"mountain_kit":24,"mounted_bow":24,"dragoon_kit":24,"bombard":24,"horse_gun":24,"mortar":24,"rocket_launcher":24,"hand_cannon":24,"musket":24,"grenadier_kit":24,"marksman_rifle":24,"assault_kit":24,"marine_kit":24,"airborne_kit":24,"engineering_kit":24,"anti_tank_kit":24,"anti_air_gun":24,"armored_car_kit":24,"light_tank_kit":24,"heavy_tank_kit":24,"tank_destroyer_kit":24,"mechanized_kit":24,"air_assault_kit":24}
 
 # Attack multipliers against the opposing unit mix. Unlisted matchups are 1.0.
 # These are intentionally data, not branches, so discoveries can replace or
@@ -56,7 +129,22 @@ const MATCHUPS := {
 	"machine_gun_company":{"levy":2.10,"line_infantry":1.85,"cavalry":2.20,"rifle_infantry":1.28},
 	"motorized_infantry":{"levy":1.85,"line_infantry":1.60,"skirmisher":1.70,"machine_gun_company":0.82},
 	"armored_formation":{"levy":2.25,"line_infantry":2.00,"rifle_infantry":1.65,"machine_gun_company":1.18},
-	"modern_artillery":{"levy":1.95,"line_infantry":1.72,"rifle_infantry":1.55,"armored_formation":0.92}
+	"modern_artillery":{"levy":1.95,"line_infantry":1.72,"rifle_infantry":1.55,"armored_formation":0.92},
+	"spearman":{"cavalry": 1.5, "light_cavalry": 1.6, "armored_cavalry": 1.4, "archer": 0.7, "crossbowman": 0.72},
+	"axeman":{"line_infantry": 1.25, "heavy_swordsman": 1.1, "archer": 0.8},
+	"slinger":{"levy": 1.3, "pikeman": 1.3, "heavy_swordsman": 0.85, "cavalry": 0.65},
+	"javelineer":{"levy": 1.3, "pikeman": 1.3, "heavy_swordsman": 0.85, "cavalry": 0.65},
+	"archer":{"levy": 1.3, "pikeman": 1.3, "heavy_swordsman": 0.85, "cavalry": 0.65},
+	"pikeman":{"cavalry": 1.5, "light_cavalry": 1.6, "armored_cavalry": 1.4, "archer": 0.7, "crossbowman": 0.72},
+	"crossbowman":{"levy": 1.3, "pikeman": 1.3, "heavy_swordsman": 0.85, "cavalry": 0.65},
+	"light_cavalry":{"archer": 1.4, "slinger": 1.5, "skirmisher": 1.35, "pikeman": 0.55, "spearman": 0.72},
+	"horse_archer":{"archer": 1.4, "slinger": 1.5, "skirmisher": 1.35, "pikeman": 0.55, "spearman": 0.72},
+	"chariot":{"archer": 1.4, "slinger": 1.5, "skirmisher": 1.35, "pikeman": 0.55, "spearman": 0.72},
+	"armored_cavalry":{"archer": 1.4, "slinger": 1.5, "skirmisher": 1.35, "pikeman": 0.55, "spearman": 0.72},
+	"war_elephant":{"levy": 1.7, "line_infantry": 1.25, "javelineer": 0.55, "horse_archer": 0.6},
+	"assault_infantry":{"machine_gun_company": 1.3, "rifle_infantry": 1.15, "armored_formation": 0.6},
+	"anti_tank":{"armored_formation": 1.8, "light_tank": 2.0, "heavy_tank": 1.5, "mechanized_infantry": 1.4, "rifle_infantry": 0.65, "assault_infantry": 0.6},
+	"tank_destroyer":{"armored_formation": 1.8, "light_tank": 2.0, "heavy_tank": 1.5, "mechanized_infantry": 1.4, "rifle_infantry": 0.65, "assault_infantry": 0.6}
 }
 
 
@@ -264,7 +352,7 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 	var commander:Dictionary=force.get("commander",{})
 	var tactics:=clampf(float(commander.get("tactics",0.5)),0.0,1.0)
 	var result: Array[Dictionary] = []
-	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))
+	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))*(1+clampf(float(force.get("joint_air_support",0)),0,.3))*(1-clampf(float(force.get("joint_air_pressure",0)),0,.25))
 	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))
 	for formation in formations:
 		var unit_id := String(formation.get("unit", "levy"))
@@ -406,7 +494,7 @@ func _siege_terrain_reduction(force:Dictionary)->float:
 	var troops:=maxi(1,int(force.get("troops",0)))
 	var effective_engineers:=0.0
 	for formation in force.get("formations",[]):
-		if String(formation.get("unit",""))!="siege_engineer" or String(formation.get("weapon",""))!="siege_kit": continue
+		if String(formation.get("unit","")) not in ["siege_engineer","combat_engineer","ram_crew","catapult_crew","trebuchet_crew","bombard_crew"]:continue
 		var count:=maxi(0,int(formation.get("count",0)))
 		var required:=maxi(1,int(formation.get("equipment_required",formation.get("authorized_count",count))))
 		var equipment_ratio:=clampf(float(formation.get("equipment",0))/float(required),0.0,1.0)

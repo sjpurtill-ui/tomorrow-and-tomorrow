@@ -1350,10 +1350,12 @@ func adjust_population_role_percentage(role:String,delta:float) -> void:
 	population_allocation_percentages[role]=target
 	synchronize_population_allocations()
 
-func effective_workers(role:String)->float:
+func effective_workers(role:String,include_military_construction:bool=false)->float:
 	var civilian_workers:=0.0
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
-	return PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
+	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
+	if role=="Construction" and not include_military_construction and MilitaryCampaign.joint_operations!=null:capacity*=1.0-MilitaryCampaign.joint_operations.construction_share(resource_settlement_id)
+	return capacity
 
 func receive_injured_veterans(count:int,severe:int)->void:
 	# Transfer within this population: never add people or deaths here.
