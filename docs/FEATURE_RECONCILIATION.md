@@ -1,3 +1,7 @@
+## September 7 — army staffing clarity
+
+INTEGRATED `fab7843` by conflict-free fast-forward from `1589e37`. Recruit & Train shows available recruits, training places and work allocation separately. Per-city watch/training priority actions replace the vague allocation detour and retain GovernmentPeopleSystem authority and occupation guards. Eleven targeted and existing recruitment tests pass; no save or calculation changes. See ARMY_STAFFING_HANDOFF.md. The city flag update `a0ff5d5` is included in this base. Player PID 47271 has not been restarted; receipt by the live session is not claimed.
+
 ## September 7 — city civilization flags
 
 INTEGRATED `a0ff5d5` by conflict-free fast-forward into canonical Mac main from `86f2971`. City flags, name colors and pins share reported civilization identity at all four camera distances; owned labels use the founding banner. Three isolated targeted checks pass, including stable refresh sizing and changes of reported control. No save schema changes. See CITY_FLAGS_HANDOFF.md. Player PID 47271 is still running; no restart or receipt of these changes by that process is claimed.

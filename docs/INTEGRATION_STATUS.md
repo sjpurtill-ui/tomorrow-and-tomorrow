@@ -1,3 +1,7 @@
+## September 7 — army staffing clarity
+
+INTEGRATED `fab7843` by conflict-free fast-forward from `1589e37`. Recruit & Train shows available recruits, training places and work allocation separately. Per-city watch/training priority actions replace the vague allocation detour and retain GovernmentPeopleSystem authority and occupation guards. Eleven targeted and existing recruitment tests pass; no save or calculation changes. See ARMY_STAFFING_HANDOFF.md. The city flag update `a0ff5d5` is included in this base. Player PID 47271 has not been restarted; receipt by the live session is not claimed.
+
 ## September 7 — foreign city labels and map intelligence
 
 Integrated `824ea64` and `4614b5e` from `codex/foreign-city-labels` by fast-forward. Known foreign cities retain name/population-estimate labels at every distance. Clicking a city opens a compact intelligence dock on the map; the full report remains optional. A live check found a competing font-size refresh that caused shrinking/blinking; the follow-up preserves aerial normalization. Two targeted regression cases pass, including normalization followed by marker refresh at all four distances. The older intelligence AI-target test remains a reproduced baseline failure (see FOREIGN_CITY_LABELS_HANDOFF.md). No save schema changes.
