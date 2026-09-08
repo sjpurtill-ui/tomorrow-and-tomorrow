@@ -321,3 +321,36 @@ func test_merging_carriers_redirects_incoming_wings_and_keeps_save_valid()->void
 	assert_str(op.validate(op.export_state())).is_empty()
 	op.advance(1)
 	assert_int(int(wing.carrier_id)).is_equal(int(first.id))
+
+func test_command_refresh_preserves_pending_region_and_mission_until_assignment()->void:
+	var wing:=_ready_force("fighter")
+	var old:Dictionary=op.create_region("air",op.R.rectangle(Vector2(10,0),20),"Old sector").region
+	var next:Dictionary=op.create_region("air",op.R.rectangle(Vector2(40,0),20),"New sector").region
+	assert_bool(op.assign(int(wing.id),old,"air_superiority").has("ok")).is_true()
+	var panel:CanvasLayer=auto_free(preload("res://scripts/hud/air_command_panel.gd").new());add_child(panel)
+	panel._region(next)
+	for i in panel.mission_picker.item_count:
+		if panel.mission_picker.get_item_metadata(i)=="interception":panel.mission_picker.select(i)
+	panel._refresh_choices()
+	assert_str(String(panel.map.selected.id)).is_equal(String(next.id))
+	assert_str(String(panel._selected(panel.mission_picker))).is_equal("interception")
+	panel._report({"error":"Example blocked order"})
+	assert_str(String(panel.map.selected.id)).is_equal(String(next.id))
+	assert_str(String(panel._selected(panel.mission_picker))).is_equal("interception")
+	panel._assign()
+	assert_str(String(wing.region.id)).is_equal(String(next.id))
+	assert_str(String(wing.mission)).is_equal("interception")
+	assert_str(panel.status.text).contains("Current order:")
+
+func test_explicit_force_selection_shows_that_forces_existing_order()->void:
+	var first:=_ready_force("fighter")
+	var second:=_ready_force("fighter")
+	var region:Dictionary=op.create_region("air",op.R.rectangle(Vector2(10,0),20),"Assigned sector").region
+	assert_bool(op.assign(int(second.id),region,"interception").has("ok")).is_true()
+	var panel:CanvasLayer=auto_free(preload("res://scripts/hud/air_command_panel.gd").new());add_child(panel)
+	panel.selected_id=int(second.id);panel._select_force(true)
+	assert_str(String(panel.map.selected.id)).is_equal(String(region.id))
+	assert_str(String(panel._selected(panel.mission_picker))).is_equal("interception")
+	panel.selected_id=int(first.id);panel._select_force(true)
+	assert_dict(panel.map.selected).is_empty()
+	assert_str(String(panel._selected(panel.mission_picker))).is_equal("hold")

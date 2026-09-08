@@ -22,6 +22,7 @@ var reports:Label
 var replacement:CheckBox
 var tick:=0.0
 var selected_id:=0
+var displayed_force_id:=-1
 var refresh_key:=""
 var panel:PanelContainer
 
@@ -41,7 +42,7 @@ func _ready()->void:
 	layer=82;op=MilitaryCampaign.joint_operations
 	map=Map.new();map.terrain=terrain;map.domain=domain;add_child(map)
 	map.region_selected.connect(_region)
-	map.force_selected.connect(func(id:int):selected_id=id;_refresh_choices();_select_force())
+	map.force_selected.connect(func(id:int):selected_id=id;_refresh_choices();_select_force(true))
 	map.base_selected.connect(func(id:int):
 		for i in base_picker.item_count:
 			if int(base_picker.get_item_metadata(i))==id:base_picker.select(i)
@@ -84,7 +85,7 @@ func _region_tools(column:Node)->void:
 		_report(result))
 
 func _force_controls(column:Node,stand_down:String)->void:
-	force_picker=_option(column);force_picker.item_selected.connect(func(_index:int):selected_id=int(_selected(force_picker));_select_force())
+	force_picker=_option(column);force_picker.item_selected.connect(func(_index:int):selected_id=int(_selected(force_picker));_select_force(true))
 	status=_label(column,"",14)
 	setup_button=_button(column,"Open Ports" if domain=="navy" else "Open Airbases",func():pages.current_tab=1)
 	mission_controls=VBoxContainer.new();mission_controls.add_theme_constant_override("separation",7);column.add_child(mission_controls)
@@ -185,19 +186,21 @@ func _refresh_choices()->void:
 	_fill(base_picker,bases);_fill(type_picker,types);_fill(city_picker,cities);_fill(companion_picker,companions);_fill(destination_picker,destinations);_fill(army_picker,armies)
 	_select_force()
 
-func _select_force()->void:
+func _select_force(follow_assignment:bool=false)->void:
+	var changed:=selected_id!=displayed_force_id or follow_assignment
+	displayed_force_id=selected_id
 	var force:Dictionary=op.force(selected_id);var missions:Array=[]
 	for id:String in op.missions_for(force):
 		if id!="transport":missions.append({"id":id,"label":op.MISSIONS[domain][id]})
-	_fill(mission_picker,missions,String(force.get("mission","hold")))
+	_fill(mission_picker,missions,String(force.get("mission","hold")) if changed else _selected(mission_picker))
 	replacement.set_pressed_no_signal(bool(force.get("auto_replace",true)))
 	map.selected_force=selected_id
-	if not force.get("region",{}).is_empty():_region(force.region)
+	if changed:
+		map.selected=force.get("region",{}).duplicate(true)
 	_refresh_status()
 func _region(region:Dictionary)->void:
 	map.selected=region
 	_refresh_status()
-	region_label.text=String(region.name)+" · control %d%%" % roundi(float(op.effects.control("player",region))*100)
 func _assign()->void:
 	_report(op.assign(selected_id,map.selected,String(_selected(mission_picker))))
 func _produce()->void:
@@ -217,9 +220,11 @@ func _report(result:Dictionary)->void:
 	_refresh_choices();map.queue_redraw()
 func _refresh_status()->void:
 	var force:Dictionary=op.force(selected_id)
+	if map.selected.is_empty():region_label.text="Select an area on the world map, or draw a new boundary."
+	else:region_label.text=String(map.selected.name)+" · control %d%%" % roundi(float(op.effects.control("player",map.selected))*100)
 	if force.is_empty():status.text="No task forces yet. Open Ports to build a port, produce ships and commission crews." if domain=="navy" else "No air wings yet. Open Airbases to build an airbase, produce aircraft and form a wing."
 	else:
-		status.text=_force_summary(force)
+		status.text=_force_summary(force)+"\nCurrent order: "+String(op.MISSIONS[domain].get(String(force.get("mission","hold")),"Stand by"))
 	force_picker.visible=not force.is_empty()
 	mission_controls.visible=not force.is_empty()
 	organization_controls.visible=not force.is_empty()
