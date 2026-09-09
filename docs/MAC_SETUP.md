@@ -1,5 +1,18 @@
 # Develop and play on a Mac
 
+## Play the standalone release
+
+For ordinary play on the canonical Mac, run:
+
+```sh
+cd /Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow
+python3 tools/launch_game_macos.py
+```
+
+This builds and opens a real macOS release app from integrated `main`, with no editor window, embedded game toolbar or debugger. It starts a fresh world by default; add `--resume-saved` to load quicksave. Exit the current game normally before relaunching. The launcher refuses another active player, a noncanonical checkout, uncommitted tracked changes or test overrides. It prints the source revision, app path, player PID and log path.
+
+Install the official Godot export templates matching the installed editor before the first build. The Mac currently has the verified 4.7.2 macOS template. Builds are kept under `artifacts/macos-release/<commit>/Tomorrow and Tomorrow.app`; rebuilding uses the release preset and verifies the local ad-hoc signature. This is a local build, not a notarized distribution. The release template loads its bundled game and rejects `--path`; the absolute app executable path and build marker identify the canonical source. The editor workflow below is for development.
+
 The repository is https://github.com/sjpurtill-ui/tomorrow-and-tomorrow and is private, owned by your personal account `sjpurtill-ui`. Sign into that account on your Mac; GitHub returns 404 to unauthenticated visitors. Do not make the repository public to fix authentication.
 
 ## Get the current game
