@@ -18,4 +18,3 @@ func test_foreign_leaders_share_civic_personality_axes_and_prioritize_survival()
 	for value in p.values():assert_float(float(value)).is_between(.12,.92)
 	assert_str(model.agenda({"food_days":3,"population":120,"food_capacity":80},p)[0].strategy).is_equal("sustenance")
 	assert_str(model.agenda({"food_days":80,"population":120,"food_capacity":200,"player_relation":{"at_war":true}},p)[0].strategy).is_equal("fortification")
-

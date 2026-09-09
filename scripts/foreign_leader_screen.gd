@@ -22,6 +22,7 @@ var timer:=0.0
 var sections:Array[Control]=[]
 var section_buttons:Array[Button]=[]
 var audience_cost:Label
+var returned_note:Label
 var pause=preload("res://scripts/hud/simulation_pause.gd").new()
 
 func _ready()->void:
@@ -52,6 +53,7 @@ func _ready()->void:
 	for index in 3:
 		var section:=VBoxContainer.new();section.size_flags_vertical=Control.SIZE_EXPAND_FILL;section.add_theme_constant_override("separation",10);body.add_child(section);sections.append(section)
 	var audience:=sections[0]
+	returned_note=label(audience,16);returned_note.add_theme_color_override("font_color",Color("d7b67a"))
 	access_note=label(audience,14)
 	button(audience,"AI Connection…",func():PronouncementInterpreter.open_connection_settings())
 	audience_cost=label(audience,14)
@@ -135,7 +137,14 @@ func refresh()->void:
 	memory.max_lines_visible=7; memory.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	var context:Dictionary=ForeignDiplomacy.situation(civ_id); var thread:Dictionary=ForeignDialogue.thread(civ_id)
 	var gate:=ForeignDialogue.access(civ_id)
+	returned_note.text="";returned_note.hide()
+	for report:Dictionary in CivilizationSystem.diplomatic_history:
+		if String(report.get("civ_id",""))!=civ_id:continue
+		returned_note.text="Envoys returned · day %d\n%s" % [int(report.get("returned_day",0)),String(report.get("outcome","Your delegation has returned."))]
+		returned_note.show();break
 	access_note.text=String(gate.reason)+("\n"+String(thread.status) if String(thread.status)!="" else "")
+	var connection_issue:=PronouncementInterpreter.connection_problem()
+	if not connection_issue.is_empty():access_note.text+="\n"+connection_issue
 	audience_button.visible=not bool(gate.ok)
 	audience_button.disabled=not CivilizationSystem.diplomatic_mission.is_empty()
 	var transcript:Array[String]=[]

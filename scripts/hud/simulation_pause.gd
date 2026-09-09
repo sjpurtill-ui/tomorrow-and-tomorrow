@@ -3,6 +3,9 @@ extends RefCounted
 static var owners:Dictionary={}
 var host_id:=0
 
+static func blocks(host:Object)->bool:
+	return is_instance_valid(host) and owners.has(host.get_instance_id())
+
 func acquire(host:Node)->void:
 	if host_id!=0 or not is_instance_valid(host) or not host.has_method("_set_game_speed") or not "game_speed" in host:return
 	host_id=host.get_instance_id()

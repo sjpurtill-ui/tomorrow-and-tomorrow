@@ -15,6 +15,7 @@ func reported_city()->Dictionary:
 
 func test_known_names_visible_and_clickable_at_every_distance()->void:
 	var city:=reported_city()
+	CivilizationSystem.civilizations[0].player_relation.contact_level=2
 	var map:Node3D=auto_free(Map.new());add_child(map)
 	map.camera=Camera3D.new();map.add_child(map.camera)
 	map.camera.projection=Camera3D.PROJECTION_PERSPECTIVE
@@ -41,9 +42,13 @@ func test_known_names_visible_and_clickable_at_every_distance()->void:
 		assert_float(flag.pixel_size).is_equal(pixel_size)
 		map.city_labels.refresh()
 		assert_array(map.city_labels.cards).has_size(1)
+		assert_str(map.city_labels.cards[0].affiliation).is_equal(String(CivilizationSystem.civilizations[0].name))
 		assert_int(label.layers).is_equal(0)
 		var hit:Dictionary=map._city_from_screen(map.city_labels.cards[0].rect.get_center())
 		assert_str(String(hit.get("city_id",""))).is_equal(String(city.city_id))
+	CivilizationSystem.civilizations[0].name="Changed known civilization"
+	map.city_labels.refresh()
+	assert_str(map.city_labels.cards[0].affiliation).is_equal("Changed known civilization")
 
 func test_map_summary_reads_reported_estimates_and_leaves_full_report_optional()->void:
 	var city:=reported_city()

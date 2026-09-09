@@ -18410,6 +18410,7 @@ func _settlement_display_name() -> String:
 	return "FOUNDING CONVOY"
 
 func _set_game_speed(speed: float) -> void:
+	if speed>0 and preload("res://scripts/hud/simulation_pause.gd").blocks(self):return
 	if GeneralCampaign.active and speed<=0:GeneralCampaign.pause_to_speak()
 	if GeneralCampaign.active and speed>0:
 		GeneralCampaign.resume()

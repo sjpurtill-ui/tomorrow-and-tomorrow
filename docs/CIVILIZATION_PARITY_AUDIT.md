@@ -21,7 +21,7 @@ Foreign leaders use the same five personality axes as civic officials. Their sta
 
 ## Simulation refactor — HELD, not delivered
 
-Development remains in `/Users/seanpurtill/Documents/Codex/tt-civ-identities`, branch `codex/distinct-civilization-identities`.
+Development remains in `/Users/seanpurtill/Documents/Codex/tt-civ-identities`, branch `codex/distinct-civilization-identities`, held commit `1e918e3`. Do not merge that branch tip as part of the interface checkpoint.
 
 The isolated work extracts the player's daily demographic step for independent civilization state, retains pregnancy and mortality accumulators, gives new opponents the same founding population and age distribution, and separates actual settlements from unpopulated strategic territory. Identical demographic inputs produce identical results across two simulated years; independent state and save continuation have dedicated tests.
 

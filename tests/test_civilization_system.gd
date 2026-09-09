@@ -1380,26 +1380,27 @@ func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:
 	assert_array(system.validate_state()).is_empty()
 
 
-func test_rivals_pay_for_training_and_develop_command_under_the_same_strategy_layer()->void:
+func test_rival_training_obeys_unlock_costs_and_long_course_duration()->void:
 	var rival:Dictionary=system.civilizations[0].duplicate(true)
-	rival["strategy"]="expansion"
-	rival["knowledge"]=0.70
-	rival["institutions"]=0.65
-	rival["logistics"]=0.70
-	rival["food_days"]=80.0
-	rival["command_readiness"]=0.40
-	rival["military_readiness"]=0.45
-	var food_before:=float(rival.food_days)
-	var command_before:=float(rival.command_readiness)
-	var readiness_before:=float(rival.military_readiness)
-	var cycles_before:=int(rival.get("training_cycles",0))
-	var advanced:Dictionary=system._advance_rival_military_training(rival,{"military":0.30},0.0)
+	rival.merge({"strategy":"expansion","knowledge":.70,"institutions":.65,"logistics":.70,"food_days":80.0,"command_readiness":.40,"military_readiness":.45,"military_proficiency":.20,"military_stockpile":1000.0},true)
+	var locked:Dictionary=system._advance_rival_military_training(rival.duplicate(true),{"military":.30},0.0)
+	assert_str(String(locked.training_focus)).is_equal("camp_drill")
+	rival.discovery_profile.technologies.append("professional_corps")
+	var advanced:Dictionary=system._advance_rival_military_training(rival,{"military":.30},0.0)
 	assert_str(String(advanced.training_focus)).is_equal("war_games")
-	assert_float(float(advanced.food_days)).is_less(food_before)
-	assert_float(float(advanced.command_readiness)).is_greater(command_before)
-	assert_float(float(advanced.military_readiness)).is_greater(readiness_before)
-	assert_int(int(advanced.training_cycles)).is_equal(cycles_before+1)
-	assert_bool(not advanced.has("generals") and not advanced.has("units")).is_true()
+	assert_float(float(advanced.food_days)).is_less(80.0)
+	assert_float(float(advanced.military_stockpile)).is_less(1000.0)
+	assert_float(float(advanced.command_readiness)).is_greater(.40)
+	assert_int(int(advanced.training_cycles)).is_equal(0)
+	var turns:=1
+	while int(advanced.training_cycles)==0 and turns<36:
+		# External resupply keeps this course funded across monthly updates.
+		advanced.food_days=80.0
+		advanced=system._advance_rival_military_training(advanced,{"military":.30},0.0)
+		turns+=1
+	assert_int(turns).is_greater(1)
+	assert_int(int(advanced.training_cycles)).is_equal(1)
+	assert_float(float(advanced.military_proficiency)).is_greater(.20)
 
 
 func test_every_rival_automatically_chooses_the_same_kind_of_founding_focus()->void:
