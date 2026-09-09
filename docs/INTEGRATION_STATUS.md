@@ -1,3 +1,11 @@
+## September 8 — grounded air missions preserve fuel and standing orders
+
+INTEGRATED `08fcf7693b439ae2c282a7e9209e21f3208397c6` by conflict-free fast-forward from `705e015` into canonical Mac main. Wings with no range coverage or no operating area now wait without spending sortie fuel. Carrier movement can ground a wing; returning within range resumes its retained order automatically, including after operations save/load. Air command shows flight fuel actually used today separately from the mission requirement and reserve. Partial coverage still operates, and naval movement, carrier/airbase ferry flights, repair returns and transport retain their charges. Training remains an independent paid policy.
+
+All **71 canonical tests pass**, zero errors/failures/skips/orphans, exit 0, across joint campaign, joint operations, training strategy and main-map services (`/tmp/tt-grounded-air-fuel-canonical.log`). The new carrier regression first reproduced the old erroneous charge of four fuel for four grounded aircraft. The four new regressions cover actual carrier movement, resumption, saved orders, report text, partial coverage, resupply, movement costs and missing-region grounding. Owned test overrides removed; no save schema or population changes. See GROUNDED_AIR_FUEL_HANDOFF.md.
+
+Player PID 15785 remains running standalone source `705e015b8b5d`; no session was interrupted. This source integration becomes playable on the next updated standalone launch. Native inspection and numerical HOI4 parity are not claimed.
+
 ## September 8 — exact naval and air detachment equipment and range
 
 INTEGRATED `8d6098c` by conflict-free fast-forward from `699eefa` into canonical Mac main. Selecting a virtual naval/air subdivision now previews the exact craft it will receive, using the same allocation function as real materialization. Mission availability and the live selected-command tooltip use that composition. Assignment validates the selected craft and their operating range before splitting: balloon-only elements cannot receive fighter missions, while a fighter element can use its own range even when its parent contains short-range balloons. Rejected orders leave assets and hierarchy unchanged; accepted splits retain established ordering and original-force replacement deficits.
