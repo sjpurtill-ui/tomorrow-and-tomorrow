@@ -1,0 +1,172 @@
+extends Control
+## A shared screen-space label layer. World positions and city reports stay authoritative.
+const NAME_SIZE:=16
+const POP_SIZE:=13
+const GAP:=7.0
+var terrain:Node
+var sources:Dictionary={}
+var cards:Array[Dictionary]=[]
+var previous:Dictionary={}
+var overflow:Array[Dictionary]=[]
+var more:Button
+var list_panel:PanelContainer
+var list_rows:VBoxContainer
+var list_signature:=""
+var layout_signature:=""
+var styles:Dictionary={}
+
+func _ready()->void:
+	mouse_filter=Control.MOUSE_FILTER_IGNORE
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	more=Button.new();more.text="More cities";more.hide();add_child(more)
+	more.pressed.connect(func():list_panel.visible=not list_panel.visible)
+	list_panel=PanelContainer.new();list_panel.hide();add_child(list_panel)
+	var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;list_panel.add_child(scroll)
+	list_rows=VBoxContainer.new();list_rows.size_flags_horizontal=Control.SIZE_EXPAND_FILL;scroll.add_child(list_rows)
+
+func register_label(label:Label3D,id:String,foreign:bool,anchor:Vector3)->void:
+	sources[id]={"label":weakref(label),"foreign":foreign,"anchor":anchor}
+	# Keep legacy label data for existing update paths; draw the text and flag once.
+	label.layers=0
+	var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
+	if flag:flag.layers=0
+
+static func arrange(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={})->Dictionary:
+	var placed:Array[Dictionary]=[];var hidden:Array[Dictionary]=[];var memory:Dictionary={}
+	var ordered:=entries.duplicate()
+	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if bool(a.foreign)!=bool(b.foreign):return not bool(a.foreign)
+		return String(a.id)<String(b.id))
+	for entry:Dictionary in ordered:
+		var anchor:Vector2=entry.anchor;var extent:Vector2=entry.extent
+		var candidates:Array[Vector2]=[]
+		if old.has(entry.id):candidates.append(anchor+Vector2(old[entry.id]))
+		for row in range(12):
+			var step:=float(row)*(extent.y+GAP)
+			candidates.append(anchor+Vector2(-extent.x*.5,-extent.y-14-step))
+			candidates.append(anchor+Vector2(-extent.x*.5,14+step))
+			candidates.append(anchor+Vector2(18,-extent.y*.5+step))
+			candidates.append(anchor+Vector2(-extent.x-18,-extent.y*.5-step))
+		# Dense clusters can use free space elsewhere on the map, with leader lines.
+		for y in range(int(bounds.position.y),int(bounds.end.y-extent.y)+1,int(extent.y+GAP)):
+			for x in range(int(bounds.position.x),int(bounds.end.x-extent.x)+1,int(extent.x+GAP)):
+				candidates.append(Vector2(x,y))
+		var chosen:=Rect2();var best:=INF
+		for index in candidates.size():
+			var pos:Vector2=candidates[index]
+			pos.x=clampf(pos.x,bounds.position.x,maxf(bounds.position.x,bounds.end.x-extent.x))
+			pos.y=clampf(pos.y,bounds.position.y,maxf(bounds.position.y,bounds.end.y-extent.y))
+			var rect:=Rect2(pos,extent)
+			if not bounds.encloses(rect):continue
+			var blocked:=false
+			for other:Dictionary in placed:
+				if rect.grow(GAP*.5).intersects(other.rect.grow(GAP*.5)):blocked=true;break
+			if blocked:continue
+			# Protect the city pins as well as the other labels.
+			for other:Dictionary in entries:
+				if rect.grow(8).has_point(other.anchor):blocked=true;break
+			if blocked:continue
+			var score:=anchor.distance_squared_to(rect.get_center())
+			if index==0 and old.has(entry.id):chosen=rect;break
+			if score<best:best=score;chosen=rect
+		if chosen.size==Vector2.ZERO:hidden.append(entry);continue
+		var card:=entry.duplicate();card.rect=chosen;placed.append(card)
+		memory[entry.id]=chosen.position-anchor
+	return {"cards":placed,"overflow":hidden,"memory":memory}
+
+func refresh()->void:
+	if not is_instance_valid(terrain) or terrain.camera==null:return
+	var camera:Camera3D=terrain.camera
+	var viewport_size:=get_viewport().get_visible_rect().size
+	var bounds:=Rect2(Vector2(90,100),(viewport_size-Vector2(110,170)).max(Vector2(100,100)))
+	var entries:Array[Dictionary]=[]
+	var font:=ThemeDB.fallback_font
+	var signature:=str(viewport_size)
+	for id in sources.keys():
+		var source:Dictionary=sources[id]
+		var label:Label3D=source.label.get_ref()
+		if not is_instance_valid(label) or label.is_queued_for_deletion():sources.erase(id);continue
+		if not label.is_visible_in_tree() or camera.is_position_behind(source.anchor):continue
+		var anchor:=camera.unproject_position(source.anchor)
+		if not Rect2(Vector2.ZERO,viewport_size).has_point(anchor):continue
+		var parts:=label.text.split("  •  ",true,1)
+		var title:=String(parts[0]);var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
+		if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
+		var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
+		var width:=font.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20
+		for line:String in lines:width=maxf(width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+54)
+		var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
+		entries.append({"id":String(id),"foreign":source.foreign,"anchor":anchor,"title":title,"lines":lines,"population":count,"color":label.modulate,"flag":flag.texture if flag else null,"extent":Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25)})
+		signature+=String(id)+str(anchor)+label.text+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
+	if signature==layout_signature:return
+	layout_signature=signature
+	var result:=arrange(entries,bounds,previous)
+	cards=result.cards;overflow=result.overflow;previous=result.memory
+	_update_overflow(viewport_size)
+	queue_redraw()
+
+static func wrap_name(title:String,font:Font,width:float)->Array[String]:
+	var lines:Array[String]=[];var line:=""
+	for word:String in title.split(" "):
+		var next:=word if line.is_empty() else line+" "+word
+		if not line.is_empty() and font.get_string_size(next,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x>width:lines.append(line);line=word
+		else:line=next
+	if not line.is_empty():lines.append(line)
+	return lines
+
+func _process(_delta:float)->void:refresh()
+
+func _unhandled_input(event:InputEvent)->void:
+	if list_panel==null or not list_panel.visible:return
+	if (event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE) or (event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT):
+		list_panel.hide();get_viewport().set_input_as_handled()
+
+func city_at(point:Vector2)->Dictionary:
+	for card:Dictionary in cards:
+		if card.rect.has_point(point):return card
+	return {}
+
+func _update_overflow(viewport_size:Vector2)->void:
+	if more==null:return
+	more.visible=not overflow.is_empty()
+	more.text="%d more cities · list" % overflow.size()
+	more.position=Vector2(viewport_size.x-230,viewport_size.y-56);more.size=Vector2(210,36)
+	list_panel.position=Vector2(viewport_size.x-340,120);list_panel.size=Vector2(320,maxf(100,viewport_size.y-190))
+	if overflow.is_empty():list_panel.hide()
+	var signature:=""
+	for entry:Dictionary in overflow:signature+=String(entry.id)+String(entry.title)+String(entry.population)+str(entry.color)+str(entry.flag.get_instance_id() if entry.flag else 0)
+	if signature==list_signature:return
+	list_signature=signature
+	for child in list_rows.get_children():list_rows.remove_child(child);child.queue_free()
+	var close:=Button.new();close.text="Close city list";close.pressed.connect(func():list_panel.hide());list_rows.add_child(close)
+	for entry:Dictionary in overflow:
+		var button:=Button.new();button.text=String(entry.title)+"\n"+String(entry.population)
+		button.icon=entry.flag;button.expand_icon=true;button.add_theme_constant_override("icon_max_width",28)
+		button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;button.alignment=HORIZONTAL_ALIGNMENT_LEFT
+		button.add_theme_color_override("font_color",entry.color);button.custom_minimum_size.y=54
+		button.pressed.connect(func():
+			list_panel.hide()
+			if entry.foreign:terrain._show_city_intel_summary(String(entry.id))
+			else:terrain._focus_settlement_from_screen(entry.anchor,false,String(entry.id)))
+		list_rows.add_child(button)
+
+func _draw()->void:
+	var font:=ThemeDB.fallback_font
+	for card:Dictionary in cards:
+		var box:Rect2=card.rect;var anchor:Vector2=card.anchor;var color:Color=card.color
+		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
+		draw_line(anchor,end,Color("071312"),3,true)
+		draw_line(anchor,end,Color(color,.65),1,true)
+		draw_circle(anchor,3,Color("071312"));draw_circle(anchor,2,color)
+	for card:Dictionary in cards:
+		var box:Rect2=card.rect;var color:Color=card.color
+		if not styles.has(color):
+			var style:=StyleBoxFlat.new();style.bg_color=Color("0a171bea");style.border_color=Color(color,.4)
+			style.set_border_width_all(1);style.set_corner_radius_all(4);styles[color]=style
+		draw_style_box(styles[color],box)
+		draw_rect(Rect2(box.position+Vector2(0,5),Vector2(3,box.size.y-10)),color)
+		if card.flag!=null:draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,6),Vector2(30,20)),false)
+		var y:=box.position.y+19
+		for line:String in card.lines:
+			draw_string(font,Vector2(box.position.x+46,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,color);y+=20
+		draw_string(font,Vector2(box.position.x+10,box.end.y-9),card.population,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("d1dad7"))

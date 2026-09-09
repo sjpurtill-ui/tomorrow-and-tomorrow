@@ -3096,6 +3096,7 @@ func _update_scale_lod() -> void:
 	_normalize_aerial_labels()
 
 var city_banner_identity:Dictionary={}
+var city_labels:Control
 
 func _normalize_aerial_labels()->void:
 	if camera==null or camera.projection!=Camera3D.PROJECTION_PERSPECTIVE: return
@@ -3131,13 +3132,31 @@ func _update_city_flag(label:Label3D)->void:
 	var ratio:=float(label.font_size)*1.2/float(flag.texture.get_height())
 	flag.pixel_size=label.pixel_size*ratio
 	flag.offset=Vector2(-(width*.5+float(label.font_size)*.35)/ratio-float(flag.texture.get_width())*.5,0)
+	_register_city_card(label)
+
+func _register_city_card(label:Label3D)->void:
+	var id:=String(label.get_meta("city_map_id",""))
+	var foreign:=bool(label.get_meta("city_map_foreign",false))
+	var anchor:Vector3=label.get_meta("city_map_anchor",label.global_position)
+	if label==settlement_map_label:
+		for city:Dictionary in GameState.player_settlements:
+			if bool(city.get("primary",false)):id=String(city.id);break
+		if is_instance_valid(settlement_blip):anchor=settlement_blip.global_position
+	elif foreign:
+		var pin:=label.get_parent().get_node_or_null("RegionalCityPin") as Label3D
+		if pin:anchor=pin.global_position
+	if id.is_empty():return
+	if not is_instance_valid(city_labels):
+		var layer:=CanvasLayer.new();layer.name="CityLabels";layer.layer=0;add_child(layer)
+		city_labels=preload("res://scripts/hud/city_labels.gd").new();city_labels.terrain=self;layer.add_child(city_labels)
+	city_labels.register_label(label,id,foreign,anchor)
 
 func _city_map_label(city_name:String,population:int=-1,estimate:Dictionary={})->String:
 	var count:="Population unknown"
 	if not estimate.is_empty():
 		count="est. %s–%s" % [_compact_population(roundi(float(estimate.get("low",0)))),_compact_population(roundi(float(estimate.get("high",0))))]
 	elif population>=0: count=_compact_population(population)
-	return "%s  •  %s" % [city_name.to_upper(),count]
+	return "%s  •  %s" % [city_name,count]
 
 func _settlement_map_label_text(_zoom:float)->String:
 	return _city_map_label(_settlement_display_name(),roundi(_settlement_model().primary_population_exact()))
@@ -3749,7 +3768,7 @@ func _refresh_settlement_footprint(force := false) -> void:
 	if not founded:
 		return
 	if settlement_map_label:
-		settlement_map_label.text="%s  •  %s" % [_settlement_display_name().to_upper(),_compact_population(roundi(_settlement_model().primary_population_exact()))]
+		settlement_map_label.text=_settlement_map_label_text(camera.size if camera!=null else 0.0)
 		# `_update_scale_lod` owns the screen-aware offset. Re-centering here used to
 		# cover the locator again every time simulation state refreshed the fabric.
 	_settlement_model().ensure_founded()
@@ -6968,7 +6987,10 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 		var position_2d:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
 		var label:=Label3D.new()
 		label.name="SecondarySettlementLabel_%d" % index
-		label.set_meta("city_civilization_id",String(settlement.get("occupied_by","player")))
+		var controller:=String(settlement.get("occupied_by",""))
+		label.set_meta("city_civilization_id",controller if controller!="" else "player")
+		label.set_meta("city_map_id",String(settlement.id))
+		label.set_meta("city_map_anchor",Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y)+.004,position_2d.y))
 		label.text=_city_map_label(String(settlement.get("name","Settlement")),int(settlement.get("population",0)))
 		label.font_size=9 if camera!=null and camera.size>2600.0 else 11
 		label.outline_size=4
@@ -12310,6 +12332,7 @@ func _refresh_contact_encounter_markers()->void:
 			fabric.position.x=0;fabric.position.z=0;marker.add_child(fabric)
 			footprint_radius=fabric.footprint_radius
 		var label:=Label3D.new();label.name="SettlementLabel";label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
+		label.set_meta("city_map_id",String(site.city_id));label.set_meta("city_map_foreign",true)
 		label.set_meta("city_civilization_id",String(site.report.get("controller","")) if String(site.report.get("controller",""))!="" else String(site.civ_id))
 		label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 		label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("#e4d7b4")
@@ -13538,6 +13561,9 @@ func _show_city_intel_summary(city_id:String)->void:
 
 func _city_from_screen(point:Vector2)->Dictionary:
 	if camera==null:return {}
+	if is_instance_valid(city_labels):
+		var card:Dictionary=city_labels.city_at(point)
+		if not card.is_empty():return CivilizationSystem.city_intelligence.known("player",String(card.id)) if card.foreign else {}
 	# Names and locator pins are clickable even when physical buildings are
 	# subpixel at regional or continental distance.
 	var picked_id:=""
@@ -13548,6 +13574,7 @@ func _city_from_screen(point:Vector2)->Dictionary:
 		for node_name in ["SettlementLabel","RegionalCityPin"]:
 			var label:=marker.get_node_or_null(node_name) as Label3D
 			if label==null or not label.visible or camera.is_position_behind(label.global_position):continue
+			if label.layers==0:continue # The screen-space card owns its relocated hit target.
 			var center:=camera.unproject_position(label.global_position)
 			var font:Font=label.font if label.font!=null else ThemeDB.fallback_font
 			var glyph_size:=font.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.font_size)
@@ -19999,6 +20026,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if is_instance_valid(city_labels):
+			var card:Dictionary=city_labels.city_at(event.position)
+			if not card.is_empty():
+				if card.foreign:_show_city_intel_summary(String(card.id))
+				else:_focus_settlement_from_screen(event.position,event.double_click,String(card.id))
+				get_viewport().set_input_as_handled();return
 		for marker:Node3D in player_field_army_markers.values():
 			if is_instance_valid(marker) and marker.visible and event.position.distance_to(camera.unproject_position(marker.global_position))<=10.0:
 				_select_field_army_from_screen(event.position);get_viewport().set_input_as_handled();return
@@ -20025,17 +20058,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		_order_selected_army_to_screen(event.position)
 		get_viewport().set_input_as_handled()
 
-func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: bool) -> bool:
+func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: bool, city_id:String="") -> bool:
 	if camera==null or not ("Hearth Circle" in GameState.settlement_completed):
 		return false
 	var selected:Dictionary={}
 	var selected_screen_distance:=INF
+	if city_id.is_empty() and is_instance_valid(city_labels):
+		var card:Dictionary=city_labels.city_at(screen_position)
+		if not card.is_empty():
+			if card.foreign:return false
+			city_id=String(card.id)
 	for settlement in _settlement_model().settlement_network_snapshot().settlements:
+		if not city_id.is_empty() and String(settlement.get("id",""))!=city_id:continue
 		var center_2d:Vector2=settlement.get("position",Vector2.ZERO)
 		var candidate_center:=Vector3(center_2d.x,_height_at(center_2d.x,center_2d.y),center_2d.y)
 		if camera.is_position_behind(candidate_center): continue
 		var distance:=screen_position.distance_to(camera.unproject_position(candidate_center))
-		if bool(settlement.get("primary",false)) and settlement_map_label and settlement_map_label.visible:
+		if not city_id.is_empty():distance=0.0
+		if bool(settlement.get("primary",false)) and settlement_map_label and settlement_map_label.visible and settlement_map_label.layers!=0:
 			var label_screen:=camera.unproject_position(settlement_map_label.position)
 			if absf(screen_position.x-label_screen.x)<=105.0 and absf(screen_position.y-label_screen.y)<=22.0:
 				distance=0.0

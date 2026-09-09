@@ -123,8 +123,8 @@ func test_local_monthly_work_updates_own_plots_and_ledger()->void:
 
 func test_all_map_labels_share_name_and_population_format()->void:
 	var terrain:Node3D=auto_free(FlatTerrain.new())
-	assert_str(terrain._city_map_label("Rivermeet",200)).is_equal("RIVERMEET  •  200")
-	assert_str(terrain._city_map_label("Elsewhere",-1,{"low":100,"high":300})).is_equal("ELSEWHERE  •  est. 100–300")
+	assert_str(terrain._city_map_label("Rivermeet",200)).is_equal("Rivermeet  •  200")
+	assert_str(terrain._city_map_label("Elsewhere",-1,{"low":100,"high":300})).is_equal("Elsewhere  •  est. 100–300")
 	assert_str(terrain._city_map_label("Unidentified settlement")).contains("Population unknown")
 	assert_str(terrain._settlement_map_label_text(.1)).is_equal(terrain._settlement_map_label_text(10000))
 

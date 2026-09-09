@@ -26,7 +26,7 @@ func test_known_names_visible_and_clickable_at_every_distance()->void:
 		var marker:Node3D=map.contact_encounter_markers[city.city_id]
 		var label:=marker.get_node("SettlementLabel") as Label3D
 		assert_bool(label.visible).is_true()
-		assert_bool(label.text.contains(String(city.name).to_upper())).is_true()
+		assert_bool(label.text.contains(String(city.name))).is_true()
 		assert_bool(label.text.contains("est.")).is_true()
 		assert_int(label.render_priority).is_equal(11)
 		map._normalize_aerial_labels()
@@ -39,7 +39,10 @@ func test_known_names_visible_and_clickable_at_every_distance()->void:
 		var pixel_size:=flag.pixel_size
 		map._normalize_aerial_labels();map._refresh_contact_encounter_markers()
 		assert_float(flag.pixel_size).is_equal(pixel_size)
-		var hit:Dictionary=map._city_from_screen(map.camera.unproject_position(label.global_position))
+		map.city_labels.refresh()
+		assert_array(map.city_labels.cards).has_size(1)
+		assert_int(label.layers).is_equal(0)
+		var hit:Dictionary=map._city_from_screen(map.city_labels.cards[0].rect.get_center())
 		assert_str(String(hit.get("city_id",""))).is_equal(String(city.city_id))
 
 func test_map_summary_reads_reported_estimates_and_leaves_full_report_optional()->void:
