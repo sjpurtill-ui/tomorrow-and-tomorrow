@@ -14,6 +14,8 @@ var selected_label:Label
 var current_order_label:Label
 var edit_order_button:Button
 var mission:OptionButton
+var mission_hint:Label
+var mission_reasons:Dictionary={}
 var cities:OptionButton
 var area_name:LineEdit
 var vision:LineEdit
@@ -61,6 +63,7 @@ func _ready()->void:
 		if id=="transport":continue
 		mission.add_item("Next: "+String(catalog[id]));mission.set_item_metadata(mission.item_count-1,id)
 	mission.item_selected.connect(func(_index:int):_refresh_targets())
+	mission_hint=_label(controls,"");mission_hint.max_lines_visible=2;mission_hint.modulate=Color("efa092");mission_hint.hide()
 	cities=OptionButton.new();cities.clip_text=true;controls.add_child(cities)
 	region_label=_label(controls,"Zone: select on map or draw below")
 	region_label.max_lines_visible=1
@@ -102,6 +105,7 @@ func _button(parent:Node,text:String,callback:Callable)->Button:
 func _selected(entry:Dictionary)->void:
 	selected=entry
 	_update_current_order()
+	_refresh_mission_availability()
 	if entry.is_empty():
 		selected_label.text="Select a command in the hierarchy";selected_label.tooltip_text=""
 		map.selected_force=0;status.text="";status.hide();return
@@ -141,6 +145,36 @@ func _edit_current_order()->void:
 func _draw_zone()->void:
 	map.begin_boundary();_report({"message":"Click boundary points on the main map. Enter finishes; right-click undoes; Escape cancels."})
 func _mission()->String:return String(mission.get_item_metadata(mission.selected))
+func _refresh_mission_availability()->void:
+	if not is_instance_valid(mission) or not is_instance_valid(apply_button) or not is_instance_valid(mission_hint):return
+	mission_reasons.clear()
+	var current:Dictionary={} if selected.is_empty() else command.preview(String(selected.id),selected.get("path",[]))
+	var selection_error:=""
+	if current.is_empty() or int(current.get("count",0))<=0:selection_error="Select an available command in the hierarchy."
+	elif not selected.get("path",[]).is_empty() and int(current.count)!=int(selected.count):selection_error="This formation's strength changed. Select it again before ordering it."
+	var capabilities:Array[Dictionary]=[]
+	if selection_error=="" and domain!="army":
+		for leaf:Dictionary in command.leaves(String(selected.id)):
+			capabilities.append({"name":String(leaf.name),"missions":MilitaryCampaign.joint_operations.missions_for(command.force(leaf))})
+	for index in mission.item_count:
+		var id:=String(mission.get_item_metadata(index));var reason:=selection_error
+		var unsupported:Array[String]=[]
+		for capability:Dictionary in capabilities:
+			if id not in capability.missions:unsupported.append(String(capability.name))
+		if not unsupported.is_empty():
+			reason="%d %s %s the required %s for this objective." % [unsupported.size(),"command" if unsupported.size()==1 else "commands","lacks" if unsupported.size()==1 else "lack","ships" if domain=="navy" else "aircraft"]
+			var examples:="\n".join(unsupported.slice(0,3))
+			if unsupported.size()>3:examples+="\n+ %d other commands" % (unsupported.size()-3)
+			reason+="\n"+examples+"\nSelect a compatible subordinate or choose another objective."
+		mission_reasons[id]=reason
+		mission.set_item_disabled(index,reason!="")
+		mission.get_popup().set_item_tooltip(index,reason)
+	var blocked:=String(mission_reasons.get(_mission(),""))
+	apply_button.disabled=blocked!="";apply_button.tooltip_text=blocked if blocked!="" else "Give this objective to the selected command. Staff report preparation and supply delays."
+	mission_hint.text=blocked.get_slice("\n",0);mission_hint.tooltip_text=blocked
+	mission_hint.visible=blocked!="" and not selected.is_empty()
+	# Never replace a player's draft when selection or equipment changes.
+	# A retained but unavailable draft is explained and cannot be submitted.
 func _refresh_targets()->void:
 	if cities==null:return
 	var retain:Variant=cities.get_item_metadata(cities.selected) if cities.item_count>0 else ""
@@ -152,8 +186,12 @@ func _refresh_targets()->void:
 			if retain==city.city_id:cities.select(cities.item_count-1)
 	if cities.item_count==0:cities.add_item("No reported cities in this zone");cities.set_item_metadata(0,"");cities.disabled=true
 	else:cities.disabled=false
+	_refresh_mission_availability()
 func _assign()->void:
 	if selected.is_empty():_report({"error":"Select a command in the hierarchy first."});return
+	_refresh_mission_availability()
+	var blocked:=String(mission_reasons.get(_mission(),""))
+	if blocked!="":_report({"error":blocked});return
 	var current:Dictionary=command.preview(String(selected.id),selected.path)
 	if current.is_empty() or (not selected.path.is_empty() and int(current.count)!=int(selected.count)):_report({"error":"This formation's strength changed. Select it again before detaching or ordering it."});tree.rebuild();return
 	var result:Dictionary=command.assign(String(selected.id),selected.path,map.selected,_mission(),String(cities.get_item_metadata(cities.selected)),vision.text)
@@ -205,7 +243,7 @@ func _process(delta:float)->void:
 	if is_instance_valid(finish_button):finish_button.visible=map.drawing
 	if is_instance_valid(cancel_boundary_button):cancel_boundary_button.visible=map.drawing
 	tick+=delta
-	if tick>=1:tick=0;tree.refresh();_update_status();_update_current_order()
+	if tick>=1:tick=0;tree.refresh();_update_status();_update_current_order();_refresh_mission_availability()
 func handle_early_input(event:InputEvent)->bool:
 	if not event is InputEventKey or not event.pressed:return false
 	if event.keycode==KEY_ESCAPE:

@@ -345,6 +345,7 @@ func test_order_action_stays_reachable_when_optional_details_and_feedback_are_lo
 			var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain=service;add_child(panel)
 			panel._selected(command.preview(service))
 			panel.current_order_label.text="Now: Encircle · A long named frontier with subordinate exceptions ".repeat(12)
+			panel.mission_hint.text="This command lacks the required equipment for the selected objective. ".repeat(4);panel.mission_hint.show()
 			panel.details_toggle.pressed.emit()
 			panel._draw_zone()
 			panel._report({"error":"Supply and route information with enough detail to wrap across several lines. ".repeat(8)})
@@ -691,3 +692,93 @@ func test_transport_order_is_identified_without_loading_an_unsupported_mission()
 		assert_str(panel._mission()).is_equal("hold");assert_str(actual.mission).is_equal("transport")
 		assert_dict(MilitaryCampaign.export_state()).is_equal(before)
 		panel.queue_free();await get_tree().process_frame
+
+func _mission_disabled(panel:CanvasLayer,id:String)->bool:
+	for index in panel.mission.item_count:
+		if panel.mission.get_item_metadata(index)==id:return panel.mission.is_item_disabled(index)
+	assert_bool(false).override_failure_message("Missing mission "+id).is_true();return true
+
+func test_air_mission_options_explain_unsupported_aircraft_before_submission()->void:
+	_craft("air",12);var id:=String(command.children("air")[0].id)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain="air";add_child(panel)
+	panel._selected(command.preview(id))
+	var before:Dictionary=MilitaryCampaign.export_state()
+	assert_bool(_mission_disabled(panel,"reconnaissance")).is_false()
+	assert_bool(_mission_disabled(panel,"hold")).is_false()
+	assert_bool(_mission_disabled(panel,"strategic_bombing")).is_true()
+	_select_draft_mission(panel,"strategic_bombing");panel._refresh_targets()
+	assert_bool(panel.apply_button.disabled).is_true()
+	assert_str(panel.mission_hint.text).contains("required aircraft")
+	assert_str(panel.mission_hint.tooltip_text).contains(command.node(id).name)
+	assert_bool(panel.mission_hint.visible).is_true()
+	panel._assign()
+	assert_str(panel.feedback.text).contains("required aircraft")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_headquarters_requires_compatible_subordinates_and_keeps_the_draft()->void:
+	_craft("air",12);var scout_id:=String(command.children("air")[0].id)
+	MilitaryCampaign.military_inventory.observation_balloon_equipment=12
+	var receipt:Dictionary=op.commission(int(op.state.bases[0].id),"observation_balloon",12)
+	assert_bool(receipt.has("ok")).is_true()
+	var fighter:Dictionary=op.force(int(receipt.id));fighter.units={"fighter":12};fighter.authorized=fighter.units.duplicate()
+	command.sync()
+	var fighter_id:=""
+	for leaf:Dictionary in command.leaves("air"):
+		if int(leaf.force_id)==int(fighter.id):fighter_id=String(leaf.id)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain="air";add_child(panel)
+	panel._selected(command.preview(fighter_id));_select_draft_mission(panel,"air_superiority");panel._refresh_targets()
+	assert_bool(panel.apply_button.disabled).is_false()
+	var before:Dictionary=MilitaryCampaign.export_state()
+	panel._selected(command.preview("air"))
+	assert_str(panel._mission()).is_equal("air_superiority")
+	assert_bool(panel.apply_button.disabled).is_true()
+	assert_bool(panel.mission_hint.text.begins_with("1 command lacks")).is_true()
+	assert_str(panel.mission_hint.tooltip_text).contains(command.node(scout_id).name)
+	assert_bool(_mission_disabled(panel,"reconnaissance")).is_true()
+	assert_bool(_mission_disabled(panel,"hold")).is_false()
+	panel._selected(command.preview(fighter_id,[0]))
+	assert_str(panel._mission()).is_equal("air_superiority")
+	assert_bool(panel.apply_button.disabled).is_false()
+	assert_bool(panel.mission_hint.visible).is_false()
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_mission_options_refresh_after_equipment_loss_without_changing_orders()->void:
+	var actual:=_craft("air",12);actual.units={"fighter":6,"observation_balloon":6};actual.authorized=actual.units.duplicate()
+	command.sync();var id:=String(command.children("air")[0].id)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain="air";add_child(panel)
+	panel._selected(command.preview(id));_select_draft_mission(panel,"air_superiority");panel._refresh_targets()
+	assert_bool(panel.apply_button.disabled).is_false()
+	actual.units.fighter=0;command.sync()
+	var before:Dictionary=MilitaryCampaign.export_state()
+	panel._process(1.1)
+	assert_str(panel._mission()).is_equal("air_superiority")
+	assert_bool(panel.apply_button.disabled).is_true()
+	assert_bool(_mission_disabled(panel,"air_superiority")).is_true()
+	assert_bool(_mission_disabled(panel,"reconnaissance")).is_false()
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	actual.units.fighter=6;command.sync();before=MilitaryCampaign.export_state();panel._process(1.1)
+	assert_bool(panel.apply_button.disabled).is_false()
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_naval_mission_options_follow_ship_roles_and_allow_real_assignment()->void:
+	var actual:=_craft("navy",12);var id:=String(command.children("navy")[0].id)
+	var area:Dictionary=op.create_region("navy",command.R.rectangle(Vector2(0,-20),4),"Fleet patrol").region
+	var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain="navy";add_child(panel)
+	panel._selected(command.preview(id))
+	assert_bool(_mission_disabled(panel,"patrol")).is_false()
+	assert_bool(_mission_disabled(panel,"invasion_support")).is_true()
+	_select_draft_mission(panel,"patrol");panel._region(area)
+	assert_bool(panel.apply_button.disabled).is_false();panel._assign()
+	assert_str(actual.mission).is_equal("patrol")
+	assert_str(actual.region.id).is_equal(area.id)
+	assert_str(panel.feedback.text).contains("Objective given")
+
+func test_empty_command_blocks_submission_without_disabling_land_objectives()->void:
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	assert_bool(panel.apply_button.disabled).is_true()
+	assert_str(panel.apply_button.tooltip_text).contains("Select an available command")
+	var id:=_home(12);panel.tree.refresh();panel._selected(command.preview(id))
+	assert_bool(_mission_disabled(panel,"encircle")).is_false()
+	assert_bool(panel.apply_button.disabled).is_false()
+	panel._selected({})
+	assert_bool(panel.apply_button.disabled).is_true();assert_bool(panel.mission_hint.visible).is_false()
