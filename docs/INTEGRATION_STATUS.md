@@ -1,3 +1,11 @@
+## September 8 — faster, adjustable map scrolling
+
+INTEGRATED `6d2b749` by conflict-free fast-forward from `9d5966b` into canonical Mac main. Two-finger panning now defaults to 4× the previous pace. Menu → Map Controls → Map scroll speed offers 0.5×–12×, a live numeric readout and Default (4×). It appears near the top, applies immediately and persists between games in the existing local preferences. Old settings gain the faster default while retaining display/audio choices. Invalid values are bounded or replaced with the default. Arrow zoom and panel scrolling are unchanged; settings keyboard adjustments cannot also pan the background map.
+
+Canonical validation: **9 gdUnit tests**, **49 input checks** and **77 full-map display/menu checks** pass, exit 0, with no reported errors/failures/skips/orphans. Includes live sensitivity, persistence/reopening/default, legacy settings, all four distances, GUI input isolation and immediate slider visibility at 1280×720/1440×900 with 100–175% UI scale. Logs: `/tmp/tt-scroll-sensitivity-canonical-tests.log`, `/tmp/tt-scroll-sensitivity-canonical-input.log`, `/tmp/tt-scroll-sensitivity-canonical-display.log`. Owned overrides removed; no simulation/save format changes. See MAP_SCROLL_SPEED_HANDOFF.md.
+
+Player PID 11813 remains uninterrupted on standalone source `9d5966b7e1c5`. This source integration does not change its bundled controls. The next updated standalone launch receives the setting; subsequent slider changes need no restart. Native trackpad feel remains for player assessment.
+
 ## September 8 — two-finger map pan and Up/Down distance
 
 INTEGRATED `6c91a4e` by conflict-free fast-forward from `154d2c5` into canonical Mac main. Two-finger movement pans both map axes at the current scale without zooming; finger spread cannot change altitude during a pan. Up/Down selects the adjacent distance with the existing smooth four-level transition. Holding arrows does not repeat or also pan. Map hints and Mac controls documentation now match. Toolbar focus no longer swallows map arrow zoom; hovered panels, text fields and decision/menu input retain their controls.
