@@ -3260,10 +3260,9 @@ func _process_camera_navigation(delta: float) -> void:
 		camera_input_msec=Time.get_ticks_msec()
 		camera_yaw=wrapf(camera_yaw+turn*0.8*delta,-PI,PI)
 		_update_camera()
-	var input:=Input.get_vector("ui_left","ui_right","ui_up","ui_down")
-	# Godot's built-in UI actions reliably cover the arrow keys. Add physical
-	# WASD here so the map also follows the strategy-game convention without
-	# changing focus/navigation behavior for buttons and modal controls.
+	# Up/Down belong to camera distance. Never poll them as movement as well.
+	var input:=Vector2(Input.get_axis("ui_left","ui_right"),0.0)
+	# WASD still moves along both screen axes.
 	var wasd:=Vector2(
 		(1.0 if Input.is_physical_key_pressed(KEY_D) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_A) else 0.0),
 		(1.0 if Input.is_physical_key_pressed(KEY_S) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_W) else 0.0)
@@ -3278,7 +3277,7 @@ func _process_camera_navigation(delta: float) -> void:
 
 
 func _camera_keyboard_movement(input:Vector2,screen_right:Vector3,screen_up:Vector3,distance:float)->Vector3:
-	# Input.get_vector reports up as negative Y. Express navigation in the
+	# Screen-space input reports up as negative Y. Express navigation in the
 	# camera's real screen axes so right/up stay right/up after camera rotation.
 	return (screen_right*input.x-screen_up*input.y)*distance
 
@@ -3292,6 +3291,15 @@ func _camera_ground_screen_right() -> Vector3:
 	var axis:=camera.global_transform.basis.x
 	axis.y=0.0
 	return axis.normalized() if axis.length_squared()>0.000001 else Vector3.RIGHT
+
+func _pan_camera_gesture(delta:Vector2)->void:
+	if camera==null or not delta.is_finite() or delta.is_zero_approx():return
+	# Native pan deltas use scroll direction, opposite to grab-and-drag.
+	# Preserve fractional movement in both axes and scale it to this view.
+	var units_per_pixel:=camera.size/maxf(1.0,get_viewport().get_visible_rect().size.y)
+	var movement:=_camera_keyboard_movement(delta,_camera_ground_screen_right(),_camera_ground_screen_up(),units_per_pixel)
+	camera_input_msec=Time.get_ticks_msec()
+	_set_camera_target(camera_target+movement)
 
 func _camera_ground_screen_up() -> Vector3:
 	var axis:=camera.global_transform.basis.y
@@ -11703,7 +11711,7 @@ func _build_map_help(layer:CanvasLayer)->void:
 	map_help_body.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	map_help_body.add_theme_font_size_override("font_size",11)
 	map_help_body.add_theme_color_override("font_color",Color("#c5cbc5"))
-	map_help_body.tooltip_text="Camera: scroll or pinch between four distances. Middle-drag to pan; Shift-scroll adjusts zoom gently. N resets north-up."
+	map_help_body.tooltip_text="Camera: two-finger slide or middle-drag to pan. Up zooms in; Down zooms out through four distances. N resets north-up."
 	root.add_child(map_help_body)
 	# The founding-focus screen is deferred until after the interface is built.  Do
 	# not flash map controls underneath that mandatory, mouse-stopping modal.
@@ -11732,7 +11740,7 @@ func _map_help_presentation(site_committed:bool,targeting:bool,settlement_convoy
 		}
 	return {
 		"title":"USE THE MAP",
-		"body":"Middle-drag to move. Scroll or pinch to change distance.\nClick a city for details; double-click to move closer.\nClick the map to close panels and this tip."
+		"body":"Two-finger slide to move. Up zooms in; Down zooms out.\nClick a city for details; double-click to move closer.\nClick the map to close panels and this tip."
 	}
 
 
@@ -18332,7 +18340,7 @@ func _update_time_interface() -> void:
 	elif settlement_convoy_targeting:
 		travel_status_label.text="SELECT KNOWN LAND FOR THE NEW SETTLEMENT  •  click a viable destination or press the button again to cancel"
 	elif placement_building == "":
-		travel_status_label.text = ("FOUNDING CONVOY READY  •  LEFT-CLICK LAND TO TRAVEL  •  FOUND SETTLEMENT ON THE TOOLBAR BELOW" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  MOUSE WHEEL TO ZOOM  •  TOOLBAR FOR MAP COMMANDS" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
+		travel_status_label.text = ("FOUNDING CONVOY READY  •  LEFT-CLICK LAND TO TRAVEL  •  FOUND SETTLEMENT ON THE TOOLBAR BELOW" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.
@@ -19577,7 +19585,7 @@ func _open_world_menu()->void:
 	controls_title.add_theme_color_override("font_color",Color("#c8b77e"))
 	content.add_child(controls_title)
 	var controls:=Label.new()
-	controls.text="Left-click terrain  •  Inspect land / choose a convoy destination\nMiddle-drag or arrows  •  Move the map    Shift+middle  •  Rotate\nPinch / two-finger scroll / + and −  •  Zoom    0–5  •  Pause and hourly time speeds    Esc  •  Menu"
+	controls.text="Left-click terrain  •  Inspect land / choose a convoy destination\nTwo-finger slide / middle-drag / WASD  •  Move the map    Shift+middle  •  Rotate\nUp  •  Zoom in    Down  •  Zoom out    0–5  •  Pause and hourly time speeds    Esc  •  Menu"
 	controls.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	controls.add_theme_font_size_override("font_size",14)
 	controls.add_theme_color_override("font_color",Color("#9fa7a2"))
@@ -19845,19 +19853,19 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		if world_menu_panel and is_instance_valid(world_menu_panel): return
+		# A toolbar button may retain focus after a click. Reserve Up/Down on
+		# bare map before GUI focus navigation; controls under the pointer keep it.
+		if event.keycode in [KEY_UP,KEY_DOWN] and _handle_camera_zoom_key(event):
+			get_viewport().set_input_as_handled();return
 		if event.keycode >= KEY_0 and event.keycode <= KEY_5:
 			_set_game_speed(float(event.keycode - KEY_0))
 	elif event is InputEventPanGesture:
-		# macOS sends precise two-finger scrolling as pan gestures, not wheel
-		# clicks. Keep fractional deltas so slow trackpad motion stays smooth.
-		if not _pointer_over_ui() and is_finite(event.delta.y) and not is_zero_approx(event.delta.y):
-			_queue_camera_zoom(event.position,clampf(event.delta.y*.18,-.6,.6)) if event.shift_pressed else _step_camera_distance(event.position,clampf(event.delta.y*.18,-.6,.6),true)
+		if not _pointer_over_ui():
+			_pan_camera_gesture(event.delta)
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMagnifyGesture:
-		if not _pointer_over_ui() and is_finite(event.factor) and event.factor>0.0 and not is_equal_approx(event.factor,1.0):
-			# A spread magnifies the map: reduce the visible camera span. Convert
-			# the native ratio to steps in the existing accumulated zoom curve.
-			_step_camera_distance(event.position,-log(event.factor)*.55/log(1.12),true)
+		# A small finger spread during a pan must not change altitude.
+		if not _pointer_over_ui():
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
@@ -19913,7 +19921,7 @@ func _dismiss_report_backdrop(event:InputEvent)->bool:
 	return false
 
 func _pointer_over_ui()->bool:
-	# Scrolling a dock must not also zoom the map beneath it. A hovered control
+	# Scrolling a dock must not also move the map beneath it. A hovered control
 	# counts as UI only when it or an ancestor actually stops mouse events;
 	# full-rect pass-through shells over bare terrain do not.
 	var hovered:=get_viewport().gui_get_hovered_control()
@@ -19922,6 +19930,26 @@ func _pointer_over_ui()->bool:
 		if (node as Control).mouse_filter==Control.MOUSE_FILTER_STOP: return true
 		node=node.get_parent()
 	return false
+
+
+func _handle_camera_zoom_key(event:InputEventKey)->bool:
+	if not event.pressed or event.alt_pressed or event.ctrl_pressed or event.meta_pressed:return false
+	if is_instance_valid(world_menu_panel):return false
+	var focused:=get_viewport().gui_get_focus_owner()
+	if focused is LineEdit or focused is TextEdit:return false
+	var arrow:=event.keycode in [KEY_UP,KEY_DOWN]
+	if arrow and _pointer_over_ui():return false
+	var zoom_step:=0.0
+	if event.keycode in [KEY_UP,KEY_PLUS,KEY_EQUAL,KEY_KP_ADD]:zoom_step=-1.0
+	elif event.keycode in [KEY_DOWN,KEY_MINUS,KEY_KP_SUBTRACT]:zoom_step=1.0
+	if zoom_step==0.0:return false
+	# One intentional arrow press selects one distance; OS repeat cannot race
+	# across the levels. Shift does not change the arrow-key distance contract.
+	if arrow and event.echo:return true
+	var center:=get_viewport().get_visible_rect().size*0.5
+	if event.shift_pressed and not arrow:_queue_camera_zoom(center,zoom_step)
+	else:_step_camera_distance(center,zoom_step)
+	return true
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -19934,18 +19962,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled();return
 	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and _dismiss_map_panels():
 		get_viewport().set_input_as_handled();return
-	if event is InputEventKey and event.pressed and not event.alt_pressed and not event.ctrl_pressed and not event.meta_pressed:
-		if world_menu_panel and is_instance_valid(world_menu_panel): return
-		# GUI gets first refusal; typing +/- in an editor must not move the map.
-		var focused:=get_viewport().gui_get_focus_owner()
-		if not (focused is LineEdit or focused is TextEdit):
-			var zoom_step:=0.0
-			if event.keycode in [KEY_PLUS,KEY_EQUAL,KEY_KP_ADD]: zoom_step=-1.0
-			elif event.keycode in [KEY_MINUS,KEY_KP_SUBTRACT]: zoom_step=1.0
-			if zoom_step!=0.0:
-				_queue_camera_zoom(get_viewport().get_visible_rect().size*0.5,zoom_step) if event.shift_pressed else _step_camera_distance(get_viewport().get_visible_rect().size*0.5,zoom_step)
-				get_viewport().set_input_as_handled()
-				return
+	if event is InputEventKey and _handle_camera_zoom_key(event):
+		get_viewport().set_input_as_handled();return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_N:
 		_reset_camera_north()
 		get_viewport().set_input_as_handled()

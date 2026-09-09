@@ -38,13 +38,15 @@ Open `project.godot` in the standard Godot editor, allow asset imports to finish
 
 The project declares Godot 4.7 and was validated on Windows with 4.7.2. It uses GDScript and the Compatibility renderer. No native extension or .NET runtime is required by the tracked game. Mac execution and performance have not been tested here. Check your Mac against [Godot's system requirements](https://docs.godotengine.org/en/stable/about/system_requirements.html).
 
-### Main map zoom
+### Main map navigation
 
-With the pointer over the map, spread two fingers to zoom in or pinch them together to zoom out. Vertical two-finger scrolling also zooms; its direction follows the Mac's scrolling preference. Scrolling over a panel stays with that panel. Mouse-wheel zoom remains available.
+Slide two fingers on the trackpad to pan the map horizontally or vertically. Pan direction follows the Mac's scrolling preference, and movement scales with the current view. Finger movement, including a small accidental pinch, does not change altitude. Scrolling over a panel stays with that panel.
 
-Keyboard fallback: `=` or `+` zooms in; `-` zooms out, centered on the view. The numeric keypad's `+` and `-` also work. Hold a key to keep zooming, or hold Shift for faster scrolling/key zoom. Keyboard zoom is inactive while typing in a text field or using Command/Control/Option shortcuts.
+With the pointer over the map, press **Up** to zoom in and **Down** to zoom out through the four distances: **10,000 ft → 50,000 ft → Region → Continent**. Each press advances one level with a smooth transition; holding the key does not repeat. Text fields, panel controls and menus retain their keyboard input.
 
-After updating the input code, save and exit the running game normally, then relaunch the project to load the new controls. An already-running game retains its old scripts.
+Middle-drag and WASD also pan; Left/Right arrows move sideways. Mouse-wheel and `+`/`-` zoom remain available, with Shift for fine adjustment. Command/Control/Option shortcuts do not activate keyboard zoom. N resets north-up.
+
+An already-running release keeps its bundled controls. Exit normally and use the standalone launcher above to load the updated build.
 
 ### Display, sound and quitting
 
