@@ -68,7 +68,8 @@ func _ready()->void:
 	# The primary action stays outside the scrolling details, at every scroll
 	# position and regardless of optional text or the selected city objective.
 	var action:=_row(orders);apply_button=_button(action,"Give objective",_assign)
-	_button(action,"Cancel orders",func():if not selected.is_empty():_report(command.cancel(String(selected.id))))
+	var cancel_orders:=_button(action,"Cancel orders",_cancel_orders)
+	cancel_orders.tooltip_text="Cancel only the selected command. A subdivision must be able to assemble before it can detach; other commands keep their objectives."
 	feedback=_label(column,"");feedback.max_lines_visible=2;feedback.hide()
 	var organization:=VBoxContainer.new();organization.name="Organization";organization.add_theme_constant_override("separation",10);tabs.add_child(organization)
 	_label(organization,"Build the chain of command",19)
@@ -134,6 +135,13 @@ func _group()->void:
 	var result:Dictionary=command.organize(ids,group_level.selected,group_name.text)
 	_report(result)
 	if not result.has("error"):tree.rebuild(String(result.id))
+func _cancel_orders()->void:
+	if selected.is_empty():_report({"error":"Select a command in the hierarchy first."});return
+	var result:Dictionary=command.cancel(String(selected.id),selected.get("path",[]),int(selected.get("count",-1)))
+	_report(result)
+	if not result.has("error"):
+		tree.rebuild(String(result.id),result.get("path",[]))
+		_update_status()
 func _report(result:Dictionary)->void:
 	feedback.text=String(result.get("error",result.get("message","Order updated.")))
 	feedback.tooltip_text=feedback.text;feedback.visible=feedback.text!=""

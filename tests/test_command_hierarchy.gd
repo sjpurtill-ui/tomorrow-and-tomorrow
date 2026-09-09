@@ -440,3 +440,125 @@ func test_structure_refresh_keeps_exact_active_subdivision_for_each_service()->v
 		assert_array(panel.tree.active_selection.path).is_equal(chosen.path)
 		assert_int(panel.tree.selections().size()).is_equal(2)
 		panel.queue_free();await get_tree().process_frame
+
+func test_cancel_virtual_squad_preserves_sibling_orders_assets_and_saved_override()->void:
+	var id:=_home(144);var area:=_zone()
+	assert_bool(command.assign(id,[],area,"defend").has("ok")).is_true()
+	var squad:Dictionary=command.preview(id,[0,0]);var before:=_totals()
+	var result:Dictionary=command.cancel(id,[0,0],int(squad.count))
+	assert_bool(result.has("ok")).override_failure_message(str(result)).is_true()
+	assert_str(result.id).is_not_equal(id)
+	assert_int(command.amount(command.node(result.id))).is_equal(int(squad.count))
+	assert_dict(_totals()).is_equal(before)
+	var holding:=0;var defending:=0
+	for leaf:Dictionary in command.leaves(id):
+		if command.order_for(leaf.id).mission=="cancelled":holding+=command.amount(leaf)
+		elif command.order_for(leaf.id).mission=="defend":defending+=command.amount(leaf)
+	assert_int(holding).is_equal(int(squad.count));assert_int(defending).is_equal(144-holding)
+	assert_str(command.order_for(id).mission).is_equal("defend")
+	var saved:Dictionary=JSON.parse_string(JSON.stringify(MilitaryCampaign.export_state()))
+	assert_bool(MilitaryCampaign.import_state(saved).has("ok")).is_true()
+	assert_str(command.order_for(result.id).mission).is_equal("cancelled")
+	assert_str(command.order_for(id).mission).is_equal("defend")
+	assert_dict(_totals()).is_equal(before)
+	var actual:Dictionary=command.force(command.node(result.id));var location:Vector2=command.land.point(actual)
+	GameState.elapsed_days=1;command.advance(1)
+	assert_vector(command.land.point(actual)).is_equal(location)
+	var moved:=false
+	for leaf:Dictionary in command.leaves(id):
+		if command.order_for(leaf.id).mission=="defend" and command.land.point(command.force(leaf)).distance_to(location)>0:moved=true
+	assert_bool(moved).is_true()
+
+func test_cancel_button_keeps_selected_team_and_parent_objective()->void:
+	var id:=_home(10);assert_bool(command.assign(id,[],_zone(),"defend").has("ok")).is_true()
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	var unit:TreeItem=panel.tree.get_root().get_first_child().get_first_child();unit.collapsed=false;panel.tree._expanded(unit)
+	var team:TreeItem=unit.get_first_child();team.select(0);panel.tree.multi_selected.emit(team,0,true)
+	var count:=int(panel.selected.count);var before:=_totals()
+	var action:Button=panel.apply_button.get_parent().get_child(1)
+	assert_str(action.text).is_equal("Cancel orders");action.pressed.emit()
+	assert_str(panel.selected.id).is_not_equal(id);assert_array(panel.selected.path).is_empty()
+	assert_int(int(panel.selected.count)).is_equal(count)
+	assert_str(panel.selected.order.mission).is_equal("cancelled")
+	assert_str(command.order_for(id).mission).is_equal("defend")
+	assert_dict(_totals()).is_equal(before)
+	assert_str(panel.feedback.text).contains("Objectives cancelled")
+
+func test_cancel_stale_or_moving_subdivision_never_changes_its_parent()->void:
+	var id:=_home(10);assert_bool(command.assign(id,[],_zone(),"defend").has("ok")).is_true()
+	var team:Dictionary=command.preview(id,[0]);var before:Dictionary=MilitaryCampaign.export_state()
+	assert_str(command.cancel(id,[0],int(team.count)+1).error).contains("strength changed")
+	assert_bool(command.cancel(id,[99],int(team.count)).has("error")).is_true()
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	var actual:Dictionary=command.force(command.node(id));actual.status="moving"
+	before=MilitaryCampaign.export_state()
+	assert_str(command.cancel(id,[0],int(team.count)).error).contains("assemble")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_cancelling_unassigned_virtual_team_is_read_only_and_keeps_selection()->void:
+	var id:=_home(10)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	var unit:TreeItem=panel.tree.get_root().get_first_child().get_first_child();unit.collapsed=false;panel.tree._expanded(unit)
+	var team:TreeItem=unit.get_first_child();team.select(0);panel.tree.multi_selected.emit(team,0,true)
+	var before:Dictionary=MilitaryCampaign.export_state();var selected:Dictionary=panel.selected.duplicate(true)
+	panel._cancel_orders()
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	assert_dict(panel.selected).is_equal(selected)
+	assert_str(panel.feedback.text).contains("no active objective")
+
+func test_cancel_service_subdivision_on_mission_does_not_stand_down_its_parent()->void:
+	for domain:String in ["navy","air"]:
+		var actual:=_craft(domain,12);var id:=String(command.children(domain)[0].id)
+		var center:=Vector2(0,-20) if domain=="navy" else Vector2(0,5)
+		var area:Dictionary=op.create_region(domain,command.R.rectangle(center,4),"Operations").region
+		assert_bool(command.assign(id,[],area,"patrol" if domain=="navy" else "reconnaissance").has("ok")).is_true()
+		command.sync();var before:Dictionary=MilitaryCampaign.export_state()
+		var result:Dictionary=command.cancel(id,[0],int(command.preview(id,[0]).count))
+		assert_str(result.error).contains("ready home base")
+		assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+		assert_str(actual.mission).is_equal("patrol" if domain=="navy" else "reconnaissance")
+
+func test_whole_service_cancellation_is_atomic_when_a_subordinate_carries_a_convoy()->void:
+	for domain:String in ["navy","air"]:
+		_craft(domain,12);var id:=String(command.children(domain)[0].id)
+		assert_bool(command.materialize(id,[0]).has("ok")).is_true()
+		var center:=Vector2(0,-20) if domain=="navy" else Vector2(0,5)
+		var area:Dictionary=op.create_region(domain,command.R.rectangle(center,4),"Operations").region
+		assert_bool(command.assign(domain,[],area,"patrol" if domain=="navy" else "reconnaissance").has("ok")).is_true()
+		var leaves:Array=command.leaves(domain);assert_int(leaves.size()).is_greater(1)
+		op.state.convoys.append({"force_id":int(leaves[-1].force_id),"status":"outbound"})
+		command.sync();var before:Dictionary=MilitaryCampaign.export_state();var crew:int=op.personnel()
+		var result:Dictionary=command.cancel(domain)
+		assert_str(result.error).contains("carrying a convoy")
+		assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+		op.state.convoys.clear();result=command.cancel(domain)
+		assert_bool(result.has("ok")).override_failure_message(str(result)).is_true()
+		assert_str(result.message).contains("home ports" if domain=="navy" else "Sorties stop")
+		assert_int(op.personnel()).is_equal(crew)
+		command.sync()
+		for leaf:Dictionary in leaves:
+			assert_str(command.force(leaf).mission).is_equal("hold")
+			assert_dict(command.force(leaf).region).is_empty()
+			assert_str(command.order_for(leaf.id).mission).is_equal("cancelled")
+
+func test_cancelling_during_a_real_battle_preserves_the_current_engagement()->void:
+	CivilizationSystem.initialize()
+	var civ:Dictionary=CivilizationSystem.civilizations[0];civ.player_relation.at_war=true;civ.military_population=2400.0
+	var id:=_home(144);assert_bool(command.assign(id,[],_zone(),"defeat").has("ok")).is_true()
+	var actual:Dictionary=command.force(command.node(id))
+	var enemy:Dictionary=CivilizationSystem.foreign_formations[0]
+	enemy.kind="patrol";enemy.civ_id=civ.id;enemy.command_position={"x":10.0,"z":0.0};enemy.disabled_until_day=0;enemy.strength_share=.05
+	actual.position=enemy.command_position.duplicate(true)
+	GameState.elapsed_days=1;CivilizationSystem._process_local_observation(1,true)
+	for known:Dictionary in command.land._known_enemies(1):
+		if known.id==enemy.id:command.land._engage(actual,known,{"mission":"defeat"},[actual])
+	assert_int(command.data.battles.size()).is_equal(1)
+	var before:Dictionary=actual.duplicate(true);var battle_before:Array=command.data.battles.duplicate(true)
+	assert_bool(command.cancel(id).has("ok")).is_true()
+	assert_str(actual.command_status).contains("resolving current engagement")
+	before.command_status=actual.command_status
+	assert_dict(actual).is_equal(before);assert_array(command.data.battles).is_equal(battle_before)
+	assert_bool(command.battle.engaged(int(actual.army_id))).is_true()
+	var completed:=MilitaryCampaign.battle_history.size();command.battle.advance_all()
+	assert_int(command.data.battles.size()+MilitaryCampaign.battle_history.size()-completed).is_equal(1)
+	for engagement:Dictionary in command.data.battles:assert_int(int(engagement.round)).is_equal(1)

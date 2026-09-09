@@ -280,17 +280,47 @@ func descendants(id:String)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	for child:Dictionary in children(id):result.append(child);result.append_array(descendants(String(child.id)))
 	return result
-func cancel(id:String)->Dictionary:
-	if node(id).is_empty():return {"error":"Select a command."}
+func cancel(id:String,path:Array=[],expected_count:int=-1)->Dictionary:
+	sync()
+	var selected:=preview(id,path)
+	if selected.is_empty():return {"error":"This command changed. Select it again."}
+	if not path.is_empty():
+		if expected_count>=0 and int(selected.count)!=expected_count:return {"error":"This formation's strength changed. Select it again before cancelling its orders."}
+		if String(selected.order.get("mission","")) in ["","hold","cancelled"]:
+			return {"ok":true,"id":id,"path":path.duplicate(),"message":"This subdivision has no active objective to cancel."}
+		# A virtual row shares its parent's force. Materialize the exact selected
+		# branch before changing orders; never cancel that parent's other troops.
+		var built:=materialize(id,path)
+		if built.has("error"):return built
+		id=String(built.id)
+	# Service stand-down can be refused by an active transport or an invalid
+	# return route. Validate all leaves, restoring each force in place, before
+	# changing the headquarters directive or any sibling's actual mission.
+	var service_changes:Array[Dictionary]=[]
+	for leaf:Dictionary in leaves(id):
+		if leaf.service=="army":continue
+		var actual:=force(leaf);var saved:=actual.duplicate(true)
+		var result:Dictionary=host.joint_operations.assign(int(leaf.force_id),{},"hold")
+		var after:=actual.duplicate(true)
+		actual.clear();actual.merge(saved,true)
+		if result.has("error"):return {"error":"%s: %s" % [leaf.name,String(result.error)]}
+		service_changes.append({"force_id":int(leaf.force_id),"after":after})
 	node(id)["order"]={"mission":"cancelled"}
 	for child:Dictionary in descendants(id):child.erase("order")
 	for leaf:Dictionary in leaves(id):
 		if leaf.service=="army":
 			var actual:=force(leaf)
-			if actual.get("status","")!="besieging":actual["status"]="stationed";actual["destination_id"]="";actual.erase("city_operation");actual.erase("target_formation_id")
-			actual["command_status"]="Orders cancelled · holding current ground"
-		else:host.joint_operations.assign(int(leaf.force_id),{},"hold")
-	return {"ok":true,"message":"This command is holding current ground. Assign a new objective when ready."}
+			var committed:bool=actual.get("status","")=="besieging" or battle.engaged(int(leaf.force_id))
+			if not committed:actual["status"]="stationed";actual["destination_id"]="";actual.erase("city_operation");actual.erase("target_formation_id")
+			actual["command_status"]="Objective cancelled · resolving current engagement" if committed else "Orders cancelled · holding current ground"
+	for change:Dictionary in service_changes:
+		var actual:Dictionary=host.joint_operations.force(int(change.force_id))
+		actual.clear();actual.merge(change.after,true)
+	var message:="Objectives cancelled for %s and its subordinates." % String(node(id).name)
+	if node(id).service=="navy":message+=" Task forces hold at or return to their home ports."
+	elif node(id).service=="air":message+=" Sorties stop; aircraft return to base or stand by on their carrier."
+	else:message+=" Commanders hold ground after any current engagement."
+	return {"ok":true,"id":id,"path":[],"message":message}
 func advance(day:int)->void:
 	if day<=int(data.last_day):return
 	data.last_day=day;sync();battle.advance_all();land.advance(day)
