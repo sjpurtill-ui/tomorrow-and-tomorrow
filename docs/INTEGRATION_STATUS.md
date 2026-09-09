@@ -1,3 +1,13 @@
+## September 9 — readable founding convoy and consistent water assessment
+
+INTEGRATED `660f863` by conflict-free fast-forward from `418027a1dbcf00148eb2383076bc90d44b6fbadc` into canonical Mac main. Founding convoys use the shared compact map card, with an aspect-preserving small flag, population and short water status. The oversized 3D banner/text are suppressed at all four distances. Cards follow convoy movement, open site review directly and avoid its panel. The bounded review scrolls its details while keeping close/founding controls visible. The final integration preserves the player's typed founding-site name casing.
+
+Daily collection and founding advice now use the same physical source projection; submerged drainage lines no longer count as fresh water. Review explains nearby open water separately from a confirmed drinking source. Human and opponent starting searches use the same dry-ground/channel clearance and water checks. No population pacing or opponent-specific placement changes.
+
+All **64 canonical tests pass**, zero errors/failures/skips/orphans, exit 0 (`/tmp/tt-founding-clarity-canonical-tests.log`); all **40 focused tests pass again** after the final name-casing correction (`/tmp/tt-founding-clarity-canonical-final.log`). Source validation includes **91 starting positions across seven seeds**, zero failures, and the real normal scene at all four distances with the review open, no script errors or leaks. Headless layout verification is not a native visual capture. See `FOUNDING_MAP_CLARITY_HANDOFF.md` for exact scope and limits.
+
+Owned test overrides removed. Save schema unchanged; physical water is reassessed on load. Normal release version is **2026.09.09.2**, built via the canonical Mac launcher; its artifact `build.ok` records the exact source commit. Player PID 53240 remains the earlier standalone `418027a1dbcf` release, uninterrupted. No editor or player was stopped and no test window was presented as the current game. A normal restart is required to load the update.
+
 ## September 9 — shared civilization rules and 12-opponent default
 
 INTEGRATED `40761bb` by conflict-free fast-forward from `ad90266903bf51ff1e56b9d2a206014fbab689ff` into canonical Mac main. New worlds give each civilization independent owned instances of the same daily systems, equal 120-person starts, real founding and local city economies, and ordinary paid equipment/recruitment/training. Controllers issue validated decisions. Shared geography, bilateral trade, scouts, combat, siege, occupation and allied relief resolve to real owner ledgers. Default: 12 opponents; 6/24/36 remain new-world options.

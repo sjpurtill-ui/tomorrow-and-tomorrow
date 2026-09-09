@@ -18198,7 +18198,7 @@ func _update_time_interface() -> void:
 			materials_button.text="MATERIALS %.0f" % material_bulk
 			materials_button.tooltip_text="%.1f bulk of carried and settled materials  •  %d recognized occurrences.\nThis is physical inventory, not a market value. Foreign trade does not exist without a returned emissary contract.\nOpen recognized sources, extraction, hauling, losses, and storage." % [material_bulk,known_count]
 	if convoy_map_label:
-		var title:="Founding convoy" if not GameState.settlement_site_committed else _settlement_display_name().capitalize()
+		var title:="Founding convoy" if not GameState.settlement_site_committed else (GameState.settlement_name.strip_edges() if not GameState.settlement_name.strip_edges().is_empty() else "Founding site")
 		convoy_map_label.text=_city_map_label(title,GameState.population_total)
 		convoy_map_label.set_meta("map_status",_convoy_water_readout() if not GameState.settlement_site_committed else "Establishing home · View progress")
 		_update_city_flag(convoy_map_label)
