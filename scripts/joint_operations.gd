@@ -499,6 +499,13 @@ func advance(day:int)->void:
 				var route:=set_route(record,destination)
 				if route.has("error"):record.status=String(route.error);continue
 		if record.mission=="hold" and record.get("route",[]).is_empty():record.status="Standing by on carrier deck" if not carrier.is_empty() else "Standing by at base";continue
+		var factors:Dictionary={}
+		# A moving carrier can take a standing air order out of range. Ground
+		# those sorties before billing fuel; ferry and repair flights still move.
+		if record.domain=="air" and record.get("route",[]).is_empty() and int(record.get("pending_carrier_id",0))<=0 and not bool(record.get("repairing",false)):
+			if record.region.is_empty():record.status="Grounded · choose an operating region";continue
+			factors=mission_factors(record,record.region,day)
+			if float(factors.coverage)<=0:record.status="Grounded · operating area out of range";continue
 		if not pay_fuel(record):record.status="No fuel · produce fuel or stand down other missions";continue
 		if int(record.get("pending_carrier_id",0))>0:
 			var target:=force(int(record.pending_carrier_id))
@@ -511,7 +518,7 @@ func advance(day:int)->void:
 		if bool(record.get("repairing",false)):record.status="Returning for repairs";continue
 		if record.mission=="hold":record.status="Arrived at base";continue
 		if record.region.is_empty():record.status="Choose an operating region";continue
-		var factors:=mission_factors(record,record.region,day)
+		if factors.is_empty():factors=mission_factors(record,record.region,day)
 		if float(factors.coverage)<=0:record.status="Area outside current base range";continue
 		record.efficiency=float(factors.efficiency)*(1.0-float(record.get("training_attending",0))/maxf(1,crew(record))*.5)
 		record.status="On mission · %d%% efficiency" % roundi(float(record.efficiency)*100)
