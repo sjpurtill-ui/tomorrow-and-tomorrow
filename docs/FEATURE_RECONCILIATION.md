@@ -1,3 +1,11 @@
+## September 8 — issued objectives are distinct from military drafts
+
+INTEGRATED `eaca48a` by conflict-free fast-forward from `d312ad0`. Army, Fleet and Air Force command panels show a colored Now line for the actual issued objective and zone/reported city, while the mission picker explicitly labels the Next objective. Current information refreshes without replacing the player's draft. Headquarters identify shared orders, mixed orders and subordinate exceptions. Edit loads the current mission, map zone, reported city and brief into the draft without issuing it or changing forces; unavailable/cancelled orders and transport do not load misleading defaults.
+
+All **53 canonical tests pass**, zero errors/failures/skips/orphans across command hierarchy, main-map services and dismissal (`/tmp/tt-current-orders-canonical.log`). Six new regressions cover read-only editing, inheritance/overrides/mixed headquarters, real separate-service order updates, reported-city targeting and hidden-name isolation, unavailable/cancelled orders, and transport. Extended 1280×720 and 1024×640 layout checks cover the new strip and Edit button with long text while preserving accessible primary actions. No simulation, camera or save changes; see CURRENT_COMMAND_ORDERS_HANDOFF.md. Owned test overrides removed.
+
+Editor PID 2812 and player PID 6076 remain uninterrupted in the canonical checkout. This pass does not claim native visual verification or receipt by the running player. Recreated panels after effective reload, or the next normal project launch, receive the UI. The summary describes issued objectives; it does not imply operational readiness or successful execution.
+
 ## September 8 — cancellation respects the selected military command
 
 INTEGRATED `49ef49c` by conflict-free fast-forward from `63e62ab` into canonical Mac main. Cancel orders now retains the selected subdivision path, detaches only that available branch and leaves sibling objectives executing. Changed-strength or busy subdivisions are refused without cancelling their parents; unassigned subdivisions stay read-only. Whole naval/air stand-down validates all subordinates before committing, reports convoy/route refusals and distinguishes port, airbase/carrier and land behavior. Already committed land battles continue resolving.

@@ -1,6 +1,6 @@
 # Issued military orders and the next draft
 
-READY for integration. Worktree `/Users/seanpurtill/Documents/Codex/tt-command-order-state`, branch `codex/current-command-orders`, base `d312ad061e7d4ed62c50c2cdedbb5103b6f6cf76`.
+INTEGRATED as `eaca48a`; all 53 canonical tests pass (`/tmp/tt-current-orders-canonical.log`). Worktree `/Users/seanpurtill/Documents/Codex/tt-command-order-state`, branch `codex/current-command-orders`, base `d312ad061e7d4ed62c50c2cdedbb5103b6f6cf76`.
 
 Selecting a command previously showed a default mission dropdown and whichever zone was last selected, with no compact account of that command's actual objective. The dropdown could consequently look like the existing order even when the unit was doing something else.
 
