@@ -23,6 +23,7 @@ const AGE_COHORTS:=["children","youth","early_adults","established_adults","matu
 const COHORT_DURATION_TURNS:={"children":168.0,"youth":132.0,"early_adults":120.0,"established_adults":120.0,"mature_adults":180.0}
 const STRATEGIES:=["sustenance","growth","inquiry","commerce","fortification","expansion"]
 const IDENTITIES=preload("res://scripts/civilization_identity.gd")
+const DEMOGRAPHY=preload("res://scripts/civilization_demography.gd")
 const REGION_ROLES:=["frontier","granary","market","works","capital"]
 const REGION_TITLES:={"frontier":"MARCH","granary":"BREADLANDS","market":"RIVER GATE","works":"FOUNDRY DISTRICT","capital":"HIGH SEAT"}
 const REGION_POPULATION_SHARES:=[0.07,0.11,0.14,0.13,0.20]
@@ -179,7 +180,7 @@ func reset_for_new_world()->void:
 	rng.seed=seed_value^0x5f3759df
 	var rival_count:=rng.randi_range(MIN_RIVAL_CIVILIZATIONS,MAX_RIVAL_CIVILIZATIONS)
 	for index in rival_count:
-		var population:=float(rng.randi_range(88,310))
+		var population:=float(GameState.FOUNDING_POPULATION)
 		# Rival origins occupy a planetary ellipse rather than a crowded regional
 		# arena. Even the nearest possible foreign homeland is thousands of
 		# kilometres away; early contact must be earned by travel or long scouting.
@@ -190,7 +191,7 @@ func reset_for_new_world()->void:
 		var knowledge:=rng.randf_range(0.12,0.30)
 		var production:=rng.randf_range(0.10,0.29)
 		var logistics:=rng.randf_range(0.10,0.30)
-		var health:=rng.randf_range(0.56,0.82)
+		var health:=0.72
 		var food_days:=rng.randf_range(24.0,64.0)
 		var military_share:=rng.randf_range(0.025,0.105)
 		var founding_focus_id:=String(GameState.FOUNDING_FOCUS_ORDER[(index+abs(seed_value))%GameState.FOUNDING_FOCUS_ORDER.size()])
@@ -208,12 +209,12 @@ func reset_for_new_world()->void:
 		var route_potential:=clampf(float(environment_profile.get("route_potential",0.5)),0.0,1.0)
 		var health_pressure:=clampf(float(environment_profile.get("health_pressure",0.3)),0.0,1.0)
 		food_days*=lerpf(0.90,1.08,food_potential)
-		health=clampf(health-health_pressure*0.14+float(environment_profile.get("water_access",0.0))*0.04,0.42,0.88)
 		production=clampf(production+construction_potential*0.09,0.08,0.38)
 		logistics=clampf(logistics+route_potential*0.08,0.08,0.38)
 		var civ:Dictionary={
 			"id":civ_id,"name":name,"population":population,
-			"cohorts":_cohorts_for_population(population,rng.randf_range(-0.025,0.025)),
+			"cohorts":_cohorts_for_population(population,0.0),
+			"demographic_state":DEMOGRAPHY.initial(population),"housing_capacity":150.0,
 			"position":normalized_position,"distance":distance,"world_position":world_position,
 			"environment_profile":environment_profile,"resource_endowment":environment_profile.get("resource_potentials",{}),
 			"territory":territory,"food_capacity":population*rng.randf_range(0.96,1.08)*lerpf(0.84,1.20,food_potential),"food_days":food_days,
@@ -228,8 +229,9 @@ func reset_for_new_world()->void:
 			"discovery_profile":ProgressionSystem.initial_rival_discovery_profile(civ_id,founding_focus_id,STRATEGIES[(index+abs(seed_value))%STRATEGIES.size()]),
 			"societal_values":SOCIETAL_VALUES_MODEL.initial_state(founding_focus_id,seed_value,civ_id)
 		}
+		for age:String in AGE_COHORTS:civ.cohorts[age]=civ.demographic_state.population_cohorts[age]
 		civ=_apply_rival_founding_focus_start(civ)
-		civ["strategic_regions"]=_create_strategic_regions(civ_id,name,population,territory,rng,identity.cities)
+		civ["strategic_regions"]=_create_strategic_regions(civ_id,name,population,territory,rng,identity.cities,true)
 		civilizations.append(civ)
 		contender_dominance_turns[civ_id]=0
 	_initialize_relations(seed_value)
@@ -263,10 +265,12 @@ func _apply_rival_founding_focus_start(civ:Dictionary)->Dictionary:
 	return civ
 
 
-func _create_strategic_regions(civ_id:String,prefix:String,population:float,territory:float,rng:RandomNumberGenerator,city_names:Array=[])->Array[Dictionary]:
+func _create_strategic_regions(civ_id:String,prefix:String,population:float,territory:float,rng:RandomNumberGenerator,city_names:Array=[],founding_world:=false)->Array[Dictionary]:
 	var regions:Array[Dictionary]=[]
 	for index in STRATEGIC_REGIONS_PER_CIV:
 		var role:=String(REGION_ROLES[index])
+		var populated:=not founding_world or role=="capital"
+		var population_share:=(1.0 if role=="capital" else 0.0) if founding_world else float(REGION_POPULATION_SHARES[index])
 		var fortification_base:={"frontier":0.42,"granary":0.18,"market":0.28,"works":0.34,"capital":0.62}
 		regions.append({
 			"id":"%s_region_%02d" % [civ_id,index+1],
@@ -275,11 +279,12 @@ func _create_strategic_regions(civ_id:String,prefix:String,population:float,terr
 			"approach_index":index,
 			"original_controller":civ_id,
 			"controller":civ_id,
-			"population":maxf(0.0001,population*float(REGION_POPULATION_SHARES[index])),
-			"population_share":float(REGION_POPULATION_SHARES[index]),
+			"settlement_founded":populated,
+			"population":population*population_share,
+			"population_share":population_share,
 			"territory_value":maxf(0.005,territory*float(REGION_TERRITORY_SHARES[index])),
 			"strategic_weight":float(REGION_STRATEGIC_WEIGHTS[index]),
-			"fortification":clampf(float(fortification_base[role])+rng.randf_range(-0.07,0.07),0.08,0.82),
+			"fortification":0.0 if founding_world else clampf(float(fortification_base[role])+rng.randf_range(-0.07,0.07),0.08,0.82),
 			"damage":0.0,
 			"resistance":0.0,
 			"integration":1.0,
@@ -2926,8 +2931,6 @@ func _advance_civilization(civ:Dictionary)->Dictionary:
 	var control_effects:=_region_control_effects(civ)
 	var working_age:=_working_age_population(cohorts)
 	var labor_share:=clampf(working_age/population,0.0,1.0)
-	var reproductive_population:=float(cohorts.get("youth",0.0))*0.45+float(cohorts.get("early_adults",0.0))*0.50+float(cohorts.get("established_adults",0.0))*0.45+float(cohorts.get("mature_adults",0.0))*0.16
-	var reproductive_factor:=clampf((reproductive_population/population)/0.285,0.45,1.35)
 	var siege_access:=MilitaryCampaign.siege_effects_for_civilization(String(civ.id))
 	var siege_output:=float(siege_access.food_output_multiplier)
 	var food_ratio:=float(civ.food_capacity)/population
@@ -2947,13 +2950,22 @@ func _advance_civilization(civ:Dictionary)->Dictionary:
 	var environmental_health_pressure:=clampf(float(environment.get("health_pressure",0.25)),0.0,1.0)
 	var environmental_resilience:=clampf(float(environment.get("ecological_resilience",0.5)),0.0,1.0)
 	var founding_effects:Dictionary=GameState.founding_focus_definition(String(civ.get("founding_focus","provision"))).get("effects",{})
-	var progression_conception:=ProgressionSystem.rival_effect(civ,"conception_support")
-	var progression_health:=ProgressionSystem.rival_effect(civ,"health_protection")
-	var annual_birth_rate:=clampf((0.020+float(allocations.growth)*0.055+maxf(0.0,food_ratio-0.92)*0.018+health*0.008)*reproductive_factor*(1.0+float(founding_effects.get("conception_support",0.0))*0.45+progression_conception),0.004,0.082)
-	var annual_death_rate:=clampf((0.010+(1.0-health)*0.030+maxf(0.0,0.92-food_ratio)*0.16+war_pressure*0.018+environmental_health_pressure*0.006)*(1.0-progression_health*0.45),0.006,0.20)
-	var births:=population*annual_birth_rate/12.0
-	var deaths:=population*annual_death_rate/12.0
-	var next_population:=maxf(1.0,population+births-deaths)
+	var demographic_state:Dictionary=civ.demographic_state if civ.has("demographic_state") else DEMOGRAPHY.initial(population)
+	# Reconcile recorded migration/battle losses before advancing the next day.
+	var prior_population:=maxf(1.0,float(demographic_state.population_exact))
+	if not is_equal_approx(prior_population,population):
+		for phase in demographic_state.pregnancy_cohorts:demographic_state.pregnancy_cohorts[phase]*=population/prior_population
+		demographic_state.population_exact=population;demographic_state.population_total=roundi(population)
+		for age:String in AGE_COHORTS:demographic_state.population_cohorts[age]=float(cohorts.get(age,0.0))
+	var intake:=clampf(food_ratio+float(civ.food_days)/30.0,0.0,1.0)
+	var housing:=clampf(float(civ.get("housing_capacity",150.0))/population,0.0,1.15)
+	var context:={"health":health,"food_security":clampf(float(civ.food_days)/45.0,0,1),"housing_ratio":housing,"cohesion":float(civ.cohesion),"birth_crisis":intake<.82,"conception_support":float(founding_effects.get("conception_support",0))+ProgressionSystem.rival_effect(civ,"conception_support"),"maternal_safety":ProgressionSystem.rival_effect(civ,"maternal_safety"),"neonatal_survival":ProgressionSystem.rival_effect(civ,"neonatal_survival")}
+	var rates:={"Illness":maxf(0,.5-health)*.055,"Hunger":maxf(0,1-intake)*.08,"Exposure":maxf(0,.68-housing)*.04}
+	var demographic_result:=DEMOGRAPHY.advance(demographic_state,context,rates,maxi(0,last_turn_day-STRATEGIC_TURN_DAYS+1),STRATEGIC_TURN_DAYS)
+	civ["demographic_state"]=demographic_result.state
+	var births:=float(demographic_result.births)
+	var deaths:=float(demographic_result.deaths)
+	var next_population:=float(demographic_result.state.population_exact)
 	var capacity_change:=population*(0.0015+float(allocations.sustenance)*0.010+float(civ.production)*0.0025)*(0.70+float(civ.ecology)*0.30)*(0.55+labor_share*0.72)*float(control_effects.food_factor)*lerpf(0.62,1.34,environmental_food)*(1.0+float(founding_effects.get("food_yield",0.0))+ProgressionSystem.rival_effect(civ,"food_output"))
 	civ["food_capacity"]=maxf(1.0,float(civ.food_capacity)+capacity_change-float(civ.food_capacity)*0.0006)
 	var monthly_balance:=float(civ.food_capacity)*float(siege_access.food_output_multiplier)/maxf(1.0,next_population)-1.0
@@ -2967,7 +2979,8 @@ func _advance_civilization(civ:Dictionary)->Dictionary:
 	civ["ecology"]=clampf(float(civ.ecology)+0.00025+(environmental_resilience-float(civ.ecology))*0.00055-float(allocations.growth)*0.0010-maxf(0.0,1.0-food_ratio)*0.0007+float(founding_effects.get("ecology_delta",0.0))*30.0+ProgressionSystem.rival_effect(civ,"ecology_recovery")*0.0015,0.08,1.0)
 	var target_military_share:=clampf(0.018+float(allocations.military)*0.30+war_pressure*0.08,0.015,0.38)
 	civ["military_share"]=move_toward(float(civ.military_share),target_military_share,0.006)
-	var next_cohorts:=_advance_cohorts(cohorts,births,deaths,maxf(0.0,1.0-food_ratio))
+	var next_cohorts:Dictionary={}
+	for age:String in AGE_COHORTS:next_cohorts[age]=demographic_result.state.population_cohorts[age]
 	var military_ceiling:=_working_age_population(next_cohorts)*0.55
 	civ["military_population"]=minf(military_ceiling,maxf(0.0,float(civ.military_population)*0.985+next_population*float(civ.military_share)*0.015))
 	civ=_advance_rival_military_training(civ,allocations,war_pressure)
@@ -4870,6 +4883,8 @@ func import_state(payload:Dictionary)->Dictionary:
 	if int(incoming.get("world_seed",GameState.world_seed))!=GameState.world_seed: return {"error":"Civilization save belongs to a different world."}
 	var shape_error:=_payload_shape_error(incoming)
 	if shape_error!="": return {"error":shape_error}
+	for civ:Dictionary in payload.get("civilizations",[]):
+		if civ.has("demographic_state") and not DEMOGRAPHY.valid(civ.demographic_state):return {"error":"Invalid civilization demographic state."}
 	for mission:Dictionary in incoming.get("scout_missions",[])+incoming.get("foreign_formations",[])+[incoming.get("diplomatic_mission",{})]:
 		if not rumor_network.valid_carried(mission): return {"error":"Invalid carried rumors."}
 		if not city_intelligence.valid_carried(mission): return {"error":"Invalid carried city observations."}

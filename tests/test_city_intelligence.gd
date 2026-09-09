@@ -10,6 +10,10 @@ func before_test()->void:
 	FoodSystem.reset_for_new_world(); FoodSystem.initialize(); FoodSystem.receive_external_food(10000)
 	GameState.civic_api_enabled=false
 	for civ:Dictionary in CivilizationSystem.civilizations:
+		# Intelligence cases need an established realm with neighboring cities.
+		for region:Dictionary in civ.strategic_regions:
+			region.settlement_founded=true;region.population=float(civ.population)/5.0;region.population_share=.2
+		civ.settlement_count=5
 		civ.player_relation.contact_level=2; civ.player_relation.opinion=.5
 
 func intel(): return CivilizationSystem.city_intelligence

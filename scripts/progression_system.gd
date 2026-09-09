@@ -215,11 +215,12 @@ func advance_rival(civ:Dictionary)->Dictionary:
 	var tiers:Dictionary=result.get("progression_tiers",{})
 	for domain in Catalog.DOMAINS:
 		if not tiers.has(domain): tiers[domain]=0
-	var population:=maxf(1.0,float(result.get("population",1.0)))
-	var settlement_count:=maxi(1,int(result.get("settlement_count",1)))
-	if float(result.get("production",0.0))>=0.16 and float(result.get("institutions",0.0))>=0.16:
-		settlement_count=maxi(settlement_count,mini(256,ceili(sqrt(population/250.0))))
-	result["settlement_count"]=settlement_count
+	# Population is not a founding order. Only actual settlement records count.
+	if result.has("strategic_regions"):
+		var founded:=0
+		for region:Dictionary in result.strategic_regions:
+			if bool(region.get("settlement_founded",true)):founded+=1
+		result["settlement_count"]=founded
 	var context:=_rival_context(result)
 	for _pass in Catalog.ERA_NAMES.size():
 		var changed:=false

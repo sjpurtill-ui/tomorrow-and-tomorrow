@@ -19,7 +19,8 @@ func sites(include_player:bool=true)->Array[Dictionary]:
 		for region:Dictionary in civ.strategic_regions:
 			if region.role=="capital": capital=region
 		for region:Dictionary in civ.strategic_regions:
-			# The five existing urban regions already carry stable map coordinates.
+			if not bool(region.get("settlement_founded",true)):continue
+			# Established settlements carry stable map coordinates.
 			# Anchor the capital at the existing home, preserving relative geography.
 			var offset:=Vector2((float(region.map_x)-float(capital.get("map_x",.5)))*220,(float(region.map_y)-float(capital.get("map_y",.5)))*180)
 			result.append({"city_id":String(region.id),"civ_id":String(civ.id),"name":String(region.name),"position":point(home+offset),"primary":region.role=="capital"})

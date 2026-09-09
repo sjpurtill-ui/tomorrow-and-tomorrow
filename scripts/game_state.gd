@@ -130,8 +130,9 @@ var discovery_progress:Dictionary={}
 var population_allocations := {"Food": 30, "Survey": 6, "Extraction": 8, "Construction": 8, "Crafting": 5, "Logistics": 5, "Knowledge": 4, "Administration": 3, "Defense": 3}
 var population_allocation_percentages := {"Food":42.0,"Survey":8.0,"Extraction":11.0,"Construction":11.0,"Crafting":7.0,"Logistics":7.0,"Knowledge":6.0,"Administration":4.0,"Defense":4.0}
 var population_allocation_auto := true
-var population_total := 120
-var population_exact := 120.0
+const FOUNDING_POPULATION:=120
+var population_total := FOUNDING_POPULATION
+var population_exact := float(FOUNDING_POPULATION)
 var population_health := 0.72
 var food_security := 0.82
 var housing_capacity := 150
@@ -397,9 +398,9 @@ var lifetime_neonatal_deaths := 0
 func reset_for_new_world(new_seed:int)->void:
 	civilian_injuries={"limited":0.0,"severe":0.0}
 	for system_name in ["HistoricalFigures","PeopleDirection","CommunityNetwork","GeneralCampaign"]:
-		var system:=get_node_or_null("/root/"+system_name)
+		var system:=get_node_or_null("/root/"+system_name) if is_inside_tree() else null
 		if system: system.reset_for_new_world()
-	var foreign:=get_node_or_null("/root/ForeignDiplomacy")
+	var foreign:=get_node_or_null("/root/ForeignDiplomacy") if is_inside_tree() else null
 	if foreign: foreign.reset_for_new_world()
 	resource_settlement_id=""
 	city_trade_shipments=[]
@@ -447,8 +448,8 @@ func reset_for_new_world(new_seed:int)->void:
 	population_allocations={"Food":30,"Survey":6,"Extraction":8,"Construction":8,"Crafting":5,"Logistics":5,"Knowledge":4,"Administration":3,"Defense":3}
 	population_allocation_percentages={"Food":42.0,"Survey":8.0,"Extraction":11.0,"Construction":11.0,"Crafting":7.0,"Logistics":7.0,"Knowledge":6.0,"Administration":4.0,"Defense":4.0}
 	population_allocation_auto=true
-	population_total=120
-	population_exact=120.0
+	population_total=FOUNDING_POPULATION
+	population_exact=float(FOUNDING_POPULATION)
 	population_health=0.72
 	food_security=0.82
 	housing_capacity=150
@@ -1026,6 +1027,24 @@ func register_population_arrivals(count:int,source:String="new arrivals",cohort_
 	_refresh_population_summary()
 	synchronize_population_allocations()
 	return {"count":actual,"source":source,"population_after":population_total,"cohorts":added}
+
+func process_demographic_day(context:Dictionary,mortality_components:Dictionary)->Dictionary:
+	initialize_population_model()
+	var annual_death_rate:=0.0
+	for rate in mortality_components.values():annual_death_rate+=maxf(0.0,float(rate))
+	simulation_metrics["annual_death_rate"]=annual_death_rate
+	simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
+	death_progress+=population_exact*annual_death_rate/365.0
+	var deaths_today:=floori(death_progress)
+	death_progress-=deaths_today
+	deaths_today=mini(deaths_today,maxi(0,population_total-1))
+	var dominant_cause:="Natural causes"
+	for cause in mortality_components:
+		if float(mortality_components[cause])>float(mortality_components.get(dominant_cause,0.0)):dominant_cause=String(cause)
+	var mortality_result:Dictionary={}
+	if deaths_today>0:mortality_result=register_population_deaths(deaths_today,dominant_cause)
+	var reproduction:=process_reproduction_day(context)
+	return {"annual_death_rate":annual_death_rate,"deaths_today":deaths_today,"dominant_cause":dominant_cause,"mortality_result":mortality_result,"reproduction":reproduction}
 
 func process_reproduction_day(context:Dictionary) -> Dictionary:
 	initialize_population_model()

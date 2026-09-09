@@ -726,30 +726,18 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if traveling:
 		var exhaustion_ramp:=clampf((GameState.convoy_exposure_days-4.0)/45.0,0.0,1.0)
 		mortality_components["Travel exhaustion"]=maxf(0.0,0.72-housing_ratio)*(0.08+exhaustion_ramp*0.32)
-	var annual_death_rate := 0.0
-	for component_rate in mortality_components.values():
-		annual_death_rate+=float(component_rate)
-	GameState.simulation_metrics["annual_death_rate"]=annual_death_rate
-	GameState.simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
-	GameState.death_progress+=population*annual_death_rate/365.0
-	var deaths_today:=floori(GameState.death_progress)
-	GameState.death_progress-=deaths_today
-	if GameState.population_total-deaths_today<1:
-		deaths_today=maxi(0,GameState.population_total-1)
-	var dominant_cause := "Natural causes"
-	for cause in mortality_components:
-		if float(mortality_components[cause])>float(mortality_components[dominant_cause]):
-			dominant_cause=String(cause)
-	var mortality_result:Dictionary={}
-	if deaths_today>0:
-		mortality_result=GameState.register_population_deaths(deaths_today,dominant_cause)
-	var reproduction:=GameState.process_reproduction_day({
+	var demographics:=GameState.process_demographic_day({
 		"health":GameState.population_health,"food_security":GameState.food_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
 		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(SettlementModel.national_population())),
 		"conception_support":DiscoverySystem.effect("conception_support")+policy_effect("conception_support")+GameState.founding_effect("conception_support")+ProgressionSystem.effect("conception_support"),
 		"maternal_safety":DiscoverySystem.effect("maternal_safety"),"neonatal_survival":DiscoverySystem.effect("neonatal_survival")
-	})
+	},mortality_components)
+	var annual_death_rate:=float(demographics.annual_death_rate)
+	var deaths_today:=int(demographics.deaths_today)
+	var dominant_cause:=String(demographics.dominant_cause)
+	var mortality_result:Dictionary=demographics.mortality_result
+	var reproduction:Dictionary=demographics.reproduction
 	var births_today:=int(reproduction.get("births_count",0))
 	var events: Array[Dictionary] = []
 	if births_today>0:
