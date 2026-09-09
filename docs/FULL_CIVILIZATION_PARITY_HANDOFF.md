@@ -3,7 +3,10 @@
 Worktree: `/Users/seanpurtill/Documents/Codex/tt-full-civilization-parity`  
 Branch: `codex/full-civilization-parity`  
 Base: `ad90266903bf51ff1e56b9d2a206014fbab689ff`  
+Source commit: `40761bb` (integrated into canonical Mac main by fast-forward).  
 Integrator: the primary task; no concurrent workers or delegated agents.
+
+Canonical verification: all 19 ownership tests pass and the normal opening scene boots and shuts down cleanly. Isolated test userdata configuration was removed after verification.
 
 ## Behavior
 
