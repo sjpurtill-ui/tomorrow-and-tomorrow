@@ -1,3 +1,11 @@
+## September 8 — two-finger map pan and Up/Down distance
+
+INTEGRATED `6c91a4e` by conflict-free fast-forward from `154d2c5` into canonical Mac main. Two-finger movement pans both map axes at the current scale without zooming; finger spread cannot change altitude during a pan. Up/Down selects the adjacent distance with the existing smooth four-level transition. Holding arrows does not repeat or also pan. Map hints and Mac controls documentation now match. Toolbar focus no longer swallows map arrow zoom; hovered panels, text fields and decision/menu input retain their controls.
+
+The real viewport input probe passes **49 checks** and the four canonical gdUnit suites pass **27 tests**, with zero errors/failures/skips/orphans; both exit normally. Logs: `/tmp/tt-trackpad-pan-canonical-probe.log` and `/tmp/tt-trackpad-pan-canonical-tests.log`. The probe covers rotated and fractional panning, all four scales, no altitude drift, arrow direction/bounds/repeat, actual GUI propagation and modal guards. Existing physical-altitude, smooth-transition, founding, dismissal and separate-service map checks pass. Owned test overrides removed. No simulation/save changes. See TRACKPAD_PAN_HANDOFF.md.
+
+No player or editor was stopped by this task. Previously recorded player PID 9776 has already exited. Native trackpad feel is not established by synthetic events. The updated controls are included in the next standalone build; an older exported app keeps its bundled input code.
+
 ## September 8 — normal standalone release launched
 
 INTEGRATED `fc7b43c` by conflict-free fast-forward from `d9e0f44`. At the user's explicit request, closed the old editor/debug session through Godot's normal Stop & Quit dialog and launched a fresh standalone release with `python3 tools/launch_game_macos.py` from the canonical Mac checkout. No editor, remote debugger or embedded-window arguments are present.
