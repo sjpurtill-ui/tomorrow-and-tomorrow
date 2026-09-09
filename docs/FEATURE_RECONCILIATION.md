@@ -1,3 +1,13 @@
+## September 9 — distinctive civilizations, visible envoy journeys and local AI setup
+
+INTEGRATED `fae9761` (source `6f1500b` plus validation corrections) by conflict-free fast-forward into canonical Mac main from `a31088e`. New worlds receive unique civilization and city names and distinct flags; map cards show the reported controlling civilization. Registering a player home no longer relocates three rivals nearby. Envoy dispatch retains the destination, schedule and map focus; returned outcomes open in a paused leader conversation. Nested settings preserve the prior speed, and speed shortcuts cannot bypass a conversation pause. The connection panel accepts a session-only API key locally and distinguishes missing credentials from HTTP failures. Foreign leaders share civic personality axes and have priorities that affect strategy and negotiations.
+
+All **69 canonical focused tests pass**, zero errors/failures/skips/orphans, exit 0 (`/tmp/tt-civ-canonical-tests.log`). Across the source checkout, **138 named tests are verified** including the full century and billion-population cases and targeted reruns after correcting an obsolete instant-training fixture. The foreign-diplomacy integration probe and local mock HTTP contract probe pass. Flags were inspected at map sizes; dialogs received headless layout checks. No live API connection or native player-window visual audit is claimed. Existing names/locations remain on load; new naming applies to new worlds. The canonical test override was removed.
+
+**HELD:** `1e918e3` in `/Users/seanpurtill/Documents/Codex/tt-civ-identities`, branch `codex/distinct-civilization-identities`, contains incomplete shared demographics and real-city records. It is excluded. Full human/AI rule parity, real opponent founding, shared city economies and multiplayer readiness are unfinished. No artificial population slowdown is delivered. The existing iteration heartbeat now prioritizes completing those shared systems; networking is explicitly outside scope. See `CIVILIZATION_PARITY_AUDIT.md` and `CIV_IDENTITY_DIPLOMACY_HANDOFF.md`.
+
+No player or editor was stopped or launched. The earlier standalone player had already exited when checked. The release is being prepared for the next user-requested launch.
+
 ## September 8 — normal standalone release launched
 
 INTEGRATED `fc7b43c` by conflict-free fast-forward from `d9e0f44`. At the user's explicit request, closed the old editor/debug session through Godot's normal Stop & Quit dialog and launched a fresh standalone release with `python3 tools/launch_game_macos.py` from the canonical Mac checkout. No editor, remote debugger or embedded-window arguments are present.
