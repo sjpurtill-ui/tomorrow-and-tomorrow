@@ -105,15 +105,32 @@ func parts(count:int,level:int,service:String)->Array[int]:
 	number=mini(number,count)
 	for index in number:result.append(count/number+(1 if index<count%number else 0))
 	return result
+func _service_unit_parts(units:Dictionary,counts:Array[int])->Array[Dictionary]:
+	# Preserve the established split order: higher-index detachments take craft
+	# from the front of the inventory; the original force keeps the remainder.
+	# Preview and materialization must use this same allocation, without mutation.
+	var result:Array[Dictionary]=[]
+	for _count in counts:result.append({})
+	if result.is_empty():return result
+	var remaining_units:=units.duplicate(true)
+	for index in range(counts.size()-1,0,-1):
+		var remaining:=counts[index]
+		for type_id:String in remaining_units:
+			var take:=mini(remaining,int(remaining_units[type_id]));remaining-=take
+			result[index][type_id]=take;remaining_units[type_id]-=take
+	result[0]=remaining_units
+	return result
 func preview(id:String,path:Array=[])->Dictionary:
 	var record:=node(id)
 	if record.is_empty():return {}
 	var count:=amount(record);var level:=int(record.level);var title:=String(record.name)
+	var units:Dictionary=force(record).get("units",{}).duplicate(true) if record.service!="army" else {}
 	for index in path:
 		var subdivisions:=parts(count,level,record.service)
 		if int(index)<0 or int(index)>=subdivisions.size():return {}
+		if not units.is_empty():units=_service_unit_parts(units,subdivisions)[int(index)]
 		count=subdivisions[int(index)];level-=1;title="%d · %s" % [int(index)+1,LEVELS[record.service][level][0]]
-	return {"id":id,"path":path.duplicate(),"service":record.service,"count":count,"level":level,"name":title,"leader":String(LEVELS[record.service][mini(level,LEVELS[record.service].size()-1)][2]),"parts":parts(count,level,record.service) if int(record.force_id)>=0 else [],"order":order_for(id).duplicate(true)}
+	return {"id":id,"path":path.duplicate(),"service":record.service,"count":count,"level":level,"name":title,"leader":String(LEVELS[record.service][mini(level,LEVELS[record.service].size()-1)][2]),"parts":parts(count,level,record.service) if int(record.force_id)>=0 else [],"order":order_for(id).duplicate(true),"units":units}
 func organize(ids:Array,level:int,title:String="")->Dictionary:
 	sync()
 	if ids.size()<2:return {"error":"Select at least two commands to group under a headquarters."}
@@ -153,6 +170,8 @@ func _split(id:String)->Dictionary:
 	var counts:=parts(amount(record),int(record.level),record.service)
 	if counts.is_empty():return {"error":"This is already the smallest command."}
 	var original_id:=int(record.force_id);var metadata:=original.duplicate(true)
+	var service_units:Array[Dictionary]=[]
+	if record.service!="army":service_units=_service_unit_parts(original.units,counts)
 	var created:Array[Dictionary]=[]
 	# Each detached record is conserved by the campaign's existing aggregate split.
 	for index in range(counts.size()-1,-1,-1):
@@ -173,11 +192,9 @@ func _split(id:String)->Dictionary:
 		else:
 			if index>0:
 				var detached:Dictionary=original.duplicate(true);detached.id=host.joint_operations._id();new_id=detached.id
-				detached.units={};detached.authorized={}
-				var remaining:=counts[index]
-				for type_id:String in original.units:
-					var take:=mini(remaining,int(original.units[type_id]));remaining-=take
-					detached.units[type_id]=take;detached.authorized[type_id]=take
+				detached.units=service_units[index].duplicate(true);detached.authorized=detached.units.duplicate(true)
+				for type_id:String in detached.units:
+					var take:=int(detached.units[type_id])
 					original.units[type_id]-=take;original.authorized[type_id]-=take
 				host.joint_operations.state.forces.append(detached)
 		var child:=_add(record.service,id,int(record.level)-1,"%d · %s" % [index+1,LEVELS[record.service][int(record.level)-1][0]],new_id)
@@ -246,11 +263,13 @@ func assign(id:String,path:Array,region:Dictionary,mission:String,target:String=
 			if city.is_empty() or not R.contains(region,G.unpack(city.position)):return {"error":"Select a reported city inside this zone."}
 			if city.get("controller","")=="player" and mission=="capture":return {"error":"This city is already under your control."}
 	else:
-		if not path.is_empty() and mission not in host.joint_operations.missions_for(force(node(id))):return {"error":"This command is not equipped for that mission."}
+		if not path.is_empty() and mission not in host.joint_operations.missions_for({"domain":selected.service,"units":selected.units}):return {"error":"This detachment is not equipped for that mission. Select a compatible subordinate."}
 		# Validate the whole order without changing a force. Restore the authority
 		# in place after each trial, including any route prepared by assign().
 		for leaf:Dictionary in leaves(id):
 			var actual:=force(leaf);var saved:=actual.duplicate(true)
+			if not path.is_empty():
+				actual.units=selected.units.duplicate(true);actual.authorized=actual.units.duplicate(true)
 			var result:Dictionary=host.joint_operations.assign(int(leaf.force_id),region,mission)
 			actual.clear();actual.merge(saved,true)
 			if result.has("error"):return {"error":"%s: %s" % [leaf.name,result.error]}

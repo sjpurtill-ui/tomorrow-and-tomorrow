@@ -110,9 +110,16 @@ func _selected(entry:Dictionary)->void:
 		selected_label.text="Select a command in the hierarchy";selected_label.tooltip_text=""
 		map.selected_force=0;status.text="";status.hide();return
 	selected_label.text="%s · %d %s" % [entry.name,int(entry.count),"personnel" if domain=="army" else "ships" if domain=="navy" else "aircraft"]
-	selected_label.tooltip_text=selected_label.text+"\n"+String(entry.leader)
+	selected_label.tooltip_text=_selection_tooltip(entry)
 	map.selected_force=int(command.node(String(entry.id)).get("force_id",0))
 	_update_status()
+func _selection_tooltip(entry:Dictionary)->String:
+	if entry.is_empty():return ""
+	var result:="%s · %d %s\n%s" % [entry.name,int(entry.count),"personnel" if domain=="army" else "ships" if domain=="navy" else "aircraft",entry.leader]
+	for type_id:String in entry.get("units",{}):
+		var count:=int(entry.units[type_id])
+		if count>0:result+="\n%d × %s" % [count,String(MilitaryCampaign.joint_operations.C.UNITS[type_id].label)]
+	return result
 func _select_force(id:int)->void:
 	command.sync()
 	for entry:Dictionary in command.data.nodes.values():
@@ -154,8 +161,12 @@ func _refresh_mission_availability()->void:
 	elif not selected.get("path",[]).is_empty() and int(current.count)!=int(selected.count):selection_error="This formation's strength changed. Select it again before ordering it."
 	var capabilities:Array[Dictionary]=[]
 	if selection_error=="" and domain!="army":
-		for leaf:Dictionary in command.leaves(String(selected.id)):
-			capabilities.append({"name":String(leaf.name),"missions":MilitaryCampaign.joint_operations.missions_for(command.force(leaf))})
+		if not current.path.is_empty():
+			capabilities.append({"name":String(current.name),"missions":MilitaryCampaign.joint_operations.missions_for({"domain":domain,"units":current.units})})
+		else:
+			for leaf:Dictionary in command.leaves(String(selected.id)):
+				capabilities.append({"name":String(leaf.name),"missions":MilitaryCampaign.joint_operations.missions_for(command.force(leaf))})
+	if is_instance_valid(selected_label):selected_label.tooltip_text=_selection_tooltip(current)
 	for index in mission.item_count:
 		var id:=String(mission.get_item_metadata(index));var reason:=selection_error
 		var unsupported:Array[String]=[]

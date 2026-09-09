@@ -782,3 +782,90 @@ func test_empty_command_blocks_submission_without_disabling_land_objectives()->v
 	assert_bool(panel.apply_button.disabled).is_false()
 	panel._selected({})
 	assert_bool(panel.apply_button.disabled).is_true();assert_bool(panel.mission_hint.visible).is_false()
+
+func _service_equipment_totals()->Dictionary:
+	var result:={"units":{},"authorized":{},"crew":op.personnel()}
+	for actual:Dictionary in op.state.forces:
+		for field:String in ["units","authorized"]:
+			for type_id:String in actual[field]:result[field][type_id]=int(result[field].get(type_id,0))+int(actual[field][type_id])
+	return result
+
+func test_virtual_air_subdivision_previews_exact_craft_and_rejects_unsupported_order()->void:
+	var actual:=_craft("air",12);actual.units={"fighter":6,"observation_balloon":6};actual.authorized=actual.units.duplicate()
+	command.sync();var id:=String(command.children("air")[0].id)
+	var region:Dictionary=op.create_region("air",command.R.rectangle(Vector2(0,5),3),"Air watch").region
+	var before:Dictionary=MilitaryCampaign.export_state()
+	var balloons:Dictionary=command.preview(id,[0]);var fighters:Dictionary=command.preview(id,[2])
+	assert_dict(balloons.units).is_equal({"fighter":0,"observation_balloon":4})
+	assert_dict(fighters.units).is_equal({"fighter":4,"observation_balloon":0})
+	var result:Dictionary=command.assign(id,[0],region,"air_superiority")
+	assert_str(result.error).contains("detachment is not equipped")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	balloons.units.fighter=999
+	assert_dict(command.preview(id,[0]).units).is_equal({"fighter":0,"observation_balloon":4})
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_nested_naval_preview_matches_split_and_preserves_replacement_targets()->void:
+	_verify_nested_service_preview("navy")
+
+func test_nested_air_preview_matches_split_and_preserves_replacement_targets()->void:
+	_verify_nested_service_preview("air")
+
+func _verify_nested_service_preview(domain:String)->void:
+	var actual:=_craft(domain,13)
+	actual.units={"war_canoe":5,"destroyer":4,"submarine":4} if domain=="navy" else {"fighter":5,"recon_plane":4,"observation_balloon":4}
+	actual.authorized=actual.units.duplicate()
+	for type_id:String in actual.authorized:actual.authorized[type_id]+=2
+	command.sync();var id:=String(command.children(domain)[0].id)
+	var before:=_service_equipment_totals();var state_before:Dictionary=MilitaryCampaign.export_state()
+	var previewed:Dictionary=command.preview(id,[0,0])
+	assert_dict(previewed.units).is_equal({"war_canoe":0,"destroyer":0,"submarine":3} if domain=="navy" else {"fighter":0,"recon_plane":0,"observation_balloon":2})
+	assert_dict(MilitaryCampaign.export_state()).is_equal(state_before)
+	var built:Dictionary=command.materialize(id,[0,0]);assert_bool(built.has("ok")).override_failure_message(str(built)).is_true()
+	var detached:Dictionary=command.force(command.node(String(built.id)))
+	assert_dict(detached.units).is_equal(previewed.units)
+	assert_dict(_service_equipment_totals()).is_equal(before)
+	var saved:Dictionary=JSON.parse_string(JSON.stringify(MilitaryCampaign.export_state()))
+	assert_bool(MilitaryCampaign.import_state(saved).has("ok")).is_true()
+	var restored:Dictionary=command.force(command.node(String(built.id)))
+	for type_id:String in previewed.units:assert_int(int(restored.units[type_id])).is_equal(int(previewed.units[type_id]))
+	assert_dict(_service_equipment_totals()).is_equal(before)
+
+func test_detached_aircraft_use_their_own_range_before_materialization()->void:
+	var actual:=_craft("air",12);actual.units={"fighter":6,"observation_balloon":6};actual.authorized=actual.units.duplicate()
+	command.sync();var id:=String(command.children("air")[0].id)
+	var distance:float=(float(op.C.UNITS.fighter.range_km)+float(op.C.UNITS.observation_balloon.range_km))*.5
+	var reachable:Dictionary=op.create_region("air",command.R.rectangle(Vector2(0,distance),3),"Distant air watch").region
+	var far:Dictionary=op.create_region("air",command.R.rectangle(Vector2(0,5000),3),"Beyond range").region
+	var before:Dictionary=MilitaryCampaign.export_state();var totals:=_service_equipment_totals()
+	var rejected:Dictionary=command.assign(id,[2],far,"air_superiority")
+	assert_str(rejected.error).contains("range")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	var issued:Dictionary=command.assign(id,[2],reachable,"air_superiority")
+	assert_bool(issued.has("ok")).override_failure_message(str(issued)).is_true()
+	var detached:Dictionary=command.force(command.node(String(issued.id)))
+	assert_dict(detached.units).is_equal({"fighter":4,"observation_balloon":0})
+	assert_str(detached.mission).is_equal("air_superiority")
+	assert_str(detached.region.id).is_equal(reachable.id)
+	assert_dict(_service_equipment_totals()).is_equal(totals)
+
+func test_subdivision_mission_ui_and_craft_tooltip_update_without_issuing_orders()->void:
+	var actual:=_craft("air",12);actual.units={"fighter":6,"observation_balloon":6};actual.authorized=actual.units.duplicate()
+	command.sync();var id:=String(command.children("air")[0].id)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain="air";add_child(panel)
+	panel._selected(command.preview(id,[0]));_select_draft_mission(panel,"air_superiority");panel._refresh_targets()
+	var before:Dictionary=MilitaryCampaign.export_state()
+	assert_bool(panel.apply_button.disabled).is_true()
+	assert_str(panel.selected_label.tooltip_text).contains("4 × "+String(op.C.UNITS.observation_balloon.label)).not_contains("Fighters")
+	panel._selected(command.preview(id,[2]))
+	assert_str(panel._mission()).is_equal("air_superiority")
+	assert_bool(panel.apply_button.disabled).is_false()
+	assert_str(panel.selected_label.tooltip_text).contains("4 × Fighters").not_contains(String(op.C.UNITS.observation_balloon.label))
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	panel._selected(command.preview(id,[0]))
+	actual.units={"fighter":9,"observation_balloon":3};actual.authorized=actual.units.duplicate()
+	before=MilitaryCampaign.export_state();panel._process(1.1)
+	assert_bool(panel.apply_button.disabled).is_false()
+	assert_str(panel.selected_label.tooltip_text).contains("1 × Fighters").contains("3 × "+String(op.C.UNITS.observation_balloon.label))
+	assert_str(panel._mission()).is_equal("air_superiority")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
