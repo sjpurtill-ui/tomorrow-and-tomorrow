@@ -1,6 +1,6 @@
 # Standalone macOS player launch
 
-READY for integration. Worktree `/Users/seanpurtill/Documents/Codex/tt-command-order-state`, branch `codex/macos-release-launcher`, base `d9e0f44ab88014ab4ad293a060b340010f716632`. The user explicitly requested a fresh normal game without the editor or debugger.
+INTEGRATED as `fc7b43c`; canonical export/signature verification and native release launch are complete (player PID 9776, version 2026.09.08.1, Year 1 / Day 1). Worktree `/Users/seanpurtill/Documents/Codex/tt-command-order-state`, branch `codex/macos-release-launcher`, base `d9e0f44ab88014ab4ad293a060b340010f716632`. The user explicitly requested a fresh normal game without the editor or debugger.
 
 Adds the macOS Release export preset and `tools/launch_game_macos.py`. Normal launches require canonical Mac main, clean tracked changes, the normal main scene, no test override and no other player. The launcher exports a true release app into the canonical checkout's per-commit artifacts, verifies its ad-hoc signature, records successful builds, and opens a fresh world by default. `--resume-saved` is explicit; `--build-only` permits isolated development exports without opening a player. Official release templates reject `--path`; the absolute executable path identifies the canonical source/build, and its bundled project supplies the main scene. No editor/debug/embedding arguments are passed.
 
