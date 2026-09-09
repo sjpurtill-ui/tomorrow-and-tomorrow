@@ -85,7 +85,7 @@ func initialize() -> void:
 		return
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
-	rng.seed = GameState.world_seed ^ 0x6c8e9cf5
+	rng.seed = WorldSimulation.state.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
 	catalog.append_array(SocietyKnowledgeCatalog.entries())
 	catalog.append_array(preload("res://scripts/settlement_architecture_knowledge.gd").entries())
@@ -108,8 +108,8 @@ func initialize() -> void:
 	for channel_variant in catalog_by_channel:
 		var channel_catalog:Array=catalog_by_channel[channel_variant]
 		channel_catalog.sort_custom(func(first:Dictionary,second:Dictionary)->bool:
-			var first_order:int=int(first.get("day",0))+absi(hash("%s:%s" % [GameState.world_seed,first.get("id","")]))%240
-			var second_order:int=int(second.get("day",0))+absi(hash("%s:%s" % [GameState.world_seed,second.get("id","")]))%240
+			var first_order:int=int(first.get("day",0))+absi(hash("%s:%s" % [WorldSimulation.state.world_seed,first.get("id","")]))%240
+			var second_order:int=int(second.get("day",0))+absi(hash("%s:%s" % [WorldSimulation.state.world_seed,second.get("id","")]))%240
 			return first_order<second_order)
 		catalog_by_channel[channel_variant]=channel_catalog
 	initialized = true
@@ -117,12 +117,12 @@ func initialize() -> void:
 
 func process_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
-	HistoricalFigures.advance(int(GameState.elapsed_days))
-	PeopleDirection.advance(int(GameState.elapsed_days))
-	CommunityNetwork.advance(int(GameState.elapsed_days))
-	ForeignDiplomacy.advance(int(GameState.elapsed_days))
+	WorldSimulation.figures.advance(int(WorldSimulation.state.elapsed_days))
+	WorldSimulation.direction.advance(int(WorldSimulation.state.elapsed_days))
+	WorldSimulation.communities.advance(int(WorldSimulation.state.elapsed_days))
+	WorldSimulation.diplomacy.advance(int(WorldSimulation.state.elapsed_days))
 	var effective_context:=context.duplicate(true)
-	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	var military_campaign:=WorldSimulation.system("MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("military_inquiry_context"):
 		var military_context:Dictionary=military_campaign.military_inquiry_context()
 		for signal_name in military_context:
@@ -130,11 +130,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	latest_context=effective_context.duplicate(true)
 	society_model.process_day(catalog,effective_context)
 	var results: Array[Dictionary] = []
-	var current_day := int(floor(GameState.elapsed_days))
+	var current_day := int(floor(WorldSimulation.state.elapsed_days))
 	_refresh_active_investigations()
-	for channel_variant in GameState.active_investigations.keys().duplicate():
+	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
-		var discovery_id:=String(GameState.active_investigations.get(channel,""))
+		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(discovery_id)
 		if discovery.is_empty(): continue
 		var allocation:=_subcategory_allocation(String(discovery.dynamic),String(discovery.subcategory))
@@ -148,20 +148,20 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		# Catalog chances describe relative discoverability. The global time scale keeps
 		# knowledge unfolding across generations instead of exhausting an era in months.
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-		var probability: float = discovery.chance / research_difficulty(discovery,GameState.world_seed) * attention * activity * material_evidence * leader_factor*ConsequenceEngine.discovery_multiplier()*(1.0+ProgressionSystem.effect("knowledge_rate"))*0.12
-		var progress:=float(GameState.discovery_progress.get(discovery_id,0.0))
+		var probability: float = discovery.chance / research_difficulty(discovery,WorldSimulation.state.world_seed) * attention * activity * material_evidence * leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
+		var progress:=float(WorldSimulation.state.discovery_progress.get(discovery_id,0.0))
 		progress+=probability*rng.randf_range(0.72,1.28)
 		if rng.randf()<probability*0.10: progress+=rng.randf_range(0.025,0.085)
-		GameState.discovery_progress[discovery_id]=clampf(progress,0.0,1.0)
+		WorldSimulation.state.discovery_progress[discovery_id]=clampf(progress,0.0,1.0)
 		if progress>=1.0:
-			GameState.known_discoveries.append(discovery.id)
-			HistoricalFigures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
+			WorldSimulation.state.known_discoveries.append(discovery.id)
+			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
 			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_effect_summary(discovery.get("effects",{})),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
-			GameState.discovery_log.push_front(event)
-			if GameState.discovery_log.size()>512: GameState.discovery_log.resize(512)
-			GameState.active_investigations.erase(channel)
-			GameState.discovery_progress.erase(discovery_id)
+			WorldSimulation.state.discovery_log.push_front(event)
+			if WorldSimulation.state.discovery_log.size()>512: WorldSimulation.state.discovery_log.resize(512)
+			WorldSimulation.state.active_investigations.erase(channel)
+			WorldSimulation.state.discovery_progress.erase(discovery_id)
 			results.append(event)
 	_refresh_active_investigations()
 	return results
@@ -173,10 +173,10 @@ func refresh_investigations()->void:
 
 func set_domain_research_priority(dynamic_id:String,weight:int)->void:
 	initialize()
-	if not GameState.research_subcategory_allocations.has(dynamic_id): return
+	if not WorldSimulation.state.research_subcategory_allocations.has(dynamic_id): return
 	var bounded_weight:=clampi(weight,0,12)
-	GameState.research_allocations[dynamic_id]=bounded_weight
-	_auto_allocate_domain_attention(dynamic_id,bounded_weight,int(floor(GameState.elapsed_days)))
+	WorldSimulation.state.research_allocations[dynamic_id]=bounded_weight
+	_auto_allocate_domain_attention(dynamic_id,bounded_weight,int(floor(WorldSimulation.state.elapsed_days)))
 	_refresh_active_investigations()
 
 
@@ -185,10 +185,10 @@ func _auto_allocate_domain_attention(dynamic_id:String,weight:int,current_day:in
 	# among the domain's four possible problem areas according to viable evidence,
 	# lived activity and civilizational affinity. This is a constant 4-channel pass,
 	# independent of population and hidden discoveries.
-	var subcategories:Dictionary=(GameState.research_subcategory_allocations.get(dynamic_id,{}) as Dictionary).duplicate(true)
+	var subcategories:Dictionary=(WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{}) as Dictionary).duplicate(true)
 	if subcategories.is_empty(): return
 	for subcategory in subcategories: subcategories[subcategory]=0
-	GameState.research_subcategory_allocations[dynamic_id]=subcategories
+	WorldSimulation.state.research_subcategory_allocations[dynamic_id]=subcategories
 	var channels:Array[Dictionary]=[]
 	for subcategory_variant in subcategories:
 		var subcategory:=String(subcategory_variant)
@@ -205,34 +205,34 @@ func _auto_allocate_domain_attention(dynamic_id:String,weight:int,current_day:in
 		var best_score:=-INF
 		for channel_data in channels:
 			var subcategory:=String(channel_data.subcategory)
-			var assigned:=int((GameState.research_subcategory_allocations[dynamic_id] as Dictionary).get(subcategory,0))
+			var assigned:=int((WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary).get(subcategory,0))
 			var candidate:Dictionary=channel_data.candidate
-			var score:=_candidate_score(candidate) if not candidate.is_empty() else float(posmod(hash("%s:%s:%s:auto_research" % [GameState.world_seed,dynamic_id,subcategory]),10_000))/100.0
+			var score:=_candidate_score(candidate) if not candidate.is_empty() else float(posmod(hash("%s:%s:%s:auto_research" % [WorldSimulation.state.world_seed,dynamic_id,subcategory]),10_000))/100.0
 			score-=float(assigned)*14.0
 			if score>best_score:
 				best_score=score
 				best=channel_data
 		if best.is_empty(): break
 		var target:=String(best.subcategory)
-		var allocations:Dictionary=GameState.research_subcategory_allocations[dynamic_id]
+		var allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_id]
 		allocations[target]=int(allocations.get(target,0))+1
-		GameState.research_subcategory_allocations[dynamic_id]=allocations
+		WorldSimulation.state.research_subcategory_allocations[dynamic_id]=allocations
 
 func active_investigation_records()->Array[Dictionary]:
 	initialize()
 	_refresh_active_investigations()
 	var records:Array[Dictionary]=[]
-	for channel in GameState.active_investigations:
-		var id:=String(GameState.active_investigations.get(channel,""))
+	for channel in WorldSimulation.state.active_investigations:
+		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		if id=="": continue
 		var discovery:=discovery_definition(id).duplicate(true)
 		if discovery.is_empty(): continue
-		var progress:=float(GameState.discovery_progress.get(id,0.0))
+		var progress:=float(WorldSimulation.state.discovery_progress.get(id,0.0))
 		var allocation:=_subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
 		var leader_factor:=_leader_factor(String(discovery.get("dynamic","")))
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
 		var research_capacity:=research_capacity_for(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
-		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,GameState.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*ConsequenceEngine.discovery_multiplier()*(1.0+ProgressionSystem.effect("knowledge_rate"))*0.12
+		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
 		discovery["discovery_name"]=String(discovery.get("name","Undetermined discovery"))
 		discovery["name"]=String(discovery.get("name","Investigation"))
 		discovery["progress"]=progress
@@ -256,7 +256,7 @@ func _default_line_name(discovery:Dictionary)->String:
 	## deterministically so the investigations page never reads as one
 	## sentence repeated with the noun swapped.
 	var templates:Array=DiscoveryFrontierCatalog.LINE_NAME_TEMPLATES
-	var index:=absi(hash("%s:%s:line" % [GameState.world_seed,String(discovery.get("id",""))]))%templates.size()
+	var index:=absi(hash("%s:%s:line" % [WorldSimulation.state.world_seed,String(discovery.get("id",""))]))%templates.size()
 	return String(templates[index]).format({"subject":String(discovery.get("subcategory","an unresolved condition")).to_lower(),"lens":"practical evidence"})
 
 
@@ -296,13 +296,13 @@ func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor
 	return "VALIDATION — the result is close to becoming established knowledge"
 
 func _refresh_active_investigations()->void:
-	var current_day:=int(floor(GameState.elapsed_days))
-	for channel_variant in GameState.active_investigations.keys().duplicate():
+	var current_day:=int(floor(WorldSimulation.state.elapsed_days))
+	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
-		var id:=String(GameState.active_investigations.get(channel,""))
+		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(id)
-		if discovery.is_empty() or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in GameState.known_discoveries or not _discovery_is_eligible(discovery,current_day):
-			GameState.active_investigations.erase(channel)
+		if discovery.is_empty() or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
+			WorldSimulation.state.active_investigations.erase(channel)
 	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
 	# When a line completes or temporarily runs out of evidence, keep the same
 	# number of observers working by redirecting them toward a live frontier. The
@@ -313,19 +313,19 @@ func _refresh_active_investigations()->void:
 		var dynamic_id:=String(channel_data.dynamic)
 		var subcategory:=String(channel_data.subcategory)
 		var channel:=_channel_key(dynamic_id,subcategory)
-		if String(GameState.active_investigations.get(channel,""))!="": continue
+		if String(WorldSimulation.state.active_investigations.get(channel,""))!="": continue
 		var candidate:=_best_candidate_for_channel(channel,current_day)
-		if not candidate.is_empty(): GameState.active_investigations[channel]=String(candidate.id)
-	GameState.active_observations.clear()
+		if not candidate.is_empty(): WorldSimulation.state.active_investigations[channel]=String(candidate.id)
+	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
-		GameState.active_observations.append(String(record.observation))
+		WorldSimulation.state.active_observations.append(String(record.observation))
 
 
 func _redistribute_stranded_attention(current_day:int)->void:
 	var stranded:Array[Dictionary]=[]
-	for dynamic_variant in GameState.research_subcategory_allocations:
+	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
 		var dynamic_id:=String(dynamic_variant)
-		var subcategories:Dictionary=GameState.research_subcategory_allocations[dynamic_variant]
+		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_variant]
 		for subcategory_variant in subcategories:
 			var subcategory:=String(subcategory_variant)
 			var allocation:=int(subcategories[subcategory_variant])
@@ -334,12 +334,12 @@ func _redistribute_stranded_attention(current_day:int)->void:
 			if not _best_candidate_for_channel(channel,current_day).is_empty(): continue
 			stranded.append({"dynamic":dynamic_id,"subcategory":subcategory,"count":allocation})
 			subcategories[subcategory_variant]=0
-		GameState.research_subcategory_allocations[dynamic_variant]=subcategories
+		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
 	if stranded.is_empty(): return
 	var live_channels:Array[Dictionary]=[]
-	for dynamic_variant in GameState.research_subcategory_allocations:
+	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
 		var dynamic_id:=String(dynamic_variant)
-		for subcategory_variant in (GameState.research_subcategory_allocations[dynamic_variant] as Dictionary):
+		for subcategory_variant in (WorldSimulation.state.research_subcategory_allocations[dynamic_variant] as Dictionary):
 			var subcategory:=String(subcategory_variant)
 			var channel:=_channel_key(dynamic_id,subcategory)
 			var candidate:=_best_candidate_for_channel(channel,current_day)
@@ -349,9 +349,9 @@ func _redistribute_stranded_attention(current_day:int)->void:
 		# A genuine evidence drought should not erase the player's broad emphasis.
 		# Leave the allocation waiting quietly; a later encounter/day gate will wake it.
 		for entry in stranded:
-			var restored:Dictionary=GameState.research_subcategory_allocations.get(String(entry.dynamic),{})
+			var restored:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(entry.dynamic),{})
 			restored[String(entry.subcategory)]=int(restored.get(String(entry.subcategory),0))+int(entry.count)
-			GameState.research_subcategory_allocations[String(entry.dynamic)]=restored
+			WorldSimulation.state.research_subcategory_allocations[String(entry.dynamic)]=restored
 		_rebuild_research_domain_totals()
 		return
 	for entry in stranded:
@@ -371,27 +371,27 @@ func _redistribute_stranded_attention(current_day:int)->void:
 					best_score=score
 					best=live
 			if best.is_empty():
-				var restored:Dictionary=GameState.research_subcategory_allocations.get(String(entry.dynamic),{})
+				var restored:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(entry.dynamic),{})
 				restored[String(entry.subcategory)]=int(restored.get(String(entry.subcategory),0))+1
-				GameState.research_subcategory_allocations[String(entry.dynamic)]=restored
+				WorldSimulation.state.research_subcategory_allocations[String(entry.dynamic)]=restored
 				continue
-			var target_allocations:Dictionary=GameState.research_subcategory_allocations.get(String(best.dynamic),{})
+			var target_allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(best.dynamic),{})
 			target_allocations[String(best.subcategory)]=int(target_allocations.get(String(best.subcategory),0))+1
-			GameState.research_subcategory_allocations[String(best.dynamic)]=target_allocations
+			WorldSimulation.state.research_subcategory_allocations[String(best.dynamic)]=target_allocations
 	_rebuild_research_domain_totals()
 
 
 func _rebuild_research_domain_totals()->void:
-	for dynamic_variant in GameState.research_subcategory_allocations:
+	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
 		var total:=0
-		for allocation in (GameState.research_subcategory_allocations[dynamic_variant] as Dictionary).values():
+		for allocation in (WorldSimulation.state.research_subcategory_allocations[dynamic_variant] as Dictionary).values():
 			total+=int(allocation)
-		GameState.research_allocations[String(dynamic_variant)]=total
+		WorldSimulation.state.research_allocations[String(dynamic_variant)]=total
 
 func active_investigation_records_shallow()->Array[Dictionary]:
 	var records:Array[Dictionary]=[]
-	for channel in GameState.active_investigations:
-		var id:=String(GameState.active_investigations.get(channel,""))
+	for channel in WorldSimulation.state.active_investigations:
+		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		if id=="": continue
 		var discovery:=discovery_definition(id)
 		if not discovery.is_empty(): records.append(discovery)
@@ -399,10 +399,10 @@ func active_investigation_records_shallow()->Array[Dictionary]:
 
 func _discovery_is_eligible(discovery:Dictionary,current_day:int)->bool:
 	var id:=String(discovery.get("id",""))
-	if id in GameState.known_discoveries or current_day<int(discovery.get("day",0)): return false
+	if id in WorldSimulation.state.known_discoveries or current_day<int(discovery.get("day",0)): return false
 	if not _path_is_viable(discovery): return false
 	for requirement in discovery.get("requires",[]):
-		if String(requirement) not in GameState.known_discoveries: return false
+		if String(requirement) not in WorldSimulation.state.known_discoveries: return false
 	return _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 
@@ -413,7 +413,7 @@ func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
 		var discovery:Dictionary=discovery_variant
 		if not _discovery_is_eligible(discovery,current_day): continue
 		var score:=_candidate_score(discovery)
-		if String(GameState.research_targets.get(channel,""))==String(discovery.id): score+=100000.0
+		if String(WorldSimulation.state.research_targets.get(channel,""))==String(discovery.id): score+=100000.0
 		if score>best_score:
 			best_score=score
 			best=discovery
@@ -431,7 +431,7 @@ func _path_is_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 
 func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 	if not bool(discovery.get("frontier",false)): return true
-	var seed_value:=GameState.world_seed if civilization_seed==0 else civilization_seed
+	var seed_value:=WorldSimulation.state.world_seed if civilization_seed==0 else civilization_seed
 	var path_key:=String(discovery.get("path_key",discovery.get("id","")))
 	var channel:=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
 	var lens_index:=int(discovery.get("lens_index",0))
@@ -445,14 +445,14 @@ func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool
 
 func _candidate_score(discovery:Dictionary)->float:
 	var id:=String(discovery.get("id",""))
-	var score:=research_affinity(discovery,GameState.world_seed,FoodSystem.current_environment_profile())
+	var score:=research_affinity(discovery,WorldSimulation.state.world_seed,WorldSimulation.food.current_environment_profile())
 	var dynamic_id:=String(discovery.get("dynamic",""))
 	var subcategory:=String(discovery.get("subcategory",""))
 	var allocation:=_subcategory_allocation(dynamic_id,subcategory)
 	score+=float(allocation)*8.0
 	for signal_name in discovery.get("signals",[]):
 		score+=clampf(float(latest_context.get(signal_name,0.0)),0.0,4.0)*13.0
-	var subcategory_scores:Dictionary=GameState.society_subcategories.get(dynamic_id,{})
+	var subcategory_scores:Dictionary=WorldSimulation.state.society_subcategories.get(dynamic_id,{})
 	score+=clampf(float(subcategory_scores.get(subcategory,0.0)),0.0,1.0)*12.0
 	score+=_founding_lens_affinity(String(discovery.get("lens","")))*18.0
 	# Once a society has invested in a viable tradition, its deeper methods have
@@ -470,7 +470,7 @@ func _founding_lens_affinity(lens:String)->float:
 		"defense":["Workplace Practice","Institutional Trial","Regional Comparison"],
 		"exchange":["Regional Comparison","Seasonal Comparison","Recorded Cases"]
 	}
-	var focus:=GameState.founding_focus if GameState.founding_focus!="" else "provision"
+	var focus:=WorldSimulation.state.founding_focus if WorldSimulation.state.founding_focus!="" else "provision"
 	var list:Array=favored.get(focus,[])
 	var index:=list.find(lens)
 	return 1.0-float(index)*0.22 if index>=0 else 0.0
@@ -503,12 +503,12 @@ func player_facing_discovery_event(source:Dictionary)->Dictionary:
 # evidence, date, adoption, and cumulative consequences.
 func established_knowledge_threads()->Array[Dictionary]:
 	initialize()
-	var log_signature:="%d:%d" % [GameState.discovery_log.size(),hash(GameState.discovery_log)]
+	var log_signature:="%d:%d" % [WorldSimulation.state.discovery_log.size(),hash(WorldSimulation.state.discovery_log)]
 	if log_signature==established_threads_signature:
 		return established_threads_cache.duplicate(true)
 	var by_thread:Dictionary={}
 	var thread_order:Array[String]=[]
-	for event_variant in GameState.discovery_log:
+	for event_variant in WorldSimulation.state.discovery_log:
 		if not event_variant is Dictionary: continue
 		var event:=player_facing_discovery_event(event_variant)
 		var definition:Dictionary=catalog_by_id.get(String(event.get("id","")),{})
@@ -569,7 +569,7 @@ func frontier_snapshot(dynamic_id:String)->Dictionary:
 	var lenses:Dictionary={}
 	var subcategories:Dictionary={}
 	var highest_maturity:=0
-	for id_variant in GameState.known_discoveries:
+	for id_variant in WorldSimulation.state.known_discoveries:
 		var definition:Dictionary=catalog_by_id.get(String(id_variant),{})
 		if String(definition.get("dynamic",""))!=dynamic_id: continue
 		known.append(definition)
@@ -588,17 +588,17 @@ func frontier_snapshot(dynamic_id:String)->Dictionary:
 		if String(record.get("dynamic",""))==dynamic_id: active.append(record)
 	var viable_now:=0
 	var viable_later:=0
-	var current_day:=int(floor(GameState.elapsed_days))
+	var current_day:=int(floor(WorldSimulation.state.elapsed_days))
 	for channel_variant in catalog_by_channel:
 		var channel:=String(channel_variant)
 		if not channel.begins_with(dynamic_id+"::"): continue
 		for definition_variant in (catalog_by_channel[channel] as Array):
 			var definition:Dictionary=definition_variant
-			if String(definition.get("id","")) in GameState.known_discoveries or not _path_is_viable(definition): continue
+			if String(definition.get("id","")) in WorldSimulation.state.known_discoveries or not _path_is_viable(definition): continue
 			if _discovery_is_eligible(definition,current_day): viable_now+=1
 			else: viable_later+=1
 	var emphasis:Array[Dictionary]=[]
-	var allocations:Dictionary=GameState.research_subcategory_allocations.get(dynamic_id,{})
+	var allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{})
 	for subcategory in allocations:
 		var observers:=int(allocations[subcategory])
 		if observers>0: emphasis.append({"name":String(subcategory),"observers":observers})
@@ -647,13 +647,13 @@ func _resource_requirements_met(requirements: Array) -> bool:
 		var needed_stage:=String(requirement.get("stage","recognized"))
 		var minimum_stock:=float(requirement.get("minimum_stock",0.0))
 		var found:=false
-		for deposit in GameState.resource_deposits:
+		for deposit in WorldSimulation.state.resource_deposits:
 			if String(deposit.get("resource",""))!=resource_name:
 				continue
 			if _stage_rank(String(deposit.get("stage","unknown")))>=_stage_rank(needed_stage):
 				found=true
 				break
-		if not found and float(GameState.resource_stockpiles.get(resource_name,0.0))>=minimum_stock and minimum_stock>0.0:
+		if not found and float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>=minimum_stock and minimum_stock>0.0:
 			found=true
 		if not found:
 			return false
@@ -666,12 +666,12 @@ func _resource_evidence(requirements:Array)->float:
 		var requirement:Dictionary=requirement_variant
 		var resource_name:=String(requirement.get("resource",""))
 		var best:=0.0
-		for deposit in GameState.resource_deposits:
+		for deposit in WorldSimulation.state.resource_deposits:
 			if String(deposit.get("resource",""))!=resource_name: continue
 			var stage_score:=float(_stage_rank(String(deposit.get("stage","unknown"))))/4.0
 			var worked:=clampf(float(deposit.get("lifetime_extracted",0.0))/200.0,0.0,0.35)
 			best=maxf(best,0.65+stage_score*0.25+worked)
-		if float(GameState.resource_stockpiles.get(resource_name,0.0))>0.0: best=maxf(best,0.82)
+		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>0.0: best=maxf(best,0.82)
 		evidence+=best
 	return clampf(evidence/maxf(1.0,float(requirements.size())),0.55,1.25)
 
@@ -709,10 +709,10 @@ func _leader_factor(direction: String) -> float:
 		"security":["Marshal",["Defense","Administration"]],"culture":["Envoy",["Diplomacy","Knowledge"]]
 	}
 	var assignment: Array = mapping.get(direction,["Scholar",["Knowledge"]])
-	return AdvisorSystem.execution_modifier(assignment[0],assignment[1])*ForeignDiplomacy.multiplier(direction)*HistoricalFigures.multiplier(direction)*PeopleDirection.research_multiplier(direction)*CommunityNetwork.multiplier(direction)
+	return WorldSimulation.advisors.execution_modifier(assignment[0],assignment[1])*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)
 
 func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
-	return int((GameState.research_subcategory_allocations.get(dynamic_id,{}) as Dictionary).get(subcategory,0))
+	return int((WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{}) as Dictionary).get(subcategory,0))
 
 
 # Research allocation values are strategic weights, never person records. The
@@ -725,17 +725,17 @@ func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
 func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	var weight:=maxi(0,_subcategory_allocation(dynamic_id,subcategory))
 	var total_weight:=research_emphasis_total()
-	var total_researchers:=maxf(0.0,float(GameState.population_allocations.get("Knowledge",0)))
+	var total_researchers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Knowledge",0)))
 	var workforce_share:=float(weight)/maxf(1.0,float(total_weight)) if weight>0 else 0.0
 	var researchers:=total_researchers*workforce_share
 	var team_scale:=0.0
 	if researchers>0.0:
 		team_scale=researchers if researchers<1.0 else 1.0+log(researchers)/log(10.0)*0.78
-	var food_support:=lerpf(0.62,1.08,clampf(float(GameState.food_security),0.0,1.0))
-	var material_capacity:=clampf(float(GameState.simulation_metrics.get("material_capacity",GameState.society_capacities.get("production",0.12))),0.0,1.2)
+	var food_support:=lerpf(0.62,1.08,clampf(float(WorldSimulation.state.food_security),0.0,1.0))
+	var material_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("material_capacity",WorldSimulation.state.society_capacities.get("production",0.12))),0.0,1.2)
 	var material_support:=lerpf(0.72,1.12,material_capacity/1.2)
-	var institutional_capacity:=clampf(float(GameState.society_capacities.get("institutions",0.25)),0.0,1.0)
-	var knowledge_capacity:=clampf(float(GameState.society_capacities.get("knowledge",0.18)),0.0,1.0)
+	var institutional_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25)),0.0,1.0)
+	var knowledge_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("knowledge",0.18)),0.0,1.0)
 	var support_multiplier:=food_support*material_support*lerpf(0.78,1.18,institutional_capacity)*lerpf(0.82,1.24,knowledge_capacity)
 	return {
 		"weight":weight,"total_weight":total_weight,"total_researchers":total_researchers,
@@ -746,8 +746,8 @@ func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 
 func research_emphasis_total()->int:
 	var total:=0
-	for dynamic_id in GameState.research_subcategory_allocations:
-		for value in (GameState.research_subcategory_allocations[dynamic_id] as Dictionary).values(): total+=maxi(0,int(value))
+	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
+		for value in (WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary).values(): total+=maxi(0,int(value))
 	return total
 
 
@@ -755,14 +755,14 @@ func research_program_summary()->Dictionary:
 	var active_lines:=0
 	var weighted_capacity:=0.0
 	var total_weight:=research_emphasis_total()
-	for dynamic_id in GameState.research_subcategory_allocations:
-		for subcategory in (GameState.research_subcategory_allocations[dynamic_id] as Dictionary):
+	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
+		for subcategory in (WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary):
 			var weight:=_subcategory_allocation(String(dynamic_id),String(subcategory))
 			if weight<=0: continue
 			active_lines+=1
 			weighted_capacity+=float(research_capacity_for(String(dynamic_id),String(subcategory)).get("progress_multiplier",0.0))*float(weight)
 	return {
-		"researchers":maxi(0,int(GameState.population_allocations.get("Knowledge",0))),
+		"researchers":maxi(0,int(WorldSimulation.state.population_allocations.get("Knowledge",0))),
 		"emphasis_total":total_weight,"active_lines":active_lines,
 		"average_line_capacity":weighted_capacity/maxf(1.0,float(total_weight))
 	}
@@ -772,8 +772,8 @@ func _channel_key(dynamic_id:String,subcategory:String)->String:
 
 func _allocated_channels()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	for dynamic_id in GameState.research_subcategory_allocations:
-		var subcategories:Dictionary=GameState.research_subcategory_allocations[dynamic_id]
+	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
+		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_id]
 		for subcategory in subcategories:
 			if int(subcategories[subcategory])>0: result.append({"dynamic":dynamic_id,"subcategory":subcategory})
 	return result
@@ -827,38 +827,38 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		var row:=entry.duplicate(true)
 		var missing:Array[String]=[]
 		for requirement in entry.get("requires",[]):
-			if String(requirement) not in GameState.known_discoveries: missing.append(String(catalog_by_id.get(String(requirement),{}).get("name",requirement)))
-		if int(GameState.elapsed_days)<int(entry.get("day",0)): missing.append("earliest day %d" % int(entry.day))
+			if String(requirement) not in WorldSimulation.state.known_discoveries: missing.append(String(catalog_by_id.get(String(requirement),{}).get("name",requirement)))
+		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): missing.append("earliest day %d" % int(entry.day))
 		if not _resource_requirements_met(entry.get("resource_requirements",[])):
 			for requirement in entry.get("resource_requirements",[]): missing.append("%s: %s access" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized"))])
-		var known:=id in GameState.known_discoveries
+		var known:=id in WorldSimulation.state.known_discoveries
 		row["ready"]=not known and missing.is_empty()
 		row["missing"]=missing
 		row["leads_to"]=children.get(id,[])
-		row["progress"]=float(GameState.discovery_progress.get(id,0.0))
-		row["research_difficulty"]=research_difficulty(entry,GameState.world_seed)
+		row["progress"]=float(WorldSimulation.state.discovery_progress.get(id,0.0))
+		row["research_difficulty"]=research_difficulty(entry,WorldSimulation.state.world_seed)
 		var channel:=_channel_key(String(entry.dynamic),String(entry.subcategory))
-		row["status"]="DISCOVERED" if known else ("RESEARCHING" if String(GameState.active_investigations.get(channel,""))==id else ("AVAILABLE" if missing.is_empty() else "LOCKED"))
+		row["status"]="DISCOVERED" if known else ("RESEARCHING" if String(WorldSimulation.state.active_investigations.get(channel,""))==id else ("AVAILABLE" if missing.is_empty() else "LOCKED"))
 		rows.append(row)
 	return rows
 
 func select_research_target(discovery_id:String)->Dictionary:
 	initialize()
 	var discovery:Dictionary=catalog_by_id.get(discovery_id,{})
-	if discovery.is_empty() or not _discovery_is_eligible(discovery,int(GameState.elapsed_days)): return {"ok":false,"reason":"This technology is not currently researchable."}
+	if discovery.is_empty() or not _discovery_is_eligible(discovery,int(WorldSimulation.state.elapsed_days)): return {"ok":false,"reason":"This technology is not currently researchable."}
 	var domain:=String(discovery.dynamic)
 	var subcategory:=String(discovery.subcategory)
 	var channel:=_channel_key(domain,subcategory)
-	var allocations:Dictionary=GameState.research_subcategory_allocations.get(domain,{})
+	var allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(domain,{})
 	if int(allocations.get(subcategory,0))<=0:
 		for other in allocations:
 			if int(allocations[other])>0:
 				allocations[other]=int(allocations[other])-1
 				break
 		allocations[subcategory]=1
-	GameState.research_subcategory_allocations[domain]=allocations
-	GameState.research_targets[channel]=discovery_id
-	GameState.active_investigations[channel]=discovery_id
+	WorldSimulation.state.research_subcategory_allocations[domain]=allocations
+	WorldSimulation.state.research_targets[channel]=discovery_id
+	WorldSimulation.state.active_investigations[channel]=discovery_id
 	_rebuild_research_domain_totals()
 	return {"ok":true}
 
@@ -887,7 +887,7 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 	var candidates:Array[Dictionary]=[]
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
-		if int(GameState.elapsed_days)<int(entry.get("day",0)): continue
+		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): continue
 		var viable:=true
 		for requirement in entry.get("requires",[]):
 			if String(requirement) not in known: viable=false; break
@@ -898,7 +898,7 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 			var capacity_floor:=0.12 if access=="recognized" else (0.20 if access=="surveyed" else (0.35 if access=="accessible" else 0.55))
 			if minf(float(civ.get("production",0.0)),float(civ.get("logistics",0.0)))<capacity_floor: viable=false; break
 		if viable: candidates.append(entry)
-	var seed_value:=int(profile.get("seed",GameState.world_seed))
+	var seed_value:=int(profile.get("seed",WorldSimulation.state.world_seed))
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return research_affinity(a,seed_value,environment)>research_affinity(b,seed_value,environment))
 	return candidates
 

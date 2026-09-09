@@ -2,16 +2,16 @@ extends Node
 ## Whole-game persistence. A save is the world seed plus the mutable state of
 ## every simulation autoload: systems with curated export_state()/import_state()
 ## use them (they carry validation and migrations); the rest are captured by
-## reflection over their script variables. Objects, Callables, and RNGs are
-## never serialized — deterministic caches rebuild from the seed on load, and
+## reflection over their script variables. RNG state is saved exactly; transient
+## objects and Callables are excluded. Deterministic caches rebuild, and
 ## the terrain scene reconstructs itself from the restored state.
 
 const SAVE_DIR:="user://saves"
 const SAVE_VERSION:=1
 const DEFAULT_SLOT:="quicksave"
 
-const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy","GeneralCampaign"]
-const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSystem","EconomySystem","SettlementModel","GovernmentPeopleSystem","WorldFacts","AdvisorSystem","FoodSystem","ConsequenceEngine","PronouncementInterpreter"]
+const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy","GeneralCampaign","WorldSimulation"]
+const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSystem","EconomySystem","SettlementModel","GovernmentPeopleSystem","WorldFacts","AdvisorSystem","FoodSystem","ConsequenceEngine","PronouncementInterpreter","PeopleDirection","HistoricalFigures","CommunityNetwork","ForeignDialogue","CivicImplementationSystem","GeneralDialogue"]
 # Deterministic caches that rebuild from the seed; persisting them would bloat
 # saves and freeze stale copies of static content.
 const REFLECT_SKIP:Dictionary={
@@ -64,7 +64,8 @@ func _write_payload(path:String,payload:Dictionary)->Dictionary:
 	var file:=FileAccess.open(temporary,FileAccess.WRITE)
 	if file==null:
 		return {"error":"The save could not be written (%s)." % path}
-	file.store_string(var_to_str(payload))
+	file.store_line("TTWORLD2")
+	file.store_buffer(var_to_bytes(payload))
 	file.flush()
 	var write_error:=file.get_error()
 	file.close()
@@ -84,7 +85,12 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	if payload.is_empty(): return {"error":"No readable save exists in that slot."}
 	if int(payload.get("version",-1))!=SAVE_VERSION: return {"error":"This save was written by an incompatible version."}
 	var metadata:Dictionary=payload.get("metadata",{})
+	var parity_check:=WorldSimulation.check_payload(payload.get("curated_WorldSimulation",{}))
+	if parity_check.has("error"):return parity_check
+	var legacy_campaign:=not bool(payload.get("curated_WorldSimulation",{}).get("enabled",false)) and float(metadata.get("elapsed_days",0))>0
 	var seed:=int(metadata.get("world_seed",GameState.world_seed))
+	var human_check:=_validate_human_payload(payload,seed)
+	if human_check.has("error"):return human_check
 	# Clean baseline on the saved seed first, so unsaved caches sit at known
 	# values; then lay the saved state over it.
 	GameState.reset_for_new_world(seed)
@@ -110,7 +116,9 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 		var result:Variant=get_node("/root/"+system_name).import_state(payload.get("curated_%s" % system_name,{}))
 		if result is Dictionary and (result as Dictionary).has("error"): errors.append("%s: %s" % [system_name,String((result as Dictionary).error)])
 	if not errors.is_empty(): return {"error":"  ".join(errors)}
-	return {"ok":true,"message":"World restored — day %d, population %d." % [int(GameState.elapsed_days),GameState.population_total]}
+	var message:="World restored — day %d, population %d." % [int(GameState.elapsed_days),GameState.population_total]
+	if legacy_campaign:message+=" This campaign keeps its original opponent model. Start a new world for equal civilization rules."
+	return {"ok":true,"legacy_campaign":legacy_campaign,"message":message}
 
 
 func _read_payload(slot:String)->Dictionary:
@@ -118,7 +126,12 @@ func _read_payload(slot:String)->Dictionary:
 	if not FileAccess.file_exists(path): return {}
 	var file:=FileAccess.open(path,FileAccess.READ)
 	if file==null: return {}
-	var payload:Variant=str_to_var(file.get_as_text())
+	var header:=file.get_line()
+	var payload:Variant
+	if header=="TTWORLD2":payload=bytes_to_var(file.get_buffer(file.get_length()-file.get_position()))
+	else:
+		file.seek(0)
+		payload=str_to_var(file.get_as_text())
 	file.close()
 	return payload if payload is Dictionary else {}
 
@@ -130,6 +143,9 @@ static func _capture_reflected(target:Object,skip:Array)->Dictionary:
 		var property_name:=String(property.name)
 		if property_name in skip: continue
 		var value:Variant=target.get(property_name)
+		if value is RandomNumberGenerator:
+			state["rng_state:"+property_name]=value.state
+			continue
 		if typeof(value) in [TYPE_OBJECT,TYPE_CALLABLE,TYPE_SIGNAL,TYPE_RID,TYPE_NIL]: continue
 		state[property_name]=value
 	return state.duplicate(true)
@@ -139,6 +155,10 @@ static func _apply_reflected(target:Object,state:Dictionary)->void:
 	## Arrays and dictionaries mutate in place so typed properties keep their
 	## element types; scalars assign directly.
 	for property_name in state:
+		if String(property_name).begins_with("rng_state:"):
+			var generator:Variant=target.get(String(property_name).trim_prefix("rng_state:"))
+			if generator is RandomNumberGenerator:generator.state=int(state[property_name])
+			continue
 		var current:Variant=target.get(property_name)
 		var value:Variant=state[property_name]
 		if current is Array and value is Array:
@@ -148,3 +168,24 @@ static func _apply_reflected(target:Object,state:Dictionary)->void:
 			(current as Dictionary).merge(value)
 		else:
 			target.set(property_name,value)
+
+func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
+	# Validate in a disposable owner scope before resetting any live civilization.
+	var id:="__save_validation__"
+	if WorldSimulation.actors.has(id):return {"error":"A save validation is already in progress."}
+	WorldSimulation.create_actor(id,seed_value)
+	var result:Dictionary=WorldSimulation.scoped(id,func()->Dictionary:
+		for name in REFLECTED_SYSTEMS:
+			if name not in WorldSimulation.OWNED_SYSTEMS:continue
+			_apply_reflected(WorldSimulation.system(name),payload.get("reflected_"+name,{}))
+		_apply_reflected(WorldSimulation.discovery.society_model,payload.get("reflected_society_model",{}))
+		for name in CURATED_SYSTEMS:
+			if name=="WorldSimulation":continue
+			if name=="ForeignDiplomacy" and not payload.has("curated_ForeignDiplomacy"):continue
+			var restored:Dictionary=WorldSimulation.system(name).import_state(payload.get("curated_"+name,{}))
+			if restored.has("error"):return {"error":name+": "+String(restored.error),"details":restored.get("details",[])}
+		return {"ok":true}
+	)
+	for instance in WorldSimulation.actors[id].systems.values():instance.free()
+	WorldSimulation.actors.erase(id)
+	return result

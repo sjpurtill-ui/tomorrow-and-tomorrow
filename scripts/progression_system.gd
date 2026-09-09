@@ -41,13 +41,14 @@ func _ready()->void:
 
 
 func _process(_delta:float)->void:
-	if GameState.world_seed!=last_world_seed: reset_for_new_world()
-	var day:=int(floor(GameState.elapsed_days))
+	if WorldSimulation.enabled:return
+	if WorldSimulation.state.world_seed!=last_world_seed: reset_for_new_world()
+	var day:=int(floor(WorldSimulation.state.elapsed_days))
 	if day!=last_evaluated_day: process_day(day)
 
 
 func reset_for_new_world()->void:
-	last_world_seed=GameState.world_seed
+	last_world_seed=WorldSimulation.state.world_seed
 	last_evaluated_day=-1
 	cached_profile_day=-1
 	cached_known_count=-1
@@ -59,9 +60,9 @@ func reset_for_new_world()->void:
 
 
 func process_day(day:int=-1)->Array[Dictionary]:
-	if GameState.world_seed!=last_world_seed: reset_for_new_world()
-	var evaluated_day:=int(floor(GameState.elapsed_days)) if day<0 else day
-	var known_count:=GameState.known_discoveries.size()
+	if WorldSimulation.state.world_seed!=last_world_seed: reset_for_new_world()
+	var evaluated_day:=int(floor(WorldSimulation.state.elapsed_days)) if day<0 else day
+	var known_count:=WorldSimulation.state.known_discoveries.size()
 	if evaluated_day==last_evaluated_day and known_count==cached_known_count: return []
 	last_evaluated_day=evaluated_day
 	# Full profile scans are fixed by the discovery catalog, never population.
@@ -112,7 +113,7 @@ func domain_summary(domain:String)->Dictionary:
 	if profile.is_empty():
 		cached_player_profile=_build_player_discovery_profile()
 		profile=cached_player_profile.get(domain,{})
-	var frontier:=DiscoverySystem.frontier_snapshot(domain)
+	var frontier:=WorldSimulation.discovery.frontier_snapshot(domain)
 	return {
 		"domain":domain,"tier":tier,"era":String(current.era),"name":String(current.name),
 		"outcome":String(current.outcome),"purpose":String(current.purpose),
@@ -136,16 +137,16 @@ func tree_snapshot()->Dictionary:
 	for domain in Catalog.DOMAINS: domain_records.append({"id":domain,"summary":domain_summary(domain)})
 	var context:=player_context()
 	return {
-		"population":GameState.population_exact,"population_uncapped":true,
+		"population":WorldSimulation.state.population_exact,"population_uncapped":true,
 		"world_reach":float(context.reach),"domains":domain_records,
-		"known_discoveries":GameState.known_discoveries.size(),
-		"active_inquiries":GameState.active_investigations.size(),
+		"known_discoveries":WorldSimulation.state.known_discoveries.size(),
+		"active_inquiries":WorldSimulation.state.active_investigations.size(),
 		"catalog_hidden":true,"log":unlock_log.duplicate(true)
 	}
 
 
 func unlocked_count()->int:
-	return GameState.known_discoveries.size()
+	return WorldSimulation.state.known_discoveries.size()
 
 
 func effect(effect_id:String)->float:
@@ -158,17 +159,17 @@ func domain_factor(domain:String,per_tier:=0.035)->float:
 
 func player_context()->Dictionary:
 	if cached_player_profile.is_empty(): cached_player_profile=_build_player_discovery_profile()
-	var settlement_count:=GameState.player_settlements.size()
-	if settlement_count==0 and GameState.settlement_site_committed: settlement_count=1
+	var settlement_count:=WorldSimulation.state.player_settlements.size()
+	if settlement_count==0 and WorldSimulation.state.settlement_site_committed: settlement_count=1
 	var reach:=0.0
 	var reach_snapshot:Dictionary={}
-	var civilization_system:=get_node_or_null("/root/CivilizationSystem")
+	var civilization_system:=WorldSimulation.system("CivilizationSystem")
 	if civilization_system!=null and civilization_system.has_method("progression_reach_snapshot"):
 		reach_snapshot=civilization_system.progression_reach_snapshot()
 		reach=float(reach_snapshot.get("combined",0.0))
 	return {
-		"population":maxf(1.0,GameState.population_exact),"settlements":settlement_count,
-		"capacities":GameState.society_capacities.duplicate(true),
+		"population":maxf(1.0,WorldSimulation.state.population_exact),"settlements":settlement_count,
+		"capacities":WorldSimulation.state.society_capacities.duplicate(true),
 		"discovery_profile":cached_player_profile.duplicate(true),
 		"reach":clampf(reach,0.0,1.0),"reach_snapshot":reach_snapshot
 	}
@@ -184,26 +185,26 @@ func _build_player_discovery_profile()->Dictionary:
 		subcategories[domain]={}
 		lenses[domain]={}
 		adoption_sums[domain]=0.0
-	for discovery_id_variant in GameState.known_discoveries:
+	for discovery_id_variant in WorldSimulation.state.known_discoveries:
 		var discovery_id:=String(discovery_id_variant)
-		var definition:Dictionary=DiscoverySystem.discovery_definition(discovery_id)
+		var definition:Dictionary=WorldSimulation.discovery.discovery_definition(discovery_id)
 		var domain:=String(definition.get("dynamic",""))
 		if domain not in Catalog.DOMAINS: continue
 		var record:Dictionary=profile[domain]
 		record["count"]=int(record.count)+1
-		record["maturity"]=maxi(int(record.maturity),int(definition.get("maturity",1)) if bool(definition.get("frontier",false)) else DiscoverySystem.technology_depth(discovery_id))
+		record["maturity"]=maxi(int(record.maturity),int(definition.get("maturity",1)) if bool(definition.get("frontier",false)) else WorldSimulation.discovery.technology_depth(discovery_id))
 		var subcategory:=String(definition.get("subcategory","General practice"))
 		var lens:=String(definition.get("lens","Lived practice"))
 		(subcategories[domain] as Dictionary)[subcategory]=true
 		(lenses[domain] as Dictionary)[lens]=true
-		adoption_sums[domain]=float(adoption_sums[domain])+clampf(float(GameState.discovery_adoption.get(discovery_id,0.025)),0.0,1.0)
+		adoption_sums[domain]=float(adoption_sums[domain])+clampf(float(WorldSimulation.state.discovery_adoption.get(discovery_id,0.025)),0.0,1.0)
 		profile[domain]=record
 	for domain in Catalog.DOMAINS:
 		var record:Dictionary=profile[domain]
 		record["breadth"]=(subcategories[domain] as Dictionary).size()
 		record["lens_count"]=(lenses[domain] as Dictionary).size()
 		record["adoption"]=float(adoption_sums[domain])/maxf(1.0,float(record.count))
-		record.merge(DiscoverySystem.domain_technology_limits(String(domain)),true)
+		record.merge(WorldSimulation.discovery.domain_technology_limits(String(domain)),true)
 		record["subcategories"]=(subcategories[domain] as Dictionary).keys()
 		record["lenses"]=(lenses[domain] as Dictionary).keys()
 		profile[domain]=record
@@ -237,7 +238,7 @@ func initial_rival_discovery_profile(civ_id:String,founding_focus:String,strateg
 	var domain_records:Dictionary={}
 	var momentum:Dictionary={}
 	var emphasis:=_rival_emphasis({"founding_focus":founding_focus,"strategy":strategy,"allocations":{}})
-	var seed_value:=GameState.world_seed^hash(civ_id)^0x27d4eb2d
+	var seed_value:=WorldSimulation.state.world_seed^hash(civ_id)^0x27d4eb2d
 	for domain in Catalog.DOMAINS:
 		var subcategory_list:Array=FrontierCatalog.SUBCATEGORIES[domain]
 		var specialty:=String(subcategory_list[posmod(hash("%s:%s:subcategory" % [seed_value,domain]),subcategory_list.size())])
@@ -269,16 +270,16 @@ func _advance_rival_discoveries(civ:Dictionary)->Dictionary:
 	profile["research_workforce"]=research_workforce
 	profile["research_capacity"]=points
 	profile["research_slots"]=research_slots
-	var seed_value:=int(profile.get("seed",GameState.world_seed))
+	var seed_value:=int(profile.get("seed",WorldSimulation.state.world_seed))
 	for slot in research_slots:
 		var domain:=_weighted_domain(seed_value,cycle,slot,emphasis)
 		momentum[domain]=float(momentum.get(domain,0.0))+points*(1.0 if slot==0 else 0.62)
-		var candidates:=DiscoverySystem.rival_research_candidates(civ,domain)
+		var candidates:=WorldSimulation.discovery.rival_research_candidates(civ,domain)
 		if candidates.is_empty():
 			momentum[domain]=minf(float(momentum[domain]),1.0)
 			continue
 		var technology:Dictionary=candidates[0]
-		var research_cost:=clampf(1.0/maxf(0.001,float(technology.get("chance",0.001))*50.0),2.0,40.0)*DiscoverySystem.research_difficulty(technology,seed_value)
+		var research_cost:=clampf(1.0/maxf(0.001,float(technology.get("chance",0.001))*50.0),2.0,40.0)*WorldSimulation.discovery.research_difficulty(technology,seed_value)
 		if float(momentum[domain])<research_cost: continue
 		momentum[domain]=float(momentum[domain])-research_cost
 		var known:Array=profile.get("technologies",[])
@@ -289,11 +290,11 @@ func _advance_rival_discoveries(civ:Dictionary)->Dictionary:
 		var record:Dictionary=domains_profile.get(domain,{})
 		var count:=mini(384,int(record.get("count",0))+1)
 		record["count"]=count
-		record["maturity"]=maxi(int(record.get("maturity",0)),DiscoverySystem.technology_depth(String(technology.id)))
-		record.merge(DiscoverySystem.domain_technology_limits(domain),true)
+		record["maturity"]=maxi(int(record.get("maturity",0)),WorldSimulation.discovery.technology_depth(String(technology.id)))
+		record.merge(WorldSimulation.discovery.domain_technology_limits(domain),true)
 		var learned_conditions:Dictionary={}
 		for learned_id in known:
-			var learned:=DiscoverySystem.discovery_definition(String(learned_id))
+			var learned:=WorldSimulation.discovery.discovery_definition(String(learned_id))
 			if String(learned.get("dynamic",""))==domain: learned_conditions[String(learned.get("subcategory",""))]=true
 		record["breadth"]=maxi(int(record.get("breadth",0)),learned_conditions.size())
 		record["lens_count"]=maxi(1,int(record.get("lens_count",0)))
@@ -379,6 +380,7 @@ func _rival_context(civ:Dictionary)->Dictionary:
 
 
 func _rival_capacities(civ:Dictionary)->Dictionary:
+	if bool(civ.get("shared_rules",false)):return civ.get("local_capacities",{}).duplicate(true)
 	var population:=maxf(1.0,float(civ.get("population",1.0)))
 	var food_ratio:=clampf(float(civ.get("food_capacity",population))/population,0.0,1.25)
 	var health:=clampf(float(civ.get("health",0.5)),0.0,1.0)
@@ -474,7 +476,7 @@ func export_state()->Dictionary:
 
 func import_state(payload:Dictionary)->Dictionary:
 	var previous:=export_state()
-	last_world_seed=int(payload.get("world_seed",GameState.world_seed))
+	last_world_seed=int(payload.get("world_seed",WorldSimulation.state.world_seed))
 	last_evaluated_day=int(payload.get("last_evaluated_day",-1))
 	if payload.has("domain_levels"):
 		domain_levels=(payload.get("domain_levels",{}) as Dictionary).duplicate(true)

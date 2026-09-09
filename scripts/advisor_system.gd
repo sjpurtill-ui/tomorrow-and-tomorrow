@@ -16,15 +16,15 @@ func reset_for_new_world()->void:
 func initialize() -> void:
 	if initialized:
 		return
-	rng.seed = GameState.world_seed ^ 0x2e17a5d3
+	rng.seed = WorldSimulation.state.world_seed ^ 0x2e17a5d3
 	initialized = true
 	_seed_world_truth()
 
 func _seed_world_truth() -> void:
-	WorldFacts.set_fact("civilization", "population", GameState.population_total, "public")
-	WorldFacts.set_fact("civilization", "sovereign", "player", "public")
-	WorldFacts.set_fact("civilization", "food_days", 30.0, "internal")
-	WorldFacts.set_fact("civilization", "settlement_status", "unsettled", "public")
+	WorldSimulation.facts.set_fact("civilization", "population", WorldSimulation.state.population_total, "public")
+	WorldSimulation.facts.set_fact("civilization", "sovereign", "player", "public")
+	WorldSimulation.facts.set_fact("civilization", "food_days", 30.0, "internal")
+	WorldSimulation.facts.set_fact("civilization", "settlement_status", "unsettled", "public")
 
 func register_advisors(roster: Array[Dictionary]) -> void:
 	initialize()
@@ -40,7 +40,7 @@ func register_advisors(roster: Array[Dictionary]) -> void:
 		advisor["courage"] = rng.randf_range(0.25,0.9)
 		advisor["pride"] = rng.randf_range(0.2,0.88)
 		advisor["suspicion"] = rng.randf_range(0.15,0.85)
-		GameState.advisor_roster.append(advisor)
+		WorldSimulation.state.advisor_roster.append(advisor)
 
 func _goals_for_background(background: String) -> Array:
 	var mapping := {
@@ -59,15 +59,15 @@ func appoint(advisor_name: String, office: String) -> bool:
 		return false
 	var person_id:=int(advisor.get("person_id",0))
 	if person_id>0:
-		var appointed:Dictionary=GovernmentPeopleSystem.mark_central_appointment(person_id,office)
+		var appointed:Dictionary=WorldSimulation.government.mark_central_appointment(person_id,office)
 		if appointed.is_empty(): return false
 		advisor=appointed
-	GameState.leadership_positions[office] = advisor
+	WorldSimulation.state.leadership_positions[office] = advisor
 	_record_memory(advisor_name, "The Sovereign appointed this person to the %s office." % office, 0.85, "duty")
 	return true
 
 func advisor_by_name(advisor_name: String) -> Dictionary:
-	for advisor in GameState.advisor_roster:
+	for advisor in WorldSimulation.state.advisor_roster:
 		if advisor.name == advisor_name:
 			return advisor
 	return {}
@@ -76,39 +76,39 @@ func update_belief(advisor_name: String, subject: String, predicate: String, val
 	var advisor := advisor_by_name(advisor_name)
 	if advisor.is_empty():
 		return
-	var belief := {"subject":subject, "predicate":predicate, "value":value, "confidence":clampf(confidence,0.0,1.0), "source":source, "day":int(GameState.elapsed_days)}
+	var belief := {"subject":subject, "predicate":predicate, "value":value, "confidence":clampf(confidence,0.0,1.0), "source":source, "day":int(WorldSimulation.state.elapsed_days)}
 	advisor.beliefs.append(belief)
 
 func generate_council_item(office: String, topic: String, urgency := 0.5) -> Dictionary:
 	initialize()
-	if not GameState.leadership_positions.has(office):
+	if not WorldSimulation.state.leadership_positions.has(office):
 		return {}
-	var advisor: Dictionary = GameState.leadership_positions[office]
+	var advisor: Dictionary = WorldSimulation.state.leadership_positions[office]
 	var act := _plan_advice(advisor, topic, urgency)
 	var rendered := _render_locally(advisor, act)
 	if not _validate(rendered, act):
 		rendered = "%s requests your attention regarding %s." % [advisor.name, topic]
-	var item := {"id":"council_%d_%d" % [int(GameState.elapsed_days), rng.randi()], "advisor":advisor.name, "office":office, "topic":topic, "act":act, "text":rendered, "urgency":urgency, "day":int(GameState.elapsed_days), "status":"unread"}
-	GameState.council_inbox.push_front(item)
+	var item := {"id":"council_%d_%d" % [int(WorldSimulation.state.elapsed_days), rng.randi()], "advisor":advisor.name, "office":office, "topic":topic, "act":act, "text":rendered, "urgency":urgency, "day":int(WorldSimulation.state.elapsed_days), "status":"unread"}
+	WorldSimulation.state.council_inbox.push_front(item)
 	return item
 
 func generate_consequence_item(event: Dictionary) -> Dictionary:
 	var office_by_domain := {"food":"Steward","health":"Steward","ecology":"Scholar","legitimacy":"Envoy","security":"Marshal","knowledge":"Scholar","materials":"Quartermaster"}
 	var domain := String(event.get("domain","population"))
 	var office := String(office_by_domain.get(domain,"Steward"))
-	if not GameState.leadership_positions.has(office): return {}
+	if not WorldSimulation.state.leadership_positions.has(office): return {}
 	var responses:=_responses_for_domain(domain)
 	# A council interruption is a decision, not a second event log. Economy,
 	# materials, and other observational domains already have dedicated records;
 	# if the council cannot offer an order that changes simulation state, it stays
 	# out of the sovereign inbox entirely.
 	if not _responses_change_state(responses): return {}
-	var advisor:Dictionary=GameState.leadership_positions[office]
+	var advisor:Dictionary=WorldSimulation.state.leadership_positions[office]
 	var text := "Sovereign, %s %s" % [String(event.get("description","Conditions require attention.")),_recommendation_for(advisor,domain)]
 	var condition_key:=String(event.get("condition_id",event.get("title",domain))).strip_edges().to_lower().replace(" ","_")
 	var severity:=String(event.get("severity","warning"))
-	var current_day:=int(GameState.elapsed_days)
-	for existing_variant in GameState.council_inbox:
+	var current_day:=int(WorldSimulation.state.elapsed_days)
+	for existing_variant in WorldSimulation.state.council_inbox:
 		var existing:Dictionary=existing_variant
 		if String(existing.get("condition_key",""))!=condition_key: continue
 		var prior_severity:=String(existing.get("severity","warning"))
@@ -141,8 +141,8 @@ func generate_consequence_item(event: Dictionary) -> Dictionary:
 		if _council_severity_rank(severity)<=_council_severity_rank(prior_severity) and current_day-last_day<365:
 			return {}
 	var item := {"id":"consequence_%d_%d" % [current_day,rng.randi()],"advisor":advisor.name,"office":office,"topic":domain,"act":{"type":"warn"},"text":text,"urgency":_council_severity_urgency(severity),"day":current_day,"last_day":current_day,"status":"unread","responses":responses,"condition_key":condition_key,"severity":severity,"occurrences":1}
-	GameState.council_inbox.push_front(item)
-	if GameState.council_inbox.size()>80: GameState.council_inbox.resize(80)
+	WorldSimulation.state.council_inbox.push_front(item)
+	if WorldSimulation.state.council_inbox.size()>80: WorldSimulation.state.council_inbox.resize(80)
 	return item
 
 func _responses_change_state(responses:Array)->bool:
@@ -160,7 +160,7 @@ func _council_severity_urgency(severity:String)->float:
 func council_decision_items(limit:=12,include_history:=true)->Array[Dictionary]:
 	var unread:Array[Dictionary]=[]
 	var history:Array[Dictionary]=[]
-	for item_variant in GameState.council_inbox:
+	for item_variant in WorldSimulation.state.council_inbox:
 		var item:Dictionary=item_variant
 		if not _responses_change_state(item.get("responses",[])): continue
 		var status:=String(item.get("status","unread"))
@@ -179,12 +179,12 @@ func council_decision_items(limit:=12,include_history:=true)->Array[Dictionary]:
 func defer_council_item(item_id:String)->void:
 	## Dismissing a queue card defers the decision: it stays in the ledger,
 	## keeps merging silently, and returns only if its condition escalates.
-	for item_variant in GameState.council_inbox:
+	for item_variant in WorldSimulation.state.council_inbox:
 		var item:Dictionary=item_variant
 		if String(item.get("id",""))!=item_id: continue
 		if String(item.get("status","unread"))=="unread":
 			item["status"]="deferred"
-			item["deferred_day"]=int(GameState.elapsed_days)
+			item["deferred_day"]=int(WorldSimulation.state.elapsed_days)
 			item["deferred_severity"]=String(item.get("severity","warning"))
 		return
 
@@ -192,7 +192,7 @@ func merged_report_items(limit:=8)->Array[Dictionary]:
 	## Routine reports and deferred decisions — everything the queue keeps
 	## quiet — so the ledger stays reachable from the council view.
 	var merged:Array[Dictionary]=[]
-	for item_variant in GameState.council_inbox:
+	for item_variant in WorldSimulation.state.council_inbox:
 		var item:Dictionary=item_variant
 		var routine:=not _responses_change_state(item.get("responses",[]))
 		var deferred:=String(item.get("status","unread"))=="deferred"
@@ -203,7 +203,7 @@ func merged_report_items(limit:=8)->Array[Dictionary]:
 
 func routine_report_count()->int:
 	var count:=0
-	for item_variant in GameState.council_inbox:
+	for item_variant in WorldSimulation.state.council_inbox:
 		var item:Dictionary=item_variant
 		if not _responses_change_state(item.get("responses",[])) or String(item.get("status","unread"))=="deferred": count+=1
 	return count
@@ -213,17 +213,17 @@ func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 	var advisor:Dictionary={}
 	var office:="Travel Council"
 	for preferred_office in ["Quartermaster","Steward","Marshal"]:
-		if GameState.leadership_positions.has(preferred_office):
-			advisor=GameState.leadership_positions[preferred_office]
+		if WorldSimulation.state.leadership_positions.has(preferred_office):
+			advisor=WorldSimulation.state.leadership_positions[preferred_office]
 			office=preferred_office
 			break
 	if advisor.is_empty():
-		for candidate in GameState.advisor_roster:
+		for candidate in WorldSimulation.state.advisor_roster:
 			if String(candidate.get("background","")) in ["Caravan Organizer","Hunter-Captain","Trader and Mediator"]:
 				advisor=candidate
 				break
-	if advisor.is_empty() and not GameState.advisor_roster.is_empty():
-		advisor=GameState.advisor_roster[0]
+	if advisor.is_empty() and not WorldSimulation.state.advisor_roster.is_empty():
+		advisor=WorldSimulation.state.advisor_roster[0]
 	var advisor_name:=String(advisor.get("name","The caravan speakers"))
 	var distance:=float(data.get("distance_km",0.0))
 	var duration:=float(data.get("duration_days",0.0))
@@ -252,14 +252,14 @@ func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 		_:
 			text="Sovereign, the travel council reports that the convoy is %d%% through its present route." % progress
 	var item:={
-		"id":"travel_%s_%d_%d" % [stage,int(GameState.elapsed_days*24.0),rng.randi()],
+		"id":"travel_%s_%d_%d" % [stage,int(WorldSimulation.state.elapsed_days*24.0),rng.randi()],
 		"advisor":advisor_name,"office":office,"topic":"settlement" if stage=="settlement" else "travel","act":{"type":"report"},
 		"text":text,"urgency":0.82 if stage in ["provisions_low","halt"] else (0.58 if stage=="settlement" else 0.42),
-		"day":int(GameState.elapsed_days),"hour":int(GameState.elapsed_days*24.0)%24,"status":"unread",
+		"day":int(WorldSimulation.state.elapsed_days),"hour":int(WorldSimulation.state.elapsed_days*24.0)%24,"status":"unread",
 		"responses":[{"label":"Acknowledge","effect":"","magnitude":0.0,"days":1.0,"ripple":"The chosen ground enters the founding record; the convoy will no longer march." if stage=="settlement" else "The report is entered into the journey record."}]
 	}
-	GameState.council_inbox.push_front(item)
-	if GameState.council_inbox.size()>80: GameState.council_inbox.resize(80)
+	WorldSimulation.state.council_inbox.push_front(item)
+	if WorldSimulation.state.council_inbox.size()>80: WorldSimulation.state.council_inbox.resize(80)
 	return item
 
 func _recommendation_for(advisor: Dictionary,domain: String) -> String:
@@ -338,18 +338,18 @@ func _validate(text: String, act: Dictionary) -> bool:
 func issue_order(order_type: String, target: String, parameters: Dictionary, addressed_office := "") -> Dictionary:
 	initialize()
 	order_sequence+=1
-	var order := {"id":"order_%d_%d" % [int(GameState.elapsed_days),rng.randi()], "sequence":order_sequence,"type":order_type, "target":target, "parameters":parameters.duplicate(true), "office":addressed_office, "issued_day":int(GameState.elapsed_days), "status":"issued"}
-	GameState.sovereign_orders.push_front(order)
+	var order := {"id":"order_%d_%d" % [int(WorldSimulation.state.elapsed_days),rng.randi()], "sequence":order_sequence,"type":order_type, "target":target, "parameters":parameters.duplicate(true), "office":addressed_office, "issued_day":int(WorldSimulation.state.elapsed_days), "status":"issued"}
+	WorldSimulation.state.sovereign_orders.push_front(order)
 	_prune_sovereign_orders()
-	if addressed_office != "" and GameState.leadership_positions.has(addressed_office):
-		var advisor: Dictionary = GameState.leadership_positions[addressed_office]
+	if addressed_office != "" and WorldSimulation.state.leadership_positions.has(addressed_office):
+		var advisor: Dictionary = WorldSimulation.state.leadership_positions[addressed_office]
 		_record_memory(advisor.name, "The Sovereign issued a %s directive concerning %s." % [order_type,target], 0.78, "directive")
 	return order
 
 func begin_pronouncement(text:String)->Dictionary:
 	var order:=issue_order("pronouncement","civilization",{"text":text.strip_edges().substr(0,500),"interpretation":{}},"")
 	order["status"]="interpreting"
-	order["submitted_day"]=int(GameState.elapsed_days)
+	order["submitted_day"]=int(WorldSimulation.state.elapsed_days)
 	return order
 
 
@@ -358,7 +358,7 @@ func _prune_sovereign_orders(limit:int=MAX_SOVEREIGN_ORDER_RECORDS)->void:
 	## the oldest closed talk first, then other resolved records, while retaining
 	## unresolved negotiations, promised reports, and the source of every policy
 	## that is still materially active.
-	while GameState.sovereign_orders.size()>limit:
+	while WorldSimulation.state.sovereign_orders.size()>limit:
 		var remove_index:=_oldest_prunable_order_index(true)
 		if remove_index<0: remove_index=_oldest_prunable_order_index(false)
 		if remove_index<0:
@@ -366,12 +366,12 @@ func _prune_sovereign_orders(limit:int=MAX_SOVEREIGN_ORDER_RECORDS)->void:
 			# order people are carrying out. Ordinary play cannot reach this state:
 			# new subjects supersede unresolved talk and policy load is capacity-bound.
 			break
-		GameState.sovereign_orders.remove_at(remove_index)
+		WorldSimulation.state.sovereign_orders.remove_at(remove_index)
 
 
 func _oldest_prunable_order_index(disposable_only:bool)->int:
-	for index in range(GameState.sovereign_orders.size()-1,-1,-1):
-		var order:Dictionary=GameState.sovereign_orders[index]
+	for index in range(WorldSimulation.state.sovereign_orders.size()-1,-1,-1):
+		var order:Dictionary=WorldSimulation.state.sovereign_orders[index]
 		if _sovereign_order_is_live(order): continue
 		if disposable_only and not _sovereign_order_is_disposable(order): continue
 		return index
@@ -388,16 +388,16 @@ func _sovereign_order_is_live(order:Dictionary)->bool:
 	# its order record so "what happened?" can resolve to evidence rather than a
 	# generic answer. It becomes prunable naturally when the dialogue rolls on.
 	if followup_state=="reported":
-		for history_variant in GameState.civic_dialogues.values():
+		for history_variant in WorldSimulation.state.civic_dialogues.values():
 			if not history_variant is Array: continue
 			for record_variant in history_variant:
 				if record_variant is Dictionary and String((record_variant as Dictionary).get("order_id",""))==order_id: return true
-	for modifier_variant in GameState.active_modifiers:
+	for modifier_variant in WorldSimulation.state.active_modifiers:
 		if not modifier_variant is Dictionary: continue
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("source_order_id",""))!=order_id: continue
 		if modifier.has("ended_reason"): continue
-		if float(modifier.get("until_day",INF))>=GameState.elapsed_days: return true
+		if float(modifier.get("until_day",INF))>=WorldSimulation.state.elapsed_days: return true
 	return false
 
 
@@ -411,9 +411,9 @@ func begin_civic_directive(text:String,settlement_id:String,leader:Dictionary)->
 	order["leader_person_id"]=int(leader.get("person_id",0))
 	order["addressed_to"]=String(leader.get("name","Unappointed leader"))
 	order["leader_title"]=String(leader.get("title",leader.get("office_title","Local leader")))
-	order["leader_disposition"]=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	order["leader_disposition"]=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	_append_civic_dialogue(settlement_id,{
-		"day":int(GameState.elapsed_days),"speaker":"player","speaker_name":"You",
+		"day":int(WorldSimulation.state.elapsed_days),"speaker":"player","speaker_name":"You",
 		"text":text.strip_edges().substr(0,500),"order_id":String(order.id),"status":"submitted",
 	})
 	return order
@@ -423,7 +423,7 @@ func recover_interrupted_civic_directives()->int:
 	# HTTP requests are process-local. If the scene or game closes while one is
 	# pending, its serialized order cannot truthfully remain INTERPRETING forever.
 	var recovered:=0
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		var order:Dictionary=order_variant
 		if String(order.get("type",""))!="pronouncement" or String(order.get("status",""))!="interpreting": continue
 		var settlement_id:=String(order.get("settlement_id",""))
@@ -436,7 +436,7 @@ func recover_interrupted_civic_directives()->int:
 			"interpretation":{"source":"interrupted","source_detail":"The game or civic panel closed before interpretation completed.","summary":"No policy was applied.","policies":[],"unresolved":"Repeat or revise the instruction."},
 		}
 		_append_civic_dialogue(settlement_id,{
-			"day":int(GameState.elapsed_days),"speaker":"leader","speaker_name":String(order.get("addressed_to","The leader")),
+			"day":int(WorldSimulation.state.elapsed_days),"speaker":"leader","speaker_name":String(order.get("addressed_to","The leader")),
 			"title":String(order.get("leader_title","Local leader")),"text":reply,"order_id":String(order.get("id","")),
 			"status":"clarify","disposition":String(order.get("leader_disposition","pragmatic")),"source":"interrupted",
 		})
@@ -445,7 +445,7 @@ func recover_interrupted_civic_directives()->int:
 
 
 func civic_dialogue_history(settlement_id:String,limit:int=8)->Array[Dictionary]:
-	var history:Array=GameState.civic_dialogues.get(settlement_id,[])
+	var history:Array=WorldSimulation.state.civic_dialogues.get(settlement_id,[])
 	var result:Array[Dictionary]=[]
 	var start:=maxi(0,history.size()-maxi(1,limit))
 	for index in range(start,history.size()):
@@ -462,7 +462,7 @@ func civic_retry_text(text:String,settlement_id:String)->String:
 
 func civic_decision_context(settlement_id:String)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	for order:Dictionary in GameState.sovereign_orders:
+	for order:Dictionary in WorldSimulation.state.sovereign_orders:
 		if String(order.get("settlement_id",""))!=settlement_id or String(order.get("status",""))=="interpreting": continue
 		result.append({"status":String(order.get("status","")),"request":String(order.get("parameters",{}).get("text",order.get("text",""))).substr(0,500),"outcome":String(order.get("leader_reply","")).substr(0,2400)})
 		if result.size()>=8: break
@@ -514,14 +514,14 @@ func withdraw_pending_civic_directive(settlement_id:String,leader_person_id:int,
 	var previous_status:=String(pending.get("status","unresolved"))
 	pending["status"]="withdrawn"
 	pending["leader_stance"]="withdrawn"
-	pending["withdrawn_day"]=int(GameState.elapsed_days)
+	pending["withdrawn_day"]=int(WorldSimulation.state.elapsed_days)
 	pending["withdrawn_from_status"]=previous_status
 	_append_civic_dialogue(settlement_id,{
-		"day":int(GameState.elapsed_days),"speaker":"player","speaker_name":"You",
+		"day":int(WorldSimulation.state.elapsed_days),"speaker":"player","speaker_name":"You",
 		"text":player_text.strip_edges().substr(0,500),"order_id":String(pending.get("id","")),"status":"withdrawal",
 	})
-	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var leader:=WorldSimulation.government.settlement_leader(settlement_id)
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var response:="Understood. I have withdrawn the unresolved instruction. Nothing from that proposal is underway."
 	match disposition_id:
 		"sycophantic": response="As you wish. I have withdrawn the unresolved instruction; nothing from it is underway."
@@ -556,7 +556,7 @@ func _civic_control_is_question(normalized:String)->bool:
 func record_civic_leadership_change(settlement_id:String,player_text:String,result:Dictionary)->void:
 	if not player_text.strip_edges().is_empty():
 		_append_civic_dialogue(settlement_id,{
-			"day":int(GameState.elapsed_days),"speaker":"player","speaker_name":"You",
+			"day":int(WorldSimulation.state.elapsed_days),"speaker":"player","speaker_name":"You",
 			"text":player_text.strip_edges().substr(0,500),"status":"leadership_action",
 		})
 	var message:=String(result.get("message",result.get("reason","Leadership did not change.")))
@@ -566,7 +566,7 @@ func record_civic_leadership_change(settlement_id:String,player_text:String,resu
 		if not pending.is_empty():
 			message+=" The unresolved directive remains before the office; %s must now answer it." % String(successor.get("name","the successor"))
 	_append_civic_dialogue(settlement_id,{
-		"day":int(GameState.elapsed_days),"speaker":"record","speaker_name":"COUNCIL RECORD",
+		"day":int(WorldSimulation.state.elapsed_days),"speaker":"record","speaker_name":"COUNCIL RECORD",
 		"text":message,"status":"leadership_changed" if bool(result.get("ok",false)) else "leadership_unchanged",
 	})
 
@@ -577,7 +577,7 @@ func record_civic_implementation_report(settlement_id:String,order:Dictionary,le
 	## leader's answer in conversational order and permit a grounded follow-up.
 	if settlement_id.is_empty() or String(order.get("id","" )).is_empty() or report_text.strip_edges().is_empty(): return false
 	var order_id:=String(order.get("id",""))
-	var history:Array=GameState.civic_dialogues.get(settlement_id,[])
+	var history:Array=WorldSimulation.state.civic_dialogues.get(settlement_id,[])
 	for record_variant in history:
 		if not record_variant is Dictionary: continue
 		var record:Dictionary=record_variant
@@ -588,9 +588,9 @@ func record_civic_implementation_report(settlement_id:String,order:Dictionary,le
 	var speaker_name:=String(leader.get("name",order.get("addressed_to","The appointed leader")))
 	var speaker_title:=String(leader.get("title",order.get("leader_title","Local leader")))
 	_append_civic_dialogue(settlement_id,{
-		"day":int(GameState.elapsed_days),"speaker":"leader","speaker_name":speaker_name,"title":speaker_title,
+		"day":int(WorldSimulation.state.elapsed_days),"speaker":"leader","speaker_name":speaker_name,"title":speaker_title,
 		"text":_with_civic_state(report_text.substr(0,900),state_label),"order_id":order_id,
-		"status":"outcome_report_%s" % normalized_outcome,"disposition":String(GovernmentPeopleSystem.leader_disposition(leader).get("id","unavailable")),
+		"status":"outcome_report_%s" % normalized_outcome,"disposition":String(WorldSimulation.government.leader_disposition(leader).get("id","unavailable")),
 		"source":"deterministic implementation report",
 	})
 	return true
@@ -598,7 +598,7 @@ func record_civic_implementation_report(settlement_id:String,order:Dictionary,le
 
 func pending_civic_proposal(settlement_id:String,leader_person_id:int=0)->Dictionary:
 	var inherited:Dictionary={}
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		var order:Dictionary=order_variant
 		if String(order.get("settlement_id",""))!=settlement_id or String(order.get("status",""))!="awaiting_confirmation": continue
 		if leader_person_id<=0 or int(order.get("leader_person_id",0))==leader_person_id: return order
@@ -610,7 +610,7 @@ func pending_civic_proposal(settlement_id:String,leader_person_id:int=0)->Dictio
 
 func _pending_civic_context(settlement_id:String,leader_person_id:int)->Dictionary:
 	var inherited:Dictionary={}
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		var order:Dictionary=order_variant
 		if String(order.get("settlement_id",""))!=settlement_id: continue
 		if String(order.get("status","")) not in ["awaiting_confirmation","awaiting_clarification","leader_refused","blocked"]: continue
@@ -740,7 +740,7 @@ func _merge_grave_followup_parameters(policy:Dictionary,text:String)->void:
 func resolve_civic_directive(text:String,interpretation:Dictionary,existing_order:Dictionary,settlement_id:String,leader_person_id:int)->Dictionary:
 	initialize()
 	var order:=existing_order
-	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
+	var leader:=WorldSimulation.government.settlement_leader(settlement_id)
 	if bool(interpretation.get("service_failure",false)):
 		order["status"]="discussion"
 		order["leader_stance"]="connection_interrupted"
@@ -758,7 +758,7 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 		return order
 	var prior_context:=_pending_civic_context(settlement_id,leader_person_id)
 	var result:=contextualize_civic_followup(text,interpretation,settlement_id,leader_person_id)
-	var disposition:Dictionary=GovernmentPeopleSystem.leader_disposition(leader)
+	var disposition:Dictionary=WorldSimulation.government.leader_disposition(leader)
 	order["leader_disposition"]=String(disposition.get("id","pragmatic"))
 	if not String(result.get("confirmed_grave_meaning","")).is_empty(): order["accepted_meaning"]=String(result.confirmed_grave_meaning)
 	var policies:Array=result.get("policies",[])
@@ -840,7 +840,7 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 		var skills:Array=policy.get("skills",[])
 		var execution:=execution_modifier_for_advisor(leader,"SettlementLeader",skills)
 		var directive_parameters:Dictionary=policy.get("directive_parameters",{})
-		var assessment:=ConsequenceEngine.directive_assessment(String(policy.get("id","")),float(policy.get("magnitude",0.0)),float(policy.get("days",30.0)),execution,directive_parameters)
+		var assessment:=WorldSimulation.consequences.directive_assessment(String(policy.get("id","")),float(policy.get("magnitude",0.0)),float(policy.get("days",30.0)),execution,directive_parameters)
 		policy["conversation_assessment"]=assessment.duplicate(true)
 		policy["requested_magnitude"]=float(assessment.get("requested_magnitude",policy.get("magnitude",0.0)))
 		var willingness:=_leader_willingness(leader,String(policy.get("id","")),assessment)
@@ -876,7 +876,7 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 		order["parameters"]={"text":text,"interpretation":result}
 		order["policy_ids"]=_policy_ids(prepared)
 		var repetition_strain:=minf(0.018,float(repeat_refusals)*0.006)
-		GovernmentPeopleSystem.adjust_person_relationship(leader_person_id,-0.022-repetition_strain,0.006,0.035+repetition_strain)
+		WorldSimulation.government.adjust_person_relationship(leader_person_id,-0.022-repetition_strain,0.006,0.035+repetition_strain)
 		if not prior_context.is_empty() and not String(result.get("contextual_prior_order_id","")).is_empty():
 			_close_civic_context(prior_context,"continued",String(order.get("id","")))
 		_append_leader_reply(settlement_id,leader,refusal,order,"refuses")
@@ -890,7 +890,7 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 		order["leader_reply"]=objection
 		order["parameters"]={"text":text,"interpretation":result}
 		order["policy_ids"]=_policy_ids(prepared)
-		GovernmentPeopleSystem.adjust_person_relationship(leader_person_id,-0.006,0.002,0.008)
+		WorldSimulation.government.adjust_person_relationship(leader_person_id,-0.006,0.002,0.008)
 		if not prior_context.is_empty() and not String(result.get("contextual_prior_order_id","")).is_empty():
 			_close_civic_context(prior_context,"continued",String(order.get("id","")))
 		_append_leader_reply(settlement_id,leader,objection,order,"objects")
@@ -911,7 +911,7 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 		committed=0
 	else:
 		committed=actually_committed
-	var followup:=CivicImplementationSystem.schedule_order(resolved)
+	var followup:=WorldSimulation.civics.schedule_order(resolved)
 	var stance:="accepted"
 	if blocked>0 or deferred>0 or refused>0 or (committed>0 and implementation_total/float(committed)<0.74): stance="qualified"
 	if committed==0: stance="unable" if blocked>0 else "refused"
@@ -927,12 +927,12 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 	resolved["leader_reply"]=reply
 	resolved["addressed_to"]=String(leader.get("name","The leader"))
 	if insistence and prepared.any(func(policy:Dictionary)->bool: return float(policy.get("leader_willingness",1.0))<0.42):
-		GovernmentPeopleSystem.adjust_person_relationship(leader_person_id,-0.015,0.004,0.025)
+		WorldSimulation.government.adjust_person_relationship(leader_person_id,-0.015,0.004,0.025)
 	elif committed>0:
-		GovernmentPeopleSystem.adjust_person_relationship(leader_person_id,0.002,0.004,-0.001)
+		WorldSimulation.government.adjust_person_relationship(leader_person_id,0.002,0.004,-0.001)
 	var prior_order_id:=String(result.get("contextual_prior_order_id",""))
 	if prior_order_id!="":
-		for prior_variant in GameState.sovereign_orders:
+		for prior_variant in WorldSimulation.state.sovereign_orders:
 			var prior_order:Dictionary=prior_variant
 			if String(prior_order.get("id",""))==prior_order_id:
 				prior_order["status"]="negotiated"
@@ -944,10 +944,10 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 
 func _append_civic_dialogue(settlement_id:String,record:Dictionary)->void:
 	if settlement_id.is_empty(): settlement_id="civilization"
-	var history:Array=GameState.civic_dialogues.get(settlement_id,[])
+	var history:Array=WorldSimulation.state.civic_dialogues.get(settlement_id,[])
 	history.append(record.duplicate(true))
 	while history.size()>MAX_CIVIC_DIALOGUE_PER_SETTLEMENT: history.pop_front()
-	GameState.civic_dialogues[settlement_id]=history
+	WorldSimulation.state.civic_dialogues[settlement_id]=history
 
 
 func _with_civic_state(reply:String,state_label:String)->String:
@@ -961,9 +961,9 @@ func _append_leader_reply(settlement_id:String,leader:Dictionary,text:String,ord
 		recorded_text="I am setting aside the unresolved discussion of %s and answering this instruction instead.\n\n%s" % [superseded_subject,recorded_text]
 		order["leader_reply"]=recorded_text
 	_append_civic_dialogue(settlement_id,{
-		"day":int(GameState.elapsed_days),"speaker":"leader","speaker_name":String(leader.get("name","Unappointed leader")),
+		"day":int(WorldSimulation.state.elapsed_days),"speaker":"leader","speaker_name":String(leader.get("name","Unappointed leader")),
 		"title":String(leader.get("title","Local leader")),"text":recorded_text.substr(0,2400),"order_id":String(order.get("id","")),
-		"status":stance,"disposition":String(GovernmentPeopleSystem.leader_disposition(leader).get("id","unavailable")),
+		"status":stance,"disposition":String(WorldSimulation.government.leader_disposition(leader).get("id","unavailable")),
 		"source":String(order.get("parameters",{}).get("interpretation",{}).get("source","deterministic interpreter")),
 	})
 	_prune_sovereign_orders()
@@ -1009,7 +1009,7 @@ func _low_confidence_question(leader:Dictionary,policies:Array)->String:
 	var policy:Dictionary=policies[0] if not policies.is_empty() else {}
 	var action:="end" if String(policy.get("action","enact"))=="repeal" else "put into effect"
 	var subject:=GovernmentPolicyCatalog.display_name(String(policy.get("id","this policy")))
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	match disposition_id:
 		"sycophantic": return "I believe I see the wisdom of your intent; should I %s %s as the settlement's actual order?" % [action,subject]
 		"cantankerous": return "Say it plainly: do you want me to %s %s?" % [action,subject]
@@ -1057,7 +1057,7 @@ func _grave_opening_question(leader:Dictionary,policies:Array)->String:
 	var alternative:=_grave_less_harmful_alternative(policies)
 	var scope_question:=_grave_scope_question(policies)
 	var warning:=_grave_warning(policies)
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var opening:="This demands a clearer answer than an ordinary order."
 	match disposition_id:
 		"sycophantic": opening="I do not doubt that you see dangers I may not, but I cannot treat this as an ordinary order."
@@ -1070,7 +1070,7 @@ func _grave_opening_question(leader:Dictionary,policies:Array)->String:
 func _grave_confirmation_question(leader:Dictionary,policies:Array)->String:
 	var meaning:=_grave_meaning(policies)
 	var warning:=_grave_warning(policies)
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var opening:="My final reading is"
 	match disposition_id:
 		"sycophantic": opening="I believe I now understand your difficult but deliberate judgment as"
@@ -1148,7 +1148,7 @@ func _grave_less_harmful_alternative(policies:Array)->String:
 func _leader_willingness(leader:Dictionary,policy_id:String,assessment:Dictionary)->float:
 	var personality:Dictionary=leader.get("personality",{})
 	var relationship:Dictionary=leader.get("relationships",{}).get("sovereign",{})
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var coercion:=float(assessment.get("coercion",0.0))
 	var empathy:=float(personality.get("empathy",0.5))
 	var discipline:=float(personality.get("discipline",0.5))
@@ -1172,7 +1172,7 @@ func _leader_objection(leader:Dictionary,policy_id:String,assessment:Dictionary)
 	var reason:="this use of our limited authority is not yet justified"
 	if coercion>=0.65 and empathy>=0.55: reason="the coercion and likely harm are greater than I can quietly accept"
 	elif float(assessment.get("resistance",0.0))>=0.55: reason="people are likely to resist, and our authority may not survive the attempt"
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	match disposition_id:
 		"sycophantic": return "your purpose is surely sound, but even I must warn that %s" % reason
 		"cantankerous": return "this is ill-judged: %s" % reason
@@ -1188,7 +1188,7 @@ func _leader_refuses(_disposition:Dictionary,_willingness:float,_insistence:bool
 
 
 func _leader_refusal(leader:Dictionary,policy_id:String,assessment:Dictionary,insistence:bool)->String:
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var coercion:=float(assessment.get("coercion",0.0))
 	if disposition_id=="principled" and coercion>=0.45:
 		return "I will not use this office to impose that harm"
@@ -1200,7 +1200,7 @@ func _leader_refusal(leader:Dictionary,policy_id:String,assessment:Dictionary,in
 
 func _leader_objection_reply(leader:Dictionary,limitations:Array[String])->String:
 	var reasons:=_join_limitations(limitations)
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	match disposition_id:
 		"sycophantic": return "Your judgment is usually the clearer one. I hesitate only because %s Tell me plainly to proceed and I will attempt it." % reasons
 		"cantankerous": return "No—not as stated. %s If you truly mean to overrule me, say so, or put someone else in this office." % reasons
@@ -1232,7 +1232,7 @@ func _civic_unmapped_answer(text:String,result:Dictionary)->String:
 
 func _leader_clarification_reply(leader:Dictionary,unresolved:String)->String:
 	var player_reason:=_player_clarification_reason(unresolved)
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	match disposition_id:
 		"sycophantic": return "There may be wisdom in the aim, but I need a concrete instruction before I commit people or stores. %s" % player_reason
 		"cantankerous": return "That is not yet an order anyone can execute. %s" % player_reason
@@ -1251,10 +1251,10 @@ func _leader_discussion_reply(leader:Dictionary,topic_ids:Array,text:String)->St
 		return "I hear the concern, but I cannot judge it without knowing what part of the settlement you mean. Nothing changes until you give an order."
 	var definition:=GovernmentPolicyCatalog.definition(topic_id)
 	var execution:=execution_modifier_for_advisor(leader,"SettlementLeader",definition.get("skills",[]))
-	var assessment:=ConsequenceEngine.directive_assessment(topic_id,float(definition.get("magnitude",0.12)),float(definition.get("days",90.0)),execution,{})
+	var assessment:=WorldSimulation.consequences.directive_assessment(topic_id,float(definition.get("magnitude",0.12)),float(definition.get("days",90.0)),execution,{})
 	var display_name:=GovernmentPolicyCatalog.display_name(topic_id)
 	var active:=false
-	for policy_variant in ConsequenceEngine.active_policies():
+	for policy_variant in WorldSimulation.consequences.active_policies():
 		if String((policy_variant as Dictionary).get("id",""))==topic_id:
 			active=true
 			break
@@ -1265,7 +1265,7 @@ func _leader_discussion_reply(leader:Dictionary,topic_ids:Array,text:String)->St
 		judgment="I would not promise %s now: %s" % [display_name,String(assessment.get("blocker","we lack the means to carry it out")).trim_suffix(".")+"."]
 	else:
 		judgment="We could attempt %s. %s %s" % [display_name,_leader_capacity_phrase(leader,float(assessment.get("implementation_rate",0.0))),String(definition.get("ripple","It would redirect real people and stores.")).strip_edges()]
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var opening:="My judgment:"
 	match disposition_id:
 		"sycophantic": opening="Your concern is well chosen. My judgment is:"
@@ -1284,7 +1284,7 @@ func _civic_discussion_reference(settlement_id:String,current_order_id:String,pr
 	## interpretation: it cannot create policies or change the referenced order.
 	if not prior_context.is_empty() and _discussion_reference_matches(prior_context,topic_ids):
 		return prior_context
-	var history:Array=GameState.civic_dialogues.get(settlement_id,[])
+	var history:Array=WorldSimulation.state.civic_dialogues.get(settlement_id,[])
 	for index in range(history.size()-1,-1,-1):
 		if not history[index] is Dictionary: continue
 		var record:Dictionary=history[index]
@@ -1295,7 +1295,7 @@ func _civic_discussion_reference(settlement_id:String,current_order_id:String,pr
 			return candidate
 	# Old saves may have orders but no dialogue ledger. The newest local order
 	# with an executable subject is still a better answer than generic help.
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		if not order_variant is Dictionary: continue
 		var candidate:Dictionary=order_variant
 		if String(candidate.get("id",""))==current_order_id: continue
@@ -1305,7 +1305,7 @@ func _civic_discussion_reference(settlement_id:String,current_order_id:String,pr
 
 
 func _civic_order_by_id(order_id:String)->Dictionary:
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		if order_variant is Dictionary and String((order_variant as Dictionary).get("id",""))==order_id:
 			return order_variant
 	return {}
@@ -1337,7 +1337,7 @@ func _leader_contextual_discussion_reply(leader:Dictionary,reference:Dictionary,
 	var body:=""
 	if _question_is_about_report(normalized):
 		match String(followup.get("state","")):
-			"pending": body="%s is still underway. I expect to report around %s, unless a physical party remains in the field longer." % [subject.capitalize(),_calendar_label(int(followup.get("due_day",int(GameState.elapsed_days)+7)))]
+			"pending": body="%s is still underway. I expect to report around %s, unless a physical party remains in the field longer." % [subject.capitalize(),_calendar_label(int(followup.get("due_day",int(WorldSimulation.state.elapsed_days)+7)))]
 			"reported": body=String(followup.get("report_text","I have already placed the outcome in the council record."))
 			_: body="There is no promised outcome report attached to %s. Its recorded state is %s." % [subject,String(reference.get("status","unresolved")).replace("_"," ")]
 	elif _question_is_about_meaning(normalized):
@@ -1356,7 +1356,7 @@ func _leader_contextual_discussion_reply(leader:Dictionary,reference:Dictionary,
 	else:
 		var disposition_capacity:=_discussion_capacity_phrase(leader,policies)
 		body="We were discussing %s. %s" % [subject,disposition_capacity]
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var opening:="The plain answer is:"
 	match disposition_id:
 		"sycophantic": opening="Of course. My reading is:"
@@ -1448,7 +1448,7 @@ func _player_clarification_reason(internal_reason:String)->String:
 
 func _leader_refusal_reply(leader:Dictionary,limitations:Array[String],insistence:bool,repeat_refusals:int=0)->String:
 	var reasons:=_join_limitations(limitations)
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	if repeat_refusals>0:
 		match disposition_id:
 			"cantankerous": return "We have already had this argument. I said no, and repeating it does not make it mine to carry. %s Replace me if you want another answer." % reasons
@@ -1466,7 +1466,7 @@ func _leader_refusal_reply(leader:Dictionary,limitations:Array[String],insistenc
 
 func _prior_civic_refusal_count(settlement_id:String,leader_person_id:int,policy_ids:Array[String],current_order_id:String)->int:
 	var count:=0
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		if not order_variant is Dictionary: continue
 		var prior:Dictionary=order_variant
 		if String(prior.get("id",""))==current_order_id or String(prior.get("settlement_id",""))!=settlement_id: continue
@@ -1516,7 +1516,7 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 		actions.append(GovernmentPolicyCatalog.display_name(String(policy.get("id","directive"))))
 	if committed<=0:
 		var reasons:=_join_limitations(limitations)
-		var unable_disposition:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+		var unable_disposition:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 		match unable_disposition:
 			"sycophantic": return "The intention is admirable, but even the finest order cannot supply what we do not have. %s" % reasons
 			"cantankerous": return "It cannot be done with what we have. %s" % reasons
@@ -1526,7 +1526,7 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 	var capacity_phrase:=_leader_capacity_phrase(leader,implementation_total/float(committed))
 	var memory_phrase:=_relevant_civic_memory_phrase(leader,policies)
 	var action_text:=", ".join(actions)
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var opening:="I understand."
 	match disposition_id:
 		"sycophantic": opening="A wise and far-sighted instruction."
@@ -1541,7 +1541,7 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 func _implementation_report_promise(followup:Dictionary)->String:
 	var snapshots:Array=followup.get("policies",[])
 	if not snapshots.is_empty() and snapshots.all(func(snapshot:Dictionary)->bool: return bool(snapshot.get("directive_parameters",{}).get("one_time",false))):
-		return "The counted action is complete. I will review its wider consequences around %s." % _calendar_label(int(followup.get("due_day",GameState.elapsed_days+7)))
+		return "The counted action is complete. I will review its wider consequences around %s." % _calendar_label(int(followup.get("due_day",WorldSimulation.state.elapsed_days+7)))
 	var has_operation:=false
 	for snapshot_variant in followup.get("policies",[]):
 		if not String((snapshot_variant as Dictionary).get("operation_kind","")).is_empty():
@@ -1549,7 +1549,7 @@ func _implementation_report_promise(followup:Dictionary)->String:
 			break
 	if has_operation:
 		return "This is underway. I will report when the commissioned party returns—or when we have reason to believe it will not."
-	var due_day:=int(followup.get("due_day",int(GameState.elapsed_days)+7))
+	var due_day:=int(followup.get("due_day",int(WorldSimulation.state.elapsed_days)+7))
 	return "This is underway. I will report back around %s with what actually happened." % _calendar_label(due_day)
 
 
@@ -1572,11 +1572,11 @@ func _leader_forecast_score(leader:Dictionary,implementation_rate:float)->float:
 	## or the eventual mechanical result. Personality adds a modest, hidden bias:
 	## flatterers overpromise, habitual skeptics underpromise, and principled
 	## leaders stay closest to the evidence available to them.
-	var knowledge:=GovernmentPeopleSystem.skill_value(leader,"Knowledge",45.0)/100.0
+	var knowledge:=WorldSimulation.government.skill_value(leader,"Knowledge",45.0)/100.0
 	var discipline:=float((leader.get("personality",{}) as Dictionary).get("discipline",0.5))
 	var person_id:=int(leader.get("person_id",0))
 	var error_span:=lerpf(0.12,0.025,clampf((knowledge+discipline)*0.5,0.0,1.0))
-	var disposition_id:=String(GovernmentPeopleSystem.leader_disposition(leader).get("id","pragmatic"))
+	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var honesty:=clampf(float(leader.get("honesty",0.5)),0.0,1.0)
 	var bias:=0.0
 	match disposition_id:
@@ -1584,7 +1584,7 @@ func _leader_forecast_score(leader:Dictionary,implementation_rate:float)->float:
 		"cantankerous": bias=-lerpf(0.09,0.025,honesty)
 		"diplomatic": bias=0.015
 		"principled": error_span*=0.55
-	return clampf(implementation_rate+sin(float(person_id)*17.41+float(GameState.elapsed_days)*0.013)*error_span+bias,0.0,1.0)
+	return clampf(implementation_rate+sin(float(person_id)*17.41+float(WorldSimulation.state.elapsed_days)*0.013)*error_span+bias,0.0,1.0)
 
 
 func _relevant_civic_memory_phrase(leader:Dictionary,policies:Array[Dictionary])->String:
@@ -1642,7 +1642,7 @@ func execute_pronouncement(text:String,interpretation:Dictionary,existing_order:
 			policy["second_order_consequence"]=String(preview.get("second_order_consequence",policy.get("ripple","")))
 			policy["applied"]=false
 		elif action=="repeal":
-			policy["repealed_active_policy"]=ConsequenceEngine.repeal_policy(effect_id,String(policy.get("ripple","Directive rescinded.")),metadata)
+			policy["repealed_active_policy"]=WorldSimulation.consequences.repeal_policy(effect_id,String(policy.get("ripple","Directive rescinded.")),metadata)
 			policy["execution_factor"]=1.0
 		else:
 			var office_execution:=float(policy.get("_office_execution_override",execution_modifier(office,policy.get("skills",[]))))
@@ -1653,7 +1653,7 @@ func execute_pronouncement(text:String,interpretation:Dictionary,existing_order:
 			metadata["executor"]=String(policy.executor)
 			metadata["office_execution_factor"]=office_execution
 			metadata["requested_magnitude"]=requested
-			var directive_result:=ConsequenceEngine.apply_directive(effect_id,requested,float(policy.get("days",30.0)),String(policy.get("ripple","Directive enacted.")),metadata,office_execution)
+			var directive_result:=WorldSimulation.consequences.apply_directive(effect_id,requested,float(policy.get("days",30.0)),String(policy.get("ripple","Directive enacted.")),metadata,office_execution)
 			var assessment:Dictionary=directive_result.get("assessment",{})
 			policy["magnitude"]=float(assessment.get("effective_magnitude",0.0))
 			policy["execution_factor"]=float(assessment.get("implementation_rate",0.0))
@@ -1670,8 +1670,8 @@ func execute_pronouncement(text:String,interpretation:Dictionary,existing_order:
 			policy["blocker"]=String(directive_result.get("error",""))
 			policy["applied"]=bool(directive_result.get("applied",false))
 			policy["skipped_as_stale"]=bool(directive_result.get("stale",false))
-			if bool(policy.applied) and GameState.leadership_positions.has(office):
-				_record_memory(String(GameState.leadership_positions[office].get("name","")),"This institution was charged with implementing %s." % GovernmentPolicyCatalog.display_name(effect_id),0.76,"duty")
+			if bool(policy.applied) and WorldSimulation.state.leadership_positions.has(office):
+				_record_memory(String(WorldSimulation.state.leadership_positions[office].get("name","")),"This institution was charged with implementing %s." % GovernmentPolicyCatalog.display_name(effect_id),0.76,"duty")
 		executed.append(policy)
 	result["policies"]=executed
 	var political_reactions:=_apply_pronouncement_reactions(executed)
@@ -1692,7 +1692,7 @@ func _apply_pronouncement_reactions(policies:Array[Dictionary])->Array[Dictionar
 		if (action=="enact" and bool(policy.get("applied",false))) or (action=="repeal" and bool(policy.get("repealed_active_policy",false))): changed.append(policy)
 	if changed.is_empty(): return []
 	var reactions:Array[Dictionary]=[]
-	for advisor_variant in GameState.advisor_roster:
+	for advisor_variant in WorldSimulation.state.advisor_roster:
 		var advisor:Dictionary=advisor_variant
 		var advisor_name:=String(advisor.get("name",""))
 		if advisor_name.is_empty(): continue
@@ -1716,7 +1716,7 @@ func _apply_pronouncement_reactions(policies:Array[Dictionary])->Array[Dictionar
 				if contribution>0.0 and not aligned_goals.has(goal): aligned_goals.append(goal)
 				elif contribution<0.0 and not opposed_goals.has(goal): opposed_goals.append(goal)
 			var office:=String(policy.get("office","Council"))
-			if GameState.leadership_positions.has(office) and String((GameState.leadership_positions[office] as Dictionary).get("name",""))==advisor_name and not duty_offices.has(office): duty_offices.append(office)
+			if WorldSimulation.state.leadership_positions.has(office) and String((WorldSimulation.state.leadership_positions[office] as Dictionary).get("name",""))==advisor_name and not duty_offices.has(office): duty_offices.append(office)
 		if is_zero_approx(alignment) and duty_offices.is_empty(): continue
 		alignment=clampf(alignment,-3.0,3.0)
 		var has_duty:=not duty_offices.is_empty()
@@ -1748,8 +1748,8 @@ func _readable_goals(goals:Array[String])->String:
 	return ", ".join(labels)
 
 func refresh_pronouncement_statuses()->void:
-	ConsequenceEngine.refresh_policy_lifecycle()
-	for order_variant in GameState.sovereign_orders:
+	WorldSimulation.consequences.refresh_policy_lifecycle()
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		var order:Dictionary=order_variant
 		if String(order.get("type",""))!="pronouncement": continue
 		# Lifecycle refresh is only for orders which reached implementation. An
@@ -1776,7 +1776,7 @@ func refresh_pronouncement_statuses()->void:
 				reasons.append("blocked")
 				continue
 			var matching:Dictionary={}
-			for modifier_variant in GameState.active_modifiers:
+			for modifier_variant in WorldSimulation.state.active_modifiers:
 				var modifier:Dictionary=modifier_variant
 				if String(modifier.get("source_order_id",""))==String(order.get("id","")) and String(modifier.get("id",""))==String(policy.get("id","")):
 					matching=modifier
@@ -1784,8 +1784,8 @@ func refresh_pronouncement_statuses()->void:
 			if matching.is_empty():
 				reasons.append("unknown")
 			else:
-				policy["observation"]=ConsequenceEngine.policy_observation(matching)
-				if GameState.elapsed_days<=float(matching.get("until_day",-INF)):
+				policy["observation"]=WorldSimulation.consequences.policy_observation(matching)
+				if WorldSimulation.state.elapsed_days<=float(matching.get("until_day",-INF)):
 					active+=1
 				else:
 					reasons.append(String(matching.get("ended_reason","expired")))
@@ -1806,14 +1806,14 @@ func refresh_pronouncement_statuses()->void:
 			order["status"]="closed"
 
 func _executor_name(office:String)->String:
-	var executing_office:=GovernmentPeopleSystem.executing_office(office)
-	if not GameState.leadership_positions.has(executing_office): return "Vacant %s office" % office
-	var name:=String(GameState.leadership_positions[executing_office].get("name",executing_office))
+	var executing_office:=WorldSimulation.government.executing_office(office)
+	if not WorldSimulation.state.leadership_positions.has(executing_office): return "Vacant %s office" % office
+	var name:=String(WorldSimulation.state.leadership_positions[executing_office].get("name",executing_office))
 	return name if executing_office==office else "%s acting for %s" % [name,office]
 
 func execution_modifier(office: String, relevant_skills: Array) -> float:
-	var executing_office:=GovernmentPeopleSystem.executing_office(office)
-	var advisor:Dictionary=GameState.leadership_positions.get(executing_office,{})
+	var executing_office:=WorldSimulation.government.executing_office(office)
+	var advisor:Dictionary=WorldSimulation.state.leadership_positions.get(executing_office,{})
 	var result:=execution_modifier_for_advisor(advisor,executing_office,relevant_skills)
 	# The founding generalist keeps essential work possible before specialist
 	# government exists, but cannot match a dedicated office. Once the specialist
@@ -1823,22 +1823,22 @@ func execution_modifier(office: String, relevant_skills: Array) -> float:
 
 
 func execution_modifier_for_advisor(advisor:Dictionary,office:String,relevant_skills:Array)->float:
-	var governance:Dictionary=ConsequenceEngine.governance_metrics()
-	var institutional_capacity:=clampf(float(GameState.society_capacities.get("institutions",0.5)),0.0,1.0)
+	var governance:Dictionary=WorldSimulation.consequences.governance_metrics()
+	var institutional_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.5)),0.0,1.0)
 	var burden:=float(governance.get("administrative_load",0.0))
 	if advisor.is_empty(): return clampf(0.34+institutional_capacity*0.32-burden*0.45,0.28,0.64)
-	var task_competence:=GovernmentPeopleSystem.competency(advisor,relevant_skills)
-	var office_competence:=GovernmentPeopleSystem.office_competency(advisor,office)
+	var task_competence:=WorldSimulation.government.competency(advisor,relevant_skills)
+	var office_competence:=WorldSimulation.government.office_competency(advisor,office)
 	var competence:=task_competence*0.70+office_competence*0.30
 	var relationship: Dictionary = advisor.get("relationships",{}).get("sovereign",{})
 	var structural_adjustment:=0.0
 	var doctrine:=String(advisor.get("doctrine",""))
-	if doctrine!="" and DiscoverySystem.society_model!=null:
-		structural_adjustment=DiscoverySystem.society_model.doctrine_execution_strength(doctrine)*0.22
+	if doctrine!="" and WorldSimulation.discovery.society_model!=null:
+		structural_adjustment=WorldSimulation.discovery.society_model.doctrine_execution_strength(doctrine)*0.22
 	return clampf(0.36+competence*0.46+float(relationship.get("trust",0.5))*0.055+float(relationship.get("respect",0.5))*0.035+institutional_capacity*0.16+structural_adjustment-burden*0.42,0.35,1.12)
 
 func respond_to_council_item(item_id: String, response: String) -> void:
-	for item in GameState.council_inbox:
+	for item in WorldSimulation.state.council_inbox:
 		if item.id == item_id:
 			item.status = "answered"
 			item.response = response
@@ -1848,7 +1848,7 @@ func respond_to_council_item(item_id: String, response: String) -> void:
 					var definition:=GovernmentPolicyCatalog.definition(effect_id)
 					var office:=String(definition.get("office",item.get("office","Council")))
 					var execution:=execution_modifier(office,definition.get("skills",[]))
-					var directive:=ConsequenceEngine.apply_directive(effect_id,float(option.get("magnitude",0.0)),float(option.get("days",30.0)),String(option.get("ripple",response)),{"office":office,"executor":_executor_name(office),"council_item_id":item_id},execution)
+					var directive:=WorldSimulation.consequences.apply_directive(effect_id,float(option.get("magnitude",0.0)),float(option.get("days",30.0)),String(option.get("ripple",response)),{"office":office,"executor":_executor_name(office),"council_item_id":item_id},execution)
 					item["directive_result"]=directive.duplicate(true)
 			_record_memory(item.advisor, "The Sovereign responded '%s' to this institution's counsel about %s." % [response,item.topic],0.62,"council")
 			return
@@ -1858,9 +1858,9 @@ func _record_memory(advisor_name: String, summary: String, importance: float, em
 	if advisor.is_empty():
 		return
 	var person_id:=int(advisor.get("person_id",0))
-	if person_id>0 and not GovernmentPeopleSystem.person_snapshot(person_id).is_empty():
-		GovernmentPeopleSystem.record_person_memory(person_id,summary,"advisor",importance,{"emotion":emotion})
+	if person_id>0 and not WorldSimulation.government.person_snapshot(person_id).is_empty():
+		WorldSimulation.government.record_person_memory(person_id,summary,"advisor",importance,{"emotion":emotion})
 		return
-	advisor.memories.push_front({"summary":summary,"importance":importance,"confidence":1.0,"emotional_weight":importance*0.5,"emotion":emotion,"created_day":int(GameState.elapsed_days),"last_recalled_day":int(GameState.elapsed_days)})
+	advisor.memories.push_front({"summary":summary,"importance":importance,"confidence":1.0,"emotional_weight":importance*0.5,"emotion":emotion,"created_day":int(WorldSimulation.state.elapsed_days),"last_recalled_day":int(WorldSimulation.state.elapsed_days)})
 	if advisor.memories.size() > 40:
 		advisor.memories.resize(40)

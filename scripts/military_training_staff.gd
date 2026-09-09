@@ -19,13 +19,13 @@ func load_state(saved:Dictionary)->void:
 	for service in ["army","navy","air"]:
 		var choice:=String(saved.get("policies",{}).get(service,"regular"))
 		if POLICIES.has(choice):data.policies[service]=choice
-	for key in ["army_last_day","food_spent","materials_spent"]:
+	for key in ["army_last_day","food_spent","materials_spent","status"]:
 		if saved.has(key):data[key]=saved[key].duplicate(true) if saved[key] is Dictionary else saved[key]
 func policy(service:String,owner:String="player")->Dictionary:
 	var id:=String(data.policies.get(service,"regular"))
 	if owner!="player":
-		var index:=CivilizationSystem._civilization_index(owner)
-		if index>=0:id=rival_policy(CivilizationSystem.civilizations[index])
+		var index:=WorldSimulation.world._civilization_index(owner)
+		if index>=0:id=rival_policy(WorldSimulation.world.civilizations[index])
 	var result:Dictionary=POLICIES.get(id,POLICIES.regular).duplicate(true);result.id=id
 	return result
 static func rival_policy(civ:Dictionary)->String:
@@ -42,7 +42,7 @@ func set_policy(service:String,id:String)->Dictionary:
 static func initial_days(days:float)->float:return maxf(45.0,days*3.0)
 static func service_days(days:float)->float:return maxf(90.0,days*3.0)
 func spendable_food()->float:
-	return maxf(0.0,FoodSystem.total_stored()-maxf(1.0,GameState.population_exact)*0.9*RESERVE_DAYS)
+	return maxf(0.0,WorldSimulation.food.total_stored()-maxf(1.0,WorldSimulation.state.population_exact)*0.9*RESERVE_DAYS)
 func snapshot(service:String)->Dictionary:
 	var result:=policy(service)
 	result.status=String(data.status.get(service,"Staff will review eligible units on the next day."))
@@ -201,22 +201,22 @@ func service_training(record:Dictionary,origin:Dictionary,day:int)->bool:
 	var paid:=false
 	var shortages:Array[String]=[]
 	if record.owner=="player":
-		paid=bool(SettlementModel.with_city_resources(String(origin.city_id),func():
+		paid=bool(WorldSimulation.settlements.with_city_resources(String(origin.city_id),func():
 			if spendable_food()<food:shortages.append("extra rations above the civilian reserve")
 			if int(host.military_consumables.get("fuel",0))<fuel:shortages.append("%d fuel" % fuel)
 			for material:String in costs:
-				if float(GameState.resource_stockpiles.get(material,0))<float(costs[material]):shortages.append(ResourceSystem.display_name(material)+" at "+String(origin.name))
+				if float(WorldSimulation.state.resource_stockpiles.get(material,0))<float(costs[material]):shortages.append(WorldSimulation.resources.display_name(material)+" at "+String(origin.name))
 			if not shortages.is_empty():return false
-			for material:String in costs:GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0))-float(costs[material])
+			for material:String in costs:WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0))-float(costs[material])
 			host.military_consumables.fuel=int(host.military_consumables.get("fuel",0))-fuel
-			FoodSystem.issue_for_obligation(food,"military_training",service.capitalize()+" staff exercises",1.0,op.crew(record))
+			WorldSimulation.food.issue_for_obligation(food,"military_training",service.capitalize()+" staff exercises",1.0,op.crew(record))
 			return true))
 	else:
 		var bill:float=fuel*.25
 		for amount in costs.values():bill+=float(amount)
-		var index:=CivilizationSystem._civilization_index(String(record.owner))
+		var index:=WorldSimulation.world._civilization_index(String(record.owner))
 		if index>=0:
-			var civ:Dictionary=CivilizationSystem.civilizations[index]
+			var civ:Dictionary=WorldSimulation.world.civilizations[index]
 			var food_days:=food/maxf(1,float(civ.get("population",1))*.9)
 			if float(civ.get("food_days",0))-food_days>=RESERVE_DAYS:
 				paid=op.rival.spend(String(record.owner),bill)

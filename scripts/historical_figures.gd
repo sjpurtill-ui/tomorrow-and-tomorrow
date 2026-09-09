@@ -22,9 +22,9 @@ var panel:Control
 var layer:CanvasLayer
 
 func ensure()->void:
-	if initialized and seed_value==GameState.world_seed: return
+	if initialized and seed_value==WorldSimulation.state.world_seed: return
 	reset_for_new_world()
-	initialized=true; seed_value=GameState.world_seed; last_day=int(GameState.elapsed_days); last_emergence=last_day
+	initialized=true; seed_value=WorldSimulation.state.world_seed; last_day=int(WorldSimulation.state.elapsed_days); last_emergence=last_day
 	for role in ROLES: _create(String(role),last_day)
 
 func reset_for_new_world()->void:
@@ -101,7 +101,7 @@ func support(id:String)->Dictionary:
 		if other.supported and other.status!="dead": count+=1
 	if not p.supported and count>=3: return {"error":"Three patronage places are filled. Withdraw support from someone first."}
 	p.supported=not p.supported
-	_event(p,int(GameState.elapsed_days),"Received public patronage." if p.supported else "Public patronage ended.")
+	_event(p,int(WorldSimulation.state.elapsed_days),"Received public patronage." if p.supported else "Public patronage ended.")
 	return {"ok":true}
 
 func living_bonus(p:Dictionary)->float:
@@ -140,7 +140,7 @@ func commander(base:Dictionary,slot:String)->Dictionary:
 		p={}
 		for candidate in people:
 			if candidate.role=="General" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
-		if p.is_empty(): p=_create("General",int(GameState.elapsed_days))
+		if p.is_empty(): p=_create("General",int(WorldSimulation.state.elapsed_days))
 		if p.is_empty(): return base.duplicate(true)
 		assignments[slot]=p.id
 	var result:=base.duplicate(true)
@@ -152,7 +152,7 @@ func commander(base:Dictionary,slot:String)->Dictionary:
 func record_battle(result:Dictionary)->void:
 	ensure()
 	var term:Dictionary=result.get("termination",{})
-	var day:=int(GameState.elapsed_days)
+	var day:=int(WorldSimulation.state.elapsed_days)
 	var key:="%s:%s:%s" % [day,result.get("seed",0),result.get("round_count",0)]
 	for side in ["attacker","defender"]:
 		var force:Dictionary=result.get(side,{})
@@ -172,9 +172,9 @@ func record_battle(result:Dictionary)->void:
 func resolve_captive(id:String,policy:String)->void:
 	var p:=by_id(id)
 	if p.is_empty() or p.status!="captured": return
-	if policy=="execute": record_death(id,int(GameState.elapsed_days),"execution in captivity")
+	if policy=="execute": record_death(id,int(WorldSimulation.state.elapsed_days),"execution in captivity")
 	elif policy in ["release","ransom"]:
-		p.status="living"; _event(p,int(GameState.elapsed_days),"Returned from captivity through %s." % policy)
+		p.status="living"; _event(p,int(WorldSimulation.state.elapsed_days),"Returned from captivity through %s." % policy)
 
 func biography(p:Dictionary)->String:
 	var pronoun:="She" if p.gender=="woman" else "He"
@@ -186,7 +186,7 @@ func export_state()->Dictionary:
 	return {"version":1,"seed":seed_value,"people":people.duplicate(true),"used":used.duplicate(true),"assignments":assignments.duplicate(true),"serial":serial,"last_day":last_day,"last_emergence":last_emergence}
 
 func import_state(state:Dictionary)->Dictionary:
-	if int(state.get("version",0))!=1 or int(state.get("seed",0))!=GameState.world_seed: return {"error":"Figure save has an incompatible version or world seed."}
+	if int(state.get("version",0))!=1 or int(state.get("seed",0))!=WorldSimulation.state.world_seed: return {"error":"Figure save has an incompatible version or world seed."}
 	if not state.get("people",[]) is Array or state.people.size()>MAX_RECORDS: return {"error":"Invalid historical figure roster."}
 	var ids:Dictionary={}; var names:Dictionary={}; var alive:=0
 	for p in state.people:
@@ -205,7 +205,7 @@ func import_state(state:Dictionary)->Dictionary:
 	for id in state.get("assignments",{}).values():
 		if not ids.has(id): return {"error":"Unknown assigned figure."}
 	people.assign(state.people.duplicate(true)); used=names; assignments=state.get("assignments",{}).duplicate(true)
-	serial=int(state.get("serial",people.size())); last_day=int(state.get("last_day",0)); last_emergence=int(state.get("last_emergence",0)); seed_value=GameState.world_seed; initialized=true
+	serial=int(state.get("serial",people.size())); last_day=int(state.get("last_day",0)); last_emergence=int(state.get("last_emergence",0)); seed_value=WorldSimulation.state.world_seed; initialized=true
 	return {"ok":true}
 
 func _unhandled_key_input(event:InputEvent)->void:

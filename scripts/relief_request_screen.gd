@@ -13,17 +13,17 @@ func _ready()->void:
 	var scroll:=ScrollContainer.new(); scroll.size_flags_vertical=SIZE_EXPAND_FILL; box.add_child(scroll)
 	var list:=VBoxContainer.new(); list.size_flags_horizontal=SIZE_EXPAND_FILL; list.add_theme_constant_override("separation",14); scroll.add_child(list)
 	var count:=0
-	for obligation:Dictionary in ForeignDiplomacy.commitments.state.obligations:
+	for obligation:Dictionary in WorldSimulation.diplomacy.commitments.state.obligations:
 		if obligation.siege_id!=siege_id or obligation.beneficiary!="player": continue
 		count+=1
 		var donor:=String(obligation.donor)
 		var row:=VBoxContainer.new(); list.add_child(row)
 		var label:=Label.new(); label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		label.text="%s · %s\n%s" % [String(ForeignDiplomacy.civilization(donor).get("name",donor)),String(ForeignDiplomacy.leader(donor).get("name","")),String(obligation.status)]
+		label.text="%s · %s\n%s" % [String(WorldSimulation.diplomacy.civilization(donor).get("name",donor)),String(WorldSimulation.diplomacy.leader(donor).get("name","")),String(obligation.status)]
 		row.add_child(label)
-		var request:=Button.new(); request.text="SEND A REQUEST FOR RELIEF"; request.disabled=not ForeignDiplomacy.commitments.covered(donor,"player",siege_id); row.add_child(request)
+		var request:=Button.new(); request.text="SEND A REQUEST FOR RELIEF"; request.disabled=not WorldSimulation.diplomacy.commitments.covered(donor,"player",siege_id); row.add_child(request)
 		request.pressed.connect(func():
-			var result:Dictionary=ForeignDiplomacy.commitments.send(donor,ForeignDiplomacy.commitments.terms("request_relief","defense","",siege_id))
+			var result:Dictionary=WorldSimulation.diplomacy.commitments.send(donor,WorldSimulation.diplomacy.commitments.terms("request_relief","defense","",siege_id))
 			status.text=String(result.get("error","Envoys carry the request. Aid has not arrived yet.")))
 	if count==0:
 		var empty:=Label.new(); empty.text="No eligible protection or league promise covers this siege."; list.add_child(empty)

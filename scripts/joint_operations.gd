@@ -76,7 +76,7 @@ func coastal_site(city:Dictionary)->Dictionary:
 	return {"error":"This city has no coast within 5 km. Choose a coastal city for a naval base."}
 func build_base(city_id:String,domain:String)->Dictionary:
 	if domain not in MISSIONS:return {"error":"Choose a naval base or airfield."}
-	var city:=SettlementModel.settlement_record(city_id)
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if city.is_empty() or not String(city.get("occupied_by","")).is_empty():return {"error":"Choose an unoccupied city you own."}
 	for existing:Dictionary in state.bases:
 		if existing.city_id==city_id and existing.domain==domain:return {"error":"This city already has this base or construction project."}
@@ -88,10 +88,10 @@ func build_base(city_id:String,domain:String)->Dictionary:
 		if site.has("error"):return site
 		location=point(site)
 	var costs:Dictionary={"Timber":50.0,"Stone":30.0} if domain=="navy" else {"Timber":30.0,"Stone":60.0,"Iron Ore":10.0}
-	var paid:Dictionary=SettlementModel.with_city_resources(city_id,func():
+	var paid:Dictionary=WorldSimulation.settlements.with_city_resources(city_id,func():
 		for material:String in costs:
-			if float(GameState.resource_stockpiles.get(material,0))<float(costs[material]):return {"error":"Base construction needs %.0f %s; %.0f in this city's stores." % [costs[material],ResourceSystem.display_name(material),float(GameState.resource_stockpiles.get(material,0))]}
-		for material:String in costs:GameState.resource_stockpiles[material]-=costs[material]
+			if float(WorldSimulation.state.resource_stockpiles.get(material,0))<float(costs[material]):return {"error":"Base construction needs %.0f %s; %.0f in this city's stores." % [costs[material],WorldSimulation.resources.display_name(material),float(WorldSimulation.state.resource_stockpiles.get(material,0))]}
+		for material:String in costs:WorldSimulation.state.resource_stockpiles[material]-=costs[material]
 		return {"ok":true})
 	if paid.has("error"):return paid
 	var record:={"id":_id(),"owner":"player","city_id":city_id,"name":String(city.get("name","City"))+(" Naval Base" if domain=="navy" else " Airfield"),"domain":domain,"position":{"x":location.x,"z":location.y},"capacity":100 if domain=="air" else 20,"condition":1.0,"construction_work":0.0,"required_work":30.0}
@@ -102,9 +102,9 @@ func base_ready(record:Dictionary)->bool:
 func base_owned(record:Dictionary,owner:String="player")->bool:
 	if record.is_empty() or String(record.owner)!=owner:return false
 	if owner!="player":
-		var truth:Dictionary=CivilizationSystem.city_intelligence.truth(String(record.city_id))
+		var truth:Dictionary=WorldSimulation.world.city_intelligence.truth(String(record.city_id))
 		return not truth.is_empty() and String(truth.get("controller",truth.get("civ_id","")))==owner
-	var city:=SettlementModel.settlement_record(String(record.city_id))
+	var city:=WorldSimulation.settlements.settlement_record(String(record.city_id))
 	return not city.is_empty() and String(city.get("occupied_by","")).is_empty()
 func available_base(domain:String)->bool:
 	for record:Dictionary in state.bases:
@@ -219,10 +219,10 @@ func disband(id:int)->Dictionary:
 func _hostile(a:String,b:String)->bool:
 	if a==b:return false
 	if a!="player" and b!="player":
-		var index:=CivilizationSystem._civilization_index(a)
-		return index>=0 and bool(CivilizationSystem.civilizations[index].get("relations",{}).get(b,{}).get("at_war",false))
-	var index:=CivilizationSystem._civilization_index(b if a=="player" else a)
-	return index>=0 and bool(CivilizationSystem.civilizations[index].player_relation.at_war)
+		var index:=WorldSimulation.world._civilization_index(a)
+		return index>=0 and bool(WorldSimulation.world.civilizations[index].get("relations",{}).get(b,{}).get("at_war",false))
+	var index:=WorldSimulation.world._civilization_index(b if a=="player" else a)
+	return index>=0 and bool(WorldSimulation.world.civilizations[index].player_relation.get("at_war",false))
 func _power(record:Dictionary,key:String)->float:
 	var value:=0.0
 	for id:String in record.units:value+=float(C.UNITS[id].get(key,0))*int(record.units[id])
@@ -239,10 +239,10 @@ func _losses(record:Dictionary,damage:float)->void:
 		if lost<=0:continue
 		record.units[id]-=lost;record.damage-=lost*durability
 		var deaths:=0 if id in ["recon_drone","strike_drone"] else lost*int(C.UNITS[id].crew)
-		if record.owner=="player":GameState.register_population_deaths(deaths,"Killed in battle")
+		if record.owner=="player":WorldSimulation.state.register_population_deaths(deaths,"Killed in battle")
 		else:
-			var index:=CivilizationSystem._civilization_index(String(record.owner))
-			if index>=0:CivilizationSystem.civilizations[index]=CivilizationSystem._remove_foreign_scout_population(CivilizationSystem.civilizations[index],deaths,true)
+			var index:=WorldSimulation.world._civilization_index(String(record.owner))
+			if index>=0:WorldSimulation.world.civilizations[index]=WorldSimulation.world._remove_foreign_scout_population(WorldSimulation.world.civilizations[index],deaths,true)
 		if record.owner=="player" or state.contacts.has("player:%d" % int(record.id)):_event("%s lost %d %s." % [record.name,lost,C.UNITS[id].label],String(record.domain))
 func _replace(record:Dictionary)->void:
 	if record.owner!="player" or not bool(record.auto_replace):return
@@ -256,7 +256,7 @@ func _replace(record:Dictionary)->void:
 func construction_share(city_id:String="")->float:
 	var selected:=city_id
 	if selected.is_empty():
-		for city:Dictionary in GameState.player_settlements:
+		for city:Dictionary in WorldSimulation.state.player_settlements:
 			if bool(city.get("primary",false)):selected=String(city.id);break
 	for record:Dictionary in state.bases:
 		if record.owner=="player" and record.city_id==selected and base_owned(record) and float(record.construction_work)<float(record.required_work):return .25
@@ -367,7 +367,7 @@ func mission_factors(record:Dictionary,region:Dictionary,day:int)->Dictionary:
 	# not the fighting efficiency of a fleet already at sea.
 	var crowding:=minf(1,capacity/maxf(1,stationed)) if record.domain=="air" else 1.0
 	var climate:=PlanetEnvironment.profile_at(point(region)) if not region.is_empty() else PlanetEnvironment.profile_at(origin_point)
-	var weather:=clampf(FoodSystem._weather_yield_factor(climate,float(day)),.52,1.0)
+	var weather:=clampf(WorldSimulation.food._weather_yield_factor(climate,float(day)),.52,1.0)
 	var base_condition:=float(origin.get("condition",0)) if carrier.is_empty() else float(carrier.condition)
 	return {"coverage":coverage,"crowding":crowding,"weather":weather,"base_condition":base_condition,"condition":float(record.condition),"stationed":stationed,"capacity":int(capacity),"efficiency":coverage*crowding*weather*base_condition*float(record.condition)}
 
@@ -416,13 +416,13 @@ func repair_at_base(record:Dictionary,origin:Dictionary)->Dictionary:
 	var costs:=repair_costs(record,rate)
 	var paid:Dictionary
 	if record.owner=="player":
-		paid=SettlementModel.with_city_resources(String(origin.city_id),func():
+		paid=WorldSimulation.settlements.with_city_resources(String(origin.city_id),func():
 			var shortages:Array[String]=[]
 			for material:String in costs:
-				var available:=float(GameState.resource_stockpiles.get(material,0))
-				if available<float(costs[material]):shortages.append("%.1f %s (%.1f available)" % [costs[material],ResourceSystem.display_name(material),available])
+				var available:=float(WorldSimulation.state.resource_stockpiles.get(material,0))
+				if available<float(costs[material]):shortages.append("%.1f %s (%.1f available)" % [costs[material],WorldSimulation.resources.display_name(material),available])
 			if not shortages.is_empty():return {"error":"Repairs waiting for "+", ".join(shortages)+" at "+String(origin.name)}
-			for material:String in costs:GameState.resource_stockpiles[material]-=costs[material]
+			for material:String in costs:WorldSimulation.state.resource_stockpiles[material]-=costs[material]
 			return {"ok":true})
 	else:
 		var total:=0.0
@@ -452,8 +452,8 @@ func advance(day:int)->void:
 			projects[record.city_id]=int(projects.get(record.city_id,0))+1
 	for record:Dictionary in state.bases:
 		if not projects.has(record.city_id) or record.owner!="player":continue
-		SettlementModel.with_city_resources(String(record.city_id),func():
-			var builders:=GameState.effective_workers("Construction",true)*.25
+		WorldSimulation.settlements.with_city_resources(String(record.city_id),func():
+			var builders:=WorldSimulation.state.effective_workers("Construction",true)*.25
 			record.construction_work=minf(float(record.required_work),float(record.construction_work)+builders*.1/int(projects[record.city_id])))
 	for record:Dictionary in state.forces:
 		record.efficiency=0.0;record.fuel_used=0
@@ -504,7 +504,7 @@ func advance(day:int)->void:
 				if route.has("error"):record.status=String(route.error);continue
 		var naval_activity:=""
 		if record.domain=="navy" and record.mission in ["patrol","convoy_raiding"] and not bool(record.get("repairing",false)) and record.get("route",[]).is_empty() and not record.region.is_empty() and latest_naval_contact(record).is_empty():
-			var search:Dictionary=geography.patrol_route(record.region,force_position(record),point(origin),range_km(record),speed(record),hash("%d:%d:%d" % [GameState.world_seed,int(record.id),day]))
+			var search:Dictionary=geography.patrol_route(record.region,force_position(record),point(origin),range_km(record),speed(record),hash("%d:%d:%d" % [WorldSimulation.state.world_seed,int(record.id),day]))
 			if not search.is_empty():
 				record.route=search.points
 				naval_activity="Patrolling" if record.mission=="patrol" else "Searching for convoys"
@@ -553,6 +553,9 @@ func docked(record:Dictionary)->bool:
 	return record.domain=="navy" and force_position(record).distance_to(point(base(int(record.base_id))))<2 and record.get("route",[]).is_empty()
 
 func can_attack(observer:Dictionary,target:Dictionary)->bool:
+	return can_attack_contact(observer,target,force_position(target),docked(target))
+
+func can_attack_contact(observer:Dictionary,target:Dictionary,target_position:Vector2,target_docked:bool)->bool:
 	if observer.mission in ["hold","reconnaissance","air_supply","invasion_support","transport"]:return false
 	if observer.domain=="air":
 		if target.domain=="air":
@@ -561,16 +564,17 @@ func can_attack(observer:Dictionary,target:Dictionary)->bool:
 			if float(target.efficiency)<=0 or target.mission=="hold":return false
 			if observer.mission not in ["air_superiority","interception"]:return false
 			return observer.mission!="interception" or target.mission not in ["air_superiority","interception"]
-		return (observer.mission=="port_strike" and docked(target)) or (observer.mission=="naval_strike" and not docked(target))
-	if target.domain!="navy" or docked(target) or bool(observer.get("repairing",false)):return false
+		return (observer.mission=="port_strike" and target_docked) or (observer.mission=="naval_strike" and not target_docked)
+	if target.domain!="navy" or target_docked or bool(observer.get("repairing",false)):return false
 	var reach:=2.0
 	for type_id:String in observer.units:
 		if int(observer.units[type_id])<=0:continue
 		if type_id in ["missile_patrol","missile_destroyer","nuclear_submarine"]:reach=maxf(reach,120)
 		elif type_id in ["destroyer","light_cruiser","heavy_cruiser","battleship","submarine","ironclad","torpedo_boat"]:reach=maxf(reach,30)
-	return force_position(observer).distance_to(force_position(target))<=reach
+	return force_position(observer).distance_to(target_position)<=reach
 
 func _detect_and_fight()->void:
+	if WorldSimulation.enabled:return
 	var damage:Dictionary={}
 	for observer:Dictionary in state.forces:
 		if float(observer.efficiency)<=0 or observer.region.is_empty():continue
@@ -581,7 +585,7 @@ func _detect_and_fight()->void:
 			var overlap:=R.overlap(observer.region,target.region) if target.domain=="air" and observer.domain=="air" and float(target.efficiency)>0 else (1.0 if R.contains(observer.region,target_position) else 0.0)
 			if overlap<=0:continue
 			if observer.domain=="navy" and (target.domain=="air" or force_position(observer).distance_to(target_position)>maxf(20,minf(150,speed(observer)*.25))):continue
-			var rng:=RandomNumberGenerator.new();rng.seed=GameState.world_seed^int(state.last_day)*104729^int(observer.id)*32452843^int(target.id)*49979687
+			var rng:=RandomNumberGenerator.new();rng.seed=WorldSimulation.state.world_seed^int(state.last_day)*104729^int(observer.id)*32452843^int(target.id)*49979687
 			var detected:=_power(observer,"detection")/(5.0+_power(target,"defense"))*B.detection_multiplier(observer,target)*overlap
 			if rng.randf()>clampf(detected,.08,.98):continue
 			state.contacts["%s:%d" % [observer.owner,target.id]]={"observer":observer.owner,"target":target.id,"region":observer.region.id,"day":state.last_day,"name":target.name,"position":preload("res://scripts/joint_geography.gd").pack(target_position),"owner":target.owner,"domain":target.domain}

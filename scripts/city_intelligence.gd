@@ -19,12 +19,13 @@ func sites(include_player:bool=true)->Array[Dictionary]:
 		for region:Dictionary in civ.strategic_regions:
 			if region.role=="capital": capital=region
 		for region:Dictionary in civ.strategic_regions:
+			if not bool(region.get("settlement_founded",true)):continue
 			# The five existing urban regions already carry stable map coordinates.
 			# Anchor the capital at the existing home, preserving relative geography.
 			var offset:=Vector2((float(region.map_x)-float(capital.get("map_x",.5)))*220,(float(region.map_y)-float(capital.get("map_y",.5)))*180)
-			result.append({"city_id":String(region.id),"civ_id":String(civ.id),"name":String(region.name),"position":point(home+offset),"primary":region.role=="capital"})
+			result.append({"city_id":String(region.id),"civ_id":String(civ.id),"name":String(region.name),"position":point(region.get("position",home+offset)),"primary":region.role=="capital"})
 	if include_player:
-		for city:Dictionary in GameState.player_settlements:
+		for city:Dictionary in WorldSimulation.state.player_settlements:
 			var position:Variant=city.get("position",Vector2.ZERO)
 			var location:=position as Vector2 if position is Vector2 else Vector2(float(position.get("x",0)),float(position.get("z",position.get("y",0))))
 			result.append({"city_id":String(city.id),"civ_id":"player","name":String(city.get("name","Settlement")),"position":point(location),"primary":bool(city.get("primary",false))})
@@ -39,7 +40,7 @@ func site(city_id:String)->Dictionary:
 
 func primary_id(civ_id:String)->String:
 	if civ_id=="player":
-		for city:Dictionary in GameState.player_settlements:
+		for city:Dictionary in WorldSimulation.state.player_settlements:
 			if bool(city.get("primary",false)): return String(city.id)
 		return ""
 	var index:int=system._civilization_index(civ_id)
@@ -53,13 +54,13 @@ func truth(city_id:String)->Dictionary:
 	if place.is_empty(): return {}
 	var values:Dictionary={}
 	if place.civ_id=="player":
-		var city:=SettlementModel.settlement_record(city_id)
-		var local:=SettlementModel.city_resource_snapshot(city_id)
+		var city:=WorldSimulation.settlements.settlement_record(city_id)
+		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id)
 		var metrics:Dictionary=local.get("metrics",{})
 		values={"population":float(local.get("population",0)),"production":float(metrics.get("material_capacity",0)),"logistics":float(metrics.get("logistics",0)),"supply":float(metrics.get("food_days",-1))}
 		if bool(city.get("primary",false)):
-			values["garrison"]=float(MilitaryCampaign.home_army.get("troops",0))
-			values["fortification"]=clampf(float(MilitaryCampaign.settlement_defense.get("stage",0))/5.0,0,1)
+			values["garrison"]=float(WorldSimulation.military.home_army.get("troops",0))
+			values["fortification"]=clampf(float(WorldSimulation.military.settlement_defense.get("stage",0))/5.0,0,1)
 		# Secondary cities do not have an independent garrison/defense ledger yet.
 		place["controller"]=String(city.get("occupied_by","player"))
 		if String(place.controller)!="player":values.erase("garrison")
@@ -72,6 +73,9 @@ func truth(city_id:String)->Dictionary:
 		if controller_index>=0: civ=system.civilizations[controller_index]
 		var fort:=float(region.fortification)*(1.0-float(region.damage)*.65)
 		values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":system.land_military_population(civ)*float(region.strategic_weight)*(.72+fort)*(.82+float(civ.logistics)*.36),"production":float(civ.production)*(1-float(region.damage)*.5),"logistics":float(civ.logistics)*(1-float(region.damage)*.3),"supply":float(civ.food_days)}
+		if bool(civ.get("shared_rules",false)):
+			var local:Dictionary=region.get("local_metrics",{})
+			values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":int(region.get("garrison",0)),"production":float(local.get("material_capacity",0)),"logistics":float(local.get("logistics",0)),"supply":float(local.get("food_days",0))}
 		if String(region.controller)=="player":
 			for key in ["garrison","production","logistics","supply"]: values.erase(key)
 		place["controller"]=String(region.controller)
@@ -86,7 +90,7 @@ func capture(observer:String,city_id:String,quality:float,day:int,source:String,
 	for key:String in FIELDS:
 		if quality<float(FIELDS[key].threshold) or not actual.values.has(key) or float(actual.values[key])<0: continue
 		var value:=float(actual.values[key])
-		var rng:=RandomNumberGenerator.new(); rng.seed=hash(observer+city_id+key+reference)^day^GameState.world_seed
+		var rng:=RandomNumberGenerator.new(); rng.seed=hash(observer+city_id+key+reference)^day^WorldSimulation.state.world_seed
 		var error:=lerpf(.65,.16,quality)
 		var quantum:=.05 if FIELDS[key].unit=="capacity" else maxf(1,pow(10,floor(log(maxf(1,value))/log(10))-1))
 		var width:=maxf(quantum,value*error)
@@ -131,7 +135,7 @@ func known(observer:String,city_id:String,day:int=-1)->Dictionary:
 	var value:Dictionary=records.get(observer,{}).get(city_id,{})
 	if value.is_empty(): return {}
 	var result:=value.duplicate(true)
-	var today:=int(GameState.elapsed_days) if day<0 else day
+	var today:=int(WorldSimulation.state.elapsed_days) if day<0 else day
 	result["age_days"]=maxi(0,today-int(value.observed_day)) if int(value.observed_day)>=0 else -1
 	result["freshness"]="date unknown" if int(value.observed_day)<0 else ("recent" if int(result.age_days)<=30 else ("aging" if int(result.age_days)<=180 else "stale"))
 	for key:String in result.fields:
@@ -179,7 +183,7 @@ func seed_known_homes()->void:
 		var relation:Dictionary=civ.player_relation
 		var id:=primary_id(String(civ.id))
 		if bool(relation.get("home_location_known",false)) and not records.get("player",{}).has(id) and valid_point(relation.get("home_position",{})):
-			publish("player",location_record({"city_id":id,"civ_id":String(civ.id),"name":"Reported home of %s" % String(civ.name),"position":relation.home_position},int(relation.get("last_observed_day",-1)),String(relation.get("home_location_source","earlier location report")),"home:"+String(civ.id)),int(GameState.elapsed_days))
+			publish("player",location_record({"city_id":id,"civ_id":String(civ.id),"name":"Reported home of %s" % String(civ.name),"position":relation.home_position},int(relation.get("last_observed_day",-1)),String(relation.get("home_location_source","earlier location report")),"home:"+String(civ.id)),int(WorldSimulation.state.elapsed_days))
 
 func migrate()->void:
 	seed_known_homes()
@@ -189,7 +193,7 @@ func migrate()->void:
 		var relation:Dictionary=civ.player_relation
 		if float(relation.get("rival_player_trace_confidence",0))<.9 or "direct" not in String(relation.get("rival_player_trace_source","")): continue
 		var position:Dictionary=relation.get("rival_player_trace_center",{})
-		if valid_point(position): publish(String(civ.id),location_record({"city_id":primary,"civ_id":"player","name":"Reported player settlement","position":position},int(relation.get("rival_player_trace_day",-1)),"legacy returned direct encounter","legacy"),int(GameState.elapsed_days))
+		if valid_point(position): publish(String(civ.id),location_record({"city_id":primary,"civ_id":"player","name":"Reported player settlement","position":position},int(relation.get("rival_player_trace_day",-1)),"legacy returned direct encounter","legacy"),int(WorldSimulation.state.elapsed_days))
 
 func stage(mission:Dictionary,observer:String,position:Vector2,quality:float,day:int,reference:String)->void:
 	if not mission.has("city_observations"): mission["city_observations"]={}
@@ -215,7 +219,7 @@ func sample_missions(day:int)->void:
 		if day<start or day>=end: continue
 		var progress:=float(day-start)/maxf(1,float(end-start))
 		var fraction:=progress*2 if progress<=.5 else (1-progress)*2
-		stage(mission,"player",route_position(mission.route,fraction),.45+clampf(GameState.combined_intelligence,0,1)*.4+(.15 if mission.get("target_kind")=="observe_city" else 0),day,"scout:%s" % str(mission.mission_id))
+		stage(mission,"player",route_position(mission.route,fraction),.45+clampf(WorldSimulation.state.combined_intelligence,0,1)*.4+(.15 if mission.get("target_kind")=="observe_city" else 0),day,"scout:%s" % str(mission.mission_id))
 	for formation:Dictionary in system.foreign_formations:
 		if formation.get("kind")!="scout" or not system._foreign_scout_is_active(formation,day): continue
 		var due:=float(formation.depart_day)+float(formation.leg_days)*2
@@ -245,14 +249,14 @@ func deliver(mission:Dictionary,observer:String,day:int)->Array[Dictionary]:
 	return result
 
 func observe_near_player(day:int)->void:
-	if not GameState.settlement_site_committed: return
+	if not WorldSimulation.state.settlement_site_committed: return
 	var positions:Array[Vector2]=[]
 	for place:Dictionary in sites():
 		if place.civ_id=="player": positions.append(vector(place.position))
 	for place:Dictionary in sites(false):
 		for position:Vector2 in positions:
 			if position.distance_to(vector(place.position))<=SIGHT_RADIUS:
-				publish("player",capture("player",place.city_id,.45+clampf(GameState.combined_intelligence,0,1)*.4,day,"local observation","lookouts"),day); break
+				publish("player",capture("player",place.city_id,.45+clampf(WorldSimulation.state.combined_intelligence,0,1)*.4,day,"local observation","lookouts"),day); break
 
 func player_estimate(observer:String,primary_only:bool=false)->Dictionary:
 	var population:=0.0; var power:=0.0; var target:Dictionary={}

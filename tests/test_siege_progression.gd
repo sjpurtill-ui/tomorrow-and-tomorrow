@@ -113,6 +113,8 @@ func test_billion_population_siege_retains_bounded_state_and_rejects_fake_receip
 	assert_int((MilitaryCampaign.active_siege.relief as Array).size()).is_equal(0)
 
 func _offensive_fixture()->Dictionary:
+	# This fixture places the army directly; supply a traversable return corridor.
+	CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return true
 	GameState.resource_stockpiles["Food"]=1000000.0
 	MilitaryCampaign.raise_recruits(200)
 	MilitaryCampaign.start_training("levy","improvised",200)

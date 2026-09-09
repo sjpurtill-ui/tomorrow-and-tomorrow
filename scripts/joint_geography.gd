@@ -6,7 +6,7 @@ var route_cache:Dictionary={}
 
 func is_land(location:Vector2)->bool:
 	if land_query.is_valid():return bool(land_query.call(location))
-	if CivilizationSystem.scout_land_authority.is_valid():return CivilizationSystem._scout_land_at(location)
+	if WorldSimulation.world.scout_land_authority.is_valid():return WorldSimulation.world._scout_land_at(location)
 	return PlanetEnvironment.is_land(location)
 
 func sea_edge(a:Vector2,b:Vector2)->bool:
@@ -18,7 +18,7 @@ func sea_edge(a:Vector2,b:Vector2)->bool:
 func sea_route(start:Vector2,finish:Vector2)->Dictionary:
 	if is_land(start) or is_land(finish):return {"error":"A naval route must start and finish on water."}
 	if start.distance_to(finish)<.001:return {"points":[pack(start)],"distance":0.0}
-	var cache_key:="%d:%s:%s" % [GameState.world_seed,str(start),str(finish)]
+	var cache_key:="%d:%s:%s" % [WorldSimulation.state.world_seed,str(start),str(finish)]
 	if route_cache.has(cache_key):return route_cache[cache_key].duplicate(true)
 	if sea_edge(start,finish):return _result([start,finish],cache_key)
 	var spacing:=maxf(5.0,start.distance_to(finish)/45.0)

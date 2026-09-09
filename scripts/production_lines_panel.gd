@@ -16,7 +16,7 @@ func _ready() -> void:
 	add_theme_constant_override("separation",6)
 	summary=Label.new();summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(summary)
 	labor=HSlider.new();labor.min_value=0;labor.max_value=100;labor.step=5;labor.tooltip_text="Share of the existing Crafting workforce assigned to military production. Idle lines return their capacity to civilian work."
-	add_child(labor);labor.value_changed.connect(func(value:float):MilitaryCampaign.set_production_labor_share(value/100);refresh())
+	add_child(labor);labor.value_changed.connect(func(value:float):WorldSimulation.military.set_production_labor_share(value/100);refresh())
 	line_choice=OptionButton.new();line_choice.fit_to_longest_item=false;add_child(line_choice);line_choice.item_selected.connect(func(_index:int):refresh(true))
 	var controls:=HBoxContainer.new();add_child(controls)
 	var caption:=Label.new();caption.text="Stock target (0 = no limit)";controls.add_child(caption)
@@ -40,7 +40,7 @@ func selected_id()->int:
 
 func selected_job()->Dictionary:
 	var id:=selected_id()
-	for job in MilitaryCampaign.equipment_queue:
+	for job in WorldSimulation.military.equipment_queue:
 		if int(job.id)==id:return job
 	return {}
 
@@ -50,21 +50,21 @@ func report(result:Dictionary)->void:
 func apply_settings()->void:
 	var job:=selected_job()
 	if job.is_empty():return
-	MilitaryCampaign.set_production_line_allocation(int(job.id),priority.value)
-	if bool(job.get("persistent",false)):report(MilitaryCampaign.configure_production_line(int(job.id),int(target.value),bool(job.get("paused",false))))
+	WorldSimulation.military.set_production_line_allocation(int(job.id),priority.value)
+	if bool(job.get("persistent",false)):report(WorldSimulation.military.configure_production_line(int(job.id),int(target.value),bool(job.get("paused",false))))
 	else:report({"message":"Batch priority updated."})
 
 func toggle_pause()->void:
 	var job:=selected_job()
 	if job.is_empty():return
-	report(MilitaryCampaign.configure_production_line(int(job.id),int(job.get("target_stock",0)),not bool(job.get("paused",false))))
+	report(WorldSimulation.military.configure_production_line(int(job.id),int(job.get("target_stock",0)),not bool(job.get("paused",false))))
 
 func retool()->void:
 	if product_choice==null or product_choice.selected<0:return
-	report(MilitaryCampaign.retool_production_line(selected_id(),String(product_choice.get_item_metadata(product_choice.selected))))
+	report(WorldSimulation.military.retool_production_line(selected_id(),String(product_choice.get_item_metadata(product_choice.selected))))
 
 func close_line()->void:
-	report(MilitaryCampaign.cancel_equipment_job(selected_id()))
+	report(WorldSimulation.military.cancel_equipment_job(selected_id()))
 
 func _process(delta:float)->void:
 	remaining-=delta
@@ -72,9 +72,9 @@ func _process(delta:float)->void:
 
 func refresh(editors:bool=false)->void:
 	if line_choice==null:return
-	var data:=MilitaryCampaign.production_lines_snapshot()
+	var data:=WorldSimulation.military.production_lines_snapshot()
 	var workforce:Dictionary=data.workforce
-	var actual_share:=MilitaryCampaign.workshop_utilization()
+	var actual_share:=WorldSimulation.military.workshop_utilization()
 	summary.text="Crafting: %.1f effective workers · %.0f%% assigned to military work (limit %.0f%%)\nHealth %.0f%% · labor %.0f%% · workplaces %.0f%% · logistics %.0f%%" % [float(workforce.workers),actual_share*100,float(data.labor_share)*100,float(workforce.health)*100,float(workforce.labor_efficiency)*100,float(workforce.workplace_condition)*100,float(workforce.logistics)*100]
 	labor.set_value_no_signal(float(data.labor_share)*100)
 	var ids:Array=[]
@@ -83,7 +83,7 @@ func refresh(editors:bool=false)->void:
 	if next_signature!=signature:
 		var selected:=selected_id();line_choice.clear()
 		for line in data.lines:
-			line_choice.add_item("%d · %s" % [int(line.id),MilitaryCampaign.PersistentProduction.product_name(String(line.item))]);line_choice.set_item_metadata(line_choice.item_count-1,int(line.id))
+			line_choice.add_item("%d · %s" % [int(line.id),WorldSimulation.military.PersistentProduction.product_name(String(line.item))]);line_choice.set_item_metadata(line_choice.item_count-1,int(line.id))
 			if int(line.id)==selected:line_choice.select(line_choice.item_count-1)
 		signature=next_signature;editors=true
 	var line:Dictionary={}
@@ -97,7 +97,7 @@ func refresh(editors:bool=false)->void:
 	pause_button.text="Resume" if bool(line.get("paused",false)) else "Pause"
 	if not persistent:details.text="Existing batch · %.0f%% efficiency · %.2f work/day. Its prepaid materials and completion rules are preserved." % [float(line.efficiency)*100,float(line.daily_work)];return
 	var inputs:Array[String]=[]
-	for resource in line.inputs_per_day:inputs.append("%s: %.2f stored / %.2f per item / %.2f per day" % [ResourceSystem.display_name(String(resource)),float(GameState.resource_stockpiles.get(resource,0)),float(line.materials[resource]),float(line.inputs_per_day[resource])])
+	for resource in line.inputs_per_day:inputs.append("%s: %.2f stored / %.2f per item / %.2f per day" % [WorldSimulation.resources.display_name(String(resource)),float(WorldSimulation.state.resource_stockpiles.get(resource,0)),float(line.materials[resource]),float(line.inputs_per_day[resource])])
 	var condition:=String(line.state)
 	if condition=="Working" and float(line.daily_work)<=0:condition="Waiting for labor or usable workplaces"
 	details.text="%s · stock %d · %s\nEfficiency %.0f%% · forecast %.2f/day · last day %d completed\nInputs at this rate: %s\nWork in progress %.0f%% · %.0f%% of military workshop effort" % [condition,int(line.stock),"CONTINUOUS — NO LIMIT" if int(line.target_stock)==0 else "maintain %d" % int(line.target_stock),float(line.efficiency)*100,float(line.forecast_output_per_day),int(line.last_output),", ".join(inputs),float(line.progress_days)/float(line.work_per_item)*100,float(line.share)*100]

@@ -51,8 +51,8 @@ var country_colors := [Color("#5b8fc4")]
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	randomize()
-	world_seed = GameState.world_seed if GameState.world_seed != 0 else randi()
-	GameState.world_seed = world_seed
+	world_seed = WorldSimulation.state.world_seed if WorldSimulation.state.world_seed != 0 else randi()
+	WorldSimulation.state.world_seed = world_seed
 	seed(world_seed)
 	_configure_world_noise()
 	_generate_seeds()
@@ -334,9 +334,9 @@ func _clamp_camera() -> void:
 	camera_pos.y = clamp(camera_pos.y, 0.0, MAP_SIZE.y)
 
 func _enter_province(province: int) -> void:
-	GameState.active_province = province
-	GameState.province_name = province_names[province]
-	GameState.province_terrain = province_terrain[province]
+	WorldSimulation.state.active_province = province
+	WorldSimulation.state.province_name = province_names[province]
+	WorldSimulation.state.province_terrain = province_terrain[province]
 	_capture_province_shape(province)
 	get_tree().change_scene_to_file("res://local_terrain.tscn")
 
@@ -358,8 +358,8 @@ func _capture_province_shape(province: int) -> void:
 	for y in height:
 		for x in width:
 			mask.set_pixel(x, y, Color.WHITE if _map_id(min_x + x, min_y + y) == province else Color.BLACK)
-	GameState.province_mask = mask
-	GameState.province_aspect = float(width) / float(height)
+	WorldSimulation.state.province_mask = mask
+	WorldSimulation.state.province_aspect = float(width) / float(height)
 
 func _leave_province() -> void:
 	map_level = "world"

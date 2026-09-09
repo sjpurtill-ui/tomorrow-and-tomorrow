@@ -24,8 +24,8 @@ var title:Label
 var layout:VBoxContainer
 
 func _ready()->void:
-	opening=GameState.founding_focus==""
-	if not PeopleDirection.needs_century_choice():selected_focus=PeopleDirection.ambition;reviewing=true
+	opening=WorldSimulation.state.founding_focus==""
+	if not WorldSimulation.direction.needs_century_choice():selected_focus=WorldSimulation.direction.ambition;reviewing=true
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var background:=ColorRect.new();background.color=Color("09191e");background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(background)
 	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -34,7 +34,7 @@ func _ready()->void:
 	layout=VBoxContainer.new();layout.add_theme_constant_override("separation",9);margin.add_child(layout)
 	var top:=HBoxContainer.new();layout.add_child(top)
 	title=_label(top,"YOUR PEOPLE’S STORY BEGINS",30);title.size_flags_horizontal=SIZE_EXPAND_FILL
-	_button(top,"RETURN · F8",func():queue_free()).visible=not PeopleDirection.needs_century_choice()
+	_button(top,"RETURN · F8",func():queue_free()).visible=not WorldSimulation.direction.needs_century_choice()
 	summary=_label(layout,"",14)
 	var tabs:=HBoxContainer.new();layout.add_child(tabs)
 	for index in 3:
@@ -54,7 +54,7 @@ func _ready()->void:
 	choice_help=_label(focus_page,"",14)
 	var detail:=_label(focus_page,"",16);detail.name="SelectionDetail";detail.custom_minimum_size.y=65
 	var confirm:=_button(focus_page,"CHOOSE A DIRECTION ABOVE",func():
-		var result:Dictionary=PeopleDirection.choose(selected_focus)
+		var result:Dictionary=WorldSimulation.direction.choose(selected_focus)
 		status.text=String(result.get("error","Focus chosen. Resume time when ready."))
 		if not result.has("error"):queue_free())
 	confirm.name="ConfirmFocus";confirm.custom_minimum_size.y=43
@@ -63,7 +63,7 @@ func _ready()->void:
 	traditions=VBoxContainer.new();body.add_child(traditions);pages.append(traditions)
 	status=_label(layout,"",13);status.visible=false
 	resized.connect(_refresh);_show_page(0)
-	print("DIRECTION_SCREEN_READY: day=",GameState.elapsed_days,"; opening=",opening,"; settlement=",GameState.settlement_name,"; seed=",GameState.world_seed)
+	print("DIRECTION_SCREEN_READY: day=",WorldSimulation.state.elapsed_days,"; opening=",opening,"; settlement=",WorldSimulation.state.settlement_name,"; seed=",WorldSimulation.state.world_seed)
 	_capture_opening.call_deferred()
 
 func _label(parent:Node,text:String,font_size:int)->Label:
@@ -94,8 +94,8 @@ func _process(delta:float)->void:
 
 func _refresh()->void:
 	if not is_instance_valid(grid):return
-	var century:=PeopleDirection.century_at(int(GameState.elapsed_days))
-	var pending:=PeopleDirection.needs_century_choice()
+	var century:=WorldSimulation.direction.century_at(int(WorldSimulation.state.elapsed_days))
+	var pending:=WorldSimulation.direction.needs_century_choice()
 	title.text="YOUR PEOPLE’S STORY BEGINS" if opening else "THE NEXT GENERATIONS."
 	title.add_theme_font_size_override("font_size",24 if size.x<1000 else 32)
 	summary.text="Give your people a purpose for the next 100 years. Their leaders handle the daily work." if opening else "Years %d–%d · A shared direction for the coming century."%[century*100+1,(century+1)*100]
@@ -120,7 +120,7 @@ func _council_page()->void:
 	_clear(council)
 	_label(council,"ADVICE, NOT ORDERS",20)
 	_label(council,"Only serving officeholders speak here. More perspectives become available as your government grows. Unknown countries and hidden plans are not evidence.",14)
-	var recommendations:=PeopleDirection.advisor_recommendations()
+	var recommendations:=WorldSimulation.direction.advisor_recommendations()
 	if recommendations.is_empty():
 		_label(council,"No appointed advisor is available yet. You can still choose any focus.",16)
 	for advice in recommendations:
@@ -131,7 +131,7 @@ func _traditions_page()->void:
 	_clear(traditions)
 	_label(traditions,"TRADITIONS & CONTINUING VISIONS",20)
 	var state:=PeopleDirection
-	var day:=int(GameState.elapsed_days)
+	var day:=int(WorldSimulation.state.elapsed_days)
 	if state.ambition!="" and state.resolved<state.VISIONS.size() and day>=state.next_vision_day:
 		var vision:Dictionary=state.VISIONS[state.resolved]
 		_label(traditions,vision.title,18)
@@ -149,8 +149,8 @@ func _traditions_page()->void:
 	for entry:Dictionary in state.history.slice(0,3):
 		_label(traditions,"Day %d · %s" % [int(entry.day),entry.text],14)
 	if not opening:
-		_button(traditions,"PEOPLE & LEGACIES",func(): HistoricalFigures.ensure(); HistoricalFigures.open_chronicle(String(HistoricalFigures.people[0].id)))
-		_button(traditions,"OUR CONNECTIONS",func(): CommunityNetwork.open_network())
+		_button(traditions,"PEOPLE & LEGACIES",func(): WorldSimulation.figures.ensure(); WorldSimulation.figures.open_chronicle(String(WorldSimulation.figures.people[0].id)))
+		_button(traditions,"OUR CONNECTIONS",func(): WorldSimulation.communities.open_network())
 
 func _capture_opening()->void:
 	if "--capture-opening" not in OS.get_cmdline_user_args() or get_tree().root.has_meta("opening_captured"):return
@@ -158,4 +158,4 @@ func _capture_opening()->void:
 	for frame in 8:await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var result:=get_viewport().get_texture().get_image().save_png("res://artifacts/player-opening.png")
-	print("OPENING_CAPTURE: ",result,"; day=",GameState.elapsed_days,"; opening=",opening)
+	print("OPENING_CAPTURE: ",result,"; day=",WorldSimulation.state.elapsed_days,"; opening=",opening)

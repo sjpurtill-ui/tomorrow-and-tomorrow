@@ -38,7 +38,7 @@ func _ready() -> void:
 		settings.ambient_light_color = Color("d4dfd8"); settings.ambient_light_energy = 0.6
 		environment.environment = settings; add_child(environment)
 		var sun := DirectionalLight3D.new(); sun.rotation_degrees = Vector3(-42,-28,0); sun.light_energy = 1.2; add_child(sun)
-		landscape.build(Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z),CivilizationSystem.ground_survey_authority)
+		landscape.build(Vector2(WorldSimulation.state.settlement_founded_at.x,WorldSimulation.state.settlement_founded_at.z),WorldSimulation.world.ground_survey_authority)
 	else: landscape.live_height = local_ground
 	camera = Camera3D.new(); camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.near = 0.001; camera.far = 1000000; add_child(camera)
@@ -156,7 +156,7 @@ func set_landscape(engagement:Dictionary)->void:
 		rotation.y=-PI*.5
 		position=Vector3(at.x,live_terrain._close_surface_height_at(at.x,at.y),at.y)
 		if String(engagement.get("home_side",""))=="attacker":
-			for army:Dictionary in MilitaryCampaign.field_armies:
+			for army:Dictionary in WorldSimulation.military.field_armies:
 				if int(army.get("army_id",0))!=int(engagement.get("home_force_id",-1)):continue
 				var point:Dictionary=army.get("position",{})
 				var actual:=Vector2(float(point.get("x",at.x)),float(point.get("z",at.y)))
@@ -167,4 +167,4 @@ func set_landscape(engagement:Dictionary)->void:
 					rotation.y=atan2(forward.x,forward.y)
 		city_center=to_local(Vector3(at.x,live_terrain._close_surface_height_at(at.x,at.y),at.y))
 		landscape.live_height=local_ground
-	else:landscape.build(BattleLandscape.encounter_position(engagement),CivilizationSystem.ground_survey_authority)
+	else:landscape.build(BattleLandscape.encounter_position(engagement),WorldSimulation.world.ground_survey_authority)

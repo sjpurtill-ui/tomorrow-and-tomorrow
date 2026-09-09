@@ -50,18 +50,18 @@ var _local_population_scope:=false
 var _national_population_in_scope:=0.0
 
 func national_population()->float:
-	return _national_population_in_scope if _local_population_scope else GameState.population_exact
+	return _national_population_in_scope if _local_population_scope else WorldSimulation.state.population_exact
 
 func settlement_record(settlement_id:String)->Dictionary:
-	for record in GameState.player_settlements:
+	for record in WorldSimulation.state.player_settlements:
 		if String(record.get("id",""))==settlement_id: return record
 	return {}
 
 func selected_settlement()->Dictionary:
 	_ensure_primary_settlement_record()
-	var record:=settlement_record(GameState.selected_player_settlement_id)
+	var record:=settlement_record(WorldSimulation.state.selected_player_settlement_id)
 	if not record.is_empty(): return record
-	for candidate in GameState.player_settlements:
+	for candidate in WorldSimulation.state.player_settlements:
 		if bool(candidate.get("primary",false)): return candidate
 	return {}
 
@@ -111,30 +111,30 @@ func city_resource_snapshot(settlement_id:String)->Dictionary:
 	_ensure_city_resources(record)
 	var local:Dictionary={}
 	if bool(record.get("primary",false)):
-		for field in CITY_RESOURCE_DEFAULTS: local[field]=GameState.get(field)
+		for field in CITY_RESOURCE_DEFAULTS: local[field]=WorldSimulation.state.get(field)
 	else: local=record.local_resources
 	return {"id":settlement_id,"name":String(record.name),"population":_settlement_population(record),"stores":(local.resource_stockpiles as Dictionary).duplicate(true),"deposits":(local.resource_deposits as Array).duplicate(true),"water":(local.water_metrics as Dictionary).duplicate(true),"food_history":(local.food_history as Array).duplicate(true),"metrics":(local.simulation_metrics as Dictionary).duplicate(true)}
 
 ## Existing resource systems run with bounded local counts. No resident objects,
 ## selected-city dependence enters the tick. Committed vital changes update the total.
 func with_local_population(operation:Callable,commit_demographics:=false)->Variant:
-	if _local_population_scope or GameState.player_settlements.is_empty(): return operation.call()
-	_national_population_in_scope=GameState.population_exact
+	if _local_population_scope or WorldSimulation.state.player_settlements.is_empty(): return operation.call()
+	_national_population_in_scope=WorldSimulation.state.population_exact
 	var saved:Dictionary={}
 	for field in ["population_exact","population_total","population_allocations","population_allocation_percentages","population_cohorts","pregnancy_cohorts","demographic_remainders","death_progress"]:
-		saved[field]=GameState.get(field)
-	var record:=settlement_record(GameState.resource_settlement_id)
+		saved[field]=WorldSimulation.state.get(field)
+	var record:=settlement_record(WorldSimulation.state.resource_settlement_id)
 	var local_population:=_settlement_population(record) if not record.is_empty() else primary_population_exact()
 	_local_population_scope=true
-	var ratio:=local_population/maxf(1.0,GameState.population_exact)
-	GameState.population_exact=local_population
-	GameState.population_total=roundi(local_population)
+	var ratio:=local_population/maxf(1.0,WorldSimulation.state.population_exact)
+	WorldSimulation.state.population_exact=local_population
+	WorldSimulation.state.population_total=roundi(local_population)
 	for field in ["population_allocations","population_cohorts","pregnancy_cohorts"]:
 		var scaled:Dictionary=(saved[field] as Dictionary).duplicate(true)
 		for key in scaled: scaled[key]=float(scaled[key])*ratio
-		GameState.set(field,scaled)
+		WorldSimulation.state.set(field,scaled)
 	if record.is_empty():
-		for candidate in GameState.player_settlements:
+		for candidate in WorldSimulation.state.player_settlements:
 			if bool(candidate.get("primary",false)): record=candidate; break
 	var population_state:Dictionary=record.get("population_state",{})
 	var local_before:Dictionary={}
@@ -143,137 +143,137 @@ func with_local_population(operation:Callable,commit_demographics:=false)->Varia
 			var values:Dictionary=population_state[field].duplicate(true)
 			var resize:=local_population/maxf(1.0,float(population_state.get("population",local_population)))
 			for key in values: values[key]=float(values[key])*resize
-			GameState.set(field,values)
-		local_before[field]=(GameState.get(field) as Dictionary).duplicate(true)
-	GameState.demographic_remainders=population_state.get("demographic_remainders",{}).duplicate(true)
-	GameState.death_progress=float(population_state.get("death_progress",float(saved.death_progress)*ratio))
+			WorldSimulation.state.set(field,values)
+		local_before[field]=(WorldSimulation.state.get(field) as Dictionary).duplicate(true)
+	WorldSimulation.state.demographic_remainders=population_state.get("demographic_remainders",{}).duplicate(true)
+	WorldSimulation.state.death_progress=float(population_state.get("death_progress",float(saved.death_progress)*ratio))
 	var percentages:Dictionary=record.get("local_allocations",{})
 	if not percentages.is_empty():
-		GameState.population_allocation_percentages=percentages.duplicate(true)
+		WorldSimulation.state.population_allocation_percentages=percentages.duplicate(true)
 		var workforce:=0.0
 		for amount in (saved.population_allocations as Dictionary).values(): workforce+=float(amount)*ratio
-		for role in GameState.population_allocations: GameState.population_allocations[role]=workforce*float(percentages.get(role,0.0))/100.0
+		for role in WorldSimulation.state.population_allocations: WorldSimulation.state.population_allocations[role]=workforce*float(percentages.get(role,0.0))/100.0
 	var vital_before:Dictionary={}
 	for field in CITY_VITAL_COUNTERS:
-		saved[field]=GameState.get(field)
+		saved[field]=WorldSimulation.state.get(field)
 		vital_before[field]=population_state.get(field,0)
-		GameState.set(field,vital_before[field])
-	saved["vital_statistics_history"]=GameState.vital_statistics_history
-	saved["vital_statistics_tracking_start_day"]=GameState.vital_statistics_tracking_start_day
+		WorldSimulation.state.set(field,vital_before[field])
+	saved["vital_statistics_history"]=WorldSimulation.state.vital_statistics_history
+	saved["vital_statistics_tracking_start_day"]=WorldSimulation.state.vital_statistics_tracking_start_day
 	var local_vitals:Array[Dictionary]=[];local_vitals.assign(population_state.get("vital_statistics_history",[]))
-	GameState.vital_statistics_history=local_vitals
-	GameState.vital_statistics_tracking_start_day=int(population_state.get("vital_statistics_tracking_start_day",int(GameState.elapsed_days)))
+	WorldSimulation.state.vital_statistics_history=local_vitals
+	WorldSimulation.state.vital_statistics_tracking_start_day=int(population_state.get("vital_statistics_tracking_start_day",int(WorldSimulation.state.elapsed_days)))
 	var result:Variant=operation.call()
-	var after:Dictionary={"population":GameState.population_exact,"population_cohorts":GameState.population_cohorts.duplicate(true),"pregnancy_cohorts":GameState.pregnancy_cohorts.duplicate(true),"demographic_remainders":GameState.demographic_remainders.duplicate(true),"death_progress":GameState.death_progress}
-	for field in CITY_VITAL_COUNTERS: after[field]=GameState.get(field)
-	after["vital_statistics_history"]=GameState.vital_statistics_history.duplicate(true)
-	after["vital_statistics_tracking_start_day"]=GameState.vital_statistics_tracking_start_day
-	for field in saved: GameState.set(field,saved[field])
+	var after:Dictionary={"population":WorldSimulation.state.population_exact,"population_cohorts":WorldSimulation.state.population_cohorts.duplicate(true),"pregnancy_cohorts":WorldSimulation.state.pregnancy_cohorts.duplicate(true),"demographic_remainders":WorldSimulation.state.demographic_remainders.duplicate(true),"death_progress":WorldSimulation.state.death_progress}
+	for field in CITY_VITAL_COUNTERS: after[field]=WorldSimulation.state.get(field)
+	after["vital_statistics_history"]=WorldSimulation.state.vital_statistics_history.duplicate(true)
+	after["vital_statistics_tracking_start_day"]=WorldSimulation.state.vital_statistics_tracking_start_day
+	for field in saved: WorldSimulation.state.set(field,saved[field])
 	if commit_demographics:
-		for field in CITY_VITAL_COUNTERS: GameState.set(field,saved[field]+after[field]-vital_before[field])
-		GameState._record_vital_statistics(int(after.lifetime_births)-int(vital_before.lifetime_births),int(after.lifetime_deaths)-int(vital_before.lifetime_deaths))
+		for field in CITY_VITAL_COUNTERS: WorldSimulation.state.set(field,saved[field]+after[field]-vital_before[field])
+		WorldSimulation.state._record_vital_statistics(int(after.lifetime_births)-int(vital_before.lifetime_births),int(after.lifetime_deaths)-int(vital_before.lifetime_deaths))
 		var change:=float(after.population)-local_population
 		var overall:=maxf(1.0,float(saved.population_exact)+change)
 		# Preserve every other city's headcount when this city's births/deaths
 		# change the national denominator, including people still in transit.
-		for city in GameState.player_settlements:
+		for city in WorldSimulation.state.player_settlements:
 			if bool(city.get("primary",false)): continue
 			var count:=float(saved.population_exact)*float(city.get("population_share",0.0))
 			if String(city.id)==String(record.get("id","")): count+=change
 			city.population_share=maxf(0.0,count)/overall
-		if bool(GameState.settlement_convoy.get("active",false)):
-			GameState.settlement_convoy.population_share=float(GameState.settlement_convoy.get("population_share",0.0))*float(saved.population_exact)/overall
-		GameState.population_exact=overall;GameState.population_total=roundi(overall)
+		if bool(WorldSimulation.state.settlement_convoy.get("active",false)):
+			WorldSimulation.state.settlement_convoy.population_share=float(WorldSimulation.state.settlement_convoy.get("population_share",0.0))*float(saved.population_exact)/overall
+		WorldSimulation.state.population_exact=overall;WorldSimulation.state.population_total=roundi(overall)
 		for field in ["population_cohorts","pregnancy_cohorts"]:
 			var combined:Dictionary=(saved[field] as Dictionary).duplicate(true)
 			for key in after[field]: combined[key]=maxf(0.0,float(combined.get(key,0.0))+float(after[field][key])-float(local_before[field].get(key,0.0)))
-			GameState.set(field,combined)
+			WorldSimulation.state.set(field,combined)
 		if not record.is_empty(): record["population_state"]=after
 	_local_population_scope=false
 	return result
 
 func with_city_resources(settlement_id:String,operation:Callable)->Variant:
-	if settlement_id!="" and GameState.resource_settlement_id==settlement_id: return operation.call()
+	if settlement_id!="" and WorldSimulation.state.resource_settlement_id==settlement_id: return operation.call()
 	var record:=settlement_record(settlement_id)
 	if record.is_empty() or bool(record.get("primary",false)): return operation.call()
 	_ensure_city_resources(record)
 	var saved:Dictionary={}
 	for field in CITY_RESOURCE_DEFAULTS:
-		saved[field]=GameState.get(field)
+		saved[field]=WorldSimulation.state.get(field)
 		var value:Variant=record.local_resources[field]
 		# Preserve typed Array fields when assigning serialized/default state.
 		if saved[field] is Array:
 			var typed:Array=(saved[field] as Array).duplicate()
 			typed.assign(value)
-			GameState.set(field,typed)
-		else: GameState.set(field,value)
-	var previous_id:=GameState.resource_settlement_id
-	GameState.resource_settlement_id=settlement_id
+			WorldSimulation.state.set(field,typed)
+		else: WorldSimulation.state.set(field,value)
+	var previous_id:=WorldSimulation.state.resource_settlement_id
+	WorldSimulation.state.resource_settlement_id=settlement_id
 	var result:Variant=operation.call()
 	for field in CITY_RESOURCE_DEFAULTS:
-		record.local_resources[field]=GameState.get(field)
-		GameState.set(field,saved[field])
-	GameState.resource_settlement_id=previous_id
+		record.local_resources[field]=WorldSimulation.state.get(field)
+		WorldSimulation.state.set(field,saved[field])
+	WorldSimulation.state.resource_settlement_id=previous_id
 	return result
 
 func process_city_resources(settlement_id:String,context:Dictionary,daily_work:Callable=Callable())->void:
 	if not String(settlement_record(settlement_id).get("occupied_by","")).is_empty():return
 	var record:=settlement_record(settlement_id)
 	if record.is_empty() or bool(record.get("primary",false)): return
-	if int(record.get("last_resource_day",-1))>=int(GameState.elapsed_days): return
+	if int(record.get("last_resource_day",-1))>=int(WorldSimulation.state.elapsed_days): return
 	with_city_resources(settlement_id,func()->void:
-		ResourceSystem.process_day(context)
-		with_local_population(func()->void:ConsequenceEngine.process_day(context),true)
-		with_local_population(func()->void:EconomySystem.process_day(context))
-		record["resource_metrics"]=GameState.simulation_metrics.duplicate(true)
+		WorldSimulation.resources.process_day(context)
+		with_local_population(func()->void:WorldSimulation.consequences.process_day(context),true)
+		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
+		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)
 		if daily_work.is_valid(): with_local_population(daily_work)
 		with_local_population(func()->void:process_month(context))
 	)
-	GameState.settlement_network_revision+=1
-	record["last_resource_day"]=int(GameState.elapsed_days)
+	WorldSimulation.state.settlement_network_revision+=1
+	record["last_resource_day"]=int(WorldSimulation.state.elapsed_days)
 
 const MAX_CITY_SHIPMENTS:=128
 const CITY_TRADE_GOODS:=["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Flint","Copper Ore","Tin Ore","Iron Ore","Coal"]
 
 func city_trade_capacity()->Dictionary:
-	var logistics:=clampf(float(GameState.society_capacities.get("logistics",0.0)),0.0,1.0)
-	var institutions:=clampf(float(GameState.society_capacities.get("institutions",0.0)),0.0,1.0)
-	var transport:=maxf(0.0,DiscoverySystem.effect("route_speed")+ProgressionSystem.effect("route_speed"))
-	var hauling:=maxf(0.0,DiscoverySystem.effect("haul_capacity")+ProgressionSystem.effect("haul_capacity"))
+	var logistics:=clampf(float(WorldSimulation.state.society_capacities.get("logistics",0.0)),0.0,1.0)
+	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.0)),0.0,1.0)
+	var transport:=maxf(0.0,WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"))
+	var hauling:=maxf(0.0,WorldSimulation.discovery.effect("haul_capacity")+WorldSimulation.progression.effect("haul_capacity"))
 	return {"ready":logistics>=0.30 and institutions>=0.20,"logistics":logistics,"speed_km_per_day":8.0*(1.0+logistics+transport),"range_km":12.0+logistics*120.0+transport*180.0,"capacity_per_worker":(4.0+logistics*24.0)*(1.0+hauling),"reason":"Leaders need 30% logistics and 20% institutions to organize regular intercity deliveries."}
 
 func _city_stores(record:Dictionary)->Dictionary:
-	if bool(record.get("primary",false)): return GameState.resource_stockpiles
+	if bool(record.get("primary",false)): return WorldSimulation.state.resource_stockpiles
 	_ensure_city_resources(record)
 	return record.local_resources.resource_stockpiles
 
 func _city_incoming(settlement_id:String,resource_name:String)->float:
 	var incoming:=0.0
-	for shipment in GameState.city_trade_shipments:
+	for shipment in WorldSimulation.state.city_trade_shipments:
 		if String(shipment.destination_id)==settlement_id and String(shipment.resource)==resource_name: incoming+=float(shipment.quantity)
 	return incoming
 
 func city_trade_snapshot(settlement_id:String)->Dictionary:
 	var shipments:Array[Dictionary]=[]
 	var history:Array[Dictionary]=[]
-	for shipment in GameState.city_trade_shipments:
+	for shipment in WorldSimulation.state.city_trade_shipments:
 		if settlement_id in [String(shipment.source_id),String(shipment.destination_id)]: shipments.append(shipment.duplicate(true))
-	for entry in GameState.city_trade_history:
+	for entry in WorldSimulation.state.city_trade_history:
 		if settlement_id in [String(entry.source_id),String(entry.destination_id)]: history.append(entry.duplicate(true))
 	return {"capacity":city_trade_capacity(),"shipments":shipments,"history":history}
 
 func _record_city_trade(entry:Dictionary)->void:
-	GameState.city_trade_history.push_front(entry.duplicate(true))
-	if GameState.city_trade_history.size()>128: GameState.city_trade_history.resize(128)
+	WorldSimulation.state.city_trade_history.push_front(entry.duplicate(true))
+	if WorldSimulation.state.city_trade_history.size()>128: WorldSimulation.state.city_trade_history.resize(128)
 
 func process_city_trade(route_assessor:Callable=Callable())->void:
-	var today:=int(GameState.elapsed_days)
-	if GameState.last_city_trade_day>=today: return
-	GameState.last_city_trade_day=today
+	var today:=int(WorldSimulation.state.elapsed_days)
+	if WorldSimulation.state.last_city_trade_day>=today: return
+	WorldSimulation.state.last_city_trade_day=today
 	# Departed shipments remain physical cargo even if logistics later declines.
 	var pending:Array[Dictionary]=[]
-	for shipment in GameState.city_trade_shipments:
-		if float(shipment.arrival_day)>GameState.elapsed_days:
+	for shipment in WorldSimulation.state.city_trade_shipments:
+		if float(shipment.arrival_day)>WorldSimulation.state.elapsed_days:
 			pending.append(shipment)
 			continue
 		var destination:=settlement_record(String(shipment.destination_id))
@@ -283,34 +283,34 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		var quantity:=float(shipment.quantity)
 		var delivered:=quantity*exp(-0.00035*float(shipment.travel_days)) if String(shipment.resource)=="Food" else quantity
 		with_city_resources(String(destination.id),func()->void:
-			if String(shipment.resource)=="Food": FoodSystem.receive_external_food(delivered)
-			else: GameState.resource_stockpiles[shipment.resource]=float(GameState.resource_stockpiles.get(shipment.resource,0.0))+delivered
+			if String(shipment.resource)=="Food": WorldSimulation.food.receive_external_food(delivered)
+			else: WorldSimulation.state.resource_stockpiles[shipment.resource]=float(WorldSimulation.state.resource_stockpiles.get(shipment.resource,0.0))+delivered
 		)
 		var arrived:=shipment.duplicate(true)
 		arrived.merge({"status":"delivered","day":today,"delivered":delivered,"lost":quantity-delivered},true)
 		_record_city_trade(arrived)
-	GameState.city_trade_shipments=pending
+	WorldSimulation.state.city_trade_shipments=pending
 	var capacity:=city_trade_capacity()
-	if not bool(capacity.ready) or GameState.player_settlements.size()<2: return
+	if not bool(capacity.ready) or WorldSimulation.state.player_settlements.size()<2: return
 	var available_transport:Dictionary={}
-	for source in GameState.player_settlements:
+	for source in WorldSimulation.state.player_settlements:
 		if not String(source.get("occupied_by","")).is_empty():continue
-		var share:=_settlement_population(source)/maxf(1.0,GameState.population_exact)
+		var share:=_settlement_population(source)/maxf(1.0,WorldSimulation.state.population_exact)
 		var workforce:=0.0
-		for amount in GameState.population_allocations.values(): workforce+=float(amount)
+		for amount in WorldSimulation.state.population_allocations.values(): workforce+=float(amount)
 		var allocations:Dictionary=source.get("local_allocations",{})
-		var carriers:=workforce*share*float(allocations.get("Logistics",0.0))/100.0 if not allocations.is_empty() else float(GameState.population_allocations.get("Logistics",0))*share
+		var carriers:=workforce*share*float(allocations.get("Logistics",0.0))/100.0 if not allocations.is_empty() else float(WorldSimulation.state.population_allocations.get("Logistics",0))*share
 		var occupied:=0.0
-		for shipment in GameState.city_trade_shipments:
+		for shipment in WorldSimulation.state.city_trade_shipments:
 			if String(shipment.source_id)==String(source.id): occupied+=float(shipment.quantity)*float(shipment.travel_days)
 		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)
 	# One request per good per city; no citizen or merchant entities are created.
-	for destination in GameState.player_settlements:
+	for destination in WorldSimulation.state.player_settlements:
 		if not String(destination.get("occupied_by","")).is_empty():continue
 		var destination_population:=_settlement_population(destination)
 		var destination_stores:=_city_stores(destination)
 		for resource_name in CITY_TRADE_GOODS:
-			if GameState.city_trade_shipments.size()>=MAX_CITY_SHIPMENTS: return
+			if WorldSimulation.state.city_trade_shipments.size()>=MAX_CITY_SHIPMENTS: return
 			var stored:=float(destination_stores.get(resource_name,0.0))
 			var shortage_floor:=destination_population*14.0 if resource_name=="Food" else maxf(2.0,destination_population*0.02)
 			if stored>=shortage_floor: continue
@@ -320,7 +320,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 			var donor:Dictionary={}
 			var nearest:=INF
 			var surplus:=0.0
-			for source in GameState.player_settlements:
+			for source in WorldSimulation.state.player_settlements:
 				if not String(source.get("occupied_by","")).is_empty():continue
 				if String(source.id)==String(destination.id) or float(available_transport.get(source.id,0.0))<=0.01: continue
 				var distance:=_record_position(source).distance_to(_record_position(destination))
@@ -339,15 +339,15 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 			var quantity:=minf(requested,minf(surplus,float(available_transport[donor.id])/travel_days))
 			if quantity<=0.01: continue
 			var sent:float=with_city_resources(String(donor.id),func()->float:
-				if resource_name=="Food": return FoodSystem.issue_for_obligation(quantity,"city_trade","Trade to %s" % String(destination.name),travel_days,0)
-				GameState.resource_stockpiles[resource_name]=float(GameState.resource_stockpiles.get(resource_name,0.0))-quantity
+				if resource_name=="Food": return WorldSimulation.food.issue_for_obligation(quantity,"city_trade","Trade to %s" % String(destination.name),travel_days,0)
+				WorldSimulation.state.resource_stockpiles[resource_name]=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-quantity
 				return quantity
 			)
 			if sent<=0.01: continue
 			available_transport[donor.id]=maxf(0.0,float(available_transport[donor.id])-sent*travel_days)
-			var shipment:={"id":GameState.next_city_trade_id,"source_id":String(donor.id),"source_name":String(donor.name),"destination_id":String(destination.id),"destination_name":String(destination.name),"resource":resource_name,"quantity":sent,"departure_day":GameState.elapsed_days,"arrival_day":GameState.elapsed_days+travel_days,"travel_days":travel_days,"status":"in_transit","day":today,"reason":"Local leaders arranged a delivery to cover a %s shortage." % resource_name}
-			GameState.next_city_trade_id+=1
-			GameState.city_trade_shipments.append(shipment)
+			var shipment:={"id":WorldSimulation.state.next_city_trade_id,"source_id":String(donor.id),"source_name":String(donor.name),"destination_id":String(destination.id),"destination_name":String(destination.name),"resource":resource_name,"quantity":sent,"departure_day":WorldSimulation.state.elapsed_days,"arrival_day":WorldSimulation.state.elapsed_days+travel_days,"travel_days":travel_days,"status":"in_transit","day":today,"reason":"Local leaders arranged a delivery to cover a %s shortage." % resource_name}
+			WorldSimulation.state.next_city_trade_id+=1
+			WorldSimulation.state.city_trade_shipments.append(shipment)
 			_record_city_trade(shipment)
 
 func reset_for_new_world()->void:
@@ -356,66 +356,65 @@ func reset_for_new_world()->void:
 	_national_population_in_scope=0.0
 
 func _autoload_node(node_name:String)->Node:
-	var tree:=Engine.get_main_loop() as SceneTree
-	return tree.root.get_node_or_null(node_name) if tree and tree.root else null
+	return WorldSimulation.system(node_name)
 
 func ensure_founded()->void:
 	_ensure_primary_settlement_record()
-	if not GameState.settlement_plots.is_empty():
-		if GameState.settlement_morphology.is_empty(): rebuild_summary()
+	if not WorldSimulation.state.settlement_plots.is_empty():
+		if WorldSimulation.state.settlement_morphology.is_empty(): rebuild_summary()
 		return
-	if "Hearth Circle" not in GameState.settlement_completed: return
-	if GameState.settlement_founded_day<0: GameState.settlement_founded_day=int(floor(GameState.elapsed_days))
+	if "Hearth Circle" not in WorldSimulation.state.settlement_completed: return
+	if WorldSimulation.state.settlement_founded_day<0: WorldSimulation.state.settlement_founded_day=int(floor(WorldSimulation.state.elapsed_days))
 	_create_founding_nucleus()
 	_create_founding_plots()
 	_create_founding_routes()
-	GameState.last_morphology_day=int(floor(GameState.elapsed_days/30.0))*30
-	GameState.morphology_revision+=1
+	WorldSimulation.state.last_morphology_day=int(floor(WorldSimulation.state.elapsed_days/30.0))*30
+	WorldSimulation.state.morphology_revision+=1
 	rebuild_summary()
 
 func _ensure_primary_settlement_record()->void:
-	if GameState.resource_settlement_id!="": return
-	if "Hearth Circle" not in GameState.settlement_completed: return
-	for settlement in GameState.player_settlements:
+	if WorldSimulation.state.resource_settlement_id!="": return
+	if "Hearth Circle" not in WorldSimulation.state.settlement_completed: return
+	for settlement in WorldSimulation.state.player_settlements:
 		if bool(settlement.get("primary",false)):
-			settlement["position"]=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+			settlement["position"]=Vector2(WorldSimulation.state.settlement_founded_at.x,WorldSimulation.state.settlement_founded_at.z)
 			settlement["name"]=_primary_settlement_name()
 			_ensure_settlement_management_fields(settlement)
-			if GameState.selected_player_settlement_id=="": GameState.selected_player_settlement_id=String(settlement.get("id",""))
+			if WorldSimulation.state.selected_player_settlement_id=="": WorldSimulation.state.selected_player_settlement_id=String(settlement.get("id",""))
 			return
 	var record:={
-		"id":"settlement_%03d" % GameState.next_player_settlement_id,
-		"sequence":GameState.next_player_settlement_id,
+		"id":"settlement_%03d" % WorldSimulation.state.next_player_settlement_id,
+		"sequence":WorldSimulation.state.next_player_settlement_id,
 		"primary":true,
 		"name":_primary_settlement_name(),
-		"position":Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z),
+		"position":Vector2(WorldSimulation.state.settlement_founded_at.x,WorldSimulation.state.settlement_founded_at.z),
 		"population_share":0.0,
-		"founded_day":maxi(0,GameState.settlement_founded_day),
+		"founded_day":maxi(0,WorldSimulation.state.settlement_founded_day),
 		"status":"established",
 		"source_settlement_id":"",
 		"territory_context":{},"environment_profile":{},"auto_manage":true,"management_focus":"establishment","leader_person_id":0
 	}
-	GameState.next_player_settlement_id+=1
-	GameState.player_settlements.append(record)
-	GameState.selected_player_settlement_id=String(record.id)
-	GameState.settlement_network_revision+=1
+	WorldSimulation.state.next_player_settlement_id+=1
+	WorldSimulation.state.player_settlements.append(record)
+	WorldSimulation.state.selected_player_settlement_id=String(record.id)
+	WorldSimulation.state.settlement_network_revision+=1
 
 func _primary_settlement_name()->String:
-	if GameState.resource_settlement_id!="": return GameState.settlement_name
-	var chosen:=GameState.settlement_name.strip_edges()
+	if WorldSimulation.state.resource_settlement_id!="": return WorldSimulation.state.settlement_name
+	var chosen:=WorldSimulation.state.settlement_name.strip_edges()
 	return chosen if chosen!="" else "FIRST SETTLEMENT"
 
 
 func _primary_settlement_id()->String:
-	if GameState.resource_settlement_id!="": return GameState.resource_settlement_id
-	for settlement in GameState.player_settlements:
+	if WorldSimulation.state.resource_settlement_id!="": return WorldSimulation.state.resource_settlement_id
+	for settlement in WorldSimulation.state.player_settlements:
 		if bool((settlement as Dictionary).get("primary",false)):
 			return String((settlement as Dictionary).get("id",""))
 	return ""
 
 
 func _record_plot_building_event(plot:Dictionary,event_name:String,day:int,materials:Dictionary={},counts_materials:=false,note:String="")->void:
-	GameState.record_building_event({
+	WorldSimulation.state.record_building_event({
 		"day":day,
 		"settlement_id":_primary_settlement_id(),
 		"settlement_name":_primary_settlement_name(),
@@ -437,14 +436,14 @@ func _record_plot_building_event(plot:Dictionary,event_name:String,day:int,mater
 
 func _ensure_settlement_management_fields(record:Dictionary)->void:
 	if not record.has("auto_manage"): record["auto_manage"]=true
-	if not record.has("management_focus"): record["management_focus"]="establishment" if int(GameState.elapsed_days)-int(record.get("founded_day",0))<365 else "balanced"
+	if not record.has("management_focus"): record["management_focus"]="establishment" if int(WorldSimulation.state.elapsed_days)-int(record.get("founded_day",0))<365 else "balanced"
 	if not record.has("leader_person_id"): record["leader_person_id"]=0
 	if not record.has("status") or String(record.get("status",""))=="founding": record["status"]="established"
 
 
 func settlement_by_id(settlement_id:String)->Dictionary:
 	_ensure_primary_settlement_record()
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		if String(settlement.get("id",""))==settlement_id:
 			var copy:=settlement.duplicate(true)
 			var population:=_settlement_population(copy)
@@ -457,46 +456,46 @@ func settlement_by_id(settlement_id:String)->Dictionary:
 func select_settlement(settlement_id:String)->Dictionary:
 	var selected:=settlement_by_id(settlement_id)
 	if selected.is_empty(): return {"ok":false,"reason":"That settlement is not owned."}
-	GameState.selected_player_settlement_id=settlement_id
+	WorldSimulation.state.selected_player_settlement_id=settlement_id
 	return {"ok":true,"settlement":selected}
 
 
 func selected_settlement_snapshot()->Dictionary:
 	_ensure_primary_settlement_record()
-	var selected:=settlement_by_id(GameState.selected_player_settlement_id)
+	var selected:=settlement_by_id(WorldSimulation.state.selected_player_settlement_id)
 	if not selected.is_empty(): return selected
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		if bool(settlement.get("primary",false)):
-			GameState.selected_player_settlement_id=String(settlement.get("id",""))
-			return settlement_by_id(GameState.selected_player_settlement_id)
+			WorldSimulation.state.selected_player_settlement_id=String(settlement.get("id",""))
+			return settlement_by_id(WorldSimulation.state.selected_player_settlement_id)
 	return {}
 
 
 func rename_settlement(settlement_id:String,new_name:String)->Dictionary:
 	var clean:=new_name.strip_edges().substr(0,32)
 	if clean=="": return {"ok":false,"reason":"A settlement name cannot be empty."}
-	for index in GameState.player_settlements.size():
-		var record:Dictionary=GameState.player_settlements[index]
+	for index in WorldSimulation.state.player_settlements.size():
+		var record:Dictionary=WorldSimulation.state.player_settlements[index]
 		if String(record.get("id",""))!=settlement_id: continue
-		for other in GameState.player_settlements:
+		for other in WorldSimulation.state.player_settlements:
 			if String(other.get("id",""))!=settlement_id and String(other.get("name","")).to_lower()==clean.to_lower():
 				return {"ok":false,"reason":"Another owned settlement already has that name."}
 		record["name"]=clean
-		GameState.player_settlements[index]=record
-		if bool(record.get("primary",false)): GameState.settlement_name=clean
-		GameState.settlement_network_revision+=1
+		WorldSimulation.state.player_settlements[index]=record
+		if bool(record.get("primary",false)): WorldSimulation.state.settlement_name=clean
+		WorldSimulation.state.settlement_network_revision+=1
 		return {"ok":true,"settlement_id":settlement_id,"name":clean}
 	return {"ok":false,"reason":"That settlement is not owned."}
 
 
 func suggested_settlement_name(destination:Vector2,origin_name:String="")->String:
-	var seed:=absi(hash("%d:place_name:%d:%d:%s" % [GameState.world_seed,roundi(destination.x*10.0),roundi(destination.y*10.0),origin_name]))
+	var seed:=absi(hash("%d:place_name:%d:%d:%s" % [WorldSimulation.state.world_seed,roundi(destination.x*10.0),roundi(destination.y*10.0),origin_name]))
 	var root:=String(SETTLEMENT_NAME_ROOTS[posmod(seed,SETTLEMENT_NAME_ROOTS.size())])
 	var ending:=String(SETTLEMENT_NAME_ENDINGS[posmod(seed/37+11,SETTLEMENT_NAME_ENDINGS.size())])
 	var suggestion:=root+ending
 	var used:Array[String]=[]
-	for settlement in GameState.player_settlements: used.append(String(settlement.get("name","")).to_lower())
-	if suggestion.to_lower() in used: suggestion="%s %s" % [root,str(GameState.next_player_settlement_id)]
+	for settlement in WorldSimulation.state.player_settlements: used.append(String(settlement.get("name","")).to_lower())
+	if suggestion.to_lower() in used: suggestion="%s %s" % [root,str(WorldSimulation.state.next_player_settlement_id)]
 	return suggestion
 
 func _record_position(record:Dictionary)->Vector2:
@@ -522,7 +521,7 @@ func _founding_material_plan(required_value:float)->Dictionary:
 	for resource_name in ["Timber","Fiber Plants","Clay","Stone"]:
 		if remaining<=0.001: break
 		var value_per_unit:=float(FOUNDING_MATERIAL_VALUE[resource_name])
-		var available:=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0)))
+		var available:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0)))
 		var taken:=minf(available,remaining/value_per_unit)
 		if taken<=0.001: continue
 		materials[resource_name]=taken
@@ -563,32 +562,32 @@ func _sanitized_territory_context(context:Dictionary,previous:Dictionary={})->Di
 
 func set_settlement_territory_context(settlement_id:String,context:Dictionary)->Dictionary:
 	_ensure_primary_settlement_record()
-	for index in GameState.player_settlements.size():
-		var record:Dictionary=GameState.player_settlements[index]
+	for index in WorldSimulation.state.player_settlements.size():
+		var record:Dictionary=WorldSimulation.state.player_settlements[index]
 		if String(record.get("id",""))!=settlement_id: continue
 		var previous:Dictionary=record.get("territory_context",{})
 		var sanitized:=_sanitized_territory_context(context,previous)
 		record["territory_context"]=sanitized
-		GameState.player_settlements[index]=record
-		if sanitized!=previous: GameState.settlement_network_revision+=1
+		WorldSimulation.state.player_settlements[index]=record
+		if sanitized!=previous: WorldSimulation.state.settlement_network_revision+=1
 		return {"ok":true,"settlement_id":settlement_id,"territory_context":sanitized.duplicate(true),"axis_count":(sanitized.get("access_axes",[]) as Array).size()}
 	return {"ok":false,"reason":"No owned settlement has that id."}
 
 
 func set_settlement_environment_profile(settlement_id:String,profile:Dictionary)->Dictionary:
 	_ensure_primary_settlement_record()
-	for index in GameState.player_settlements.size():
-		var record:Dictionary=GameState.player_settlements[index]
+	for index in WorldSimulation.state.player_settlements.size():
+		var record:Dictionary=WorldSimulation.state.player_settlements[index]
 		if String(record.get("id",""))!=settlement_id: continue
 		var previous_signature:=String((record.get("environment_profile",{}) as Dictionary).get("signature",""))
 		record["environment_profile"]=profile.duplicate(true)
-		GameState.player_settlements[index]=record
-		if String(profile.get("signature",""))!=previous_signature: GameState.settlement_network_revision+=1
+		WorldSimulation.state.player_settlements[index]=record
+		if String(profile.get("signature",""))!=previous_signature: WorldSimulation.state.settlement_network_revision+=1
 		return {"ok":true,"settlement_id":settlement_id,"environment_profile":profile.duplicate(true)}
 	return {"ok":false,"reason":"No owned settlement has that id."}
 
 func _province_terrain_permeability()->float:
-	var terrain:=GameState.province_terrain.to_lower()
+	var terrain:=WorldSimulation.state.province_terrain.to_lower()
 	if "mountain" in terrain: return 0.28
 	if "hill" in terrain or "broken" in terrain: return 0.52
 	if "wetland" in terrain or "marsh" in terrain: return 0.42
@@ -609,9 +608,9 @@ func coastal_site_profile(record_or_context:Dictionary={})->Dictionary:
 	var storm:=clampf(float(context.get("storm_exposure",0.0)),0.0,1.0)*shoreline
 	var erosion:=clampf(float(context.get("erosion_exposure",0.0)),0.0,1.0)*shoreline
 	var open_water:=clampf(float(context.get("open_water_exposure",0.0)),0.0,1.0)*shoreline
-	var infrastructure_tier:=clampi(int(ProgressionSystem.domain_tier("infrastructure")),0,8)
-	var logistics_tier:=clampi(int(ProgressionSystem.domain_tier("logistics")),0,8)
-	var knowledge_tier:=clampi(int(ProgressionSystem.domain_tier("knowledge")),0,8)
+	var infrastructure_tier:=clampi(int(WorldSimulation.progression.domain_tier("infrastructure")),0,8)
+	var logistics_tier:=clampi(int(WorldSimulation.progression.domain_tier("logistics")),0,8)
+	var knowledge_tier:=clampi(int(WorldSimulation.progression.domain_tier("knowledge")),0,8)
 	var movement_gate:=1.0 if infrastructure_tier>=2 and logistics_tier>=2 and knowledge_tier>=2 else 0.0
 	var trade_gate:=1.0 if infrastructure_tier>=3 and logistics_tier>=3 and knowledge_tier>=2 else 0.0
 	var exposure:=clampf(storm*0.62+erosion*0.38,0.0,1.0)
@@ -635,7 +634,7 @@ func _territory_access_axes(record:Dictionary)->Array[Dictionary]:
 	if not bool(record.get("primary",false)): return axes
 	# Existing paths and worked occurrences pull the claim in actual used
 	# directions. Only a fixed sample is retained, independent of population.
-	for route_variant in GameState.settlement_routes:
+	for route_variant in WorldSimulation.state.settlement_routes:
 		if axes.size()>=MAX_TERRITORY_ACCESS_AXES: break
 		var route:Dictionary=route_variant
 		if not bool(route.get("active",true)): continue
@@ -645,7 +644,7 @@ func _territory_access_axes(record:Dictionary)->Array[Dictionary]:
 		if direction.length_squared()<0.000001: continue
 		axes.append({"kind":"route","direction":direction.normalized(),"influence":clampf(0.28+float(route.get("condition",0.2))*0.45,0.18,0.72)})
 	var center:=_record_position(record)
-	for deposit_variant in GameState.resource_deposits:
+	for deposit_variant in WorldSimulation.state.resource_deposits:
 		if axes.size()>=MAX_TERRITORY_ACCESS_AXES: break
 		var deposit:Dictionary=deposit_variant
 		if String(deposit.get("stage","")) not in ["surveyed","accessible","worked","developed"]: continue
@@ -657,33 +656,33 @@ func _territory_access_axes(record:Dictionary)->Array[Dictionary]:
 
 func _territory_drivers(record:Dictionary,population:float)->Dictionary:
 	var context:Dictionary=record.get("territory_context",{})
-	var able:=maxf(1.0,float(GameState.able_population()))
+	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
 	var working:=0.0
 	for role in ["Food","Survey","Extraction","Construction","Logistics"]:
-		working+=maxf(0.0,GameState.effective_workers(role))
+		working+=maxf(0.0,WorldSimulation.state.effective_workers(role))
 	var derived_work:=clampf(working/maxf(1.0,able*0.68),0.0,1.0)
 	var route_condition:=0.0
 	var active_routes:=0
 	if bool(record.get("primary",false)):
-		for route_variant in GameState.settlement_routes:
+		for route_variant in WorldSimulation.state.settlement_routes:
 			var route:Dictionary=route_variant
 			if not bool(route.get("active",true)): continue
 			active_routes+=1
 			route_condition+=clampf(float(route.get("condition",0.0)),0.0,1.0)
 	if active_routes>0: route_condition/=float(active_routes)
-	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.16))+DiscoverySystem.effect("route_speed")*0.25,0.0,1.0)
+	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))+WorldSimulation.discovery.effect("route_speed")*0.25,0.0,1.0)
 	var derived_travel:=clampf(float(active_routes)/48.0+route_condition*0.38+logistics*0.42,0.0,1.0)
-	var water:=0.72 if bool(record.get("primary",false)) and bool(GameState.water_metrics.get("source_accessible",false)) else 0.08
-	for deposit_variant in GameState.resource_deposits:
+	var water:=0.72 if bool(record.get("primary",false)) and bool(WorldSimulation.state.water_metrics.get("source_accessible",false)) else 0.08
+	for deposit_variant in WorldSimulation.state.resource_deposits:
 		var deposit:Dictionary=deposit_variant
 		if String(deposit.get("resource",""))=="Freshwater" and String(deposit.get("stage","")) in ["surveyed","accessible","worked","developed"]:
 			water=maxf(water,0.74)
-	var age_days:=maxi(0,int(GameState.elapsed_days)-int(record.get("founded_day",0)))
+	var age_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(record.get("founded_day",0)))
 	var terrain:=clampf(float(context.get("terrain_permeability",_province_terrain_permeability())),0.0,1.0)
 	var work:=maxf(derived_work,clampf(float(context.get("work_access",0.0)),0.0,1.0))
 	var travel:=maxf(derived_travel,clampf(float(context.get("travel_access",0.0)),0.0,1.0))
 	water=maxf(water,clampf(float(context.get("water_access",0.0)),0.0,1.0))
-	var institutions:=clampf(float(GameState.society_capacities.get("institutions",0.25))+DiscoverySystem.effect("state_capacity"),0.0,1.0)
+	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25))+WorldSimulation.discovery.effect("state_capacity"),0.0,1.0)
 	var delegated:Dictionary=record.get("delegated_effects",{})
 	work=clampf(work+float(delegated.get("work",0.0)),0.0,1.0)
 	travel=clampf(travel+float(delegated.get("travel",0.0)),0.0,1.0)
@@ -697,28 +696,28 @@ func _territory_drivers(record:Dictionary,population:float)->Dictionary:
 
 func _committed_satellite_share(include_convoy:=true)->float:
 	var share:=0.0
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		if not bool(settlement.get("primary",false)):
 			share+=maxf(0.0,float(settlement.get("population_share",0.0)))
-	if include_convoy and bool(GameState.settlement_convoy.get("active",false)):
-		share+=maxf(0.0,float(GameState.settlement_convoy.get("population_share",0.0)))
-	share+=float(MilitaryCampaign.recovery.data.remnant.get("people",0))/maxf(1,GameState.population_exact)
+	if include_convoy and bool(WorldSimulation.state.settlement_convoy.get("active",false)):
+		share+=maxf(0.0,float(WorldSimulation.state.settlement_convoy.get("population_share",0.0)))
+	share+=float(WorldSimulation.military.recovery.data.remnant.get("people",0))/maxf(1,WorldSimulation.state.population_exact)
 	return clampf(share,0.0,1.0)
 
 func primary_population_exact()->float:
-	if _local_population_scope: return GameState.population_exact
-	return maxf(1.0,GameState.population_exact*(1.0-_committed_satellite_share()))
+	if _local_population_scope: return WorldSimulation.state.population_exact
+	return maxf(1.0,WorldSimulation.state.population_exact*(1.0-_committed_satellite_share()))
 
 func _primary_population()->int:
-	if _local_population_scope: return GameState.population_total
-	return maxi(1,roundi(float(GameState.population_total)*(1.0-_committed_satellite_share())))
+	if _local_population_scope: return WorldSimulation.state.population_total
+	return maxi(1,roundi(float(WorldSimulation.state.population_total)*(1.0-_committed_satellite_share())))
 
 func _primary_able_population()->float:
-	return maxf(1.0,float(GameState.able_population())*primary_population_exact()/maxf(1.0,GameState.population_exact))
+	return maxf(1.0,float(WorldSimulation.state.able_population())*primary_population_exact()/maxf(1.0,WorldSimulation.state.population_exact))
 
 func _settlement_population(record:Dictionary)->float:
 	if bool(record.get("primary",false)): return primary_population_exact()
-	if _local_population_scope and String(record.get("id",""))==GameState.resource_settlement_id:return GameState.population_exact
+	if _local_population_scope and String(record.get("id",""))==WorldSimulation.state.resource_settlement_id:return WorldSimulation.state.population_exact
 	return maxf(1.0,float(national_population())*maxf(0.0,float(record.get("population_share",0.0))))
 
 func _settlement_classification(record:Dictionary,population:float)->String:
@@ -734,11 +733,11 @@ func _settlement_classification(record:Dictionary,population:float)->String:
 
 func _base_claim_radius_km(record:Dictionary,population:float)->float:
 	var territory:=_territory_drivers(record,population)
-	var able:=maxf(1.0,float(GameState.able_population()))
-	var survey_share:=clampf(GameState.effective_workers("Survey")/maxf(1.0,able*0.10),0.0,1.0)
-	var administration_share:=clampf(GameState.effective_workers("Administration")/maxf(1.0,able*0.08),0.0,1.0)
+	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
+	var survey_share:=clampf(WorldSimulation.state.effective_workers("Survey")/maxf(1.0,able*0.10),0.0,1.0)
+	var administration_share:=clampf(WorldSimulation.state.effective_workers("Administration")/maxf(1.0,able*0.08),0.0,1.0)
 	var logistics:=float(territory.logistics)
-	var state_capacity:=clampf(float(GameState.society_capacities.get("institutions",0.25))+DiscoverySystem.effect("state_capacity"),0.0,1.0)
+	var state_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25))+WorldSimulation.discovery.effect("state_capacity"),0.0,1.0)
 	var defense_factor:=0.0
 	var military:=_autoload_node("MilitaryCampaign")
 	if military and military.has_method("settlement_defense_snapshot"):
@@ -747,17 +746,17 @@ func _base_claim_radius_km(record:Dictionary,population:float)->float:
 	var reach:=0.62+survey_share*0.16+administration_share*0.18+logistics*0.16+state_capacity*0.11+defense_factor*0.08
 	reach+=float(territory.work)*0.09+float(territory.travel)*0.09+float(territory.water)*0.05
 	reach*=0.82+float(territory.terrain)*0.18
-	var age_days:=maxi(0,int(GameState.elapsed_days)-int(record.get("founded_day",0)))
+	var age_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(record.get("founded_day",0)))
 	var maturity:=clampf(0.48+sqrt(float(age_days)/730.0)*0.30,0.48,1.0)
 	var worked_area_km2:=population/72.0*reach*reach*maturity
 	if bool(record.get("primary",false)):
-		worked_area_km2+=float(GameState.settlement_completed.size())*0.045+float(GameState.settlement_routes.size())*0.0015
+		worked_area_km2+=float(WorldSimulation.state.settlement_completed.size())*0.045+float(WorldSimulation.state.settlement_routes.size())*0.0015
 	var radius:=sqrt(maxf(0.12,worked_area_km2)/PI)
 	var coast:=coastal_site_profile(record)
 	radius*=float(coast.claim_multiplier)
 	if bool(record.get("primary",false)):
 		var fabric_extent:=0.0
-		for plot in GameState.settlement_plots:
+		for plot in WorldSimulation.state.settlement_plots:
 			for point in (plot.get("polygon",PackedVector2Array()) as PackedVector2Array): fabric_extent=maxf(fabric_extent,point.length())
 		radius=maxf(radius,fabric_extent+0.16)
 	return clampf(radius,0.32,4600.0)
@@ -774,7 +773,7 @@ func _bounded_claim_radius(index:int,records:Array[Dictionary],base_radius:float
 
 func _claim_boundary(record:Dictionary,radius:float,drivers:Dictionary={})->PackedVector2Array:
 	var center:=_record_position(record)
-	var seed:=hash("%d:player_settlement_border:%s" % [GameState.world_seed,String(record.get("id","settlement"))])
+	var seed:=hash("%d:player_settlement_border:%s" % [WorldSimulation.state.world_seed,String(record.get("id","settlement"))])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=seed
 	var rotation:=rng.randf_range(0.0,TAU)
@@ -801,7 +800,7 @@ func _claim_boundary(record:Dictionary,radius:float,drivers:Dictionary={})->Pack
 func settlement_network_snapshot()->Dictionary:
 	_ensure_primary_settlement_record()
 	var records:Array[Dictionary]=[]
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		_ensure_settlement_management_fields(settlement)
 		records.append(settlement.duplicate(true))
 	var public_settlements:Array[Dictionary]=[]
@@ -821,12 +820,12 @@ func settlement_network_snapshot()->Dictionary:
 		if bool(record.get("primary",false)): record["name"]=_primary_settlement_name()
 		public_settlements.append(record)
 	return {
-		"revision":GameState.settlement_network_revision+GameState.morphology_revision,
+		"revision":WorldSimulation.state.settlement_network_revision+WorldSimulation.state.morphology_revision,
 		"settlements":public_settlements,
 		"count":public_settlements.size(),
 		"limit":MAX_PLAYER_SETTLEMENTS,
-		"convoy":GameState.settlement_convoy.duplicate(true),
-		"represented_population":roundi(GameState.population_exact),
+		"convoy":WorldSimulation.state.settlement_convoy.duplicate(true),
+		"represented_population":roundi(WorldSimulation.state.population_exact),
 		"runtime_people_entities":0
 	}
 
@@ -853,7 +852,7 @@ func territory_control_snapshot()->Dictionary:
 					occupations.append({"id":String(region.get("id","")),"kind":"occupied_strategic_region","name":String(region.get("name","OCCUPIED REGION")),"controller":"player","original_controller":String(region.get("original_controller",civ.get("id",""))),"population":roundi(float(region.get("population",0.0))),"role":String(region.get("role","frontier")),"integration":clampf(float(region.get("integration",0.0)),0.0,1.0),"resistance":clampf(float(region.get("resistance",0.0)),0.0,1.0),"damage":clampf(float(region.get("damage",0.0)),0.0,1.0),"occupation_turns":maxi(0,int(region.get("occupation_turns",0)))})
 	var occupied_population:=0
 	for occupation in occupations: occupied_population+=int(occupation.get("population",0))
-	return {"revision":int(network.revision)+(int(civilization_system.get("turn_index")) if civilization_system else 0),"settlement_claims":claims,"occupied_regions":occupations,"settlement_claim_count":claims.size(),"occupied_region_count":occupations.size(),"record_count":claims.size()+occupations.size(),"record_limit":MAX_PLAYER_SETTLEMENTS+MAX_OCCUPIED_STRATEGIC_REGIONS,"owned_population":roundi(GameState.population_exact),"occupied_population":occupied_population,"controlled_population":roundi(GameState.population_exact)+occupied_population,"runtime_people_entities":0,"bounded":true}
+	return {"revision":int(network.revision)+(int(civilization_system.get("turn_index")) if civilization_system else 0),"settlement_claims":claims,"occupied_regions":occupations,"settlement_claim_count":claims.size(),"occupied_region_count":occupations.size(),"record_count":claims.size()+occupations.size(),"record_limit":MAX_PLAYER_SETTLEMENTS+MAX_OCCUPIED_STRATEGIC_REGIONS,"owned_population":roundi(WorldSimulation.state.population_exact),"occupied_population":occupied_population,"controlled_population":roundi(WorldSimulation.state.population_exact)+occupied_population,"runtime_people_entities":0,"bounded":true}
 
 func _point_to_boundary_distance(point:Vector2,boundary:PackedVector2Array)->float:
 	if boundary.is_empty(): return INF
@@ -911,11 +910,11 @@ func known_route_assessment(origin:Vector2,destination:Vector2)->Dictionary:
 
 func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionary:
 	_ensure_primary_settlement_record()
-	if "Hearth Circle" not in GameState.settlement_completed:
+	if "Hearth Circle" not in WorldSimulation.state.settlement_completed:
 		return {"ok":false,"reason":"A permanent first settlement must exist before another can be founded."}
-	if bool(GameState.settlement_convoy.get("active",false)):
+	if bool(WorldSimulation.state.settlement_convoy.get("active",false)):
 		return {"ok":false,"reason":"A settlement convoy is already underway."}
-	if GameState.player_settlements.size()>=MAX_PLAYER_SETTLEMENTS:
+	if WorldSimulation.state.player_settlements.size()>=MAX_PLAYER_SETTLEMENTS:
 		return {"ok":false,"reason":"The bounded settlement register is full."}
 	var land:=known_land_assessment(destination)
 	if not bool(land.get("known",false)):
@@ -958,14 +957,14 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionar
 	if food_available<food_required: blockers.append("%.0f more travel rations" % (food_required-food_available))
 	if float(material_plan.missing_value)>0.001:
 		blockers.append("%.1f more founding supplies (use any mix of timber, plant fiber, clay, or stone)" % float(material_plan.missing_value))
-	var population_share:=float(founders)/maxf(1.0,GameState.population_exact)
+	var population_share:=float(founders)/maxf(1.0,WorldSimulation.state.population_exact)
 	if bool(origin.get("primary",false)) and _committed_satellite_share(false)+population_share>0.92: blockers.append("more population must remain in the established network")
 	return {
 		"ok":blockers.is_empty(),"reason":"Ready" if blockers.is_empty() else "Need %s." % ", ".join(blockers),
 		"origin_id":String(origin.get("id","")),"origin_name":String(origin.get("name","ORIGIN")),"origin":_record_position(origin),
 		"destination":destination,"distance_km":origin_distance,"duration_days":duration,"minimum_duration_days":maxf(0.5,origin_distance/SETTLEMENT_CONVOY_KM_PER_DAY),"population":founders,
 		"population_share":population_share,"known_land":true,"known_route":true,"map_source":String(land.get("source","returned chart")),
-		"population_sources":GameState.proportional_population_commitment(founders),
+		"population_sources":WorldSimulation.state.proportional_population_commitment(founders),
 		"food":food_required,"materials":founding_materials,
 		"suggested_name":suggested_settlement_name(destination,String(origin.get("name",""))),
 		"material_required":founding_material_required,"material_supplied":float(material_plan.supplied_value),
@@ -985,64 +984,64 @@ func _depart_local_convoy(destination:Vector2,quote:Dictionary,settlement_name:S
 	if food_system and food_system.has_method("remove_for_settlement_convoy"):
 		food_removed=float(food_system.remove_for_settlement_convoy(float(quote.food),"Settlement convoy • %s" % String(quote.origin_name),float(quote.duration_days),int(quote.population)))
 	else:
-		food_removed=minf(float(quote.food),float(GameState.resource_stockpiles.get("Food",0.0)))
-		GameState.resource_stockpiles["Food"]=maxf(0.0,float(GameState.resource_stockpiles.get("Food",0.0))-food_removed)
+		food_removed=minf(float(quote.food),float(WorldSimulation.state.resource_stockpiles.get("Food",0.0)))
+		WorldSimulation.state.resource_stockpiles["Food"]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Food",0.0))-food_removed)
 	if food_removed+0.01<float(quote.food):
 		return {"ok":false,"reason":"The provision ledger changed before the convoy could be supplied."}
 	var committed_materials:Dictionary=(quote.get("materials",{}) as Dictionary).duplicate(true)
 	for resource_name_variant in committed_materials:
 		var resource_name:=String(resource_name_variant)
-		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(committed_materials[resource_name]))
+		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(committed_materials[resource_name]))
 	var origin:=settlement_record(String(quote.origin_id))
 	if not bool(origin.get("primary",false)): origin.population_share=maxf(0.0,float(origin.population_share)-float(quote.population_share))
-	GameState.settlement_convoy={
+	WorldSimulation.state.settlement_convoy={
 		"active":true,"phase":"traveling","origin_id":String(quote.origin_id),"origin_name":String(quote.origin_name),
-		"origin":quote.origin,"position":quote.origin,"destination":destination,"depart_day":GameState.elapsed_days,
-		"arrival_day":GameState.elapsed_days+float(quote.duration_days),"duration_days":float(quote.duration_days),"progress":0.0,
+		"origin":quote.origin,"position":quote.origin,"destination":destination,"depart_day":WorldSimulation.state.elapsed_days,
+		"arrival_day":WorldSimulation.state.elapsed_days+float(quote.duration_days),"duration_days":float(quote.duration_days),"progress":0.0,
 		"population":int(quote.population),"population_share":float(quote.population_share),
 		"population_sources":(quote.population_sources as Dictionary).duplicate(true),
 		"food_committed":float(quote.food),"materials_committed":committed_materials,
 		"settlement_name":settlement_name.strip_edges().substr(0,32) if settlement_name.strip_edges()!="" else String(quote.get("suggested_name",suggested_settlement_name(destination,String(quote.origin_name))))
 	}
-	GameState.settlement_network_revision+=1
+	WorldSimulation.state.settlement_network_revision+=1
 	return quote
 
 func update_settlement_convoy(position:Vector2,progress:float)->void:
-	if not bool(GameState.settlement_convoy.get("active",false)): return
-	var origin:=_vector2_value(GameState.settlement_convoy.get("origin",position))
-	var destination:=_vector2_value(GameState.settlement_convoy.get("destination",position))
-	var depart_day:=float(GameState.settlement_convoy.get("depart_day",GameState.elapsed_days))
-	var duration:=maxf(0.5,float(GameState.settlement_convoy.get("duration_days",0.5)))
-	var temporal_progress:=clampf((GameState.elapsed_days-depart_day)/duration,0.0,1.0)
+	if not bool(WorldSimulation.state.settlement_convoy.get("active",false)): return
+	var origin:=_vector2_value(WorldSimulation.state.settlement_convoy.get("origin",position))
+	var destination:=_vector2_value(WorldSimulation.state.settlement_convoy.get("destination",position))
+	var depart_day:=float(WorldSimulation.state.settlement_convoy.get("depart_day",WorldSimulation.state.elapsed_days))
+	var duration:=maxf(0.5,float(WorldSimulation.state.settlement_convoy.get("duration_days",0.5)))
+	var temporal_progress:=clampf((WorldSimulation.state.elapsed_days-depart_day)/duration,0.0,1.0)
 	var authoritative_progress:=minf(clampf(progress,0.0,1.0),temporal_progress)
-	GameState.settlement_convoy["position"]=origin.lerp(destination,authoritative_progress)
-	GameState.settlement_convoy["progress"]=authoritative_progress
-	GameState.settlement_convoy["phase"]="arrived" if authoritative_progress>=1.0 else "traveling"
+	WorldSimulation.state.settlement_convoy["position"]=origin.lerp(destination,authoritative_progress)
+	WorldSimulation.state.settlement_convoy["progress"]=authoritative_progress
+	WorldSimulation.state.settlement_convoy["phase"]="arrived" if authoritative_progress>=1.0 else "traveling"
 
 func complete_settlement_convoy(destination:Vector2)->Dictionary:
-	if not bool(GameState.settlement_convoy.get("active",false)): return {"ok":false,"reason":"No settlement convoy is underway."}
-	var convoy:=GameState.settlement_convoy.duplicate(true)
+	if not bool(WorldSimulation.state.settlement_convoy.get("active",false)): return {"ok":false,"reason":"No settlement convoy is underway."}
+	var convoy:=WorldSimulation.state.settlement_convoy.duplicate(true)
 	var planned_destination:=_vector2_value(convoy.get("destination",destination))
 	if destination.distance_to(planned_destination)>0.01:
 		return {"ok":false,"reason":"The convoy can establish only the charted destination approved at departure."}
-	if GameState.elapsed_days+0.0001<float(convoy.get("arrival_day",GameState.elapsed_days)) or float(convoy.get("progress",0.0))<0.9999:
+	if WorldSimulation.state.elapsed_days+0.0001<float(convoy.get("arrival_day",WorldSimulation.state.elapsed_days)) or float(convoy.get("progress",0.0))<0.9999:
 		return {"ok":false,"reason":"The founding convoy has not physically reached its destination."}
-	var sequence:=GameState.next_player_settlement_id
+	var sequence:=WorldSimulation.state.next_player_settlement_id
 	var record:={
 		"id":"settlement_%03d" % sequence,"sequence":sequence,"primary":false,
 		"name":String(convoy.get("settlement_name",suggested_settlement_name(planned_destination,String(convoy.get("origin_name",""))))),"position":planned_destination,
-		"population_share":float(convoy.get("population_share",0.0)),"founded_day":int(floor(GameState.elapsed_days)),
+		"population_share":float(convoy.get("population_share",0.0)),"founded_day":int(floor(WorldSimulation.state.elapsed_days)),
 		"status":"established","source_settlement_id":String(convoy.get("origin_id","")),"territory_context":{},"environment_profile":{},
 		"auto_manage":true,"management_focus":"establishment","leader_person_id":0
 	}
-	GameState.next_player_settlement_id+=1
-	GameState.player_settlements.append(record)
+	WorldSimulation.state.next_player_settlement_id+=1
+	WorldSimulation.state.player_settlements.append(record)
 	_ensure_city_resources(record)
 	with_city_resources(String(record.id),func()->void:
-		FoodSystem.receive_external_food(maxf(0.0,float(convoy.get("food_committed",0.0))-float(convoy.get("population",0))*float(convoy.get("duration_days",0.0))))
+		WorldSimulation.food.receive_external_food(maxf(0.0,float(convoy.get("food_committed",0.0))-float(convoy.get("population",0))*float(convoy.get("duration_days",0.0))))
 	)
-	GameState.record_building_event({
-		"day":int(floor(GameState.elapsed_days)),
+	WorldSimulation.state.record_building_event({
+		"day":int(floor(WorldSimulation.state.elapsed_days)),
 		"settlement_id":String(record.id),
 		"settlement_name":String(record.name),
 		"event":"founded",
@@ -1055,21 +1054,21 @@ func complete_settlement_convoy(destination:Vector2)->Dictionary:
 		"status":"active",
 		"note":"Founders converted their carried construction supplies into the first enduring local fabric.",
 	})
-	GameState.settlement_convoy={}
-	GameState.settlement_network_revision+=1
-	CivilizationSystem.settlement_siting.founded(String(record.id),String(record.name),planned_destination,int(GameState.elapsed_days))
+	WorldSimulation.state.settlement_convoy={}
+	WorldSimulation.state.settlement_network_revision+=1
+	WorldSimulation.world.settlement_siting.founded(String(record.id),String(record.name),planned_destination,int(WorldSimulation.state.elapsed_days))
 	return {"ok":true,"settlement":record.duplicate(true),"population":roundi(_settlement_population(record))}
 
 func _create_founding_nucleus()->void:
-	var nucleus_id:=GameState.next_settlement_nucleus_id
-	GameState.next_settlement_nucleus_id+=1
-	GameState.settlement_nuclei.append({"id":nucleus_id,"kind":"founding_hearth","position":Vector2.ZERO,"pull":1.0,"active":true,"created_day":GameState.settlement_founded_day,"absorbed_day":-1})
+	var nucleus_id:=WorldSimulation.state.next_settlement_nucleus_id
+	WorldSimulation.state.next_settlement_nucleus_id+=1
+	WorldSimulation.state.settlement_nuclei.append({"id":nucleus_id,"kind":"founding_hearth","position":Vector2.ZERO,"pull":1.0,"active":true,"created_day":WorldSimulation.state.settlement_founded_day,"absorbed_day":-1})
 
 func _create_founding_plots(city:Dictionary={})->void:
-	if city.is_empty(): GameState.initialize_population_model()
+	if city.is_empty(): WorldSimulation.state.initialize_population_model()
 	var secondary:=not city.is_empty()
 	var target:Array[Dictionary]=[]
-	if not secondary: target=GameState.settlement_plots
+	if not secondary: target=WorldSimulation.state.settlement_plots
 	# Plots are a bounded visual sample of the settlement fabric.  Their resident
 	# counts are aggregate population cells, never homes backed by person records.
 	var population:=_settlement_population(city) if secondary else primary_population_exact()
@@ -1080,10 +1079,10 @@ func _create_founding_plots(city:Dictionary={})->void:
 	var accepted_centers:Array[Vector2]=[Vector2.ZERO]
 	var accepted_radii:Array[float]=[0.009]
 	for index in total_count:
-		var plot_id:=index+1 if secondary else GameState.next_settlement_plot_id
-		if not secondary: GameState.next_settlement_plot_id+=1
-		var plot_seed:=hash("%d:settlement_plot:%d" % [GameState.world_seed,plot_id])
-		if secondary: plot_seed=hash("%d:%s:%d" % [GameState.world_seed,String(city.id),plot_id])
+		var plot_id:=index+1 if secondary else WorldSimulation.state.next_settlement_plot_id
+		if not secondary: WorldSimulation.state.next_settlement_plot_id+=1
+		var plot_seed:=hash("%d:settlement_plot:%d" % [WorldSimulation.state.world_seed,plot_id])
+		if secondary: plot_seed=hash("%d:%s:%d" % [WorldSimulation.state.world_seed,String(city.id),plot_id])
 		var rng:=RandomNumberGenerator.new()
 		rng.seed=plot_seed
 		var land_use:="residential_compound"
@@ -1118,7 +1117,7 @@ func _create_founding_plots(city:Dictionary={})->void:
 		if land_use in ["water","waste"]:
 			material_family="earth"
 			material_mix={"Clay":0.35,"Stone":0.12,"Fiber Plants":0.08}
-		var created_day:=int(city.get("founded_day",0)) if secondary else GameState.settlement_founded_day
+		var created_day:=int(city.get("founded_day",0)) if secondary else WorldSimulation.state.settlement_founded_day
 		var plot_form:="portable_shelter_cluster" if index<residential_count else _founding_function_form(land_use)
 		var plot:Dictionary={
 			"id":plot_id,"seed":plot_seed,"nucleus_id":1,"parent_plot_id":-1,"lineage_ids":[],
@@ -1138,12 +1137,12 @@ func _create_founding_plots(city:Dictionary={})->void:
 		}
 		target.append(plot)
 		if not secondary:
-			GameState.settlement_plot_history.append({"day":created_day,"plot_id":plot_id,"event":"founded","new_state":"active","cause":"Initial settlement fabric established"})
+			WorldSimulation.state.settlement_plot_history.append({"day":created_day,"plot_id":plot_id,"event":"founded","new_state":"active","cause":"Initial settlement fabric established"})
 			_record_plot_building_event(plot,"founded",created_day,{},false,"Raised from carried shelter, salvaged fabric, and locally gathered material.")
 	if secondary: city.local_resources["settlement_plots"]=target
 
 func _founding_plot_center(index:int,total_count:int,land_use:String,rng:RandomNumberGenerator,attempt:int)->Vector2:
-	var seed_angle:=float(abs(GameState.world_seed)%6283)*0.001
+	var seed_angle:=float(abs(WorldSimulation.state.world_seed)%6283)*0.001
 	if land_use=="communal":
 		return Vector2.ZERO
 	if land_use=="water":
@@ -1151,8 +1150,8 @@ func _founding_plot_center(index:int,total_count:int,land_use:String,rng:RandomN
 	if land_use=="waste":
 		return Vector2.from_angle(seed_angle-PI*0.32+attempt*0.19)*rng.randf_range(0.080,0.105)
 	var cluster_count:=3
-	var cluster_index:int=(index*7+absi(GameState.world_seed))%cluster_count
-	var cluster_angle:=seed_angle+float(cluster_index)*TAU/float(cluster_count)+sin(float(cluster_index*19+GameState.world_seed))*0.34
+	var cluster_index:int=(index*7+absi(WorldSimulation.state.world_seed))%cluster_count
+	var cluster_angle:=seed_angle+float(cluster_index)*TAU/float(cluster_count)+sin(float(cluster_index*19+WorldSimulation.state.world_seed))*0.34
 	var cluster_distance:=0.014+float(cluster_index%2)*0.008+rng.randf_range(-0.002,0.003)
 	var cluster_center:=Vector2.from_angle(cluster_angle)*cluster_distance
 	var local_angle:=seed_angle+float(index)*2.399963229728653+float(attempt)*1.37
@@ -1186,7 +1185,7 @@ func _founding_function_form(land_use:String)->String:
 	return {"communal":"open_hearth_yard","storage":"guarded_cache","workshop":"open_work_yard","water":"carried_water_point","waste":"refuse_and_latrine_ground"}.get(land_use,"open_ground")
 
 func _create_founding_routes()->void:
-	_create_founding_routes_for(GameState.settlement_plots,GameState.settlement_routes,GameState.settlement_founded_day)
+	_create_founding_routes_for(WorldSimulation.state.settlement_plots,WorldSimulation.state.settlement_routes,WorldSimulation.state.settlement_founded_day)
 
 func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary],day:int)->void:
 	var route_id:=1
@@ -1205,8 +1204,8 @@ func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary
 		var direction:=nearest-plot_center
 		var side:=Vector2(-direction.y,direction.x).normalized()
 		var bend_strength:=minf(0.005,nearest_distance*0.16)
-		var bend_a:=plot_center.lerp(nearest,0.34)+side*sin(float(int(plot.id)*37+GameState.world_seed))*bend_strength
-		var bend_b:=plot_center.lerp(nearest,0.69)-side*sin(float(int(plot.id)*19+GameState.world_seed)*0.73)*bend_strength*0.68
+		var bend_a:=plot_center.lerp(nearest,0.34)+side*sin(float(int(plot.id)*37+WorldSimulation.state.world_seed))*bend_strength
+		var bend_b:=plot_center.lerp(nearest,0.69)-side*sin(float(int(plot.id)*19+WorldSimulation.state.world_seed)*0.73)*bend_strength*0.68
 		var route:Dictionary={"id":route_id,"kind":"desire_path","points":PackedVector2Array([plot_center,bend_a,bend_b,nearest]),"condition":0.38+float(int(plot.id)%5)*0.025,"width_m":0.62+float(int(plot.id)%4)*0.11,"created_day":day,"active":true}
 		routes.append(route)
 		plot["frontage_route_id"]=route_id
@@ -1215,34 +1214,34 @@ func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary
 
 func process_month(context:Dictionary={})->Array[Dictionary]:
 	ensure_founded()
-	if GameState.settlement_plots.is_empty(): return []
-	var month_day:=int(floor(GameState.elapsed_days/30.0))*30
-	if month_day<=GameState.last_morphology_day: return []
-	GameState.last_morphology_day=month_day
+	if WorldSimulation.state.settlement_plots.is_empty(): return []
+	var month_day:=int(floor(WorldSimulation.state.elapsed_days/30.0))*30
+	if month_day<=WorldSimulation.state.last_morphology_day: return []
+	WorldSimulation.state.last_morphology_day=month_day
 	var events:Array[Dictionary]=[]
 	var active_construction:Array[Dictionary]=[]
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
-	var builders:=GameState.effective_workers("Construction")
-	var labor_efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
+	var builders:=WorldSimulation.state.effective_workers("Construction")
+	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var builders_per_site:=builders/float(maxi(1,active_construction.size()))
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		plot["last_update_day"]=month_day
 		if String(plot.get("status",""))=="under_construction":
 			var previous_progress:=float(plot.get("construction_progress",0.0))
 			# Parallel projects divide the real monthly builder pool. A large population
 			# can build concurrently, but no site receives the whole workforce for free.
-			var directive_pace:=1.0+maxf(0.0,ConsequenceEngine.policy_effect("construction_rate"))
+			var directive_pace:=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("construction_rate"))
 			plot["construction_progress"]=clampf(previous_progress+builders_per_site*labor_efficiency*directive_pace*0.10,0.0,1.0)
 			if not is_equal_approx(previous_progress,float(plot.construction_progress)):
-				GameState.morphology_revision+=1
+				WorldSimulation.state.morphology_revision+=1
 			if float(plot.construction_progress)>=1.0:
 				plot["status"]="active"
 				plot["condition"]=0.92
 				plot["repair_state"]="maintained"
-				GameState.settlement_plot_history.append({"day":month_day,"plot_id":int(plot.id),"event":"construction_completed","new_state":"active","cause":String(plot.get("growth_cause","household pressure"))})
+				WorldSimulation.state.settlement_plot_history.append({"day":month_day,"plot_id":int(plot.id),"event":"construction_completed","new_state":"active","cause":String(plot.get("growth_cause","household pressure"))})
 				_record_plot_building_event(plot,"completed",month_day,{},false,String(plot.get("growth_cause","Construction completed.")))
-				GameState.morphology_revision+=1
+				WorldSimulation.state.morphology_revision+=1
 				events.append({"type":"morphology","title":_completion_title(String(plot.get("land_use","residential_compound"))),"plot_id":int(plot.id)})
 	_synchronize_early_works(month_day,events)
 	_evolve_inherited_fabric(month_day,events)
@@ -1267,41 +1266,41 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 func _bound_morphology_state()->void:
 	# Historical detail is summarized by current plot state; old event rows are
 	# telemetry, not authoritative geometry.
-	if GameState.settlement_plot_history.size()>MAX_PLOT_HISTORY:
-		GameState.settlement_plot_history=GameState.settlement_plot_history.slice(GameState.settlement_plot_history.size()-MAX_PLOT_HISTORY)
-	if GameState.settlement_routes.size()>MAX_SIMULATED_ROUTES:
-		GameState.settlement_routes.resize(MAX_SIMULATED_ROUTES)
-	if GameState.settlement_nuclei.size()>MAX_SIMULATED_NUCLEI:
-		GameState.settlement_nuclei.resize(MAX_SIMULATED_NUCLEI)
+	if WorldSimulation.state.settlement_plot_history.size()>MAX_PLOT_HISTORY:
+		WorldSimulation.state.settlement_plot_history=WorldSimulation.state.settlement_plot_history.slice(WorldSimulation.state.settlement_plot_history.size()-MAX_PLOT_HISTORY)
+	if WorldSimulation.state.settlement_routes.size()>MAX_SIMULATED_ROUTES:
+		WorldSimulation.state.settlement_routes.resize(MAX_SIMULATED_ROUTES)
+	if WorldSimulation.state.settlement_nuclei.size()>MAX_SIMULATED_NUCLEI:
+		WorldSimulation.state.settlement_nuclei.resize(MAX_SIMULATED_NUCLEI)
 
 func _can_add_plots(amount:=1)->bool:
-	return GameState.settlement_plots.size()+maxi(0,amount)<=MAX_SIMULATED_PLOTS
+	return WorldSimulation.state.settlement_plots.size()+maxi(0,amount)<=MAX_SIMULATED_PLOTS
 
 func _active_construction_count()->int:
 	var count:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status",""))=="under_construction": count+=1
 	return count
 
 func _monthly_construction_slots()->int:
-	var builders:=GameState.effective_workers("Construction")
+	var builders:=WorldSimulation.state.effective_workers("Construction")
 	if builders<4.0: return 0
-	var efficiency:=clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.12,1.45)
+	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.12,1.45)
 	# One early household project occupies roughly six effective builder-months.
 	# Administrative/logistical maturity raises the safe coordination ceiling but
 	# does not conjure labor or materials.
-	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.12)),0.0,1.0)
+	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.12)),0.0,1.0)
 	var coordination_cap:=3+floori(logistics*9.0)
-	var directive_pace:=1.0+maxf(0.0,ConsequenceEngine.policy_effect("construction_rate"))
+	var directive_pace:=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("construction_rate"))
 	return clampi(maxi(1,floori(builders*efficiency*directive_pace/6.0)),1,coordination_cap)
 
 func _update_plot_prosperity(day:int)->void:
-	var economy:=GameState.economy_metrics
+	var economy:=WorldSimulation.state.economy_metrics
 	var market_access:=float(economy.get("market_access",0.0))
 	var reliability:=float(economy.get("exchange_reliability",0.45))
 	var shortage:=float(economy.get("shortage_pressure",0.0))
 	var inequality:=float(economy.get("inequality",0.25))
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) in ["ruin","reclaimed"]: continue
 		var use:=String(plot.get("land_use",""))
 		var exchange_exposure:=0.22
@@ -1313,14 +1312,14 @@ func _update_plot_prosperity(day:int)->void:
 		var target:=clampf(0.12+market_access*exchange_exposure+reliability*0.16+service*0.14+condition*0.10-shortage*0.34-maxf(0.0,inequality-0.30)*0.18,0.03,0.94)
 		var prior:=float(plot.get("prosperity",0.30))
 		plot["prosperity"]=lerpf(prior,target,0.12)
-		if absf(float(plot.prosperity)-prior)>0.001: GameState.morphology_revision+=1
+		if absf(float(plot.prosperity)-prior)>0.001: WorldSimulation.state.morphology_revision+=1
 		plot["last_economy_update_day"]=day
 
 func _attempt_secondary_nucleus(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
 	var occupied_households:Array[Dictionary]=[]
 	var effective_household_units:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
 		if String(plot.get("status","")) not in ["active","stressed","damaged"]: continue
 		occupied_households.append(plot)
@@ -1328,21 +1327,21 @@ func _attempt_secondary_nucleus(day:int,events:Array[Dictionary],context:Diction
 	var desired_nuclei:=clampi(1+floori(float(maxi(0,effective_household_units-24))/28.0),1,8)
 	if _active_nuclei()>=desired_nuclei: return
 	var route_by_id:Dictionary={}
-	for route in GameState.settlement_routes:
+	for route in WorldSimulation.state.settlement_routes:
 		if bool(route.get("active",true)): route_by_id[int(route.get("id",-1))]=route
 	var best_plot:Dictionary={}
 	var best_score:=-INF
 	for plot in occupied_households:
 		var candidate:=Vector2(plot.get("centroid",Vector2.ZERO))
 		var nearest_nucleus:=INF
-		for nucleus in GameState.settlement_nuclei:
+		for nucleus in WorldSimulation.state.settlement_nuclei:
 			if bool(nucleus.get("active",true)):
 				nearest_nucleus=minf(nearest_nucleus,candidate.distance_to(Vector2(nucleus.get("position",Vector2.ZERO))))
 		if nearest_nucleus<0.085: continue
 		var route:Dictionary=route_by_id.get(int(plot.get("frontage_route_id",-1)),{})
 		var hierarchy_bonus:float=float({"path":0.0,"lane":0.42,"main_approach":0.86,"farm_lane":0.24}.get(String(route.get("hierarchy","path")),0.0))
 		var score:=nearest_nucleus*5.4+float(route.get("traffic",0.0))*0.92+float(hierarchy_bonus)+float(plot.get("service_access",0.0))*0.34
-		var origin:Vector3=context.get("settlement_origin",GameState.settlement_founded_at)
+		var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
 		var height_callable:Callable=context.get("terrain_height_at",Callable())
 		if height_callable.is_valid():
 			var sample:=0.015
@@ -1355,14 +1354,14 @@ func _attempt_secondary_nucleus(day:int,events:Array[Dictionary],context:Diction
 			best_score=score
 			best_plot=plot
 	if best_plot.is_empty(): return
-	var nucleus_id:=GameState.next_settlement_nucleus_id
-	GameState.next_settlement_nucleus_id+=1
+	var nucleus_id:=WorldSimulation.state.next_settlement_nucleus_id
+	WorldSimulation.state.next_settlement_nucleus_id+=1
 	var nucleus_kind:="market_crossing" if nucleus_id%3==0 else "neighborhood_hearth"
 	var nucleus_position:=Vector2(best_plot.get("centroid",Vector2.ZERO))
-	GameState.settlement_nuclei.append({"id":nucleus_id,"kind":nucleus_kind,"position":nucleus_position,"pull":0.78 if nucleus_kind=="market_crossing" else 0.66,"active":true,"created_day":day,"absorbed_day":-1,"founding_plot_id":int(best_plot.get("id",-1))})
+	WorldSimulation.state.settlement_nuclei.append({"id":nucleus_id,"kind":nucleus_kind,"position":nucleus_position,"pull":0.78 if nucleus_kind=="market_crossing" else 0.66,"active":true,"created_day":day,"absorbed_day":-1,"founding_plot_id":int(best_plot.get("id",-1))})
 	best_plot["nucleus_id"]=nucleus_id
-	GameState.settlement_plot_history.append({"day":day,"plot_id":int(best_plot.get("id",-1)),"event":"secondary_nucleus_formed","new_state":nucleus_kind,"cause":"outer households and inherited route traffic formed a durable local focus"})
-	GameState.morphology_revision+=1
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(best_plot.get("id",-1)),"event":"secondary_nucleus_formed","new_state":nucleus_kind,"cause":"outer households and inherited route traffic formed a durable local focus"})
+	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"A New Local Centre Emerged","plot_id":int(best_plot.get("id",-1)),"nucleus_id":nucleus_id})
 
 func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context:Dictionary={})->void:
@@ -1375,14 +1374,14 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 	if day%360!=0 or _settlement_age_years(day)<4.0: return
 	var population:=_primary_population()
 	if population<1800: return
-	var builders:=int(GameState.population_allocations.get("Construction",0))
-	var logisticians:=int(GameState.population_allocations.get("Logistics",0))
-	var administrators:=int(GameState.population_allocations.get("Administration",0))
-	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.0)),0.0,1.0)
+	var builders:=int(WorldSimulation.state.population_allocations.get("Construction",0))
+	var logisticians:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
+	var administrators:=int(WorldSimulation.state.population_allocations.get("Administration",0))
+	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.0)),0.0,1.0)
 	if builders<24 or logisticians<12 or administrators<8 or logistics<0.28: return
-	if "route_memory" not in GameState.known_discoveries and "graded_roads" not in GameState.known_discoveries: return
+	if "route_memory" not in WorldSimulation.state.known_discoveries and "graded_roads" not in WorldSimulation.state.known_discoveries: return
 	var satellite_count:=0
-	for nucleus in GameState.settlement_nuclei:
+	for nucleus in WorldSimulation.state.settlement_nuclei:
 		if bool(nucleus.get("active",true)) and String(nucleus.get("kind","")) in ["satellite_quarter","industrial_satellite","river_quarter"]:
 			satellite_count+=1
 	var desired_satellites:=clampi(1+floori(float(maxi(0,population-1800))/3500.0),1,6)
@@ -1397,11 +1396,11 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 		cluster_cost[resource_name]=float(recipe.cost[resource_name])*14.0
 	if not _can_pay_fabric_cost(cluster_cost): return
 	var occupied_extent:=0.10
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status",""))=="reclaimed": continue
 		occupied_extent=maxf(occupied_extent,Vector2(plot.get("centroid",Vector2.ZERO)).length())
 	var ring_distance:=clampf(occupied_extent+0.11,0.19,1.05)
-	var district_seed:=hash("%d:district:%d:%d" % [GameState.world_seed,GameState.next_settlement_nucleus_id,day])
+	var district_seed:=hash("%d:district:%d:%d" % [WorldSimulation.state.world_seed,WorldSimulation.state.next_settlement_nucleus_id,day])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=district_seed
 	var best_center:=Vector2.ZERO
@@ -1410,7 +1409,7 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 		var angle:=rng.randf()*TAU
 		var candidate:=Vector2.from_angle(angle)*ring_distance*rng.randf_range(0.94,1.08)
 		var nearest_nucleus_distance:=INF
-		for nucleus in GameState.settlement_nuclei:
+		for nucleus in WorldSimulation.state.settlement_nuclei:
 			if bool(nucleus.get("active",true)):
 				nearest_nucleus_distance=minf(nearest_nucleus_distance,candidate.distance_to(Vector2(nucleus.get("position",Vector2.ZERO))))
 		if nearest_nucleus_distance<0.12: continue
@@ -1425,19 +1424,19 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 			best_center=candidate
 	if best_score<=-9000.0: return
 	for resource_name in cluster_cost:
-		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(cluster_cost[resource_name]))
-	var nucleus_id:=GameState.next_settlement_nucleus_id
-	GameState.next_settlement_nucleus_id+=1
+		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(cluster_cost[resource_name]))
+	var nucleus_id:=WorldSimulation.state.next_settlement_nucleus_id
+	WorldSimulation.state.next_settlement_nucleus_id+=1
 	var previous_nucleus_position:=Vector2.ZERO
 	var previous_distance:=INF
-	for nucleus in GameState.settlement_nuclei:
+	for nucleus in WorldSimulation.state.settlement_nuclei:
 		if not bool(nucleus.get("active",true)): continue
 		var nucleus_position:=Vector2(nucleus.get("position",Vector2.ZERO))
 		var distance:=best_center.distance_to(nucleus_position)
 		if distance<previous_distance:
 			previous_distance=distance
 			previous_nucleus_position=nucleus_position
-	GameState.settlement_nuclei.append({"id":nucleus_id,"kind":"satellite_quarter","position":best_center,"pull":0.82,"active":true,"created_day":day,"absorbed_day":-1})
+	WorldSimulation.state.settlement_nuclei.append({"id":nucleus_id,"kind":"satellite_quarter","position":best_center,"pull":0.82,"active":true,"created_day":day,"absorbed_day":-1})
 	var generation:=clampi(_supported_fabric_tier(day),0,4)
 	var created_plots:Array[Dictionary]=[]
 	created_plots.append(_make_district_seed_plot(best_center,0.014,"mixed_household",recipe,day,nucleus_id,generation,0))
@@ -1464,16 +1463,16 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 	for created_index in created_plots.size():
 		var plot:Dictionary=created_plots[created_index]
 		if created_index==0: plot["frontage_route_id"]=connector_id
-		GameState.settlement_plots.append(plot)
+		WorldSimulation.state.settlement_plots.append(plot)
 		if created_index>0: _create_growth_route(plot,day)
-		GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"district_ground_claimed","new_state":String(plot.land_use),"cause":"regional service pressure, route access, administration, construction labour, and delivered materials"})
-	GameState.morphology_revision+=1
+		WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"district_ground_claimed","new_state":String(plot.land_use),"cause":"regional service pressure, route access, administration, construction labour, and delivered materials"})
+	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"A Connected Quarter Was Founded","plot_id":int(created_plots[0].id),"nucleus_id":nucleus_id,"plots":created_plots.size()})
 
 func _make_district_seed_plot(center:Vector2,radius:float,land_use:String,recipe:Dictionary,day:int,nucleus_id:int,generation:int,member_index:int)->Dictionary:
-	var plot_id:=GameState.next_settlement_plot_id
-	GameState.next_settlement_plot_id+=1
-	var plot_seed:=hash("%d:district_plot:%d:%d" % [GameState.world_seed,plot_id,member_index])
+	var plot_id:=WorldSimulation.state.next_settlement_plot_id
+	WorldSimulation.state.next_settlement_plot_id+=1
+	var plot_seed:=hash("%d:district_plot:%d:%d" % [WorldSimulation.state.world_seed,plot_id,member_index])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed
 	var polygon:=_irregular_polygon(center,radius,plot_seed)
@@ -1489,12 +1488,12 @@ func _make_district_seed_plot(center:Vector2,radius:float,land_use:String,recipe
 
 func _create_district_connector(start:Vector2,finish:Vector2,day:int)->int:
 	var route_id:=1
-	for route in GameState.settlement_routes: route_id=maxi(route_id,int(route.get("id",0))+1)
+	for route in WorldSimulation.state.settlement_routes: route_id=maxi(route_id,int(route.get("id",0))+1)
 	var direction:=finish-start
 	var side:=Vector2(-direction.y,direction.x).normalized()
 	var bend:=minf(0.060,direction.length()*0.16)
-	var graded:="graded_roads" in GameState.known_discoveries
-	GameState.settlement_routes.append({
+	var graded:="graded_roads" in WorldSimulation.state.known_discoveries
+	WorldSimulation.state.settlement_routes.append({
 		"id":route_id,"kind":"district_connector","hierarchy":"main_approach","points":PackedVector2Array([start,start.lerp(finish,0.18)+side*bend*0.72,start.lerp(finish,0.39)+side*bend,start.lerp(finish,0.62)-side*bend*0.48,start.lerp(finish,0.82)-side*bend*0.22,finish]),
 		"condition":0.72 if graded else 0.48,"width_m":4.6 if graded else 2.8,"surface_tier":3 if graded else 1,"surface":"drained_earth" if graded else "cleared_earth","traffic":0.44,"created_day":day,"active":true
 	})
@@ -1502,7 +1501,7 @@ func _create_district_connector(start:Vector2,finish:Vector2,day:int)->int:
 
 func _permanent_resident_capacity()->int:
 	var capacity:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
 		if String(plot.get("status","")) not in ["active","stressed","damaged"]: continue
 		capacity+=int(plot.get("resident_capacity",0))
@@ -1510,7 +1509,7 @@ func _permanent_resident_capacity()->int:
 
 func _update_overflow_encampments(day:int,events:Array[Dictionary])->void:
 	var camps:Array[Dictionary]=[]
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use",""))=="temporary_encampment": camps.append(plot)
 	camps.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.get("created_day",0))<int(b.get("created_day",0)))
 	var remaining:=maxi(0,_primary_population()-_permanent_resident_capacity())
@@ -1529,32 +1528,32 @@ func _update_overflow_encampments(day:int,events:Array[Dictionary])->void:
 			camp["vacant_months"]=0
 			camp["status"]="active"
 		if prior_population!=assigned or String(camp.get("status","active"))!=previous_status:
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 			if previous_status!="vacant" and String(camp.status)=="vacant":
-				GameState.settlement_plot_history.append({"day":day,"plot_id":int(camp.id),"event":"overflow_camp_emptied","new_state":"vacant","cause":"permanent household capacity absorbed the displaced population"})
+				WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(camp.id),"event":"overflow_camp_emptied","new_state":"vacant","cause":"permanent household capacity absorbed the displaced population"})
 				events.append({"type":"morphology","title":"A Temporary Camp Emptied","plot_id":int(camp.id)})
 
 func _attempt_overflow_encampment(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
 	var permanent_capacity:=_permanent_resident_capacity()
 	var represented_in_camps:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use",""))=="temporary_encampment" and String(plot.get("status",""))=="active": represented_in_camps+=int(plot.get("resident_count",0))
 	var unrepresented:=_primary_population()-permanent_capacity-represented_in_camps
 	if unrepresented<28: return
-	var camp_labor:=int(GameState.population_allocations.get("Construction",0))+int(GameState.population_allocations.get("Logistics",0))
+	var camp_labor:=int(WorldSimulation.state.population_allocations.get("Construction",0))+int(WorldSimulation.state.population_allocations.get("Logistics",0))
 	if camp_labor<4: return
 	var plot:=_create_overflow_encampment(day,unrepresented,context)
 	if plot.is_empty(): return
 	_create_growth_route(plot,day,"camp_path")
-	GameState.settlement_plots.append(plot)
-	GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"overflow_camp_formed","new_state":"active","cause":"population exceeded durable household capacity; families occupied temporary ground using carried and salvaged cover"})
-	GameState.morphology_revision+=1
+	WorldSimulation.state.settlement_plots.append(plot)
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"overflow_camp_formed","new_state":"active","cause":"population exceeded durable household capacity; families occupied temporary ground using carried and salvaged cover"})
+	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"Families Occupied Temporary Ground","plot_id":int(plot.id)})
 
 func _create_overflow_encampment(day:int,unrepresented:int,context:Dictionary={})->Dictionary:
-	var plot_id:=GameState.next_settlement_plot_id
-	var plot_seed:=hash("%d:overflow_encampment:%d" % [GameState.world_seed,plot_id])
+	var plot_id:=WorldSimulation.state.next_settlement_plot_id
+	var plot_seed:=hash("%d:overflow_encampment:%d" % [WorldSimulation.state.world_seed,plot_id])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed
 	var target_population:=mini(unrepresented,rng.randi_range(72,132))
@@ -1565,7 +1564,7 @@ func _create_overflow_encampment(day:int,unrepresented:int,context:Dictionary={}
 	var camp_density_per_hectare:=rng.randf_range(210.0,340.0)
 	var radius:=clampf(sqrt((float(target_population)/camp_density_per_hectare)/100.0/PI),0.027,0.045)
 	var anchors:Array[Dictionary]=[]
-	for existing in GameState.settlement_plots:
+	for existing in WorldSimulation.state.settlement_plots:
 		if String(existing.get("status","")) in ["ruin","reclaimed","vacant"]: continue
 		if String(existing.get("land_use","")) in ["water","waste","field"]: continue
 		anchors.append(existing)
@@ -1580,7 +1579,7 @@ func _create_overflow_encampment(day:int,unrepresented:int,context:Dictionary={}
 		var anchor_radius:=sqrt(_polygon_area_km2(anchor.get("polygon",PackedVector2Array()))/PI)
 		var nucleus_position:=Vector2.ZERO
 		var nearest_nucleus_distance:=INF
-		for nucleus in GameState.settlement_nuclei:
+		for nucleus in WorldSimulation.state.settlement_nuclei:
 			if not bool(nucleus.get("active",true)): continue
 			var candidate_position:=Vector2(nucleus.get("position",Vector2.ZERO))
 			var distance:=anchor_center.distance_to(candidate_position)
@@ -1598,7 +1597,7 @@ func _create_overflow_encampment(day:int,unrepresented:int,context:Dictionary={}
 			best_score=score
 			best_center=center
 	if best_score<=-9000.0: return {}
-	GameState.next_settlement_plot_id+=1
+	WorldSimulation.state.next_settlement_plot_id+=1
 	var polygon:=_irregular_polygon(best_center,radius,plot_seed)
 	return {
 		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(best_center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
@@ -1617,19 +1616,19 @@ func _completion_title(land_use:String)->String:
 	}.get(land_use,"New Ground Entered Use")
 
 func _has_active_construction()->bool:
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status",""))=="under_construction": return true
 	return false
 
 func _recognized_fertile_ground()->Dictionary:
-	for deposit in GameState.resource_deposits:
+	for deposit in WorldSimulation.state.resource_deposits:
 		if String(deposit.get("resource",""))=="Fertile Soil" and String(deposit.get("stage","unknown")) in ["surveyed","accessible","developed"]:
 			return deposit
 	return {}
 
 func _update_field_seasons(day:int)->void:
 	var visual_state_changed:=false
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use",""))!="field": continue
 		var previous_phase:=String(plot.get("cultivation_phase","prepared"))
 		var previous_cover:=float(plot.get("crop_cover",0.0))
@@ -1655,15 +1654,15 @@ func _update_field_seasons(day:int)->void:
 		plot["cultivation_phase"]=phase
 		plot["crop_cover"]=clampf(cover,0.0,1.0)
 		if phase!=previous_phase or absf(cover-previous_cover)>=0.03: visual_state_changed=true
-	if visual_state_changed: GameState.morphology_revision+=1
+	if visual_state_changed: WorldSimulation.state.morphology_revision+=1
 
 func _update_plot_workforce(day:int,events:Array[Dictionary])->void:
 	var role_by_use:Dictionary={"field":"Food","workshop":"Crafting","storage":"Logistics"}
 	for land_use in role_by_use:
 		var role:=String(role_by_use[land_use])
-		var available:=maxi(0,int(GameState.population_allocations.get(role,0)))
+		var available:=maxi(0,int(WorldSimulation.state.population_allocations.get(role,0)))
 		var candidates:Array[Dictionary]=[]
-		for plot in GameState.settlement_plots:
+		for plot in WorldSimulation.state.settlement_plots:
 			if String(plot.get("land_use",""))!=land_use: continue
 			if String(plot.get("status","")) in ["under_construction","ruin","reclaimed"]: continue
 			candidates.append(plot)
@@ -1688,19 +1687,19 @@ func _update_plot_workforce(day:int,events:Array[Dictionary])->void:
 					plot["status"]="active"
 					plot["reoccupation_state"]="reoccupied"
 			if String(plot.get("status",""))!=previous_status:
-				GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"work_ground_idled" if assigned<=0 else "work_ground_reoccupied","new_state":String(plot.status),"cause":"%s labor allocation changed" % role})
-				GameState.morphology_revision+=1
+				WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"work_ground_idled" if assigned<=0 else "work_ground_reoccupied","new_state":String(plot.status),"cause":"%s labor allocation changed" % role})
+				WorldSimulation.state.morphology_revision+=1
 				events.append({"type":"morphology","title":"%s %s" % [land_use.capitalize(),"Fell Idle" if assigned<=0 else "Returned to Use"],"plot_id":int(plot.id)})
 
 func _attempt_field_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
-	if "seed_selection" not in GameState.known_discoveries: return
-	var food_workers:=int(GameState.population_allocations.get("Food",0))
+	if "seed_selection" not in WorldSimulation.state.known_discoveries: return
+	var food_workers:=int(WorldSimulation.state.population_allocations.get("Food",0))
 	if food_workers<10: return
 	var fertile_ground:=_recognized_fertile_ground()
 	if fertile_ground.is_empty(): return
 	var field_count:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use",""))=="field" and String(plot.get("status","")) not in ["ruin","reclaimed"]: field_count+=1
 	# One field plot is an aggregate worked by at most twelve assigned people.
 	# Keep enough persistent plots to represent the labor that actually exists;
@@ -1710,18 +1709,18 @@ func _attempt_field_growth(day:int,events:Array[Dictionary],context:Dictionary={
 	var plot:=_create_field_plot(day,fertile_ground,field_count,context)
 	if plot.is_empty(): return
 	_create_growth_route(plot,day,"field_track")
-	GameState.settlement_plots.append(plot)
-	GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"field_opened","new_state":"active","cause":"seed selection, assigned food labor, and surveyed fertile soil"})
-	GameState.morphology_revision+=1
+	WorldSimulation.state.settlement_plots.append(plot)
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"field_opened","new_state":"active","cause":"seed selection, assigned food labor, and surveyed fertile soil"})
+	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"Cultivation Opened at the Settlement Fringe","plot_id":int(plot.id)})
 
 func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,context:Dictionary={})->Dictionary:
-	var plot_id:=GameState.next_settlement_plot_id
-	var plot_seed:=hash("%d:settlement_field:%d" % [GameState.world_seed,plot_id])
+	var plot_id:=WorldSimulation.state.next_settlement_plot_id
+	var plot_seed:=hash("%d:settlement_field:%d" % [WorldSimulation.state.world_seed,plot_id])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed
-	var settlement_world:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
-	var deposit_position:Vector3=fertile_ground.get("position",GameState.settlement_founded_at)
+	var settlement_world:=Vector2(WorldSimulation.state.settlement_founded_at.x,WorldSimulation.state.settlement_founded_at.z)
+	var deposit_position:Vector3=fertile_ground.get("position",WorldSimulation.state.settlement_founded_at)
 	var direction:=Vector2(deposit_position.x,deposit_position.z)-settlement_world
 	if direction.length()<0.01: direction=Vector2.from_angle(rng.randf()*TAU)
 	direction=direction.normalized()
@@ -1733,14 +1732,14 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 	var found:=false
 	var best_center:=Vector2.ZERO
 	var best_site_score:=-INF
-	var origin:Vector3=context.get("settlement_origin",GameState.settlement_founded_at)
+	var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
 	var height_callable:Callable=context.get("terrain_height_at",Callable())
 	var river_callable:Callable=context.get("river_distance_at",Callable())
 	var drainage_tangent_callable:Callable=context.get("drainage_tangent_at",Callable())
 	var moisture_callable:Callable=context.get("moisture_at",Callable())
 	var buildable_callable:Callable=context.get("buildable_land_at",Callable())
 	var existing_fields:Array[Dictionary]=[]
-	for existing in GameState.settlement_plots:
+	for existing in WorldSimulation.state.settlement_plots:
 		if String(existing.get("land_use",""))=="field" and String(existing.get("status","")) not in ["ruin","reclaimed"]: existing_fields.append(existing)
 	for attempt in 80:
 		if not existing_fields.is_empty() and rng.randf()<0.78:
@@ -1753,7 +1752,7 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 			var angle:=direction.angle()+rng.randf_range(-0.88,0.88)+float(field_index)*0.17
 			center=Vector2.from_angle(angle)*rng.randf_range(0.11,0.24)
 		var clear:=true
-		for existing in GameState.settlement_plots:
+		for existing in WorldSimulation.state.settlement_plots:
 			var existing_polygon:PackedVector2Array=existing.get("polygon",PackedVector2Array())
 			var existing_radius:=sqrt(_polygon_area_km2(existing_polygon)/PI)
 			var clearance_factor:=1.045 if String(existing.get("land_use",""))=="field" else 1.12
@@ -1793,7 +1792,7 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 			found=true
 	if not found: return {}
 	center=best_center
-	GameState.next_settlement_plot_id+=1
+	WorldSimulation.state.next_settlement_plot_id+=1
 	var world_x:=origin.x+center.x
 	var world_z:=origin.z+center.y
 	var river_distance:=INF
@@ -1831,7 +1830,7 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 	return {
 		"id":plot_id,"seed":plot_seed,"nucleus_id":1,"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
 		"land_use":"field","secondary_use":"seasonal_grazing","form":"hand_cultivated_clearance","field_pattern":field_pattern,"crop_family":crop_family,"cultivation_phase":"prepared","crop_cover":0.16,"material_family":"earth","material_mix":{"Soil":0.86,"Fiber Plants":0.04},"construction_recipe":"clearing_and_hand_cultivation","supply_provenance":{"Fertile Soil":String(fertile_ground.get("id","local occurrence"))},"replacement_debt":{},"roof_coverage":0.0,"storeys":0,
-		"resident_capacity":0,"resident_count":0,"worker_capacity":12,"worker_count":mini(12,int(GameState.population_allocations.get("Food",0))),"storage_capacity":0.0,"condition":0.82,"maintenance_debt":0.02,"service_access":0.28,"hazard_exposure":rng.randf_range(0.08,0.22),"prosperity":0.30,
+		"resident_capacity":0,"resident_count":0,"worker_capacity":12,"worker_count":mini(12,int(WorldSimulation.state.population_allocations.get("Food",0))),"storage_capacity":0.0,"condition":0.82,"maintenance_debt":0.02,"service_access":0.28,"hazard_exposure":rng.randf_range(0.08,0.22),"prosperity":0.30,
 		"status":"active","reclamation":0.0,"pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied","displaced_households":0,"returning_households":0,"claim_pressure":0.0,
 		"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
 	}
@@ -1866,7 +1865,7 @@ func _irregular_field_polygon(center:Vector2,radius:float,plot_seed:int,rotation
 func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 	var residential:Array[Dictionary]=[]
 	var total_capacity:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
 		if String(plot.get("status","")) in ["ruin","reclaimed","under_construction"]: continue
 		residential.append(plot)
@@ -1900,21 +1899,21 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 				plot["reoccupation_state"]="reoccupied"
 				plot["abandoned_day"]=-1
 		if String(plot.get("status",""))!=previous_status:
-			GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"vacated" if String(plot.status)=="vacant" else "reoccupied","new_state":plot.status,"cause":"population redistribution across usable household ground"})
+			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"vacated" if String(plot.status)=="vacant" else "reoccupied","new_state":plot.status,"cause":"population redistribution across usable household ground"})
 			_record_plot_building_event(plot,"vacated" if String(plot.status)=="vacant" else "reoccupied",day,{},false,"Population redistributed across usable household ground.")
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Ground %s" % ("Vacated" if String(plot.status)=="vacant" else "Reoccupied"),"plot_id":int(plot.id)})
-	var builders:=GameState.effective_workers("Construction")
-	var labor_efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
+	var builders:=WorldSimulation.state.effective_workers("Construction")
+	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var maintained_plots:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) in ["ruin","reclaimed","under_construction"]: continue
 		maintained_plots+=1
 	var maintenance_per_plot:=builders*labor_efficiency/maxf(1.0,float(maintained_plots))*0.0032
-	var hardship:=clampf(1.0-float(GameState.simulation_metrics.get("health",GameState.population_health)),0.0,1.0)
+	var hardship:=clampf(1.0-float(WorldSimulation.state.simulation_metrics.get("health",WorldSimulation.state.population_health)),0.0,1.0)
 	var rng:=RandomNumberGenerator.new()
-	rng.seed=GameState.world_seed^day^0x27d4eb2d
-	for plot in GameState.settlement_plots:
+	rng.seed=WorldSimulation.state.world_seed^day^0x27d4eb2d
+	for plot in WorldSimulation.state.settlement_plots:
 		var status:=String(plot.get("status","active"))
 		if status in ["under_construction","ruin","reclaimed"]: continue
 		var temporary_ground:=String(plot.get("land_use",""))=="temporary_encampment"
@@ -1936,24 +1935,24 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 				plot["status"]="reclaimed"
 				plot["condition"]=0.0
 				plot["repair_state"]="ground_reclaimed"
-				GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"temporary_ground_reclaimed","new_state":"reclaimed","cause":"the overflow camp emptied and vegetation returned across its temporary footprint"})
-				GameState.morphology_revision+=1
+				WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"temporary_ground_reclaimed","new_state":"reclaimed","cause":"the overflow camp emptied and vegetation returned across its temporary footprint"})
+				WorldSimulation.state.morphology_revision+=1
 				events.append({"type":"morphology","title":"Temporary Ground Was Reclaimed","plot_id":int(plot.id)})
 			elif status in ["active","stressed"] and rng.randf()<exposure*0.0015:
 				plot["condition"]=maxf(0.06,float(plot.condition)-rng.randf_range(0.06,0.22))
 				plot["status"]="stressed"
 				plot["repair_state"]="cover_failed"
-				GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"temporary_cover_failed","new_state":"stressed","cause":"weather or fire damaged temporary family cover"})
-				GameState.morphology_revision+=1
+				WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"temporary_cover_failed","new_state":"stressed","cause":"weather or fire damaged temporary family cover"})
+				WorldSimulation.state.morphology_revision+=1
 				events.append({"type":"morphology","title":"Temporary Cover Failed","plot_id":int(plot.id)})
 			elif status=="active" and float(plot.condition)<0.34:
 				plot["status"]="stressed"
-				GameState.morphology_revision+=1
+				WorldSimulation.state.morphology_revision+=1
 			elif status=="stressed" and float(plot.condition)>=0.46:
 				plot["status"]="active"
-				GameState.morphology_revision+=1
+				WorldSimulation.state.morphology_revision+=1
 			if absf(float(plot.condition)-previous_condition)>0.018:
-				GameState.morphology_revision+=1
+				WorldSimulation.state.morphology_revision+=1
 			continue
 		if status in ["active","stressed"] and rng.randf()<exposure*0.0015:
 			var severity:=rng.randf_range(0.06,0.22)
@@ -1962,22 +1961,22 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 			plot["pre_damage_use"]=String(plot.get("land_use",""))
 			plot["damaged_day"]=day
 			plot["repair_state"]="awaiting_assessment" if String(plot.status)=="damaged" else "unrepairable"
-			GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"damage","new_state":plot.status,"cause":"localized fire, weather, or structural failure"})
+			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"damage","new_state":plot.status,"cause":"localized fire, weather, or structural failure"})
 			_record_plot_building_event(plot,"destroyed" if String(plot.status)=="ruin" else "damaged",day,{},false,"Localized fire, weather, or structural failure.")
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Ground Damaged","plot_id":int(plot.id)})
 		elif status=="active" and float(plot.condition)<0.48:
 			plot["status"]="stressed"
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 		elif status=="stressed" and float(plot.condition)>=0.58:
 			plot["status"]="active"
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 		elif status=="damaged" and float(plot.condition)<0.14:
 			plot["status"]="ruin"
 			plot["repair_state"]="unrepairable"
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 		if absf(float(plot.condition)-previous_condition)>0.018:
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 	# A route's importance comes from its own frontage and every occupied branch
 	# feeding into it. Propagate demand through the inherited route tree so a
 	# heavily used approach can emerge organically instead of every segment being
@@ -1986,12 +1985,12 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 	var route_frontage_plots:Dictionary={}
 	var route_parent:Dictionary={}
 	var route_by_id:Dictionary={}
-	for route in GameState.settlement_routes:
+	for route in WorldSimulation.state.settlement_routes:
 		if bool(route.get("active",true)): route_by_id[int(route.id)]=route
 	for route_id in route_by_id:
 		route_direct_users[route_id]=0
 		route_frontage_plots[route_id]=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		var frontage_id:=int(plot.get("frontage_route_id",-1))
 		if not route_by_id.has(frontage_id): continue
 		route_frontage_plots[frontage_id]=int(route_frontage_plots.get(frontage_id,0))+1
@@ -2065,35 +2064,35 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		var widening_capacity:=clampf(builders*labor_efficiency/18.0,0.04,0.46)
 		route["width_m"]=move_toward(float(route.get("width_m",target_width)),target_width,0.035+widening_capacity*0.09)
 	if day%90==0:
-		GameState.morphology_revision+=1
+		WorldSimulation.state.morphology_revision+=1
 
 func _synchronize_early_works(day:int,events:Array[Dictionary])->void:
-	if "Lean-to Shelters" in GameState.settlement_completed:
-		for plot in GameState.settlement_plots:
+	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed:
+		for plot in WorldSimulation.state.settlement_plots:
 			if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"] or String(plot.get("form","")) not in ["portable_shelter_cluster","light_shelter_cluster"]: continue
 			plot["form"]="lean_to_household_cluster"
 			plot["converted_day"]=day
 			plot["roof_coverage"]=maxf(float(plot.get("roof_coverage",0.0)),0.22)
-			GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":"lean_to_household_cluster","cause":"Lean-to Shelters"})
+			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":"lean_to_household_cluster","cause":"Lean-to Shelters"})
 			_record_plot_building_event(plot,"converted",day,{},false,"Portable shelter became a rooted lean-to household cluster.")
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Shelters Took Root","plot_id":int(plot.id)})
 	var work_forms:Dictionary={"Storage Pits":{"use":"storage","from":"guarded_cache","to":"lined_storage_pits"},"Open Work Area":{"use":"workshop","from":"open_work_yard","to":"sheltered_work_area"}}
 	for work_name in work_forms:
-		if work_name not in GameState.settlement_completed: continue
+		if work_name not in WorldSimulation.state.settlement_completed: continue
 		var definition:Dictionary=work_forms[work_name]
-		for plot in GameState.settlement_plots:
+		for plot in WorldSimulation.state.settlement_plots:
 			if String(plot.get("land_use",""))!=String(definition.use) or String(plot.get("form",""))!=String(definition.from): continue
 			plot["form"]=definition.to
 			plot["converted_day"]=day
 			plot["roof_coverage"]=maxf(float(plot.get("roof_coverage",0.0)),0.28)
-			GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":definition.to,"cause":work_name})
+			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":definition.to,"cause":work_name})
 			_record_plot_building_event(plot,"converted",day,{},false,"%s changed this inherited ground." % work_name)
-			GameState.morphology_revision+=1
+			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"%s Changed the Ground" % work_name,"plot_id":int(plot.id)})
 
 func _settlement_age_years(day:int)->float:
-	var founded_day:=GameState.settlement_founded_day
+	var founded_day:=WorldSimulation.state.settlement_founded_day
 	if founded_day<0: founded_day=day
 	return maxf(0.0,float(day-founded_day)/365.0)
 
@@ -2117,28 +2116,28 @@ func _age_fabric_ceiling(age_years:float)->int:
 
 func _supported_fabric_tier(day:int)->int:
 	var age_ceiling:=_age_fabric_ceiling(_settlement_age_years(day))
-	var builders:=int(GameState.population_allocations.get("Construction",0))
-	var craftspeople:=int(GameState.population_allocations.get("Crafting",0))
-	var logisticians:=int(GameState.population_allocations.get("Logistics",0))
-	var administrators:=int(GameState.population_allocations.get("Administration",0))
+	var builders:=int(WorldSimulation.state.population_allocations.get("Construction",0))
+	var craftspeople:=int(WorldSimulation.state.population_allocations.get("Crafting",0))
+	var logisticians:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
+	var administrators:=int(WorldSimulation.state.population_allocations.get("Administration",0))
 	var support:=0
-	if "Lean-to Shelters" in GameState.settlement_completed and builders>=4: support=1
-	if GameState.settlement_completed.size()>=3 and craftspeople>=4: support=2
+	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed and builders>=4: support=1
+	if WorldSimulation.state.settlement_completed.size()>=3 and craftspeople>=4: support=2
 	if craftspeople>=8 and logisticians>=4: support=3
 	if craftspeople>=14 and logisticians>=8 and _active_nuclei()>=2: support=4
-	var logistics_metric:=float(GameState.simulation_metrics.get("logistics",0.0))
-	var labor_efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.0))
-	var construction_effect:=DiscoverySystem.effect("construction_rate")
-	var route_effect:=DiscoverySystem.effect("route_speed")
-	var craft_effect:=DiscoverySystem.effect("craft_output")
+	var logistics_metric:=float(WorldSimulation.state.simulation_metrics.get("logistics",0.0))
+	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.0))
+	var construction_effect:=WorldSimulation.discovery.effect("construction_rate")
+	var route_effect:=WorldSimulation.discovery.effect("route_speed")
+	var craft_effect:=WorldSimulation.discovery.effect("craft_output")
 	if craftspeople>=24 and logisticians>=12 and labor_efficiency>=0.48: support=5
 	if craftspeople>=36 and logisticians>=20 and administrators>=4 and logistics_metric+route_effect>=0.24: support=6
 	if craftspeople>=54 and logisticians>=30 and administrators>=8 and construction_effect+craft_effect>=0.035: support=7
 	if craftspeople>=80 and logisticians>=48 and administrators>=16 and construction_effect+route_effect+craft_effect>=0.075: support=8
 	if craftspeople>=120 and logisticians>=72 and administrators>=28 and construction_effect+route_effect+craft_effect>=0.13: support=9
-	var standardization:=DiscoverySystem.effect("standardization")
-	var state_capacity:=DiscoverySystem.effect("state_capacity")
-	var tool_quality:=DiscoverySystem.effect("tool_quality")
+	var standardization:=WorldSimulation.discovery.effect("standardization")
+	var state_capacity:=WorldSimulation.discovery.effect("state_capacity")
+	var tool_quality:=WorldSimulation.discovery.effect("tool_quality")
 	if craftspeople>=200 and logisticians>=120 and administrators>=60 and construction_effect+route_effect+craft_effect+standardization>=0.22: support=10
 	if craftspeople>=350 and logisticians>=220 and administrators>=120 and construction_effect+route_effect+craft_effect+standardization+tool_quality>=0.34: support=11
 	if craftspeople>=600 and logisticians>=400 and administrators>=250 and construction_effect+route_effect+craft_effect+standardization+tool_quality+state_capacity>=0.50: support=12
@@ -2174,29 +2173,29 @@ func _fabric_material_family_for(plot:Dictionary,target_tier:int)->String:
 	# entire town with one fashionable construction system.
 	var current:=String(plot.get("material_family","organic"))
 	var parcel_variant:=absi(int(plot.get("seed",1)))%10
-	var stone_program:=ConsequenceEngine.policy_effect("stone_priority")>0.01
+	var stone_program:=WorldSimulation.consequences.policy_effect("stone_priority")>0.01
 	var stone_tier:=1 if stone_program else 7
 	var stone_variants:=[0,1,3,4,6,8] if stone_program else [0,3,6,8]
-	if target_tier>=stone_tier and "stone_selection" in GameState.known_discoveries and float(GameState.resource_stockpiles.get("Stone",0.0))>=2.0 and parcel_variant in stone_variants:
+	if target_tier>=stone_tier and "stone_selection" in WorldSimulation.state.known_discoveries and float(WorldSimulation.state.resource_stockpiles.get("Stone",0.0))>=2.0 and parcel_variant in stone_variants:
 		return "stone"
-	if target_tier>=4 and "clay_shaping" in GameState.known_discoveries and float(GameState.resource_stockpiles.get("Clay",0.0))>=1.5 and parcel_variant in [1,2,4,5,7]:
+	if target_tier>=4 and "clay_shaping" in WorldSimulation.state.known_discoveries and float(WorldSimulation.state.resource_stockpiles.get("Clay",0.0))>=1.5 and parcel_variant in [1,2,4,5,7]:
 		return "earth"
 	return current
 
 func _can_pay_fabric_cost(cost:Dictionary)->bool:
 	for resource_name in cost:
-		if float(GameState.resource_stockpiles.get(resource_name,0.0))<float(cost[resource_name]): return false
+		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))<float(cost[resource_name]): return false
 	return true
 
 func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 	# A quarterly bounded conversion keeps centuries affordable and ensures that an
 	# era remains a heterogeneous accretion of old and new fabric. Population never
 	# repaints the whole settlement in one frame.
-	if day%90!=0 or int(GameState.population_allocations.get("Construction",0))<4: return
+	if day%90!=0 or int(WorldSimulation.state.population_allocations.get("Construction",0))<4: return
 	var target_tier:=_supported_fabric_tier(day)
 	if target_tier<=0: return
 	var candidates:Array[Dictionary]=[]
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) not in ["active","stressed"]: continue
 		if String(plot.get("land_use","")) in ["temporary_encampment","water","waste","pasture","vacant","ruin"]: continue
 		var current_tier:=int(plot.get("fabric_generation",0))
@@ -2211,8 +2210,8 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 		candidates.append({"plot":plot,"next_tier":next_tier,"cost":cost,"score":score})
 	if candidates.is_empty(): return
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.score)>float(b.score))
-	var builders:=int(GameState.population_allocations.get("Construction",0))
-	var logistics:=clampf(float(GameState.simulation_metrics.get("logistics",0.0)),0.0,1.0)
+	var builders:=int(WorldSimulation.state.population_allocations.get("Construction",0))
+	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.0)),0.0,1.0)
 	var upgrade_slots:=clampi(1+floori(float(builders)/80.0)+floori(logistics*2.0),1,12)
 	for candidate_index in mini(upgrade_slots,candidates.size()):
 		var chosen:Dictionary=candidates[candidate_index]
@@ -2224,7 +2223,7 @@ func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->
 	var next_tier:int=chosen.next_tier
 	var cost:Dictionary=chosen.cost
 	for resource_name in cost:
-		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(cost[resource_name]))
+		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(cost[resource_name]))
 	var previous_form:=String(chosen_plot.get("form","inherited_plot"))
 	var use:=String(chosen_plot.get("land_use",""))
 	var target_family:=_fabric_material_family_for(chosen_plot,next_tier)
@@ -2242,7 +2241,7 @@ func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->
 		var durable:=String(chosen_plot.get("material_family","organic")) in ["earth","stone"]
 		var new_storeys:=1
 		if durable and next_tier>=5: new_storeys=2
-		if durable and next_tier>=8 and DiscoverySystem.effect("construction_rate")>=0.025: new_storeys=3
+		if durable and next_tier>=8 and WorldSimulation.discovery.effect("construction_rate")>=0.025: new_storeys=3
 		if next_tier>=11:new_storeys=4+posmod(int(chosen_plot.get("seed",1)),3)
 		if next_tier>=12:new_storeys=6+posmod(int(chosen_plot.get("seed",1)),7)
 		chosen_plot["storeys"]=maxi(int(chosen_plot.get("storeys",1)),new_storeys)
@@ -2252,29 +2251,29 @@ func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->
 	var provenance:Dictionary=chosen_plot.get("supply_provenance",{}).duplicate(true)
 	for resource_name in cost: provenance[resource_name]=float(provenance.get(resource_name,0.0))+float(cost[resource_name])
 	chosen_plot["supply_provenance"]=provenance
-	GameState.settlement_plot_history.append({"day":day,"plot_id":int(chosen_plot.id),"event":"fabric_evolved","old_form":previous_form,"new_state":String(chosen_plot.form),"cause":"sustained use, inherited access, skilled labour, and delivered replacement material","fabric_generation":next_tier})
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(chosen_plot.id),"event":"fabric_evolved","old_form":previous_form,"new_state":String(chosen_plot.form),"cause":"sustained use, inherited access, skilled labour, and delivered replacement material","fabric_generation":next_tier})
 	_record_plot_building_event(chosen_plot,"rebuilt",day,cost.duplicate(true),true,"%s became %s as inherited fabric was renewed." % [previous_form.replace("_"," "),String(chosen_plot.form).replace("_"," ")])
 	# Route surfacing records cumulative public work separately from hierarchy. A
 	# lane may remain geometrically ancient while its surface changes repeatedly.
 	var frontage_id:=int(chosen_plot.get("frontage_route_id",-1))
-	for route in GameState.settlement_routes:
+	for route in WorldSimulation.state.settlement_routes:
 		if int(route.get("id",-2))!=frontage_id: continue
 		var surface_tier:=mini(next_tier,5)
 		route["surface_tier"]=maxi(int(route.get("surface_tier",0)),surface_tier)
 		route["surface"]=["trodden","cleared_earth","compacted_earth","drained_earth","gravel_or_rubble","maintained_hard_surface"][surface_tier]
 		route["condition"]=minf(1.0,float(route.get("condition",0.3))+0.06)
 		break
-	GameState.morphology_revision+=1
+	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"Inherited Ground Changed With Use","plot_id":int(chosen_plot.id),"form":String(chosen_plot.form)})
 
 func _functional_plot_count(land_use:String)->int:
 	var count:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use",""))==land_use and String(plot.get("status","")) not in ["ruin","reclaimed"]: count+=1
 	return count
 
 func _available_functional_recipe(land_use:String)->Dictionary:
-	var stocks:=GameState.resource_stockpiles
+	var stocks:=WorldSimulation.state.resource_stockpiles
 	var recipes:Array[Dictionary]=[]
 	if land_use=="workshop":
 		recipes=[
@@ -2312,7 +2311,7 @@ func _available_functional_recipe(land_use:String)->Dictionary:
 		]
 	for recipe in recipes:
 		var discovery:=String(recipe.get("requires",""))
-		if not discovery.is_empty() and discovery not in GameState.known_discoveries: continue
+		if not discovery.is_empty() and discovery not in WorldSimulation.state.known_discoveries: continue
 		var available:=true
 		for resource_name in recipe.cost:
 			if float(stocks.get(resource_name,0.0))<float(recipe.cost[resource_name]):
@@ -2323,27 +2322,27 @@ func _available_functional_recipe(land_use:String)->Dictionary:
 
 func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
-	if _has_active_construction() or int(GameState.population_allocations.get("Construction",0))<4: return
+	if _has_active_construction() or int(WorldSimulation.state.population_allocations.get("Construction",0))<4: return
 	var candidates:Array[Dictionary]=[]
-	if "Open Work Area" in GameState.settlement_completed:
-		var crafting:=int(GameState.population_allocations.get("Crafting",0))
+	if "Open Work Area" in WorldSimulation.state.settlement_completed:
+		var crafting:=int(WorldSimulation.state.population_allocations.get("Crafting",0))
 		var desired_workshops:=clampi(floori(float(crafting)/6.0),1,14)
 		var existing_workshops:=_functional_plot_count("workshop")
 		if existing_workshops<desired_workshops:
 			candidates.append({"use":"workshop","pressure":float(desired_workshops-existing_workshops)+float(crafting)/20.0})
-	if "Storage Pits" in GameState.settlement_completed:
-		var logistics:=int(GameState.population_allocations.get("Logistics",0))
+	if "Storage Pits" in WorldSimulation.state.settlement_completed:
+		var logistics:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
 		var desired_storage:=clampi(floori(float(logistics)/5.0),1,14)
-		var stored_bulk:=float(GameState.simulation_metrics.get("material_stored_bulk",0.0))
-		var capacity:=float(GameState.simulation_metrics.get("material_storage_capacity",1.0))
+		var stored_bulk:=float(WorldSimulation.state.simulation_metrics.get("material_stored_bulk",0.0))
+		var capacity:=float(WorldSimulation.state.simulation_metrics.get("material_storage_capacity",1.0))
 		if stored_bulk>capacity*0.72: desired_storage+=1
 		var existing_storage:=_functional_plot_count("storage")
 		if existing_storage<desired_storage:
 			candidates.append({"use":"storage","pressure":float(desired_storage-existing_storage)+stored_bulk/maxf(1.0,capacity)})
 	var settlement_age:=_settlement_age_years(day)
-	var logistics_workers:=int(GameState.population_allocations.get("Logistics",0))
-	var administration_workers:=int(GameState.population_allocations.get("Administration",0))
-	var extraction_workers:=int(GameState.population_allocations.get("Extraction",0))
+	var logistics_workers:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
+	var administration_workers:=int(WorldSimulation.state.population_allocations.get("Administration",0))
+	var extraction_workers:=int(WorldSimulation.state.population_allocations.get("Extraction",0))
 	if settlement_age>=10.0 and logistics_workers>=12:
 		var desired_markets:=clampi(1+floori(float(logistics_workers)/90.0),1,10)
 		var existing_markets:=_functional_plot_count("market")
@@ -2356,7 +2355,7 @@ func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Diction
 		var desired_civic:=clampi(1+floori(float(administration_workers)/110.0),1,8)
 		var existing_civic:=_functional_plot_count("civic")
 		if existing_civic<desired_civic: candidates.append({"use":"civic","pressure":float(desired_civic-existing_civic)+float(administration_workers)/160.0})
-	if settlement_age>=40.0 and extraction_workers>=18 and "stone_selection" in GameState.known_discoveries:
+	if settlement_age>=40.0 and extraction_workers>=18 and "stone_selection" in WorldSimulation.state.known_discoveries:
 		var desired_industry:=clampi(1+floori(float(extraction_workers)/70.0),1,12)
 		var existing_industry:=_functional_plot_count("dirty_industry")
 		if existing_industry<desired_industry: candidates.append({"use":"dirty_industry","pressure":float(desired_industry-existing_industry)+float(extraction_workers)/100.0})
@@ -2369,12 +2368,12 @@ func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Diction
 		var plot:=_create_functional_growth_plot(day,land_use,recipe,context)
 		if plot.is_empty(): continue
 		for resource_name in recipe.cost:
-			GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(recipe.cost[resource_name]))
+			WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(recipe.cost[resource_name]))
 		_create_growth_route(plot,day)
-		GameState.settlement_plots.append(plot)
-		GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":String(plot.growth_cause)})
+		WorldSimulation.state.settlement_plots.append(plot)
+		WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":String(plot.growth_cause)})
 		_record_plot_building_event(plot,"started",day,(recipe.cost as Dictionary).duplicate(true),true,String(plot.growth_cause))
-		GameState.morphology_revision+=1
+		WorldSimulation.state.morphology_revision+=1
 		events.append({"type":"morphology","title":"%s Claimed" % ("New Working Ground" if land_use=="workshop" else "New Storage Ground"),"plot_id":int(plot.id)})
 		return
 
@@ -2382,12 +2381,12 @@ func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:D
 	# Reject occupied ground first. The remaining terms make settlement growth
 	# follow inherited lanes, useful nuclei, water and buildable terrain instead of
 	# adding rings around an abstract population centre.
-	for existing in GameState.settlement_plots:
+	for existing in WorldSimulation.state.settlement_plots:
 		var existing_radius:=sqrt(_polygon_area_km2(existing.get("polygon",PackedVector2Array()))/PI)
 		if candidate.distance_to(Vector2(existing.get("centroid",Vector2.ZERO)))<(radius+existing_radius)*1.18:
 			return -10000.0
 	var nearest_route:=INF
-	for route in GameState.settlement_routes:
+	for route in WorldSimulation.state.settlement_routes:
 		if not bool(route.get("active",true)): continue
 		var points:PackedVector2Array=route.get("points",PackedVector2Array())
 		for point_index in points.size()-1:
@@ -2395,7 +2394,7 @@ func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:D
 	var route_access:=exp(-nearest_route/0.018) if nearest_route<INF else 0.0
 	var nucleus_pull:=0.0
 	var nearest_nucleus_distance:=INF
-	for nucleus in GameState.settlement_nuclei:
+	for nucleus in WorldSimulation.state.settlement_nuclei:
 		if not bool(nucleus.get("active",true)): continue
 		var distance:=candidate.distance_to(Vector2(nucleus.get("position",Vector2.ZERO)))
 		nearest_nucleus_distance=minf(nearest_nucleus_distance,distance)
@@ -2407,7 +2406,7 @@ func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:D
 	if land_use=="storage": score+=compactness*1.25
 	elif land_use in ["workshop","dirty_industry"]: score+=edge_preference*1.12-route_access*0.10
 	else: score+=compactness*0.86
-	var origin:Vector3=context.get("settlement_origin",GameState.settlement_founded_at)
+	var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
 	var world_x:=origin.x+candidate.x
 	var world_z:=origin.z+candidate.y
 	var buildable_callable:Callable=context.get("buildable_land_at",Callable())
@@ -2430,7 +2429,7 @@ func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:D
 func _nearest_nucleus_id(position:Vector2)->int:
 	var nearest_id:=1
 	var nearest_distance:=INF
-	for nucleus in GameState.settlement_nuclei:
+	for nucleus in WorldSimulation.state.settlement_nuclei:
 		if not bool(nucleus.get("active",true)): continue
 		var distance:=position.distance_to(Vector2(nucleus.get("position",Vector2.ZERO)))
 		if distance<nearest_distance:
@@ -2439,13 +2438,13 @@ func _nearest_nucleus_id(position:Vector2)->int:
 	return nearest_id
 
 func _create_functional_growth_plot(day:int,land_use:String,recipe:Dictionary,context:Dictionary={})->Dictionary:
-	var plot_id:=GameState.next_settlement_plot_id
-	var plot_seed:=hash("%d:settlement_%s:%d" % [GameState.world_seed,land_use,plot_id])
+	var plot_id:=WorldSimulation.state.next_settlement_plot_id
+	var plot_seed:=hash("%d:settlement_%s:%d" % [WorldSimulation.state.world_seed,land_use,plot_id])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed
 	var radius:=rng.randf_range(0.009,0.014) if land_use in ["workshop","market","hospitality"] else (rng.randf_range(0.012,0.019) if land_use in ["civic","dirty_industry"] else rng.randf_range(0.008,0.012))
 	var anchors:Array[Dictionary]=[]
-	for existing in GameState.settlement_plots:
+	for existing in WorldSimulation.state.settlement_plots:
 		if String(existing.get("status","")) in ["ruin","reclaimed"]: continue
 		var existing_use:=String(existing.get("land_use",""))
 		if existing_use==land_use or existing_use in ["communal","mixed_household"]: anchors.append(existing)
@@ -2466,10 +2465,10 @@ func _create_functional_growth_plot(day:int,land_use:String,recipe:Dictionary,co
 			best_center=center
 	if best_score<=-9000.0: return {}
 	center=best_center
-	GameState.next_settlement_plot_id+=1
+	WorldSimulation.state.next_settlement_plot_id+=1
 	var polygon:=_irregular_polygon(center,radius,plot_seed)
 	var worker_role:=String({"workshop":"Crafting","storage":"Logistics","market":"Logistics","hospitality":"Logistics","civic":"Administration","dirty_industry":"Extraction"}.get(land_use,"Logistics"))
-	var workers:=int(GameState.population_allocations.get(worker_role,0))
+	var workers:=int(WorldSimulation.state.population_allocations.get(worker_role,0))
 	var worker_capacity:=rng.randi_range(5,8) if land_use not in ["civic","dirty_industry"] else rng.randi_range(10,18)
 	var secondary_use:=String({"workshop":"craft","storage":"provisions","market":"exchange","hospitality":"lodging","civic":"administration","dirty_industry":"bulk_processing"}.get(land_use,"service"))
 	return {
@@ -2482,22 +2481,22 @@ func _create_functional_growth_plot(day:int,land_use:String,recipe:Dictionary,co
 
 func _resident_capacity_for_growth()->int:
 	var capacity:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) in ["active","stressed","under_construction"]:
 			capacity+=int(plot.get("resident_capacity",0))
 	return capacity
 
 func _available_household_recipe()->Dictionary:
-	var stocks:=GameState.resource_stockpiles
+	var stocks:=WorldSimulation.state.resource_stockpiles
 	# A stone-housing directive changes which feasible recipe builders choose; it
 	# cannot bypass the material discovery or the delivered stock requirement.
-	if ConsequenceEngine.policy_effect("stone_priority")>0.01 and "stone_selection" in GameState.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
+	if WorldSimulation.consequences.policy_effect("stone_priority")>0.01 and "stone_selection" in WorldSimulation.state.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
 		return {"family":"stone","form":"dry_stone_household","cost":{"Stone":4.2,"Timber":0.8},"mix":{"Stone":0.72,"Timber":0.12,"Fiber Plants":0.06}}
 	if float(stocks.get("Timber",0.0))>=1.8 and float(stocks.get("Fiber Plants",0.0))>=1.2:
 		return {"family":"organic","form":"timber_and_fibre_household","cost":{"Timber":1.8,"Fiber Plants":1.2},"mix":{"Timber":0.52,"Fiber Plants":0.34,"Clay":0.05}}
-	if "clay_shaping" in GameState.known_discoveries and float(stocks.get("Clay",0.0))>=3.2 and float(stocks.get("Fiber Plants",0.0))>=0.6:
+	if "clay_shaping" in WorldSimulation.state.known_discoveries and float(stocks.get("Clay",0.0))>=3.2 and float(stocks.get("Fiber Plants",0.0))>=0.6:
 		return {"family":"earth","form":"earthen_household","cost":{"Clay":3.2,"Fiber Plants":0.6},"mix":{"Clay":0.68,"Fiber Plants":0.16,"Timber":0.08}}
-	if "stone_selection" in GameState.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
+	if "stone_selection" in WorldSimulation.state.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
 		return {"family":"stone","form":"dry_stone_household","cost":{"Stone":4.2,"Timber":0.8},"mix":{"Stone":0.72,"Timber":0.12,"Fiber Plants":0.06}}
 	return {}
 
@@ -2505,7 +2504,7 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	if not _can_add_plots(): return false
 	var capacity:=_resident_capacity_for_growth()
 	if _primary_population()<=roundi(float(capacity)*0.88): return false
-	if int(GameState.population_allocations.get("Construction",0))<4: return false
+	if int(WorldSimulation.state.population_allocations.get("Construction",0))<4: return false
 	var recipe:=_available_household_recipe()
 	if recipe.is_empty(): return false
 	# Some pressure becomes roofed infill inside a viable inherited compound;
@@ -2516,22 +2515,22 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	var plot:=_create_household_growth_plot(day,recipe,context)
 	if plot.is_empty(): return false
 	for resource_name in recipe.cost:
-		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(recipe.cost[resource_name]))
+		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(recipe.cost[resource_name]))
 	_create_growth_route(plot,day)
-	GameState.settlement_plots.append(plot)
-	GameState.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":"household crowding, available labor, and delivered materials"})
+	WorldSimulation.state.settlement_plots.append(plot)
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":"household crowding, available labor, and delivered materials"})
 	_record_plot_building_event(plot,"started",day,(recipe.cost as Dictionary).duplicate(true),true,"Household crowding, available labor, and delivered materials.")
-	GameState.morphology_revision+=1
+	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"New Household Ground Claimed","plot_id":int(plot.id)})
 	return true
 
 func _attempt_household_infill(day:int,recipe:Dictionary,events:Array[Dictionary],action_index:=0)->bool:
 	var route_by_id:Dictionary={}
-	for route in GameState.settlement_routes:
+	for route in WorldSimulation.state.settlement_routes:
 		if bool(route.get("active",true)): route_by_id[int(route.get("id",-1))]=route
 	var best_plot:Dictionary={}
 	var best_score:=-INF
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]: continue
 		if String(plot.get("status","")) not in ["active","stressed"]: continue
 		var coverage:=float(plot.get("roof_coverage",0.0))
@@ -2547,12 +2546,12 @@ func _attempt_household_infill(day:int,recipe:Dictionary,events:Array[Dictionary
 	var cost_scale:=0.58+float(int(best_plot.get("infill_units",0)))*0.12
 	for resource_name in recipe.cost:
 		var required:=float(recipe.cost[resource_name])*cost_scale
-		if float(GameState.resource_stockpiles.get(resource_name,0.0))<required: return false
+		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))<required: return false
 	for resource_name in recipe.cost:
 		var required:=float(recipe.cost[resource_name])*cost_scale
-		GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-required)
+		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-required)
 	var rng:=RandomNumberGenerator.new()
-	rng.seed=hash("%d:infill:%d:%d:%d" % [GameState.world_seed,int(best_plot.id),day,action_index])
+	rng.seed=hash("%d:infill:%d:%d:%d" % [WorldSimulation.state.world_seed,int(best_plot.id),day,action_index])
 	var capacity_gain:=rng.randi_range(3,6)
 	best_plot["infill_units"]=int(best_plot.get("infill_units",0))+1
 	best_plot["resident_capacity"]=int(best_plot.get("resident_capacity",0))+capacity_gain
@@ -2564,11 +2563,11 @@ func _attempt_household_infill(day:int,recipe:Dictionary,events:Array[Dictionary
 	var provenance:Dictionary=best_plot.get("supply_provenance",{}).duplicate(true)
 	for resource_name in recipe.cost: provenance[resource_name]=float(provenance.get(resource_name,0.0))+float(recipe.cost[resource_name])*cost_scale
 	best_plot["supply_provenance"]=provenance
-	GameState.settlement_plot_history.append({"day":day,"plot_id":int(best_plot.id),"event":"compound_infilled","new_state":"active","cause":"household pressure, route access, construction labor, and delivered materials roofed part of an inherited yard","capacity_gain":capacity_gain})
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(best_plot.id),"event":"compound_infilled","new_state":"active","cause":"household pressure, route access, construction labor, and delivered materials roofed part of an inherited yard","capacity_gain":capacity_gain})
 	var infill_materials:Dictionary={}
 	for resource_name in recipe.cost: infill_materials[String(resource_name)]=float(recipe.cost[resource_name])*cost_scale
 	_record_plot_building_event(best_plot,"infilled",day,infill_materials,true,"Roofed part of an inherited yard; gained capacity for %d people." % capacity_gain)
-	GameState.morphology_revision+=1
+	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"An Inherited Compound Was Infilled","plot_id":int(best_plot.id),"capacity_gain":capacity_gain})
 	return true
 
@@ -2576,25 +2575,25 @@ func _create_growth_route(plot:Dictionary,day:int,route_kind:String="desire_path
 	var plot_center:=Vector2(plot.get("centroid",Vector2.ZERO))
 	var nearest:=Vector2.ZERO
 	var nearest_distance:=INF
-	for existing in GameState.settlement_plots:
+	for existing in WorldSimulation.state.settlement_plots:
 		var candidate:=Vector2(existing.get("centroid",Vector2.ZERO))
 		var distance:=plot_center.distance_to(candidate)
 		if distance<nearest_distance:
 			nearest=candidate
 			nearest_distance=distance
 	var route_id:=1
-	for route in GameState.settlement_routes: route_id=maxi(route_id,int(route.get("id",0))+1)
+	for route in WorldSimulation.state.settlement_routes: route_id=maxi(route_id,int(route.get("id",0))+1)
 	var direction:=nearest-plot_center
 	var side:=Vector2(-direction.y,direction.x).normalized()
 	var bend_strength:=minf(0.004,nearest_distance*0.16)
-	var bend_a:=plot_center.lerp(nearest,0.36)+side*sin(float(int(plot.id)*29+GameState.world_seed))*bend_strength
-	var bend_b:=plot_center.lerp(nearest,0.72)-side*sin(float(int(plot.id)*17+GameState.world_seed)*0.67)*bend_strength*0.62
-	GameState.settlement_routes.append({"id":route_id,"kind":route_kind,"points":PackedVector2Array([plot_center,bend_a,bend_b,nearest]),"condition":0.10 if route_kind=="camp_path" else (0.16 if route_kind=="field_track" else 0.22),"width_m":0.34 if route_kind=="camp_path" else (0.72 if route_kind=="field_track" else 0.58),"created_day":day,"active":true})
+	var bend_a:=plot_center.lerp(nearest,0.36)+side*sin(float(int(plot.id)*29+WorldSimulation.state.world_seed))*bend_strength
+	var bend_b:=plot_center.lerp(nearest,0.72)-side*sin(float(int(plot.id)*17+WorldSimulation.state.world_seed)*0.67)*bend_strength*0.62
+	WorldSimulation.state.settlement_routes.append({"id":route_id,"kind":route_kind,"points":PackedVector2Array([plot_center,bend_a,bend_b,nearest]),"condition":0.10 if route_kind=="camp_path" else (0.16 if route_kind=="field_track" else 0.22),"width_m":0.34 if route_kind=="camp_path" else (0.72 if route_kind=="field_track" else 0.58),"created_day":day,"active":true})
 	plot["frontage_route_id"]=route_id
 
 func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary={})->Dictionary:
-	var plot_id:=GameState.next_settlement_plot_id
-	var plot_seed:=hash("%d:settlement_growth:%d" % [GameState.world_seed,plot_id])
+	var plot_id:=WorldSimulation.state.next_settlement_plot_id
+	var plot_seed:=hash("%d:settlement_growth:%d" % [WorldSimulation.state.world_seed,plot_id])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed
 	var radius:=rng.randf_range(0.007,0.010)
@@ -2602,12 +2601,12 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 	var best_center:=Vector2.ZERO
 	var best_score:=-INF
 	var anchors:Array[Dictionary]=[]
-	for existing in GameState.settlement_plots:
+	for existing in WorldSimulation.state.settlement_plots:
 		if String(existing.get("land_use","")) in ["residential_compound","mixed_household","communal","workshop"] and String(existing.get("status","")) not in ["ruin","reclaimed"]:
 			anchors.append(existing)
 	if anchors.is_empty(): return {}
 	var active_nuclei:Array[Dictionary]=[]
-	for nucleus in GameState.settlement_nuclei:
+	for nucleus in WorldSimulation.state.settlement_nuclei:
 		if bool(nucleus.get("active",true)): active_nuclei.append(nucleus)
 	var target_nucleus:Dictionary=active_nuclei[absi(plot_seed)%active_nuclei.size()] if not active_nuclei.is_empty() else {"id":1,"position":Vector2.ZERO}
 	var target_nucleus_position:=Vector2(target_nucleus.get("position",Vector2.ZERO))
@@ -2615,7 +2614,7 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 		return Vector2(a.get("centroid",Vector2.ZERO)).distance_to(target_nucleus_position)<Vector2(b.get("centroid",Vector2.ZERO)).distance_to(target_nucleus_position))
 	var cluster_growth:=anchors.size()>=34 and plot_id%10 in [0,1,2]
 	var cluster_phase:=floori(float(plot_id)/10.0)
-	var cluster_angle:=fmod(float(hash("%d:outer_cluster:%d" % [GameState.world_seed,cluster_phase]))*0.000001,TAU)
+	var cluster_angle:=fmod(float(hash("%d:outer_cluster:%d" % [WorldSimulation.state.world_seed,cluster_phase]))*0.000001,TAU)
 	var cluster_target:=target_nucleus_position+Vector2.from_angle(cluster_angle)*((0.090+float(cluster_phase%4)*0.014) if cluster_growth else 0.0)
 	for attempt in 72:
 		var anchor_index:=mini(anchors.size()-1,floori(pow(rng.randf(),2.15)*float(anchors.size())))
@@ -2635,14 +2634,14 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 		var score:=_growth_site_score(center,radius,"residential_compound",context)
 		# Most households infill, but a stable seeded minority follows the outer
 		# frontage so a settlement develops irregular arms rather than a disk.
-		if (plot_id+GameState.world_seed)%5==0: score+=exp(-absf(center.distance_to(target_nucleus_position)-0.11)/0.075)*0.82
+		if (plot_id+WorldSimulation.state.world_seed)%5==0: score+=exp(-absf(center.distance_to(target_nucleus_position)-0.11)/0.075)*0.82
 		if cluster_growth: score+=exp(-center.distance_to(cluster_target)/0.075)*1.48
 		if score>best_score:
 			best_score=score
 			best_center=center
 	if best_score<=-9000.0: return {}
 	center=best_center
-	GameState.next_settlement_plot_id+=1
+	WorldSimulation.state.next_settlement_plot_id+=1
 	var polygon:=_irregular_polygon(center,radius,plot_seed)
 	return {
 		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
@@ -2674,7 +2673,7 @@ func rebuild_summary()->Dictionary:
 	var occupied_capacity:=0
 	var fabric_generation_total:=0.0
 	var era_counts:Dictionary={}
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		var area:=float(plot.get("area_ha",0.0))
 		built_area+=area
 		condition_total+=float(plot.get("condition",0.0))
@@ -2693,28 +2692,28 @@ func rebuild_summary()->Dictionary:
 			fabric_generation_total+=float(plot.get("fabric_generation",0))
 			var era_key:=String(plot.get("morphology_era","founding"))
 			era_counts[era_key]=int(era_counts.get(era_key,0))+1
-	var count:=GameState.settlement_plots.size()
+	var count:=WorldSimulation.state.settlement_plots.size()
 	var population:=_primary_population()
 	var mean_fabric_generation:=fabric_generation_total/maxf(1.0,float(count))
 	var fabric_maturity:=clampf(mean_fabric_generation/12.0,0.0,1.0)
 	var surfaced_routes:=0
-	for route in GameState.settlement_routes:
+	for route in WorldSimulation.state.settlement_routes:
 		if int(route.get("surface_tier",0))>=2: surfaced_routes+=1
-	var surfaced_route_share:=float(surfaced_routes)/maxf(1.0,float(GameState.settlement_routes.size()))
-	var permanence:=clampf(0.16+float(active_plots)/maxf(1.0,float(count))*0.15+float(GameState.settlement_completed.size())*0.035+fabric_maturity*0.34,0.0,1.0)
-	var specialization:=clampf(float(GameState.population_allocations.get("Crafting",0)+GameState.population_allocations.get("Extraction",0)+GameState.population_allocations.get("Knowledge",0)+GameState.population_allocations.get("Administration",0)+GameState.population_allocations.get("Logistics",0))/maxf(1.0,_primary_able_population()),0.0,1.0)
-	var exchange:=clampf(float(GameState.economy_metrics.get("market_access",float(GameState.simulation_metrics.get("logistics",0.16))*0.35+DiscoverySystem.effect("trade_capacity")*0.40)),0.0,1.0)
-	var institutions:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.62))*0.35+GameState.effective_workers("Administration")/maxf(1.0,float(population)*0.06)*0.25,0.0,1.0)
-	var connectivity:=clampf(float(GameState.simulation_metrics.get("logistics",0.16))*0.55+DiscoverySystem.effect("route_speed")*0.30,0.0,1.0)
-	var infrastructure:=clampf(float(GameState.settlement_completed.size())/10.0+DiscoverySystem.effect("construction_rate")*0.20+fabric_maturity*0.26+surfaced_route_share*0.18,0.0,1.0)
+	var surfaced_route_share:=float(surfaced_routes)/maxf(1.0,float(WorldSimulation.state.settlement_routes.size()))
+	var permanence:=clampf(0.16+float(active_plots)/maxf(1.0,float(count))*0.15+float(WorldSimulation.state.settlement_completed.size())*0.035+fabric_maturity*0.34,0.0,1.0)
+	var specialization:=clampf(float(WorldSimulation.state.population_allocations.get("Crafting",0)+WorldSimulation.state.population_allocations.get("Extraction",0)+WorldSimulation.state.population_allocations.get("Knowledge",0)+WorldSimulation.state.population_allocations.get("Administration",0)+WorldSimulation.state.population_allocations.get("Logistics",0))/maxf(1.0,_primary_able_population()),0.0,1.0)
+	var exchange:=clampf(float(WorldSimulation.state.economy_metrics.get("market_access",float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))*0.35+WorldSimulation.discovery.effect("trade_capacity")*0.40)),0.0,1.0)
+	var institutions:=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.62))*0.35+WorldSimulation.state.effective_workers("Administration")/maxf(1.0,float(population)*0.06)*0.25,0.0,1.0)
+	var connectivity:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))*0.55+WorldSimulation.discovery.effect("route_speed")*0.30,0.0,1.0)
+	var infrastructure:=clampf(float(WorldSimulation.state.settlement_completed.size())/10.0+WorldSimulation.discovery.effect("construction_rate")*0.20+fabric_maturity*0.26+surfaced_route_share*0.18,0.0,1.0)
 	var service_population:=roundi(float(population)*(1.0+exchange*0.55+connectivity*0.35))
-	var food_import_share:=clampf(float(GameState.simulation_metrics.get("food_import_share",0.0)),0.0,1.0)
+	var food_import_share:=clampf(float(WorldSimulation.state.simulation_metrics.get("food_import_share",0.0)),0.0,1.0)
 	var summary:Dictionary={
 		"classification":"founding camp","classification_confidence":0.80,"resident_population":population,"service_population":service_population,
 		"built_area_ha":built_area,"occupied_area_ha":occupied_area,"vacancy_ratio":float(vacant)/maxf(1.0,float(count)),"ruin_ratio":float(ruins)/maxf(1.0,float(count)),
 		"mean_condition":condition_total/maxf(1.0,float(count)),"density_people_ha":float(population)/maxf(0.01,occupied_area),"permanence":permanence,
 		"specialization":specialization,"exchange":exchange,"institutions":institutions,"connectivity":connectivity,"infrastructure":infrastructure,
-		"price_stability":clampf(1.0-absf(float(GameState.economy_metrics.get("inflation",0.0)))*8.0,0.0,1.0),"inequality":float(GameState.economy_metrics.get("inequality",0.0)),
+		"price_stability":clampf(1.0-absf(float(WorldSimulation.state.economy_metrics.get("inflation",0.0)))*8.0,0.0,1.0),"inequality":float(WorldSimulation.state.economy_metrics.get("inequality",0.0)),
 		"diversity":clampf(float(uses.size())/12.0,0.0,1.0),"mean_fabric_generation":mean_fabric_generation,"fabric_maturity":fabric_maturity,"morphology_eras":era_counts,"surfaced_route_share":surfaced_route_share,"food_import_share":food_import_share,"active_nuclei":_active_nuclei(),"district_count":maxi(1,_active_nuclei()),
 		"usable_resident_capacity":occupied_capacity,"population_without_permanent_housing":maxi(0,population-occupied_capacity),"temporary_camp_population":temporary_camp_population,"temporary_shelter_capacity":temporary_shelter_capacity,"unsheltered_population":maxi(0,population-occupied_capacity-temporary_shelter_capacity),"limiting_factors":[]
 	}
@@ -2722,7 +2721,7 @@ func rebuild_summary()->Dictionary:
 	summary["classification"]=classification_result.classification
 	summary["classification_confidence"]=classification_result.confidence
 	summary["limiting_factors"]=classification_result.limits
-	GameState.settlement_morphology=summary
+	WorldSimulation.state.settlement_morphology=summary
 	return summary
 
 func _classify(summary:Dictionary)->Dictionary:
@@ -2731,7 +2730,7 @@ func _classify(summary:Dictionary)->Dictionary:
 	if float(summary.permanence)<0.50:
 		return {"classification":"hamlet","confidence":0.78,"limits":["permanence remains below village level"]}
 	var communal_functions:=0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use","")) in ["communal","storage","water","civic","sacred"] and String(plot.get("status",""))=="active": communal_functions+=1
 	var resident_population:=int(summary.resident_population)
 	var city_functions:=float(summary.exchange)>=0.55 and float(summary.institutions)>=0.50 and float(summary.infrastructure)>=0.50 and float(summary.food_import_share)>=0.15 and int(summary.district_count)>=3 and float(summary.service_population)>=float(summary.resident_population)*1.5
@@ -2751,24 +2750,24 @@ func _classify(summary:Dictionary)->Dictionary:
 	return {"classification":"hamlet","confidence":0.70,"limits":limits}
 
 func classification()->String:
-	if GameState.settlement_morphology.is_empty(): rebuild_summary()
-	return String(GameState.settlement_morphology.get("classification","founding camp"))
+	if WorldSimulation.state.settlement_morphology.is_empty(): rebuild_summary()
+	return String(WorldSimulation.state.settlement_morphology.get("classification","founding camp"))
 
 func classification_reason()->String:
-	if GameState.settlement_morphology.is_empty(): rebuild_summary()
-	var limits:Array=GameState.settlement_morphology.get("limiting_factors",[])
+	if WorldSimulation.state.settlement_morphology.is_empty(): rebuild_summary()
+	var limits:Array=WorldSimulation.state.settlement_morphology.get("limiting_factors",[])
 	return "Functional gates satisfied." if limits.is_empty() else "; ".join(limits)
 
 func plots_for_lod(lod:int)->Array[Dictionary]:
 	ensure_founded()
-	return GameState.settlement_plots.duplicate(true)
+	return WorldSimulation.state.settlement_plots.duplicate(true)
 
 func apply_plot_damage(plot_id:int,severity:float,cause:String)->Dictionary:
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if int(plot.get("id",-1))!=plot_id: continue
 		_apply_damage_to_plot_record(plot,clampf(severity,0.0,1.0),cause)
 		_record_plot_damage_history(plot,cause)
-		GameState.morphology_revision+=1
+		WorldSimulation.state.morphology_revision+=1
 		rebuild_summary()
 		return plot
 	return {}
@@ -2779,7 +2778,7 @@ func apply_bounded_siege_damage(seed:int,severity:float,extent_share:float,cause
 	# spawns one record per building: even a billion-person megalopolis changes at most
 	# this fixed number of already-simulated plots in one engagement.
 	var eligible:Array[Dictionary]=[]
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","active")) in ["vacant","ruin","reclaimed"]: continue
 		if String(plot.get("land_use","")) in ["field","pasture","water","waste"]: continue
 		eligible.append(plot)
@@ -2801,9 +2800,9 @@ func apply_bounded_siege_damage(seed:int,severity:float,extent_share:float,cause
 		_record_plot_damage_history(plot,cause)
 		affected.append(int(plot.get("id",-1)))
 	if not affected.is_empty():
-		GameState.morphology_revision+=1
-		if GameState.settlement_plot_history.size()>MAX_PLOT_HISTORY:
-			GameState.settlement_plot_history=GameState.settlement_plot_history.slice(GameState.settlement_plot_history.size()-MAX_PLOT_HISTORY)
+		WorldSimulation.state.morphology_revision+=1
+		if WorldSimulation.state.settlement_plot_history.size()>MAX_PLOT_HISTORY:
+			WorldSimulation.state.settlement_plot_history=WorldSimulation.state.settlement_plot_history.slice(WorldSimulation.state.settlement_plot_history.size()-MAX_PLOT_HISTORY)
 		rebuild_summary()
 	return affected
 
@@ -2812,7 +2811,7 @@ func _apply_damage_to_plot_record(plot:Dictionary,severity:float,cause:String)->
 	var bounded:=clampf(severity,0.0,1.0)
 	if String(plot.get("pre_damage_use",""))=="": plot["pre_damage_use"]=String(plot.get("land_use",""))
 	plot["condition"]=clampf(float(plot.get("condition",1.0))-bounded,0.0,1.0)
-	plot["damaged_day"]=int(floor(GameState.elapsed_days))
+	plot["damaged_day"]=int(floor(WorldSimulation.state.elapsed_days))
 	var damage:Dictionary=plot.get("damage",{}).duplicate(true)
 	var channel:="fire" if "fire" in cause.to_lower() else "structural"
 	damage[channel]=clampf(float(damage.get(channel,0.0))+bounded,0.0,1.0)
@@ -2822,12 +2821,12 @@ func _apply_damage_to_plot_record(plot:Dictionary,severity:float,cause:String)->
 
 
 func _record_plot_damage_history(plot:Dictionary,cause:String)->void:
-	GameState.settlement_plot_history.append({"day":int(floor(GameState.elapsed_days)),"plot_id":int(plot.get("id",-1)),"event":"damage","new_state":plot.status,"cause":cause})
-	_record_plot_building_event(plot,"destroyed" if String(plot.get("status",""))=="ruin" else "damaged",int(floor(GameState.elapsed_days)),{},false,cause)
+	WorldSimulation.state.settlement_plot_history.append({"day":int(floor(WorldSimulation.state.elapsed_days)),"plot_id":int(plot.get("id",-1)),"event":"damage","new_state":plot.status,"cause":cause})
+	_record_plot_building_event(plot,"destroyed" if String(plot.get("status",""))=="ruin" else "damaged",int(floor(WorldSimulation.state.elapsed_days)),{},false,cause)
 
 func apply_area_damage(center_km:Vector2,radius_km:float,severity:float,cause:String)->Array[int]:
 	var affected:Array[int]=[]
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		var distance:=Vector2(plot.get("centroid",Vector2.ZERO)).distance_to(center_km)
 		if distance>radius_km: continue
 		var falloff:=1.0-distance/maxf(0.001,radius_km)
@@ -2836,15 +2835,15 @@ func apply_area_damage(center_km:Vector2,radius_km:float,severity:float,cause:St
 	return affected
 
 func abandon_plot(plot_id:int,cause:String)->Dictionary:
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if int(plot.get("id",-1))!=plot_id: continue
 		plot["status"]="vacant"
 		plot["reoccupation_state"]="displaced"
-		plot["abandoned_day"]=int(floor(GameState.elapsed_days))
+		plot["abandoned_day"]=int(floor(WorldSimulation.state.elapsed_days))
 		plot["resident_count"]=0
-		GameState.settlement_plot_history.append({"day":int(floor(GameState.elapsed_days)),"plot_id":plot_id,"event":"abandoned","new_state":"vacant","cause":cause})
-		_record_plot_building_event(plot,"abandoned",int(floor(GameState.elapsed_days)),{},false,cause)
-		GameState.morphology_revision+=1
+		WorldSimulation.state.settlement_plot_history.append({"day":int(floor(WorldSimulation.state.elapsed_days)),"plot_id":plot_id,"event":"abandoned","new_state":"vacant","cause":cause})
+		_record_plot_building_event(plot,"abandoned",int(floor(WorldSimulation.state.elapsed_days)),{},false,cause)
+		WorldSimulation.state.morphology_revision+=1
 		rebuild_summary()
 		return plot
 	return {}
@@ -2852,7 +2851,7 @@ func abandon_plot(plot_id:int,cause:String)->Dictionary:
 func validate_state()->PackedStringArray:
 	var errors:=PackedStringArray()
 	var ids:Dictionary={}
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		var id:=int(plot.get("id",-1))
 		if id<1: errors.append("plot has invalid id")
 		elif ids.has(id): errors.append("duplicate plot id %d" % id)
@@ -2869,11 +2868,11 @@ func validate_state()->PackedStringArray:
 
 func validate_settlement_network()->PackedStringArray:
 	var errors:=PackedStringArray()
-	if GameState.player_settlements.size()>MAX_PLAYER_SETTLEMENTS: errors.append("settlement register exceeds its bounded record limit")
+	if WorldSimulation.state.player_settlements.size()>MAX_PLAYER_SETTLEMENTS: errors.append("settlement register exceeds its bounded record limit")
 	var ids:Dictionary={}
 	var primary_count:=0
 	var satellite_share:=0.0
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		var id:=String(settlement.get("id",""))
 		if id=="": errors.append("settlement has no id")
 		elif ids.has(id): errors.append("duplicate settlement id %s" % id)
@@ -2895,17 +2894,17 @@ func validate_settlement_network()->PackedStringArray:
 		for axis_variant in axes:
 			var axis:Dictionary=axis_variant
 			if _vector2_value(axis.get("direction",Vector2.ZERO)).length_squared()<0.000001: errors.append("settlement %s has an invalid territory access direction" % id)
-	if not GameState.player_settlements.is_empty() and primary_count!=1: errors.append("settlement register must contain exactly one primary settlement")
-	if bool(GameState.settlement_convoy.get("active",false)):
-		var convoy_share:=float(GameState.settlement_convoy.get("population_share",-1.0))
+	if not WorldSimulation.state.player_settlements.is_empty() and primary_count!=1: errors.append("settlement register must contain exactly one primary settlement")
+	if bool(WorldSimulation.state.settlement_convoy.get("active",false)):
+		var convoy_share:=float(WorldSimulation.state.settlement_convoy.get("population_share",-1.0))
 		if not is_finite(convoy_share) or convoy_share<=0.0: errors.append("settlement convoy has an invalid population share")
 		satellite_share+=maxf(0.0,convoy_share)
-		if float(GameState.settlement_convoy.get("duration_days",0.0))<=0.0: errors.append("settlement convoy has an invalid duration")
-		var convoy_progress:=float(GameState.settlement_convoy.get("progress",-1.0))
+		if float(WorldSimulation.state.settlement_convoy.get("duration_days",0.0))<=0.0: errors.append("settlement convoy has an invalid duration")
+		var convoy_progress:=float(WorldSimulation.state.settlement_convoy.get("progress",-1.0))
 		if not is_finite(convoy_progress) or convoy_progress<0.0 or convoy_progress>1.0: errors.append("settlement convoy has invalid progress")
-		if String(GameState.settlement_convoy.get("phase","")) not in ["traveling","arrived"]: errors.append("settlement convoy has an invalid lifecycle phase")
+		if String(WorldSimulation.state.settlement_convoy.get("phase","")) not in ["traveling","arrived"]: errors.append("settlement convoy has an invalid lifecycle phase")
 	var recovery_capital:=false
-	for city in GameState.player_settlements:
+	for city in WorldSimulation.state.player_settlements:
 		if bool(city.get("recovery_capital",false)):recovery_capital=true
 	if satellite_share>(1.0 if recovery_capital else .92): errors.append("satellite settlements and convoys consume too much of the aggregate population")
 	for settlement in settlement_network_snapshot().settlements:
@@ -2931,6 +2930,6 @@ func _polygon_centroid(polygon:PackedVector2Array)->Vector2:
 
 func _active_nuclei()->int:
 	var count:=0
-	for nucleus in GameState.settlement_nuclei:
+	for nucleus in WorldSimulation.state.settlement_nuclei:
 		if bool(nucleus.get("active",true)): count+=1
 	return count

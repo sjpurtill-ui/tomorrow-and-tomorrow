@@ -11,43 +11,43 @@ func reset()->void:
 
 func preview(civ_id:String,region_id:String,count:int,status:String)->Dictionary:
 	if not STATUSES.has(status): return {"error":"Choose citizenship, slavery or coerced penal status."}
-	if SettlementModel._primary_settlement_id().is_empty(): return {"error":"Establish a home settlement before moving residents there."}
-	if MilitaryCampaign.recovery.home_unavailable(): return {"error":"The destination is occupied."}
+	if WorldSimulation.settlements._primary_settlement_id().is_empty(): return {"error":"Establish a home settlement before moving residents there."}
+	if WorldSimulation.military.recovery.home_unavailable(): return {"error":"The destination is occupied."}
 	if count<1: return {"error":"Choose at least one resident."}
 	if data.transfers.size()>=MAX_TRANSFERS: return {"error":"All eight transport groups are already traveling."}
 	if data.groups.size()+data.transfers.size()>=MAX_GROUPS: return {"error":"The community-record capacity is full."}
-	var region:Dictionary=CivilizationSystem.region_snapshot(civ_id,region_id)
+	var region:Dictionary=WorldSimulation.world.region_snapshot(civ_id,region_id)
 	if region.is_empty() or String(region.controller)!="player": return {"error":"Select a region you occupy."}
-	var garrison:Dictionary=MilitaryCampaign.occupation_force_for_region(civ_id,region_id)
+	var garrison:Dictionary=WorldSimulation.military.occupation_force_for_region(civ_id,region_id)
 	if int(garrison.get("troops",0))<=0: return {"error":"An unsupported occupation cannot organize a transfer."}
 	if status!="citizen":
-		var control:=CivilizationSystem.occupation_coercion_availability(civ_id,region_id,count)
+		var control:=WorldSimulation.world.occupation_coercion_availability(civ_id,region_id,count)
 		if control.has("error"):return control
 	if count>floori(float(region.population)): return {"error":"There are fewer residents here than requested."}
-	var available_housing:=maxi(0,GameState.housing_capacity-ceili(SettlementModel.primary_population_exact()))
+	var available_housing:=maxi(0,WorldSimulation.state.housing_capacity-ceili(WorldSimulation.settlements.primary_population_exact()))
 	for transfer:Dictionary in data.transfers: available_housing-=int(transfer.people)
 	if count>available_housing: return {"error":"Home has room for %d additional residents after pending arrivals." % maxi(0,available_housing)}
-	var start:Vector2=CivilizationSystem.city_intelligence.vector(CivilizationSystem.city_intelligence.site(region_id).get("position",{}))
-	var target:Vector2=CivilizationSystem.player_world_origin
-	var plan:Dictionary=CivilizationSystem._plan_scout_land_route(start,target)
+	var start:Vector2=WorldSimulation.world.city_intelligence.vector(WorldSimulation.world.city_intelligence.site(region_id).get("position",{}))
+	var target:Vector2=WorldSimulation.world.player_world_origin
+	var plan:Dictionary=WorldSimulation.world._plan_scout_land_route(start,target)
 	if not bool(plan.get("ok",false)): return {"error":String(plan.get("reason","No continuous land route is available."))}
 	var route:Array=plan.get("route",[])
 	if route.is_empty(): return {"error":"No surveyed route is available."}
-	var distance:float=CivilizationSystem._scout_route_distance(route)
+	var distance:float=WorldSimulation.world._scout_route_distance(route)
 	var days:=maxi(1,ceili(distance/12.0))
 	var food:=float(count)*(days+7)
-	var civ:Dictionary=CivilizationSystem.civilizations[CivilizationSystem._civilization_index(civ_id)]
-	var local_food:=float(civ.food_days)*float(region.population)
+	var civ:Dictionary=WorldSimulation.world.civilizations[WorldSimulation.world._civilization_index(civ_id)]
+	var local_food:=float(region.get("stores",{}).get("Food",0)) if WorldSimulation.enabled else float(civ.food_days)*float(region.population)
 	if food>local_food: return {"error":"The occupied region lacks %.0f travel rations. Shorten the transfer or restore local supplies." % (food-local_food)}
 	if float(civ.population)-count<1: return {"error":"This transfer would exceed the source population."}
-	return {"ok":true,"people":count,"status":status,"route":route,"distance":distance,"days":days,"food":food,"source":civ_id,"region":region_id,"destination":SettlementModel._primary_settlement_id()}
+	return {"ok":true,"people":count,"status":status,"route":route,"distance":distance,"days":days,"food":food,"source":civ_id,"region":region_id,"destination":WorldSimulation.settlements._primary_settlement_id()}
 
 func depart(civ_id:String,region_id:String,count:int,status:String)->Dictionary:
 	var ready:=preview(civ_id,region_id,count,status)
 	if ready.has("error"): return ready
-	var index:int=CivilizationSystem._civilization_index(civ_id)
-	var civ:Dictionary=CivilizationSystem.civilizations[index]
-	var region_index:int=CivilizationSystem._region_index(civ,region_id)
+	var index:int=WorldSimulation.world._civilization_index(civ_id)
+	var civ:Dictionary=WorldSimulation.world.civilizations[index]
+	var region_index:int=WorldSimulation.world._region_index(civ,region_id)
 	var region:Dictionary=civ.strategic_regions[region_index]
 	var profile:Dictionary={}
 	var old_population:=float(civ.population)
@@ -58,18 +58,33 @@ func depart(civ_id:String,region_id:String,count:int,status:String)->Dictionary:
 	civ.population=old_population-count
 	civ.food_days=food_remaining/maxf(1,float(civ.population))
 	region.population=float(region.population)-count
+	if WorldSimulation.enabled:
+		var source:=preload("res://scripts/civilization_combat.gd").owner(civ_id)
+		var city_id:=String(region.get("local_city_id",""))
+		var paid:=preload("res://scripts/civilization_exchange.gd").take(civ_id,"Food",float(ready.food),city_id)
+		if paid+.0001<float(ready.food):
+			preload("res://scripts/civilization_exchange.gd").receive(civ_id,"Food",paid,city_id)
+			return {"error":"Available food changed before departure."}
+		profile=WorldSimulation.scoped(source,func()->Dictionary:
+			return WorldSimulation.settlements.with_city_resources(city_id,func()->Dictionary:
+				return WorldSimulation.settlements.with_local_population(func()->Dictionary:
+					WorldSimulation.state.register_population_departures(count,"Transfer from occupied settlement")
+					return WorldSimulation.state.last_population_removal_by_cohort.duplicate(true)
+				,true)
+			)
+		)
 	var governance:Dictionary=preload("res://scripts/occupation_governance.gd").state(region)
 	if status!="citizen":
-		governance["last_coercive_day"]=int(GameState.elapsed_days)
+		governance["last_coercive_day"]=int(WorldSimulation.state.elapsed_days)
 		governance.grievance=clampf(float(governance.grievance)+.10,0,1)
 		civ.player_relation.opinion=clampf(float(civ.player_relation.get("opinion",0))-.08,-1,1)
 	region.governance=governance
 	civ.strategic_regions[region_index]=region
-	CivilizationSystem.civilizations[index]=civ
-	ready.merge({"id":int(data.next_id),"depart_day":int(GameState.elapsed_days),"position":(ready.route as Array)[0].duplicate(true),"traveled":0.0,"cohorts":profile,"origin_name":String(civ.name),"origin_region_name":String(region.name),"mortality_remainder":0.0,"arrived":false},true)
+	WorldSimulation.world.civilizations[index]=civ
+	ready.merge({"id":int(data.next_id),"depart_day":int(WorldSimulation.state.elapsed_days),"position":(ready.route as Array)[0].duplicate(true),"traveled":0.0,"cohorts":profile,"origin_name":String(civ.name),"origin_region_name":String(region.name),"mortality_remainder":0.0,"arrived":false},true)
 	ready.erase("ok")
 	data.next_id=int(data.next_id)+1
-	if int(data.last_day)<0: data.last_day=int(GameState.elapsed_days)
+	if int(data.last_day)<0: data.last_day=int(WorldSimulation.state.elapsed_days)
 	data.transfers.append(ready)
 	return {"ok":true,"message":"%d residents departed %s with %.0f travel rations. Arrival is expected in about %d days; their legal status on arrival is %s." % [count,region.name,float(ready.food),int(ready.days),STATUSES[status]]}
 
@@ -96,7 +111,7 @@ func _day(day:int)->void:
 			people=int(transfer.people)
 		if people<=0: _record(transfer,"No survivors reached a settlement.",day); continue
 		transfer.traveled=minf(float(transfer.distance),float(transfer.traveled)+12.0*(.5+.5*eaten/maxf(1,needed)))
-		var point:Vector2=CivilizationSystem.city_intelligence.route_position(transfer.route,float(transfer.traveled)/maxf(.001,float(transfer.distance)))
+		var point:Vector2=WorldSimulation.world.city_intelligence.route_position(transfer.route,float(transfer.traveled)/maxf(.001,float(transfer.distance)))
 		transfer.position={"x":point.x,"z":point.y}
 		if float(transfer.traveled)>=float(transfer.distance):
 			if _housing_room(String(transfer.destination))<people:
@@ -112,23 +127,23 @@ func _day(day:int)->void:
 			group.welfare=clampf(float(group.welfare)+.004*(1-coercion)-.008*coercion,0,1)
 
 func _housing_room(city_id:String)->int:
-	var city:=SettlementModel.settlement_record(city_id)
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if city.is_empty() or not String(city.get("occupied_by","")).is_empty(): return 0
-	var housing:int=SettlementModel.with_city_resources(city_id,func()->int:return GameState.housing_capacity)
-	return maxi(0,housing-ceili(SettlementModel._settlement_population(city)))
+	var housing:int=WorldSimulation.settlements.with_city_resources(city_id,func()->int:return WorldSimulation.state.housing_capacity)
+	return maxi(0,housing-ceili(WorldSimulation.settlements._settlement_population(city)))
 
 func _arrive(transfer:Dictionary,day:int)->void:
-	var old_population:=GameState.population_exact
+	var old_population:=WorldSimulation.state.population_exact
 	var counts:Dictionary={}
-	for city:Dictionary in GameState.player_settlements:
-		if not bool(city.get("primary",false)): counts[String(city.id)]=SettlementModel._settlement_population(city)
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		if not bool(city.get("primary",false)): counts[String(city.id)]=WorldSimulation.settlements._settlement_population(city)
 	var people:=int(transfer.people)
-	GameState.register_population_arrivals(people,"Arrivals from "+String(transfer.origin_name),transfer.cohorts)
-	for city:Dictionary in GameState.player_settlements:
-		if counts.has(String(city.id)): city.population_share=(float(counts[String(city.id)])+(people if String(city.id)==String(transfer.destination) else 0))/GameState.population_exact
-	for group:Dictionary in data.groups: group.share=float(group.share)*old_population/GameState.population_exact
-	data.groups.append({"id":int(transfer.id),"origin":String(transfer.source),"origin_region":String(transfer.region),"origin_name":String(transfer.origin_name),"settlement_id":String(transfer.destination),"status":String(transfer.status),"share":float(people)/GameState.population_exact,"arrival_day":day,"grievance":.15 if String(transfer.status)=="citizen" else .65,"inherited_grievance":0.0,"welfare":.5})
-	SettlementModel.with_city_resources(String(transfer.destination),func()->void:FoodSystem.receive_external_food(float(transfer.food)))
+	WorldSimulation.state.register_population_arrivals(people,"Arrivals from "+String(transfer.origin_name),transfer.cohorts)
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		if counts.has(String(city.id)): city.population_share=(float(counts[String(city.id)])+(people if String(city.id)==String(transfer.destination) else 0))/WorldSimulation.state.population_exact
+	for group:Dictionary in data.groups: group.share=float(group.share)*old_population/WorldSimulation.state.population_exact
+	data.groups.append({"id":int(transfer.id),"origin":String(transfer.source),"origin_region":String(transfer.region),"origin_name":String(transfer.origin_name),"settlement_id":String(transfer.destination),"status":String(transfer.status),"share":float(people)/WorldSimulation.state.population_exact,"arrival_day":day,"grievance":.15 if String(transfer.status)=="citizen" else .65,"inherited_grievance":0.0,"welfare":.5})
+	WorldSimulation.settlements.with_city_resources(String(transfer.destination),func()->void:WorldSimulation.food.receive_external_food(float(transfer.food)))
 	_record(transfer,"Arrived: %d residents, %s." % [people,STATUSES[String(transfer.status)]],day)
 
 func emancipate(group_id:int)->Dictionary:
@@ -151,7 +166,7 @@ func effects()->Dictionary:
 func _record(transfer:Dictionary,message:String,day:int)->void:
 	data.history.push_front({"id":int(transfer.id),"day":day,"people":int(transfer.people),"origin":String(transfer.origin_name),"description":message})
 	while data.history.size()>32: data.history.pop_back()
-	GameState.simulation_events.push_front({"day":day,"title":"Population transfer","description":message,"domain":"institutions","severity":"notice"})
+	WorldSimulation.state.simulation_events.push_front({"day":day,"title":"Population transfer","description":message,"domain":"institutions","severity":"notice"})
 
 static func validate(payload:Dictionary)->Array[String]:
 	var errors:Array[String]=[]

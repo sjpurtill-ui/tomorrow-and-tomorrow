@@ -32,7 +32,7 @@ static func resource_for(ground:Dictionary,day:int,rng:RandomNumberGenerator,lon
 		var candidates:Array=["Medicinal Plants"] if biome in ["woodland","wetland","grassland","floodplain"] else ["Salt","Phosphate Rock"] if biome=="steppe" else ["Flint","Copper Ore","Tin Ore","Iron Ore","Coal"]
 		var recognized:Array[String]=[]
 		for special in candidates:
-			if int(day/365)>=int(ResourceSystem.catalog.get(special,{}).get("recognition_year",999)): recognized.append(special)
+			if int(day/365)>=int(WorldSimulation.resources.catalog.get(special,{}).get("recognition_year",999)): recognized.append(special)
 		if not recognized.is_empty(): return recognized[rng.randi_range(0,recognized.size()-1)]
 	return pool[rng.randi_range(0,pool.size()-1)]
 

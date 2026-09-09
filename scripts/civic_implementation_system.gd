@@ -20,12 +20,12 @@ func reset_for_new_world()->void:
 
 
 func process_day(day:int=-1)->Array[Dictionary]:
-	var current_day:=int(GameState.elapsed_days) if day<0 else day
+	var current_day:=int(WorldSimulation.state.elapsed_days) if day<0 else day
 	var events:Array[Dictionary]=[]
 	# New commitments are discovered here rather than requiring the dialogue or
 	# API code to own simulation scheduling.  This also repairs active directives
 	# from saves made before delayed reports existed.
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		var order:Dictionary=order_variant
 		if not order.has("implementation_followup"):
 			schedule_order(order,current_day)
@@ -48,7 +48,7 @@ func schedule_order(order:Dictionary,day:int=-1)->Dictionary:
 	if order.has("implementation_followup"): return (order.implementation_followup as Dictionary).duplicate(true)
 	var policies:=_implemented_policies(order)
 	if policies.is_empty(): return {}
-	var current_day:=int(GameState.elapsed_days) if day<0 else day
+	var current_day:=int(WorldSimulation.state.elapsed_days) if day<0 else day
 	var shortest_duration:=730.0
 	var snapshots:Array[Dictionary]=[]
 	for policy in policies:
@@ -87,13 +87,13 @@ func schedule_order(order:Dictionary,day:int=-1)->Dictionary:
 
 func pending_count()->int:
 	var count:=0
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		if String((order_variant as Dictionary).get("implementation_followup",{}).get("state",""))=="pending": count+=1
 	return count
 
 
 func outcome_for_order(order_id:String)->Dictionary:
-	for order_variant in GameState.sovereign_orders:
+	for order_variant in WorldSimulation.state.sovereign_orders:
 		var order:Dictionary=order_variant
 		if String(order.get("id",""))==order_id:
 			return (order.get("implementation_followup",{}) as Dictionary).duplicate(true)
@@ -179,21 +179,21 @@ func _resolve_order(order:Dictionary,followup:Dictionary,current_day:int)->Dicti
 	_ensure_report_in_dialogue(order,followup,leader)
 	_ensure_report_in_memory(order,followup,leader)
 	var report_id:="directive_outcome_%s" % String(order.get("id","unknown"))
-	GameState.council_inbox.push_front({
+	WorldSimulation.state.council_inbox.push_front({
 		"id":report_id,"advisor":leader_name,"office":leader_title,"topic":"civic directive",
 		"act":{"type":"report","order_id":String(order.get("id","")),"settlement_id":String(followup.get("settlement_id",""))},
 		"text":report_text,"urgency":0.72 if outcome=="failure" else 0.52 if outcome=="partial" else 0.34,
 		"day":current_day,"status":"unread","report_outcome":outcome,"source_order_id":String(order.get("id","")),
 	})
-	if GameState.council_inbox.size()>MAX_INBOX_ITEMS: GameState.council_inbox.resize(MAX_INBOX_ITEMS)
+	if WorldSimulation.state.council_inbox.size()>MAX_INBOX_ITEMS: WorldSimulation.state.council_inbox.resize(MAX_INBOX_ITEMS)
 	var title:="Directive Succeeded" if outcome=="success" else "Directive Partly Succeeded" if outcome=="partial" else "Directive Failed"
 	var event:Dictionary={
 		"id":report_id,"day":current_day,"title":title,"description":"%s reports: %s" % [leader_name,report_text],
 		"domain":"institutions","severity":"warning" if outcome=="failure" else "notice",
 		"source_order_id":String(order.get("id","")),"leader_person_id":int(followup.get("reporter_person_id",0)),
 	}
-	GameState.simulation_events.push_front(event)
-	if GameState.simulation_events.size()>MAX_EVENTS: GameState.simulation_events.resize(MAX_EVENTS)
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>MAX_EVENTS: WorldSimulation.state.simulation_events.resize(MAX_EVENTS)
 	return event
 
 
@@ -202,7 +202,7 @@ func _ensure_report_in_dialogue(order:Dictionary,followup:Dictionary,leader:Dict
 	if String(followup.get("state",""))!="reported": return
 	var reporter:=leader
 	if reporter.is_empty(): reporter=_reporting_leader(followup)
-	AdvisorSystem.record_civic_implementation_report(
+	WorldSimulation.advisors.record_civic_implementation_report(
 		String(followup.get("settlement_id",order.get("settlement_id",""))),order,reporter,
 		String(followup.get("report_text","")),String(followup.get("outcome","partial"))
 	)
@@ -216,7 +216,7 @@ func _ensure_report_in_memory(order:Dictionary,followup:Dictionary,leader:Dictio
 	var reporter:=leader
 	if reporter.is_empty(): reporter=_reporting_leader(followup)
 	var reporter_id:=int(reporter.get("person_id",followup.get("reporter_person_id",0)))
-	if reporter_id<=0 or GovernmentPeopleSystem.person_snapshot(reporter_id).is_empty(): return
+	if reporter_id<=0 or WorldSimulation.government.person_snapshot(reporter_id).is_empty(): return
 	var policy_ids:Array[String]=[]
 	var labels:Array[String]=[]
 	for result_variant in followup.get("policy_results",[]):
@@ -229,7 +229,7 @@ func _ensure_report_in_memory(order:Dictionary,followup:Dictionary,leader:Dictio
 	var outcome_words:="succeeded" if outcome=="success" else "failed" if outcome=="failure" else "achieved only part of its aim"
 	var subject:=", ".join(labels) if not labels.is_empty() else "the civic directive"
 	var original_leader_id:=int(followup.get("leader_person_id",0))
-	GovernmentPeopleSystem.record_person_memory(reporter_id,"%s %s when the settlement attempted it." % [subject,outcome_words],"civic_outcome",0.82 if outcome=="failure" else 0.72,{
+	WorldSimulation.government.record_person_memory(reporter_id,"%s %s when the settlement attempted it." % [subject,outcome_words],"civic_outcome",0.82 if outcome=="failure" else 0.72,{
 		"order_id":String(order.get("id","")),"outcome":outcome,"policy_ids":policy_ids,
 		"settlement_id":String(followup.get("settlement_id",order.get("settlement_id",""))),
 		"inherited":original_leader_id>0 and reporter_id!=original_leader_id,
@@ -258,14 +258,14 @@ func _evaluate_policy(order_id:String,snapshot:Dictionary,current_day:int,schedu
 	var continuity:=clampf(elapsed/duration,0.0,1.0)
 	var active:=not modifier.is_empty() and current_day<=float(modifier.get("until_day",-INF)) and not modifier.has("ended_reason")
 	if active: continuity=1.0
-	var assessment:=ConsequenceEngine.directive_assessment(
+	var assessment:=WorldSimulation.consequences.directive_assessment(
 		policy_id,float(snapshot.get("requested_magnitude",0.0)),
 		maxf(7.0,duration-elapsed),float(snapshot.get("office_execution",0.5)),
 		(snapshot.get("directive_parameters",{}) as Dictionary)
 	)
 	var capacity_score:=clampf(float(assessment.get("implementation_rate",0.0)),0.0,1.0)
 	var planned_score:=clampf(float(snapshot.get("planned_implementation",0.0)),0.0,1.0)
-	var observation:=ConsequenceEngine.policy_observation(modifier) if not modifier.is_empty() else {"metrics":[],"summary":"No continuing policy record could be found."}
+	var observation:=WorldSimulation.consequences.policy_observation(modifier) if not modifier.is_empty() else {"metrics":[],"summary":"No continuing policy record could be found."}
 	var evidence:=_evidence_score(observation.get("metrics",[]))
 	var score:=planned_score*0.34+capacity_score*0.26+evidence*0.30+continuity*0.10
 	if not active:
@@ -303,7 +303,7 @@ func _evaluate_operation(snapshot:Dictionary)->Dictionary:
 			"qualitative_evidence":evidence,"limitations":[],"bounded":true,
 			"operation_kind":String(snapshot.get("operation_kind","")),"mission_id":mission_id,"recruits":recruits,
 		}
-	var last_outcome:Dictionary=CivilizationSystem.last_scout_outcome
+	var last_outcome:Dictionary=WorldSimulation.world.last_scout_outcome
 	var failure_matches:=mission_id>0 and int(last_outcome.get("mission_id",0))==mission_id and String(last_outcome.get("status",""))=="missing"
 	return {
 		"id":String(snapshot.get("id","operation")),"label":GovernmentPolicyCatalog.display_name(String(snapshot.get("id","operation"))),
@@ -358,21 +358,21 @@ func _mission_id_from_dispatch_status(status:Dictionary,operation_kind:String)->
 
 func _operation_is_active(mission_id:int)->bool:
 	if mission_id<=0: return false
-	for mission_variant in CivilizationSystem.scout_missions:
+	for mission_variant in WorldSimulation.world.scout_missions:
 		if int((mission_variant as Dictionary).get("mission_id",0))==mission_id: return true
 	return false
 
 
 func _scout_report(mission_id:int)->Dictionary:
 	if mission_id<=0: return {}
-	for report_variant in CivilizationSystem.scout_reports:
+	for report_variant in WorldSimulation.world.scout_reports:
 		var report:Dictionary=report_variant
 		if int(report.get("mission_id",0))==mission_id: return report
 	return {}
 
 
 func _modifier_for(order_id:String,policy_id:String)->Dictionary:
-	for modifier_variant in GameState.active_modifiers:
+	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("kind",""))!="policy": continue
 		if String(modifier.get("source_order_id",""))==order_id and String(modifier.get("id",""))==policy_id: return modifier
@@ -382,9 +382,9 @@ func _modifier_for(order_id:String,policy_id:String)->Dictionary:
 func _reporting_leader(followup:Dictionary)->Dictionary:
 	var settlement_id:=String(followup.get("settlement_id",""))
 	if not settlement_id.is_empty():
-		var current:=GovernmentPeopleSystem.settlement_leader(settlement_id)
+		var current:=WorldSimulation.government.settlement_leader(settlement_id)
 		if not current.is_empty(): return current
-	var original:=GovernmentPeopleSystem.person_snapshot(int(followup.get("leader_person_id",0)))
+	var original:=WorldSimulation.government.person_snapshot(int(followup.get("leader_person_id",0)))
 	if String(original.get("status","active"))=="active": return original
 	return {}
 

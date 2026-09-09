@@ -29,6 +29,9 @@ func attach(engagement:Dictionary,candidates:Array)->void:
 		for entry:Dictionary in records:combined[key]+=int(entry[key])
 	engagement[side]=combined;engagement[side+"_initial"]=total;engagement["command_participants"]=records
 func engaged(army_id:int)->bool:
+	var assigned:int=host._field_army_index(army_id)
+	if assigned>=0 and bool(host.field_armies[assigned].get("relief_assignment",false)):return true
+	if WorldSimulation.enabled and preload("res://scripts/civilization_combat.gd").reserved({"actor":WorldSimulation.actor_id,"field_id":army_id},false):return true
 	var engagements:Array=host.command_hierarchy.data.get("battles",[]).duplicate()
 	if not host.active_engagement.is_empty():engagements.append(host.active_engagement)
 	for engagement:Dictionary in engagements:

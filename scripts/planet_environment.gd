@@ -31,7 +31,7 @@ func reset_for_new_world()->void:
 
 
 func _ensure_configured()->void:
-	var seed_value:=GameState.world_seed
+	var seed_value:=WorldSimulation.state.world_seed
 	if seed_value==_configured_seed: return
 	_configured_seed=seed_value
 	_viable_land_cache.clear()

@@ -33,8 +33,8 @@ var panel:Control
 var layer:CanvasLayer
 
 func ensure()->void:
-	if initialized and seed_value==GameState.world_seed: return
-	reset_for_new_world(); seed_value=GameState.world_seed; initialized=true; last_day=int(GameState.elapsed_days)
+	if initialized and seed_value==WorldSimulation.state.world_seed: return
+	reset_for_new_world(); seed_value=WorldSimulation.state.world_seed; initialized=true; last_day=int(WorldSimulation.state.elapsed_days)
 	next_vision_day=last_day+30
 
 func reset_for_new_world()->void:
@@ -44,14 +44,14 @@ func reset_for_new_world()->void:
 func choose(id:String)->Dictionary:
 	ensure()
 	if not AMBITIONS.has(id): return {"error":"Unknown ambition."}
-	var day:=int(GameState.elapsed_days)
+	var day:=int(WorldSimulation.state.elapsed_days)
 	if not needs_century_choice(): return {"error":"This century's focus is already chosen. Reconsider at the start of the next century."}
 	ambition=id; chosen_day=day; chosen_century=century_at(day); last_day=day
-	if GameState.founding_focus=="":
+	if WorldSimulation.state.founding_focus=="":
 		# Complete the old time gate without applying an unrelated survival preset.
-		GameState.founding_focus="collective_ambition"
-		GameState.founding_focus_selected_day=day
-		GameState.founding_banner_index=AMBITIONS.keys().find(id)%4
+		WorldSimulation.state.founding_focus="collective_ambition"
+		WorldSimulation.state.founding_focus_selected_day=day
+		WorldSimulation.state.founding_banner_index=AMBITIONS.keys().find(id)%4
 	_log(day,"Century %d: chose to %s." % [chosen_century+1,String(AMBITIONS[id].name).to_lower()])
 	return {"ok":true}
 
@@ -60,10 +60,10 @@ func century_at(day:int)->int:
 
 func needs_century_choice()->bool:
 	ensure()
-	return ambition.is_empty() or chosen_century!=century_at(int(GameState.elapsed_days))
+	return ambition.is_empty() or chosen_century!=century_at(int(WorldSimulation.state.elapsed_days))
 
 func next_century_day()->int:
-	return (century_at(int(GameState.elapsed_days))+1)*CENTURY_DAYS
+	return (century_at(int(WorldSimulation.state.elapsed_days))+1)*CENTURY_DAYS
 
 func research_multiplier(domain:String)->float:
 	ensure()
@@ -75,21 +75,21 @@ func advance(day:int)->void:
 	if day<=last_day: return
 	if ambition!="" and chosen_century>=0:
 		var axis:String=AMBITIONS[ambition].axis
-		var state:Dictionary=VALUES.normalize_state(GameState.societal_values)
+		var state:Dictionary=VALUES.normalize_state(WorldSimulation.state.societal_values)
 		var active_days:=maxi(0,mini(day,(chosen_century+1)*CENTURY_DAYS)-maxi(last_day,chosen_day))
 		state.official[axis]=move_toward(float(state.official[axis]),float(AMBITIONS[ambition].target),float(active_days)*.00008)
-		GameState.societal_values=VALUES.normalize_state(state)
+		WorldSimulation.state.societal_values=VALUES.normalize_state(state)
 	last_day=day
 
 func decide(option:int)->Dictionary:
 	ensure()
-	var day:=int(GameState.elapsed_days)
+	var day:=int(WorldSimulation.state.elapsed_days)
 	if ambition=="" or resolved>=VISIONS.size() or day<next_vision_day: return {"error":"There is no vision awaiting your support."}
 	if option<0 or option>=2: return {"error":"Unknown vision."}
 	var choice:Dictionary=VISIONS[resolved].options[option]
-	var state:Dictionary=VALUES.normalize_state(GameState.societal_values)
+	var state:Dictionary=VALUES.normalize_state(WorldSimulation.state.societal_values)
 	state.official[choice.axis]=clampf(float(state.official[choice.axis])+float(choice.delta),0,1)
-	GameState.societal_values=VALUES.normalize_state(state)
+	WorldSimulation.state.societal_values=VALUES.normalize_state(state)
 	_log(day,String(choice.label)+". "+String(choice.meaning))
 	resolved+=1; next_vision_day=day+180
 	return {"ok":true}
@@ -99,8 +99,8 @@ func _log(day:int,message:String)->void:
 	if history.size()>24: history.resize(24)
 
 func advocate(role:String)->String:
-	HistoricalFigures.ensure()
-	for p in HistoricalFigures.people:
+	WorldSimulation.figures.ensure()
+	for p in WorldSimulation.figures.people:
 		if p.role==role and p.status=="living": return String(p.name)+", "+role.to_lower()
 	return "Community voices"
 
@@ -111,15 +111,15 @@ func routine_work(_day:int)->void:
 func advisor_recommendations()->Array[Dictionary]:
 	# Read the existing redacted knowledge surface, never raw rival records.
 	var known:Array=[]
-	for record in CivilizationSystem.known_competition_snapshot().get("leaders",[]):
+	for record in WorldSimulation.world.known_competition_snapshot().get("leaders",[]):
 		if String(record.get("id",""))=="player": continue
 		var relation:Dictionary=record.get("player_relation",{})
 		if int(relation.get("contact_level",0))<2: continue
 		known.append({"name":String(record.get("name","A contacted community")),"at_war":bool(relation.get("at_war",false)),"trade":float(relation.get("trade",0.0))>0.0})
 	known.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return String(a.name)<String(b.name))
 	var result:Array[Dictionary]=[]
-	for office in GovernmentPeopleSystem.active_offices():
-		var person:=GovernmentPeopleSystem.officeholder(String(office.key))
+	for office in WorldSimulation.government.active_offices():
+		var person:=WorldSimulation.government.officeholder(String(office.key))
 		if person.is_empty() or String(person.get("status","active"))!="active": continue
 		var recommendation:=_recommendation(String(office.key),known)
 		recommendation["person_id"]=int(person.get("person_id",0))
@@ -136,9 +136,9 @@ func _recommendation(role:String,known:Array)->Dictionary:
 		if bool(record.get("trade",false)) and trading=="": trading=String(record.name)
 	var focus:=String({"Steward":"gathering","Quartermaster":"makers","Marshal":"military","Scholar":"inquiry","Envoy":"horizons"}.get(role,"gathering"))
 	var why:=String({"Steward":"A shared civic life helps our settlements work together.","Quartermaster":"Durable tools and infrastructure make our existing labor more useful.","Marshal":"Reliable military organization and supply give us more options without committing us to war.","Scholar":"Sustained inquiry builds our capacity to test claims rather than rely on hearsay.","Envoy":"Returned journeys and direct contact can give future decisions a firmer basis."}.get(role,"Our institutions need a durable common purpose."))
-	if role in ["Steward","Quartermaster"] and float(GameState.simulation_metrics.get("food_days",30.0))<15.0:
+	if role in ["Steward","Quartermaster"] and float(WorldSimulation.state.simulation_metrics.get("food_days",30.0))<15.0:
 		focus="sustenance"; why="Our reported food reserve is low; I would put dependable food systems ahead of other ambitions."
-	elif role=="Steward" and GameState.population_health<0.65:
+	elif role=="Steward" and WorldSimulation.state.population_health<0.65:
 		focus="wellbeing"; why="Our own health is under strain; I would invest in care and future generations."
 	elif role in ["Quartermaster","Envoy"] and trading!="":
 		focus="commerce"; why="Our recorded exchange with %s gives us a real starting point for better production and transport." % trading
@@ -151,16 +151,16 @@ func _recommendation(role:String,known:Array)->Dictionary:
 
 func export_state()->Dictionary:
 	ensure()
-	return {"version":2,"chosen_century":chosen_century,"network":CommunityNetwork.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true)}
+	return {"version":2,"chosen_century":chosen_century,"network":WorldSimulation.communities.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true)}
 
 func import_state(state:Dictionary)->Dictionary:
-	if int(state.get("version",0)) not in [1,2] or state.get("seed",0)!=GameState.world_seed: return {"error":"Incompatible people-direction save."}
+	if int(state.get("version",0)) not in [1,2] or state.get("seed",0)!=WorldSimulation.state.world_seed: return {"error":"Incompatible people-direction save."}
 	var imported_century:=int(state.get("chosen_century",-1))
 	if int(state.version)==1:
 		# Preserve the player's existing ambition for their current century, rather
 		# than replacing it with an assistant/game choice when an old save loads.
-		imported_century=century_at(int(GameState.elapsed_days)) if String(state.get("ambition",""))!="" else -1
-	if imported_century < -1 or imported_century>century_at(int(GameState.elapsed_days)): return {"error":"Invalid focus century."}
+		imported_century=century_at(int(WorldSimulation.state.elapsed_days)) if String(state.get("ambition",""))!="" else -1
+	if imported_century < -1 or imported_century>century_at(int(WorldSimulation.state.elapsed_days)): return {"error":"Invalid focus century."}
 	if (String(state.get("ambition",""))=="")!=(imported_century==-1): return {"error":"Focus and century disagree."}
 	if state.get("ambition","")!="" and not AMBITIONS.has(state.ambition): return {"error":"Invalid ambition."}
 	if int(state.get("resolved",0))<0 or int(state.get("resolved",0))>VISIONS.size() or not state.get("history",[]) is Array or state.get("history",[]).size()>24: return {"error":"Invalid vision history."}
@@ -171,11 +171,11 @@ func import_state(state:Dictionary)->Dictionary:
 		if not event is Dictionary or not event.has_all(["day","text"]): return {"error":"Invalid history record."}
 	if state.has("network"):
 		if not state.network is Dictionary: return {"error":"Invalid network save."}
-		var network_result:=CommunityNetwork.import_state(state.network)
+		var network_result:=WorldSimulation.communities.import_state(state.network)
 		if network_result.has("error"): return network_result
 	else:
-		CommunityNetwork.reset_for_new_world(); CommunityNetwork.ensure()
-	ambition=state.get("ambition",""); chosen_day=int(state.get("chosen_day",-1)); last_day=int(state.get("last_day",0)); resolved=int(state.get("resolved",0)); next_vision_day=int(state.get("next_vision_day",30)); automatic_work=bool(state.get("automatic_work",true)); work_baseline=state.get("work_baseline",{}).duplicate(true); work_day=int(state.get("work_day",-30)); history.assign(state.get("history",[]).duplicate(true)); seed_value=GameState.world_seed; initialized=true
+		WorldSimulation.communities.reset_for_new_world(); WorldSimulation.communities.ensure()
+	ambition=state.get("ambition",""); chosen_day=int(state.get("chosen_day",-1)); last_day=int(state.get("last_day",0)); resolved=int(state.get("resolved",0)); next_vision_day=int(state.get("next_vision_day",30)); automatic_work=bool(state.get("automatic_work",true)); work_baseline=state.get("work_baseline",{}).duplicate(true); work_day=int(state.get("work_day",-30)); history.assign(state.get("history",[]).duplicate(true)); seed_value=WorldSimulation.state.world_seed; initialized=true
 	chosen_century=imported_century
 	return {"ok":true}
 

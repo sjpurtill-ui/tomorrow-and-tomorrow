@@ -13,14 +13,14 @@ var world_seed:=-999999
 var panel:Control
 var layer:CanvasLayer
 func ensure()->void:
-	if world_seed==GameState.world_seed: return
-	reset_for_new_world(); world_seed=GameState.world_seed; last_day=int(GameState.elapsed_days)
+	if world_seed==WorldSimulation.state.world_seed: return
+	reset_for_new_world(); world_seed=WorldSimulation.state.world_seed; last_day=int(WorldSimulation.state.elapsed_days)
 func reset_for_new_world()->void:
 	active=""; progress=0; completed.clear(); history.clear(); last_day=0; world_seed=-999999
 	if is_instance_valid(panel): panel.queue_free()
 func nodes()->Array[Dictionary]:
-	var result:Array[Dictionary]=[{"id":"player","name":GameState.settlement_name if GameState.settlement_name!="" else "Your people","treaty":"home","war":false}]
-	for known:Dictionary in CivilizationSystem.known_competition_snapshot().get("leaders",[]):
+	var result:Array[Dictionary]=[{"id":"player","name":WorldSimulation.state.settlement_name if WorldSimulation.state.settlement_name!="" else "Your people","treaty":"home","war":false}]
+	for known:Dictionary in WorldSimulation.world.known_competition_snapshot().get("leaders",[]):
 		if String(known.get("id",""))=="player": continue
 		var relation:Dictionary=known.get("player_relation",{})
 		result.append({"id":known.id,"name":known.name,"treaty":String(relation.get("treaty","none")),"war":bool(relation.get("at_war",false))})
@@ -34,21 +34,21 @@ func blocker(id:String)->String:
 func _prerequisite(id:String)->String:
 	match id:
 		"records":
-			if GameState.known_discoveries.is_empty(): return "Requires at least one established discovery to preserve."
+			if WorldSimulation.state.known_discoveries.is_empty(): return "Requires at least one established discovery to preserve."
 		"gathering":
-			if not GameState.settlement_site_committed: return "Requires a chosen settlement site."
+			if not WorldSimulation.state.settlement_site_committed: return "Requires a chosen settlement site."
 			if nodes().size()<2: return "Requires direct contact with another community."
 		"routes":
-			if CivilizationSystem.scout_reports.is_empty(): return "Requires a returned scouting report."
+			if WorldSimulation.world.scout_reports.is_empty(): return "Requires a returned scouting report."
 	return ""
 func start(id:String)->Dictionary:
 	var reason:=blocker(id)
 	if reason!="": return {"error":reason}
 	var project:Dictionary=PROJECTS[id]
 	for item in project.cost:
-		if float(GameState.resource_stockpiles.get(item,0))<float(project.cost[item]): return {"error":"Requires %d %s in stores." % [int(project.cost[item]),item]}
-	for item in project.cost: GameState.resource_stockpiles[item]=float(GameState.resource_stockpiles.get(item,0))-float(project.cost[item])
-	active=id; progress=0; last_day=int(GameState.elapsed_days)
+		if float(WorldSimulation.state.resource_stockpiles.get(item,0))<float(project.cost[item]): return {"error":"Requires %d %s in stores." % [int(project.cost[item]),item]}
+	for item in project.cost: WorldSimulation.state.resource_stockpiles[item]=float(WorldSimulation.state.resource_stockpiles.get(item,0))-float(project.cost[item])
+	active=id; progress=0; last_day=int(WorldSimulation.state.elapsed_days)
 	_log("Backed "+String(project.name)+".")
 	return {"ok":true}
 func advance(day:int)->void:
@@ -56,7 +56,7 @@ func advance(day:int)->void:
 	if day<=last_day: return
 	var elapsed:=day-last_day; last_day=day
 	if active=="" or _prerequisite(active)!="": return
-	var workers:=float(GameState.population_allocations.get("Knowledge",0))+float(GameState.population_allocations.get("Administration",0))
+	var workers:=float(WorldSimulation.state.population_allocations.get("Knowledge",0))+float(WorldSimulation.state.population_allocations.get("Administration",0))
 	if workers<=0: return
 	progress+=elapsed*minf(1.0,workers/4.0)
 	if progress>=float(PROJECTS[active].work):
@@ -68,7 +68,7 @@ func multiplier(domain:String)->float:
 		if PROJECTS[id].domain==domain: bonus+=.12
 	return (1.0+bonus)*(.92 if active!="" else 1.0)
 func _log(message:String)->void:
-	history.push_front({"day":int(GameState.elapsed_days),"text":message})
+	history.push_front({"day":int(WorldSimulation.state.elapsed_days),"text":message})
 	if history.size()>12: history.resize(12)
 func propose(id:String,purpose:String)->Dictionary:
 	if purpose not in ["open_trade","non_aggression"]: return {"error":"Unknown cooperation proposal."}
@@ -76,13 +76,13 @@ func propose(id:String,purpose:String)->Dictionary:
 	for node in nodes():
 		if node.id==id and id!="player": visible=true
 	if not visible: return {"error":"No known community selected."}
-	return CivilizationSystem.dispatch_diplomat(id,"",purpose)
+	return WorldSimulation.world.dispatch_diplomat(id,"",purpose)
 func export_state()->Dictionary:
 	ensure()
 	return {"version":1,"seed":world_seed,"active":active,"progress":progress,"completed":completed.duplicate(),"history":history.duplicate(true),"last_day":last_day}
 func import_state(data:Dictionary)->Dictionary:
 	if not data.has_all(["version","seed","active","progress","completed","history","last_day"]): return {"error":"Incomplete network state."}
-	if data.get("version",0)!=1 or data.get("seed",0)!=GameState.world_seed: return {"error":"Incompatible network state."}
+	if data.get("version",0)!=1 or data.get("seed",0)!=WorldSimulation.state.world_seed: return {"error":"Incompatible network state."}
 	if not data.get("completed",[]) is Array or data.completed.size()>3 or not data.get("history",[]) is Array or data.history.size()>12: return {"error":"Invalid network history."}
 	var seen:Dictionary={}
 	for id in data.completed:
@@ -96,7 +96,7 @@ func import_state(data:Dictionary)->Dictionary:
 	if not (data.last_day is float or data.last_day is int) or not is_finite(float(data.last_day)) or float(data.last_day)<0: return {"error":"Invalid network date."}
 	for event in data.history:
 		if not event is Dictionary or not event.has_all(["day","text"]): return {"error":"Invalid network event."}
-	active=pending; progress=float(data.get("progress",0)); completed.assign(data.completed); history.assign(data.history.duplicate(true)); last_day=int(data.get("last_day",0)); world_seed=GameState.world_seed
+	active=pending; progress=float(data.get("progress",0)); completed.assign(data.completed); history.assign(data.history.duplicate(true)); last_day=int(data.get("last_day",0)); world_seed=WorldSimulation.state.world_seed
 	return {"ok":true}
 func _unhandled_key_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F9:

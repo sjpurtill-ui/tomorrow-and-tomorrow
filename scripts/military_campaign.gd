@@ -130,9 +130,10 @@ func _empty_consumable_inventory()->Dictionary:
 
 
 func _process(_delta:float)->void:
-	if GameState.world_seed!=last_world_seed:
+	if WorldSimulation.enabled:return
+	if WorldSimulation.state.world_seed!=last_world_seed:
 		reset_for_new_world()
-	var current_day:=int(GameState.elapsed_days)
+	var current_day:=int(WorldSimulation.state.elapsed_days)
 	if last_processed_day<0: last_processed_day=current_day
 	while last_processed_day<current_day:
 		last_processed_day+=1
@@ -145,8 +146,8 @@ func reset_for_new_world()->void:
 	joint_operations.reset()
 	recovery.reset()
 	occupation_transfers.reset()
-	last_world_seed=GameState.world_seed
-	last_processed_day=int(GameState.elapsed_days)
+	last_world_seed=WorldSimulation.state.world_seed
+	last_processed_day=int(WorldSimulation.state.elapsed_days)
 	home_army={}
 	battle_history.clear()
 	pending_aftermath.clear()
@@ -191,13 +192,13 @@ func muster_home_army(requested_strength:=-1)->Dictionary:
 	# but do not conjure trained or equipped formations. Call start_training()
 	# to field recruits. Repeated muster calls must not mobilize the same target twice.
 	if home_army.is_empty(): home_army=_empty_home_army()
-	var desired:=int(GameState.population_allocations.get("Defense",0)) if requested_strength<0 else maxi(0,int(requested_strength))
+	var desired:=int(WorldSimulation.state.population_allocations.get("Defense",0)) if requested_strength<0 else maxi(0,int(requested_strength))
 	raise_recruits(maxi(0,desired-_mobilized_count()))
 	return campaign_army_snapshot()
 
 
 func raise_recruits(count:int)->Dictionary:
-	GameState.initialize_population_model()
+	WorldSimulation.state.initialize_population_model()
 	if home_army.is_empty(): home_army=_empty_home_army()
 	var capacity:=recruitment_capacity()
 	var raised:=mini(maxi(0,count),maxi(0,capacity-_mobilized_count()))
@@ -267,7 +268,7 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	var training_days:=maxf(3.0,base_training_days*(PROTOTYPE_TRAINING_MULTIPLIER if prototype else 1.0))
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	aggregate_recruits-=accepted
-	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"start_day":int(GameState.elapsed_days),"required_days":training_days,"injury_accumulator":0.0,"prototype":prototype})
+	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"start_day":int(WorldSimulation.state.elapsed_days),"required_days":training_days,"injury_accumulator":0.0,"prototype":prototype})
 	if prototype:
 		return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"prototype":true,"message":"An experimental cohort of %d begins learning %s from first principles â€” %.0f days at exceptional cost. The practice is understood, not yet established." % [accepted,unit.replace("_"," "),training_days]}
 	return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"message":"Training begun for %d %s with %s; baseline %.0f days, with %d/%d training places now committed." % [accepted,unit.replace("_"," "),weapon.replace("_"," "),training_days,_queued_trainees(),training_capacity()]}
@@ -309,7 +310,7 @@ func start_training_program(program_id:String)->Dictionary:
 		"id":program_id,
 		"label":String(definition.label),
 		"scope":String(definition.scope),
-		"started_day":int(GameState.elapsed_days),
+		"started_day":int(WorldSimulation.state.elapsed_days),
 		"progress_days":0.0,
 		"duration_days":float(definition.duration_days),
 		"participants":_training_program_participants(definition),
@@ -347,7 +348,7 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 	var order_id:=next_training_order_id; next_training_order_id+=1
 	var required_days:=maxf(3.0,base_days*0.58)
 	aggregate_recruits-=accepted
-	training_queue.append({"id":order_id,"mode":"reinforce","target_formation_id":formation_id,"unit":String(formation.unit),"weapon":String(formation.weapon),"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"start_day":int(GameState.elapsed_days),"required_days":required_days,"injury_accumulator":0.0})
+	training_queue.append({"id":order_id,"mode":"reinforce","target_formation_id":formation_id,"unit":String(formation.unit),"weapon":String(formation.weapon),"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"start_day":int(WorldSimulation.state.elapsed_days),"required_days":required_days,"injury_accumulator":0.0})
 	return {"id":order_id,"accepted":accepted,"target_formation_id":formation_id,"required_days":required_days,"message":"%d replacements entered training for %s; baseline %.0f days before they rejoin formation %d." % [accepted,String(formation.unit).replace("_"," "),required_days,formation_id]}
 
 
@@ -372,7 +373,7 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 	var base_days:=UnitCatalog.training_days(unit)
 	var required_days:=maxf(3.0,base_days*(0.72-retained_experience*0.24))
 	var order_id:=next_training_order_id; next_training_order_id+=1
-	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":personnel_count,"experience":retained_experience,"progress_days":0.0,"start_day":int(GameState.elapsed_days),"required_days":required_days,"injury_accumulator":0.0})
+	training_queue.append({"id":order_id,"mode":"retrain","unit":unit,"weapon":weapon,"count":personnel_count,"experience":retained_experience,"progress_days":0.0,"start_day":int(WorldSimulation.state.elapsed_days),"required_days":required_days,"injury_accumulator":0.0})
 	_refresh_readiness()
 	return {"id":order_id,"accepted":personnel_count,"returned_equipment":returned_gear,"returned_ammunition":returned_ammunition,"required_days":required_days,"message":"%d experienced personnel left the field to retrain as %s with %s; baseline %.0f days." % [personnel_count,unit.replace("_"," "),weapon.replace("_"," "),required_days]}
 
@@ -411,7 +412,7 @@ func equipment_production_quote(item:String,count:int)->Dictionary:
 		var holdings:=int(military_inventory.get(item,0))
 		for job_variant in equipment_queue:
 			if String((job_variant as Dictionary).get("item",""))==item: holdings+=maxi(0,int((job_variant as Dictionary).get("count",0)))
-		if item_discovery!="" and not item_discovery.begins_with("__") and item_discovery in GameState.known_discoveries and holdings+amount<=12:
+		if item_discovery!="" and not item_discovery.begins_with("__") and item_discovery in WorldSimulation.state.known_discoveries and holdings+amount<=12:
 			experimental=true
 		else:
 			return {"error":gate.reason,"required_discovery":gate.discovery}
@@ -419,7 +420,7 @@ func equipment_production_quote(item:String,count:int)->Dictionary:
 	if experimental: recipe=recipe.duplicate(true); recipe["days"]=float(recipe.days)*2.0
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount
-		if float(GameState.resource_stockpiles.get(material,0.0))<required:
+		if float(WorldSimulation.state.resource_stockpiles.get(material,0.0))<required:
 			return {"error":"Insufficient %s: need %.1f." % [material,required]}
 	return {"ok":true,"amount":amount,"recipe":recipe,"experimental":experimental}
 
@@ -428,7 +429,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	if quote.has("error"):return quote
 	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe;var experimental:=bool(quote.experimental)
 	for material in recipe.materials:
-		GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
+		WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
 	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
 	var reserved:Dictionary={}
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
@@ -457,14 +458,14 @@ func consumable_production_quote(item:String,count:int)->Dictionary:
 	var recipe:=_consumable_recipe(item)
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount
-		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
+		if float(WorldSimulation.state.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
 	return {"ok":true,"amount":amount,"recipe":recipe}
 
 func queue_consumable_production(item:String,count:int)->Dictionary:
 	var quote:=consumable_production_quote(item,count)
 	if quote.has("error"):return quote
 	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe
-	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
+	for material in recipe.materials: WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
 	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
 	var reserved:Dictionary={}
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
@@ -482,14 +483,14 @@ func transport_cart_quote(count:int)->Dictionary:
 	var recipe:Dictionary=_transport_recipe()
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount
-		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
+		if float(WorldSimulation.state.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s: need %.1f." % [material,required]}
 	return {"ok":true,"amount":amount,"recipe":recipe}
 
 func queue_transport_cart_production(count:int)->Dictionary:
 	var quote:=transport_cart_quote(count)
 	if quote.has("error"):return quote
 	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe
-	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
+	for material in recipe.materials: WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount
 	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
 	var reserved:Dictionary={}
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
@@ -506,14 +507,14 @@ func equipment_repair_quote(item:String,count:int)->Dictionary:
 	var recipe:Dictionary=_equipment_recipe(item)
 	for material in recipe.materials:
 		var required:=float(recipe.materials[material])*amount*0.18
-		if float(GameState.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s for repairs: need %.1f." % [material,required]}
+		if float(WorldSimulation.state.resource_stockpiles.get(material,0.0))<required: return {"error":"Insufficient %s for repairs: need %.1f." % [material,required]}
 	return {"ok":true,"amount":amount,"recipe":recipe,"material_factor":0.18,"work_factor":0.38}
 
 func queue_equipment_repair(item:String,count:int)->Dictionary:
 	var quote:=equipment_repair_quote(item,count)
 	if quote.has("error"):return quote
 	var amount:=int(quote.amount);var recipe:Dictionary=quote.recipe
-	for material in recipe.materials: GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount*0.18
+	for material in recipe.materials: WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0.0))-float(recipe.materials[material])*amount*0.18
 	damaged_equipment[item]=int(damaged_equipment.get(item,0))-amount
 	var work_per_item:=float(recipe.days)*0.38
 	var job_id:=next_equipment_job_id; next_equipment_job_id+=1
@@ -540,7 +541,7 @@ func cancel_equipment_job(job_id:int)->Dictionary:
 		for material in (job.get("reserved_materials",{}) as Dictionary):
 			var per_item:=float(job.reserved_materials[material])/maxf(1.0,float(count))
 			var amount:=per_item*refundable_units
-			GameState.resource_stockpiles[material]=float(GameState.resource_stockpiles.get(material,0.0))+amount
+			WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0.0))+amount
 			refunded[material]=amount
 		if String(job.get("job_type","production"))=="repair" and remaining>0:
 			var item:=String(job.get("item","improvised"))
@@ -607,7 +608,7 @@ func production_lines_snapshot()->Dictionary:
 
 
 func recruitment_capacity()->int:
-	var population:=GameState.able_population()
+	var population:=WorldSimulation.state.able_population()
 	var share:=0.04
 	if _adoption("watch_rotation")>=0.10: share=0.08
 	if _adoption("public_levies")>=0.15: share=0.18
@@ -640,7 +641,7 @@ func population_commitment_snapshot()->Dictionary:
 	var occupation:=maxi(0,_occupation_force_total())
 	var naval_air:=joint_operations.personnel()
 	var total:=training_and_reserve+home+field+occupation+naval_air
-	var allocated_defense:=maxi(0,int(GameState.population_allocations.get("Defense",0)))
+	var allocated_defense:=maxi(0,int(WorldSimulation.state.population_allocations.get("Defense",0)))
 	return {
 		"total":total,"allocated_defense":allocated_defense,"excess_beyond_defense":maxi(0,total-allocated_defense),
 		"records":[
@@ -719,7 +720,7 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 	force["region_name"]=String(region.get("name","STRATEGIC REGION"))
 	force["required"]=required
 	force["supply_level"]=supply
-	force["committed_day"]=int(GameState.elapsed_days)
+	force["committed_day"]=int(WorldSimulation.state.elapsed_days)
 	force["commander"]=source_commander
 	occupation_forces.append(force)
 	_refresh_readiness()
@@ -805,7 +806,7 @@ func remove_occupation_force(civ_id:String,region_id:String,return_survivors:boo
 
 
 func occupation_action_availability(civ_id:String,region_id:String,action:String)->Dictionary:
-	var region:=CivilizationSystem.region_snapshot(civ_id,region_id)
+	var region:=WorldSimulation.world.region_snapshot(civ_id,region_id)
 	if region.is_empty(): return {"error":"Select a valid strategic region."}
 	if String(region.get("controller",""))!="player": return {"error":"This region is not under your occupation."}
 	var force:=occupation_force_for_region(civ_id,region_id)
@@ -818,8 +819,8 @@ func occupation_action_availability(civ_id:String,region_id:String,action:String
 				if String(army.get("location_id",""))==region_id and String(army.get("status",""))=="stationed" and int(army.get("troops",0))>available:
 					source_id=int(army.army_id); available=int(army.troops)
 			if available<=0: return {"error":"March a field army to this region first. Reinforcements must arrive before joining its garrison."}
-			var required:=CivilizationSystem.occupation_requirement(CivilizationSystem.civilizations[CivilizationSystem._civilization_index(civ_id)],region)
-			if action=="reinforce_control":required=float(CivilizationSystem.occupation_control(civ_id,region_id,true).get("required",required))
+			var required:=WorldSimulation.world.occupation_requirement(WorldSimulation.world.civilizations[WorldSimulation.world._civilization_index(civ_id)],region)
+			if action=="reinforce_control":required=float(WorldSimulation.world.occupation_control(civ_id,region_id,true).get("required",required))
 			var effectiveness:=clampf(float(force.get("supply_level",1.0)),.05,1.0)*(.5+.5*clampf(float(force.get("readiness",1.0)),0,1))
 			var gap:=maxi(1,ceili(required/effectiveness)-int(force.get("troops",0)))
 			return {"ok":true,"amount":mini(gap,available),"required":required,"source_army_id":source_id}
@@ -835,7 +836,7 @@ func occupation_action_availability(civ_id:String,region_id:String,action:String
 func reinforce_occupation(civ_id:String,region_id:String,control_force:bool=false)->Dictionary:
 	var availability:=occupation_action_availability(civ_id,region_id,"reinforce_control" if control_force else "reinforce_occupation")
 	if availability.has("error"): return availability
-	var region:=CivilizationSystem.region_snapshot(civ_id,region_id)
+	var region:=WorldSimulation.world.region_snapshot(civ_id,region_id)
 	var existing_index:=_occupation_force_index(civ_id,region_id)
 	if existing_index<0: return establish_occupation_force(civ_id,region,float(availability.required),int(availability.source_army_id))
 	var detached:=_detach_field_army_formations(int(availability.source_army_id),int(availability.amount))
@@ -854,15 +855,15 @@ func reinforce_occupation(civ_id:String,region_id:String,control_force:bool=fals
 func evacuate_occupation(civ_id:String,region_id:String)->Dictionary:
 	var availability:=occupation_action_availability(civ_id,region_id,"evacuate_occupation")
 	if availability.has("error"): return availability
-	var region:=CivilizationSystem.region_snapshot(civ_id,region_id)
+	var region:=WorldSimulation.world.region_snapshot(civ_id,region_id)
 	var occupation_index:=_occupation_force_index(civ_id,region_id)
 	var force:Dictionary=occupation_forces[occupation_index].duplicate(true)
 	var army_id:=next_field_army_id
-	var position:Dictionary=CivilizationSystem.city_intelligence.site(region_id).get("position",{})
-	if not CivilizationSystem.city_intelligence.valid_point(position): return {"error":"The occupation's location is unavailable; no return route can be issued."}
+	var position:Dictionary=WorldSimulation.world.city_intelligence.site(region_id).get("position",{})
+	if not WorldSimulation.world.city_intelligence.valid_point(position): return {"error":"The occupation's location is unavailable; no return route can be issued."}
 	# Transfer the complete record, including injuries, captives and issued gear.
 	# A withdrawal can exceed normal command capacity but never the hard bound.
-	force.merge({"army_id":army_id,"name":"Withdrawal from %s" % String(region.name),"status":"stationed","location_id":region_id,"location_name":String(region.name),"position":position.duplicate(true),"destination_id":"","distance_total_km":0.0,"distance_remaining_km":0.0,"runner_count":RUNNERS_PER_ARMY,"last_runner_departure_day":int(GameState.elapsed_days)},true)
+	force.merge({"army_id":army_id,"name":"Withdrawal from %s" % String(region.name),"status":"stationed","location_id":region_id,"location_name":String(region.name),"position":position.duplicate(true),"destination_id":"","distance_total_km":0.0,"distance_remaining_km":0.0,"runner_count":RUNNERS_PER_ARMY,"last_runner_departure_day":int(WorldSimulation.state.elapsed_days)},true)
 	force["last_report"]=_army_report_snapshot(force)
 	field_armies.append(force)
 	var result:=return_field_army(army_id)
@@ -882,7 +883,7 @@ func field_army_capacity()->int:
 
 
 func field_armies_snapshot()->Dictionary:
-	return {"armies":field_armies.duplicate(true),"active":field_armies.size(),"capacity":field_army_capacity(),"live_reports":_live_army_reporting(),"runner_messages_in_flight":runner_messages.size(),"destinations":CivilizationSystem.military_movement_destinations() if CivilizationSystem!=null and CivilizationSystem.has_method("military_movement_destinations") else []}
+	return {"armies":field_armies.duplicate(true),"active":field_armies.size(),"capacity":field_army_capacity(),"live_reports":_live_army_reporting(),"runner_messages_in_flight":runner_messages.size(),"destinations":WorldSimulation.world.military_movement_destinations() if CivilizationSystem!=null and WorldSimulation.world.has_method("military_movement_destinations") else []}
 
 
 func set_formation_visual(army_id:int,formation_id:int,model_id:String)->Dictionary:
@@ -961,8 +962,8 @@ func _field_army_index(army_id:int)->int:
 
 func _movement_destination(destination_id:String)->Dictionary:
 	if destination_id=="player_home" and recovery.home_unavailable():return {}
-	if CivilizationSystem==null or not CivilizationSystem.has_method("military_movement_destinations"): return {}
-	for destination_variant in CivilizationSystem.military_movement_destinations():
+	if CivilizationSystem==null or not WorldSimulation.world.has_method("military_movement_destinations"): return {}
+	for destination_variant in WorldSimulation.world.military_movement_destinations():
 		var destination:Dictionary=destination_variant
 		if String(destination.get("id",""))==destination_id: return destination.duplicate(true)
 	return {}
@@ -1001,13 +1002,13 @@ func _assemble_field_army(detached:Array[Dictionary],custom_name:String="")->Dic
 	force["departure_day"]=-1
 	force["arrival_day"]=-1
 	force["supply_level"]=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
-	force["commander"]=HistoricalFigures.commander(_acting_field_commander(false),"army_%d" % army_id)
+	force["commander"]=WorldSimulation.figures.commander(_acting_field_commander(false),"army_%d" % army_id)
 	force["visual_theme"]=String(home_army.get("visual_theme","equipment"))
 	# Runners carry the army's reports home; without them (and before signal-era
 	# development) the government would know nothing of a distant force.
 	force["exercise_readiness_bonus"]=float(home_army.get("exercise_readiness_bonus",0.0))
 	force["runner_count"]=RUNNERS_PER_ARMY
-	force["last_runner_departure_day"]=int(GameState.elapsed_days)
+	force["last_runner_departure_day"]=int(WorldSimulation.state.elapsed_days)
 	force["last_report"]=_army_report_snapshot(force)
 	field_armies.append(force)
 	_refresh_readiness()
@@ -1041,16 +1042,16 @@ func _field_army_speed(force:Dictionary)->float:
 		quality+=count*(0.65+0.20*clampf(float(formation.get("training",0.5)),0.0,1.0)+0.15*clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0))
 		personnel+=count
 	if personnel==0: return 0.0
-	var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.4))*0.35+float(GameState.simulation_metrics.get("logistics",0.16))*0.35+float(force.get("supply_level",0.5))*0.30,0.15,1.0)
+	var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.4))*0.35+float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))*0.35+float(force.get("supply_level",0.5))*0.30,0.15,1.0)
 	return maxf(2.0,slowest*(quality/float(personnel))*(0.55+logistics*0.45)*(0.5+0.5*clampf(float(force.get("supply_level",0.5)),0.0,1.0)))
 
 
 func field_route_availability(start:Vector2,target:Vector2)->Dictionary:
-	if not CivilizationSystem.scout_land_authority.is_valid():return {"error":"Terrain information is unavailable. No march was ordered; return to the map and try a charted land destination."}
+	if not WorldSimulation.world.scout_land_authority.is_valid():return {"error":"Terrain information is unavailable. No march was ordered; return to the map and try a charted land destination."}
 	var distance:=start.distance_to(target)
 	var samples:=clampi(ceili(distance/.5),1,131072)
 	for step in samples+1:
-		if not CivilizationSystem._scout_land_at(start.lerp(target,float(step)/samples)):
+		if not WorldSimulation.world._scout_land_at(start.lerp(target,float(step)/samples)):
 			return {"error":"Water blocks the direct army route. No march was ordered. Choose a charted land waypoint around the obstruction; armies cannot embark on scout watercraft."}
 	return {"ok":true}
 
@@ -1060,7 +1061,7 @@ func _field_supply_advice(army:Dictionary)->String:
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is in battle. Its commander will act on a new objective after disengaging."}
-	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
+	if WorldSimulation.campaign.active and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
@@ -1090,8 +1091,8 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	army["destination_position"]=target_position.duplicate(true)
 	army["distance_total_km"]=distance
 	army["distance_remaining_km"]=distance
-	army["departure_day"]=int(GameState.elapsed_days)
-	army["arrival_day"]=int(GameState.elapsed_days)+ceili(distance/maxf(0.1,speed))
+	army["departure_day"]=int(WorldSimulation.state.elapsed_days)
+	army["arrival_day"]=int(WorldSimulation.state.elapsed_days)+ceili(distance/maxf(0.1,speed))
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
@@ -1100,7 +1101,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is in battle. Its commander will act on a new objective after disengaging."}
-	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
+	if WorldSimulation.campaign.active and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	## Map-order movement to a free position on scouted ground. The caller (the
 	## map layer) validates that the point is charted, dry land before issuing;
@@ -1112,9 +1113,9 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
 	var target:=Vector2(x,z)
 	if CivilizationSystem!=null:
-		if CivilizationSystem.has_method("_position_is_revealed") and not CivilizationSystem._position_is_revealed(target):
+		if WorldSimulation.world.has_method("_position_is_revealed") and not WorldSimulation.world._position_is_revealed(target):
 			return {"error":"That ground is uncharted. Armies march only where returned scout reports have charted land; send scouts first."}
-		if CivilizationSystem.has_method("_scout_land_at") and not CivilizationSystem._scout_land_at(target):
+		if WorldSimulation.world.has_method("_scout_land_at") and not WorldSimulation.world._scout_land_at(target):
 			return {"error":"That point is open water. Armies need a charted land destination."}
 	var army:Dictionary=field_armies[index]
 	var current_position:Dictionary=army.get("position",{})
@@ -1133,8 +1134,8 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	army["destination_position"]={"x":target.x,"z":target.y}
 	army["distance_total_km"]=distance
 	army["distance_remaining_km"]=distance
-	army["departure_day"]=int(GameState.elapsed_days)
-	army["arrival_day"]=int(GameState.elapsed_days)+ceili(distance/maxf(0.1,speed))
+	army["departure_day"]=int(WorldSimulation.state.elapsed_days)
+	army["arrival_day"]=int(WorldSimulation.state.elapsed_days)+ceili(distance/maxf(0.1,speed))
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
@@ -1149,7 +1150,7 @@ func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
 	if not active_engagement.is_empty(): return {"can_order":false,"can_engage":false,"error":"Finish the active battle before ordering another engagement."}
 	if not active_threat.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the active campaign decision before ordering another engagement."}
 	if not pending_aftermath.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the current battle aftermath first."}
-	var sighting:Dictionary=CivilizationSystem.visible_formation_sighting(formation_id)
+	var sighting:Dictionary=WorldSimulation.world.visible_formation_sighting(formation_id)
 	if sighting.is_empty(): return {"can_order":false,"can_engage":false,"error":"Contact has been lost. Reacquire the formation before issuing an order."}
 	var army:Dictionary=field_armies[index]
 	if int(army.get("troops",0))<=0: return {"can_order":false,"can_engage":false,"error":"The selected field army has no personnel able to fight."}
@@ -1184,14 +1185,14 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 		return {"error":String(availability.get("error","Move the selected army into contact first.")) if not bool(availability.get("can_order",false)) else "The selected army is %.0f km away. Order an intercept before attempting battle." % float(availability.get("distance_km",0.0))}
 	var army:Dictionary=availability.army
 	if bool((availability.sighting as Dictionary).get("carries_report",false)):
-		var caught:=CivilizationSystem.resolve_foreign_scout_interception(formation_id,"capture",-1.0,army_id)
+		var caught:=WorldSimulation.world.resolve_foreign_scout_interception(formation_id,"capture",-1.0,army_id)
 		var pursuit_index:=_field_army_index(army_id)
 		if pursuit_index>=0:
 			field_armies[pursuit_index]["status"]="stationed"
 			field_armies[pursuit_index].erase("target_formation_id")
 			field_armies[pursuit_index].erase("order_kind")
 		return caught
-	var incident:Dictionary=CivilizationSystem.foreign_formation_engagement_data(formation_id,int(army.get("troops",0)))
+	var incident:Dictionary=WorldSimulation.world.foreign_formation_engagement_data(formation_id,int(army.get("troops",0)))
 	if incident.has("error"): return incident
 	incident["field_army_id"]=army_id
 	_create_civilization_threat(incident,"offensive")
@@ -1203,7 +1204,7 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 		field_armies[index].erase("order_kind")
 	var engagement:=begin_threat_engagement()
 	if engagement.has("error"):return engagement
-	active_engagement.threat["war_id"]=CivilizationSystem.record_player_hostile_order(String(incident.source_civ_id),"","A player army attacked a foreign field force.")
+	active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(String(incident.source_civ_id),"","A player army attacked a foreign field force.")
 	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"CONTACT â€” %s has engaged %s. Open WAR PLANNING to order HOLD, PUSH, or RETREAT." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
 
 
@@ -1373,7 +1374,7 @@ func template_training_quote(template_id:int)->Dictionary:
 		var shortfall:=maxi(0,int(equipment[weapon])-int(military_inventory.get(weapon,0)))
 		if shortfall>0:blockers.append("%d %s equipment sets missing; produce them in Supply." % [shortfall,weapon.replace("_"," ")])
 	var food:=float(required)*baseline_days
-	if FoodSystem.total_stored()<food:blockers.append("At least %.0f rations needed for the full class; %.0f stored." % [food,FoodSystem.total_stored()])
+	if WorldSimulation.food.total_stored()<food:blockers.append("At least %.0f rations needed for the full class; %.0f stored." % [food,WorldSimulation.food.total_stored()])
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty():blockers.append("Resolve the battle or aftermath first.")
 	if recovery.home_unavailable():blockers.append("Home is occupied.")
 	return {"can_start":blockers.is_empty() and missing>0,"missing":missing,"required":required,"shortfalls":shortfalls,"blockers":blockers,"food":food,"people_room":people_room,"training_places":maxi(0,training_capacity()-_queued_trainees()),"equipment":equipment,"active_training":active}
@@ -1529,7 +1530,7 @@ func _process_field_army_movement_day()->void:
 		if String(army.get("status","stationed"))!="moving": continue
 		var intercept_target_id:=String(army.get("target_formation_id",""))
 		if not intercept_target_id.is_empty():
-			var tracked:Dictionary=CivilizationSystem.visible_formation_sighting(intercept_target_id)
+			var tracked:Dictionary=WorldSimulation.world.visible_formation_sighting(intercept_target_id)
 			if tracked.is_empty():
 				army["status"]="stationed"
 				army["location_name"]="LAST KNOWN CONTACT"
@@ -1537,7 +1538,7 @@ func _process_field_army_movement_day()->void:
 				army.erase("target_formation_id")
 				army.erase("order_kind")
 				field_armies[index]=army
-				GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Intercept lost contact","description":"%s reached the last observation but the foreign formation was no longer in sight. No battle occurred." % String(army.get("name","The field army")),"domain":"security","severity":"warning"})
+				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Intercept lost contact","description":"%s reached the last observation but the foreign formation was no longer in sight. No battle occurred." % String(army.get("name","The field army")),"domain":"security","severity":"warning"})
 				continue
 			var tracked_position:Dictionary=tracked.get("position",{})
 			var current_position:Dictionary=army.get("position",{})
@@ -1568,7 +1569,7 @@ func _process_field_army_movement_day()->void:
 			army["status"]="stationed";army["location_id"]="field_position";army["location_name"]="Blocked route";army["destination_id"]=""
 			army["distance_remaining_km"]=maxf(0.0,float(army.get("distance_remaining_km",0)))+traveled
 			army["movement_block_reason"]=String(route.error)
-			army=_dispatch_army_runner(army,int(GameState.elapsed_days));field_armies[index]=army
+			army=_dispatch_army_runner(army,int(WorldSimulation.state.elapsed_days));field_armies[index]=army
 			continue
 		army["position"]={"x":current.x,"z":current.y}
 		army["supply_level"]=clampf(move_toward(float(army.get("supply_level",0.75)),field_provision_delivery_ratio(),0.025)-0.0008*traveled,0.05,1.0)
@@ -1577,24 +1578,24 @@ func _process_field_army_movement_day()->void:
 			army["location_id"]=String(army.get("destination_id",""))
 			army["location_name"]=String(army.get("destination_name","DESTINATION"))
 			army["destination_id"]=""
-			army["arrival_day"]=int(GameState.elapsed_days)
+			army["arrival_day"]=int(WorldSimulation.state.elapsed_days)
 			if _army_is_home(army) or _live_army_reporting():
-				GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d personnel and %d%% supply." % [String(army.name),String(army.location_name),int(army.troops),roundi(float(army.supply_level)*100.0)],"domain":"security","severity":"notice"})
+				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d personnel and %d%% supply." % [String(army.name),String(army.location_name),int(army.troops),roundi(float(army.supply_level)*100.0)],"domain":"security","severity":"notice"})
 			else:
 				# Arrival is itself only known at home once a runner delivers it.
-				army=_dispatch_army_runner(army,int(GameState.elapsed_days))
+				army=_dispatch_army_runner(army,int(WorldSimulation.state.elapsed_days))
 		field_armies[index]=army
 		if remaining<=0.001 and army.has("city_operation"):
 			var planned:Dictionary=army.city_operation.duplicate(true)
 			field_armies[index].erase("city_operation")
 			var result:=order_city_operation(int(army.army_id),String(planned.civ_id),String(planned.region_id),bool(planned.besiege))
-			GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"City order blocked" if result.has("error") else "City engagement begins","description":String(result.get("error","The army reached its ordered city and began hostilities.")),"domain":"security","severity":"warning"})
+			WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"City order blocked" if result.has("error") else "City engagement begins","description":String(result.get("error","The army reached its ordered city and began hostilities.")),"domain":"security","severity":"warning"})
 		if remaining<=0.001 and not intercept_target_id.is_empty():
 			var contact_result:=launch_map_engagement(int(army.get("army_id",0)),intercept_target_id)
 			if contact_result.has("error"):
 				field_armies[index].erase("target_formation_id")
 				field_armies[index].erase("order_kind")
-				GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Intercept did not engage","description":String(contact_result.error),"domain":"security","severity":"warning"})
+				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Intercept did not engage","description":String(contact_result.error),"domain":"security","severity":"warning"})
 
 
 func _live_army_reporting()->bool:
@@ -1605,12 +1606,12 @@ func _live_army_reporting()->bool:
 func _army_report_snapshot(army:Dictionary)->Dictionary:
 	var carried:Dictionary={}
 	var position:Dictionary=army.get("position",{})
-	if int(army.get("troops",0))>0 and CivilizationSystem.city_intelligence.valid_point(position):
-		CivilizationSystem.city_intelligence.stage(carried,"player",CivilizationSystem.city_intelligence.vector(position),.65,int(GameState.elapsed_days),"army:%s" % str(army.get("army_id",0)))
+	if int(army.get("troops",0))>0 and WorldSimulation.world.city_intelligence.valid_point(position):
+		WorldSimulation.world.city_intelligence.stage(carried,"player",WorldSimulation.world.city_intelligence.vector(position),.65,int(WorldSimulation.state.elapsed_days),"army:%s" % str(army.get("army_id",0)))
 	return {
 		"city_observations":carried.get("city_observations",{}),
 		"formations":(army.get("formations",[]) as Array).duplicate(true),
-		"day":int(GameState.elapsed_days),
+		"day":int(WorldSimulation.state.elapsed_days),
 		"position":(army.get("position",{}) as Dictionary).duplicate(true),
 		"status":String(army.get("status","stationed")),
 		"location_name":String(army.get("location_name","")),
@@ -1645,7 +1646,7 @@ func _dispatch_army_runner(army:Dictionary,day:int)->Dictionary:
 
 
 func _process_army_runners_day()->void:
-	var day:=int(GameState.elapsed_days)
+	var day:=int(WorldSimulation.state.elapsed_days)
 	var live:=_live_army_reporting()
 	for index in field_armies.size():
 		var army:Dictionary=field_armies[index]
@@ -1653,7 +1654,7 @@ func _process_army_runners_day()->void:
 			# At home (or with signal-era communications) the government simply
 			# knows; runners are only the early-game information carrier.
 			army["last_report"]=_army_report_snapshot(army)
-			CivilizationSystem.city_intelligence.deliver(army.last_report,"player",day)
+			WorldSimulation.world.city_intelligence.deliver(army.last_report,"player",day)
 			field_armies[index]=army
 			continue
 		if day-int(army.get("last_runner_departure_day",day))>=RUNNER_INTERVAL_DAYS:
@@ -1666,7 +1667,7 @@ func _process_army_runners_day()->void:
 		if day<int(message.get("arrival_day",day)):
 			remaining_messages.append(message)
 			continue
-		CivilizationSystem.city_intelligence.deliver(message.get("snapshot",{}),"player",day)
+		WorldSimulation.world.city_intelligence.deliver(message.get("snapshot",{}),"player",day)
 		var army_index:=_field_army_index(int(message.get("army_id",-1)))
 		if army_index>=0:
 			var army:Dictionary=field_armies[army_index]
@@ -1678,7 +1679,7 @@ func _process_army_runners_day()->void:
 				var report_day:=int(snapshot.get("day",day))
 				var status_text:="held position at %s" % String(snapshot.get("location_name","the field")) if String(snapshot.get("status","stationed"))=="stationed" else "was marching on %s with %.0f km remaining" % [String(snapshot.get("destination_name","its objective")),float(snapshot.get("distance_remaining_km",0.0))]
 				if not String(snapshot.get("movement_block_reason","")).is_empty():status_text+=". "+String(snapshot.movement_block_reason)
-				GameState.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of day %d the army %s with %d personnel and %d%% supply." % [String(message.get("army_name","the field army")),report_day,status_text,int(snapshot.get("troops",0)),roundi(float(snapshot.get("supply_level",1.0))*100.0)],"domain":"security","severity":"notice"})
+				WorldSimulation.state.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of day %d the army %s with %d personnel and %d%% supply." % [String(message.get("army_name","the field army")),report_day,status_text,int(snapshot.get("troops",0)),roundi(float(snapshot.get("supply_level",1.0))*100.0)],"domain":"security","severity":"notice"})
 	runner_messages=remaining_messages
 
 
@@ -1692,15 +1693,15 @@ func military_capabilities()->Dictionary:
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
 	var queued_trainees:=_queued_trainees()
-	return {"development":military_development_snapshot(),"organization":formation_organization_snapshot(),"production_lines":production_lines_snapshot(),"field_armies":field_armies_snapshot(),"fronts":CivilizationSystem.military_fronts_snapshot() if CivilizationSystem!=null and CivilizationSystem.has_method("military_fronts_snapshot") else {"fronts":[]},"units":units,"equipment":equipment,"unit_equipment":_unit_equipment_view(),"training_programs":training_program_catalog(),"training_program":training_program_snapshot(),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"delivery_load_capacity":_daily_delivery_capacity(),"equipment_delivery_load":EQUIPMENT_DELIVERY_LOAD.duplicate(true),"ammunition_delivery_load":AMMUNITION_DELIVERY_LOAD.duplicate(true),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"development":military_development_snapshot(),"organization":formation_organization_snapshot(),"production_lines":production_lines_snapshot(),"field_armies":field_armies_snapshot(),"fronts":WorldSimulation.world.military_fronts_snapshot() if CivilizationSystem!=null and WorldSimulation.world.has_method("military_fronts_snapshot") else {"fronts":[]},"units":units,"equipment":equipment,"unit_equipment":_unit_equipment_view(),"training_programs":training_program_catalog(),"training_program":training_program_snapshot(),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"delivery_load_capacity":_daily_delivery_capacity(),"equipment_delivery_load":EQUIPMENT_DELIVERY_LOAD.duplicate(true),"ammunition_delivery_load":AMMUNITION_DELIVERY_LOAD.duplicate(true),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func military_development_snapshot()->Dictionary:
 	var tiers:Dictionary={
-		"security":ProgressionSystem.domain_tier("security"),
-		"production":ProgressionSystem.domain_tier("production"),
-		"logistics":ProgressionSystem.domain_tier("logistics"),
-		"institutions":ProgressionSystem.domain_tier("institutions")
+		"security":WorldSimulation.progression.domain_tier("security"),
+		"production":WorldSimulation.progression.domain_tier("production"),
+		"logistics":WorldSimulation.progression.domain_tier("logistics"),
+		"institutions":WorldSimulation.progression.domain_tier("institutions")
 	}
 	var era:Dictionary=MILITARY_DEVELOPMENT.era_for_tiers(int(tiers.security),int(tiers.production),int(tiers.logistics),int(tiers.institutions))
 	era["support_tiers"]=tiers
@@ -1724,7 +1725,7 @@ func validate_military_progression()->Array[String]:
 		for gate_name in gate_map:
 			var discovery:=String(gate_map[gate_name])
 			if discovery=="" or discovery.begins_with("__"): continue
-			if DiscoverySystem.discovery_definition(discovery).is_empty(): errors.append("%s references missing discovery %s." % [String(gate_name),discovery])
+			if WorldSimulation.discovery.discovery_definition(discovery).is_empty(): errors.append("%s references missing discovery %s." % [String(gate_name),discovery])
 	for unit in UnitCatalog.ARCHETYPES:
 		for item in UnitCatalog.equipment_for(String(unit)):
 			if not EQUIPMENT_KNOWLEDGE.has(item): errors.append("%s references unknown equipment %s." % [String(unit),String(item)])
@@ -1765,7 +1766,7 @@ func military_inquiry_context()->Dictionary:
 	var combat_pressure:=minf(1.0,float(recent_combat_days)*0.08+(0.35 if not pending_aftermath.is_empty() else 0.0))
 	var injury_pressure:=minf(2.0,float(wounded)*0.10+float(recent_combat_days)*0.045)
 	var threat_gap:=maxi(0,threat_strength-fielded)
-	var logistics_practice:=minf(0.50,float(GameState.population_allocations.get("Logistics",0))*0.04)
+	var logistics_practice:=minf(0.50,float(WorldSimulation.state.population_allocations.get("Logistics",0))*0.04)
 	return {
 		"defense":minf(3.0,0.12+service_pressure*0.45+threat_pressure*0.80+readiness_shortfall*0.55+combat_pressure*0.35),
 		"danger":minf(3.0,threat_pressure+combat_pressure*0.75),
@@ -1784,14 +1785,14 @@ func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dict
 	if int(home_army.get("troops",0))<=0: return {"error":"No deployable home army."}
 	_refresh_readiness()
 	var battle_options:=options.duplicate(true)
-	battle_options["seed"]=int(battle_options.get("seed",GameState.world_seed^int(GameState.elapsed_days+1.0)*7919))
+	battle_options["seed"]=int(battle_options.get("seed",WorldSimulation.state.world_seed^int(WorldSimulation.state.elapsed_days+1.0)*7919))
 	battle_options["terrain_defense"]=float(battle_options.get("terrain_defense",_terrain_defense()))
 	var result:Dictionary=simulator.simulate(home_army,enemy_force,battle_options)
 	return _commit_campaign_battle(result)
 
 
 func _commit_campaign_battle(result:Dictionary)->Dictionary:
-	HistoricalFigures.record_battle(result)
+	WorldSimulation.figures.record_battle(result)
 	var home_side:=String(result.get("home_side","attacker"))
 	var home_result:Dictionary=result.get(home_side,result.get("attacker",{}))
 	var home_force_kind:=String(result.get("home_force_kind","field"))
@@ -1823,7 +1824,7 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	var termination_summary:=String(termination.get("summary",""))
 	if termination_summary!="": result["message"]=termination_summary
 	var record:=result.duplicate(true)
-	record["day"]=int(GameState.elapsed_days)
+	record["day"]=int(WorldSimulation.state.elapsed_days)
 	battle_history.push_front(record)
 	if battle_history.size()>40: battle_history.resize(40)
 	pending_aftermath=termination.duplicate(true) if home_won else {}
@@ -1854,11 +1855,11 @@ func resolve_aftermath(prisoner_policy:String,spoils_policy:String,general_polic
 			_apply_campaign_general_policy(general_policy,pending_aftermath,outcome)
 	else:
 		_mark_home_prisoners(prisoners)
-	outcome["day"]=int(GameState.elapsed_days)
+	outcome["day"]=int(WorldSimulation.state.elapsed_days)
 	outcome["aftermath"]=pending_aftermath.duplicate(true)
 	outcome["message"]=_aftermath_description(outcome)
 	pending_aftermath.clear()
-	GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Battle aftermath resolved","description":_aftermath_description(outcome),"domain":"security","severity":"notice"})
+	WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Battle aftermath resolved","description":_aftermath_description(outcome),"domain":"security","severity":"notice"})
 	army_changed.emit(home_army.duplicate(true))
 	return outcome
 
@@ -1888,7 +1889,7 @@ func campaign_army_snapshot()->Dictionary:
 func economic_burden_snapshot()->Dictionary:
 	var mobilized:=_mobilized_count(); var home_soldiers:=int(home_army.get("troops",0)); var army_soldiers:=field_army_active_personnel(); var field_soldiers:=home_soldiers+army_soldiers; var occupation_soldiers:=_occupation_force_total(); var queued:=_queued_trainees(); var recruits:=aggregate_recruits
 	var provisions:=float(home_army.get("provisions_required_today",0.0))
-	if int(home_army.get("provision_day",-1))<int(GameState.elapsed_days)-1: provisions=float(home_soldiers)*0.90+float(army_soldiers)*1.05
+	if int(home_army.get("provision_day",-1))<int(WorldSimulation.state.elapsed_days)-1: provisions=float(home_soldiers)*0.90+float(army_soldiers)*1.05
 	else:
 		for army in field_armies: provisions+=float(army.get("provisions_required_today",0.0))
 	provisions+=float(occupation_soldiers)*0.72
@@ -1998,6 +1999,7 @@ func begin_threat_engagement()->Dictionary:
 	if not active_engagement.is_empty(): return engagement_snapshot()
 	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
+	if WorldSimulation.enabled and preload("res://scripts/civilization_combat.gd").reserved(active_threat.get("owned_target",{})):return {"error":"That formation is already committed to a battle."}
 	var target_civ_id:=String(active_threat.get("source_civ_id",""))
 	var target_region_id:=String(active_threat.get("target_region_id",""))
 	var occupation_index:=_occupation_force_index(target_civ_id,target_region_id) if target_region_id!="" else -1
@@ -2119,16 +2121,16 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 		if recovering.is_empty():recovering=[{"army_id":final_result.home_force_id}]
 		for member:Dictionary in recovering:
 			var recovering_index:=_field_army_index(int(member.army_id))
-			if recovering_index>=0:field_armies[recovering_index]["command_recover_until"]=int(GameState.elapsed_days)+14
+			if recovering_index>=0:field_armies[recovering_index]["command_recover_until"]=int(WorldSimulation.state.elapsed_days)+14
 	_apply_home_siege_damage(final_result)
 	if source_civ_id!="":
-		var strategic_outcome:Dictionary=CivilizationSystem.resolve_player_battle(source_civ_id,final_result)
+		var strategic_outcome:Dictionary=WorldSimulation.world.resolve_player_battle(source_civ_id,final_result)
 		if String(threat.get("incident_kind","campaign"))=="raid" and String(final_result.get("campaign_mode","defensive"))=="defensive" and bool(strategic_outcome.get("decisive",false)) and not bool(strategic_outcome.get("player_won",false)):
 			var raid_losses:=_apply_raid_store_losses(threat,0.65)
 			strategic_outcome["raid_losses"]=raid_losses
-			GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Raiders break into the stores","description":"The defeated garrison could not prevent the raiders from taking portable food and materials.","domain":"security","severity":"danger"})
+			WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Raiders break into the stores","description":"The defeated garrison could not prevent the raiders from taking portable food and materials.","domain":"security","severity":"danger"})
 		if bool(final_result.get("field_encounter",false)):
-			CivilizationSystem.resolve_foreign_formation_after_battle(String(final_result.get("formation_id","")),final_result)
+			WorldSimulation.world.resolve_foreign_formation_after_battle(String(final_result.get("formation_id","")),final_result)
 		if bool(strategic_outcome.get("region_captured",false)):
 			var garrison:=establish_occupation_force(source_civ_id,strategic_outcome.get("region",{}),float(strategic_outcome.get("occupation_required",0.0)),int(final_result.get("home_force_id",0)))
 			command_hierarchy.battle.reinforce_occupation(source_civ_id,String(strategic_outcome.get("region",{}).get("id","")),final_result.get("command_participants",[]))
@@ -2140,7 +2142,7 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 			strategic_outcome["player_occupation"]=occupation
 			if occupation.has("error"):
 				strategic_outcome["message"]=String(occupation.error)
-				GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Defeat without occupation","description":String(occupation.error),"domain":"security","severity":"notice"})
+				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Defeat without occupation","description":String(occupation.error),"domain":"security","severity":"notice"})
 		committed["strategic_outcome"]=strategic_outcome
 	# The battle report is directly known, including the soldiers just detached
 	# to hold the city. Do not keep presenting a pre-battle runner headcount.
@@ -2156,10 +2158,10 @@ func _apply_raid_store_losses(threat:Dictionary,battle_modifier:float=1.0)->Dict
 	var protection:=store_protection()
 	var fraction:=clampf(float(threat.get("plunder_fraction",0.12))*float(protection.get("exposed_share",1.0))*battle_modifier,0.0,0.35)
 	for resource_name in ["Food","Timber","Stone","Fiber Plants"]:
-		var available:=float(GameState.resource_stockpiles.get(resource_name,0.0))
+		var available:=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))
 		var requested:=available*fraction
-		var removed:=FoodSystem.issue_for_obligation(requested,"raid_loss","Stores seized after a failed defense") if resource_name=="Food" else requested
-		if resource_name!="Food": GameState.resource_stockpiles[resource_name]=maxf(0.0,available-removed)
+		var removed:=WorldSimulation.food.issue_for_obligation(requested,"raid_loss","Stores seized after a failed defense") if resource_name=="Food" else requested
+		if resource_name!="Food": WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,available-removed)
 		losses[resource_name]=removed
 	return losses
 
@@ -2206,21 +2208,21 @@ func respond_to_threat(response:String)->Dictionary:
 	if choice=="tribute":
 		if String(threat.get("target_region_id",""))!="":
 			return {"error":"A strategic-region recapture campaign cannot be bought off with settlement food. Defend the occupation or withdraw from the region."}
-		var demanded:=float(threat.get("tribute_food",0.0)); var available:=FoodSystem.total_stored()
+		var demanded:=float(threat.get("tribute_food",0.0)); var available:=WorldSimulation.food.total_stored()
 		if available<demanded: return {"error":"The demanded tribute requires %.1f Food; only %.1f is stored." % [demanded,available]}
-		var paid:=FoodSystem.issue_for_obligation(demanded,"tribute","Tribute under threat")
+		var paid:=WorldSimulation.food.issue_for_obligation(demanded,"tribute","Tribute under threat")
 		if paid+0.0001<demanded:
-			FoodSystem.receive_external_food(paid)
+			WorldSimulation.food.receive_external_food(paid)
 			return {"error":"The physical food stores changed before tribute could be transferred."}
-		GameState.simulation_metrics["security"]=clampf(float(GameState.simulation_metrics.get("security",0.38))-0.035,0.0,1.0)
-		CivilizationSystem.resolve_player_incident(String(threat.get("source_civ_id","")),"tribute",{"food":paid})
+		WorldSimulation.state.simulation_metrics["security"]=clampf(float(WorldSimulation.state.simulation_metrics.get("security",0.38))-0.035,0.0,1.0)
+		WorldSimulation.world.resolve_player_incident(String(threat.get("source_civ_id","")),"tribute",{"food":paid})
 		_resolve_threat_without_battle("Tribute paid","The settlement surrendered %.1f Food to avoid battle." % paid)
 		return {"resolved":true,"response":choice,"food_paid":paid}
 	if choice=="withdraw":
 		var target_region_id:=String(threat.get("target_region_id",""))
 		if target_region_id!="":
 			var source_civ_id:=String(threat.get("source_civ_id",""))
-			var abandonment:=CivilizationSystem.abandon_occupied_region(source_civ_id,target_region_id)
+			var abandonment:=WorldSimulation.world.abandon_occupied_region(source_civ_id,target_region_id)
 			remove_occupation_force(source_civ_id,target_region_id,false)
 			_resolve_threat_without_battle("Occupation withdrawn",String(abandonment.get("message","The occupation force yielded the strategic region.")))
 			return {"resolved":true,"response":choice,"region_abandoned":target_region_id,"strategic_outcome":abandonment}
@@ -2230,14 +2232,14 @@ func respond_to_threat(response:String)->Dictionary:
 		var base_plunder_fraction:=clampf(float(threat.get("plunder_fraction",0.12)),0.0,1.0)
 		var effective_plunder_fraction:=base_plunder_fraction*float(protection.exposed_share)
 		for resource_name in ["Food","Timber","Stone","Fiber Plants"]:
-			var available:=float(GameState.resource_stockpiles.get(resource_name,0.0))
+			var available:=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))
 			var amount:=available*effective_plunder_fraction
-			var removed:=FoodSystem.issue_for_obligation(amount,"raid_loss","Food seized during withdrawal") if resource_name=="Food" else amount
+			var removed:=WorldSimulation.food.issue_for_obligation(amount,"raid_loss","Food seized during withdrawal") if resource_name=="Food" else amount
 			protected[resource_name]=maxf(0.0,available*base_plunder_fraction-removed)
-			if resource_name!="Food": GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-removed)
+			if resource_name!="Food": WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-removed)
 			losses[resource_name]=removed
 		var message:="The population yielded ground. Raiders took %.0f%% of reserves; fortified stores protected %.0f%% of the threatened share." % [effective_plunder_fraction*100.0,float(protection.seizure_reduction)*100.0]
-		CivilizationSystem.resolve_player_incident(String(threat.get("source_civ_id","")),"withdraw",{"resources":losses})
+		WorldSimulation.world.resolve_player_incident(String(threat.get("source_civ_id","")),"withdraw",{"resources":losses})
 		_resolve_threat_without_battle("Settlement yields ground",message)
 		return {"resolved":true,"response":choice,"resources_lost":losses,"resources_protected":protected,"base_plunder_fraction":base_plunder_fraction,"effective_plunder_fraction":effective_plunder_fraction,"store_protection":protection,"message":message}
 	return {"error":"Unknown threat response: %s" % response}
@@ -2267,7 +2269,7 @@ func offensive_campaign_availability(civ_id:String,region_id:String="",army_id:i
 	if command_hierarchy.executing and not command_hierarchy.battle_candidates.is_empty():
 		committed_strength=0
 		for participant:Dictionary in command_hierarchy.battle_candidates:committed_strength+=int(participant.get("troops",0))
-	var incident:=CivilizationSystem.offensive_campaign_data(civ_id,committed_strength,region_id)
+	var incident:=WorldSimulation.world.offensive_campaign_data(civ_id,committed_strength,region_id)
 	if incident.has("error"): return incident
 	incident["field_army_id"]=int(maneuver_army.get("army_id",0))
 	return {"ok":true,"incident":incident,"field_army":maneuver_army.duplicate(true)}
@@ -2292,7 +2294,7 @@ func city_operation_quote(army_id:int,civ_id:String,region_id:String)->Dictionar
 	if not active_engagement.is_empty() or not active_siege.is_empty() or not active_threat.is_empty() or not pending_aftermath.is_empty():return {"error":"Resolve the current battle, siege or aftermath first."}
 	var index:=_field_army_index(army_id)
 	if index<0 or int(field_armies[index].get("troops",0))<=0:return {"error":"No active soldiers in the selected army. Choose another army."}
-	var report:Dictionary=CivilizationSystem.city_intelligence.known("player",region_id)
+	var report:Dictionary=WorldSimulation.world.city_intelligence.known("player",region_id)
 	if report.is_empty() or _movement_destination(region_id).is_empty():return {"error":"No returned report identifies this destination."}
 	if civ_id=="" or civ_id=="player":return {"error":"Identify the foreign settlement before ordering an attack."}
 	var point:Dictionary=field_armies[index].get("position",{})
@@ -2323,7 +2325,7 @@ func launch_offensive(civ_id:String,region_id:String="",army_id:int=0)->Dictiona
 	_create_civilization_threat(incident,"offensive")
 	var result:=begin_threat_engagement()
 	if not result.has("error"):
-		active_engagement.threat["war_id"]=CivilizationSystem.record_player_hostile_order(civ_id,region_id,"A player army attacked the settlement without awaiting a declaration.")
+		active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(civ_id,region_id,"A player army attacked the settlement without awaiting a declaration.")
 	return result
 
 
@@ -2339,7 +2341,7 @@ func raid_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
 			maneuver_army=force
 			break
 	if maneuver_army.is_empty(): return {"error":"Move a field army to the selected region before ordering a raid."}
-	var incident:=CivilizationSystem.offensive_campaign_data(civ_id,int(maneuver_army.get("troops",0)),region_id,true)
+	var incident:=WorldSimulation.world.offensive_campaign_data(civ_id,int(maneuver_army.get("troops",0)),region_id,true)
 	if incident.has("error"): return incident
 	incident["field_army_id"]=int(maneuver_army.get("army_id",0))
 	return {"ok":true,"incident":incident,"field_army":maneuver_army.duplicate(true)}
@@ -2354,7 +2356,7 @@ func launch_raid(civ_id:String,region_id:String="")->Dictionary:
 
 func _resolve_threat_without_battle(title:String,description:String)->void:
 	active_threat.clear(); threats_resolved+=1; threat_changed.emit({})
-	GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":title,"description":description,"domain":"security","severity":"warning"})
+	WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":title,"description":description,"domain":"security","severity":"warning"})
 
 
 func _process_threat_day()->void:
@@ -2364,7 +2366,7 @@ func _process_threat_day()->void:
 		advance_engagement(command_hierarchy.land.battle_order() if bool(active_engagement.get("commander_managed",false)) else "hold")
 		return
 	if not active_threat.is_empty():
-		if int(GameState.elapsed_days)>int(active_threat.get("deadline_day",GameState.elapsed_days)) and pending_aftermath.is_empty():
+		if int(WorldSimulation.state.elapsed_days)>int(active_threat.get("deadline_day",WorldSimulation.state.elapsed_days)) and pending_aftermath.is_empty():
 			var occupation_defense:=occupation_force_for_region(String(active_threat.get("source_civ_id","")),String(active_threat.get("target_region_id","")))
 			if int(settlement_defense.get("stage",0))>=1 and String(active_threat.get("target_region_id",""))=="" and not bool(active_threat.get("field_encounter",false)) and String(active_threat.get("incident_kind","campaign"))!="raid":
 				var investment:=begin_siege()
@@ -2372,8 +2374,8 @@ func _process_threat_day()->void:
 			respond_to_threat("defend" if int(settlement_defense_snapshot().get("garrison_personnel",0))>0 or int(occupation_defense.get("troops",0))>0 else "withdraw")
 			while not active_engagement.is_empty() and not bool(active_engagement.get("awaiting_player_view",false)): advance_engagement("hold")
 		return
-	if not GameState.settlement_site_committed or int(GameState.elapsed_days)<90 or not pending_aftermath.is_empty(): return
-	var incident:=CivilizationSystem.consume_player_incident()
+	if not WorldSimulation.state.settlement_site_committed or int(WorldSimulation.state.elapsed_days)<90 or not pending_aftermath.is_empty(): return
+	var incident:=WorldSimulation.world.consume_player_incident()
 	if incident.is_empty(): return
 	_create_civilization_threat(incident,"defensive")
 
@@ -2383,26 +2385,33 @@ func _create_civilization_threat(incident:Dictionary,campaign_mode:String="defen
 	var technology:=clampf(float(incident.get("technology",0.15)),0.0,1.0)
 	var readiness:=clampf(float(incident.get("readiness",0.5)),0.1,1.0)
 	var source_name:=String(incident.get("source_name","RIVAL POLITY"))
-	var rng:=RandomNumberGenerator.new(); rng.seed=GameState.world_seed^int(GameState.elapsed_days)*104729^String(incident.get("id","")).hash()
-	var enemy_formations:Array[Dictionary]=[]
-	if technology>=0.52:
-		var archers:=roundi(float(strength)*0.28); var line:=roundi(float(strength)*0.38); var levy:=strength-archers-line
-		enemy_formations=[{"unit":"levy","weapon":"improvised","count":levy,"equipment":levy},{"unit":"line_infantry","weapon":"spear","count":line,"equipment":line},{"unit":"skirmisher","weapon":"bow","count":archers,"equipment":archers,"ammunition":archers*6}]
-	elif technology>=0.27:
-		var line:=roundi(float(strength)*0.42); enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength-line,"equipment":strength-line},{"unit":"line_infantry","weapon":"spear","count":line,"equipment":line}]
-	else: enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength,"equipment":strength}]
-	var enemy_morale:=clampf(0.42+readiness*0.42+float(war_reputation.get("grievance",0.0))*0.08-float(war_reputation.get("fear",0.0))*0.07,0.32,0.92)
-	var enemy:Dictionary=simulator.create_formation_force("%s FIELD HOST" % source_name,enemy_formations,enemy_morale,readiness)
-	enemy["commander"]=simulator.create_commander("%s FIELD STAFF" % source_name,rng.randf_range(0.38,0.72),rng.randf_range(0.38,0.72),rng.randf_range(0.30,0.68),rng.randf_range(0.42,0.78))
+	var rng:=RandomNumberGenerator.new(); rng.seed=WorldSimulation.state.world_seed^int(WorldSimulation.state.elapsed_days)*104729^String(incident.get("id","")).hash()
+	var enemy:Dictionary={}
+	if WorldSimulation.enabled:
+		enemy=preload("res://scripts/civilization_combat.gd").force_for(incident)
+		if enemy.is_empty():return
+		strength=int(enemy.get("troops",0))
+	else:
+		var enemy_formations:Array[Dictionary]=[]
+		if technology>=0.52:
+			var archers:=roundi(float(strength)*0.28); var line:=roundi(float(strength)*0.38); var levy:=strength-archers-line
+			enemy_formations=[{"unit":"levy","weapon":"improvised","count":levy,"equipment":levy},{"unit":"line_infantry","weapon":"spear","count":line,"equipment":line},{"unit":"skirmisher","weapon":"bow","count":archers,"equipment":archers,"ammunition":archers*6}]
+		elif technology>=0.27:
+			var line:=roundi(float(strength)*0.42); enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength-line,"equipment":strength-line},{"unit":"line_infantry","weapon":"spear","count":line,"equipment":line}]
+		else: enemy_formations=[{"unit":"levy","weapon":"improvised","count":strength,"equipment":strength}]
+		var enemy_morale:=clampf(0.42+readiness*0.42+float(war_reputation.get("grievance",0.0))*0.08-float(war_reputation.get("fear",0.0))*0.07,0.32,0.92)
+		enemy=simulator.create_formation_force("%s FIELD HOST" % source_name,enemy_formations,enemy_morale,readiness)
+		enemy["commander"]=simulator.create_commander("%s FIELD STAFF" % source_name,rng.randf_range(0.38,0.72),rng.randf_range(0.38,0.72),rng.randf_range(0.30,0.68),rng.randf_range(0.42,0.78))
 	var offensive:=campaign_mode=="offensive"
 	var is_raid:=String(incident.get("incident_kind","campaign"))=="raid"
 	var target_name:=String(incident.get("target_region_name",""))
 	var threat_title:="Raid on %s" % target_name if is_raid and offensive else ("%s raiders approaching" % source_name if is_raid else ("Campaign for %s" % target_name if offensive and target_name!="" else ("Campaign against %s" % source_name if offensive else ("%s moves to recapture %s" % [source_name,target_name] if target_name!="" else "%s campaign approaching" % source_name))))
 	var report_text:="The raiding column is committed against %s: scouts estimate about %d defenders. Victory may seize portable stores but will not occupy the region." % [target_name,strength] if is_raid and offensive else ("Watchers report roughly %d %s raiders moving toward local stores. Muster the garrison, pay them off, or yield before they arrive." % [strength,source_name] if is_raid else ("The field host is committed against %s: scouts estimate an aggregate defending capacity of %d." % [target_name if target_name!="" else source_name,strength] if offensive else ("%s is moving roughly %d personnel to retake %s. Its occupation force will defend within seven days." % [source_name,strength,target_name] if target_name!="" else "Scouts identify an organized %s field host of roughly %d. A response is required within seven days." % [source_name,strength])))
-	active_threat={"id":"threat_%d_%d" % [int(GameState.elapsed_days),threats_resolved],"title":threat_title,"incident_kind":String(incident.get("incident_kind","campaign")),"campaign_mode":campaign_mode,"source_civ_id":String(incident.get("source_civ_id","")),"source_name":source_name,"field_encounter":bool(incident.get("field_encounter",false)),"formation_id":String(incident.get("formation_id","")),"target_region_id":String(incident.get("target_region_id","")),"target_position":incident.get("target_position",{}).duplicate(true),"target_region_name":String(incident.get("target_region_name","")),"target_region_role":String(incident.get("target_region_role","")),"target_population":float(incident.get("target_population",0.0)),"occupation_required":float(incident.get("occupation_required",0.0)),"recapture_campaign":bool(incident.get("recapture_campaign",false)),"field_army_id":int(incident.get("field_army_id",0)),"discovered_day":int(GameState.elapsed_days),"deadline_day":int(GameState.elapsed_days)+(9999 if offensive else 7),"terrain_defense":float(incident.get("terrain_defense",_terrain_defense())),"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
+	active_threat={"id":"threat_%d_%d" % [int(WorldSimulation.state.elapsed_days),threats_resolved],"title":threat_title,"incident_kind":String(incident.get("incident_kind","campaign")),"campaign_mode":campaign_mode,"source_civ_id":String(incident.get("source_civ_id","")),"source_name":source_name,"field_encounter":bool(incident.get("field_encounter",false)),"formation_id":String(incident.get("formation_id","")),"target_region_id":String(incident.get("target_region_id","")),"target_position":incident.get("target_position",{}).duplicate(true),"target_region_name":String(incident.get("target_region_name","")),"target_region_role":String(incident.get("target_region_role","")),"target_population":float(incident.get("target_population",0.0)),"occupation_required":float(incident.get("occupation_required",0.0)),"recapture_campaign":bool(incident.get("recapture_campaign",false)),"field_army_id":int(incident.get("field_army_id",0)),"discovered_day":int(WorldSimulation.state.elapsed_days),"deadline_day":int(WorldSimulation.state.elapsed_days)+(9999 if offensive else 7),"terrain_defense":float(incident.get("terrain_defense",_terrain_defense())),"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
+	if enemy.has("owned_target"):active_threat["owned_target"]=enemy.owned_target.duplicate(true)
 	active_threat["routine_raid"]=preload("res://scripts/raid_policy.gd").routine(active_threat,_home_defense_force(false))
 	if bool(active_threat.routine_raid): report_text="Watchers report roughly %d %s raiders. The local defense has the advantage and will handle their approach; you can inspect the report in War Planning." % [strength,source_name]
-	GameState.council_inbox.push_front({"id":String(active_threat.id),"advisor":"MARSHAL'S OFFICE","office":"Marshal","topic":"security","act":{"type":"report"},"text":report_text,"urgency":0.35 if bool(active_threat.get("routine_raid",false)) else 0.96,"day":int(GameState.elapsed_days),"status":"unread"})
+	WorldSimulation.state.council_inbox.push_front({"id":String(active_threat.id),"advisor":"MARSHAL'S OFFICE","office":"Marshal","topic":"security","act":{"type":"report"},"text":report_text,"urgency":0.35 if bool(active_threat.get("routine_raid",false)) else 0.96,"day":int(WorldSimulation.state.elapsed_days),"status":"unread"})
 	threat_changed.emit(active_threat.duplicate(true))
 
 
@@ -2431,10 +2440,10 @@ func field_provision_delivery_ratio()->float:
 	if recovery.home_unavailable():return 0.0
 	var troops:=int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()
 	if troops<=0: return 1.0
-	var workers:=float(GameState.population_allocations.get("Logistics",0))
+	var workers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var labor_coverage:=clampf(workers/maxf(1.0,float(troops)*0.09),0.0,1.0)
 	var commander_logistics:=clampf(float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4)),0.0,1.0)
-	var carts:=float(GameState.resource_stockpiles.get("Transport Carts",0.0))
+	var carts:=float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0))
 	var cart_coverage:=clampf(carts/maxf(1.0,float(troops)/24.0),0.0,1.0)
 	return clampf(0.08+labor_coverage*0.42+commander_logistics*0.20+_adoption("supply_groups")*0.20+cart_coverage*0.10,0.0,1.0)
 
@@ -2443,7 +2452,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 	if home_army.is_empty() and occupation_forces.is_empty() and field_armies.is_empty(): return
 	var need:=maxf(0.0,required)
 	var received:=clampf(delivered,0.0,need)
-	var prepaid:=int(GeneralCampaign.army().get("troops",0)) if GeneralCampaign.active else 0
+	var prepaid:=int(WorldSimulation.campaign.army().get("troops",0)) if WorldSimulation.campaign.active else 0
 	var total_active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-prepaid)
 	var credited:=float(air_delivery.get("total",0))
 	var delivery_ratio:=clampf(received/maxf(.01,need-credited),0,1) if need>credited else 1.0
@@ -2455,17 +2464,17 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		home_army["provisions_required_today"]=home_need
 		home_army["provisions_delivered_today"]=home_received
 		home_army["provision_ratio"]=provision_ratio
-		home_army["provision_day"]=int(GameState.elapsed_days)
+		home_army["provision_day"]=int(WorldSimulation.state.elapsed_days)
 		var shortfall:=maxf(0.0,home_need-home_received)
 		home_army["provision_shortfall_total"]=float(home_army.get("provision_shortfall_total",0.0))+shortfall
 		home_army["provision_shortfall_days"]=int(home_army.get("provision_shortfall_days",0))+1 if shortfall>0.01 else 0
-		var condition_target:=clampf(GameState.population_health*0.55+GameState.food_security*0.20+provision_ratio*0.25-float(home_army.get("service_strain",0))*.20,0.0,1.0)
+		var condition_target:=clampf(WorldSimulation.state.population_health*0.55+WorldSimulation.state.food_security*0.20+provision_ratio*0.25-float(home_army.get("service_strain",0))*.20,0.0,1.0)
 		var formations:Array=home_army.get("formations",[])
 		for index in formations.size(): formations[index]["personnel_condition"]=move_toward(float(formations[index].get("personnel_condition",condition_target)),condition_target,0.014)
 		home_army["formations"]=formations
 	for force_index in field_armies.size():
 		var force:Dictionary=field_armies[force_index]
-		if bool(force.get("general_managed",false)) and GeneralCampaign.active:continue
+		if bool(force.get("general_managed",false)) and WorldSimulation.campaign.active:continue
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
 		var field_credit:=float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0))
 		var field_received:=field_credit+maxf(0,need*share-field_credit)*delivery_ratio
@@ -2473,9 +2482,9 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		force["provisions_required_today"]=need*share
 		force["provisions_delivered_today"]=field_received
 		force["provision_ratio"]=provision_ratio
-		force["provision_day"]=int(GameState.elapsed_days)
+		force["provision_day"]=int(WorldSimulation.state.elapsed_days)
 		force["supply_level"]=move_toward(float(force.get("supply_level",0.5)),provision_ratio,0.055 if String(force.get("status","stationed"))=="stationed" else 0.025)
-		var field_condition:=clampf(GameState.population_health*0.48+GameState.food_security*0.17+provision_ratio*0.35,0.0,1.0)
+		var field_condition:=clampf(WorldSimulation.state.population_health*0.48+WorldSimulation.state.food_security*0.17+provision_ratio*0.35,0.0,1.0)
 		var field_formations:Array=force.get("formations",[])
 		for formation_index in field_formations.size(): field_formations[formation_index]["personnel_condition"]=move_toward(float(field_formations[formation_index].get("personnel_condition",field_condition)),field_condition,0.016)
 		force["formations"]=field_formations
@@ -2487,9 +2496,9 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		force["provisions_required_today"]=need*share
 		force["provisions_delivered_today"]=need*share*delivery_ratio
 		force["provision_ratio"]=provision_ratio
-		force["provision_day"]=int(GameState.elapsed_days)
+		force["provision_day"]=int(WorldSimulation.state.elapsed_days)
 		force["supply_level"]=move_toward(float(force.get("supply_level",0.5)),provision_ratio,0.08)
-		var occupation_condition:=clampf(GameState.population_health*0.48+GameState.food_security*0.17+provision_ratio*0.35,0.0,1.0)
+		var occupation_condition:=clampf(WorldSimulation.state.population_health*0.48+WorldSimulation.state.food_security*0.17+provision_ratio*0.35,0.0,1.0)
 		var occupation_formations:Array=force.get("formations",[])
 		for formation_index in occupation_formations.size(): occupation_formations[formation_index]["personnel_condition"]=move_toward(float(occupation_formations[formation_index].get("personnel_condition",occupation_condition)),occupation_condition,0.018)
 		force["formations"]=occupation_formations
@@ -2497,7 +2506,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 
 
 func prisoner_custody_snapshot()->Dictionary:
-	var guards:=float(GameState.population_allocations.get("Defense",0))*0.18
+	var guards:=float(WorldSimulation.state.population_allocations.get("Defense",0))*0.18
 	var coverage:=clampf(guards/maxf(1.0,float(foreign_prisoners)+float(held_generals.size())*2.0),0.0,1.0)
 	return {"prisoners":foreign_prisoners,"held_generals":held_generals.size(),"custody_days":prisoner_custody_days,"guard_coverage":coverage,"food_demand":prisoner_food_demand(),"escape_risk":maxf(0.0,1.0-coverage),"escaped_total":escaped_prisoners_total}
 
@@ -2529,15 +2538,15 @@ func resolve_held_general(index:int,policy:String)->Dictionary:
 	if normalized not in ["release","ransom","execute"]: return {"error":"Unknown held-general policy: %s" % policy}
 	if index<0 or index>=held_generals.size(): return {"error":"Held general %d was not found." % index}
 	var general:Dictionary=held_generals.pop_at(index)
-	HistoricalFigures.resolve_captive(String(general.get("figure_id","")),normalized)
+	WorldSimulation.figures.resolve_captive(String(general.get("figure_id","")),normalized)
 	var outcome:Dictionary={"general":general.duplicate(true),"general_policy":normalized}
 	if normalized=="ransom":
 		outcome["war_wealth_receipt"]=_receive_war_wealth(50.0,"state treasury","Ransom for held commander")
 		outcome["ransom_income"]=50
 	elif normalized=="release":
-		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
 	else:
-		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
+		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
 		outcome["executed"]=true
 	return outcome
 
@@ -2563,13 +2572,13 @@ func resolve_held_captives(prisoner_policy:String,general_policy:String)->Dictio
 	var message:="Captives remain in custody."
 	if prisoners_resolved>0 or generals_resolved>0:
 		message="Resolved %d prisoner%s and %d commander%s." % [prisoners_resolved,"" if prisoners_resolved==1 else "s",generals_resolved,"" if generals_resolved==1 else "s"]
-		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Captive policy enacted","description":message,"domain":"security","severity":"notice"})
+		WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Captive policy enacted","description":message,"domain":"security","severity":"notice"})
 	return {"message":message,"prisoner_policy":normalized_prisoners,"general_policy":normalized_generals,"prisoners_resolved":prisoners_resolved,"generals_resolved":generals_resolved,"prisoner_result":prisoner_result,"general_results":general_results,"foreign_prisoners":foreign_prisoners,"held_generals":held_generals.size()}
 
 
 func _mobilization_cost()->Dictionary:
 	var total:=_mobilized_count()
-	var defense_allocation:=int(GameState.population_allocations.get("Defense",0))
+	var defense_allocation:=int(WorldSimulation.state.population_allocations.get("Defense",0))
 	var assigned_defense:=mini(total,defense_allocation)
 	var by_role:Dictionary={"Defense":assigned_defense}
 	if total>assigned_defense: by_role["Other labor displaced"]=total-assigned_defense
@@ -2581,9 +2590,9 @@ func export_state()->Dictionary:
 		"version":SAVE_VERSION,
 		"joint_operations":joint_operations.export_state(),
 		"command_hierarchy":command_hierarchy.export_state(),
-		"world_seed":GameState.world_seed,
-		"historical_figures":HistoricalFigures.export_state(),
-		"people_direction":PeopleDirection.export_state(),
+		"world_seed":WorldSimulation.state.world_seed,
+		"historical_figures":WorldSimulation.figures.export_state(),
+		"people_direction":WorldSimulation.direction.export_state(),
 		"last_processed_day":last_processed_day,
 		"home_army":home_army.duplicate(true),
 		"battle_history":battle_history.duplicate(true),
@@ -2651,7 +2660,7 @@ func import_state(payload:Dictionary)->Dictionary:
 	if not transfer_errors.is_empty(): return {"error":"Invalid occupation population state.","details":transfer_errors}
 	if not payload.get("runner_messages",[]) is Array: return {"error":"Invalid runner messages."}
 	for message in payload.get("runner_messages",[]):
-		if not message is Dictionary or not message.get("snapshot",{}) is Dictionary or not CivilizationSystem.city_intelligence.valid_carried(message.get("snapshot",{})): return {"error":"Invalid carried city observation."}
+		if not message is Dictionary or not message.get("snapshot",{}) is Dictionary or not WorldSimulation.world.city_intelligence.valid_carried(message.get("snapshot",{})): return {"error":"Invalid carried city observation."}
 	var siege_error:=SiegeModel.validate(payload.get("active_siege",{}))
 	if not siege_error.is_empty(): return {"error":siege_error}
 	if not payload.get("siege_history",[]) is Array or payload.get("siege_history",[]).size()>SiegeModel.HISTORY_LIMIT: return {"error":"Invalid siege history."}
@@ -2667,24 +2676,24 @@ func import_state(payload:Dictionary)->Dictionary:
 		incoming["next_field_army_id"]=1
 		incoming["version"]=SAVE_VERSION
 	elif incoming_version!=SAVE_VERSION: return {"error":"Unsupported military save version."}
-	if int(incoming.get("world_seed",GameState.world_seed))!=GameState.world_seed: return {"error":"Military save belongs to a different world."}
+	if int(incoming.get("world_seed",WorldSimulation.state.world_seed))!=WorldSimulation.state.world_seed: return {"error":"Military save belongs to a different world."}
 	var previous:=export_state()
 	if incoming.has("historical_figures"):
-		var figure_result:=HistoricalFigures.import_state(incoming.historical_figures)
+		var figure_result:=WorldSimulation.figures.import_state(incoming.historical_figures)
 		if figure_result.has("error"): return figure_result
 	if incoming.has("people_direction"):
-		var direction_result:=PeopleDirection.import_state(incoming.people_direction)
+		var direction_result:=WorldSimulation.direction.import_state(incoming.people_direction)
 		if direction_result.has("error"):
-			HistoricalFigures.import_state(previous.historical_figures)
+			WorldSimulation.figures.import_state(previous.historical_figures)
 			return direction_result
 	_apply_imported_state(incoming)
 	var errors:=validate_state()
 	if not errors.is_empty():
 		_apply_imported_state(previous)
-		HistoricalFigures.import_state(previous.historical_figures)
-		PeopleDirection.import_state(previous.people_direction)
+		WorldSimulation.figures.import_state(previous.historical_figures)
+		WorldSimulation.direction.import_state(previous.people_direction)
 		return {"error":"Invalid military save state.","details":errors}
-	last_world_seed=GameState.world_seed
+	last_world_seed=WorldSimulation.state.world_seed
 	return {"ok":true,"version":SAVE_VERSION}
 
 
@@ -2909,7 +2918,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	occupation_transfers.data.merge(payload.get("occupation_transfers",{}).duplicate(true),true)
 	active_siege=(payload.get("active_siege",{}) as Dictionary).duplicate(true)
 	siege_history.assign(payload.get("siege_history",[]))
-	last_processed_day=int(payload.get("last_processed_day",int(GameState.elapsed_days)))
+	last_processed_day=int(payload.get("last_processed_day",int(WorldSimulation.state.elapsed_days)))
 	home_army=(payload.get("home_army",{}) as Dictionary).duplicate(true)
 	_normalize_formation_ammunition()
 	battle_history.assign(payload.get("battle_history",[]))
@@ -3008,7 +3017,7 @@ func _empty_home_army()->Dictionary:
 	force["desertion_accumulator"]=0.0
 	force["desertions_total"]=0
 	force["exercise_readiness_bonus"]=0.0
-	force["campaign_day"]=int(GameState.elapsed_days)
+	force["campaign_day"]=int(WorldSimulation.state.elapsed_days)
 	return force
 
 
@@ -3112,15 +3121,15 @@ func unit_capability_state(unit:String)->Dictionary:
 	elif gate_id.begins_with("__military_tier_"):
 		var required:=int(gate_id.trim_prefix("__military_tier_").trim_suffix("__"))
 		state="observed" if int(military_development_snapshot().get("tier",0))>=required-1 else "unobserved"
-	elif gate_id in GameState.known_discoveries:
+	elif gate_id in WorldSimulation.state.known_discoveries:
 		state="understood"
 		result["can_prototype"]=true
 	else:
-		var definition:Dictionary=DiscoverySystem.discovery_definition(gate_id)
+		var definition:Dictionary=WorldSimulation.discovery.discovery_definition(gate_id)
 		var prerequisites_met:=true
 		for requirement in definition.get("requires",[]):
-			if String(requirement) not in GameState.known_discoveries: prerequisites_met=false
-		state="observed" if not definition.is_empty() and prerequisites_met and int(GameState.elapsed_days)>=int(definition.get("day",0)) else "unobserved"
+			if String(requirement) not in WorldSimulation.state.known_discoveries: prerequisites_met=false
+		state="observed" if not definition.is_empty() and prerequisites_met and int(WorldSimulation.state.elapsed_days)>=int(definition.get("day",0)) else "unobserved"
 	result["state"]=state
 	return result
 
@@ -3148,7 +3157,7 @@ func _training_gate(unit:String,weapon:String)->Dictionary:
 	# and its equipment; observation alone fields nothing.
 	var unit_understood:=bool(unit_gate.unlocked) or bool(unit_capability_state(unit).get("can_prototype",false))
 	var weapon_discovery:=String(EQUIPMENT_KNOWLEDGE.get(weapon,""))
-	var weapon_understood:=bool(weapon_gate.unlocked) or (weapon_discovery!="" and not weapon_discovery.begins_with("__") and weapon_discovery in GameState.known_discoveries)
+	var weapon_understood:=bool(weapon_gate.unlocked) or (weapon_discovery!="" and not weapon_discovery.begins_with("__") and weapon_discovery in WorldSimulation.state.known_discoveries)
 	if unit_understood and weapon_understood:
 		if _prototype_formation_exists(unit): return {"error":"An experimental %s cohort already exists; establish the practice (adoption) before raising more." % unit.replace("_"," ")}
 		return {"prototype":true}
@@ -3183,16 +3192,16 @@ func _formations_for_strength(total:int)->Array[Dictionary]:
 
 
 func _marshal_commander()->Dictionary:
-	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
-	var security:=float(GameState.society_capacities.get("security",0.38))
-	var logistics:=float(GameState.society_capacities.get("logistics",0.16))
-	if marshal.is_empty(): return HistoricalFigures.commander(_acting_field_commander(false),"home")
+	var marshal:Dictionary=WorldSimulation.state.leadership_positions.get("Marshal",{})
+	var security:=float(WorldSimulation.state.society_capacities.get("security",0.38))
+	var logistics:=float(WorldSimulation.state.society_capacities.get("logistics",0.16))
+	if marshal.is_empty(): return WorldSimulation.figures.commander(_acting_field_commander(false),"home")
 	# Field command now derives from the same visible aptitudes used by every
 	# other appointment. Compatibility composites keep older commanders valid.
-	var command:=clampf(GovernmentPeopleSystem.skill_value(marshal,"Strategy",50.0)/100.0*0.68+security*0.32,0.0,1.0)
-	var tactics:=clampf(GovernmentPeopleSystem.skill_value(marshal,"Tactics",50.0)/100.0*0.72+security*0.28,0.0,1.0)
-	var supply_command:=clampf(GovernmentPeopleSystem.skill_value(marshal,"Logistics",50.0)/100.0*0.66+logistics*0.34,0.0,1.0)
-	var resolve:=clampf(GovernmentPeopleSystem.skill_value(marshal,"Discipline",50.0)/100.0*0.60+security*0.40,0.0,1.0)
+	var command:=clampf(WorldSimulation.government.skill_value(marshal,"Strategy",50.0)/100.0*0.68+security*0.32,0.0,1.0)
+	var tactics:=clampf(WorldSimulation.government.skill_value(marshal,"Tactics",50.0)/100.0*0.72+security*0.28,0.0,1.0)
+	var supply_command:=clampf(WorldSimulation.government.skill_value(marshal,"Logistics",50.0)/100.0*0.66+logistics*0.34,0.0,1.0)
+	var resolve:=clampf(WorldSimulation.government.skill_value(marshal,"Discipline",50.0)/100.0*0.60+security*0.40,0.0,1.0)
 	var commander:Dictionary=simulator.create_commander(String(marshal.get("name","MARSHAL'S OFFICE")),command,tactics,supply_command,resolve)
 	commander["office"]="Marshal"
 	commander["institutional"]=true
@@ -3211,10 +3220,10 @@ func _apply_home_commander_fate(termination:Dictionary)->void:
 	var fate:=String(termination.get("commander_fate","escaped"))
 	if fate not in ["killed","captured"]: return
 	var former:Dictionary=home_army.get("commander",{})
-	var successor:=HistoricalFigures.commander(_acting_field_commander(false),"home")
+	var successor:=WorldSimulation.figures.commander(_acting_field_commander(false),"home")
 	home_army["commander"]=successor
 	var command_effect:="was destroyed" if fate=="killed" else "was captured"
-	GameState.council_inbox.push_front({"id":"command_succession_%d" % int(GameState.elapsed_days),"advisor":String(successor.get("name","ACTING FIELD STAFF")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":"%s %s. %s has assumed field coordination with reduced effectiveness." % [String(former.get("name","The field command element")),command_effect,String(successor.get("name","The acting field staff"))],"urgency":0.98,"day":int(GameState.elapsed_days),"status":"unread"})
+	WorldSimulation.state.council_inbox.push_front({"id":"command_succession_%d" % int(WorldSimulation.state.elapsed_days),"advisor":String(successor.get("name","ACTING FIELD STAFF")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":"%s %s. %s has assumed field coordination with reduced effectiveness." % [String(former.get("name","The field command element")),command_effect,String(successor.get("name","The acting field staff"))],"urgency":0.98,"day":int(WorldSimulation.state.elapsed_days),"status":"unread"})
 
 
 func _record_military_deaths(_legacy_names:Array[String],cause:String)->void:
@@ -3223,12 +3232,12 @@ func _record_military_deaths(_legacy_names:Array[String],cause:String)->void:
 
 func _record_aggregate_military_deaths(count:int,cause:String)->void:
 	if count<=0: return
-	var location:=GameState.settlement_name if GameState.settlement_name!="" else "the campaign"
-	var record:Dictionary={"id":"military_deaths_%d_%d" % [int(GameState.elapsed_days),GameState.demographic_ledger.size()],"day":int(GameState.elapsed_days),"start_day":int(GameState.elapsed_days),"end_day":int(GameState.elapsed_days),"title":"%s military deaths near %s" % [_compact_count(count),location],"description":"%s personnel were killed during military operations." % _compact_count(count),"domain":"population","severity":"demographic","kind":"death","count":count,"cause":cause,"location":location,"population_after":GameState.population_total,"affected_cohorts":{"early_adults":roundi(count*0.46),"established_adults":roundi(count*0.39),"mature_adults":count-roundi(count*0.46)-roundi(count*0.39)}}
-	GameState.demographic_ledger.push_front(record)
-	if GameState.demographic_ledger.size()>120: GameState.demographic_ledger.resize(120)
-	GameState.simulation_events.push_front(record)
-	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+	var location:=WorldSimulation.state.settlement_name if WorldSimulation.state.settlement_name!="" else "the campaign"
+	var record:Dictionary={"id":"military_deaths_%d_%d" % [int(WorldSimulation.state.elapsed_days),WorldSimulation.state.demographic_ledger.size()],"day":int(WorldSimulation.state.elapsed_days),"start_day":int(WorldSimulation.state.elapsed_days),"end_day":int(WorldSimulation.state.elapsed_days),"title":"%s military deaths near %s" % [_compact_count(count),location],"description":"%s personnel were killed during military operations." % _compact_count(count),"domain":"population","severity":"demographic","kind":"death","count":count,"cause":cause,"location":location,"population_after":WorldSimulation.state.population_total,"affected_cohorts":{"early_adults":roundi(count*0.46),"established_adults":roundi(count*0.39),"mature_adults":count-roundi(count*0.46)-roundi(count*0.39)}}
+	WorldSimulation.state.demographic_ledger.push_front(record)
+	if WorldSimulation.state.demographic_ledger.size()>120: WorldSimulation.state.demographic_ledger.resize(120)
+	WorldSimulation.state.simulation_events.push_front(record)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 
 func _compact_count(value:int)->String:
 	if value>=1_000_000_000: return "%.2fB" % (float(value)/1_000_000_000.0)
@@ -3238,12 +3247,12 @@ func _compact_count(value:int)->String:
 
 
 func _acting_field_commander(assign_office:bool)->Dictionary:
-	var security:=clampf(float(GameState.society_capacities.get("security",0.38)),0.0,1.0)
-	var logistics:=clampf(float(GameState.society_capacities.get("logistics",0.16)),0.0,1.0)
-	var knowledge:=clampf(float(GameState.society_capacities.get("knowledge",0.18)),0.0,1.0)
+	var security:=clampf(float(WorldSimulation.state.society_capacities.get("security",0.38)),0.0,1.0)
+	var logistics:=clampf(float(WorldSimulation.state.society_capacities.get("logistics",0.16)),0.0,1.0)
+	var knowledge:=clampf(float(WorldSimulation.state.society_capacities.get("knowledge",0.18)),0.0,1.0)
 	var competence:=clampf(0.28+security*0.30+knowledge*0.16,0.30,0.70)
 	var institution:={"institution_id":"acting_field_staff","name":"ACTING FIELD STAFF","background":"Temporary collective command","institutional":true,"traits":["Distributed","Adaptive"],"skills":{"Strategy":roundi(competence*100.0),"Tactics":roundi(competence*92.0),"Logistics":roundi((competence*0.65+logistics*0.35)*100.0),"Discipline":roundi(competence*88.0)},"relationships":{"sovereign":{"trust":0.46,"respect":0.52,"fear":0.18,"resentment":0.0,"obligation":0.62}},"honesty":0.52,"courage":clampf(competence+0.10,0.0,1.0),"pride":0.42,"suspicion":0.48,"support":roundi(competence*75.0),"acting":true}
-	if assign_office: GameState.leadership_positions["Marshal"]=institution
+	if assign_office: WorldSimulation.state.leadership_positions["Marshal"]=institution
 	var commander:Dictionary=simulator.create_commander(String(institution.name),competence,competence*0.92,clampf(competence*0.65+logistics*0.35,0.0,1.0),clampf(competence+0.08,0.0,1.0))
 	commander["office"]="Marshal"
 	commander["acting"]=true
@@ -3253,7 +3262,7 @@ func _acting_field_commander(assign_office:bool)->Dictionary:
 
 func _synchronize_field_commander()->void:
 	if home_army.is_empty(): return
-	var marshal:Dictionary=GameState.leadership_positions.get("Marshal",{})
+	var marshal:Dictionary=WorldSimulation.state.leadership_positions.get("Marshal",{})
 	home_army["commander"]=_marshal_commander()
 	for force in field_armies+occupation_forces:
 		var commander:Dictionary=force.get("commander",{}).duplicate(true)
@@ -3278,7 +3287,7 @@ func force_condition_profile(force:Dictionary={})->Dictionary:
 	var total:=0
 	for formation in subject.get("formations",[]):
 		var count:=maxi(0,int(formation.get("count",0)))
-		var capacity:=clampf(float(formation.get("personnel_condition",GameState.population_health)),0.0,1.0)
+		var capacity:=clampf(float(formation.get("personnel_condition",WorldSimulation.state.population_health)),0.0,1.0)
 		total+=count
 		var band_index:=0 if capacity>=0.72 else (1 if capacity>=0.50 else (2 if capacity>=0.30 else 3))
 		bands[band_index]["count"]=int(bands[band_index].count)+count
@@ -3287,11 +3296,11 @@ func force_condition_profile(force:Dictionary={})->Dictionary:
 
 
 func _campaign_morale()->float:
-	return clampf(float(GameState.simulation_metrics.get("cohesion",0.58))*0.55+float(GameState.simulation_metrics.get("security",0.38))*0.45,0.15,1.0)
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58))*0.55+float(WorldSimulation.state.simulation_metrics.get("security",0.38))*0.45,0.15,1.0)
 
 
 func _default_settlement_defense()->Dictionary:
-	return {"stage":0,"integrity":1.0,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":int(GameState.elapsed_days)}
+	return {"stage":0,"integrity":1.0,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":int(WorldSimulation.state.elapsed_days)}
 
 
 func _ensure_settlement_defense()->void:
@@ -3306,7 +3315,7 @@ func _ensure_settlement_defense()->void:
 
 func settlement_defense_upgrade_availability()->Dictionary:
 	_ensure_settlement_defense()
-	if not GameState.settlement_site_committed: return {"available":false,"reason":"Found a permanent settlement before preparing a fixed defensive perimeter."}
+	if not WorldSimulation.state.settlement_site_committed: return {"available":false,"reason":"Found a permanent settlement before preparing a fixed defensive perimeter."}
 	if int(settlement_defense.project_stage)>=0:
 		var active_stage:Dictionary=SETTLEMENT_DEFENSE_STAGES[int(settlement_defense.project_stage)]
 		return {"available":false,"active":true,"reason":"%s is already under construction." % String(active_stage.name),"stage":active_stage.duplicate(true)}
@@ -3315,9 +3324,9 @@ func settlement_defense_upgrade_availability()->Dictionary:
 	var stage:Dictionary=SETTLEMENT_DEFENSE_STAGES[next_stage]
 	var missing:Array[String]=[]
 	for material in (stage.materials as Dictionary):
-		var required:=float(stage.materials[material]); var stored:=float(GameState.resource_stockpiles.get(material,0.0))
+		var required:=float(stage.materials[material]); var stored:=float(WorldSimulation.state.resource_stockpiles.get(material,0.0))
 		if stored+0.0001<required: missing.append("%s %.0f/%.0f" % [String(material),stored,required])
-	var labor:=int(GameState.population_allocations.get("Defense",0))
+	var labor:=int(WorldSimulation.state.population_allocations.get("Defense",0))
 	if labor<=0: missing.append("assign population to Defense")
 	var reason:="Ready: reserve the listed materials and commit aggregate Defense labor."
 	if not missing.is_empty(): reason="Needs "+", ".join(missing)+"."
@@ -3329,7 +3338,7 @@ func start_settlement_defense_upgrade()->Dictionary:
 	if not bool(availability.get("available",false)): return {"error":String(availability.get("reason","The next defense stage is unavailable."))}
 	var stage_index:=int(availability.stage_index); var stage:Dictionary=SETTLEMENT_DEFENSE_STAGES[stage_index]
 	for material in (stage.materials as Dictionary):
-		GameState.resource_stockpiles[material]=maxf(0.0,float(GameState.resource_stockpiles.get(material,0.0))-float(stage.materials[material]))
+		WorldSimulation.state.resource_stockpiles[material]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(material,0.0))-float(stage.materials[material]))
 	settlement_defense["project_stage"]=stage_index
 	settlement_defense["project_progress"]=0.0
 	settlement_defense["project_work"]=0.0
@@ -3346,7 +3355,7 @@ func settlement_defense_snapshot()->Dictionary:
 	# Defense labor is physically present and serves in the watch while its basic
 	# training rotates automatically. Formal formations remain separately visible.
 	var troops:=maxi(trained_troops,_home_garrison_target())
-	var garrison_required:=maxi(8,ceili(maxf(1.0,GameState.population_exact)*0.035))
+	var garrison_required:=maxi(8,ceili(maxf(1.0,WorldSimulation.state.population_exact)*0.035))
 	var garrison_coverage:=clampf(float(troops)/float(garrison_required),0.0,1.0)
 	var integrity:=float(settlement_defense.integrity)
 	var construction:Dictionary={}
@@ -3362,8 +3371,8 @@ func _process_settlement_defense_day()->void:
 	var project_index:=int(settlement_defense.project_stage)
 	if project_index>=0:
 		var project:Dictionary=SETTLEMENT_DEFENSE_STAGES[project_index]
-		var workers:=maxf(0.0,float(GameState.population_allocations.get("Defense",0)))
-		var efficiency:=clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
+		var workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))
+		var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
 		# A bounded project can use vast aggregate labor without creating per-worker
 		# tasks or completing more than 4% of a strategic stage in one simulated day.
 		var daily_work:=minf(float(project.work)*0.04,workers*efficiency*0.38)
@@ -3378,11 +3387,11 @@ func _process_settlement_defense_day()->void:
 			settlement_defense["project_progress"]=0.0
 			settlement_defense["project_work"]=0.0
 			settlement_defense["reserved_materials"]={}
-			settlement_defense["completed_day"]=int(GameState.elapsed_days)
-			GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"%s completed" % String(project.name).capitalize(),"description":String(project.description),"domain":"security","severity":"notice"})
+			settlement_defense["completed_day"]=int(WorldSimulation.state.elapsed_days)
+			WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s completed" % String(project.name).capitalize(),"description":String(project.description),"domain":"security","severity":"notice"})
 	var integrity:=float(settlement_defense.integrity)
 	if integrity<1.0 and active_engagement.is_empty():
-		var repair_workers:=maxf(0.0,float(GameState.population_allocations.get("Construction",0)))+maxf(0.0,float(GameState.population_allocations.get("Defense",0)))*0.20
+		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))*0.20
 		if repair_workers>0.0:
 			settlement_defense["integrity"]=move_toward(integrity,1.0,minf(0.006,repair_workers*0.00012))
 			changed=true
@@ -3403,15 +3412,15 @@ func _apply_home_siege_damage(result:Dictionary)->void:
 	# contiguous group of aggregate plots, which the map renders through the same
 	# GREAT -> DESTROYED grid ladder used for maintenance and prosperity. An unfortified
 	# settlement is therefore more exposed, not magically immune to urban damage.
-	if not GameState.settlement_plots.is_empty():
-		var battle_seed:=int(result.get("seed",hash("%d:%s:%d:home_siege" % [int(GameState.elapsed_days),outcome,rounds])))
+	if not WorldSimulation.state.settlement_plots.is_empty():
+		var battle_seed:=int(result.get("seed",hash("%d:%s:%d:home_siege" % [int(WorldSimulation.state.elapsed_days),outcome,rounds])))
 		var fabric_severity:=clampf(float(rounds)*0.018+(0.16 if breached else 0.035),0.035,0.42)
 		var exposed_share:=clampf(0.04+float(rounds)*0.018+(0.12 if breached else 0.0),0.04,0.32)
-		SettlementModel.apply_bounded_siege_damage(battle_seed,fabric_severity,exposed_share,"home siege combat")
+		WorldSimulation.settlements.apply_bounded_siege_damage(battle_seed,fabric_severity,exposed_share,"home siege combat")
 
 
 func defensive_position()->Dictionary:
-	var terrain:=String(GameState.province_terrain)
+	var terrain:=String(WorldSimulation.state.province_terrain)
 	var terrain_base:=float({"Mountains":1.35,"Hills":1.20,"Forest":1.15,"Marsh":1.12,"Plains":1.0}.get(terrain,1.0))
 	var fieldworks_adoption:=_adoption("field_fortifications")
 	var fieldworks_bonus:=fieldworks_adoption*FIELD_FORTIFICATION_MAX_BONUS
@@ -3443,7 +3452,7 @@ func _terrain_defense()->float:
 
 
 func _home_army_name()->String:
-	return "%s Host" % (GameState.settlement_name if GameState.settlement_name!="" else "Founding")
+	return "%s Host" % (WorldSimulation.state.settlement_name if WorldSimulation.state.settlement_name!="" else "Founding")
 
 
 func _apply_home_result(side:Dictionary,rounds:Array,_battle_seed:int,home_side:String="attacker")->void:
@@ -3463,7 +3472,7 @@ func _apply_home_result(side:Dictionary,rounds:Array,_battle_seed:int,home_side:
 		result_formations[index]["experience"]=clampf(prior_experience+experience_gain*(1.0-prior_experience),0.0,1.0)
 		result_formations[index].erase("soldier_ids")
 	if int(totals.killed)>0:
-		GameState.register_population_deaths(int(totals.killed),"Killed in battle")
+		WorldSimulation.state.register_population_deaths(int(totals.killed),"Killed in battle")
 		_record_aggregate_military_deaths(int(totals.killed),"Killed in battle")
 	var persisted:=home_army.duplicate(true)
 	var salvage_accumulators:Dictionary=persisted.get("battlefield_salvage_accumulators",{}).duplicate()
@@ -3489,7 +3498,7 @@ func _apply_home_result(side:Dictionary,rounds:Array,_battle_seed:int,home_side:
 	persisted["dead"]=int(side.get("dead",persisted.get("dead",0)))
 	for forbidden_key in ["soldier_ids","wounded_ids","scattered_ids","captured_ids"]: persisted.erase(forbidden_key)
 	home_army=persisted
-	home_army["campaign_day"]=int(GameState.elapsed_days)
+	home_army["campaign_day"]=int(WorldSimulation.state.elapsed_days)
 
 
 func _apply_occupation_result(civ_id:String,region_id:String,side:Dictionary,rounds:Array,battle_seed:int,home_side:String)->void:
@@ -3532,7 +3541,8 @@ func _process_military_day()->void:
 		_process_army_runners_day()
 		occupation_transfers.advance(last_processed_day)
 		return
-	if active_engagement.is_empty(): _reconcile_external_military_mortality()
+	var home_fighting:bool=command_hierarchy.battle.engaged(0)
+	if active_engagement.is_empty() and not home_fighting: _reconcile_external_military_mortality()
 	_process_settlement_defense_day()
 	_process_service_rest_day()
 	_process_prisoner_custody_day()
@@ -3541,14 +3551,14 @@ func _process_military_day()->void:
 	_process_training_injuries_day()
 	_process_requested_templates()
 	_ensure_automatic_basic_training()
-	_process_training_day()
+	if not home_fighting:_process_training_day()
 	_process_training_program_day()
 	_process_field_army_movement_day()
 	_process_army_runners_day()
 	_process_siege_day()
-	occupation_transfers.advance(int(GameState.elapsed_days))
+	occupation_transfers.advance(int(WorldSimulation.state.elapsed_days))
 	_process_threat_day()
-	if not active_engagement.is_empty(): return
+	if not active_engagement.is_empty() or home_fighting: return
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
 	var logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.5))
 	_update_supply_day()
@@ -3579,7 +3589,7 @@ func _process_military_day()->void:
 	home_army["equipment_delivered_today"]=delivered
 	home_army["ammunition_delivered_today"]=ammunition_delivered
 	_refresh_readiness()
-	home_army["campaign_day"]=int(GameState.elapsed_days)
+	home_army["campaign_day"]=int(WorldSimulation.state.elapsed_days)
 	army_changed.emit(home_army.duplicate(true))
 
 
@@ -3589,14 +3599,14 @@ func _process_prisoner_custody_day()->Dictionary:
 		return {"escaped":0,"remaining":0}
 	prisoner_custody_days+=1
 	var custody:=prisoner_custody_snapshot()
-	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
+	var cohesion:=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
 	var daily_escape_rate:=maxf(0.0,1.0-float(custody.guard_coverage))*0.006*(1.15-cohesion*0.35)
 	prisoner_escape_accumulator+=float(foreign_prisoners)*daily_escape_rate
 	var escaped:=mini(foreign_prisoners,floori(prisoner_escape_accumulator))
 	prisoner_escape_accumulator-=float(escaped)
 	foreign_prisoners-=escaped
 	escaped_prisoners_total+=escaped
-	if escaped>0: GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Prisoners escape","description":"%d prisoners escape inadequate custody." % escaped,"domain":"security","severity":"warning"})
+	if escaped>0: WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Prisoners escape","description":"%d prisoners escape inadequate custody." % escaped,"domain":"security","severity":"warning"})
 	return {"escaped":escaped,"remaining":foreign_prisoners,"guard_coverage":custody.guard_coverage}
 
 
@@ -3608,7 +3618,7 @@ func home_captive_snapshot()->Dictionary:
 
 
 func _home_captive_return_chance(_cohort:Dictionary,days_captive:int)->float:
-	var security:=clampf(float(GameState.society_capacities.get("security",0.38)),0.0,1.0)
+	var security:=clampf(float(WorldSimulation.state.society_capacities.get("security",0.38)),0.0,1.0)
 	var mercy:=clampf(float(war_reputation.get("mercy",0.0)),0.0,1.0)
 	var grievance:=clampf(float(war_reputation.get("grievance",0.0)),0.0,1.0)
 	return clampf(0.00035+minf(365.0,float(maxi(0,days_captive)))*0.000008+security*0.00060+mercy*0.00120-grievance*0.00135,0.00010,0.008)
@@ -3632,8 +3642,8 @@ func _process_home_captives_day(return_chance_override:float=-1.0)->Dictionary:
 	if returned>0:
 		aggregate_recruits+=returned
 		var message:="%s captives returned from enemy custody and entered the recruit reserve." % _compact_count(returned)
-		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Captive cohort returns","description":message,"domain":"security","severity":"notice"})
-		GameState.council_inbox.push_front({"id":"captive_return_%d" % int(GameState.elapsed_days),"advisor":String((home_army.get("commander",{}) as Dictionary).get("name","FIELD COMMAND")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":message,"urgency":0.58,"day":int(GameState.elapsed_days),"status":"unread"})
+		WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Captive cohort returns","description":message,"domain":"security","severity":"notice"})
+		WorldSimulation.state.council_inbox.push_front({"id":"captive_return_%d" % int(WorldSimulation.state.elapsed_days),"advisor":String((home_army.get("commander",{}) as Dictionary).get("name","FIELD COMMAND")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":message,"urgency":0.58,"day":int(WorldSimulation.state.elapsed_days),"status":"unread"})
 	return {"returned":returned}
 
 
@@ -3671,23 +3681,23 @@ func _process_aggregate_service_strain_day()->Dictionary:
 	var current_strain:=float(home_army.get("service_strain",0.0))
 	var average_strain:=move_toward(current_strain,hardship,.012 if hardship<current_strain else .006)
 
-	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
+	var cohesion:=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
 	var pressure:=(maxf(0.0,average_strain-0.42)*0.020*clampf(hardship*2.0,0,1)+maxf(0.0,0.42-supply)*0.024+maxf(0.0,0.32-morale)*0.018)*(1.15-discipline*0.65)*(1.10-cohesion*0.35)
 	var accumulator:=float(home_army.get("desertion_accumulator",0.0))+float(troops)*pressure; var deserted:=mini(troops,floori(accumulator)); accumulator-=deserted
 	if deserted>0:
 		_stand_down_aggregate(deserted); home_army["desertions_total"]=int(home_army.get("desertions_total",0))+deserted
 		home_army["morale"]=clampf(morale-minf(0.12,float(deserted)/maxf(1.0,float(troops))*0.5),0.0,1.5)
-		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Soldiers desert","description":"%s exhausted soldiers abandon the host." % _compact_count(deserted),"domain":"security","severity":"warning"})
+		WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Soldiers desert","description":"%s exhausted soldiers abandon the host." % _compact_count(deserted),"domain":"security","severity":"warning"})
 	home_army["service_days"]=int(home_army.get("service_days",0))+1; home_army["service_strain"]=average_strain; home_army["discipline"]=discipline; home_army["desertion_pressure"]=pressure; home_army["desertion_accumulator"]=accumulator
 	return {"deserted":deserted,"pressure":pressure,"discipline":discipline,"strain":average_strain}
 
 
 func _update_supply_day()->void:
 	var provision_day:=int(home_army.get("provision_day",-1))
-	var provision_current:=provision_day>=0 and provision_day>=int(GameState.elapsed_days)-1
-	var nutrition:=clampf(float(home_army.get("provision_ratio",1.0)),0.0,1.0) if provision_current else clampf(float(GameState.simulation_metrics.get("food_intake_ratio",GameState.food_security))*field_provision_delivery_ratio(),0.0,1.0)
+	var provision_current:=provision_day>=0 and provision_day>=int(WorldSimulation.state.elapsed_days)-1
+	var nutrition:=clampf(float(home_army.get("provision_ratio",1.0)),0.0,1.0) if provision_current else clampf(float(WorldSimulation.state.simulation_metrics.get("food_intake_ratio",WorldSimulation.state.food_security))*field_provision_delivery_ratio(),0.0,1.0)
 	var troops:=maxi(1,_mobilized_count())
-	var logistics_workers:=float(GameState.population_allocations.get("Logistics",0))
+	var logistics_workers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var commander_logistics:=clampf(float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4)),0.0,1.0)
 	var labor_coverage:=clampf(logistics_workers/maxf(1.0,float(troops)*0.08),0.0,1.0)
 	var practice:=_adoption("supply_groups")
@@ -3701,11 +3711,11 @@ func _update_supply_day()->void:
 
 
 func _daily_delivery_capacity()->float:
-	var workers:=int(GameState.population_allocations.get("Logistics",0))
+	var workers:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
 	if workers<=0: return 0.0
 	var commander_logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4))
 	var practice:=_adoption("supply_groups")
-	var carts:=minf(float(workers),maxf(0.0,float(GameState.resource_stockpiles.get("Transport Carts",0.0))))
+	var carts:=minf(float(workers),maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0))))
 	return maxf(0.50,float(workers)*(0.35+commander_logistics*0.45+practice*0.40)+carts*(0.75+practice*0.45))
 
 
@@ -3832,7 +3842,7 @@ func _process_equipment_production_day()->void:
 		var produced:=maxi(0,completed-previously_completed)
 		if produced>0:
 			if String(job.get("job_type","production"))=="consumable": military_consumables[String(job.item)]=int(military_consumables.get(String(job.item),0))+produced
-			elif String(job.get("job_type","production"))=="transport": GameState.resource_stockpiles["Transport Carts"]=float(GameState.resource_stockpiles.get("Transport Carts",0.0))+produced
+			elif String(job.get("job_type","production"))=="transport": WorldSimulation.state.resource_stockpiles["Transport Carts"]=float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0))+produced
 			else: military_inventory[String(job.item)]=int(military_inventory.get(String(job.item),0))+produced
 		job["completed"]=completed
 		if completed>=int(job.count): equipment_queue.remove_at(index)
@@ -3848,7 +3858,7 @@ func _training_program_gate(program_id:String,include_campaign_state:bool=true)-
 	if not bool(knowledge_gate.get("unlocked",false)): return {"error":String(knowledge_gate.reason),"required_discovery":knowledge_gate.discovery}
 	if String(definition.get("scope","army"))=="army" and exercise_personnel()<=0:
 		return {"error":"Have at least one trained formation stationed at home before ordering %s." % String(definition.label).capitalize()}
-	if String(definition.get("scope","army"))=="command" and int(GameState.population_allocations.get("Defense",0))<3:
+	if String(definition.get("scope","army"))=="command" and int(WorldSimulation.state.population_allocations.get("Defense",0))<3:
 		return {"error":"Staff exercises require at least 3 people committed to Defense administration."}
 	if include_campaign_state:
 		if not active_engagement.is_empty(): return {"error":"Training cannot begin during a live battle."}
@@ -3858,7 +3868,8 @@ func _training_program_gate(program_id:String,include_campaign_state:bool=true)-
 
 
 func _exercise_forces()->Array[Dictionary]:
-	var forces:Array[Dictionary]=[home_army]
+	var forces:Array[Dictionary]=[]
+	if not command_hierarchy.battle.engaged(0):forces.append(home_army)
 	for force in field_armies:
 		if not command_hierarchy.battle.engaged(int(force.army_id)) and String(force.get("status",""))=="stationed" and String(force.get("location_id",""))=="player_home": forces.append(force)
 	return forces
@@ -3872,7 +3883,7 @@ func exercise_personnel()->int:
 
 func _training_program_participants(definition:Dictionary)->int:
 	if String(definition.get("scope","army"))=="command":
-		return mini(maxi(0,int(GameState.population_allocations.get("Defense",0))),maxi(1,ceili(float(exercise_personnel())*0.012)))
+		return mini(maxi(0,int(WorldSimulation.state.population_allocations.get("Defense",0))),maxi(1,ceili(float(exercise_personnel())*0.012)))
 	var total:=0
 	for force in _exercise_forces():
 		for formation:Dictionary in force.get("formations",[]):total+=int(formation.get("training_attending",0))
@@ -3918,11 +3929,11 @@ func _process_training_program_day()->void:
 		return
 	var required_food:=float(participants)*float(definition.food_per_participant)
 	var available_food:=training_staff.spendable_food()
-	var food_taken:=FoodSystem.issue_for_obligation(minf(required_food,available_food),"military_training","%s â€¢ %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
+	var food_taken:=WorldSimulation.food.issue_for_obligation(minf(required_food,available_food),"military_training","%s â€¢ %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
 	var ration_coverage:=clampf(food_taken/maxf(0.001,required_food),0.0,1.0) if required_food>0.0 else 1.0
-	var supply_coverage:=field_provision_delivery_ratio() if String(definition.scope)=="army" else clampf(0.45+float(GameState.society_capacities.get("institutions",0.25))*0.30+float(GameState.society_capacities.get("logistics",0.16))*0.25,0.0,1.0)
+	var supply_coverage:=field_provision_delivery_ratio() if String(definition.scope)=="army" else clampf(0.45+float(WorldSimulation.state.society_capacities.get("institutions",0.25))*0.30+float(WorldSimulation.state.society_capacities.get("logistics",0.16))*0.25,0.0,1.0)
 	var commander:Dictionary=home_army.get("commander",_marshal_commander())
-	var instruction:=clampf(0.48+float(commander.get("command",0.5))*0.22+float(GameState.society_capacities.get("security",0.38))*0.20+_adoption("formation_drill")*0.10,0.35,1.15)
+	var instruction:=clampf(0.48+float(commander.get("command",0.5))*0.22+float(WorldSimulation.state.society_capacities.get("security",0.38))*0.20+_adoption("formation_drill")*0.10,0.35,1.15)
 	var efficiency:=clampf(instruction*ration_coverage*(0.45+supply_coverage*0.55),0.0,1.20)
 	training_program["food_required_total"]=float(training_program.get("food_required_total",0.0))+required_food
 	training_program["food_consumed_total"]=float(training_program.get("food_consumed_total",0.0))+food_taken
@@ -3948,7 +3959,7 @@ func _process_training_program_day()->void:
 		force["formations"]=force_formations
 		force["exercise_readiness_bonus"]=clampf(float(force.get("exercise_readiness_bonus",0.0))+float(definition.readiness_gain)*progress_fraction,0.0,0.20)
 		formations.append_array(force_formations)
-	var command_focus_multiplier:=1.0+GameState.founding_effect("command_development")+ProgressionSystem.effect("warfare_readiness")*0.30
+	var command_focus_multiplier:=1.0+WorldSimulation.state.founding_effect("command_development")+WorldSimulation.progression.effect("warfare_readiness")*0.30
 	for skill in (definition.get("command_gain",{}) as Dictionary):
 		command_development[skill]=clampf(float(command_development.get(skill,0.0))+float(definition.command_gain[skill])*progress_fraction*command_focus_multiplier,0.0,0.30)
 	var issued_equipment:=0
@@ -3984,15 +3995,15 @@ func _apply_exercise_equipment_wear(requested:int)->int:
 
 func _complete_training_program(definition:Dictionary)->void:
 	var completed:=training_program.duplicate(true)
-	completed["completed_day"]=int(GameState.elapsed_days)
+	completed["completed_day"]=int(WorldSimulation.state.elapsed_days)
 	completed["readiness_bonus"]=float(home_army.get("exercise_readiness_bonus",0.0))
 	completed["command_development"]=command_development.duplicate(true)
 	completed["description"]=String(definition.description)
 	last_training_program=completed
 	training_program.clear()
 	training_program_cycles+=1
-	GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"%s complete" % String(definition.label).capitalize(),"description":"The exercise improved aggregate formation preparation and command practice. It consumed %.1f extra rations and wore %d issued equipment." % [float(completed.get("food_consumed_total",0.0)),int(completed.get("equipment_worn",0))],"domain":"security","severity":"notice"})
-	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+	WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s complete" % String(definition.label).capitalize(),"description":"The exercise improved aggregate formation preparation and command practice. It consumed %.1f extra rations and wore %d issued equipment." % [float(completed.get("food_consumed_total",0.0)),int(completed.get("equipment_worn",0))],"domain":"security","severity":"notice"})
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 	_refresh_readiness()
 	army_changed.emit(home_army.duplicate(true))
 
@@ -4002,7 +4013,7 @@ func _process_training_day()->void:
 	var policy:Dictionary=training_staff.policy("army")
 	if float(policy.intake)<=0 or training_staff.spendable_food()<=0:return
 	var rations:=float(_queued_trainees())*.18*float(policy.intake)
-	var paid:=FoodSystem.issue_for_obligation(minf(rations,training_staff.spendable_food()),"military_training","Initial army instruction",1.0,_queued_trainees())
+	var paid:=WorldSimulation.food.issue_for_obligation(minf(rations,training_staff.spendable_food()),"military_training","Initial army instruction",1.0,_queued_trainees())
 	training_staff.record_food("army",paid)
 	var training_rate:=_effective_training_rate(_queued_trainees())*float(policy.intake)*clampf(paid/maxf(.001,rations),0,1)
 	var training_equipment_budget:=military_inventory.duplicate(true)
@@ -4024,7 +4035,7 @@ func _process_training_day()->void:
 		training["equipment_access_sum"]=float(training.get("equipment_access_sum",0.0))+equipment_access*progress_increment
 		training["instruction_progress_sum"]=float(training.get("instruction_progress_sum",0.0))+progress_increment
 		var intensity:=float({"levy":0.75,"line_infantry":1.0,"skirmisher":0.90,"cavalry":1.20}.get(String(training.unit),1.0))
-		var average_condition:=clampf(GameState.population_health*0.50+GameState.food_security*0.25+_population_shelter_condition()*0.25,0.0,1.0)
+		var average_condition:=clampf(WorldSimulation.state.population_health*0.50+WorldSimulation.state.food_security*0.25+_population_shelter_condition()*0.25,0.0,1.0)
 		training["injury_accumulator"]=float(training.get("injury_accumulator",0.0))+float(training.count)*0.0012*intensity*(1.35-average_condition*0.55)*_training_injury_risk_multiplier()
 		var injuries:=mini(int(training.count),floori(float(training.injury_accumulator)))
 		training["injury_accumulator"]=float(training.injury_accumulator)-float(injuries)
@@ -4060,7 +4071,7 @@ func _process_training_injuries_day()->void:
 func _home_garrison_target()->int:
 	# The macro Defense allocation is the standing local watch. It is distinct from
 	# maneuver armies and occupation forces, which are explicitly away from home.
-	return maxi(0,int(GameState.population_allocations.get("Defense",0)))
+	return maxi(0,int(WorldSimulation.state.population_allocations.get("Defense",0)))
 
 
 func _automatic_basic_trainees()->int:
@@ -4096,12 +4107,12 @@ func _training_injury_risk_multiplier()->float:
 
 
 func _trainee_condition(_legacy_roster:Array=[])->float:
-	return clampf(GameState.population_health*0.50+GameState.food_security*0.25+_population_shelter_condition()*0.25,0.0,1.0)
+	return clampf(WorldSimulation.state.population_health*0.50+WorldSimulation.state.food_security*0.25+_population_shelter_condition()*0.25,0.0,1.0)
 
 
 func _population_shelter_condition()->float:
-	var capacity_ratio:=clampf(float(GameState.housing_capacity)/maxf(1.0,GameState.population_exact),0.0,1.0)
-	var infrastructure:=clampf(float(GameState.society_capacities.get("infrastructure",0.05)),0.0,1.0)
+	var capacity_ratio:=clampf(float(WorldSimulation.state.housing_capacity)/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0)
+	var infrastructure:=clampf(float(WorldSimulation.state.society_capacities.get("infrastructure",0.05)),0.0,1.0)
 	return clampf(capacity_ratio*0.82+infrastructure*0.18,0.0,1.0)
 
 
@@ -4165,7 +4176,7 @@ func _complete_training(training:Dictionary)->void:
 		var prior_value:Variant=previous_army[key]
 		rebuilt[key]=prior_value.duplicate(true) if prior_value is Array or prior_value is Dictionary else prior_value
 	if not rebuilt.has("commander"): rebuilt["commander"]=_marshal_commander()
-	rebuilt["campaign_day"]=int(GameState.elapsed_days)
+	rebuilt["campaign_day"]=int(WorldSimulation.state.elapsed_days)
 	home_army=rebuilt
 	_refresh_readiness()
 
@@ -4221,10 +4232,10 @@ func _knowledge_gate(discovery:String,minimum_adoption:float)->Dictionary:
 		var development:=military_development_snapshot()
 		var current_tier:=int(development.get("tier",0))
 		return {"unlocked":current_tier>=required_tier,"discovery":"","military_tier":current_tier,"required_military_tier":required_tier,"adoption":1.0 if current_tier>=required_tier else 0.0,"minimum_adoption":1.0,"prerequisites":[],"reason":"Available through %s." % String(development.label).capitalize() if current_tier>=required_tier else "Requires military development band %d, produced by adopted security research plus supporting production, logistics, and institutions." % required_tier}
-	var definition:Dictionary=DiscoverySystem.discovery_definition(discovery)
+	var definition:Dictionary=WorldSimulation.discovery.discovery_definition(discovery)
 	var prerequisites:Array=(definition.get("requires",[]) as Array).duplicate()
 	var gate_base:={"discovery":discovery,"minimum_adoption":minimum_adoption,"prerequisites":prerequisites,"available_day":int(definition.get("day",0))}
-	if discovery not in GameState.known_discoveries:
+	if discovery not in WorldSimulation.state.known_discoveries:
 		var label:=String(definition.get("name",discovery.replace("_"," ").capitalize()))
 		gate_base.merge({"unlocked":false,"adoption":0.0,"reason":"Requires inquiry: %s." % label})
 		return gate_base
@@ -4237,20 +4248,20 @@ func _knowledge_gate(discovery:String,minimum_adoption:float)->Dictionary:
 
 
 func _adoption(discovery:String)->float:
-	return DiscoverySystem.adoption(discovery) if discovery in GameState.known_discoveries else 0.0
+	return WorldSimulation.discovery.adoption(discovery) if discovery in WorldSimulation.state.known_discoveries else 0.0
 
 
 func _training_rate()->float:
-	var security:=float(GameState.society_capacities.get("security",0.38))
-	return (0.42+security*0.55)*(1.0+_adoption("formation_drill")*0.35+_adoption("professional_corps")*0.55+GameState.founding_effect("training_rate")+ProgressionSystem.effect("warfare_readiness"))
+	var security:=float(WorldSimulation.state.society_capacities.get("security",0.38))
+	return (0.42+security*0.55)*(1.0+_adoption("formation_drill")*0.35+_adoption("professional_corps")*0.55+WorldSimulation.state.founding_effect("training_rate")+WorldSimulation.progression.effect("warfare_readiness"))
 
 
 func training_capacity()->int:
-	var defense_workers:=float(GameState.population_allocations.get("Defense",0))
+	var defense_workers:=float(WorldSimulation.state.population_allocations.get("Defense",0))
 	var commander:Dictionary=home_army.get("commander",_marshal_commander())
 	var command:=clampf(float(commander.get("command",0.5)),0.0,1.0)
 	var base:=3.0+defense_workers*0.30+command*3.0
-	base*=1.0+_adoption("formation_drill")*0.45+_adoption("professional_corps")*0.70+_adoption("military_staffs")*0.20+GameState.founding_effect("training_capacity")+ProgressionSystem.effect("security_efficiency")*0.60
+	base*=1.0+_adoption("formation_drill")*0.45+_adoption("professional_corps")*0.70+_adoption("military_staffs")*0.20+WorldSimulation.state.founding_effect("training_capacity")+WorldSimulation.progression.effect("security_efficiency")*0.60
 	return maxi(1,floori(base))
 
 
@@ -4264,7 +4275,7 @@ func _training_quality(unit:String,retained_experience:float=0.0)->float:
 	var base:=float({"levy":0.48,"line_infantry":0.58,"skirmisher":0.55,"cavalry":0.56}.get(unit,0.50))
 	var commander:Dictionary=home_army.get("commander",_marshal_commander())
 	var doctrine_transfer:=_army_experience()*_adoption("professional_corps")
-	return clampf(base+float(commander.get("command",0.5))*0.12+_adoption("formation_drill")*0.14+_adoption("professional_corps")*0.12+_adoption("military_staffs")*0.06+retained_experience*0.20+doctrine_transfer*0.12+GameState.founding_effect("command_development")*0.08,0.30,1.15)
+	return clampf(base+float(commander.get("command",0.5))*0.12+_adoption("formation_drill")*0.14+_adoption("professional_corps")*0.12+_adoption("military_staffs")*0.06+retained_experience*0.20+doctrine_transfer*0.12+WorldSimulation.state.founding_effect("command_development")*0.08,0.30,1.15)
 
 
 func _refresh_formation_experience()->void:
@@ -4296,7 +4307,7 @@ func _refresh_readiness()->void:
 	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
 	var discipline:=clampf(float(home_army.get("discipline",0.5)),0.0,1.0)
 	var exercise_bonus:=clampf(float(home_army.get("exercise_readiness_bonus",0.0)),0.0,0.20)
-	var base_condition:=clampf(GameState.population_health*0.55+GameState.food_security*0.18+_population_shelter_condition()*0.12+supply*0.15,0.0,1.0)
+	var base_condition:=clampf(WorldSimulation.state.population_health*0.55+WorldSimulation.state.food_security*0.18+_population_shelter_condition()*0.12+supply*0.15,0.0,1.0)
 	for formation_index in formations.size():
 		var formation:Dictionary=formations[formation_index]
 		var formation_condition:=clampf(float(formation.get("personnel_condition",base_condition)),0.0,1.0)
@@ -4320,11 +4331,11 @@ func _production_rate()->float:
 
 
 func _base_production_rate()->float:
-	var crafting:=GameState.effective_workers("Crafting")*0.16*float(PersistentProduction.workforce().condition_factor)
+	var crafting:=WorldSimulation.state.effective_workers("Crafting")*0.16*float(PersistentProduction.workforce().condition_factor)
 	if crafting<=0.0: return 0.0
-	var industrial_scale:=ProgressionSystem.domain_factor("production",0.18)
-	var logistics_scale:=ProgressionSystem.domain_factor("logistics",0.07)
-	return crafting*(0.55+float(GameState.society_capacities.get("production",0.12))*0.45+_adoption("workshop_standards")*0.45)*industrial_scale*logistics_scale
+	var industrial_scale:=WorldSimulation.progression.domain_factor("production",0.18)
+	var logistics_scale:=WorldSimulation.progression.domain_factor("logistics",0.07)
+	return crafting*(0.55+float(WorldSimulation.state.society_capacities.get("production",0.12))*0.45+_adoption("workshop_standards")*0.45)*industrial_scale*logistics_scale
 
 
 func _equipment_backlog_work()->float:
@@ -4354,19 +4365,19 @@ func _apply_campaign_prisoner_policy(policy:String,count:int,outcome:Dictionary)
 	elif normalized in ["release","parole"]:
 		outcome["released_prisoners"]=count
 		_adjust_war_reputation(float(count)*0.006,0.0,-float(count)*0.004)
-		if normalized=="parole": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.015,0.0,1.0)
+		if normalized=="parole": WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))+0.015,0.0,1.0)
 	elif normalized=="ransom":
 		outcome["war_wealth_receipt"]=_receive_war_wealth(count*2.0,"state treasury","Ransom for prisoners of war")
 		outcome["ransom_income"]=count*2
 		_adjust_war_reputation(0.0,float(count)*0.001,float(count)*0.003)
 	elif normalized=="execute":
 		outcome["executed_prisoners"]=count
-		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.06,0.0,1.0)
+		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.06,0.0,1.0)
 		_adjust_war_reputation(0.0,float(count)*0.010,float(count)*0.014)
 	elif normalized=="enslave":
-		GameState.resource_stockpiles["Forced Labor"]=float(GameState.resource_stockpiles.get("Forced Labor",0.0))+count
+		WorldSimulation.state.resource_stockpiles["Forced Labor"]=float(WorldSimulation.state.resource_stockpiles.get("Forced Labor",0.0))+count
 		outcome["forced_laborers"]=count
-		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))-0.035,0.0,1.0)
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))-0.035,0.0,1.0)
 		_adjust_war_reputation(0.0,float(count)*0.006,float(count)*0.012)
 	else:
 		foreign_prisoners+=count
@@ -4397,17 +4408,17 @@ func _apply_campaign_spoils_policy(policy:String,spoils:Dictionary,outcome:Dicti
 	var converted_value:=float(wealth)+float(gear_total)*2.0+float(consumable_total)*0.15+float(supplies)+float(carts)*5.0
 	match policy.to_lower():
 		"army stores":
-			GameState.resource_stockpiles["Food"]=float(GameState.resource_stockpiles.get("Food",0.0))+supplies
-			GameState.resource_stockpiles["Transport Carts"]=float(GameState.resource_stockpiles.get("Transport Carts",0.0))+carts
+			WorldSimulation.state.resource_stockpiles["Food"]=float(WorldSimulation.state.resource_stockpiles.get("Food",0.0))+supplies
+			WorldSimulation.state.resource_stockpiles["Transport Carts"]=float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0))+carts
 			outcome["war_wealth_receipt"]=_receive_war_wealth(float(wealth),"state treasury","Captured campaign wealth stored by the army")
 		"reward troops":
 			home_army["morale"]=clampf(float(home_army.get("morale",0.0))+0.10,0.0,1.5)
 			outcome["war_wealth_receipt"]=_receive_war_wealth(converted_value,"troops","Campaign spoils distributed to the troops")
 		"state treasury": outcome["war_wealth_receipt"]=_receive_war_wealth(converted_value,"state treasury","Campaign spoils transferred to the state treasury")
-		"return property": GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.06,0.0,1.0)
+		"return property": WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))+0.06,0.0,1.0)
 		"unrestricted plunder":
 			outcome["war_wealth_receipt"]=_receive_war_wealth(converted_value*1.35,"troops","Unrestricted campaign plunder")
-			GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.04,0.0,1.0)
+			WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.04,0.0,1.0)
 	if policy.to_lower()=="return property": _adjust_war_reputation(0.04,0.0,-0.025)
 	elif policy.to_lower()=="unrestricted plunder": _adjust_war_reputation(0.0,0.035,0.065)
 	outcome["spoils"]={"gear":gear_total,"ammunition":consumable_total,"supplies":supplies,"carts":carts,"wealth":wealth}
@@ -4417,29 +4428,29 @@ func _apply_campaign_general_policy(policy:String,aftermath:Dictionary,outcome:D
 	var general:Dictionary=(aftermath.get("commander_record",{}) as Dictionary).duplicate(true)
 	general["name"]=String(general.get("name",aftermath.get("commander","CAPTURED COMMAND STAFF")))
 	general["institutional"]=true
-	general["captured_day"]=int(GameState.elapsed_days)
+	general["captured_day"]=int(WorldSimulation.state.elapsed_days)
 	for skill in ["command","tactics","logistics","resolve"]: general[skill]=clampf(float(general.get(skill,0.5)),0.0,1.0)
 	if policy.to_lower()=="hold": held_generals.append(general)
 	elif policy.to_lower()=="ransom":
 		outcome["general_war_wealth_receipt"]=_receive_war_wealth(50.0,"state treasury","Ransom for captured enemy commander")
 		outcome["general_ransom_income"]=50
 	elif policy.to_lower()=="release":
-		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))+0.01,0.0,1.0)
 		_adjust_war_reputation(0.025,0.0,-0.012)
 	elif policy.to_lower()=="execute":
-		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
+		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.025,0.0,1.0)
 		_adjust_war_reputation(0.0,0.06,0.09)
 		outcome["general_executed"]=true
-	HistoricalFigures.resolve_captive(String(general.get("figure_id","")),policy.to_lower())
+	WorldSimulation.figures.resolve_captive(String(general.get("figure_id","")),policy.to_lower())
 	outcome["general_policy"]=policy
 
 
 func _receive_war_wealth(amount:float,destination:String,reason:String)->Dictionary:
 	var accepted:=maxf(0.0,amount)
-	var economy:=get_node_or_null("/root/EconomySystem")
+	var economy:=WorldSimulation.system("EconomySystem")
 	if economy!=null and economy.has_method("receive_war_wealth"):
 		return economy.call("receive_war_wealth",accepted,destination,reason)
-	GameState.resource_stockpiles["Coin"]=float(GameState.resource_stockpiles.get("Coin",0.0))+accepted
+	WorldSimulation.state.resource_stockpiles["Coin"]=float(WorldSimulation.state.resource_stockpiles.get("Coin",0.0))+accepted
 	return {"accepted":accepted,"destination":"collective stores","medium":"physical coin and bullion","material_deposited":accepted,"currency_deposited":0.0,"fallback":true}
 
 
@@ -4499,13 +4510,13 @@ func battle_report_text(result:Dictionary)->String:
 	var enemy:Dictionary=result.get("defender" if home_side=="attacker" else "attacker",{})
 	var threat:Dictionary=result.get("threat",{})
 	var opponent:=String(threat.get("source_name",enemy.get("name","an unidentified force")))
-	var place:=String(result.get("target_region_name",threat.get("target_region_name",GameState.settlement_name)))
+	var place:=String(result.get("target_region_name",threat.get("target_region_name",WorldSimulation.state.settlement_name)))
 	if place.is_empty(): place="the settlement"
 	var losses:=maxi(0,int(home.get("initial_troops",home.get("troops",0)))-int(home.get("remaining_troops",0)))
 	return "%s at %s against %s. Our force: %d remaining; %d lost or removed from the field; morale %.0f%%. %s" % [String(result.get("outcome","inconclusive")).replace("_"," ").capitalize(),place,opponent,int(home.get("remaining_troops",0)),losses,float(home.get("morale",0.0))*100.0,"We defended against an approaching attack." if home_side=="defender" else "Our force was conducting an offensive operation."]
 
 func _record_council_battle(result:Dictionary)->void:
-	GameState.council_inbox.push_front({"id":"battle_%d_%d" % [int(GameState.elapsed_days),int(result.seed)],"advisor":"FIELD COMMAND","office":"Marshal","topic":"security","act":{"type":"warn"},"text":battle_report_text(result),"urgency":1.0,"severity":"critical","day":int(GameState.elapsed_days),"status":"unread","battle_seed":int(result.seed)})
+	WorldSimulation.state.council_inbox.push_front({"id":"battle_%d_%d" % [int(WorldSimulation.state.elapsed_days),int(result.seed)],"advisor":"FIELD COMMAND","office":"Marshal","topic":"security","act":{"type":"warn"},"text":battle_report_text(result),"urgency":1.0,"severity":"critical","day":int(WorldSimulation.state.elapsed_days),"status":"unread","battle_seed":int(result.seed)})
 
 
 func _aftermath_description(outcome:Dictionary)->String:
@@ -4546,12 +4557,12 @@ func _demobilize_disabled(requested:int)->int:
 	home_army["disabled_pool"]=int(home_army.get("disabled_pool",0))-amount
 	home_army["severe_disabled_pool"]=int(home_army.get("severe_disabled_pool",0))-severe
 	home_army["wounded_pool"]=int(home_army.get("wounded_pool",0))-amount
-	GameState.receive_injured_veterans(amount,severe)
+	WorldSimulation.state.receive_injured_veterans(amount,severe)
 	return amount
 
 
 func _siege_capacity_for(threat:Dictionary,force:Dictionary,offensive:bool=true)->Dictionary:
-	var inputs:={"population":float(threat.get("target_population",1000)) if offensive else SettlementModel.primary_population_exact(),"defenders":int(threat.get("strength",threat.get("enemy_force",{}).get("troops",0))) if offensive else int(_home_defense_force().get("troops",0)),"besiegers":int(force.get("troops",0)),"besieger_supply":float(force.get("provision_ratio",force.get("supply_level",1.0))),"fortification":clampf(float(threat.get("terrain_defense",1))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
+	var inputs:={"population":float(threat.get("target_population",1000)) if offensive else WorldSimulation.settlements.primary_population_exact(),"defenders":int(threat.get("strength",threat.get("enemy_force",{}).get("troops",0))) if offensive else int(_home_defense_force().get("troops",0)),"besiegers":int(force.get("troops",0)),"besieger_supply":float(force.get("provision_ratio",force.get("supply_level",1.0))),"fortification":clampf(float(threat.get("terrain_defense",1))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
 	if command_hierarchy.executing and not command_hierarchy.battle_candidates.is_empty():
 		inputs.besiegers=0
 		for candidate:Dictionary in command_hierarchy.battle_candidates:inputs.besiegers+=int(candidate.troops)
@@ -4573,7 +4584,7 @@ func start_offensive_siege(civ_id:String,region_id:String,army_id:int=0)->Dictio
 	_create_civilization_threat(available.incident,"offensive")
 	var result:=begin_siege()
 	if not result.has("error"):
-		active_siege.threat["war_id"]=CivilizationSystem.record_player_hostile_order(civ_id,region_id,"A player army began a hostile siege.")
+		active_siege.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(civ_id,region_id,"A player army began a hostile siege.")
 	else:active_threat.clear()
 	return result
 
@@ -4581,16 +4592,17 @@ func begin_siege()->Dictionary:
 	if not active_siege.is_empty() or not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Resolve the current military operation first."}
 	if active_threat.is_empty() or bool(active_threat.get("field_encounter",false)) or String(active_threat.get("incident_kind","campaign"))=="raid": return {"error":"A siege needs a settlement campaign, not a passing raid or field encounter."}
 	var offensive:=String(active_threat.get("campaign_mode","defensive"))=="offensive"
+	if WorldSimulation.enabled and not preload("res://scripts/civilization_siege.gd").available(active_threat.get("owned_target",{})):return {"error":"This city is already under siege."}
 	if not offensive and not String(active_threat.get("target_region_id","")).is_empty(): return {"error":"This siege interface currently supports the home settlement and field-army offensives; defend the occupation through its existing battle controls."}
 	var army_id:=int(active_threat.get("field_army_id",0))
 	var index:=_field_army_index(army_id)
 	if offensive and (index<0 or int(field_armies[index].get("troops",0))<=0): return {"error":"The investing army is no longer available."}
 	var rival:=String(active_threat.get("source_civ_id",""))
 	if rival.is_empty(): return {"error":"The besieging force has no known campaign owner."}
-	var day:=int(GameState.elapsed_days)
+	var day:=int(WorldSimulation.state.elapsed_days)
 	var region_id:=String(active_threat.get("target_region_id",""))
 	if offensive and (String(field_armies[index].get("status",""))!="stationed" or String(field_armies[index].get("location_id",""))!=region_id): return {"error":"The investing army must be stationed at the selected settlement."}
-	var position:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var position:=Vector2(WorldSimulation.state.settlement_founded_at.x,WorldSimulation.state.settlement_founded_at.z)
 	if offensive:
 		var point:Dictionary=field_armies[index].get("position",{})
 		if not point.has_all(["x","z"]): return {"error":"The investing army has no valid physical position."}
@@ -4599,11 +4611,12 @@ func begin_siege()->Dictionary:
 	var capacity:=_siege_capacity_for(active_threat,besieger,offensive)
 	if capacity.has("error"):return capacity
 	active_threat["target_position"]={"x":position.x,"z":position.y}
-	active_siege={"id":"siege_%d_%d_%d_%d" % [GameState.world_seed,day,army_id,threats_resolved],"active":true,"mode":"offensive" if offensive else "defensive","attacker_id":"player" if offensive else rival,"defender_id":rival if offensive else "player","start_day":day,"last_day":day,"days":0,"target_position":{"x":position.x,"z":position.y},"region_id":region_id,"army_id":army_id,"threat":active_threat.duplicate(true),"pressure":0.0,"fatigue":0.0,"blockade":0.0,"hardship":0.0,"starving_days":0,"relief":[]}
-	if not offensive:active_siege.home_city={"id":SettlementModel._primary_settlement_id(),"name":GameState.settlement_name,"population":SettlementModel.primary_population_exact(),"defense_stage":int(settlement_defense.get("stage",0))}
+	active_siege={"id":"siege_%d_%d_%d_%d" % [WorldSimulation.state.world_seed,day,army_id,threats_resolved],"active":true,"mode":"offensive" if offensive else "defensive","attacker_id":"player" if offensive else rival,"defender_id":rival if offensive else "player","start_day":day,"last_day":day,"days":0,"target_position":{"x":position.x,"z":position.y},"region_id":region_id,"army_id":army_id,"threat":active_threat.duplicate(true),"pressure":0.0,"fatigue":0.0,"blockade":0.0,"hardship":0.0,"starving_days":0,"relief":[]}
+	if not offensive:active_siege.home_city={"id":WorldSimulation.settlements._primary_settlement_id(),"name":WorldSimulation.state.settlement_name,"population":WorldSimulation.settlements.primary_population_exact(),"defense_stage":int(settlement_defense.get("stage",0))}
 	active_threat.clear()
 	if offensive: field_armies[index]["status"]="besieging"
-	if not offensive and ForeignDiplomacy.has_method("notify_defensive_siege"): ForeignDiplomacy.call("notify_defensive_siege",rival,"player",String(active_siege.id),day)
+	if not offensive and WorldSimulation.diplomacy.has_method("notify_defensive_siege"): WorldSimulation.diplomacy.call("notify_defensive_siege",rival,"player",String(active_siege.id),day)
+	if WorldSimulation.enabled:preload("res://scripts/civilization_siege.gd").publish()
 	threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
 	return {"ok":true,"siege":siege_public_snapshot(),"message":"The army takes positions around the approaches. Supply and endurance now change over time; no assault or population transfer has occurred."}
 
@@ -4616,12 +4629,12 @@ func siege_public_snapshot(siege_id:String="")->Dictionary:
 	for key in ["id","active","mode","attacker_id","defender_id","start_day","days","target_position","region_id","pressure","blockade"]: result[key]=active_siege.get(key)
 	var offensive:=String(active_siege.mode)=="offensive"
 	result["own_supply_ratio"]=_siege_own_supply()
-	result["own_food_days"]=maxf(0,float(GameState.simulation_metrics.get("food_days",0))) if not offensive else -1.0
+	result["own_food_days"]=maxf(0,float(WorldSimulation.state.simulation_metrics.get("food_days",0))) if not offensive else -1.0
 	result["enemy_supply_assessment"]="No reliable count of enemy stores."
 	result["enemy_supply_report_day"]=-1
 	var rival:=String(active_siege.defender_id if offensive else active_siege.attacker_id)
 	if offensive:
-		var city:Dictionary=CivilizationSystem.city_intelligence.known("player",String(active_siege.region_id))
+		var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(active_siege.region_id))
 		var supply:Dictionary=city.get("fields",{}).get("supply",{})
 		if not supply.is_empty():
 			result["enemy_supply_assessment"]="Regional reserve outlook observed at this city: %d–%d days; %s." % [roundi(float(supply.low)),roundi(float(supply.high)),"stale" if bool(supply.stale) else "dated estimate"]
@@ -4637,16 +4650,19 @@ func _siege_own_supply()->float:
 	if active_siege.is_empty(): return 1.0
 	var index:=_field_army_index(int(active_siege.get("army_id",0)))
 	if String(active_siege.mode)=="offensive" and index>=0: return clampf(float(field_armies[index].get("provision_ratio",field_armies[index].get("supply_level",.5))),0,1)
-	return clampf(float(GameState.simulation_metrics.get("food_intake_ratio",GameState.food_security)),0,1)
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("food_intake_ratio",WorldSimulation.state.food_security)),0,1)
 
 func siege_home_food_access()->float:
 	if active_siege.is_empty() or String(active_siege.mode)!="defensive": return 1.0
+	var local_id:=WorldSimulation.state.resource_settlement_id
+	if local_id.is_empty():local_id=WorldSimulation.settlements._primary_settlement_id()
+	if active_siege.has("home_city") and String(active_siege.home_city.id)!=local_id:return 1.0
 	return clampf(1-float(active_siege.get("blockade",0))*.8,.2,1)
 
 func siege_effects_for_civilization(civ_id:String)->Dictionary:
 	var share:=0.0
 	if not active_siege.is_empty() and String(active_siege.mode)=="offensive" and String(active_siege.defender_id)==civ_id:
-		for civ:Dictionary in CivilizationSystem.civilizations:
+		for civ:Dictionary in WorldSimulation.world.civilizations:
 			if String(civ.id)!=civ_id: continue
 			for region:Dictionary in civ.get("strategic_regions",[]):
 				if String(region.get("id",""))==String(active_siege.region_id): share=clampf(float(region.get("population",0))/maxf(1,float(civ.population)),0,1)
@@ -4654,13 +4670,13 @@ func siege_effects_for_civilization(civ_id:String)->Dictionary:
 	return {"food_output_multiplier":clampf(1-closure*.8,.2,1),"logistics_multiplier":clampf(1-closure*.7,.3,1)}
 
 func _process_siege_day()->void:
-	if active_siege.is_empty(): return
+	if active_siege.is_empty() or active_siege.has("shared_source_actor"): return
 	var day:=last_processed_day
 	if day<=int(active_siege.last_day): return
 	var offensive:=String(active_siege.mode)=="offensive"
 	var rival:=String(active_siege.defender_id if offensive else active_siege.attacker_id)
 	var enemy:Dictionary={}
-	for civ:Dictionary in CivilizationSystem.civilizations:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
 		if String(civ.id)==rival: enemy=civ; break
 	if enemy.is_empty(): _end_siege("The opposing campaign is no longer active."); return
 	var relation:Dictionary=enemy.get("player_relation",{})
@@ -4669,6 +4685,12 @@ func _process_siege_day()->void:
 	if offensive and (army_index<0 or int(field_armies[army_index].get("troops",0))<=0): _end_siege("The investing force can no longer hold the approaches."); return
 	var threat:Dictionary=active_siege.threat
 	var enemy_force:Dictionary=threat.get("enemy_force",{})
+	var actual_status:Dictionary={}
+	if WorldSimulation.enabled and threat.has("owned_target"):
+		enemy_force=preload("res://scripts/civilization_combat.gd").force_for(threat)
+		actual_status=preload("res://scripts/civilization_siege.gd").target_status(threat)
+		threat.enemy_force=enemy_force
+		threat.target_population=actual_status.get("population",threat.get("target_population",0))
 	var own_strength:=int(field_armies[army_index].get("troops",0)) if offensive else int(settlement_defense_snapshot().get("garrison_personnel",0))
 	if offensive and bool(active_siege.get("commander_managed",false)):
 		own_strength=0
@@ -4679,18 +4701,20 @@ func _process_siege_day()->void:
 	var camps:Array=active_siege.get("relief",[])
 	for index in range(camps.size()-1,-1,-1):
 		var camp:Dictionary=camps[index]
-		var ration:=maxf(0,float(camp.troops))*.55
+		var present:=preload("res://scripts/civilization_siege.gd").camp_strength(camp) if WorldSimulation.enabled else int(camp.troops)
+		var ration:=maxf(0,float(present))*.55
 		var supplied:=clampf(float(camp.food)/maxf(.01,ration),0,1)
 		camp["food"]=maxf(0,float(camp.food)-ration)
 		if supplied<.1:
 			_return_siege_relief(camp); camps.remove_at(index); continue
-		if String(camp.beneficiary_id)==String(active_siege.attacker_id): besieger_relief+=float(camp.troops)*supplied
-		else: defender_relief+=float(camp.troops)*supplied
+		if String(camp.beneficiary_id)==String(active_siege.attacker_id): besieger_relief+=float(present)*supplied
+		else: defender_relief+=float(present)*supplied
 	active_siege["relief"]=camps
-	var inputs:={"besiegers":(own_strength if offensive else enemy_strength)+besieger_relief,"defenders":enemy_strength if offensive else own_strength,"population":float(threat.get("target_population",1000)) if offensive else SettlementModel.primary_population_exact(),"defender_relief":defender_relief,"besieger_supply":_siege_own_supply() if offensive else enemy_supply,"defender_food_days":float(enemy.get("food_days",0)) if offensive else float(GameState.simulation_metrics.get("food_days",0)),"fortification":clampf(float(threat.get("terrain_defense",1.0))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
+	var inputs:={"besiegers":(own_strength if offensive else enemy_strength)+besieger_relief,"defenders":enemy_strength if offensive else own_strength,"population":float(threat.get("target_population",1000)) if offensive else WorldSimulation.settlements.primary_population_exact(),"defender_relief":defender_relief,"besieger_supply":_siege_own_supply() if offensive else enemy_supply,"defender_food_days":float(actual_status.get("food_days",enemy.get("food_days",0))) if offensive else float(WorldSimulation.state.simulation_metrics.get("food_days",0)),"fortification":clampf(float(threat.get("terrain_defense",1.0))-1,0,1) if offensive else float(settlement_defense_snapshot().get("defense_bonus",0))}
 	if not bool(SiegeModel.capacity(inputs).viable):
 		_end_siege("The force can no longer cover the settlement approaches. The siege is lifted; surviving soldiers return.");return
 	active_siege=SiegeModel.advance(active_siege,day,inputs)
+	if WorldSimulation.enabled:preload("res://scripts/civilization_siege.gd").publish()
 	if bool(active_siege.get("commander_managed",false)) and float(active_siege.pressure)>=.72 and float(active_siege.fatigue)<.75:
 		command_hierarchy.executing=true;command_hierarchy.battle_candidates=command_hierarchy.battle.siege_members()
 		siege_order(String(active_siege.id),"assault")
@@ -4702,6 +4726,7 @@ func _process_siege_day()->void:
 
 func siege_order(siege_id:String,order:String)->Dictionary:
 	if active_siege.is_empty() or siege_id!=String(active_siege.id): return {"error":"This siege is no longer active."}
+	if WorldSimulation.enabled and active_siege.has("shared_source_actor"):return preload("res://scripts/civilization_siege.gd").order(active_siege,order)
 	if order=="continue": return {"ok":true,"message":"The existing siege orders continue. Time, supply and access determine its progress."}
 	var saved:=active_siege.duplicate(true)
 	if order=="assault":
@@ -4727,25 +4752,27 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 func _end_siege(reason:String,return_army:bool=true,count_resolved:bool=true)->void:
 	if active_siege.is_empty(): return
 	var ended:=active_siege.duplicate(true)
-	for camp:Dictionary in ended.get("relief",[]): _return_siege_relief(camp)
+	if not ended.has("shared_source_actor"):
+		for camp:Dictionary in ended.get("relief",[]): _return_siege_relief(camp)
 	active_siege.clear()
+	if WorldSimulation.enabled:preload("res://scripts/civilization_siege.gd").ended(ended,reason)
 	var index:=_field_army_index(int(ended.get("army_id",0)))
 	if index>=0:
 		field_armies[index]["status"]="stationed"
 		if return_army:
 			var return_route:=move_field_army(int(ended.army_id),"player_home")
 			if return_route.has("error"): reason+=" The army remains at its position: "+String(return_route.error)
-	ended["active"]=false; ended["ended_day"]=int(GameState.elapsed_days); ended["summary"]=reason; ended["relief"]=[]
+	ended["active"]=false; ended["ended_day"]=int(WorldSimulation.state.elapsed_days); ended["summary"]=reason; ended["relief"]=[]
 	siege_history.push_front(ended)
 	if siege_history.size()>SiegeModel.HISTORY_LIMIT: siege_history.resize(SiegeModel.HISTORY_LIMIT)
-	GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"Siege ended","description":reason,"domain":"security","severity":"major"})
-	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+	WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Siege ended","description":reason,"domain":"security","severity":"major"})
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 	if count_resolved: threats_resolved+=1
 	army_changed.emit(home_army.duplicate(true))
 
 func siege_negotiation_available(siege_id:String,civ_id:String)->Dictionary:
 	if active_siege.is_empty() or String(active_siege.id)!=siege_id or civ_id=="player" or civ_id not in [active_siege.attacker_id,active_siege.defender_id]: return {"ok":false,"reason":"No opposing siege is available for these talks."}
-	for civ:Dictionary in CivilizationSystem.civilizations:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
 		if String(civ.id)==civ_id and not bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): return {"ok":true,"reason":"An agreed ceasefire permits withdrawal."}
 	if float(active_siege.fatigue)>=.7: return {"ok":true,"reason":"Visible exhaustion makes lifting the siege credible."}
 	return {"ok":false,"reason":"No ceasefire or credible withdrawal condition has been established. Continue talks; no agreement is assumed."}
@@ -4761,19 +4788,24 @@ func receive_siege_relief(siege_id:String,receipt_id:String)->Dictionary:
 	var camps:Array=active_siege.get("relief",[])
 	if camps.size()>=SiegeModel.RELIEF_LIMIT: return {"error":"The siege already has its bounded relief-camp capacity."}
 	for camp:Dictionary in camps:
-		if String(camp.receipt_id)==receipt_id: return {"error":"This relief delivery has already been received."}
-	if not CivilizationSystem.has_method("consume_siege_relief_receipt"): return {"error":"No verified relief delivery is available."}
-	var receipt:Dictionary=CivilizationSystem.call("consume_siege_relief_receipt",receipt_id,siege_id)
+		if String(camp.receipt_id)==receipt_id and String(camp.get("receipt_owner",WorldSimulation.actor_id))==WorldSimulation.actor_id: return {"error":"This relief delivery has already been received."}
+	if not WorldSimulation.world.has_method("consume_siege_relief_receipt"): return {"error":"No verified relief delivery is available."}
+	var receipt:Dictionary=WorldSimulation.world.call("consume_siege_relief_receipt",receipt_id,siege_id)
 	if not bool(receipt.get("ok",false)): return receipt
 	if String(receipt.get("beneficiary_id","")) not in [active_siege.attacker_id,active_siege.defender_id]:
 		_return_siege_relief({"receipt_id":receipt_id,"troops":int(receipt.get("troops",0)),"food":float(receipt.get("food",0))})
 		return {"error":"Relief belongs to another operation and is returning to its donor."}
 	var camp:={"receipt_id":receipt_id,"donor_civ_id":String(receipt.get("donor_civ_id","")),"beneficiary_id":String(receipt.beneficiary_id),"troops":maxi(0,int(receipt.get("troops",0))),"food":maxf(0,float(receipt.get("food",0)))}
+	if WorldSimulation.enabled:camp.receipt_owner=WorldSimulation.actor_id
 	camps.append(camp); active_siege["relief"]=camps
+	if WorldSimulation.enabled:preload("res://scripts/civilization_siege.gd").add_camp(camp)
 	return {"ok":true,"message":"A physically delivered allied camp supports the approaches. Its people remain part of their own society."}
 
 func _return_siege_relief(camp:Dictionary)->void:
-	if ForeignDiplomacy.has_method("complete_siege_relief"): ForeignDiplomacy.call("complete_siege_relief",String(camp.receipt_id),int(camp.troops),float(camp.food))
+	if WorldSimulation.enabled and camp.has("receipt_owner"):
+		WorldSimulation.scoped(String(camp.receipt_owner),func()->void:WorldSimulation.diplomacy.complete_siege_relief(String(camp.receipt_id),int(camp.troops),float(camp.food)))
+		return
+	if WorldSimulation.diplomacy.has_method("complete_siege_relief"): WorldSimulation.diplomacy.call("complete_siege_relief",String(camp.receipt_id),int(camp.troops),float(camp.food))
 
 
 func training_progress_snapshot()->Dictionary:
@@ -4802,7 +4834,7 @@ func training_progress_snapshot()->Dictionary:
 		if trainees>capacity: reasons.append("Crowded classes: %d trainees / %d places" % [trainees,capacity])
 		if access<.999: reasons.append("Limited practice equipment: %d of %d" % [examples,needed])
 		if reasons.is_empty(): reasons.append("Normal instruction pace")
-		result[int(order.id)]={"id":int(order.id),"count":int(order.count),"unit":String(order.unit),"weapon":weapon,"progress":progress,"required":required,"percent":roundi(clampf(progress/required,0,1)*100),"rate":rate,"estimated_days":ceili(maxf(0,required-progress)/rate) if rate>0 else -1,"elapsed_days":maxi(0,int(GameState.elapsed_days)-int(order.start_day)) if order.has("start_day") else -1,"reason":" · ".join(reasons),"injured":maxi(0,int(order.get("initial_count",order.count))-int(order.count))}
+		result[int(order.id)]={"id":int(order.id),"count":int(order.count),"unit":String(order.unit),"weapon":weapon,"progress":progress,"required":required,"percent":roundi(clampf(progress/required,0,1)*100),"rate":rate,"estimated_days":ceili(maxf(0,required-progress)/rate) if rate>0 else -1,"elapsed_days":maxi(0,int(WorldSimulation.state.elapsed_days)-int(order.start_day)) if order.has("start_day") else -1,"reason":" · ".join(reasons),"injured":maxi(0,int(order.get("initial_count",order.count))-int(order.count))}
 	return result
 
 func siege_visual_snapshot(siege_id:String="")->Dictionary:
@@ -4813,8 +4845,8 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 			if siege_id=="" or String(past.id)==siege_id: operation=past;break
 	if operation.is_empty():return {}
 	var offensive:=String(operation.mode)=="offensive"
-	var city:Dictionary=CivilizationSystem.city_intelligence.known("player",String(operation.region_id)) if offensive else {}
-	var population:=SettlementModel.primary_population_exact() if not offensive else -1.0
+	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(operation.region_id)) if offensive else {}
+	var population:=WorldSimulation.settlements.primary_population_exact() if not offensive else -1.0
 	var damage:=0.0
 	var defense_stage:=int(settlement_defense.get("stage",0)) if not offensive else -1
 	var description:="Your settlement and its current defenses."
@@ -4831,7 +4863,7 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 		if not ruin.is_empty():damage=(float(ruin.low)+float(ruin.high))*.5
 		description="Representative layout from dated reports. Building materials and exact interior layout are unconfirmed."
 	var archived_home:Dictionary=operation.get("home_city",{})
-	var same_home:=String(archived_home.get("id",SettlementModel._primary_settlement_id()))==SettlementModel._primary_settlement_id() and not recovery.home_unavailable()
+	var same_home:=String(archived_home.get("id",WorldSimulation.settlements._primary_settlement_id()))==WorldSimulation.settlements._primary_settlement_id() and not recovery.home_unavailable()
 	if not offensive and not same_home:
 		population=float(archived_home.get("population",population));defense_stage=int(archived_home.get("defense_stage",defense_stage))
 		description="Last observed city layout at the siege. Occupation and recovery continue through Survival & Independence."
@@ -4846,7 +4878,7 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 	else:
 		for past_battle:Dictionary in battle_history:
 			if int(past_battle.get("seed",-2))==seed_value:battle=past_battle.duplicate(true);break
-	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",GameState.settlement_name)) if String(archived_home.get("name",GameState.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value,"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
+	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",WorldSimulation.state.settlement_name)) if String(archived_home.get("name",WorldSimulation.state.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value,"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
 
 func template_recruitment_blocker()->String:
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return "Resolve the battle or aftermath before recruiting."
@@ -4905,15 +4937,15 @@ func apply_transport_casualties(army_id:int,fraction:float)->int:
 		formation.count=count-lost;losses+=lost
 		for key in ["equipment","ammunition"]:formation[key]=floori(float(formation.get(key,0))*(1-clampf(fraction,0,1)))
 	army.troops=maxi(0,int(army.get("troops",0))-losses)
-	if losses>0:GameState.register_population_deaths(losses,"Killed in battle")
+	if losses>0:WorldSimulation.state.register_population_deaths(losses,"Killed in battle")
 	if int(army.troops)==0:army.embarked=false;army.status="stationed"
 	return losses
 
 func draw_delivered_field_rations(required:float)->Dictionary:
 	var result:={"total":0.0,"by_army":{}}
-	var active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-(int(GeneralCampaign.army().get("troops",0)) if GeneralCampaign.active else 0))
+	var active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-(int(WorldSimulation.campaign.army().get("troops",0)) if WorldSimulation.campaign.active else 0))
 	for army:Dictionary in field_armies:
-		if GeneralCampaign.active and bool(army.get("general_managed",false)):continue
+		if WorldSimulation.campaign.active and bool(army.get("general_managed",false)):continue
 		var needed:=maxf(0,required)*int(army.get("troops",0))/active
 		var amount:=minf(needed,maxf(0,float(army.get("delivered_field_food",0))))
 		army.delivered_field_food=maxf(0,float(army.get("delivered_field_food",0))-amount)

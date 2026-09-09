@@ -25,20 +25,20 @@ func thread(id:String)->Dictionary:
 	return threads[id]
 
 func access(id:String)->Dictionary:
-	var person:=ForeignDiplomacy.leader(id)
+	var person:=WorldSimulation.diplomacy.leader(id)
 	if person.is_empty(): return {"ok":false,"reason":"Establish direct contact before approaching this leadership."}
 	var known_day:=int(person.get("audience_day",-1))
-	for record:Dictionary in CivilizationSystem.diplomatic_history:
+	for record:Dictionary in WorldSimulation.world.diplomatic_history:
 		if String(record.get("civ_id",""))==id and record.has("returned_day"): known_day=maxi(known_day,int(record.returned_day))
 	if known_day>=0: return {"ok":true,"day":known_day,"reason":"An envoy channel is established. Observations remain dated; discussion does not reveal hidden territory."}
-	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
 	if String(mission.get("civ_id",""))==id: return {"ok":false,"reason":"Your delegates are traveling. The exchange opens when they return, around day %d." % int(mission.get("return_day",0))}
 	return {"ok":false,"reason":"Send delegates to establish an audience. You can continue negotiating through that channel after they return."}
 
 func ask(id:String,message:String)->bool:
 	if pending.has(id): return false
 	var gate:=access(id)
-	if ForeignDiplomacy.leader(id).is_empty(): return false
+	if WorldSimulation.diplomacy.leader(id).is_empty(): return false
 	var t:=thread(id)
 	if not bool(gate.ok): t.status=gate.reason; changed.emit(id); return false
 	var clean:=message.strip_edges().substr(0,1500)
@@ -56,19 +56,19 @@ func retry(id:String)->void:
 
 func _append(id:String,role:String,content:String)->void:
 	var t:=thread(id)
-	t.messages.append({"role":role,"content":content,"day":int(GameState.elapsed_days)})
+	t.messages.append({"role":role,"content":content,"day":int(WorldSimulation.state.elapsed_days)})
 	while t.messages.size()>MAX_MESSAGES: t.messages.pop_front()
 
 func known_context(id:String)->Dictionary:
-	var person:=ForeignDiplomacy.leader(id)
+	var person:=WorldSimulation.diplomacy.leader(id)
 	if person.is_empty(): return {}
 	var observations:Array=[]
-	for record:Dictionary in CivilizationSystem.diplomatic_history:
+	for record:Dictionary in WorldSimulation.world.diplomatic_history:
 		if String(record.get("civ_id",""))!=id or not record.has("returned_day"): continue
 		observations.append({"day":int(record.returned_day),"observations":record.get("observations",[]),"outcome":String(record.get("outcome",""))})
 		if observations.size()>=3: break
-	var civ:=ForeignDiplomacy.civilization(id); var relation:Dictionary=civ.player_relation
-	return {"day":int(GameState.elapsed_days),"leader":{"name":person.name,"temperament":person.temperament,"bio":person.bio,"personality":person.personality,"stated_goals":person.goals},"community":civ.name,"communicated_position":ForeignDiplomacy.situation(id),"relationship":{"at_war":bool(relation.get("at_war",false)),"treaty":String(relation.get("treaty","none"))},"memories":person.memories,"counteroffer":person.counter,"understanding":person.accord,"current_draft":thread(id).draft,"returned_reports":observations,"access":access(id),"commitments":ForeignDiplomacy.commitments.public_snapshot(id),"active_siege":ForeignDiplomacy.commitments.siege_info("current"),"city_reports":CivilizationSystem.city_intelligence.known_cities("player",id)}
+	var civ:=WorldSimulation.diplomacy.civilization(id); var relation:Dictionary=civ.player_relation
+	return {"day":int(WorldSimulation.state.elapsed_days),"leader":{"name":person.name,"temperament":person.temperament,"bio":person.bio,"personality":person.personality,"stated_goals":person.goals},"community":civ.name,"communicated_position":WorldSimulation.diplomacy.situation(id),"relationship":{"at_war":bool(relation.get("at_war",false)),"treaty":String(relation.get("treaty","none"))},"memories":person.memories,"counteroffer":person.counter,"understanding":person.accord,"current_draft":thread(id).draft,"returned_reports":observations,"access":access(id),"commitments":WorldSimulation.diplomacy.commitments.public_snapshot(id),"active_siege":WorldSimulation.diplomacy.commitments.siege_info("current"),"city_reports":WorldSimulation.world.city_intelligence.known_cities("player",id)}
 
 func _request(id:String)->void:
 	var gate:=access(id)
@@ -83,21 +83,21 @@ func _request(id:String)->void:
 	var payload:Dictionary={"model":config.model,"messages":messages,"max_completion_tokens":2800}
 	if bool(config.get("structured_output",false)):
 		payload.response_format={"type":"json_schema","json_schema":{"name":"foreign_audience","strict":true,"schema":{"type":"object","additionalProperties":false,"properties":{"reply":{"type":"string"},"accord":{"type":"string","enum":["","exchange","routes","restraint"]},"tone":{"type":"string","enum":["equals","honor","firm"]},"generous":{"type":"boolean"}},"required":["reply","accord","tone","generous"]}}}
-		payload.response_format.json_schema.schema.properties["commitment"]={"anyOf":[{"type":"object","additionalProperties":false,"properties":{},"required":[]},{"type":"object","additionalProperties":false,"properties":{"action":{"type":"string","enum":ForeignDiplomacy.commitments.ACTIONS.keys()},"goal":{"type":"string","enum":["defense","exchange","routes"]},"target_id":{"type":"string"},"siege_id":{"type":"string"}},"required":["action","goal","target_id","siege_id"]}]}
+		payload.response_format.json_schema.schema.properties["commitment"]={"anyOf":[{"type":"object","additionalProperties":false,"properties":{},"required":[]},{"type":"object","additionalProperties":false,"properties":{"action":{"type":"string","enum":WorldSimulation.diplomacy.commitments.ACTIONS.keys()},"goal":{"type":"string","enum":["defense","exchange","routes"]},"target_id":{"type":"string"},"siege_id":{"type":"string"}},"required":["action","goal","target_id","siege_id"]}]}
 		payload.response_format.json_schema.schema.required.append("commitment")
 	var error:=http.request(String(config.endpoint),PackedStringArray(["Content-Type: application/json","Authorization: Bearer "+String(config.api_key)]),HTTPClient.METHOD_POST,JSON.stringify(payload))
 	if error!=OK: _response.call_deferred(HTTPRequest.RESULT_CANT_CONNECT,0,PackedStringArray(),PackedByteArray(),id,http)
 	changed.emit(id)
 
 func valid_draft(value:Variant)->bool:
-	if value is Dictionary and value.has("commitment"): return ForeignDiplomacy.commitments.valid_terms(value.commitment)
+	if value is Dictionary and value.has("commitment"): return WorldSimulation.diplomacy.commitments.valid_terms(value.commitment)
 	return value is Dictionary and (value.is_empty() or (value.has_all(["accord","tone","generous"]) and value.accord in ["exchange","routes","restraint"] and value.tone in ["equals","honor","firm"] and value.generous is bool))
 
 func accept(id:String,value:Variant)->bool:
 	if not bool(access(id).ok): return false
 	if not value is Dictionary or not value.has_all(["reply","accord","tone","generous"]): return false
 	if not value.reply is String or value.reply.strip_edges()=="" or value.reply.length()>1800 or value.accord not in ["","exchange","routes","restraint"] or not ForeignDiplomacy.TONES.has(value.tone) or not value.generous is bool: return false
-	if value.has("commitment") and (not value.commitment is Dictionary or (not value.commitment.is_empty() and not ForeignDiplomacy.commitments.valid_terms(value.commitment))): return false
+	if value.has("commitment") and (not value.commitment is Dictionary or (not value.commitment.is_empty() and not WorldSimulation.diplomacy.commitments.valid_terms(value.commitment))): return false
 	if not (value.get("commitment",{}) as Dictionary).is_empty() and value.accord!="": return false
 	var t:=thread(id); t.reply=value.reply
 	if value.accord!="": t.draft={"accord":value.accord,"tone":value.tone,"generous":value.generous}

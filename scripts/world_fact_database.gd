@@ -11,7 +11,7 @@ func set_fact(subject: String, predicate: String, value: Variant, visibility := 
 	var key := "%s::%s" % [subject, predicate]
 	var fact_id := "fact_%06d" % next_fact_id
 	next_fact_id += 1
-	facts[key] = {"id":fact_id, "subject":subject, "predicate":predicate, "value":value, "visibility":visibility, "source":source, "day":int(GameState.elapsed_days)}
+	facts[key] = {"id":fact_id, "subject":subject, "predicate":predicate, "value":value, "visibility":visibility, "source":source, "day":int(WorldSimulation.state.elapsed_days)}
 	return fact_id
 
 func query(subject: String, predicate: String) -> Dictionary:

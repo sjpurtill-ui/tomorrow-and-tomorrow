@@ -19,15 +19,15 @@ func reset_for_new_world()->void:
 	seed_value=-999999; leaders.clear()
 	commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 	if is_instance_valid(panel): panel.queue_free()
-	ForeignDialogue.reset()
+	WorldSimulation.dialogue.reset()
 
 func ensure()->void:
-	if seed_value==GameState.world_seed: return
-	reset_for_new_world(); seed_value=GameState.world_seed
+	if seed_value==WorldSimulation.state.world_seed: return
+	reset_for_new_world(); seed_value=WorldSimulation.state.world_seed
 
 func civilization(id:String)->Dictionary:
-	CivilizationSystem.initialize()
-	for civ:Dictionary in CivilizationSystem.civilizations:
+	WorldSimulation.world.initialize()
+	for civ:Dictionary in WorldSimulation.world.civilizations:
 		if String(civ.id)==id and int(civ.player_relation.get("contact_level",0))>=2: return civ
 	return {}
 
@@ -74,7 +74,7 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	var blocker:=""
 	if bool(relation.get("at_war",false)): blocker="Peace must be negotiated before shared work."
 	elif not (p.accord as Dictionary).is_empty(): blocker="An understanding is already active with this leader."
-	elif int(GameState.elapsed_days)<int(p.next_day): blocker="Let the last exchange settle: %d days before another proposal." % (int(p.next_day)-int(GameState.elapsed_days))
+	elif int(WorldSimulation.state.elapsed_days)<int(p.next_day): blocker="Let the last exchange settle: %d days before another proposal." % (int(p.next_day)-int(WorldSimulation.state.elapsed_days))
 	var binding:=not (p.counter as Dictionary).is_empty() and String(p.counter.accord)==accord and generous
 	var outcome:="accept" if score>=.25 or binding else ("counter" if score>=-.1 and not generous else "refuse")
 	return {"outcome":outcome,"label":{"accept":"Receptive","counter":"Likely to ask for more","refuse":"Unconvinced"}[outcome],"reasons":" ".join(reasons),"blocker":blocker,"cost":12 if generous else 4,"bonus":.08 if generous else .12,"domain":ACCORDS[accord].domain,"binding":binding}
@@ -83,48 +83,48 @@ func send(id:String,accord:String,tone:String,generous:bool=false)->Dictionary:
 	var f:=forecast(id,accord,tone,generous)
 	if f.has("error"): return f
 	if f.blocker!="": return {"error":f.blocker}
-	if float(GameState.resource_stockpiles.get("Timber",0))<int(f.cost): return {"error":"The delegation needs %d Timber for the proposed shared work." % int(f.cost)}
-	var result:=CivilizationSystem.dispatch_diplomat(id,"","leader_parley")
+	if float(WorldSimulation.state.resource_stockpiles.get("Timber",0))<int(f.cost): return {"error":"The delegation needs %d Timber for the proposed shared work." % int(f.cost)}
+	var result:=WorldSimulation.world.dispatch_diplomat(id,"","leader_parley")
 	if result.has("error"): return result
-	GameState.resource_stockpiles["Timber"]=float(GameState.resource_stockpiles.get("Timber",0))-int(f.cost)
+	WorldSimulation.state.resource_stockpiles["Timber"]=float(WorldSimulation.state.resource_stockpiles.get("Timber",0))-int(f.cost)
 	var p:=leader(id); p.serial=int(p.serial)+1
-	CivilizationSystem.diplomatic_mission["leader_terms"]={"accord":accord,"tone":tone,"generous":generous,"cost":int(f.cost),"serial":p.serial}
+	WorldSimulation.world.diplomatic_mission["leader_terms"]={"accord":accord,"tone":tone,"generous":generous,"cost":int(f.cost),"serial":p.serial}
 	remember(id,"You sent a proposal for %s. The answer is still on the road." % ACCORDS[accord].name)
 	return result
 
 func send_audience(id:String)->Dictionary:
 	if leader(id).is_empty(): return {"error":"Establish direct contact first."}
-	if bool(ForeignDialogue.access(id).ok): return {"error":"Your envoy channel is already established; continue the conversation."}
-	var result:=CivilizationSystem.dispatch_diplomat(id,"","leader_parley")
+	if bool(WorldSimulation.dialogue.access(id).ok): return {"error":"Your envoy channel is already established; continue the conversation."}
+	var result:=WorldSimulation.world.dispatch_diplomat(id,"","leader_parley")
 	if result.has("error"): return result
-	CivilizationSystem.diplomatic_mission["leader_audience"]=true
+	WorldSimulation.world.diplomatic_mission["leader_audience"]=true
 	remember(id,"Delegates departed to establish an audience. No agreement was proposed.")
 	return result
 
 func resolve(id:String)->Dictionary:
-	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
 	if mission.has("commitment_terms"): return commitments.resolve(id,mission)
 	var terms:Dictionary=mission.get("leader_terms",{})
 	var p:=leader(id)
 	if not p.is_empty() and String(mission.get("civ_id",""))==id and bool(mission.get("leader_audience",false)):
-		if int(GameState.elapsed_days)<int(mission.get("return_day",2147483647)): return {"error":"The audience report is still traveling."}
-		p["audience_day"]=int(GameState.elapsed_days)
+		if int(WorldSimulation.state.elapsed_days)<int(mission.get("return_day",2147483647)): return {"error":"The audience report is still traveling."}
+		p["audience_day"]=int(WorldSimulation.state.elapsed_days)
 		mission["leader_audience"]=false
 		var greeting:="The delegates established an audience with %s. The envoy channel is open for continued discussion; no agreement has been made." % String(p.name)
 		remember(id,greeting)
 		return {"ok":true,"message":greeting}
-	if p.is_empty() or String(mission.get("civ_id",""))!=id or int(GameState.elapsed_days)<int(mission.get("return_day",2147483647)) or not valid_terms(terms): return {"error":"No returned leader proposal is available."}
+	if p.is_empty() or String(mission.get("civ_id",""))!=id or int(WorldSimulation.state.elapsed_days)<int(mission.get("return_day",2147483647)) or not valid_terms(terms): return {"error":"No returned leader proposal is available."}
 	if int(terms.serial)<=int(p.resolved): return {"error":"This answer has already been received."}
 	if int(terms.serial)!=int(p.serial): return {"error":"This answer does not match the dispatched proposal."}
 	var f:=forecast(id,String(terms.accord),String(terms.tone),bool(terms.generous))
 	p.resolved=int(terms.serial)
-	p["audience_day"]=int(GameState.elapsed_days)
+	p["audience_day"]=int(WorldSimulation.state.elapsed_days)
 	var outcome:String=f.get("outcome","refuse")
 	if String(f.get("blocker",""))!="": outcome="refuse"
 	var civ:=civilization(id); var relation:Dictionary=civ.player_relation
 	var message:=""
 	if outcome=="accept":
-		p.counter={}; p.accord={"kind":terms.accord,"until":int(GameState.elapsed_days)+730,"bonus":f.bonus}
+		p.counter={}; p.accord={"kind":terms.accord,"until":int(WorldSimulation.state.elapsed_days)+730,"bonus":f.bonus}
 		p.trust=clampf(float(p.trust)+.15,-1,1)
 		relation.opinion=clampf(float(relation.get("opinion",0))+.08,-1,1)
 		if terms.accord=="restraint": relation.border_tension=maxf(0,float(relation.get("border_tension",0))-.25)
@@ -133,14 +133,14 @@ func resolve(id:String)->Dictionary:
 		civ[capability]=clampf(float(civ.get(capability,0))+(.04 if terms.generous else .02),0,1)
 		message="%s agrees to %s. Your %s research gains %d%% for two years; their %s rises %d points. War ends the understanding." % [p.name,ACCORDS[terms.accord].name,ACCORDS[terms.accord].domain,roundi(float(f.bonus)*100),capability,4 if terms.generous else 2]
 	elif outcome=="counter":
-		p.counter={"accord":terms.accord}; p.next_day=int(GameState.elapsed_days)
+		p.counter={"accord":terms.accord}; p.next_day=int(WorldSimulation.state.elapsed_days)
 		message="%s offers a counterproposal: your people supply 12 Timber and receive an 8%% research benefit; theirs gain four capability points. Send revised terms whenever you wish." % p.name
 	else:
-		p.counter={}; p.next_day=int(GameState.elapsed_days)+90
+		p.counter={}; p.next_day=int(WorldSimulation.state.elapsed_days)+90
 		p.trust=clampf(float(p.trust)-.04,-1,1)
 		message="%s declines. %s The next approach can be made after 90 days." % [p.name,"War has overtaken the proposal." if bool(relation.get("at_war",false)) else String(f.get("reasons","Conditions have changed."))]
 	if outcome!="accept":
-		GameState.resource_stockpiles["Timber"]=float(GameState.resource_stockpiles.get("Timber",0))+int(terms.cost)
+		WorldSimulation.state.resource_stockpiles["Timber"]=float(WorldSimulation.state.resource_stockpiles.get("Timber",0))+int(terms.cost)
 		message+=" The reserved Timber is returned; journey provisions were consumed."
 	remember(id,message)
 	return {"ok":outcome=="accept","message":message,"outcome":outcome}
@@ -148,7 +148,7 @@ func resolve(id:String)->Dictionary:
 func remember(id:String,message:String)->void:
 	var p:=leader(id)
 	if p.is_empty(): return
-	p.memories.push_front({"day":int(GameState.elapsed_days),"text":message})
+	p.memories.push_front({"day":int(WorldSimulation.state.elapsed_days),"text":message})
 	if p.memories.size()>12: p.memories.resize(12)
 
 func advance(day:int)->void:
@@ -164,7 +164,7 @@ func advance(day:int)->void:
 			remember(id,"War ended our shared undertaking. Trust fell sharply." if war else "Two years of cooperation completed. Your word carries more weight now.")
 
 func multiplier(domain:String)->float:
-	advance(int(GameState.elapsed_days))
+	advance(int(WorldSimulation.state.elapsed_days))
 	var bonus:=0.0
 	for p:Dictionary in leaders.values():
 		if not (p.accord as Dictionary).is_empty() and ACCORDS[p.accord.kind].domain==domain: bonus+=float(p.accord.bonus)
@@ -174,12 +174,12 @@ func valid_terms(t:Dictionary)->bool:
 	return t.has_all(["accord","tone","generous","cost","serial"]) and ACCORDS.has(t.accord) and TONES.has(t.tone) and t.generous is bool and t.cost==(12 if t.generous else 4) and (t.serial is int or t.serial is float) and float(t.serial)>=1
 
 func export_state()->Dictionary:
-	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true),"dialogue":ForeignDialogue.export_state(),"commitments":commitments.state.duplicate(true)}
+	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true),"dialogue":WorldSimulation.dialogue.export_state(),"commitments":commitments.state.duplicate(true)}
 
 func import_state(data:Dictionary)->Dictionary:
-	if data.get("seed")!=GameState.world_seed or not data.get("leaders") is Dictionary or data.leaders.size()>64: return {"error":"Invalid foreign leader state."}
+	if data.get("seed")!=WorldSimulation.state.world_seed or not data.get("leaders") is Dictionary or data.leaders.size()>64: return {"error":"Invalid foreign leader state."}
 	if data.has("commitments") and not commitments.validate(data.commitments): return {"error":"Invalid protection or league commitments."}
-	if not ForeignDialogue.validate_state(data.get("dialogue",{})): return {"error":"Invalid foreign discussion history."}
+	if not WorldSimulation.dialogue.validate_state(data.get("dialogue",{})): return {"error":"Invalid foreign discussion history."}
 	for id in data.get("dialogue",{}):
 		if not data.leaders.has(id): return {"error":"Discussion references an unknown leader."}
 	for id in data.leaders:
@@ -196,7 +196,7 @@ func import_state(data:Dictionary)->Dictionary:
 		if not p.counter.is_empty() and not ACCORDS.has(p.counter.get("accord","")): return {"error":"Invalid counteroffer."}
 		if not p.accord.is_empty():
 			if not ACCORDS.has(p.accord.get("kind","")) or p.accord.get("bonus",0) not in [.08,.12] or not (p.accord.get("until") is int or p.accord.get("until") is float) or not is_finite(float(p.accord.until)) or p.accord.until<0: return {"error":"Invalid active understanding."}
-	leaders=data.leaders.duplicate(true); seed_value=GameState.world_seed; ForeignDialogue.import_state(data.get("dialogue",{}))
+	leaders=data.leaders.duplicate(true); seed_value=WorldSimulation.state.world_seed; WorldSimulation.dialogue.import_state(data.get("dialogue",{}))
 	commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 	if data.has("commitments"): commitments.state=data.commitments.duplicate(true)
 	return {"ok":true}

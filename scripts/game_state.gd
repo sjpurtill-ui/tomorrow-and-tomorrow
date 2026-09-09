@@ -69,6 +69,7 @@ const FOUNDING_FOCUSES := {
 	}
 }
 
+var opponent_count := 12
 var world_seed := 0
 var founding_banner_index := -1
 var founding_focus := ""
@@ -379,6 +380,7 @@ var health_history: Array[Dictionary] = []
 var death_progress := 0.0
 var consecutive_food_shortage_days := 0.0
 var consecutive_water_shortage_days := 0.0
+var founding_journey:Dictionary={}
 var convoy_traveling := false
 var convoy_exposure_days := 0.0
 var convoy_emergency_halt_reason := ""
@@ -395,11 +397,12 @@ var lifetime_maternal_deaths := 0
 var lifetime_neonatal_deaths := 0
 
 func reset_for_new_world(new_seed:int)->void:
+	if WorldSimulation.actor_id=="player":WorldSimulation.clear()
 	civilian_injuries={"limited":0.0,"severe":0.0}
 	for system_name in ["HistoricalFigures","PeopleDirection","CommunityNetwork","GeneralCampaign"]:
-		var system:=get_node_or_null("/root/"+system_name)
+		var system:=WorldSimulation.system(system_name)
 		if system: system.reset_for_new_world()
-	var foreign:=get_node_or_null("/root/ForeignDiplomacy")
+	var foreign:=WorldSimulation.system("ForeignDiplomacy")
 	if foreign: foreign.reset_for_new_world()
 	resource_settlement_id=""
 	city_trade_shipments=[]
@@ -546,6 +549,7 @@ func reset_for_new_world(new_seed:int)->void:
 	death_progress=0.0
 	consecutive_food_shortage_days=0.0
 	consecutive_water_shortage_days=0.0
+	founding_journey={}
 	convoy_traveling=false
 	convoy_exposure_days=0.0
 	convoy_emergency_halt_reason=""
@@ -589,7 +593,7 @@ func founding_focus_catalog()->Array[Dictionary]:
 
 
 func founding_focus_definition(focus_id:String=founding_focus)->Dictionary:
-	if focus_id=="collective_ambition": return {"name":String(PeopleDirection.AMBITIONS.get(PeopleDirection.ambition,{}).get("name","Collective ambition")),"effects":{},"description":"Our people are pursuing a shared direction."}
+	if focus_id=="collective_ambition": return {"name":String(PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}).get("name","Collective ambition")),"effects":{},"description":"Our people are pursuing a shared direction."}
 	return (FOUNDING_FOCUSES.get(focus_id,{}) as Dictionary).duplicate(true)
 
 
@@ -1354,7 +1358,7 @@ func effective_workers(role:String,include_military_construction:bool=false)->fl
 	var civilian_workers:=0.0
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
-	if role=="Construction" and not include_military_construction and MilitaryCampaign.joint_operations!=null:capacity*=1.0-MilitaryCampaign.joint_operations.construction_share(resource_settlement_id)
+	if role=="Construction" and not include_military_construction and WorldSimulation.military.joint_operations!=null:capacity*=1.0-WorldSimulation.military.joint_operations.construction_share(resource_settlement_id)
 	return capacity
 
 func receive_injured_veterans(count:int,severe:int)->void:

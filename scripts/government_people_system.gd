@@ -133,7 +133,7 @@ func reset_for_new_world()->void:
 
 
 func initialize(reconcile_stage:bool=true)->void:
-	if "Hearth Circle" not in GameState.settlement_completed or GameState.player_settlements.is_empty(): return
+	if "Hearth Circle" not in WorldSimulation.state.settlement_completed or WorldSimulation.state.player_settlements.is_empty(): return
 	if initializing: return
 	initializing=true
 	# Re-evaluate the structure when a save is opened as well as when a new world
@@ -183,9 +183,9 @@ func process_day(day:int)->Array[Dictionary]:
 
 
 func _stage_from_conditions()->int:
-	var population:=GameState.population_total
-	var settlements:=GameState.player_settlements.size()
-	var institutions:=clampf(float(GameState.society_capacities.get("institutions",0.0)),0.0,1.0)
+	var population:=WorldSimulation.state.population_total
+	var settlements:=WorldSimulation.state.player_settlements.size()
+	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.0)),0.0,1.0)
 	var stage:=0
 	# Offices appear because there is enough real work to divide, not because an
 	# abstract capacity number crossed a line. Institutions can delay the more
@@ -211,14 +211,14 @@ func _update_government_stage(record_event:bool,events:Array[Dictionary]=[])->vo
 	revision+=1
 	if record_event:
 		var expanded:=government_stage>previous
-		var event:Dictionary={"day":int(GameState.elapsed_days),"title":"Government Expanded" if expanded else "Government Consolidated","description":"Population, distance, and institutional work now require additional named officeholders. Government remains a bounded cast of people, not an abstract cabinet." if expanded else "The surviving population and settlements can no longer sustain every specialized office. Their responsibilities return to the remaining general government.","domain":"institutions","severity":"major"}
+		var event:Dictionary={"day":int(WorldSimulation.state.elapsed_days),"title":"Government Expanded" if expanded else "Government Consolidated","description":"Population, distance, and institutional work now require additional named officeholders. Government remains a bounded cast of people, not an abstract cabinet." if expanded else "The surviving population and settlements can no longer sustain every specialized office. Their responsibilities return to the remaining general government.","domain":"institutions","severity":"major"}
 		events.append(event)
-		GameState.simulation_events.push_front(event)
-		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+		WorldSimulation.state.simulation_events.push_front(event)
+		if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 
 
 func government_form()->String:
-	var identity:Dictionary=ValuesModel.identity_snapshot(GameState.societal_values)
+	var identity:Dictionary=ValuesModel.identity_snapshot(WorldSimulation.state.societal_values)
 	var name:=String(identity.get("name","FEDERATED FORMING ORDER")).to_upper()
 	if name.begins_with("CENTRALIZED"): return "centralized"
 	if name.begins_with("LOCALIST"): return "localist"
@@ -228,7 +228,7 @@ func government_form()->String:
 func structure_snapshot()->Dictionary:
 	initialize()
 	return {
-		"stage":government_stage,"form":government_form(),"name":String(ValuesModel.identity_snapshot(GameState.societal_values).get("name","Forming Order")),
+		"stage":government_stage,"form":government_form(),"name":String(ValuesModel.identity_snapshot(WorldSimulation.state.societal_values).get("name","Forming Order")),
 		"scope":government_scope(),"active_offices":active_offices(),"living_people":living_people().size(),"pool_limit":MAX_GOVERNMENT_PEOPLE,"revision":revision,
 	}
 
@@ -301,11 +301,11 @@ func _desired_pool_size()->int:
 	# A hearth-sized polity should contain a handful of recognizable public
 	# figures, not a miniature modern bureaucracy. The cast grows only when
 	# places and specialist offices create real work for it.
-	return clampi(3+government_stage*4+GameState.player_settlements.size()*2+active_offices().size(),6,MAX_GOVERNMENT_PEOPLE)
+	return clampi(3+government_stage*4+WorldSimulation.state.player_settlements.size()*2+active_offices().size(),6,MAX_GOVERNMENT_PEOPLE)
 
 
 func _ensure_pool()->void:
-	var target:=mini(_desired_pool_size(),maxi(1,GameState.population_total))
+	var target:=mini(_desired_pool_size(),maxi(1,WorldSimulation.state.population_total))
 	while living_people().size()<target and people.size()<MAX_GOVERNMENT_PEOPLE:
 		people.append(_generate_person(next_person_id))
 		next_person_id+=1
@@ -314,21 +314,21 @@ func _ensure_pool()->void:
 
 func _generate_person(person_id:int)->Dictionary:
 	var rng:=RandomNumberGenerator.new()
-	rng.seed=hash("%d:government_person:%d" % [GameState.world_seed,person_id])
+	rng.seed=hash("%d:government_person:%d" % [WorldSimulation.state.world_seed,person_id])
 	var name:="%s %s" % [GIVEN_NAMES[posmod(person_id*7+rng.randi(),GIVEN_NAMES.size())],FAMILY_NAMES[posmod(person_id*11+rng.randi(),FAMILY_NAMES.size())]]
 	for existing in people:
 		if String(existing.get("name",""))==name:
 			name="%s %s" % [name,String.chr(65+posmod(person_id,26))]
 			break
 	var age:=rng.randi_range(18,58)
-	var life_expectancy:=clampf(GameState.projected_life_expectancy()+18.0,48.0,88.0)
+	var life_expectancy:=clampf(WorldSimulation.state.projected_life_expectancy()+18.0,48.0,88.0)
 	var death_age:=clampf(rng.randfn(life_expectancy,11.5),maxf(36.0,float(age)+2.0),105.0)
 	var skills:Dictionary={}
 	for skill in SKILL_KEYS: skills[skill]=clampi(roundi(rng.randfn(47.0,11.0)),22,72)
 	# Every public figure has an intelligible comparative advantage and a real
 	# limitation. This prevents a candidate slate of statistically identical
 	# generalists while still allowing rare broadly capable people.
-	var primary_index:=posmod(person_id-1+int(GameState.world_seed%SKILL_KEYS.size()),SKILL_KEYS.size())
+	var primary_index:=posmod(person_id-1+int(WorldSimulation.state.world_seed%SKILL_KEYS.size()),SKILL_KEYS.size())
 	var secondary_index:=posmod(primary_index+2+rng.randi_range(0,2),SKILL_KEYS.size())
 	while secondary_index==primary_index: secondary_index=posmod(secondary_index+1,SKILL_KEYS.size())
 	var weak_index:=posmod(primary_index+4+rng.randi_range(0,2),SKILL_KEYS.size())
@@ -342,12 +342,12 @@ func _generate_person(person_id:int)->Dictionary:
 	var personality:Dictionary=preload("res://scripts/leader_personality.gd").generate(rng)
 	var doctrine:="directive" if float(personality.assertiveness)>0.68 else ("representative" if float(personality.empathy)>0.68 else ("measured" if float(personality.discipline)>0.66 else ("territorial" if float(personality.risk_tolerance)<0.36 else "federated")))
 	var background:=_background_for_skills(skills)
-	var settlements:=GameState.player_settlements
+	var settlements:=WorldSimulation.state.player_settlements
 	var home_id:=String(settlements[posmod(person_id-1,settlements.size())].get("id","")) if not settlements.is_empty() else ""
-	var born_day:=int(GameState.elapsed_days)-age*365-rng.randi_range(0,364)
+	var born_day:=int(WorldSimulation.state.elapsed_days)-age*365-rng.randi_range(0,364)
 	var profile:=_dynamic_profile(skills,personality)
 	return {
-		"person_id":person_id,"name":name,"born_day":born_day,"death_age_years":death_age,"died_day":-1,"status":"active","known_since_day":int(GameState.elapsed_days),
+		"person_id":person_id,"name":name,"born_day":born_day,"death_age_years":death_age,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
 		"home_settlement_id":home_id,"office_key":"","local_leader_of":"","appointed_day":-1,"experience_months":0,
 		"background":background,"institutional":false,"traits":[trait_a,trait_b],"personality":personality,"skills":skills,"doctrine":doctrine,
 		"dynamic_profile":profile,"subcategory_profile":{},"support":clampi(roundi(28.0+float(profile.culture)*34.0+float(profile.institutions)*26.0),18,92),
@@ -498,7 +498,7 @@ func appointment_assessment(person:Dictionary,office_key:String)->Dictionary:
 		weakness_text="Better suited to %s; appointing here forgoes that advantage" % ("local leadership" if best_office=="SettlementLeader" else best_office)
 	var current_duty:=String(person.get("office_key",""))
 	if current_duty=="" and String(person.get("local_leader_of",""))!="": current_duty="Settlement leader"
-	var known_days:=maxi(0,int(GameState.elapsed_days)-int(person.get("known_since_day",int(GameState.elapsed_days))))
+	var known_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(person.get("known_since_day",int(WorldSimulation.state.elapsed_days))))
 	var experience_months:=int(person.get("experience_months",0))
 	var record:="LITTLE TESTED"
 	if known_days>=5*365 or experience_months>=48: record="ESTABLISHED RECORD"
@@ -526,7 +526,7 @@ func living_people()->Array[Dictionary]:
 
 
 func age_years(person:Dictionary,day:int=-1)->int:
-	var current_day:=int(GameState.elapsed_days) if day<0 else day
+	var current_day:=int(WorldSimulation.state.elapsed_days) if day<0 else day
 	var end_day:=int(person.get("died_day",current_day)) if int(person.get("died_day",-1))>=0 else current_day
 	return maxi(0,floori(float(end_day-int(person.get("born_day",0)))/365.0))
 
@@ -553,12 +553,12 @@ func adjust_person_relationship(person_id:int,trust_delta:float=0.0,respect_delt
 	sovereign["resentment"]=clampf(float(sovereign.get("resentment",0.0))+resentment_delta,0.0,1.0)
 	relationships["sovereign"]=sovereign
 	people[index]["relationships"]=relationships
-	for roster_index in GameState.advisor_roster.size():
-		if int(GameState.advisor_roster[roster_index].get("person_id",0))!=person_id: continue
-		GameState.advisor_roster[roster_index]["relationships"]=relationships.duplicate(true)
-	for office_key in GameState.leadership_positions:
-		if int((GameState.leadership_positions[office_key] as Dictionary).get("person_id",0))!=person_id: continue
-		GameState.leadership_positions[office_key]["relationships"]=relationships.duplicate(true)
+	for roster_index in WorldSimulation.state.advisor_roster.size():
+		if int(WorldSimulation.state.advisor_roster[roster_index].get("person_id",0))!=person_id: continue
+		WorldSimulation.state.advisor_roster[roster_index]["relationships"]=relationships.duplicate(true)
+	for office_key in WorldSimulation.state.leadership_positions:
+		if int((WorldSimulation.state.leadership_positions[office_key] as Dictionary).get("person_id",0))!=person_id: continue
+		WorldSimulation.state.leadership_positions[office_key]["relationships"]=relationships.duplicate(true)
 	revision+=1
 	return sovereign.duplicate(true)
 
@@ -577,8 +577,8 @@ func record_person_memory(person_id:int,summary:String,kind:String="civic",impor
 		"confidence":1.0,
 		"emotional_weight":clampf(importance*0.5,0.0,1.0),
 		"emotion":String(metadata.get("emotion","duty")).substr(0,32),
-		"created_day":int(GameState.elapsed_days),
-		"last_recalled_day":int(GameState.elapsed_days),
+		"created_day":int(WorldSimulation.state.elapsed_days),
+		"last_recalled_day":int(WorldSimulation.state.elapsed_days),
 	}
 	for key in ["order_id","outcome","settlement_id"]:
 		if metadata.has(key): memory[key]=String(metadata[key]).substr(0,96)
@@ -600,12 +600,12 @@ func record_person_memory(person_id:int,summary:String,kind:String="civic",impor
 	memories.push_front(memory)
 	if memories.size()>MAX_PERSON_MEMORIES: memories.resize(MAX_PERSON_MEMORIES)
 	people[index]["memories"]=memories
-	for roster_index in GameState.advisor_roster.size():
-		if int(GameState.advisor_roster[roster_index].get("person_id",0))==person_id:
-			GameState.advisor_roster[roster_index]["memories"]=memories.duplicate(true)
-	for office_key in GameState.leadership_positions:
-		if int((GameState.leadership_positions[office_key] as Dictionary).get("person_id",0))==person_id:
-			GameState.leadership_positions[office_key]["memories"]=memories.duplicate(true)
+	for roster_index in WorldSimulation.state.advisor_roster.size():
+		if int(WorldSimulation.state.advisor_roster[roster_index].get("person_id",0))==person_id:
+			WorldSimulation.state.advisor_roster[roster_index]["memories"]=memories.duplicate(true)
+	for office_key in WorldSimulation.state.leadership_positions:
+		if int((WorldSimulation.state.leadership_positions[office_key] as Dictionary).get("person_id",0))==person_id:
+			WorldSimulation.state.leadership_positions[office_key]["memories"]=memories.duplicate(true)
 	revision+=1
 	return memory.duplicate(true)
 
@@ -633,13 +633,13 @@ func candidates_for_office(office_key:String,settlement_id:String="",limit:int=6
 		# The player receives a socially legible shortlist, not a competency table
 		# secretly sorted into the correct answer. The incumbent remains reviewable;
 		# everyone else has a stable, seed-dependent order unrelated to true fit.
-		var incumbent_id:=int((GameState.leadership_positions.get(office_key,{}) as Dictionary).get("person_id",0))
+		var incumbent_id:=int((WorldSimulation.state.leadership_positions.get(office_key,{}) as Dictionary).get("person_id",0))
 		candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 			var a_incumbent:=int(a.get("person_id",0))==incumbent_id
 			var b_incumbent:=int(b.get("person_id",0))==incumbent_id
 			if a_incumbent!=b_incumbent: return a_incumbent
-			var a_order:=posmod(hash("%d:%s:shortlist:%d" % [GameState.world_seed,office_key,int(a.get("person_id",0))]),2147483647)
-			var b_order:=posmod(hash("%d:%s:shortlist:%d" % [GameState.world_seed,office_key,int(b.get("person_id",0))]),2147483647)
+			var a_order:=posmod(hash("%d:%s:shortlist:%d" % [WorldSimulation.state.world_seed,office_key,int(a.get("person_id",0))]),2147483647)
+			var b_order:=posmod(hash("%d:%s:shortlist:%d" % [WorldSimulation.state.world_seed,office_key,int(b.get("person_id",0))]),2147483647)
 			return a_order<b_order
 		)
 	if candidates.size()>limit: candidates.resize(limit)
@@ -663,18 +663,18 @@ func mark_central_appointment(person_id:int,office_key:String)->Dictionary:
 			people[other_index]["office_title"]=""
 		if int(people[other_index].get("person_id",0))==person_id:
 			var former_office:=String(people[other_index].get("office_key",""))
-			if former_office!="" and former_office!=office_key: GameState.leadership_positions.erase(former_office)
+			if former_office!="" and former_office!=office_key: WorldSimulation.state.leadership_positions.erase(former_office)
 			people[other_index]["office_key"]=""
 			people[other_index]["office_title"]=""
 	people[index]["office_key"]=office_key
-	people[index]["appointed_day"]=int(GameState.elapsed_days)
+	people[index]["appointed_day"]=int(WorldSimulation.state.elapsed_days)
 	people[index]["office_title"]=String(office.title)
-	GameState.leadership_positions[office_key]=person_snapshot(person_id)
+	WorldSimulation.state.leadership_positions[office_key]=person_snapshot(person_id)
 	# At founding scale the central polity and its only settlement are the same
 	# community. The Steward therefore carries the local duty too; we do not
 	# invent a second layer of government for 120 residents.
-	if office_key=="Steward" and government_stage==0 and GameState.player_settlements.size()==1:
-		assign_settlement_leader(String(GameState.player_settlements[0].get("id","")),person_id)
+	if office_key=="Steward" and government_stage==0 and WorldSimulation.state.player_settlements.size()==1:
+		assign_settlement_leader(String(WorldSimulation.state.player_settlements[0].get("id","")),person_id)
 	revision+=1
 	_sync_advisor_roster()
 	return person_snapshot(person_id)
@@ -688,30 +688,30 @@ func _synchronize_office_holders(events:Array[Dictionary]=[],record_events:bool=
 		if assigned_key!="" and assigned_key not in active_keys:
 			people[person_index]["office_key"]=""
 			people[person_index]["office_title"]=""
-	for key_variant in GameState.leadership_positions.keys():
+	for key_variant in WorldSimulation.state.leadership_positions.keys():
 		var key:=String(key_variant)
-		var holder:Dictionary=GameState.leadership_positions.get(key,{})
+		var holder:Dictionary=WorldSimulation.state.leadership_positions.get(key,{})
 		var person_id:=int(holder.get("person_id",0))
 		var person:=person_snapshot(person_id)
 		if key not in active_keys or person.is_empty() or String(person.get("status",""))!="active":
-			GameState.leadership_positions.erase(key)
+			WorldSimulation.state.leadership_positions.erase(key)
 			continue
 		person["office_title"]=String(office_definition(key).title)
-		GameState.leadership_positions[key]=person
+		WorldSimulation.state.leadership_positions[key]=person
 	# The first government is one recognizable person. Later specialist offices
 	# emerge vacant and remain a player choice.
-	if "Steward" not in GameState.leadership_positions:
+	if "Steward" not in WorldSimulation.state.leadership_positions:
 		var candidates:=candidates_for_office("Steward","",1)
 		if not candidates.is_empty():
 			var person:=mark_central_appointment(int(candidates[0].person_id),"Steward")
-			GameState.leadership_positions["Steward"]=person
-			if government_stage==0 and GameState.player_settlements.size()==1 and record_events:
-				events.append({"day":int(GameState.elapsed_days),"title":"Local Succession","description":"%s now carries the founding council and local leadership of %s." % [String(person.get("name","A successor")),String(GameState.player_settlements[0].get("name","the settlement"))],"domain":"institutions","severity":"notice"})
+			WorldSimulation.state.leadership_positions["Steward"]=person
+			if government_stage==0 and WorldSimulation.state.player_settlements.size()==1 and record_events:
+				events.append({"day":int(WorldSimulation.state.elapsed_days),"title":"Local Succession","description":"%s now carries the founding council and local leadership of %s." % [String(person.get("name","A successor")),String(WorldSimulation.state.player_settlements[0].get("name","the settlement"))],"domain":"institutions","severity":"notice"})
 
 
 func officeholder(office_key:String)->Dictionary:
 	initialize()
-	var holder:Dictionary=GameState.leadership_positions.get(office_key,{})
+	var holder:Dictionary=WorldSimulation.state.leadership_positions.get(office_key,{})
 	if holder.is_empty(): return {}
 	var person:=person_snapshot(int(holder.get("person_id",0)))
 	if person.is_empty(): return {}
@@ -723,21 +723,21 @@ func assign_settlement_leader(settlement_id:String,person_id:int)->Dictionary:
 	var person_index:=_find_person_index(person_id)
 	if person_index<0 or String(people[person_index].get("status",""))!="active": return {"ok":false,"reason":"That person is not available."}
 	var settlement_index:=-1
-	for index in GameState.player_settlements.size():
-		if String(GameState.player_settlements[index].get("id",""))==settlement_id: settlement_index=index; break
+	for index in WorldSimulation.state.player_settlements.size():
+		if String(WorldSimulation.state.player_settlements[index].get("id",""))==settlement_id: settlement_index=index; break
 	if settlement_index<0: return {"ok":false,"reason":"That settlement is not owned."}
-	if government_stage==0 and GameState.player_settlements.size()==1:
-		var steward_id:=int((GameState.leadership_positions.get("Steward",{}) as Dictionary).get("person_id",0))
+	if government_stage==0 and WorldSimulation.state.player_settlements.size()==1:
+		var steward_id:=int((WorldSimulation.state.leadership_positions.get("Steward",{}) as Dictionary).get("person_id",0))
 		if steward_id>0 and person_id!=steward_id:
 			return {"ok":false,"reason":"The founding council and its only settlement are still one office. Replace the founding leader instead."}
 	for other_index in people.size():
 		if String(people[other_index].get("local_leader_of",""))==settlement_id: people[other_index]["local_leader_of"]=""
 	people[person_index]["local_leader_of"]=settlement_id
 	people[person_index]["home_settlement_id"]=settlement_id
-	people[person_index]["appointed_day"]=int(GameState.elapsed_days)
-	GameState.player_settlements[settlement_index]["leader_person_id"]=person_id
-	GameState.player_settlements[settlement_index]["leader_title"]=settlement_leader_title()
-	GameState.settlement_network_revision+=1
+	people[person_index]["appointed_day"]=int(WorldSimulation.state.elapsed_days)
+	WorldSimulation.state.player_settlements[settlement_index]["leader_person_id"]=person_id
+	WorldSimulation.state.player_settlements[settlement_index]["leader_title"]=settlement_leader_title()
+	WorldSimulation.state.settlement_network_revision+=1
 	revision+=1
 	return {"ok":true,"leader":person_snapshot(person_id),"title":settlement_leader_title()}
 
@@ -746,36 +746,36 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 	initialize()
 	action="arrest" if action.to_lower()=="arrest" else "dismiss"
 	var settlement_index:=-1
-	for index in GameState.player_settlements.size():
-		if String(GameState.player_settlements[index].get("id",""))==settlement_id: settlement_index=index; break
+	for index in WorldSimulation.state.player_settlements.size():
+		if String(WorldSimulation.state.player_settlements[index].get("id",""))==settlement_id: settlement_index=index; break
 	if settlement_index<0: return {"ok":false,"reason":"That settlement is not owned."}
-	var previous_id:=int(GameState.player_settlements[settlement_index].get("leader_person_id",0))
+	var previous_id:=int(WorldSimulation.state.player_settlements[settlement_index].get("leader_person_id",0))
 	var previous:=person_snapshot(previous_id)
 	if previous.is_empty(): return {"ok":false,"reason":"That settlement has no leader to remove."}
 	var arrest:=action=="arrest"
-	var combined_founding_office:=government_stage==0 and GameState.player_settlements.size()==1
+	var combined_founding_office:=government_stage==0 and WorldSimulation.state.player_settlements.size()==1
 	var previous_index:=_find_person_index(previous_id)
 	if previous_index>=0:
 		people[previous_index]["local_leader_of"]=""
-		people[previous_index]["removed_day"]=int(GameState.elapsed_days)
+		people[previous_index]["removed_day"]=int(WorldSimulation.state.elapsed_days)
 		people[previous_index]["removal_reason"]="arrested" if arrest else "dismissed"
 		if arrest: people[previous_index]["status"]="detained"
 	if combined_founding_office or arrest:
-		for office_key_variant in GameState.leadership_positions.keys().duplicate():
+		for office_key_variant in WorldSimulation.state.leadership_positions.keys().duplicate():
 			var office_key:=String(office_key_variant)
-			if int((GameState.leadership_positions[office_key] as Dictionary).get("person_id",0))!=previous_id: continue
-			GameState.leadership_positions.erase(office_key)
+			if int((WorldSimulation.state.leadership_positions[office_key] as Dictionary).get("person_id",0))!=previous_id: continue
+			WorldSimulation.state.leadership_positions.erase(office_key)
 		if previous_index>=0:
 			people[previous_index]["office_key"]=""
 			people[previous_index]["office_title"]=""
-	GameState.player_settlements[settlement_index]["leader_person_id"]=0
-	GameState.player_settlements[settlement_index]["leader_title"]=settlement_leader_title()
+	WorldSimulation.state.player_settlements[settlement_index]["leader_person_id"]=0
+	WorldSimulation.state.player_settlements[settlement_index]["leader_title"]=settlement_leader_title()
 	if arrest:
-		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))-0.04,0.01,0.99)
-		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.025,0.01,0.99)
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))-0.04,0.01,0.99)
+		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.025,0.01,0.99)
 	else:
-		GameState.simulation_metrics["legitimacy"]=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5))-0.008,0.01,0.99)
-		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.5))-0.002,0.01,0.99)
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))-0.008,0.01,0.99)
+		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.002,0.01,0.99)
 	_ensure_pool()
 	var successors:=candidates_for_office("SettlementLeader",settlement_id,MAX_GOVERNMENT_PEOPLE,false)
 	var successor:Dictionary={}
@@ -795,13 +795,13 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 	var successor_record:Dictionary=appointment.get("leader",{})
 	var succession_text:=" %s now succeeds them." % String(successor_record.get("name","A successor")) if bool(appointment.get("ok",false)) else " The office is vacant."
 	var event:={
-		"day":int(GameState.elapsed_days),"title":"Leader Arrested" if arrest else "Leader Dismissed",
-		"description":"%s was %s as %s of %s.%s" % [String(previous.get("name","The former leader")),"arrested and detained" if arrest else "dismissed",settlement_leader_title(),String(GameState.player_settlements[settlement_index].get("name","the settlement")),succession_text],
+		"day":int(WorldSimulation.state.elapsed_days),"title":"Leader Arrested" if arrest else "Leader Dismissed",
+		"description":"%s was %s as %s of %s.%s" % [String(previous.get("name","The former leader")),"arrested and detained" if arrest else "dismissed",settlement_leader_title(),String(WorldSimulation.state.player_settlements[settlement_index].get("name","the settlement")),succession_text],
 		"domain":"institutions","severity":"major" if arrest else "notice",
 	}
-	GameState.simulation_events.push_front(event)
-	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
-	GameState.settlement_network_revision+=1
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
+	WorldSimulation.state.settlement_network_revision+=1
 	revision+=1
 	_sync_advisor_roster()
 	var legitimacy_cost:=0.04 if arrest else 0.008
@@ -817,7 +817,7 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 
 func settlement_leader(settlement_id:String)->Dictionary:
 	if not initializing: initialize()
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		if String(settlement.get("id",""))!=settlement_id: continue
 		var person:=person_snapshot(int(settlement.get("leader_person_id",0)))
 		if person.is_empty(): return {}
@@ -827,32 +827,32 @@ func settlement_leader(settlement_id:String)->Dictionary:
 
 
 func _ensure_local_leaders(events:Array[Dictionary]=[])->void:
-	for settlement_index in GameState.player_settlements.size():
-		var settlement:Dictionary=GameState.player_settlements[settlement_index]
+	for settlement_index in WorldSimulation.state.player_settlements.size():
+		var settlement:Dictionary=WorldSimulation.state.player_settlements[settlement_index]
 		var settlement_id:=String(settlement.get("id",""))
 		var current:=person_snapshot(int(settlement.get("leader_person_id",0)))
 		if not current.is_empty() and String(current.get("status",""))=="active":
 			settlement["leader_title"]=settlement_leader_title()
-			GameState.player_settlements[settlement_index]=settlement
+			WorldSimulation.state.player_settlements[settlement_index]=settlement
 			continue
 		# At founding scale the only civic office and the only local office are
 		# intentionally the same person. A migrated save could have a Steward but
 		# no leader_person_id; choosing the highest-rated generic local candidate
 		# here was then rejected by assign_settlement_leader and left the colony
 		# permanently vacant.
-		if government_stage==0 and GameState.player_settlements.size()==1:
-			var steward_id:=int((GameState.leadership_positions.get("Steward",{}) as Dictionary).get("person_id",0))
+		if government_stage==0 and WorldSimulation.state.player_settlements.size()==1:
+			var steward_id:=int((WorldSimulation.state.leadership_positions.get("Steward",{}) as Dictionary).get("person_id",0))
 			if steward_id>0:
 				var founding_result:=assign_settlement_leader(settlement_id,steward_id)
 				if bool(founding_result.get("ok",false)):
-					events.append({"day":int(GameState.elapsed_days),"title":"Founding Leader Recognized","description":"%s now carries both the founding council and the local leadership of %s." % [String((founding_result.get("leader",{}) as Dictionary).get("name","The founding leader")),String(settlement.get("name","the settlement"))],"domain":"institutions","severity":"notice"})
+					events.append({"day":int(WorldSimulation.state.elapsed_days),"title":"Founding Leader Recognized","description":"%s now carries both the founding council and the local leadership of %s." % [String((founding_result.get("leader",{}) as Dictionary).get("name","The founding leader")),String(settlement.get("name","the settlement"))],"domain":"institutions","severity":"notice"})
 				continue
 		var candidates:=candidates_for_office("SettlementLeader",settlement_id,1)
 		if candidates.is_empty(): candidates=candidates_for_office("SettlementLeader","",1)
 		if candidates.is_empty(): continue
 		var result:=assign_settlement_leader(settlement_id,int(candidates[0].person_id))
 		if bool(result.get("ok",false)):
-			events.append({"day":int(GameState.elapsed_days),"title":"Local Succession","description":"%s now serves as %s of %s." % [String(candidates[0].name),String(result.title),String(settlement.get("name","the settlement"))],"domain":"institutions","severity":"notice"})
+			events.append({"day":int(WorldSimulation.state.elapsed_days),"title":"Local Succession","description":"%s now serves as %s of %s." % [String(candidates[0].name),String(result.title),String(settlement.get("name","the settlement"))],"domain":"institutions","severity":"notice"})
 
 
 func _process_lifespans(day:int,events:Array[Dictionary])->void:
@@ -874,22 +874,22 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		people[index]=person
 		# This named person is part of the aggregate population. Register exactly one
 		# death through the same conserved demographic entry point.
-		GameState.register_population_deaths(1,"Natural causes")
+		WorldSimulation.state.register_population_deaths(1,"Natural causes")
 		var service_note:=" while serving as %s" % held_title if held_title!="" else (" while leading a settlement" if local_id!="" else "")
 		var event:Dictionary={"day":day,"title":"Officeholder Died","description":"%s died aged %d%s. The office and local duties now pass through the same succession rules as every other appointment." % [String(person.name),floori(age),service_note],"domain":"institutions","severity":"major"}
 		events.append(event)
-		GameState.simulation_events.push_front(event)
-		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+		WorldSimulation.state.simulation_events.push_front(event)
+		if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 		revision+=1
 
 
 func _focus_decision_for_settlement(settlement:Dictionary)->Dictionary:
-	var age_days:=maxi(0,int(GameState.elapsed_days)-int(settlement.get("founded_day",0)))
+	var age_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(settlement.get("founded_day",0)))
 	if age_days<365:
 		return {"id":"establishment","label":FOCUS_LABELS.establishment,"reason":"This place is less than a year old and still needs its first dependable works and routines."}
 	var territory:Dictionary=settlement.get("territory_context",{})
 	var is_primary:=bool(settlement.get("primary",false))
-	var water:Dictionary=GameState.water_metrics
+	var water:Dictionary=WorldSimulation.state.water_metrics
 	var water_intake:=clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)
 	var source_accessible:=bool(water.get("source_accessible",true))
 	var water_required:=maxf(0.0,float(water.get("required_today",0.0)))
@@ -907,11 +907,11 @@ func _focus_decision_for_settlement(settlement:Dictionary)->Dictionary:
 		return {"id":"water","label":"STABILIZE WATER SUPPLY","reason":"Collection replaced only %d%% of daily use and the reserve has fallen to %.1f days." % [roundi(water_collected/water_required*100.0),water_days]}
 	if not is_primary and local_water_access<0.28:
 		return {"id":"water","label":"IMPROVE WATER ACCESS","reason":"This settlement's local freshwater access is weak; the bottleneck is finding and carrying water, not the size of the reserve."}
-	var food_days:=float(GameState.simulation_metrics.get("food_days",30.0))
-	var food_net:=float(GameState.simulation_metrics.get("food_net",0.0))
-	var food_intake:=clampf(float(GameState.simulation_metrics.get("food_intake_ratio",1.0)),0.0,1.0)
-	var food_projected_days:=float(GameState.simulation_metrics.get("food_projected_days",9999.0))
-	var food_forecast:Dictionary=GameState.simulation_metrics.get("food_forecast_90",{})
+	var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",30.0))
+	var food_net:=float(WorldSimulation.state.simulation_metrics.get("food_net",0.0))
+	var food_intake:=clampf(float(WorldSimulation.state.simulation_metrics.get("food_intake_ratio",1.0)),0.0,1.0)
+	var food_projected_days:=float(WorldSimulation.state.simulation_metrics.get("food_projected_days",9999.0))
+	var food_forecast:Dictionary=WorldSimulation.state.simulation_metrics.get("food_forecast_90",{})
 	var forecast_shortage_day:=int(food_forecast.get("first_shortage_day",-1))
 	if food_intake<0.995:
 		return {"id":"provisions","label":"RESTORE FOOD SUPPLY","reason":"Only %d%% of today's food requirement was met." % roundi(food_intake*100.0)}
@@ -919,11 +919,11 @@ func _focus_decision_for_settlement(settlement:Dictionary)->Dictionary:
 		return {"id":"provisions","label":FOCUS_LABELS.provisions,"reason":"The seasonal and weather outlook projects a shortage in about %d days." % forecast_shortage_day}
 	if food_net<0.0 and food_projected_days<45.0:
 		return {"id":"provisions","label":FOCUS_LABELS.provisions,"reason":"Food stores are shrinking and are projected to last %.1f days without a correction." % food_projected_days}
-	var housing_ratio:=float(GameState.simulation_metrics.get("housing_ratio",1.0))
+	var housing_ratio:=float(WorldSimulation.state.simulation_metrics.get("housing_ratio",1.0))
 	if housing_ratio<0.96:
 		return {"id":"shelter","label":FOCUS_LABELS.shelter,"reason":"Shelter currently covers only %d%% of the population." % roundi(housing_ratio*100.0)}
-	var security:=float(GameState.society_capacities.get("security",0.4))
-	if security<0.30 and GameState.player_settlements.size()>1:
+	var security:=float(WorldSimulation.state.society_capacities.get("security",0.4))
+	if security<0.30 and WorldSimulation.state.player_settlements.size()>1:
 		return {"id":"defense","label":FOCUS_LABELS.defense,"reason":"Several settlements must be protected while security capacity remains weak."}
 	var leader:=settlement_leader(String(settlement.get("id","")))
 	if not leader.is_empty():
@@ -943,7 +943,7 @@ func _manual_focus_reason(focus:String)->String:
 
 func _survival_guard()->Dictionary:
 	var reasons:Array[String]=[]
-	var water:Dictionary=GameState.water_metrics
+	var water:Dictionary=WorldSimulation.state.water_metrics
 	var required:=maxf(0.0,float(water.get("required_today",0.0)))
 	var collected:=maxf(0.0,float(water.get("collected_today",required)))
 	var water_days:=maxf(0.0,float(water.get("days",30.0)))
@@ -954,7 +954,7 @@ func _survival_guard()->Dictionary:
 	var water_risk:=water_measured and (water_intake<0.995 or not bool(water.get("source_accessible",true)) or (collected<required*1.03 and water_days<10.0))
 	if water_risk:
 		reasons.append("water collection is not safely replacing daily use")
-	var metrics:Dictionary=GameState.simulation_metrics
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	var food_intake:=clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.0)
 	var food_net:=float(metrics.get("food_net",0.0))
 	var projected:=float(metrics.get("food_projected_days",9999.0))
@@ -1010,14 +1010,14 @@ func _delegate_settlements(_day:int)->void:
 	var total_weight:=0.0
 	var satellite_share:=0.0
 	var management_changed:=false
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		if not bool(settlement.get("primary",false)): satellite_share+=maxf(0.0,float(settlement.get("population_share",0.0)))
-	for index in GameState.player_settlements.size():
-		var settlement:Dictionary=GameState.player_settlements[index]
+	for index in WorldSimulation.state.player_settlements.size():
+		var settlement:Dictionary=WorldSimulation.state.player_settlements[index]
 		var share:=maxf(0.01,1.0-satellite_share) if bool(settlement.get("primary",false)) else maxf(0.001,float(settlement.get("population_share",0.0)))
 		var auto_manage:=bool(settlement.get("auto_manage",true))
-		var guard:Dictionary=SettlementModel.with_city_resources(String(settlement.id),_survival_guard)
-		var decision:Dictionary=SettlementModel.with_city_resources(String(settlement.id),func()->Dictionary: return _focus_decision_for_settlement(settlement)) if auto_manage else {
+		var guard:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.id),_survival_guard)
+		var decision:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.id),func()->Dictionary: return _focus_decision_for_settlement(settlement)) if auto_manage else {
 			"id":String(settlement.get("management_focus","balanced")),
 			"label":String(FOCUS_LABELS.get(String(settlement.get("management_focus","balanced")),"BALANCED STEWARDSHIP")),
 			"reason":String(settlement.get("management_focus_reason",_manual_focus_reason(String(settlement.get("management_focus","balanced"))))),
@@ -1026,7 +1026,7 @@ func _delegate_settlements(_day:int)->void:
 		var leader:=settlement_leader(String(settlement.get("id","")))
 		# A manual focus governs discretionary work; the leader's food-and-water
 		# safeguard still applies and is recalculated from the latest daily ledger.
-		var allocations:Dictionary=SettlementModel.with_city_resources(String(settlement.id),func()->Dictionary: return _allocations_for_focus(focus,leader))
+		var allocations:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.id),func()->Dictionary: return _allocations_for_focus(focus,leader))
 		var skills:Dictionary=leader.get("skills",{})
 		var competence:=clampf(office_competency(leader,"SettlementLeader"),0.18,0.94) if not leader.is_empty() else 0.18
 		var old_signature:="%s|%s|%s" % [String(settlement.get("management_focus","")),bool(settlement.get("survival_guard_active",false)),JSON.stringify(settlement.get("local_allocations",{}))]
@@ -1043,46 +1043,46 @@ func _delegate_settlements(_day:int)->void:
 		settlement["delegated_effects"]={"competence":competence,"work":competence*0.12,"travel":float(skills.get("Logistics",35))/100.0*0.10,"water":float(skills.get("Provisioning",35))/100.0*0.08,"support":competence*0.14}
 		var new_signature:="%s|%s|%s" % [focus,bool(guard.active),JSON.stringify(allocations)]
 		management_changed=management_changed or old_signature!=new_signature
-		GameState.player_settlements[index]=settlement
+		WorldSimulation.state.player_settlements[index]=settlement
 		for role in GameState.POPULATION_ROLES: aggregate[role]=float(aggregate[role])+float(allocations.get(role,0.0))*share
 		total_weight+=share
 	if total_weight>0.0:
-		for role in GameState.POPULATION_ROLES: GameState.population_allocation_percentages[role]=float(aggregate[role])/total_weight
-		GameState.synchronize_population_allocations()
-	if management_changed: GameState.settlement_network_revision+=1
+		for role in GameState.POPULATION_ROLES: WorldSimulation.state.population_allocation_percentages[role]=float(aggregate[role])/total_weight
+		WorldSimulation.state.synchronize_population_allocations()
+	if management_changed: WorldSimulation.state.settlement_network_revision+=1
 
 
 func settlement_management(settlement_id:String)->Dictionary:
 	initialize()
-	for settlement in GameState.player_settlements:
+	for settlement in WorldSimulation.state.player_settlements:
 		if String(settlement.get("id",""))!=settlement_id: continue
 		return {"leader":settlement_leader(settlement_id),"leader_title":settlement_leader_title(),"focus":String(settlement.get("management_focus","balanced")),"focus_label":String(settlement.get("management_focus_label",FOCUS_LABELS.balanced)),"focus_reason":String(settlement.get("management_focus_reason","Local priorities have not yet been reassessed.")),"focus_effect":String(settlement.get("management_focus_effect",FOCUS_EFFECTS.balanced)),"survival_guard_active":bool(settlement.get("survival_guard_active",false)),"auto_manage":bool(settlement.get("auto_manage",true)),"allocations":(settlement.get("local_allocations",BASE_ALLOCATIONS) as Dictionary).duplicate(true),"effects":(settlement.get("delegated_effects",{}) as Dictionary).duplicate(true)}
 	return {}
 
 
 func set_settlement_focus(settlement_id:String,focus:String)->Dictionary:
-	if not String(SettlementModel.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
+	if not String(WorldSimulation.settlements.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
 	if focus not in FOCUS_LABELS: return {"ok":false,"reason":"Unknown settlement focus."}
-	for index in GameState.player_settlements.size():
-		if String(GameState.player_settlements[index].get("id",""))!=settlement_id: continue
-		GameState.player_settlements[index]["management_focus"]=focus
-		GameState.player_settlements[index]["management_focus_label"]=String(FOCUS_LABELS[focus])
-		GameState.player_settlements[index]["management_focus_reason"]=_manual_focus_reason(focus)
-		GameState.player_settlements[index]["management_focus_effect"]=String(FOCUS_EFFECTS.get(focus,FOCUS_EFFECTS.balanced))
-		GameState.player_settlements[index]["auto_manage"]=false
-		GameState.player_settlements[index]["local_allocations"]=_allocations_for_focus(focus,settlement_leader(settlement_id))
-		GameState.settlement_network_revision+=1
+	for index in WorldSimulation.state.player_settlements.size():
+		if String(WorldSimulation.state.player_settlements[index].get("id",""))!=settlement_id: continue
+		WorldSimulation.state.player_settlements[index]["management_focus"]=focus
+		WorldSimulation.state.player_settlements[index]["management_focus_label"]=String(FOCUS_LABELS[focus])
+		WorldSimulation.state.player_settlements[index]["management_focus_reason"]=_manual_focus_reason(focus)
+		WorldSimulation.state.player_settlements[index]["management_focus_effect"]=String(FOCUS_EFFECTS.get(focus,FOCUS_EFFECTS.balanced))
+		WorldSimulation.state.player_settlements[index]["auto_manage"]=false
+		WorldSimulation.state.player_settlements[index]["local_allocations"]=_allocations_for_focus(focus,settlement_leader(settlement_id))
+		WorldSimulation.state.settlement_network_revision+=1
 		revision+=1
 		return {"ok":true,"focus":focus,"label":String(FOCUS_LABELS[focus])}
 	return {"ok":false,"reason":"That settlement is not owned."}
 
 
 func restore_delegation(settlement_id:String)->Dictionary:
-	if not String(SettlementModel.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
-	for index in GameState.player_settlements.size():
-		if String(GameState.player_settlements[index].get("id",""))!=settlement_id: continue
-		GameState.player_settlements[index]["auto_manage"]=true
-		_delegate_settlements(int(GameState.elapsed_days))
+	if not String(WorldSimulation.settlements.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
+	for index in WorldSimulation.state.player_settlements.size():
+		if String(WorldSimulation.state.player_settlements[index].get("id",""))!=settlement_id: continue
+		WorldSimulation.state.player_settlements[index]["auto_manage"]=true
+		_delegate_settlements(int(WorldSimulation.state.elapsed_days))
 		revision+=1
 		return {"ok":true}
 	return {"ok":false,"reason":"That settlement is not owned."}
@@ -1090,7 +1090,7 @@ func restore_delegation(settlement_id:String)->Dictionary:
 
 func _sync_advisor_roster()->void:
 	var prior_by_id:Dictionary={}
-	for prior in GameState.advisor_roster:
+	for prior in WorldSimulation.state.advisor_roster:
 		var prior_id:=int(prior.get("person_id",0))
 		if prior_id>0: prior_by_id[prior_id]=prior
 	var roster:Array[Dictionary]=[]
@@ -1103,4 +1103,4 @@ func _sync_advisor_roster()->void:
 					var preserved:Variant=prior.get(field)
 					person[field]=preserved.duplicate(true) if preserved is Array or preserved is Dictionary else preserved
 		roster.append(person)
-	GameState.advisor_roster=roster
+	WorldSimulation.state.advisor_roster=roster

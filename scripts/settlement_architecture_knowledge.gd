@@ -8,7 +8,7 @@ static func entries()->Array[Dictionary]:
 static func _entry(id:String,title:String,requires:Array,day:int,effects:Dictionary)->Dictionary:
 	return {"id":id,"name":title,"direction":"Infrastructure","day":day,"chance":.001,"requires":requires,"signals":["construction","materials","crafting"],"observation":"Builders test and standardize "+title.to_lower()+" before adopting it in new construction. Existing districts retain their inherited fabric.","effects":effects}
 static func adopted(id:String)->bool:
-	return id in GameState.known_discoveries and float(GameState.discovery_adoption.get(id,0))>=.2
+	return id in WorldSimulation.state.known_discoveries and float(WorldSimulation.state.discovery_adoption.get(id,0))>=.2
 static func ceiling()->int:
 	if adopted("reinforced_concrete") and adopted("safety_lifts"):return 12
 	if adopted("structural_steel"):return 11

@@ -32,9 +32,9 @@ static func flag_svg(identity:Dictionary)->String:
 	return '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="40" viewBox="0 0 64 40"><path d="M2 2 V39" stroke="#ede3c9" stroke-width="2"/><rect x="5" y="5" width="55" height="30" fill="#%s"/>%s<g color="#14232d" fill="#14232d" stroke="#14232d" stroke-width="3" stroke-linejoin="round">%s</g><g color="#%s" fill="#%s">%s</g><rect x="5" y="5" width="55" height="30" fill="none" stroke="#14232d" stroke-width="1"/></svg>' % [field,pattern,symbol.replace("currentColor","#14232d"),ink,ink,symbol.replace("currentColor","#"+ink)]
 
 static func foreign(civ_id:String)->Dictionary:
-	if cache_seed!=GameState.world_seed:cache.clear();cache_seed=GameState.world_seed
+	if cache_seed!=WorldSimulation.state.world_seed:cache.clear();cache_seed=WorldSimulation.state.world_seed
 	if cache.has(civ_id):return cache[civ_id]
-	var identity:Dictionary=IDENTITIES.identity(GameState.world_seed,civ_id).duplicate()
+	var identity:Dictionary=IDENTITIES.identity(WorldSimulation.state.world_seed,civ_id).duplicate()
 	if civ_id.is_empty():identity={"field":"7c8588","color":"bdc6c7","ink":"e7e4d4","pattern":0,"symbol":2}
 	var image:=Image.new();image.load_svg_from_string(flag_svg(identity))
 	if cache.size()>=128:cache.clear()

@@ -30,9 +30,9 @@ func _ready()->void:
 	treaty.item_selected.connect(func(_i:int): _refresh())
 	quote=_label(sidebar,15)
 	proposal=_button(sidebar,"SEND PROPOSAL BY ENVOY",func():
-		var result:Dictionary=CommunityNetwork.propose(selected,_purpose()); status.text=String(result.get("error",result.get("message","Delegation dispatched."))); _refresh())
+		var result:Dictionary=WorldSimulation.communities.propose(selected,_purpose()); status.text=String(result.get("error",result.get("message","Delegation dispatched."))); _refresh())
 	_button(sidebar,"SPEAK WITH THEIR LEADER",func():
-		if selected!="player": ForeignDiplomacy.open(selected))
+		if selected!="player": WorldSimulation.diplomacy.open(selected))
 	var legend:=_label(layout,14); legend.text="Gold: trade · Green: non-aggression · Red: war · Grey: contact only. This is a relationship diagram, not a geographical map."
 	var row:=HBoxContainer.new(); layout.add_child(row)
 	project_choice=OptionButton.new(); project_choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL; row.add_child(project_choice)
@@ -40,7 +40,7 @@ func _ready()->void:
 		project_choice.add_item(CommunityNetwork.PROJECTS[id].name); project_choice.set_item_metadata(project_choice.item_count-1,id)
 	project_choice.item_selected.connect(func(_i:int): _refresh())
 	project_button=_button(row,"BACK THIS PROJECT",func():
-		var result:Dictionary=CommunityNetwork.start(String(project_choice.get_selected_metadata())); status.text=String(result.get("error","Project backed. Your people handle the work.")); _refresh())
+		var result:Dictionary=WorldSimulation.communities.start(String(project_choice.get_selected_metadata())); status.text=String(result.get("error","Project backed. Your people handle the work.")); _refresh())
 	project_detail=_label(layout,16)
 	status=_label(layout,15)
 	_refresh()
@@ -54,7 +54,7 @@ func _process(delta:float)->void:
 	timer+=delta
 	if timer>1: timer=0; _refresh()
 func _refresh()->void:
-	var nodes:=CommunityNetwork.nodes(); map.update_nodes(nodes)
+	var nodes:=WorldSimulation.communities.nodes(); map.update_nodes(nodes)
 	var current:Dictionary=nodes[0]
 	for node in nodes:
 		if node.id==selected: current=node
@@ -66,15 +66,15 @@ func _refresh()->void:
 	else:
 		treaty.visible=true
 		detail.text="%s\nCurrent relationship: %s\nAutonomy: independent\nCommon opportunity: exchange or mutual security." % [current.name,"war" if current.war else String(current.treaty).replace("_"," ")]
-		var offer:Dictionary=CivilizationSystem.diplomatic_mission_quote(selected,"",_purpose())
+		var offer:Dictionary=WorldSimulation.world.diplomatic_mission_quote(selected,"",_purpose())
 		proposal.disabled=offer.has("error") or not bool(offer.get("can_dispatch",true))
 		quote.text=String(offer.error) if offer.has("error") else "%d envoys · %.1f Food for provisions · %d days round trip.\nYour envoys must return with an answer before an agreement takes effect." % [int(offer.personnel),float(offer.provisions),int(offer.total_days)]
 		quote.text+="\nAn accepted trade or non-aggression agreement replaces your current treaty with this community."
 	var id:=String(project_choice.get_selected_metadata()); var definition:Dictionary=CommunityNetwork.PROJECTS[id]
 	var costs:Array[String]=[]
 	for item in definition.cost: costs.append("%d %s" % [int(definition.cost[item]),item])
-	var reason:=CommunityNetwork.blocker(id)
+	var reason:=WorldSimulation.communities.blocker(id)
 	project_button.disabled=reason!=""
 	project_detail.text="%s\nCosts: %s · %d work-days with at least four knowledge/administration workers.\n%s All research is 8%% slower while the project is underway." % [definition.purpose,", ".join(costs),int(definition.work),definition.effect]
 	if reason!="": project_detail.text+="\n"+reason
-	if CommunityNetwork.active!="": project_detail.text+="\nActive: %s · %d%% of work complete" % [CommunityNetwork.PROJECTS[CommunityNetwork.active].name,roundi(CommunityNetwork.progress/float(CommunityNetwork.PROJECTS[CommunityNetwork.active].work)*100)]
+	if WorldSimulation.communities.active!="": project_detail.text+="\nActive: %s · %d%% of work complete" % [CommunityNetwork.PROJECTS[WorldSimulation.communities.active].name,roundi(WorldSimulation.communities.progress/float(CommunityNetwork.PROJECTS[WorldSimulation.communities.active].work)*100)]

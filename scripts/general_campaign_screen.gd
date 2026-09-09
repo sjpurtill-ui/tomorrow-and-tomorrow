@@ -31,9 +31,9 @@ func _ready()->void:
 	title=_label(header,"THE ALDERFORD WAR",23);title.size_flags_horizontal=SIZE_EXPAND_FILL
 	var level:=OptionButton.new();level.name="Difficulty"
 	for value in ["Easy","Medium","Hard"]:level.add_item(value)
-	level.select(["easy","medium","hard"].find(GeneralCampaign.difficulty));level.disabled=int(GeneralCampaign.state.get("turn",0))>0
+	level.select(["easy","medium","hard"].find(WorldSimulation.campaign.difficulty));level.disabled=int(WorldSimulation.campaign.state.get("turn",0))>0
 	level.tooltip_text="Easy: slower adaptation. Medium: coalition planning. Hard: shared observations and more event-driven alternatives. Equal resource rules. Choose before the first commitment."
-	level.item_selected.connect(func(index:int):GeneralCampaign.difficulty=["easy","medium","hard"][index]);header.add_child(level)
+	level.item_selected.connect(func(index:int):WorldSimulation.campaign.difficulty=["easy","medium","hard"][index]);header.add_child(level)
 	_button(header,"MAP",_show_map)
 	_button(header,"WATCH",_watch)
 	_button(header,"CLOSE",func():hide())
@@ -41,14 +41,14 @@ func _ready()->void:
 	body=HBoxContainer.new();body.size_flags_vertical=SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",16);root.add_child(body)
 	var left:=PanelContainer.new();left.size_flags_horizontal=SIZE_EXPAND_FILL;body.add_child(left)
 	map_stage=SubViewportContainer.new();map_stage.stretch=true;left.add_child(map_stage)
-	var map_view:=SubViewport.new();map_view.own_world_3d=false;map_view.world_3d=GeneralCampaign.terrain.get_world_3d();map_view.size=Vector2i(800,600);map_stage.add_child(map_view)
+	var map_view:=SubViewport.new();map_view.own_world_3d=false;map_view.world_3d=WorldSimulation.campaign.terrain.get_world_3d();map_view.size=Vector2i(800,600);map_stage.add_child(map_view)
 	map_camera=Camera3D.new();map_camera.projection=Camera3D.PROJECTION_ORTHOGONAL;map_camera.far=2000;map_camera.near=.01;map_view.add_child(map_camera)
-	var origin:Vector2=GeneralCampaign.state.origin
+	var origin:Vector2=WorldSimulation.campaign.state.origin
 	map_camera.position=Vector3(origin.x,100,origin.y);map_camera.look_at(Vector3(origin.x,0,origin.y),Vector3(0,0,-1));map_camera.size=80
 	map=preload("res://scripts/general_campaign_map.gd").new();map.size_flags_vertical=SIZE_EXPAND_FILL;left.add_child(map)
 	stage=SubViewportContainer.new();stage.stretch=true;left.add_child(stage);stage.hide()
-	viewport=SubViewport.new();viewport.own_world_3d=false;viewport.world_3d=GeneralCampaign.terrain.get_world_3d();viewport.size=Vector2i(800,600);stage.add_child(viewport)
-	diorama=BattleDiorama.new();diorama.live_terrain=GeneralCampaign.terrain;viewport.add_child(diorama)
+	viewport=SubViewport.new();viewport.own_world_3d=false;viewport.world_3d=WorldSimulation.campaign.terrain.get_world_3d();viewport.size=Vector2i(800,600);stage.add_child(viewport)
+	diorama=BattleDiorama.new();diorama.live_terrain=WorldSimulation.campaign.terrain;viewport.add_child(diorama)
 	stage.gui_input.connect(_camera_input)
 	right=VBoxContainer.new();right.custom_minimum_size.x=360;body.add_child(right)
 	_label(right,"YOUR GENERAL",12)
@@ -58,8 +58,8 @@ func _ready()->void:
 	send=_button(right,"SPEAK TO YOUR GENERAL",func():_send(entry.text))
 	commit=_button(right,"COMMIT OBJECTIVE",_commit)
 	next_button=_button(right,"PAUSE TO SPEAK",func():
-		if GeneralCampaign.state.status=="executing":GeneralCampaign.pause_to_speak()
-		else:GeneralCampaign.resume())
+		if WorldSimulation.campaign.state.status=="executing":WorldSimulation.campaign.pause_to_speak()
+		else:WorldSimulation.campaign.resume())
 	var footer:=HBoxContainer.new();root.add_child(footer)
 	_button(footer,"SAVE CAMPAIGN",func():
 		var result:=SaveSystem.save_game("river_war");status.text=String(result.get("message",result.get("error",""))))
@@ -68,7 +68,7 @@ func _ready()->void:
 		if not result.has("error"):get_tree().reload_current_scene()
 		else:status.text=String(result.error))
 	_label(footer,"Generals execute. You decide the purpose.",13)
-	GeneralCampaign.changed.connect(refresh)
+	WorldSimulation.campaign.changed.connect(refresh)
 	resized.connect(_fit);map.resized.connect(_fit);_fit();_show_map();refresh()
 
 func _label(parent:Node,text:String,font_size:int)->Label:
@@ -81,14 +81,14 @@ func _fit()->void:
 	if title:title.add_theme_font_size_override("font_size",18 if size.x<1000 else 23)
 	if kpis:kpis.add_theme_font_size_override("font_size",14 if size.x<1000 else 16)
 func _send(text:String)->void:
-	if GeneralDialogue.ask(text):entry.clear()
+	if WorldSimulation.general_dialogue.ask(text):entry.clear()
 func _commit()->void:
-	var result:=GeneralCampaign.commit_proposal();refresh();status.text=String(result.get("error",result.get("message","")))
+	var result:=WorldSimulation.campaign.commit_proposal();refresh();status.text=String(result.get("error",result.get("message","")))
 func refresh()->void:
-	if not GeneralCampaign.active:return
-	var s:Dictionary=GeneralCampaign.state;var a:=GeneralCampaign.army()
-	title.text="ALDERFORD · Day %d · %s"%[int(GameState.elapsed_days),"Orders resolving" if s.status=="executing" else "Council paused"]
-	kpis.text="%d FIT SOLDIERS     %d CASUALTIES     %.1f DAYS OF FOOD     %d%% EQUIPPED"%[int(a.get("troops",0)),int(s.losses),GeneralCampaign.food_days(),roundi(GeneralCampaign.equipment_ratio(a)*100)]
+	if not WorldSimulation.campaign.active:return
+	var s:Dictionary=WorldSimulation.campaign.state;var a:=WorldSimulation.campaign.army()
+	title.text="ALDERFORD · Day %d · %s"%[int(WorldSimulation.state.elapsed_days),"Orders resolving" if s.status=="executing" else "Council paused"]
+	kpis.text="%d FIT SOLDIERS     %d CASUALTIES     %.1f DAYS OF FOOD     %d%% EQUIPPED"%[int(a.get("troops",0)),int(s.losses),WorldSimulation.campaign.food_days(),roundi(WorldSimulation.campaign.equipment_ratio(a)*100)]
 	if float(a.get("morale",1))<.4:kpis.text+="     COHESION SHAKEN"
 	kpis.tooltip_text="Fit soldiers can fight now. Casualties counts all losses from action in this war, including soldiers who later recover. Food is carried rations at current strength. Equipment is issued weapons divided by current personnel."
 	var text:="%s\n\n"%s.general_name
@@ -97,37 +97,37 @@ func refresh()->void:
 	var level:=find_child("Difficulty",true,false) as OptionButton
 	if level:level.disabled=int(s.turn)>0
 	var proposal:Dictionary=s.proposal
-	commit.disabled=proposal.is_empty() or (GeneralCampaign.resolving and s.status=="executing") or GeneralDialogue.pending.has("player")
+	commit.disabled=proposal.is_empty() or (WorldSimulation.campaign.resolving and s.status=="executing") or WorldSimulation.general_dialogue.pending.has("player")
 	commit.text="COMMIT: "+String(proposal.get("action","objective")).to_upper()
-	if not proposal.is_empty() and proposal.get("target","home")!="home":commit.text+=" "+String(GeneralCampaign.rival(proposal.target).get("name",""))
-	send.disabled=GeneralDialogue.pending.has("player")
-	next_button.disabled=s.outcome!="" or (not GeneralCampaign.resolving and s.mission.is_empty())
+	if not proposal.is_empty() and proposal.get("target","home")!="home":commit.text+=" "+String(WorldSimulation.campaign.rival(proposal.target).get("name",""))
+	send.disabled=WorldSimulation.general_dialogue.pending.has("player")
+	next_button.disabled=s.outcome!="" or (not WorldSimulation.campaign.resolving and s.mission.is_empty())
 	next_button.text="PAUSE TO SPEAK" if s.status=="executing" else "CONTINUE MISSION"
-	status.text=GeneralDialogue.status if not GeneralDialogue.status.is_empty() else "Discussion pauses time. Committing advances both sides and the wider world."
+	status.text=WorldSimulation.general_dialogue.status if not WorldSimulation.general_dialogue.status.is_empty() else "Discussion pauses time. Committing advances both sides and the wider world."
 	if not s.battle.is_empty() and int(s.battle.seed)!=last_battle_seed:_watch()
 
 func _watch()->void:
-	if GeneralCampaign.state.get("battle",{}).is_empty():status.text="No battle has occurred yet. The map shows actual mission progress.";return
+	if WorldSimulation.campaign.state.get("battle",{}).is_empty():status.text="No battle has occurred yet. The map shows actual mission progress.";return
 	map.hide();map_stage.hide();stage.show()
-	var s:Dictionary=GeneralCampaign.state;var at:Vector2=s.battle.location
-	GeneralCampaign.terrain._set_camera_target(Vector3(at.x,0,at.y))
-	GeneralCampaign.terrain.camera.size=.22
+	var s:Dictionary=WorldSimulation.campaign.state;var at:Vector2=s.battle.location
+	WorldSimulation.campaign.terrain._set_camera_target(Vector3(at.x,0,at.y))
+	WorldSimulation.campaign.terrain.camera.size=.22
 	diorama.set_landscape({"threat":{"target_position":{"x":at.x,"z":at.y}}})
 	diorama.reset(s.battle_initial[0],s.battle_initial[1]);diorama.target=Vector3(0,1,0);diorama._camera_update()
 	last_battle_seed=int(s.battle.seed);playback_round=0;playback_clock=0
 	status.text="Recorded battle · schematic deployment; cohort positions are not recorded. Drag to pan, right-drag to orbit, wheel to zoom at the pointer. Viewing does not resolve it twice."
 
 func _process(delta:float)->void:
-	if not GeneralCampaign.active:return
-	if GeneralCampaign.resolving:title.text="ALDERFORD · Day %.2f · %s"%[GameState.elapsed_days,GeneralCampaign.state.status]
-	if not stage.visible or GeneralCampaign.state.battle.is_empty():return
+	if not WorldSimulation.campaign.active:return
+	if WorldSimulation.campaign.resolving:title.text="ALDERFORD · Day %.2f · %s"%[WorldSimulation.state.elapsed_days,WorldSimulation.campaign.state.status]
+	if not stage.visible or WorldSimulation.campaign.state.battle.is_empty():return
 	playback_clock+=delta
-	var battle:Dictionary=GeneralCampaign.state.battle
+	var battle:Dictionary=WorldSimulation.campaign.state.battle
 	if playback_clock>=2 and playback_round<battle.rounds.size():
 		playback_clock=0
 		var row:Dictionary=battle.rounds[playback_round];playback_round+=1
 		# Cohort losses are applied cumulatively to the recorded initial forces.
-		var forces:Array=GeneralCampaign.state.battle_initial.duplicate(true)
+		var forces:Array=WorldSimulation.campaign.state.battle_initial.duplicate(true)
 		for i in playback_round:
 			var record:Dictionary=battle.rounds[i]
 			for side in 2:
@@ -150,5 +150,5 @@ func _camera_input(event:InputEvent)->void:
 
 func _show_map()->void:
 	map.show();map_stage.show();stage.hide()
-	var at:Vector2=GeneralCampaign.state.origin
-	GeneralCampaign.terrain._set_camera_target(Vector3(at.x,0,at.y));GeneralCampaign.terrain.camera.size=80
+	var at:Vector2=WorldSimulation.campaign.state.origin
+	WorldSimulation.campaign.terrain._set_camera_target(Vector3(at.x,0,at.y));WorldSimulation.campaign.terrain.camera.size=80

@@ -11,33 +11,36 @@ var claims:Array[Dictionary]=[]
 var route_cache:Dictionary={}
 func _init(owner:RefCounted)->void:_command=weakref(owner);host=owner.host
 func clear_cache()->void:route_cache.clear();claims.clear()
-func point(force:Dictionary)->Vector2:return G.unpack(force.get("position",G.pack(CivilizationSystem.player_world_origin)))
+func point(force:Dictionary)->Vector2:return G.unpack(force.get("position",G.pack(WorldSimulation.world.player_world_origin)))
 func is_land(at:Vector2)->bool:
-	return CivilizationSystem.scout_land_authority.is_valid() and CivilizationSystem._scout_land_at(at)
+	return WorldSimulation.world.scout_land_authority.is_valid() and WorldSimulation.world._scout_land_at(at)
 func rally(region:Dictionary)->Dictionary:
 	var center:=R.bounds(region).get_center()
-	if R.contains(region,center) and is_land(center) and CivilizationSystem._position_is_revealed(center):return G.pack(center)
+	if R.contains(region,center) and is_land(center) and WorldSimulation.world._position_is_revealed(center):return G.pack(center)
 	var box:=R.bounds(region)
 	for x in 12:
 		for y in 12:
 			var at:=box.position+box.size*Vector2((x+.5)/12.0,(y+.5)/12.0)
-			if R.contains(region,at) and is_land(at) and CivilizationSystem._position_is_revealed(at):return G.pack(at)
+			if R.contains(region,at) and is_land(at) and WorldSimulation.world._position_is_revealed(at):return G.pack(at)
 	return {}
 func refresh_claims()->void:
 	claims.clear()
-	for entry:Dictionary in SettlementModel.territory_control_snapshot().settlement_claims:
+	for entry:Dictionary in WorldSimulation.settlements.territory_control_snapshot().settlement_claims:
 		var owner:=String(entry.controller)
 		claims.append({"owner":"player" if owner=="" else owner,"city_id":entry.id,"position":entry.position,"boundary":entry.boundary})
 	# Use the same population/terrain-driven claim geometry as domestic cities.
-	for site:Dictionary in CivilizationSystem.city_intelligence.sites(false):
-		var location:Dictionary=CivilizationSystem._region_location(String(site.city_id))
+	for site:Dictionary in WorldSimulation.world.city_intelligence.sites(false):
+		var location:Dictionary=WorldSimulation.world._region_location(String(site.city_id))
 		if location.is_empty():continue
-		var civ:Dictionary=CivilizationSystem.civilizations[int(location.owner_index)]
+		var civ:Dictionary=WorldSimulation.world.civilizations[int(location.owner_index)]
 		var region:Dictionary=civ.strategic_regions[int(location.region_index)]
+		if WorldSimulation.enabled:
+			claims.append({"owner":String(region.controller),"city_id":site.city_id,"position":G.unpack(site.position),"boundary":region.get("boundary",PackedVector2Array())})
+			continue
 		var record:Dictionary={"id":site.city_id,"position":G.unpack(site.position),"primary":site.primary,"status":"established","territory_context":{}}
 		var reach:=.65+float(civ.get("logistics",.2))*.25+float(civ.get("institutions",.2))*.2
 		var radius:=clampf(sqrt(maxf(.12,float(region.population)/72.0*reach*reach)/PI),.32,4600.0)
-		claims.append({"owner":String(region.controller),"city_id":site.city_id,"position":record.position,"boundary":SettlementModel._claim_boundary(record,radius)})
+		claims.append({"owner":String(region.controller),"city_id":site.city_id,"position":record.position,"boundary":WorldSimulation.settlements._claim_boundary(record,radius)})
 func territory(at:Vector2)->Dictionary:
 	for claim:Dictionary in claims:
 		if Geometry2D.is_point_in_polygon(at,claim.boundary):return claim
@@ -56,26 +59,26 @@ func frontage(troops:int)->float:
 	return clampf(sqrt(maxf(0,troops))*.085,.12,10.0)
 func enemies(day:int,only_hostile:bool=true)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	for formation:Dictionary in CivilizationSystem.foreign_formations:
+	for formation:Dictionary in WorldSimulation.world.foreign_formations:
 		if formation.get("kind","")=="scout" or day<int(formation.get("disabled_until_day",0)) or (only_hostile and not hostile(String(formation.civ_id))):continue
-		var index:int=CivilizationSystem._civilization_index(String(formation.civ_id))
+		var index:int=WorldSimulation.world._civilization_index(String(formation.civ_id))
 		if index<0:continue
-		var civ:Dictionary=CivilizationSystem.civilizations[index]
-		var land_personnel:float=CivilizationSystem.land_military_population(civ)
-		var count:=maxi(1,roundi(land_personnel*float(formation.get("strength_share",.05)))) if land_personnel>=1 else 0
+		var civ:Dictionary=WorldSimulation.world.civilizations[index]
+		var land_personnel:float=WorldSimulation.world.land_military_population(civ)
+		var count:=int(formation.get("actual_troops",maxi(1,roundi(land_personnel*float(formation.get("strength_share",.05)))) if land_personnel>=1 else 0))
 		if count<=0:continue
-		result.append({"id":formation.id,"owner":formation.civ_id,"position":G.pack(CivilizationSystem._foreign_formation_position(formation,float(day))),"troops":count,"strength":count*(.35+.65*float(formation.get("readiness",.4))),"record":formation})
+		result.append({"id":formation.id,"owner":formation.civ_id,"position":G.pack(WorldSimulation.world._foreign_formation_position(formation,float(day))),"troops":count,"strength":count*(.35+.65*float(formation.get("readiness",.4))),"record":formation})
 	return result
 func _known_enemies(day:int)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	for enemy:Dictionary in enemies(day):
-		if not CivilizationSystem.visible_formation_sighting(String(enemy.id)).is_empty():result.append(enemy)
+		if not WorldSimulation.world.visible_formation_sighting(String(enemy.id)).is_empty():result.append(enemy)
 	return result
 func route(start:Vector2,goal:Vector2)->Array:
 	if not is_land(start) or not is_land(goal):return []
 	if not host.field_route_availability(start,goal).has("error"):return [G.pack(goal)]
 	var step:=clampf(start.distance_to(goal)/24.0,.25,5.0)
-	var key:=str(GameState.world_seed)+str(start.snapped(Vector2.ONE*.1))+str(goal.snapped(Vector2.ONE*.1))
+	var key:=str(WorldSimulation.state.world_seed)+str(start.snapped(Vector2.ONE*.1))+str(goal.snapped(Vector2.ONE*.1))
 	if route_cache.has(key):
 		var valid:=true;var previous:=start
 		for waypoint:Dictionary in route_cache[key]:
@@ -114,6 +117,7 @@ func route(start:Vector2,goal:Vector2)->Array:
 	if not result.is_empty():route_cache[key]=result.duplicate(true)
 	return result
 func _respond_rivals(day:int)->void:
+	if WorldSimulation.enabled:return # Their own leaders move their real formations.
 	# Existing patrol/expedition personnel leave their physical position to meet
 	# incursions. This changes their route, not their nation's manpower ledger.
 	for enemy:Dictionary in enemies(day,false):
@@ -178,9 +182,9 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 			var proposed:=current.move_toward(next,distance)
 			var claim:=territory(proposed)
 			if not claim.is_empty() and claim.owner!="player" and not hostile(String(claim.owner)):
-				var city:Dictionary=CivilizationSystem.city_intelligence.known("player",String(order.get("target","")))
+				var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(order.get("target","")))
 				if not city.is_empty() and String(city.get("civ_id",""))==String(claim.owner) and order.mission in ["capture","occupy","raze"]:
-					CivilizationSystem.record_player_hostile_order(String(claim.owner),String(claim.city_id),"A commanded offensive crossed the defended city border.")
+					WorldSimulation.world.record_player_hostile_order(String(claim.owner),String(claim.city_id),"A commanded offensive crossed the defended city border.")
 				else:actual["command_status"]="Holding at neutral border · no authority to invade";budget=0;break
 			var blocked:=false
 			for enemy:Dictionary in enemies(day):
@@ -194,7 +198,7 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 	actual["location_name"]="Commanded ground";actual["distance_remaining_km"]=current.distance_to(destination)
 	actual["destination_position"]=G.pack(destination);actual["destination_id"]=""
 	actual["supply_level"]=clampf(float(actual.get("supply_level",1))-.0008*current.distance_to(start),.0,1)
-	if current.distance_to(CivilizationSystem.player_world_origin)<.5:actual["location_id"]="player_home";actual["location_name"]="Home settlement"
+	if current.distance_to(WorldSimulation.world.player_world_origin)<.5:actual["location_id"]="player_home";actual["location_name"]="Home settlement"
 func _engage(actual:Dictionary,enemy:Dictionary,order:Dictionary,allies:Array)->void:
 	if command.battle.enemy_engaged(String(enemy.id)) or command.data.battles.size()>=32:return
 	if not host.active_engagement.is_empty() or not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():return
@@ -232,7 +236,7 @@ func advance(day:int)->void:
 				if split.has("ok"):
 					for child:Dictionary in split.children:child["maneuver_organized"]=true
 	refresh_claims();_respond_rivals(day)
-	CivilizationSystem._process_local_observation(day,true)
+	WorldSimulation.world._process_local_observation(day,true)
 	var groups:Dictionary={}
 	for record:Dictionary in command.leaves("army"):
 		var actual:Dictionary=command.force(record);var order:Dictionary=command.order_for(String(record.id))
@@ -247,19 +251,19 @@ func advance(day:int)->void:
 		for index in group.size():
 			var item:Dictionary=group[index];var actual:Dictionary=item.actual;var order:Dictionary=item.order
 			if int(actual.get("troops",0))<=0 or bool(actual.get("embarked",false)):continue
-			if GeneralCampaign.active and int(actual.army_id)==int(GeneralCampaign.state.get("army_id",-1)):continue
+			if WorldSimulation.campaign.active and int(actual.army_id)==int(WorldSimulation.campaign.state.get("army_id",-1)):continue
 			if not host.active_siege.is_empty() and int(actual.army_id) in host.active_siege.get("command_members",[int(host.active_siege.get("army_id",0))]):
 				if order.mission=="withdraw" and int(actual.army_id)==int(host.active_siege.army_id):host.siege_order(String(host.active_siege.id),"withdraw")
 				else:actual["command_status"]="Investing city · siege staff executing";continue
 			if command.battle.engaged(int(actual.army_id)):continue
 			var region:Dictionary=command.zone(String(order.get("zone_id","")))
 			var destination:=rally(region) if not region.is_empty() else {}
-			if order.mission=="withdraw":destination=G.pack(CivilizationSystem.player_world_origin)
+			if order.mission=="withdraw":destination=G.pack(WorldSimulation.world.player_world_origin)
 			if destination.is_empty():actual["command_status"]="No charted assembly ground · awaiting reconnaissance";continue
 			actual["command_status"]="Assembling in zone" if not R.contains(region,point(actual)) else "Patrolling assigned ground"
 			var supply:=float(actual.get("supply_level",0))
 			if supply<.2 or float(actual.get("morale",1))<.22 or day<int(actual.get("command_recover_until",0)):
-				actual["command_status"]="Commander withdrawing to recover supply and morale";_move(actual,CivilizationSystem.player_world_origin,{"mission":"withdraw"},day);continue
+				actual["command_status"]="Commander withdrawing to recover supply and morale";_move(actual,WorldSimulation.world.player_world_origin,{"mission":"withdraw"},day);continue
 			var target:Dictionary={};var nearest:=INF
 			for enemy:Dictionary in known:
 				if not R.contains(region,point(enemy)) or order.mission=="withdraw":continue
@@ -278,7 +282,7 @@ func advance(day:int)->void:
 				_engage(actual,target,order,allies)
 				if command.battle.engaged(int(actual.army_id)):continue
 			elif order.mission in ["capture","occupy","raze"]:
-				var city:Dictionary=CivilizationSystem.city_intelligence.known("player",String(order.get("target","")))
+				var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(order.get("target","")))
 				if city.is_empty():actual["command_status"]="City report unavailable · awaiting reconnaissance";continue
 				destination=city.position
 				if point(actual).distance_to(G.unpack(destination))<=.5:
@@ -290,18 +294,18 @@ func advance(day:int)->void:
 func _city(actual:Dictionary,city:Dictionary,order:Dictionary,day:int,allies:Array=[])->void:
 	if command.battle.city_engaged(String(city.city_id)) or command.data.battles.size()>=32:
 		actual["command_status"]="Holding city approaches · another command is assaulting";return
-	var location:Dictionary=CivilizationSystem._region_location(String(city.city_id))
+	var location:Dictionary=WorldSimulation.world._region_location(String(city.city_id))
 	if location.is_empty():actual["command_status"]="City ownership unavailable";return
-	var region:Dictionary=CivilizationSystem.civilizations[int(location.owner_index)].strategic_regions[int(location.region_index)]
+	var region:Dictionary=WorldSimulation.world.civilizations[int(location.owner_index)].strategic_regions[int(location.region_index)]
 	if String(region.controller)=="player":
 		actual["location_id"]=String(city.city_id);actual["command_status"]="Holding occupied city"
-		var control:Dictionary=CivilizationSystem.occupation_control(String(city.civ_id),String(city.city_id),order.mission=="raze")
+		var control:Dictionary=WorldSimulation.world.occupation_control(String(city.civ_id),String(city.city_id),order.mission=="raze")
 		if control.has("required") and not bool(control.get("controlled",false)):
 			var garrison:Dictionary=host.occupation_force_for_region(String(city.civ_id),String(city.city_id))
 			if garrison.is_empty():host.establish_occupation_force(String(city.civ_id),region,float(control.required),int(actual.army_id))
 			else:command.battle.reinforce_occupation(String(city.civ_id),String(city.city_id),[{"army_id":int(actual.army_id)}],float(control.required))
 		if order.mission=="raze" and not bool(region.get("governance",{}).get("ruined",false)):
-			var result:Dictionary=CivilizationSystem.set_occupation_policy(String(city.civ_id),String(city.city_id),"raze")
+			var result:Dictionary=WorldSimulation.world.set_occupation_policy(String(city.civ_id),String(city.city_id),"raze")
 			actual["command_status"]=String(result.get("error","City infrastructure razed · occupation retained"))
 		return
 	if not host.active_engagement.is_empty() or not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():actual["command_status"]="Holding approach · another engagement is resolving";return

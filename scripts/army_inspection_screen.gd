@@ -44,7 +44,7 @@ func _ready() -> void:
 	var layout := VBoxContainer.new(); margin.add_child(layout)
 	var header := HBoxContainer.new(); layout.add_child(header)
 	heading=Label.new(); heading.text="BATTLEFIELD"; heading.add_theme_font_size_override("font_size",24); heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL; header.add_child(heading)
-	button(header,"PEOPLE & LEGACIES",func(): HistoricalFigures.open_chronicle())
+	button(header,"PEOPLE & LEGACIES",func(): WorldSimulation.figures.open_chronicle())
 	button(header,"CLOSE",func(): queue_free())
 	status=Label.new(); status.add_theme_color_override("font_color",Color("8db7c5")); status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; layout.add_child(status)
 	var scores:=HBoxContainer.new(); layout.add_child(scores)
@@ -62,7 +62,7 @@ func _ready() -> void:
 	var sidebar:=VBoxContainer.new(); sidebar.custom_minimum_size.x=310; body.add_child(sidebar)
 	details=Label.new(); details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; sidebar.add_child(details)
 	details.text="FORMATION INSPECTOR\nClick a formation to see its soldiers and condition."
-	life_story=button(sidebar,"READ LIFE STORY",func(): HistoricalFigures.open_chronicle(selected_figure_id)); life_story.visible=false
+	life_story=button(sidebar,"READ LIFE STORY",func(): WorldSimulation.figures.open_chronicle(selected_figure_id)); life_story.visible=false
 	var legend:=Label.new(); legend.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; legend.add_theme_font_size_override("font_size",14)
 	legend.text="CASUALTIES = dead + wounded.\nOUT OF ACTION also includes scattered.\nLasting injuries are a subset of wounded survivors; they retain reduced work capacity after returning home.\nEach figure represents a group."
 	sidebar.add_child(legend)
@@ -71,14 +71,14 @@ func _ready() -> void:
 	theme_choice=OptionButton.new(); appearance.add_child(theme_choice)
 	for label in UnitVisualCatalog.LABELS: theme_choice.add_item(label)
 	theme_choice.item_selected.connect(func(index:int):
-		var result:Dictionary=MilitaryCampaign.set_army_visual_theme(inspected_army_id,UnitVisualCatalog.THEMES[index])
+		var result:Dictionary=WorldSimulation.military.set_army_visual_theme(inspected_army_id,UnitVisualCatalog.THEMES[index])
 		status.text=String(result.get("error",result.get("message",""))); signature="")
 	formation_choice=OptionButton.new(); formation_choice.fit_to_longest_item=false; formation_choice.custom_minimum_size.x=250; appearance.add_child(formation_choice)
 	formation_choice.item_selected.connect(func(_index:int): _model_options())
 	model_choice=OptionButton.new(); model_choice.fit_to_longest_item=false; appearance.add_child(model_choice)
 	model_choice.item_selected.connect(func(index:int):
 		if formation_choice.selected<0: return
-		var result:Dictionary=MilitaryCampaign.set_formation_visual(inspected_army_id,int(formation_choice.get_selected_metadata()),String(model_choice.get_item_metadata(index)))
+		var result:Dictionary=WorldSimulation.military.set_formation_visual(inspected_army_id,int(formation_choice.get_selected_metadata()),String(model_choice.get_item_metadata(index)))
 		status.text=String(result.get("error",result.get("message",""))); signature="")
 	var note:=Label.new(); note.text="Appearance only. Equipment and\ncombat role stay unchanged."; note.add_theme_font_size_override("font_size",12); appearance.add_child(note)
 	var navigation:=HBoxContainer.new(); sidebar.add_child(navigation)
@@ -109,17 +109,17 @@ func _process(delta:float)->void:
 	if not campaign_mode: return
 	poll+=delta
 	if poll>.25: poll=0; _sync_campaign()
-	var active:=not MilitaryCampaign.active_engagement.is_empty()
+	var active:=not WorldSimulation.military.active_engagement.is_empty()
 	for order in order_buttons: order.disabled=not active or view.round_clock<2.4 or view.playback_speed==0
 
 func _force_for_inspection()->Dictionary:
-	if inspected_army_id==0: return MilitaryCampaign.campaign_army_snapshot()
-	for army:Dictionary in MilitaryCampaign.field_armies_snapshot().get("armies",[]):
+	if inspected_army_id==0: return WorldSimulation.military.campaign_army_snapshot()
+	for army:Dictionary in WorldSimulation.military.field_armies_snapshot().get("armies",[]):
 		if int(army.get("army_id",0))==inspected_army_id: return army
 	return {}
 
 func _sync_campaign()->void:
-	var active:Dictionary=MilitaryCampaign.engagement_snapshot()
+	var active:Dictionary=WorldSimulation.military.engagement_snapshot()
 	if not active.is_empty():
 		appearance.visible=false
 		var key:="%s/%s" % [active.get("seed",0),active.get("round",0)]
@@ -132,8 +132,8 @@ func _sync_campaign()->void:
 		heading.text="LIVE BATTLE • ROUND %d" % int(active.get("round",0))
 		status.text="%s · Orders resolve one campaign round. Defender terrain defense: %+.0f%%. Figures represent groups of soldiers." % [String(view.landscape.context.get("label","Battlefield")),(float(active.get("terrain_defense",1))-1.0)*100.0]
 		signature=key
-	elif not encounter.is_empty() and not MilitaryCampaign.battle_history.is_empty():
-		var result:Dictionary=MilitaryCampaign.battle_history[0]
+	elif not encounter.is_empty() and not WorldSimulation.military.battle_history.is_empty():
+		var result:Dictionary=WorldSimulation.military.battle_history[0]
 		if str(result.get("seed",-1))!=encounter: return
 		var key:="finished/"+encounter
 		if signature==key: return
@@ -196,8 +196,8 @@ func _model_options()->void:
 		if id==current: model_choice.select(model_choice.item_count-1)
 
 func _order(command:String)->void:
-	if not campaign_mode or MilitaryCampaign.active_engagement.is_empty(): return
-	var result:Dictionary=MilitaryCampaign.advance_engagement(command)
+	if not campaign_mode or WorldSimulation.military.active_engagement.is_empty(): return
+	var result:Dictionary=WorldSimulation.military.advance_engagement(command)
 	if result.has("error"): status.text=String(result.error)
 	else: _sync_campaign()
 

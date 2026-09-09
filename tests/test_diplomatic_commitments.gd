@@ -6,6 +6,7 @@ class SiegeFixture extends "res://scripts/diplomatic_commitments.gd":
 
 func before_test()->void:
 	GameState.reset_for_new_world(424242)
+	MilitaryCampaign.reset_for_new_world()
 	SettlementModel.reset_for_new_world(); GovernmentPeopleSystem.reset_for_new_world()
 	CivilizationSystem.reset_for_new_world(); CivilizationSystem.initialize()
 	ForeignDiplomacy.reset_for_new_world(); ForeignDiplomacy.ensure()

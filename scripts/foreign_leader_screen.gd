@@ -58,16 +58,16 @@ func _ready()->void:
 	button(audience,"AI Connection…",func():PronouncementInterpreter.open_connection_settings())
 	audience_cost=label(audience,14)
 	audience_button=button(audience,"SEND DELEGATES FOR AN AUDIENCE",func():
-		var result:=ForeignDiplomacy.send_audience(civ_id)
+		var result:=WorldSimulation.diplomacy.send_audience(civ_id)
 		message.text=String(result.get("error","Delegates departed. Their report must return before conversation opens."));refresh())
 	speech=RichTextLabel.new();speech.bbcode_enabled=false;speech.scroll_following=true
 	speech.custom_minimum_size.y=120;speech.size_flags_vertical=Control.SIZE_EXPAND_FILL;speech.add_theme_font_size_override("normal_font_size",16);audience.add_child(speech)
 	var talk:=HBoxContainer.new();audience.add_child(talk)
 	entry=LineEdit.new();entry.placeholder_text="Ask, challenge, or suggest terms…";entry.max_length=1500;entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;talk.add_child(entry)
 	ask_button=button(talk,"DISCUSS",ask);entry.text_submitted.connect(func(_text:String):ask())
-	retry_button=button(talk,"RETRY",func():ForeignDialogue.retry(civ_id);refresh())
+	retry_button=button(talk,"RETRY",func():WorldSimulation.dialogue.retry(civ_id);refresh())
 	draft_button=button(audience,"REVIEW PROPOSED TERMS",func():
-		var draft:Dictionary=ForeignDialogue.thread(civ_id).draft
+		var draft:Dictionary=WorldSimulation.dialogue.thread(civ_id).draft
 		if draft.is_empty():return
 		if draft.has("commitment"):open_commitments(draft.commitment);return
 		accord.select(ForeignDiplomacy.ACCORDS.keys().find(draft.accord));tone.select(ForeignDiplomacy.TONES.keys().find(draft.tone));generous.set_pressed_no_signal(draft.generous);show_section(1);refresh())
@@ -76,7 +76,7 @@ func _ready()->void:
 	var row:=HBoxContainer.new();terms.add_child(row)
 	accord=OptionButton.new();accord.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(accord)
 	for definition:Dictionary in ForeignDiplomacy.ACCORDS.values():accord.add_item(definition.name)
-	accord.select(ForeignDiplomacy.ACCORDS.keys().find(ForeignDiplomacy.situation(civ_id).priority))
+	accord.select(ForeignDiplomacy.ACCORDS.keys().find(WorldSimulation.diplomacy.situation(civ_id).priority))
 	tone=OptionButton.new();row.add_child(tone)
 	for text:String in ForeignDiplomacy.TONES.values():tone.add_item(text)
 	for choice:OptionButton in [accord,tone]:choice.item_selected.connect(func(_i:int):refresh())
@@ -84,7 +84,7 @@ func _ready()->void:
 	assessment=label(terms,15);assessment.add_theme_color_override("font_color",Color("d7b67a"))
 	costs=label(terms,15)
 	submit=button(terms,"SEND ENVOYS WITH THESE TERMS",func():
-		var result:Dictionary=ForeignDiplomacy.send(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
+		var result:Dictionary=WorldSimulation.diplomacy.send(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
 		message.text=String(result.get("error","Proposal sent. Envoys must return with an answer before an agreement takes effect."));refresh())
 	var record:=sections[2]
 	personal=label(record,17)
@@ -94,7 +94,7 @@ func _ready()->void:
 	button(archive,"›",func():page+=1;refresh())
 	memory=label(record,15)
 	message=label(root,15)
-	ForeignDialogue.changed.connect(func(id:String):
+	WorldSimulation.dialogue.changed.connect(func(id:String):
 		if id==civ_id:refresh())
 	show_section(0);refresh()
 func show_section(index:int)->void:
@@ -114,7 +114,7 @@ func button(parent:Node,text:String,action:Callable)->Button:
 func selected_accord()->String: return ForeignDiplomacy.ACCORDS.keys()[accord.selected]
 func selected_tone()->String: return ForeignDiplomacy.TONES.keys()[tone.selected]
 func ask()->void:
-	if ForeignDialogue.ask(civ_id,entry.text): entry.clear()
+	if WorldSimulation.dialogue.ask(civ_id,entry.text): entry.clear()
 	refresh()
 
 func open_commitments(draft:Dictionary={})->void:
@@ -124,21 +124,21 @@ func _process(delta:float)->void:
 	timer+=delta
 	if timer>=1: timer=0; refresh()
 func refresh()->void:
-	ForeignDiplomacy.advance(int(GameState.elapsed_days))
-	var p:=ForeignDiplomacy.leader(civ_id); var civ:=ForeignDiplomacy.civilization(civ_id)
+	WorldSimulation.diplomacy.advance(int(WorldSimulation.state.elapsed_days))
+	var p:=WorldSimulation.diplomacy.leader(civ_id); var civ:=WorldSimulation.diplomacy.civilization(civ_id)
 	if p.is_empty(): queue_free(); return
 	heading.text=String(p.name).to_upper()+" · "+String(civ.name)
 	personal.text="%s\n\n%s\n\nPersonal trust: %s" % [p.temperament,p.bio,"earned" if float(p.trust)>.1 else ("damaged" if float(p.trust)<-.1 else "untested")]
 	for goal:Dictionary in p.get("goals",[]):personal.text+="\n• "+String(goal.title)
-	if not (p.accord as Dictionary).is_empty(): personal.text+="\n\n%s\n%d days of cooperation remain." % [ForeignDiplomacy.ACCORDS[p.accord.kind].name,maxi(0,int(p.accord.until)-int(GameState.elapsed_days))]
+	if not (p.accord as Dictionary).is_empty(): personal.text+="\n\n%s\n%d days of cooperation remain." % [ForeignDiplomacy.ACCORDS[p.accord.kind].name,maxi(0,int(p.accord.until)-int(WorldSimulation.state.elapsed_days))]
 	page=clampi(page,0,maxi(0,p.memories.size()-1))
 	memory.text="Your dealings will leave a record here." if p.memories.is_empty() else "Day %d · %d of %d\n%s" % [int(p.memories[page].day),page+1,p.memories.size(),String(p.memories[page].text)]
 	# One memory per page keeps long campaign histories off the main screen.
 	memory.max_lines_visible=7; memory.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	var context:Dictionary=ForeignDiplomacy.situation(civ_id); var thread:Dictionary=ForeignDialogue.thread(civ_id)
-	var gate:=ForeignDialogue.access(civ_id)
+	var context:Dictionary=WorldSimulation.diplomacy.situation(civ_id); var thread:Dictionary=WorldSimulation.dialogue.thread(civ_id)
+	var gate:=WorldSimulation.dialogue.access(civ_id)
 	returned_note.text="";returned_note.hide()
-	for report:Dictionary in CivilizationSystem.diplomatic_history:
+	for report:Dictionary in WorldSimulation.world.diplomatic_history:
 		if String(report.get("civ_id",""))!=civ_id:continue
 		returned_note.text="Envoys returned · day %d\n%s" % [int(report.get("returned_day",0)),String(report.get("outcome","Your delegation has returned."))]
 		returned_note.show();break
@@ -146,7 +146,7 @@ func refresh()->void:
 	var connection_issue:=PronouncementInterpreter.connection_problem()
 	if not connection_issue.is_empty():access_note.text+="\n"+connection_issue
 	audience_button.visible=not bool(gate.ok)
-	audience_button.disabled=not CivilizationSystem.diplomatic_mission.is_empty()
+	audience_button.disabled=not WorldSimulation.world.diplomatic_mission.is_empty()
 	var transcript:Array[String]=[]
 	for turn:Dictionary in thread.messages:
 		transcript.append("%s · %s\n%s" % ["You" if turn.role=="user" else String(p.name),"earlier exchange" if int(turn.day)<0 else "day %d" % int(turn.day),String(turn.content)])
@@ -154,19 +154,19 @@ func refresh()->void:
 	if displayed.is_empty(): displayed=String(context.title)+"\n“"+String(context.line)+"”" if bool(gate.ok) else "An audience has not yet been established. Your delegates must make the journey before this leader can answer."
 	if speech.text!=displayed: speech.text=displayed
 	draft_button.visible=not (thread.draft as Dictionary).is_empty()
-	ask_button.disabled=ForeignDialogue.pending.has(civ_id) or not bool(gate.ok)
-	entry.editable=not ForeignDialogue.pending.has(civ_id) and bool(gate.ok)
+	ask_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok)
+	entry.editable=not WorldSimulation.dialogue.pending.has(civ_id) and bool(gate.ok)
 	retry_button.visible=bool(thread.retryable)
-	retry_button.disabled=ForeignDialogue.pending.has(civ_id) or not bool(gate.ok)
-	var f:Dictionary=ForeignDiplomacy.forecast(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
+	retry_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok)
+	var f:Dictionary=WorldSimulation.diplomacy.forecast(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
 	assessment.text=f.label+" · "+f.reasons+"\nThe answer is settled when envoys return; circumstances can change."
-	var quote:Dictionary=CivilizationSystem.diplomatic_mission_quote(civ_id,"","leader_parley")
+	var quote:Dictionary=WorldSimulation.world.diplomatic_mission_quote(civ_id,"","leader_parley")
 	audience_cost.visible=not bool(gate.ok)
 	audience_cost.text=String(quote.error) if quote.has("error") else "Audience journey: %d delegates, %.1f food rations spent at departure, %d days round trip. No Timber offer or agreement is included."%[int(quote.personnel),float(quote.provisions),int(quote.total_days)]
 	audience_button.disabled=quote.has("error")
 	var blocker:String=f.blocker
 	if blocker=="" and quote.has("error"): blocker=quote.error
-	if blocker=="" and float(GameState.resource_stockpiles.get("Timber",0))<int(f.cost): blocker="Not enough Timber for these terms."
+	if blocker=="" and float(WorldSimulation.state.resource_stockpiles.get("Timber",0))<int(f.cost): blocker="Not enough Timber for these terms."
 	submit.disabled=blocker!=""
 	generous.text="Larger offer: ON · 12 Timber" if generous.button_pressed else "Larger offer: OFF · standard 4 Timber"
 	var travel:="Journey unavailable." if quote.has("error") else "DEPARTURE: %d envoys; %.1f food rations spent. Return in %d days." % [int(quote.personnel),float(quote.provisions),int(quote.total_days)]

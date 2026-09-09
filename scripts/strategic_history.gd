@@ -3,21 +3,21 @@ extends RefCounted
 const MONTHLY_LIMIT:=120
 const ANNUAL_LIMIT:=256
 static func capture_scopes()->Dictionary:
-	var scopes:={"civilization":{"population":GameState.population_total}}
-	for city in GameState.player_settlements:
+	var scopes:={"civilization":{"population":WorldSimulation.state.population_total}}
+	for city in WorldSimulation.state.player_settlements:
 		var id:=String(city.get("id",""))
 		if id.is_empty(): continue
-		var row:={"population":roundi(SettlementModel._settlement_population(city))}
+		var row:={"population":roundi(WorldSimulation.settlements._settlement_population(city))}
 		var primary:=bool(city.get("primary",false))
 		var local:Dictionary=city.get("local_resources",{})
-		var metrics:Dictionary=GameState.simulation_metrics if primary else local.get("simulation_metrics",{})
-		var water:Dictionary=GameState.water_metrics if primary else local.get("water_metrics",{})
-		var stocks:Dictionary=GameState.resource_stockpiles if primary else local.get("resource_stockpiles",{})
-		var stage:=String(GameState.economy_stage if primary else local.get("economy_stage","subsistence"))
+		var metrics:Dictionary=WorldSimulation.state.simulation_metrics if primary else local.get("simulation_metrics",{})
+		var water:Dictionary=WorldSimulation.state.water_metrics if primary else local.get("water_metrics",{})
+		var stocks:Dictionary=WorldSimulation.state.resource_stockpiles if primary else local.get("resource_stockpiles",{})
+		var stage:=String(WorldSimulation.state.economy_stage if primary else local.get("economy_stage","subsistence"))
 		var accounts:={"treasury":"public_treasury","private_currency":"private_currency","hoards":"currency_hoards","aid":"mutual_aid_reserve"} if stage=="currency" else {"metal":"weighed_metal_circulation"} if stage=="weighed_metal" else {}
 		for key in accounts:
 			var field:String=accounts[key]
-			if primary or local.has(field): row[key]=GameState.get(field) if primary else local[field]
+			if primary or local.has(field): row[key]=WorldSimulation.state.get(field) if primary else local[field]
 		for field in ["food_days","food_production","food_eaten"]:
 			if metrics.has(field): row[field]=maxf(0.0,float(metrics[field]))
 		if water.has("days"): row["water_days"]=maxf(0.0,float(water.days))
@@ -47,9 +47,9 @@ static func record(history:Dictionary,day:int,scopes:Dictionary)->void:
 	history["scopes"]=ledgers
 
 static func sample()->void:
-	var day:=int(GameState.elapsed_days)
-	if GameState.strategic_history.has("last_day") and day-int(GameState.strategic_history.last_day)<30: return
-	record(GameState.strategic_history,day,capture_scopes())
+	var day:=int(WorldSimulation.state.elapsed_days)
+	if WorldSimulation.state.strategic_history.has("last_day") and day-int(WorldSimulation.state.strategic_history.last_day)<30: return
+	record(WorldSimulation.state.strategic_history,day,capture_scopes())
 
 static func points(history:Dictionary,scope:String)->Array:
 	var ledger:Dictionary=history.get("scopes",{}).get(scope,{})
@@ -64,15 +64,15 @@ static func points(history:Dictionary,scope:String)->Array:
 static func available_points(scope:String,series:Array)->Array:
 	var rows:Dictionary={}
 	if scope=="civilization":
-		for entry in GameState.demographic_ledger:
+		for entry in WorldSimulation.state.demographic_ledger:
 			if entry.has("day") and entry.has("population_after"): rows[int(entry.day)]={"day":int(entry.day),"population":int(entry.population_after)}
 	else:
-		var city:Dictionary=SettlementModel.settlement_record(scope)
+		var city:Dictionary=WorldSimulation.settlements.settlement_record(scope)
 		var primary:=bool(city.get("primary",false))
 		var local:Dictionary=city.get("local_resources",{})
-		var food:Array=GameState.food_history if primary else local.get("food_history",[])
-		var water:Array=GameState.water_history if primary else local.get("water_history",[])
-		var economy:Array=GameState.economy_history if primary else local.get("economy_history",[])
+		var food:Array=WorldSimulation.state.food_history if primary else local.get("food_history",[])
+		var water:Array=WorldSimulation.state.water_history if primary else local.get("water_history",[])
+		var economy:Array=WorldSimulation.state.economy_history if primary else local.get("economy_history",[])
 		for entry in economy:
 			if not entry.has("day"): continue
 			var row:Dictionary=rows.get(int(entry.day),{"day":int(entry.day)})
@@ -93,7 +93,7 @@ static func available_points(scope:String,series:Array)->Array:
 			var row:Dictionary=rows.get(int(entry.day),{"day":int(entry.day)})
 			if entry.has("stored") and float(entry.get("required",0))>0: row["water_days"]=float(entry.stored)/float(entry.required)
 			rows[int(entry.day)]=row
-	for entry in points(GameState.strategic_history,scope):
+	for entry in points(WorldSimulation.state.strategic_history,scope):
 		var row:Dictionary=rows.get(int(entry.day),{})
 		row.merge(entry,true)
 		rows[int(entry.day)]=row

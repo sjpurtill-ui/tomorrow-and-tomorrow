@@ -20,8 +20,8 @@ func configure(value:Dictionary)->void:
 	identity=String(value.id)
 	var region:=String(value.get("region_id",""))
 	CityEncounterWorld.focus(terrain,region)
-	var report:Dictionary=CivilizationSystem.city_intelligence.known("player",region)
-	center=GameState.settlement_founded_at
+	var report:Dictionary=WorldSimulation.world.city_intelligence.known("player",region)
+	center=WorldSimulation.state.settlement_founded_at
 	if not report.is_empty():center=Vector3(float(report.position.x),0,float(report.position.z))
 	center.y=terrain._close_surface_height_at(center.x,center.z)
 	target=center;zoom=maxf(.18,terrain.camera.size)
@@ -36,7 +36,7 @@ func focus(place:String)->void:
 	zoom=.28 if place=="overview" else .12
 	if place=="gate":
 		# Actual approaching army location, not an invented gate or siege ring.
-		for army:Dictionary in MilitaryCampaign.field_armies:
+		for army:Dictionary in WorldSimulation.military.field_armies:
 			if String(army.get("status",""))=="besieging":
 				var p:Variant=army.get("position",{})
 				if p is Dictionary:target=Vector3(float(p.get("x",center.x)),center.y,float(p.get("z",center.z)))

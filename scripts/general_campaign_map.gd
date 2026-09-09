@@ -6,8 +6,8 @@ func _process(_delta:float)->void:queue_redraw()
 func point(cell:Vector2i)->Vector2:
 	return size*.5+Vector2(cell)*minf(size.x,size.y)/float(GeneralCampaign.RADIUS*2+4)
 func _draw()->void:
-	if GeneralCampaign.state.is_empty():return
-	var state:Dictionary=GeneralCampaign.state
+	if WorldSimulation.campaign.state.is_empty():return
+	var state:Dictionary=WorldSimulation.campaign.state
 	var font:=ThemeDB.fallback_font
 	draw_circle(point(Vector2i.ZERO),6,Color("e3c579"))
 	draw_string(font,point(Vector2i.ZERO)+Vector2(10,-9),"Alderford",HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("f6e6b8"))
@@ -19,9 +19,9 @@ func _draw()->void:
 		_draw_front({"troops":int(known.troops)},observed,Color("de795e"))
 		draw_string(font,observed+Vector2(9,20),"%d seen · day %d"%[int(known.troops),int(known.day)],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e5c6b4"))
 	var here:=point(state.cell)
-	_draw_front(GeneralCampaign.army(),here,Color("73ddcc"))
+	_draw_front(WorldSimulation.campaign.army(),here,Color("73ddcc"))
 	draw_arc(here,13,0,TAU,32,Color("c0fff0"),2)
-	draw_string(font,here+Vector2(12,20),"%d fit soldiers"%int(GeneralCampaign.army().get("troops",0)),HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color("b8ffe9"))
+	draw_string(font,here+Vector2(12,20),"%d fit soldiers"%int(WorldSimulation.campaign.army().get("troops",0)),HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color("b8ffe9"))
 	if not state.mission.is_empty():
 		var destination:Vector2i=Vector2i.ZERO
 		if state.mission.action in ["attack","besiege"]:destination=state.seen[String(state.mission.target)].home

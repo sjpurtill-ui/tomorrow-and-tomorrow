@@ -51,8 +51,8 @@ static func startup_blockers(host:Node,item:String)->Array[String]:
 	if float(staff.workers)<=0:result.append("No available craftspeople. Assign crafting work in your cities.")
 	elif float(staff.condition_factor)<=0:result.append("Workforce or workplaces cannot operate. Restore health and usable workshops.")
 	for resource:String in definition.materials:
-		var needed:=float(definition.materials[resource]);var stored:=float(GameState.resource_stockpiles.get(resource,0))
-		if stored<needed:result.append("%s: %.2f in stores; %.2f needed for one item." % [ResourceSystem.display_name(resource),stored,needed])
+		var needed:=float(definition.materials[resource]);var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
+		if stored<needed:result.append("%s: %.2f in stores; %.2f needed for one item." % [WorldSimulation.resources.display_name(resource),stored,needed])
 	return result
 
 static func start(host: Node, item: String, target: int) -> Dictionary:
@@ -92,7 +92,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 
 static func stock(host: Node, job: Dictionary) -> int:
 	if String(job.job_type)=="consumable": return int(host.military_consumables.get(String(job.item),0))
-	if String(job.job_type)=="transport": return int(GameState.resource_stockpiles.get("Transport Carts",0))
+	if String(job.job_type)=="transport": return int(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0))
 	return int(host.military_inventory.get(String(job.item),0))
 
 static func state(host: Node, job: Dictionary) -> String:
@@ -104,20 +104,20 @@ static func state(host: Node, job: Dictionary) -> String:
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
 	for resource in job.materials:
-		if float(job.materials[resource])>0 and float(GameState.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+ResourceSystem.display_name(String(resource))
+		if float(job.materials[resource])>0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
 	return "Working"
 
 static func eligible(host: Node, job: Dictionary) -> bool:
 	return state(host,job) in ["Working","Batch"]
 
 static func workforce() -> Dictionary:
-	var workers:=GameState.effective_workers("Crafting")
-	var health:=clampf(GameState.population_health,0.0,1.0)
-	var labor:=clampf(float(GameState.simulation_metrics.get("labor_efficiency",.72)),0.0,1.45)
-	var carrying:=GameState.effective_workers("Logistics")
+	var workers:=WorldSimulation.state.effective_workers("Crafting")
+	var health:=clampf(WorldSimulation.state.population_health,0.0,1.0)
+	var labor:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72)),0.0,1.45)
+	var carrying:=WorldSimulation.state.effective_workers("Logistics")
 	var logistics:=clampf(.35+carrying/maxf(1.0,workers*.3)*.65,.35,1.0)
 	var weight:=0.0;var usable:=0.0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("land_use","")) not in ["workshop","mixed_household"]: continue
 		var size:=maxf(1.0,float(plot.get("worker_capacity",1)))
 		weight+=size
@@ -140,18 +140,18 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	var possible:=units
 	for resource in job.materials:
 		var cost:=float(job.materials[resource])
-		if cost>0: possible=minf(possible,maxf(0,float(GameState.resource_stockpiles.get(resource,0)))/cost)
+		if cost>0: possible=minf(possible,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0)))/cost)
 	possible=maxf(0,possible)
 	for resource in job.materials:
 		var consumed:=float(job.materials[resource])*possible
-		GameState.resource_stockpiles[resource]=maxf(0,float(GameState.resource_stockpiles.get(resource,0))-consumed)
+		WorldSimulation.state.resource_stockpiles[resource]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0))-consumed)
 		job.last_consumed[resource]=consumed
 	var progress:=float(job.progress_days)+possible*per_item
 	var produced:=maxi(0,floori(progress/per_item+.000000001))
 	job.progress_days=maxf(0,progress-produced*per_item)
 	job.completed=int(job.completed)+produced;job.last_output=produced;job.last_work=possible*per_item
 	if String(job.job_type)=="consumable": host.military_consumables[String(job.item)]=stock(host,job)+produced
-	elif String(job.job_type)=="transport": GameState.resource_stockpiles["Transport Carts"]=stock(host,job)+produced
+	elif String(job.job_type)=="transport": WorldSimulation.state.resource_stockpiles["Transport Carts"]=stock(host,job)+produced
 	else: host.military_inventory[String(job.item)]=stock(host,job)+produced
 	if possible>0: job.efficiency=move_toward(float(job.efficiency),1.0,.0025*(.65+host._adoption("workshop_standards"))*minf(1,possible/maxf(.000001,units)))
 
@@ -171,9 +171,9 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	result["forecast_output_per_day"]=float(result.output_per_day) if result.state=="Working" else 0.0
 	result["materials_status"]=[]
 	for resource:String in job.materials:
-		var cost:=float(job.materials[resource]);var stored:=float(GameState.resource_stockpiles.get(resource,0))
+		var cost:=float(job.materials[resource]);var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
 		if cost>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),stored/cost)
-		result.materials_status.append({"resource":resource,"name":ResourceSystem.display_name(resource),"stored":stored,"per_item":cost,"per_day":float(result.inputs_per_day[resource])})
+		result.materials_status.append({"resource":resource,"name":WorldSimulation.resources.display_name(resource),"stored":stored,"per_item":cost,"per_day":float(result.inputs_per_day[resource])})
 	if int(job.target_stock)>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),maxf(0,int(job.target_stock)-int(result.stock)-float(job.progress_days)/float(job.work_per_item)))
 	return result
 

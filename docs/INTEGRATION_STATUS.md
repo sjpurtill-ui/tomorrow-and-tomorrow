@@ -1,3 +1,11 @@
+## September 9 — shared civilization rules and 12-opponent default
+
+READY in `codex/full-civilization-parity`, based on canonical `ad90266903bf51ff1e56b9d2a206014fbab689ff`. New worlds give each civilization independent owned instances of the same daily systems, equal 120-person starts, real founding and local city economies, and ordinary paid equipment/recruitment/training. Controllers issue validated decisions. Shared geography, bilateral trade, scouts, combat, siege, occupation and allied relief resolve to real owner ledgers. Default: 12 opponents; 6/24/36 remain new-world options.
+
+All 318 focused and regression tests pass, zero errors/failures/skips/orphans. A 365-day real-geography world with 12 opponents validates cleanly; a 36-opponent starting check finds reachable water for every party. The optimized food forecast matches 72 base-formula comparisons exactly. The normal opening scene boots and shuts down cleanly headlessly. See `FULL_CIVILIZATION_PARITY_HANDOFF.md` for details and limits. This is common simulation and ownership, not multiplayer networking or proof of 2,500-year balance. The old held `1e918e3` adapter is excluded. Legacy saves keep their old opponent model; new worlds use the new rules.
+
+Canonical integration and release build are pending final integrator verification. No player game/editor has been stopped or launched for this delivery.
+
 ## September 9 — distinctive civilizations, visible envoy journeys and local AI setup
 
 INTEGRATED `fae9761` (source `6f1500b` plus validation corrections) by conflict-free fast-forward into canonical Mac main from `a31088e`. New worlds receive unique civilization and city names and distinct flags; map cards show the reported controlling civilization. Registering a player home no longer relocates three rivals nearby. Envoy dispatch retains the destination, schedule and map focus; returned outcomes open in a paused leader conversation. Nested settings preserve the prior speed, and speed shortcuts cannot bypass a conversation pause. The connection panel accepts a session-only API key locally and distinguishes missing credentials from HTTP failures. Foreign leaders share civic personality axes and have priorities that affect strategy and negotiations.

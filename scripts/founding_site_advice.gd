@@ -16,14 +16,14 @@ func _init(world:Node3D)->void:
 	terrain=world
 
 func assess(position:Vector3,fresh:bool=false)->Dictionary:
-	var next_revision:="%d:%d" % [GameState.world_seed,CivilizationSystem.fog_revision]
+	var next_revision:="%d:%d" % [WorldSimulation.state.world_seed,WorldSimulation.world.fog_revision]
 	if next_revision!=revision:
 		cache.clear();revision=next_revision
 	# Only display reads share a 25 m cell. Commit always rechecks the exact point.
 	var key:=Vector2(position.x,position.z).snapped(Vector2.ONE*.025)
 	if not fresh and cache.has(key):return cache[key].duplicate(true)
 	var result:=_assess(position)
-	var neighbors:Dictionary=CivilizationSystem.settlement_siting.preview(Vector2(position.x,position.z))
+	var neighbors:Dictionary=WorldSimulation.world.settlement_siting.preview(Vector2(position.x,position.z))
 	result["neighbors"]=neighbors
 	result["water_recommended"]=bool(result.recommended)
 	if float(neighbors.penalty)>0:
@@ -53,7 +53,7 @@ func _assess(position:Vector3)->Dictionary:
 	if nearest.is_empty() or distance>COLLECTION_LIMIT_KM:
 		result.merge({"title":"NO USABLE WATER CONFIRMED","reason":"No known fresh water within the 6 km collection limit. Choose another site or scout more ground before founding."},true)
 		return result
-	var ratio:=ResourceSystem._household_surface_water_access_ratio(distance)
+	var ratio:=WorldSimulation.resources._household_surface_water_access_ratio(distance)
 	var nearby:=distance<=NEAR_WATER_KM
 	var bearing:=compass(position,nearest.position)
 	var source_text:="%s · %.1f km %s" % [String(nearest.kind),distance,bearing]

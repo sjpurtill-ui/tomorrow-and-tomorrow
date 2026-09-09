@@ -114,7 +114,7 @@ func sample(day:int)->void:
 	var hosts:Array[Dictionary]=[]
 	for civ:Dictionary in system.civilizations:
 		if bool(civ.get("alive",true)): hosts.append({"id":String(civ.id),"position":system._civilization_world_position(civ)})
-	if GameState.settlement_site_committed: hosts.append({"id":"player","position":system.player_world_origin})
+	if WorldSimulation.state.settlement_site_committed: hosts.append({"id":"player","position":system.player_world_origin})
 	for mission:Dictionary in system.scout_missions:
 		var start:=int(mission.start_day); var end:=int(mission.get("actual_return_day",mission.return_day))
 		if day<start or day>=end: continue

@@ -54,7 +54,7 @@ func _ready()->void:
 	_button(top,"Close",_close)
 	title=_label(root,"Settlement report",23,T.INK)
 	selector=OptionButton.new();selector.fit_to_longest_item=false;selector.custom_minimum_size.y=34;root.add_child(selector)
-	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player",civ_id):
+	for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities("player",civ_id):
 		selector.add_item(String(city.name));selector.set_item_metadata(selector.item_count-1,String(city.city_id))
 		if city.city_id==city_id:selector.select(selector.item_count-1)
 	selector.item_selected.connect(func(_i:int):refresh())
@@ -79,7 +79,7 @@ func _ready()->void:
 	var military:=_page(tabs,"Military")
 	_label(military,"Approach this settlement",20,T.INK)
 	army_choice=OptionButton.new();army_choice.fit_to_longest_item=false;army_choice.custom_minimum_size.y=34;military.add_child(army_choice)
-	for force:Dictionary in MilitaryCampaign.field_armies:
+	for force:Dictionary in WorldSimulation.military.field_armies:
 		if int(force.get("troops",0))<=0:continue
 		army_choice.add_item(String(force.name));army_choice.set_item_metadata(army_choice.item_count-1,int(force.army_id))
 	var terrain_scene:=CityEncounterWorld.terrain(get_tree().root)
@@ -96,7 +96,7 @@ func _ready()->void:
 	siege=_button(combat_row,"BESIEGE",func():_operate(true));siege.size_flags_horizontal=SIZE_EXPAND_FILL
 	_button(military,"DIPLOMACY",_diplomacy)
 	garrison_button=_button(military,"MANAGE GARRISON",func():
-		for force:Dictionary in MilitaryCampaign.occupation_forces:
+		for force:Dictionary in WorldSimulation.military.occupation_forces:
 			if String(force.get("region_id",""))==city_id:_close();preload("res://scripts/hud/occupation_view.gd").open(String(force.civ_id),city_id);return)
 	aftermath_button=_button(military,"REVIEW BATTLE AFTERMATH",func():
 		var scene:=get_tree().current_scene
@@ -105,8 +105,8 @@ func _ready()->void:
 	tabs.current_tab=0
 	feedback=_label(root,"Estimates describe returned observations. Conditions may have changed.",13,T.TEXT_SOFT)
 	var world:=CityEncounterWorld.terrain(get_tree().root)
-	var known:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
-	if world!=null and not known.is_empty() and MilitaryCampaign.active_engagement.is_empty():
+	var known:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
+	if world!=null and not known.is_empty() and WorldSimulation.military.active_engagement.is_empty():
 		world.camera.size=maxf(.22,preload("res://scripts/foreign_settlement_visual.gd").framing_size(known))
 		world._set_camera_target(Vector3(known.position.x,0,known.position.z));world._refresh_contact_encounter_markers()
 	refresh()
@@ -115,39 +115,39 @@ func _show_map()->void:
 	var scene:=get_tree().current_scene
 	if scene and scene.has_method("_focus_known_city"):scene._focus_known_city(city_id)
 func _send_scouts()->void:
-	var result:=CivilizationSystem.dispatch_scouts(int(duration.get_selected_metadata()),"city:"+city_id)
+	var result:=WorldSimulation.world.dispatch_scouts(int(duration.get_selected_metadata()),"city:"+city_id)
 	feedback.text=String(result.get("error","Scouts departed. Evidence will update after their return."));refresh()
 func _march()->void:
 	if army_choice.item_count==0:return
-	var result:=MilitaryCampaign.move_field_army(int(army_choice.get_selected_metadata()),city_id)
+	var result:=WorldSimulation.military.move_field_army(int(army_choice.get_selected_metadata()),city_id)
 	feedback.text=String(result.get("error",result.get("message","Movement ordered.")));refresh()
 func _diplomacy()->void:
-	var city:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
+	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
 	var owner:=String(city.get("controller",""));if owner=="":owner=String(city.get("civ_id",""))
 	if owner=="":feedback.text="The polity has not been identified. Return a better report first.";return
 	var scene:=get_tree().current_scene
 	if scene and scene.has_method("_open_civilizations_panel"):
 		scene.selected_civilization_id=owner;scene.selected_civilization_region_id=city_id;_close();scene._open_civilizations_panel()
 func _operate(besiege:bool)->void:
-	if not MilitaryCampaign.active_siege.is_empty() and String(MilitaryCampaign.active_siege.region_id)==city_id:
+	if not WorldSimulation.military.active_siege.is_empty() and String(WorldSimulation.military.active_siege.region_id)==city_id:
 		_close();preload("res://scripts/hud/siege_screen.gd").open();return
-	if not MilitaryCampaign.active_engagement.is_empty():
+	if not WorldSimulation.military.active_engagement.is_empty():
 		_close();MilitaryCommandUI._open_battle_graphics();return
-	var city:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
+	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
 	var owner:=String(city.get("controller",""));if owner=="":owner=String(city.get("civ_id",""))
 	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
-	var result:=MilitaryCampaign.order_city_operation(chosen,owner,city_id,besiege)
+	var result:=WorldSimulation.military.order_city_operation(chosen,owner,city_id,besiege)
 	if result.has("error"):feedback.text=String(result.error);refresh();return
 	if bool(result.get("queued",false)):feedback.text=String(result.message);_close();return
 	var scene:=get_tree().current_scene
 	_close()
 	if besiege:preload("res://scripts/hud/siege_screen.gd").open()
-	elif not MilitaryCampaign.active_engagement.is_empty():MilitaryCommandUI.call_deferred("_open_battle_graphics")
+	elif not WorldSimulation.military.active_engagement.is_empty():MilitaryCommandUI.call_deferred("_open_battle_graphics")
 func refresh()->void:
 	if selector.item_count==0:
 		title.text="No reported settlements";summary.text="A returned report must first identify a city.";send.disabled=true;march.disabled=true;attack.disabled=true;siege.disabled=true;return
 	city_id=String(selector.get_selected_metadata())
-	var city:Dictionary=CivilizationSystem.city_intelligence.known("player",city_id)
+	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
 	title.text=String(city.name).trim_prefix("Reported home of ").capitalize()
 	var fields:Dictionary=city.fields
 	var age:=int(city.get("age_days",-1))
@@ -156,7 +156,7 @@ func refresh()->void:
 	if source=="legacy or returned home location":source="Earlier home-location report"
 	provenance.text="%s · Received day %d · %s" % [source,int(city.reported_day),String(city.freshness).capitalize()]
 	provenance.tooltip_text="Source: %s\nReference: %s\nObserved day: %d" % [String(city.source),String(city.reference),int(city.observed_day)]
-	control_label.text="LAST REPORTED CONTROL  ·  "+CivilizationSystem.city_intelligence.controller_label(String(city.controller))
+	control_label.text="LAST REPORTED CONTROL  ·  "+WorldSimulation.world.city_intelligence.controller_label(String(city.controller))
 	for key:String in cards:
 		var field:Dictionary=fields.get(key,{})
 		var value:Label=cards[key].value;var note:Label=cards[key].note
@@ -165,23 +165,23 @@ func refresh()->void:
 			var scale:=100.0 if INTEL.FIELDS[key].unit=="capacity" else 1.0
 			value.text="%s–%s %s" % [str(roundi(float(field.low)*scale)),str(roundi(float(field.high)*scale)),"%" if scale>1 else String(INTEL.FIELDS[key].unit)]
 			note.text="Observed day %d%s" % [int(field.observed_day)," · stale" if bool(field.get("stale",false)) else ""]
-	var quote:=CivilizationSystem.scout_mission_quote(int(duration.get_selected_metadata()),"city:"+city_id)
+	var quote:=WorldSimulation.world.scout_mission_quote(int(duration.get_selected_metadata()),"city:"+city_id)
 	send.disabled=not bool(quote.get("can_dispatch",false))
 	costs.text=String(quote.get("error",quote.get("blocker",""))) if send.disabled else "%d scouts · %.1f food\n%d days planned" % [int(quote.personnel),float(quote.provisions),int(quote.duration_days)]
 	var owner:=String(city.controller);if owner=="":owner=String(city.civ_id)
-	var owner_index:=CivilizationSystem._civilization_index(owner)
+	var owner_index:=WorldSimulation.world._civilization_index(owner)
 	if owner_index>=0:
-		var relation:Dictionary=CivilizationSystem.civilizations[owner_index].player_relation
+		var relation:Dictionary=WorldSimulation.world.civilizations[owner_index].player_relation
 		control_label.text+="  /  "+("AT WAR" if bool(relation.get("at_war",false)) else "AT PEACE · attacking starts a war")
 	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
-	var availability:=MilitaryCampaign.city_operation_quote(chosen,owner,city_id)
+	var availability:=WorldSimulation.military.city_operation_quote(chosen,owner,city_id)
 	attack.disabled=availability.has("error");siege.disabled=attack.disabled
-	var same_siege:=not MilitaryCampaign.active_siege.is_empty() and String(MilitaryCampaign.active_siege.region_id)==city_id
+	var same_siege:=not WorldSimulation.military.active_siege.is_empty() and String(WorldSimulation.military.active_siege.region_id)==city_id
 	if same_siege:attack.disabled=false;siege.disabled=false
 	garrison_button.visible=false
-	for force:Dictionary in MilitaryCampaign.occupation_forces:
+	for force:Dictionary in WorldSimulation.military.occupation_forces:
 		if String(force.get("region_id",""))==city_id and int(force.get("troops",0))>0:garrison_button.visible=true
-	aftermath_button.visible=not MilitaryCampaign.pending_aftermath.is_empty()
+	aftermath_button.visible=not WorldSimulation.military.pending_aftermath.is_empty()
 	attack.visible=not garrison_button.visible;siege.visible=not garrison_button.visible
 
 	var here:=bool(availability.get("at_target",false))
@@ -190,7 +190,7 @@ func refresh()->void:
 	military_note.text=String(availability.get("error","Army is at this city. Your order starts hostilities immediately." if here else "Approach takes about %d days. Hostilities begin on arrival." % int(availability.get("days",0))))
 
 	if same_siege:attack.text="RETURN TO SIEGE";siege.visible=false;military_note.text="Your army is maintaining this siege. Return to its orders and supply situation."
-	if garrison_button.visible:military_note.text=MilitaryCampaign.city_force_summary(city_id)
+	if garrison_button.visible:military_note.text=WorldSimulation.military.city_force_summary(city_id)
 
 func _process(delta:float)->void:
 	timer+=delta

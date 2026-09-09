@@ -131,10 +131,10 @@ func _ready()->void:
 	view=BattleDiorama.new()
 	var world:=CityEncounterWorld.terrain(get_tree().root)
 	if world!=null:
-		var encounter:Dictionary=MilitaryCampaign.active_engagement
-		if encounter.is_empty() and not MilitaryCampaign.battle_history.is_empty():encounter=MilitaryCampaign.battle_history[0]
+		var encounter:Dictionary=WorldSimulation.military.active_engagement
+		if encounter.is_empty() and not WorldSimulation.military.battle_history.is_empty():encounter=WorldSimulation.military.battle_history[0]
 		if history_seed>=0:
-			for past:Dictionary in MilitaryCampaign.battle_history:
+			for past:Dictionary in WorldSimulation.military.battle_history:
 				if int(past.get("seed",-1))==history_seed:encounter=past;break
 		var region:=String(encounter.get("target_region_id",encounter.get("threat",{}).get("target_region_id","")))
 		if not region.is_empty():
@@ -156,7 +156,7 @@ func _build_header()->void:
 	chrome=panel();top_row=HBoxContainer.new();top_row.add_theme_constant_override("separation",14);chrome.add_child(top_row)
 	heading=label(top_row,"BATTLE",26,TEXT,true);heading.size_flags_horizontal=SIZE_EXPAND_FILL
 	phase_label=label(top_row,"GIVING ORDERS",12,GOLD);phase_label.add_theme_stylebox_override("normal",style(Color(ORANGE,.15),Color(0,0,0,0),18));city_button=button(top_row,"City report",_city_report)
-	button(top_row,"People & legacies",func():HistoricalFigures.open_chronicle());button(top_row,"×",_close)
+	button(top_row,"People & legacies",func():WorldSimulation.figures.open_chronicle());button(top_row,"×",_close)
 	armies_strip=Control.new();armies_strip.mouse_filter=MOUSE_FILTER_IGNORE;add_child(armies_strip)
 	for side in 2:
 		var p:=PanelContainer.new();p.add_theme_stylebox_override("panel",style(Color(INK,.86),Color(0,0,0,0)));armies_strip.add_child(p);p.minimum_size_changed.connect(_layout.call_deferred);army_panels.append(p)
@@ -219,11 +219,11 @@ func _build_controls()->void:
 	progress=ProgressBar.new();progress.show_percentage=false;progress.custom_minimum_size.y=6;progress.add_theme_stylebox_override("fill",style(GOLD,GOLD));center.add_child(progress)
 	var ends:=box(controls);skip_button=button(ends,"Skip to result →",_skip);retreat_button=button(ends,"Retreat whole army",_retreat,ORANGE);seed_label=label(ends,"",10,MUTED)
 func _initialize()->void:
-	context=MilitaryCampaign.active_engagement.duplicate(true)
-	if context.is_empty() and not MilitaryCampaign.battle_history.is_empty():
-		context=MilitaryCampaign.battle_history.front().duplicate(true)
+	context=WorldSimulation.military.active_engagement.duplicate(true)
+	if context.is_empty() and not WorldSimulation.military.battle_history.is_empty():
+		context=WorldSimulation.military.battle_history.front().duplicate(true)
 		if history_seed>=0:
-			for past:Dictionary in MilitaryCampaign.battle_history:
+			for past:Dictionary in WorldSimulation.military.battle_history:
 				if int(past.get("seed",-1))==history_seed:context=past.duplicate(true);break
 		finished_context=context.duplicate(true)
 	home_side=0 if String(context.get("home_side","defender"))=="attacker" else 1
@@ -241,7 +241,7 @@ func _initialize()->void:
 	heading.text=String(context.get("target_region_name",context.get("threat",{}).get("target_region_name","BATTLEFIELD"))).to_upper()
 	city_button.disabled=String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))).is_empty()
 	seed_label.text="BATTLE SEED %s"%str(context.get("seed","—")) if OS.has_feature("editor") or ProjectSettings.get_setting("application/config/custom_user_dir_name","").contains("Test") else ""
-	if not MilitaryCampaign.active_engagement.is_empty():MilitaryCampaign.active_engagement["awaiting_player_view"]=true;phase="orders"
+	if not WorldSimulation.military.active_engagement.is_empty():WorldSimulation.military.active_engagement["awaiting_player_view"]=true;phase="orders"
 	else:phase="ended"
 	_rebuild_orders();_rebuild_plates();_phase_ui()
 	if phase=="ended":_show_result()
@@ -260,7 +260,7 @@ func _name(side:int,index:int)->String:
 	var forms:=_forms(side)
 	if index<0 or index>=forms.size():return "No formation"
 	return "%d · %s"%[index+1,String(forms[index].get("name",forms[index].get("unit",forms[index].get("unit_id","Formation")))).replace("_"," ").capitalize()]
-func _orders()->Dictionary:return MilitaryCampaign.active_engagement.get("formation_orders",{})
+func _orders()->Dictionary:return WorldSimulation.military.active_engagement.get("formation_orders",{})
 func _unordered()->int:
 	var missing:=0
 	for i in _forms(home_side).size():
@@ -318,7 +318,7 @@ func _refresh_armies()->void:
 		force_labels[side].values.text="%d FIGHTING    %d OUT    %d%% MORALE"%[_count(force),int(losses.get("out_of_action",0)),roundi(float(force.get("morale",1))*100)]
 		force_labels[side].title.tooltip_text="Commander: %s" % String(force.get("commander",{}).get("name","Not recorded"))
 		force_labels[side].values.tooltip_text="Out of action: %d dead · %d wounded · %d fled / scattered. Lasting disabilities: %d. Unclassified: %d. Fighting is the remaining active personnel, not the number of decorative figures."%[int(losses.get("dead",0)),int(losses.get("wounded",0)),int(losses.get("scattered",0)),int(losses.get("disabled",0)),int(losses.get("unclassified",0))]
-	var a:Dictionary=MilitaryCampaign.combat_summary(cached_forces[0],cached_forces[1]);var d:Dictionary=MilitaryCampaign.combat_summary(cached_forces[1],cached_forces[0],float(context.get("terrain_defense",1)))
+	var a:Dictionary=WorldSimulation.military.combat_summary(cached_forces[0],cached_forces[1]);var d:Dictionary=WorldSimulation.military.combat_summary(cached_forces[1],cached_forces[0],float(context.get("terrain_defense",1)))
 	var av:=float(a.get("effective_strength",0));var dv:=float(d.get("effective_strength",0));momentum_value=100*av/(av+dv) if av+dv>0 else 50;strength_history[_round()]=momentum_value;previous_momentum=float(strength_history.get(_round()-1,momentum_value))
 	var change:=roundi(momentum_value-previous_momentum)
 	momentum_label.text="STRENGTH · %s · %d%% / %d%%%s"%["Attackers lead" if momentum_value>52 else ("Defenders lead" if momentum_value<48 else "Even"),roundi(momentum_value),100-roundi(momentum_value),(" · %+d"%change) if not current_record.is_empty() and change!=0 else ""]
@@ -326,16 +326,16 @@ func _refresh_armies()->void:
 	momentum_label.add_theme_color_override("font_color",TEAL if momentum_value>=50 else ORANGE)
 	momentum_note.text="Strength share, not odds · Morale breaks at 15%" if current_record.is_empty() else "%s · Morale breaks at 15%%"%String(current_record.get("intensity","Contact"))
 func _resolve()->void:
-	if phase!="orders" or MilitaryCampaign.active_engagement.is_empty():return
+	if phase!="orders" or WorldSimulation.military.active_engagement.is_empty():return
 	phase="resolving";resolve_count+=1
-	var committed:Dictionary=MilitaryCampaign.advance_engagement("hold")
+	var committed:Dictionary=WorldSimulation.military.advance_engagement("hold")
 	_capture_round(committed);_start_presentation()
 func _capture_round(committed:Dictionary={})->void:
-	context=MilitaryCampaign.active_engagement.duplicate(true)
+	context=WorldSimulation.military.active_engagement.duplicate(true)
 	if context.is_empty():
 		if committed.has("rounds"):finished_context=committed.duplicate(true)
-		context=finished_context.duplicate(true) if not finished_context.is_empty() else MilitaryCampaign.battle_history.front().duplicate(true)
-	else:MilitaryCampaign.active_engagement["awaiting_player_view"]=true
+		context=finished_context.duplicate(true) if not finished_context.is_empty() else WorldSimulation.military.battle_history.front().duplicate(true)
+	else:WorldSimulation.military.active_engagement["awaiting_player_view"]=true
 	var records:Array=context.get("rounds",[]);var record:Dictionary=records.back() if not records.is_empty() else {}
 	present(context.get("attacker",context.get("attacker_result",{})),context.get("defender",context.get("defender_result",{})),record,String(context.get("outcome","")),records)
 func _start_presentation()->void:
@@ -370,7 +370,7 @@ func _finish_presentation()->void:
 	if phase!="resolving":return
 	if replaying:
 		replaying=false;_capture_round();view.reset(initial_forces[0],initial_forces[1]);view.apply_snapshot(cached_forces[0],cached_forces[1],current_record,final_outcome);_rebuild_plates();phase=replay_return
-	else:phase="result" if not MilitaryCampaign.active_engagement.is_empty() else "ended"
+	else:phase="result" if not WorldSimulation.military.active_engagement.is_empty() else "ended"
 	_show_result();_phase_ui()
 func _skip()->void:
 	if phase=="resolving":elapsed=DURATION;_finish_presentation()
@@ -382,31 +382,31 @@ func _show_result()->void:
 	var ended:=phase=="ended"
 	result_title.text="ROUND %d COMPLETE"%_round()
 	if ended:result_title.text="VICTORY" if String(context.get("winner",""))==String(cached_forces[home_side].get("name","")) else ("WITHDRAWAL" if bool(context.get("orders",{}).get("retreated",false)) else ("DEFEAT" if not String(context.get("winner","")).is_empty() else "BATTLE ENDED"))
-	result_text.text="Your army: %d fighting · %d out this round\nEnemy army: %d fighting · %d out this round\n\n%s"%[_count(cached_forces[home_side]),_record_loss(home_side),_count(cached_forces[1-home_side]),_record_loss(1-home_side),("Review the aftermath before choosing the next operation." if not MilitaryCampaign.pending_aftermath.is_empty() else "The result is recorded in the campaign. Return to the map when ready.") if ended else "The battle is paused. Review losses, then give the next orders."]
+	result_text.text="Your army: %d fighting · %d out this round\nEnemy army: %d fighting · %d out this round\n\n%s"%[_count(cached_forces[home_side]),_record_loss(home_side),_count(cached_forces[1-home_side]),_record_loss(1-home_side),("Review the aftermath before choosing the next operation." if not WorldSimulation.military.pending_aftermath.is_empty() else "The result is recorded in the campaign. Return to the map when ready.") if ended else "The battle is paused. Review losses, then give the next orders."]
 	if ended:
 		var termination:Dictionary=context.get("termination",{})
 		result_text.text="Active at contact end: Your army %d · Enemy %d.\n%d of the defeated army's remaining troops were taken prisoner.\nDefeated commander: %s."%[_count(cached_forces[home_side]),_count(cached_forces[1-home_side]),int(termination.get("prisoners",0)),String(termination.get("commander_fate","not recorded"))]
-		if not MilitaryCampaign.pending_aftermath.is_empty():result_text.text+="\nYour decisions about captives and property are still pending."
+		if not WorldSimulation.military.pending_aftermath.is_empty():result_text.text+="\nYour decisions about captives and property are still pending."
 		var strategic:Dictionary=context.get("strategic_outcome",{})
 		if strategic.get("region_captured",false):result_text.text+="\nCity captured. Occupation assignments are recorded in the campaign."
 		for side in 2:force_labels[side].values.text=force_labels[side].values.text.replace("FIGHTING","AT CONTACT END")
 	history_choice.clear()
 	for i in round_records.size():history_choice.add_item("Round %d"%(i+1),i)
 	if not round_records.is_empty():history_choice.select(round_records.size()-1)
-	replay_button.disabled=round_records.is_empty();policy_box.hide();result_return.visible=not ended or not MilitaryCampaign.pending_aftermath.is_empty()
-	result_primary.text="REVIEW AFTERMATH →" if ended and not MilitaryCampaign.pending_aftermath.is_empty() else ("RETURN TO MAP" if ended else "NEXT ORDERS →")
+	replay_button.disabled=round_records.is_empty();policy_box.hide();result_return.visible=not ended or not WorldSimulation.military.pending_aftermath.is_empty()
+	result_primary.text="REVIEW AFTERMATH →" if ended and not WorldSimulation.military.pending_aftermath.is_empty() else ("RETURN TO MAP" if ended else "NEXT ORDERS →")
 func _continue()->void:
 	if phase=="result":phase="orders";_rebuild_orders();_phase_ui()
 	elif phase=="ended":
-		if MilitaryCampaign.pending_aftermath.is_empty():_close()
+		if WorldSimulation.military.pending_aftermath.is_empty():_close()
 		else:_open_aftermath()
 	elif phase=="aftermath":
-		var result:Dictionary=MilitaryCampaign.resolve_aftermath(prisoner_choice.get_item_metadata(prisoner_choice.selected),spoils_choice.get_item_metadata(spoils_choice.selected),general_choice.get_item_metadata(general_choice.selected))
+		var result:Dictionary=WorldSimulation.military.resolve_aftermath(prisoner_choice.get_item_metadata(prisoner_choice.selected),spoils_choice.get_item_metadata(spoils_choice.selected),general_choice.get_item_metadata(general_choice.selected))
 		result_text.text=String(result.get("error",result.get("message","Aftermath recorded.")))
 		if not result.has("error"):phase="ended";policy_box.hide();result_return.hide();result_primary.text="RETURN TO MAP";_phase_ui()
 func _open_aftermath()->void:
 	phase="aftermath";result_title.text="THE AFTERMATH";result_return.show()
-	var pending:Dictionary=MilitaryCampaign.pending_aftermath
+	var pending:Dictionary=WorldSimulation.military.pending_aftermath
 	var home_won:=String(pending.get("captor",""))==String(pending.get("home_force_name",""))
 	result_text.text="%d captives · %s\n%s"%[int(pending.get("prisoners",0)),"Your army controls the captives and property." if home_won else "The enemy holds these prisoners.","Choose their treatment. Decisions enter the campaign record." if home_won else "Acknowledge the outcome to record your captured personnel."]
 	policy_box.visible=home_won;general_choice.disabled=not bool(pending.get("captured_general",false));replay_button.hide();history_choice.hide();result_primary.text="CONFIRM DECISIONS →" if home_won else "ACKNOWLEDGE →";_phase_ui()
@@ -439,7 +439,7 @@ func _replay()->void:
 func _retreat()->void:
 	pass # Observation never submits legacy cohort or retreat orders.
 func _city_report()->void:
-	CivilizationSystem.city_intelligence.open(String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))))
+	WorldSimulation.world.city_intelligence.open(String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))))
 func _close()->void:queue_free()
 func _exit_tree()->void:
 	if is_instance_valid(view) and is_instance_valid(view.live_terrain):view.live_terrain.remove_meta("city_encounter_army")
@@ -532,7 +532,7 @@ func _rebuild_plates()->void:
 	for group in view.groups:group.banner.visible=false
 	for general in view.generals:
 		general.label.visible=false
-		var detail:Dictionary=general.details();var b:=button(marker_layer,"%s GENERAL · %s\n%s"%["YOUR" if int(general.get_meta("side",-1))==home_side else "ENEMY",String(detail.name),String(detail.fate).to_upper()],HistoricalFigures.open_chronicle.bind(String(detail.figure_id)),GOLD)
+		var detail:Dictionary=general.details();var b:=button(marker_layer,"%s GENERAL · %s\n%s"%["YOUR" if int(general.get_meta("side",-1))==home_side else "ENEMY",String(detail.name),String(detail.fate).to_upper()],WorldSimulation.figures.open_chronicle.bind(String(detail.figure_id)),GOLD)
 		b.add_theme_font_size_override("font_size",11);b.custom_minimum_size.y=30;b.disabled=String(detail.figure_id).is_empty();b.add_theme_stylebox_override("disabled",style(Color(INK,.85),GOLD,4));b.add_theme_color_override("font_disabled_color",GOLD);plates.append({"node":b,"general":general})
 func _update_markers()->void:
 	var occupied:Array[Rect2]=[]
@@ -574,7 +574,7 @@ func _spawn_losses()->void:
 			node.add_theme_constant_override("outline_size",5);node.add_theme_color_override("font_outline_color",INK)
 			floats.append({"node":node,"side":side,"index":i})
 func _selected(data:Dictionary)->void:
-	if data.has("figure_id"):HistoricalFigures.open_chronicle(String(data.figure_id));return
+	if data.has("figure_id"):WorldSimulation.figures.open_chronicle(String(data.figure_id));return
 	var side:=int(data.get("side",home_side));var name:=String(data.get("name",""))
 	for i in _forms(side).size():
 		if UnitVisualCatalog.model(_forms(side)[i],"equipment",i).replace("_"," ").capitalize()==name:

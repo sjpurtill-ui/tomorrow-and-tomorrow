@@ -90,7 +90,7 @@ static func artwork(report:Dictionary)->String:
 
 static func mark_reviewed(report:Dictionary)->void:
 	var key:=identity(report)
-	for saved:Dictionary in CivilizationSystem.scout_reports:
+	for saved:Dictionary in WorldSimulation.world.scout_reports:
 		if identity(saved)==key: saved["archive_reviewed"]=true; return
 
 static func revision(reports:Array)->Array:

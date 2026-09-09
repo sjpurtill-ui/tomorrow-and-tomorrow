@@ -65,7 +65,7 @@ func sync()->void:
 					var expected:=String(current.get("mission","hold"))
 					if expected=="cancelled":expected="hold"
 					if mission!=expected or area_id!=String(current.get("zone_id","")):
-						record["order"]={"mission":mission,"zone_id":area_id,"target":"","vision":"","day":int(GameState.elapsed_days)}
+						record["order"]={"mission":mission,"zone_id":area_id,"target":"","vision":"","day":int(WorldSimulation.state.elapsed_days)}
 	var records:Array=[{"service":"army","id":0,"actual":host.home_army}]
 	for actual:Dictionary in host.field_armies:records.append({"service":"army","id":actual.army_id,"actual":actual})
 	for actual:Dictionary in host.joint_operations.state.forces:
@@ -158,7 +158,7 @@ func _busy(record:Dictionary)->String:
 	if actual.is_empty():return "The force is no longer available."
 	if record.service=="army":
 		if battle.engaged(int(record.force_id)):return "This command is already committed to a battle."
-		if GeneralCampaign.active and int(actual.get("army_id",-1))==int(GeneralCampaign.state.get("army_id",-2)):return "This army is committed to its general's active campaign."
+		if WorldSimulation.campaign.active and int(actual.get("army_id",-1))==int(WorldSimulation.campaign.state.get("army_id",-2)):return "This army is committed to its general's active campaign."
 		if not host.active_engagement.is_empty() or not host.pending_aftermath.is_empty():return "Resolve the active battle before reorganizing forces."
 		if bool(actual.get("embarked",false)) or actual.get("status","stationed") in ["moving","besieging"]:return "Let this command assemble before detaching a subordinate."
 	else:
@@ -180,13 +180,13 @@ func _split(id:String)->Dictionary:
 			if index>0 or original_id==0:
 				var formations:Array[Dictionary]=host._detach_occupation_formations(counts[index]) if original_id==0 else host._detach_field_army_formations(original_id,counts[index])
 				var detached:Dictionary=host.simulator.create_formation_force("Detachment",formations,float(metadata.get("morale",.7)),float(metadata.get("readiness",.5)))
-				detached.merge({"position":G.pack(CivilizationSystem.player_world_origin),"status":"stationed","location_id":"player_home","location_name":"Home settlement","destination_id":"","destination_name":"","destination_position":{},"distance_total_km":0.0,"distance_remaining_km":0.0,"departure_day":-1,"arrival_day":-1},true)
+				detached.merge({"position":G.pack(WorldSimulation.world.player_world_origin),"status":"stationed","location_id":"player_home","location_name":"Home settlement","destination_id":"","destination_name":"","destination_position":{},"distance_total_km":0.0,"distance_remaining_km":0.0,"departure_day":-1,"arrival_day":-1},true)
 				for key:String in ["status","location_id","location_name","position","destination_id","destination_position","destination_name","distance_total_km","distance_remaining_km","departure_day","arrival_day","supply_level","visual_theme","exercise_readiness_bonus"]:
 					if metadata.has(key):detached[key]=metadata[key].duplicate(true) if metadata[key] is Dictionary else metadata[key]
 				detached["army_id"]=int(host.next_field_army_id);host.next_field_army_id+=1;new_id=detached.army_id
 				detached["commander"]=metadata.get("commander",{}).duplicate(true);detached.commander.erase("figure_id")
 				detached.commander["name"]="%s leader" % LEVELS.army[int(record.level)-1][0]
-				detached["runner_count"]=mini(2,counts[index]);detached["last_runner_departure_day"]=int(GameState.elapsed_days)
+				detached["runner_count"]=mini(2,counts[index]);detached["last_runner_departure_day"]=int(WorldSimulation.state.elapsed_days)
 				detached["last_report"]=host._army_report_snapshot(detached);host.field_armies.append(detached)
 			else:original=force(record)
 		else:
@@ -259,7 +259,7 @@ func assign(id:String,path:Array,region:Dictionary,mission:String,target:String=
 		if mission not in LAND_MISSIONS:return {"error":"Choose a supported land objective."}
 		if mission!="withdraw" and zone(String(region.get("id",""))).is_empty():return {"error":"Select a saved battle zone on the map."}
 		if mission in ["capture","occupy","raze"]:
-			var city:Dictionary=CivilizationSystem.city_intelligence.known("player",target)
+			var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",target)
 			if city.is_empty() or not R.contains(region,G.unpack(city.position)):return {"error":"Select a reported city inside this zone."}
 			if city.get("controller","")=="player" and mission=="capture":return {"error":"This city is already under your control."}
 	else:
@@ -291,7 +291,7 @@ func assign(id:String,path:Array,region:Dictionary,mission:String,target:String=
 	# Explicit whole-command orders replace subordinate exceptions. Subsequent
 	# orders to one child create a new exception without stealing siblings.
 	for entry:Dictionary in descendants(selected_id):entry.erase("order")
-	node(selected_id)["order"]={"zone_id":String(region.get("id","")),"mission":mission,"target":target,"vision":vision.strip_edges().left(240),"day":int(GameState.elapsed_days)}
+	node(selected_id)["order"]={"zone_id":String(region.get("id","")),"mission":mission,"target":target,"vision":vision.strip_edges().left(240),"day":int(WorldSimulation.state.elapsed_days)}
 	for leaf:Dictionary in leaves(selected_id):
 		if leaf.service=="army":force(leaf).erase("city_operation");force(leaf).erase("target_formation_id");force(leaf)["command_status"]="Commander preparing objective"
 	return {"ok":true,"id":selected_id,"message":"Objective given to %s and its subordinates. Leaders execute it as the calendar advances." % String(node(selected_id).name)}

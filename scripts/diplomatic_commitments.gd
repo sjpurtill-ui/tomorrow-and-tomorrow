@@ -6,7 +6,7 @@ const OBLIGATION="Respond to a member's defensive siege with feasible relief; co
 var state:Dictionary={"serial":0,"resolved":0,"pacts":{},"factions":[],"obligations":[],"relief":[],"history":[]}
 
 func civ(id:String)->Dictionary:
-	for value:Dictionary in CivilizationSystem.civilizations:
+	for value:Dictionary in WorldSimulation.world.civilizations:
 		if String(value.id)==id: return value
 	return {}
 
@@ -33,7 +33,7 @@ func at_war(first:String,second:String)->bool:
 	return bool(value.player_relation.get("at_war",false)) if "player" in [first,second] else bool((value.relations as Dictionary).get(second,{}).get("at_war",false))
 
 func eligibility(id:String,t:Dictionary)->String:
-	if not valid_terms(t) or ForeignDiplomacy.leader(id).is_empty(): return "Choose a known leader and valid terms."
+	if not valid_terms(t) or WorldSimulation.diplomacy.leader(id).is_empty(): return "Choose a known leader and valid terms."
 	var league:=faction()
 	if t.action not in ["negotiate_siege","leave_faction"] and at_war("player",id): return "We are at war with this leader; settle that conflict first."
 	match String(t.action):
@@ -51,14 +51,14 @@ func eligibility(id:String,t:Dictionary)->String:
 			if league.members.size()>=9: return "All nine civilization seats are already filled."
 		"set_goal","debate_war","leave_faction":
 			if league.is_empty() or id not in league.members: return "Address a member of your league."
-			if t.action=="debate_war" and (ForeignDiplomacy.civilization(t.target_id).is_empty() or t.target_id in league.members): return "Choose a known civilization outside the league for the war discussion."
+			if t.action=="debate_war" and (WorldSimulation.diplomacy.civilization(t.target_id).is_empty() or t.target_id in league.members): return "Choose a known civilization outside the league for the war discussion."
 		"request_relief":
 			if not covered(id,"player",t.siege_id): return "No defensive siege obligation to us is active for this leader."
 		"negotiate_siege":
 			var siege:=siege_info(t.siege_id)
 			if not bool(siege.get("active",false)) or id not in [siege.get("attacker_id"),siege.get("defender_id")]: return "Choose an active siege involving this leader."
-			if MilitaryCampaign.has_method("siege_negotiation_available"):
-				var consent:Dictionary=MilitaryCampaign.call("siege_negotiation_available",t.siege_id,id)
+			if WorldSimulation.military.has_method("siege_negotiation_available"):
+				var consent:Dictionary=WorldSimulation.military.call("siege_negotiation_available",t.siege_id,id)
 				if not bool(consent.get("ok",false)): return String(consent.get("reason",consent.get("error","The opposing leader is not willing to withdraw under these conditions.")))
 	return ""
 
@@ -72,7 +72,7 @@ func assessment(id:String,t:Dictionary)->Dictionary:
 		for member:String in league.members:
 			if member!="player" and member not in voters: voters.append(member)
 	for member:String in voters:
-		var support:=opinion("player",member)+float(ForeignDiplomacy.leader(member).get("trust",0))*.35
+		var support:=opinion("player",member)+float(WorldSimulation.diplomacy.leader(member).get("trust",0))*.35
 		var reason:="Our dealings give this proposal a basis." if support>=.05 else "We need stronger relations before taking on this promise."
 		if t.action=="join_faction" and "player" in league.get("members",[]) and member!=id:
 			support=minf(support,opinion(member,id)); reason="We judge the candidate by our own relationship with them."
@@ -89,7 +89,7 @@ func assessment(id:String,t:Dictionary)->Dictionary:
 func mission_quote(id:String,t:Dictionary)->Dictionary:
 	var error:=eligibility(id,t)
 	if error!="": return {"error":error}
-	var quote:=CivilizationSystem.diplomatic_mission_quote(id,"","leader_parley")
+	var quote:=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley")
 	if quote.has("error"): return quote
 	# A league proposal includes physical consultation of every existing member.
 	var extra_days:=0
@@ -97,9 +97,9 @@ func mission_quote(id:String,t:Dictionary)->Dictionary:
 	if league.is_empty() and t.action=="join_faction": league=faction(id)
 	if not league.is_empty() and t.action in ["join_faction","set_goal","debate_war","leave_faction"]:
 		for member:String in league.members:
-			if member!="player" and member!=id: extra_days+=CivilizationSystem._intercivilization_message_days(civ(id),civ(member))
+			if member!="player" and member!=id: extra_days+=WorldSimulation.world._intercivilization_message_days(civ(id),civ(member))
 	var extra_food:=float(extra_days)*float(quote.personnel)*.55
-	if FoodSystem.total_stored()<float(quote.provisions)+extra_food: return {"error":"The delegation and league consultations need %.1f Food." % (float(quote.provisions)+extra_food)}
+	if WorldSimulation.food.total_stored()<float(quote.provisions)+extra_food: return {"error":"The delegation and league consultations need %.1f Food." % (float(quote.provisions)+extra_food)}
 	quote["consultation_days"]=extra_days; quote["consultation_food"]=extra_food
 	return quote
 
@@ -107,20 +107,20 @@ func send(id:String,t:Dictionary)->Dictionary:
 	var quote:=mission_quote(id,t)
 	if quote.has("error"): return quote
 	var extra_days:=int(quote.consultation_days); var extra_food:=float(quote.consultation_food)
-	var result:=CivilizationSystem.dispatch_diplomat(id,"","leader_parley")
+	var result:=WorldSimulation.world.dispatch_diplomat(id,"","leader_parley")
 	if result.has("error"): return result
-	if extra_food>0: FoodSystem.issue_for_obligation(extra_food,"diplomacy","League consultations",extra_days,int(quote.personnel))
+	if extra_food>0: WorldSimulation.food.issue_for_obligation(extra_food,"diplomacy","League consultations",extra_days,int(quote.personnel))
 	state.serial=int(state.serial)+1
 	var carried:=t.duplicate(true); carried["serial"]=state.serial
-	CivilizationSystem.diplomatic_mission["commitment_terms"]=carried
-	CivilizationSystem.diplomatic_mission.return_day+=extra_days
-	CivilizationSystem.diplomatic_mission.provisions+=extra_food
-	ForeignDiplomacy.remember(id,"Envoys carry our proposal: %s. No commitment exists until their return." % ACTIONS[t.action])
+	WorldSimulation.world.diplomatic_mission["commitment_terms"]=carried
+	WorldSimulation.world.diplomatic_mission.return_day+=extra_days
+	WorldSimulation.world.diplomatic_mission.provisions+=extra_food
+	WorldSimulation.diplomacy.remember(id,"Envoys carry our proposal: %s. No commitment exists until their return." % ACTIONS[t.action])
 	return result
 
 func resolve(id:String,mission:Dictionary)->Dictionary:
 	var t:Dictionary=mission.get("commitment_terms",{})
-	if not valid_terms(t) or String(mission.get("civ_id",""))!=id or int(GameState.elapsed_days)<int(mission.get("return_day",2147483647)): return {"error":"No returned commitment proposal is available."}
+	if not valid_terms(t) or String(mission.get("civ_id",""))!=id or int(WorldSimulation.state.elapsed_days)<int(mission.get("return_day",2147483647)): return {"error":"No returned commitment proposal is available."}
 	if not number(t.get("serial")) or float(t.serial)!=floor(float(t.serial)) or int(t.serial)!=int(state.serial) or int(t.serial)<=int(state.resolved): return {"error":"This commitment answer was already received or is stale."}
 	state.resolved=int(t.serial)
 	var forecast:=assessment(id,t)
@@ -131,15 +131,15 @@ func resolve(id:String,mission:Dictionary)->Dictionary:
 	if ok:
 		match String(t.action):
 			"protection":
-				state.pacts[id]={"since":int(GameState.elapsed_days),"trigger":"defensive_siege","obligation":OBLIGATION}
+				state.pacts[id]={"since":int(WorldSimulation.state.elapsed_days),"trigger":"defensive_siege","obligation":OBLIGATION}
 				message="Mutual protection is ratified. It covers defensive sieges beginning after today, subject to real forces, provisions and access; it does not authorize offensive wars."
 			"found_faction":
-				state.factions.append({"id":"league_%d" % int(t.serial),"name":"League of %s" % String(civ(id).name),"members":["player",id],"joined":{"player":int(GameState.elapsed_days),id:int(GameState.elapsed_days)},"goal":t.goal,"since":int(GameState.elapsed_days),"votes":{},"obligation":OBLIGATION})
+				state.factions.append({"id":"league_%d" % int(t.serial),"name":"League of %s" % String(civ(id).name),"members":["player",id],"joined":{"player":int(WorldSimulation.state.elapsed_days),id:int(WorldSimulation.state.elapsed_days)},"goal":t.goal,"since":int(WorldSimulation.state.elapsed_days),"votes":{},"obligation":OBLIGATION})
 				message="Our league is founded. Each member keeps its leader, people and army. New members and policy changes require consultation and unanimous consent."
 			"join_faction":
 				var joining:String=id if "player" in league.members else "player"
 				league.members.append(joining); league.votes=forecast.votes
-				league.joined[joining]=int(GameState.elapsed_days)
+				league.joined[joining]=int(WorldSimulation.state.elapsed_days)
 				message="The candidate and existing members consent. %s joins the league." % (String(civ(id).name) if joining!="player" else "Your civilization")
 			"set_goal":
 				league.goal=t.goal; league.votes=forecast.votes
@@ -157,17 +157,17 @@ func resolve(id:String,mission:Dictionary)->Dictionary:
 				ok=bool(result.get("ok",false)); message=String(result.get("message",result.get("error","Relief could not depart.")))
 			"negotiate_siege":
 				var result:Dictionary={"error":"No siege negotiation executor is available."}
-				if MilitaryCampaign.has_method("negotiated_siege_withdrawal"): result=MilitaryCampaign.call("negotiated_siege_withdrawal",t.siege_id,id)
+				if WorldSimulation.military.has_method("negotiated_siege_withdrawal"): result=WorldSimulation.military.call("negotiated_siege_withdrawal",t.siege_id,id)
 				ok=bool(result.get("ok",false)); message=String(result.get("message",result.get("error","The siege terms were declined.")))
 	else:
 		if not league.is_empty(): league.votes=forecast.votes
 		if message=="": message="The proposal did not receive unanimous consent. The recorded positions explain the disagreement; revise it and continue the discussion."
-	ForeignDiplomacy.leader(id)["audience_day"]=int(GameState.elapsed_days)
-	ForeignDiplomacy.remember(id,message); record(message)
+	WorldSimulation.diplomacy.leader(id)["audience_day"]=int(WorldSimulation.state.elapsed_days)
+	WorldSimulation.diplomacy.remember(id,message); record(message)
 	return {"ok":ok,"message":message}
 
 func record(message:String)->void:
-	state.history.push_front({"day":int(GameState.elapsed_days),"text":message})
+	state.history.push_front({"day":int(WorldSimulation.state.elapsed_days),"text":message})
 	if state.history.size()>24: state.history.resize(24)
 
 func note_food_aid(id:String,amount:float,day:int)->void:
@@ -188,8 +188,8 @@ func policy_allocations(id:String,allocations:Dictionary)->Dictionary:
 	return result
 
 func siege_info(id:String)->Dictionary:
-	if not MilitaryCampaign.has_method("siege_public_snapshot"): return {}
-	return MilitaryCampaign.call("siege_public_snapshot","" if id=="current" else id)
+	if not WorldSimulation.military.has_method("siege_public_snapshot"): return {}
+	return WorldSimulation.military.call("siege_public_snapshot","" if id=="current" else id)
 
 func covered(donor:String,beneficiary:String,siege_id:String)->bool:
 	for obligation:Dictionary in state.obligations:
@@ -205,7 +205,7 @@ func notify_attack(attacker:String,defender:String,siege_id:String,day:int)->voi
 	var siege:=siege_info(siege_id)
 	if not bool(siege.get("active",false)) or siege.get("attacker_id")!=attacker or siege.get("defender_id")!=defender or int(siege.get("start_day",-1))!=day: return
 	var verified:=false
-	for war:Dictionary in CivilizationSystem.war_history:
+	for war:Dictionary in WorldSimulation.world.war_history:
 		if String(war.get("status",""))=="active" and attacker in war.get("participants",[]) and defender in war.get("participants",[]) and war_initiator(war)==attacker: verified=true; break
 	if not verified: return
 	create_obligations(attacker,defender,siege_id,day)
@@ -242,7 +242,7 @@ func create_obligations(attacker:String,defender:String,siege_id:String,day:int)
 func observe_ally_wars()->void:
 	# Rival-only wars have aggregate records, not simulated siege scenes. Their
 	# defensive call requests player aid; it never manufactures a besieged city.
-	for war:Dictionary in CivilizationSystem.war_history:
+	for war:Dictionary in WorldSimulation.world.war_history:
 		if war.get("status")!="active" or "player" in war.get("participants",[]): continue
 		var attacker:=war_initiator(war)
 		if attacker=="": continue
@@ -255,8 +255,8 @@ func observe_ally_wars()->void:
 		# Use the known home route to the actual player origin for message travel.
 		var position:Dictionary=source.player_relation.get("home_position",{})
 		if not position.has_all(["x","z"]): continue
-		var delay:=maxi(3,ceili(CivilizationSystem.player_world_origin.distance_to(Vector2(float(position.x),float(position.z)))/13.0))
-		if int(GameState.elapsed_days)<int(war.started_day)+delay: continue
+		var delay:=maxi(3,ceili(WorldSimulation.world.player_world_origin.distance_to(Vector2(float(position.x),float(position.z)))/13.0))
+		if int(WorldSimulation.state.elapsed_days)<int(war.started_day)+delay: continue
 		create_obligations(attacker,defender,"war:"+String(war.id),int(war.started_day))
 
 func relief_quote(donor:String,beneficiary:String,siege_id:String)->Dictionary:
@@ -270,7 +270,8 @@ func relief_quote(donor:String,beneficiary:String,siege_id:String)->Dictionary:
 	if state.relief.size()>=16: return {"error":"All sixteen tracked relief missions are still active."}
 	var position:Dictionary=siege.get("target_position",{})
 	if not position.has_all(["x","z"]): return {"error":"No confirmed route reaches this siege."}
-	var origin:=CivilizationSystem._civilization_world_position(source)
+	if WorldSimulation.enabled:return preload("res://scripts/civilization_relief.gd").quote(donor,position)
+	var origin:=WorldSimulation.world._civilization_world_position(source)
 	var distance:=origin.distance_to(Vector2(float(position.x),float(position.z)))
 	var days:=maxi(3,ceili(distance/(17.0*(.75+float(source.logistics)*.25))))
 	var available:=maxi(0,floori(float(source.military_population)*.20))
@@ -285,10 +286,16 @@ func dispatch_relief(donor:String,beneficiary:String,siege_id:String)->Dictionar
 	var quote:=relief_quote(donor,beneficiary,siege_id)
 	if quote.has("error"): return quote
 	var source:=civ(donor)
-	source.military_population=float(source.military_population)-int(quote.troops)
-	source.food_days=maxf(0,float(source.food_days)-float(quote.food)/maxf(1,float(source.population)))
+	var ownership:Dictionary={}
+	if WorldSimulation.enabled:
+		ownership=preload("res://scripts/civilization_relief.gd").reserve(donor,quote)
+		if ownership.has("error"):return ownership
+	else:
+		source.military_population=float(source.military_population)-int(quote.troops)
+		source.food_days=maxf(0,float(source.food_days)-float(quote.food)/maxf(1,float(source.population)))
 	state.serial=int(state.serial)+1
-	var receipt:={"id":"relief_%d" % int(state.serial),"siege_id":siege_id,"donor_civ_id":donor,"beneficiary_id":beneficiary,"troops":int(quote.troops),"food":float(quote.camp_food),"travel_food":float(quote.travel_food),"travel_days":int(quote.travel_days),"due_day":int(GameState.elapsed_days)+int(quote.travel_days),"status":"outbound","survivors":int(quote.troops),"unused_food":0.0}
+	var receipt:={"id":"relief_%d" % int(state.serial),"siege_id":siege_id,"donor_civ_id":donor,"beneficiary_id":beneficiary,"troops":int(quote.troops),"food":float(quote.camp_food),"travel_food":float(quote.travel_food),"travel_days":int(quote.travel_days),"due_day":int(WorldSimulation.state.elapsed_days)+int(quote.travel_days),"status":"outbound","survivors":int(quote.troops),"unused_food":0.0}
+	receipt.merge(ownership)
 	state.relief.append(receipt)
 	for obligation:Dictionary in state.obligations:
 		if obligation.donor==donor and obligation.beneficiary==beneficiary and obligation.siege_id==siege_id: obligation.status="dispatched"
@@ -299,7 +306,7 @@ func dispatch_relief(donor:String,beneficiary:String,siege_id:String)->Dictionar
 func consume_receipt(receipt_id:String,siege_id:String)->Dictionary:
 	for receipt:Dictionary in state.relief:
 		if receipt.id!=receipt_id: continue
-		if receipt.siege_id!=siege_id or receipt.status!="delivered" or int(GameState.elapsed_days)<int(receipt.due_day): return {"error":"No matching delivered relief receipt is available."}
+		if receipt.siege_id!=siege_id or receipt.status!="delivered" or int(WorldSimulation.state.elapsed_days)<int(receipt.due_day): return {"error":"No matching delivered relief receipt is available."}
 		var siege:=siege_info(siege_id)
 		if not bool(siege.get("active",false)) or String(siege.get("defender_id",""))!=String(receipt.beneficiary_id): return {"error":"The receipt's beneficiary is not defending this active siege."}
 		receipt.status="camped"
@@ -311,23 +318,27 @@ func complete_relief(receipt_id:String,survivors:int,unused_food:float)->Diction
 		if receipt.id!=receipt_id: continue
 		# Relief camps do not participate in casualty rounds. A lower survivor
 		# count needs a future explicit casualty/death-ledger transaction first.
-		if receipt.status not in ["camped","delivered","outbound"] or survivors!=int(receipt.troops) or not is_finite(unused_food) or unused_food<0 or unused_food>float(receipt.food)+.001: return {"error":"Invalid or duplicate relief return."}
+		if receipt.status not in ["camped","delivered","outbound"] or (survivors!=int(receipt.troops) and not receipt.has("owned_actor")) or not is_finite(unused_food) or unused_food<0 or unused_food>float(receipt.food)+.001: return {"error":"Invalid or duplicate relief return."}
+		if receipt.has("owned_actor"):survivors=preload("res://scripts/civilization_relief.gd").strength(receipt)
 		receipt.survivors=survivors; receipt.unused_food=unused_food; receipt.status="returning"
-		receipt.due_day=int(GameState.elapsed_days)+int(receipt.travel_days)
+		receipt.due_day=int(WorldSimulation.state.elapsed_days)+int(receipt.travel_days)
 		return {"ok":true}
 	return {"error":"Unknown relief receipt."}
 
 func advance_relief(day:int)->void:
 	for receipt:Dictionary in state.relief.duplicate():
+		if receipt.has("owned_actor"):preload("res://scripts/civilization_relief.gd").advance(receipt,day)
 		if day<int(receipt.due_day): continue
 		if receipt.status=="outbound":
 			receipt.status="delivered"
 			var delivered:Dictionary={"error":"Siege ended."}
-			if MilitaryCampaign.has_method("receive_siege_relief"): delivered=MilitaryCampaign.call("receive_siege_relief",receipt.siege_id,receipt.id)
+			if WorldSimulation.military.has_method("receive_siege_relief"): delivered=WorldSimulation.military.call("receive_siege_relief",receipt.siege_id,receipt.id)
 			if not bool(delivered.get("ok",false)): complete_relief(receipt.id,int(receipt.troops),float(receipt.food))
 		elif receipt.status=="returning":
 			var source:=civ(receipt.donor_civ_id)
-			if not source.is_empty():
+			if receipt.has("owned_actor"):
+				preload("res://scripts/civilization_relief.gd").restore(receipt)
+			elif not source.is_empty():
 				source.military_population=minf(float(source.population),float(source.military_population)+int(receipt.survivors))
 				source.food_days=minf(180,float(source.food_days)+float(receipt.unused_food)/maxf(1,float(source.population)))
 				record("%d relief troops returned to %s with %.1f unused Food." % [int(receipt.survivors),String(source.name),float(receipt.unused_food)])
@@ -359,7 +370,7 @@ func public_snapshot(id:String)->Dictionary:
 	for receipt:Dictionary in state.relief:
 		if receipt.beneficiary_id=="player": missions.append({"id":receipt.id,"donor":receipt.donor_civ_id,"status":receipt.status,"due_day":receipt.due_day,"troops":receipt.troops})
 	var known:Array=[]
-	for value:Dictionary in CivilizationSystem.civilizations:
+	for value:Dictionary in WorldSimulation.world.civilizations:
 		if int(value.player_relation.get("contact_level",0))>=2: known.append({"id":String(value.id),"name":String(value.name)})
 	return {"protection":state.pacts.get(id,{}).duplicate(true),"league":league.duplicate(true),"obligations":promises,"relief":missions,"history":state.history.duplicate(true),"known_civilizations":known,"actions":ACTIONS,"goals":GOALS}
 
@@ -400,7 +411,7 @@ func validate(data:Variant)->bool:
 		if not receipt.id is String or receipt.id.length()>80 or receipt.id in receipts or not receipt.siege_id is String or receipt.siege_id.length()>120 or not receipt.donor_civ_id is String or civ(receipt.donor_civ_id).is_empty() or not receipt.beneficiary_id is String or (receipt.beneficiary_id!="player" and civ(receipt.beneficiary_id).is_empty()) or receipt.status not in ["outbound","delivered","camped","returning"]: return false
 		for key:String in ["troops","food","travel_food","travel_days","due_day","survivors","unused_food"]:
 			if not number(receipt[key]) or float(receipt[key])<0: return false
-		if receipt.troops<3 or receipt.troops>1000000000 or receipt.survivors!=receipt.troops or receipt.unused_food>receipt.food or receipt.travel_days<3: return false
+		if receipt.troops<3 or receipt.troops>1000000000 or (receipt.survivors!=receipt.troops and not receipt.has("owned_actor")) or receipt.unused_food>receipt.food or receipt.travel_days<3: return false
 		for key:String in ["troops","survivors","travel_days","due_day"]:
 			if float(receipt[key])!=floor(float(receipt[key])): return false
 		if not is_equal_approx(float(receipt.food),float(receipt.troops)*30*.55) or not is_equal_approx(float(receipt.travel_food),float(receipt.troops)*float(receipt.travel_days)*.55): return false

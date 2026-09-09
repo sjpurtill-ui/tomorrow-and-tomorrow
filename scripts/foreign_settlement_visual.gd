@@ -28,7 +28,7 @@ func build(report:Dictionary,height_at:Callable)->void:
 	footprint_radius=framing_size(report)*.27
 	set_meta("representative_layout",true)
 	var lanes:=SurfaceTool.new();lanes.begin(Mesh.PRIMITIVE_TRIANGLES);surfaces["EarthAndLanes"]=lanes
-	var rng:=RandomNumberGenerator.new();rng.seed=hash(String(report.city_id))^GameState.world_seed
+	var rng:=RandomNumberGenerator.new();rng.seed=hash(String(report.city_id))^WorldSimulation.state.world_seed
 	var heading:=rng.randf_range(-PI,PI)
 	var plan:Dictionary={"buildings":[],"replaced":{}}
 	var courts:=ceili(float(building_count)/4.0)

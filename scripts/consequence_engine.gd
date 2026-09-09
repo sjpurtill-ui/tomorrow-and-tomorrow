@@ -8,7 +8,7 @@ const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 var initialized := false
 
 func _food_system() -> Node:
-	return get_node("/root/FoodSystem")
+	return WorldSimulation.system("FoodSystem")
 
 func reset_for_new_world()->void:
 	initialized=false
@@ -17,11 +17,11 @@ func initialize() -> void:
 	if initialized:
 		return
 	initialized = true
-	GameState.initialize_population_model()
-	GameState.synchronize_population_allocations()
-	if GameState.resource_stockpiles.is_empty():
-		ResourceSystem.initialize()
-	GameState.simulation_metrics["health"] = GameState.population_health
+	WorldSimulation.state.initialize_population_model()
+	WorldSimulation.state.synchronize_population_allocations()
+	if WorldSimulation.state.resource_stockpiles.is_empty():
+		WorldSimulation.resources.initialize()
+	WorldSimulation.state.simulation_metrics["health"] = WorldSimulation.state.population_health
 
 func directive_assessment(effect_id:String,requested_magnitude:float,duration_days:float,office_execution:float=1.0,directive_parameters:Dictionary={})->Dictionary:
 	initialize()
@@ -30,13 +30,13 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 	var contract:=GovernmentPolicyCatalog.directive_contract(effect_id)
 	if contract.is_empty():
 		return {"can_apply":false,"blocker":"This directive has no bounded implementation contract.","id":effect_id}
-	var population:=maxf(1.0,GameState.population_exact)
-	var administration_share:=float(GameState.population_allocations.get("Administration",0))/population
-	var defense_share:=float(GameState.population_allocations.get("Defense",0))/population
-	var institutions:=clampf(float(GameState.society_capacities.get("institutions",0.0)),0.0,1.0)
-	var security:=clampf(float(GameState.simulation_metrics.get("security",GameState.society_capacities.get("security",0.0))),0.0,1.0)
-	var legitimacy:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5)),0.0,1.0)
-	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
+	var population:=maxf(1.0,WorldSimulation.state.population_exact)
+	var administration_share:=float(WorldSimulation.state.population_allocations.get("Administration",0))/population
+	var defense_share:=float(WorldSimulation.state.population_allocations.get("Defense",0))/population
+	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.0)),0.0,1.0)
+	var security:=clampf(float(WorldSimulation.state.simulation_metrics.get("security",WorldSimulation.state.society_capacities.get("security",0.0))),0.0,1.0)
+	var legitimacy:=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5)),0.0,1.0)
+	var cohesion:=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
 	var administration_capacity:=clampf(institutions*0.62+clampf(administration_share/0.06,0.0,1.0)*0.38,0.0,1.0)
 	var security_capacity:=clampf(security*0.72+clampf(defense_share/0.08,0.0,1.0)*0.28,0.0,1.0)
 	var administration_required:=clampf(float(contract.get("administration_required",0.0)),0.0,1.0)
@@ -47,13 +47,13 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 	var missing_discoveries:Array[String]=[]
 	for discovery_variant in contract.get("required_discoveries",[]):
 		var discovery:=String(discovery_variant)
-		if discovery not in GameState.known_discoveries: missing_discoveries.append(discovery)
+		if discovery not in WorldSimulation.state.known_discoveries: missing_discoveries.append(discovery)
 	if not missing_discoveries.is_empty(): knowledge_factor=0.0
 	var recognized_resource:=String(contract.get("recognized_resource",""))
 	var resource_recognition_factor:=1.0
 	if not recognized_resource.is_empty():
-		var recognized:=float(GameState.resource_stockpiles.get(recognized_resource,0.0))>0.0001
-		for deposit_variant in GameState.resource_deposits:
+		var recognized:=float(WorldSimulation.state.resource_stockpiles.get(recognized_resource,0.0))>0.0001
+		for deposit_variant in WorldSimulation.state.resource_deposits:
 			var deposit:Dictionary=deposit_variant
 			if String(deposit.get("resource",""))==recognized_resource and String(deposit.get("stage","unknown"))!="unknown": recognized=true; break
 		resource_recognition_factor=1.0 if recognized else 0.0
@@ -79,7 +79,7 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 	var operation_factor:=1.0
 	if operation=="recruitment_scouts":
 		var mission_days:=_scout_operation_days(duration)
-		operation_quote=CivilizationSystem.scout_mission_quote(mission_days,"recruit_people")
+		operation_quote=WorldSimulation.world.scout_mission_quote(mission_days,"recruit_people")
 		operation_factor=1.0 if bool(operation_quote.get("can_dispatch",false)) else 0.0
 	var implementation_rate:=clampf(clampf(office_execution,0.0,1.12)*administration_factor*security_factor*resource_factor*capacity_factor*knowledge_factor*resource_recognition_factor*operation_factor*(0.45+compliance*0.55),0.0,1.0)
 	var effective_magnitude:=clampf(requested*implementation_rate,0.0,0.25)
@@ -104,7 +104,7 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 			var raw_deaths:=floori((target_population if String(target.get("scope",""))=="all" else population*maxf(0.0,coefficient)*requested)*implementation_rate)
 			var annual_capacity:=_remaining_directive_death_capacity(population,security_capacity)
 			if counted_action:
-				annual_capacity=floori(float(GameState.population_cohorts.get("working_age",0))*security_capacity)
+				annual_capacity=floori(float(WorldSimulation.state.population_cohorts.get("working_age",0))*security_capacity)
 				# A person is indivisible. Require the full explicit count; never round
 				# a single act down through standing-policy magnitude/compliance.
 				raw_deaths=maxi(0,int(target.exact_count))
@@ -128,7 +128,7 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 	var blocker:=""
 	if not can_apply:
 		blocker="; ".join(blockers) if not blockers.is_empty() else "Implementation capacity is too low to produce a measurable effect."
-		if counted_action: blocker="The requested count is %d; eligible population is %d and available enforcement capacity is %d. No one was killed and no effects were applied." % [int(counted_target.exact_count),floori(_directive_target_population(counted_target,population)),floori(float(GameState.population_cohorts.get("working_age",0))*security_capacity)]
+		if counted_action: blocker="The requested count is %d; eligible population is %d and available enforcement capacity is %d. No one was killed and no effects were applied." % [int(counted_target.exact_count),floori(_directive_target_population(counted_target,population)),floori(float(WorldSimulation.state.population_cohorts.get("working_age",0))*security_capacity)]
 	return {
 		"id":effect_id,"domain":String(contract.get("domain","social")),"can_apply":can_apply,
 		"blocker":blocker,"limitations":blockers,
@@ -153,22 +153,22 @@ func _scout_operation_days(requested_days:float)->int:
 
 func _directive_target_population(target:Dictionary,population:float)->float:
 	if target.is_empty(): return population
-	GameState.initialize_population_model()
+	WorldSimulation.state.initialize_population_model()
 	var eligible:=0.0
 	var age_cohorts:Array=target.get("age_cohorts",[])
 	if age_cohorts.is_empty(): eligible=population
 	else:
 		for cohort_variant in age_cohorts:
-			eligible+=maxf(0.0,float(GameState.population_cohorts.get(String(cohort_variant),0.0)))
+			eligible+=maxf(0.0,float(WorldSimulation.state.population_cohorts.get(String(cohort_variant),0.0)))
 	var sex:=String(target.get("sex",""))
 	if sex in ["female","male"]:
-		eligible*=clampf(float(GameState.population_cohorts.get(sex,population*0.5))/maxf(1.0,population),0.0,1.0)
+		eligible*=clampf(float(WorldSimulation.state.population_cohorts.get(sex,population*0.5))/maxf(1.0,population),0.0,1.0)
 	return clampf(eligible,0.0,maxf(0.0,population-1.0))
 
 func apply_directive(effect_id:String,requested_magnitude:float,duration_days:float,source:String,metadata:Dictionary={},office_execution:float=1.0)->Dictionary:
 	var source_id:=String(metadata.get("source_order_id",""))
 	if not source_id.is_empty():
-		for prior in GameState.active_modifiers:
+		for prior in WorldSimulation.state.active_modifiers:
 			if String(prior.get("source_order_id",""))==source_id and String(prior.get("id",""))==effect_id:
 				return {"applied":false,"stale":true,"error":"This order already has an execution record."}
 	var directive_parameters:Dictionary=metadata.get("directive_parameters",{})
@@ -178,7 +178,7 @@ func apply_directive(effect_id:String,requested_magnitude:float,duration_days:fl
 		return {"applied":false,"assessment":assessment,"error":String(assessment.get("blocker","Directive cannot be implemented."))}
 	if String(assessment.get("operation",""))=="recruitment_scouts":
 		var mission_days:=_scout_operation_days(float(assessment.get("duration_days",90.0)))
-		var operation_result:=CivilizationSystem.dispatch_scouts(mission_days,"recruit_people")
+		var operation_result:=WorldSimulation.world.dispatch_scouts(mission_days,"recruit_people")
 		if not bool(operation_result.get("ok",false)):
 			return {"applied":false,"assessment":assessment,"error":String(operation_result.get("error","The recruitment expedition could not depart."))}
 		assessment["operation_result"]=operation_result.duplicate(true)
@@ -200,8 +200,8 @@ func apply_directive(effect_id:String,requested_magnitude:float,duration_days:fl
 	if not deadline_enforcement.is_empty():
 		directive_metadata["deadline_enforcement"]=deadline_enforcement
 		directive_metadata["deadline_resolved"]=false
-		directive_metadata["deadline_baseline_pregnancies"]=GameState.estimated_active_pregnancies()
-		directive_metadata["deadline_baseline_conceptions"]=GameState.lifetime_conceptions
+		directive_metadata["deadline_baseline_pregnancies"]=WorldSimulation.state.estimated_active_pregnancies()
+		directive_metadata["deadline_baseline_conceptions"]=WorldSimulation.state.lifetime_conceptions
 		directive_metadata["deadline_target_households"]=_pronatalist_target_households()
 	var applied:=apply_policy(effect_id,float(assessment.effective_magnitude),float(assessment.duration_days),source,directive_metadata)
 	if not applied:
@@ -214,7 +214,7 @@ func apply_directive(effect_id:String,requested_magnitude:float,duration_days:fl
 	assessment["costs"]=costs
 	var direct_effects:=_apply_directive_direct_effects(effect_id,assessment)
 	assessment["direct_effects_applied"]=direct_effects
-	for modifier_variant in GameState.active_modifiers:
+	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("id",""))!=effect_id or String(modifier.get("source_order_id",""))!=String(metadata.get("source_order_id","")): continue
 		modifier["directive_costs"]=costs.duplicate(true)
@@ -223,7 +223,7 @@ func apply_directive(effect_id:String,requested_magnitude:float,duration_days:fl
 			# Retain the receipt for saves/reviews, without a standing repression program.
 			modifier["effects"]={}
 			modifier["ended_reason"]="completed"
-			modifier["until_day"]=GameState.elapsed_days-0.001
+			modifier["until_day"]=WorldSimulation.state.elapsed_days-0.001
 		break
 	var consequence:=String(assessment.second_order_consequence)
 	var implementation_phrase:="Implementation is broad" if float(assessment.implementation_rate)>=0.72 else "Implementation is uneven" if float(assessment.implementation_rate)>=0.36 else "Implementation is narrow"
@@ -235,42 +235,42 @@ func _pronatalist_target_households()->int:
 	# Households are not individual agents. Infer a conservative bounded count from
 	# the fixed age cohorts: the smaller of likely parents and children, discounted
 	# to approximate one-child households. This remains O(1) at world scale.
-	GameState.initialize_population_model()
-	var likely_parents:=float(GameState.population_cohorts.get("youth",0.0))*0.22+float(GameState.population_cohorts.get("early_adults",0.0))*0.62+float(GameState.population_cohorts.get("established_adults",0.0))*0.68+float(GameState.population_cohorts.get("mature_adults",0.0))*0.18
-	var children:=float(GameState.population_cohorts.get("children",0.0))
-	return clampi(roundi(minf(likely_parents,children)*0.46),0,maxi(0,roundi(GameState.population_exact/3.0)))
+	WorldSimulation.state.initialize_population_model()
+	var likely_parents:=float(WorldSimulation.state.population_cohorts.get("youth",0.0))*0.22+float(WorldSimulation.state.population_cohorts.get("early_adults",0.0))*0.62+float(WorldSimulation.state.population_cohorts.get("established_adults",0.0))*0.68+float(WorldSimulation.state.population_cohorts.get("mature_adults",0.0))*0.18
+	var children:=float(WorldSimulation.state.population_cohorts.get("children",0.0))
+	return clampi(roundi(minf(likely_parents,children)*0.46),0,maxi(0,roundi(WorldSimulation.state.population_exact/3.0)))
 
 func _directive_material_available()->float:
 	var total:=0.0
-	for resource_variant in GameState.resource_stockpiles:
+	for resource_variant in WorldSimulation.state.resource_stockpiles:
 		var resource:=String(resource_variant)
 		if resource in ["Food","Freshwater"]: continue
-		total+=maxf(0.0,float(GameState.resource_stockpiles.get(resource,0.0)))
+		total+=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource,0.0)))
 	return total
 
 func _withdraw_directive_materials(requested:float)->float:
 	var remaining:=maxf(0.0,requested)
 	var resources:Array[String]=[]
-	for resource_variant in GameState.resource_stockpiles:
+	for resource_variant in WorldSimulation.state.resource_stockpiles:
 		var resource:=String(resource_variant)
 		if resource not in ["Food","Freshwater"]: resources.append(resource)
 	resources.sort()
 	for resource in resources:
 		if remaining<=0.0001: break
-		var stored:=maxf(0.0,float(GameState.resource_stockpiles.get(resource,0.0)))
+		var stored:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource,0.0)))
 		var used:=minf(stored,remaining)
-		GameState.resource_stockpiles[resource]=stored-used
+		WorldSimulation.state.resource_stockpiles[resource]=stored-used
 		remaining-=used
 	return maxf(0.0,requested-remaining)
 
 func _remaining_directive_death_capacity(population:float,security_capacity:float)->int:
 	var recent:=0
-	var current_day:=int(GameState.elapsed_days)
-	for record_variant in GameState.demographic_ledger:
+	var current_day:=int(WorldSimulation.state.elapsed_days)
+	for record_variant in WorldSimulation.state.demographic_ledger:
 		var record:Dictionary=record_variant
 		if current_day-int(record.get("day",current_day))>365: continue
 		if String(record.get("cause","")).begins_with("Directive:"): recent+=maxi(0,int(record.get("count",0)))
-	var annual_capacity:=mini(maxi(0,roundi(population)-1),roundi(float(GameState.population_allocations.get("Defense",0))*3.0+population*security_capacity*0.002))
+	var annual_capacity:=mini(maxi(0,roundi(population)-1),roundi(float(WorldSimulation.state.population_allocations.get("Defense",0))*3.0+population*security_capacity*0.002))
 	return maxi(0,annual_capacity-recent)
 
 func _apply_directive_direct_effects(effect_id:String,assessment:Dictionary)->Dictionary:
@@ -286,21 +286,21 @@ func _apply_directive_direct_effects(effect_id:String,assessment:Dictionary)->Di
 			target=target.duplicate(true)
 			target["source_order_id"]=String(assessment.get("source_order_id",""))
 			var description:="The order executed %s once." % String(target.get("label","the specified count")) if bool(parameters.get("one_time",false)) else String(assessment.get("second_order_consequence","Deaths resulted from directive enforcement."))
-			var death_result:=GameState.register_directive_population_deaths(requested_deaths,effect_id,description,target)
+			var death_result:=WorldSimulation.state.register_directive_population_deaths(requested_deaths,effect_id,description,target)
 			applied[channel]=int(death_result.get("count",0))
 			# Some targeted people flee or hide when enforcement is visible. Departures
 			# are living population loss, not falsely recorded casualties.
 			if requested_deaths>0 and not bool(parameters.get("one_time",false)) and float(assessment.get("resistance",0.0))>0.30:
 				var departures:=floori(float(requested_deaths)*float(assessment.get("resistance",0.0))*0.45)
-				var departure_result:=GameState.register_population_departures(departures,"Flight from directive: %s" % effect_id.replace("_"," "))
+				var departure_result:=WorldSimulation.state.register_population_departures(departures,"Flight from directive: %s" % effect_id.replace("_"," "))
 				applied["population_departures"]=int(departure_result.get("count",0))
 			continue
 		if not metric_map.has(channel): continue
 		var metric:=String(metric_map[channel])
-		var before:=float(GameState.simulation_metrics.get(metric,GameState.population_health if metric=="health" else 0.5))
+		var before:=float(WorldSimulation.state.simulation_metrics.get(metric,WorldSimulation.state.population_health if metric=="health" else 0.5))
 		var after:=clampf(before+float(planned[channel]),0.01,0.99)
-		GameState.simulation_metrics[metric]=after
-		if metric=="health": GameState.population_health=after
+		WorldSimulation.state.simulation_metrics[metric]=after
+		if metric=="health": WorldSimulation.state.population_health=after
 		applied[channel]=after-before
 	return applied
 
@@ -308,9 +308,9 @@ func apply_policy(effect_id: String,magnitude: float,duration_days: float,source
 	initialize()
 	var incoming_sequence:=int(metadata.get("source_order_sequence",0))
 	var incoming_order_id:=String(metadata.get("source_order_id",""))
-	for existing_variant in GameState.active_modifiers:
+	for existing_variant in WorldSimulation.state.active_modifiers:
 		var existing:Dictionary=existing_variant
-		if String(existing.get("id",""))!=effect_id or String(existing.get("kind",""))!="policy" or GameState.elapsed_days>float(existing.get("until_day",-INF)): continue
+		if String(existing.get("id",""))!=effect_id or String(existing.get("kind",""))!="policy" or WorldSimulation.state.elapsed_days>float(existing.get("until_day",-INF)): continue
 		if incoming_order_id!="" and String(existing.get("source_order_id",""))==incoming_order_id: return false
 		var existing_sequence:=int(existing.get("source_order_sequence",0))
 		if incoming_sequence>0 and existing_sequence>incoming_sequence:
@@ -320,31 +320,31 @@ func apply_policy(effect_id: String,magnitude: float,duration_days: float,source
 	# exploitable stack of repeated identical pronouncements.
 	var superseded:=false
 	var prior_magnitude:=0.0
-	for modifier in GameState.active_modifiers:
+	for modifier in WorldSimulation.state.active_modifiers:
 		if bool(metadata.get("directive_parameters",{}).get("one_time",false)): break
-		if String(modifier.get("id",""))==effect_id and String(modifier.get("kind",""))=="policy" and GameState.elapsed_days<=float(modifier.get("until_day",-INF)):
+		if String(modifier.get("id",""))==effect_id and String(modifier.get("kind",""))=="policy" and WorldSimulation.state.elapsed_days<=float(modifier.get("until_day",-INF)):
 			superseded=true
 			prior_magnitude=float(modifier.get("magnitude",0.0))
 			_refresh_policy_observation_record(modifier)
-			modifier["until_day"]=GameState.elapsed_days-0.001
-			modifier["ended_day"]=GameState.elapsed_days
+			modifier["until_day"]=WorldSimulation.state.elapsed_days-0.001
+			modifier["ended_day"]=WorldSimulation.state.elapsed_days
 			modifier["ended_reason"]="superseded"
 			modifier["superseded_by_order_id"]=String(metadata.get("source_order_id",""))
 	if superseded: _record_policy_churn(clampf(0.025+absf(prior_magnitude-clampf(magnitude,-0.35,0.35))*0.12,0.025,0.07),"A standing %s directive was replaced before its term ended." % effect_id.replace("_"," "))
 	var effects:Dictionary=(metadata.get("effects",{}) as Dictionary).duplicate(true)
 	if effects.is_empty() and GovernmentPolicyCatalog.has_policy(effect_id): effects=GovernmentPolicyCatalog.definition(effect_id).get("effects",{})
-	var record:={"id":effect_id,"kind":"policy","effects":effects,"magnitude":clampf(magnitude,-0.35,0.35),"started_day":GameState.elapsed_days,"until_day":GameState.elapsed_days+clampf(duration_days,1.0,3650.0),"description":source}
+	var record:={"id":effect_id,"kind":"policy","effects":effects,"magnitude":clampf(magnitude,-0.35,0.35),"started_day":WorldSimulation.state.elapsed_days,"until_day":WorldSimulation.state.elapsed_days+clampf(duration_days,1.0,3650.0),"description":source}
 	var observation_baseline:=_capture_policy_observation(effects)
 	var observation_baseline_days:Dictionary={}
-	for metric in observation_baseline: observation_baseline_days[metric]=GameState.elapsed_days
+	for metric in observation_baseline: observation_baseline_days[metric]=WorldSimulation.state.elapsed_days
 	record["observation_baseline"]=observation_baseline
 	record["observation_baseline_days"]=observation_baseline_days
 	record["observation_latest"]=observation_baseline.duplicate(true)
-	record["observation_updated_day"]=GameState.elapsed_days
+	record["observation_updated_day"]=WorldSimulation.state.elapsed_days
 	for key in metadata:
 		if String(key)=="effects": continue
 		record[key]=metadata[key]
-	GameState.active_modifiers.append(record)
+	WorldSimulation.state.active_modifiers.append(record)
 	_prune_policy_history()
 	_add_event("Directive Issued",source,"policy","notice")
 	return true
@@ -353,14 +353,14 @@ func repeal_policy(effect_id:String,source:String,metadata:Dictionary={})->bool:
 	initialize()
 	var repealed:=false
 	var longest_remaining:=0.0
-	for modifier in GameState.active_modifiers:
+	for modifier in WorldSimulation.state.active_modifiers:
 		if String(modifier.get("id",""))!=effect_id or String(modifier.get("kind",""))!="policy": continue
-		if GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
-		longest_remaining=maxf(longest_remaining,float(modifier.get("until_day",GameState.elapsed_days))-GameState.elapsed_days)
+		if WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		longest_remaining=maxf(longest_remaining,float(modifier.get("until_day",WorldSimulation.state.elapsed_days))-WorldSimulation.state.elapsed_days)
 		_refresh_policy_observation_record(modifier)
-		modifier["until_day"]=GameState.elapsed_days-0.001
-		modifier["repealed_day"]=GameState.elapsed_days
-		modifier["ended_day"]=GameState.elapsed_days
+		modifier["until_day"]=WorldSimulation.state.elapsed_days-0.001
+		modifier["repealed_day"]=WorldSimulation.state.elapsed_days
+		modifier["ended_day"]=WorldSimulation.state.elapsed_days
 		modifier["ended_reason"]="repealed"
 		for key in metadata: modifier["repeal_"+String(key)]=metadata[key]
 		repealed=true
@@ -370,39 +370,39 @@ func repeal_policy(effect_id:String,source:String,metadata:Dictionary={})->bool:
 	return repealed
 
 func _record_policy_churn(magnitude:float,description:String)->void:
-	GameState.active_modifiers.append({"id":"policy_churn","kind":"governance","magnitude":clampf(magnitude,0.0,0.10),"started_day":GameState.elapsed_days,"until_day":GameState.elapsed_days+120.0,"description":description})
+	WorldSimulation.state.active_modifiers.append({"id":"policy_churn","kind":"governance","magnitude":clampf(magnitude,0.0,0.10),"started_day":WorldSimulation.state.elapsed_days,"until_day":WorldSimulation.state.elapsed_days+120.0,"description":description})
 	_add_event("Policy Reversal",description,"institutions","warning")
 
 func refresh_policy_lifecycle()->void:
-	for modifier_variant in GameState.active_modifiers:
+	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("kind","")) not in ["policy","governance"] or modifier.has("ended_reason"): continue
-		if GameState.elapsed_days>float(modifier.get("until_day",INF)):
+		if WorldSimulation.state.elapsed_days>float(modifier.get("until_day",INF)):
 			if String(modifier.get("kind",""))=="policy" and not bool(modifier.get("deadline_resolved",true)):
 				_resolve_deadline_enforcement(modifier)
 			if String(modifier.get("kind",""))=="policy": _refresh_policy_observation_record(modifier)
 			modifier["ended_reason"]="expired"
-			modifier["ended_day"]=float(modifier.get("until_day",GameState.elapsed_days))
+			modifier["ended_day"]=float(modifier.get("until_day",WorldSimulation.state.elapsed_days))
 
 func _resolve_deadline_enforcement(policy:Dictionary)->void:
 	policy["deadline_resolved"]=true
 	if String(policy.get("deadline_enforcement",""))!="pregnancy_threat": return
 	var target_households:=maxi(0,int(policy.get("deadline_target_households",0)))
-	var new_conceptions:=maxi(0,GameState.lifetime_conceptions-int(policy.get("deadline_baseline_conceptions",GameState.lifetime_conceptions)))
+	var new_conceptions:=maxi(0,WorldSimulation.state.lifetime_conceptions-int(policy.get("deadline_baseline_conceptions",WorldSimulation.state.lifetime_conceptions)))
 	var noncompliant:=maxi(0,target_households-mini(target_households,new_conceptions))
 	var parameters:Dictionary=policy.get("directive_parameters",{})
 	var target:Dictionary=parameters.get("demographic_target",{})
-	var security_capacity:=clampf(float(GameState.simulation_metrics.get("security",0.0)),0.0,1.0)
-	var executable:=mini(noncompliant,_remaining_directive_death_capacity(maxf(1.0,GameState.population_exact),security_capacity))
+	var security_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("security",0.0)),0.0,1.0)
+	var executable:=mini(noncompliant,_remaining_directive_death_capacity(maxf(1.0,WorldSimulation.state.population_exact),security_capacity))
 	var enforced:=floori(float(executable)*clampf(float(policy.get("implementation_rate",0.0)),0.0,1.0))
-	var death_result:=GameState.register_directive_population_deaths(enforced,String(policy.get("id","coercive_pronatalism")),"Parents in households that did not meet the pregnancy threat were killed when its deadline arrived.",target)
+	var death_result:=WorldSimulation.state.register_directive_population_deaths(enforced,String(policy.get("id","coercive_pronatalism")),"Parents in households that did not meet the pregnancy threat were killed when its deadline arrived.",target)
 	var killed:=int(death_result.get("count",0))
-	var flight_result:=GameState.register_population_departures(floori(float(noncompliant)*clampf(float(policy.get("resistance",0.0)),0.0,1.0)*0.24),"Flight from pregnancy enforcement")
+	var flight_result:=WorldSimulation.state.register_population_departures(floori(float(noncompliant)*clampf(float(policy.get("resistance",0.0)),0.0,1.0)*0.24),"Flight from pregnancy enforcement")
 	var fled:=int(flight_result.get("count",0))
-	var legitimacy:=float(GameState.simulation_metrics.get("legitimacy",0.5))
-	var cohesion:=float(GameState.simulation_metrics.get("cohesion",0.5))
-	GameState.simulation_metrics["legitimacy"]=clampf(legitimacy-0.01-minf(0.08,float(killed+fled)/maxf(1.0,GameState.population_exact)*0.22),0.01,0.99)
-	GameState.simulation_metrics["cohesion"]=clampf(cohesion-0.008-minf(0.06,float(killed+fled)/maxf(1.0,GameState.population_exact)*0.18),0.01,0.99)
+	var legitimacy:=float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))
+	var cohesion:=float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))
+	WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(legitimacy-0.01-minf(0.08,float(killed+fled)/maxf(1.0,WorldSimulation.state.population_exact)*0.22),0.01,0.99)
+	WorldSimulation.state.simulation_metrics["cohesion"]=clampf(cohesion-0.008-minf(0.06,float(killed+fled)/maxf(1.0,WorldSimulation.state.population_exact)*0.18),0.01,0.99)
 	policy["deadline_result"]={"target_households":target_households,"new_conceptions":new_conceptions,"noncompliant_households":noncompliant,"deaths":killed,"departures":fled}
 	var description:="The pregnancy deadline passed."
 	if killed>0 or fled>0: description+=" Enforcement killed %d people; %d fled or disappeared from the census." % [killed,fled]
@@ -412,35 +412,35 @@ func _resolve_deadline_enforcement(policy:Dictionary)->void:
 
 func _prune_policy_history(limit:=400)->void:
 	refresh_policy_lifecycle()
-	if GameState.active_modifiers.size()<=limit: return
+	if WorldSimulation.state.active_modifiers.size()<=limit: return
 	var retained_orders:Dictionary={}
-	for order_variant in GameState.sovereign_orders: retained_orders[String((order_variant as Dictionary).get("id",""))]=true
-	while GameState.active_modifiers.size()>limit:
+	for order_variant in WorldSimulation.state.sovereign_orders: retained_orders[String((order_variant as Dictionary).get("id",""))]=true
+	while WorldSimulation.state.active_modifiers.size()>limit:
 		var remove_index:=-1
-		for index in GameState.active_modifiers.size():
-			var modifier:Dictionary=GameState.active_modifiers[index]
+		for index in WorldSimulation.state.active_modifiers.size():
+			var modifier:Dictionary=WorldSimulation.state.active_modifiers[index]
 			if String(modifier.get("kind","")) not in ["policy","governance"] or not modifier.has("ended_reason"): continue
 			if String(modifier.get("kind",""))=="policy" and retained_orders.has(String(modifier.get("source_order_id",""))): continue
 			remove_index=index
 			break
 		if remove_index<0: break
-		GameState.active_modifiers.remove_at(remove_index)
+		WorldSimulation.state.active_modifiers.remove_at(remove_index)
 
 func modifier_strength(effect_id: String) -> float:
 	var result := 0.0
-	for modifier in GameState.active_modifiers:
+	for modifier in WorldSimulation.state.active_modifiers:
 		if String(modifier.get("id","")) != effect_id:
 			continue
-		if GameState.elapsed_days > float(modifier.get("until_day",INF)):
+		if WorldSimulation.state.elapsed_days > float(modifier.get("until_day",INF)):
 			continue
 		result += clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)
 	return clampf(result,-0.50,0.50)
 
 func policy_effect(channel:String)->float:
 	var result:=0.0
-	for modifier_variant in GameState.active_modifiers:
+	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
-		if String(modifier.get("kind",""))!="policy" or GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		if String(modifier.get("kind",""))!="policy" or WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
 		var effects:Dictionary=modifier.get("effects",{})
 		if effects.is_empty() and GovernmentPolicyCatalog.has_policy(String(modifier.get("id",""))): effects=GovernmentPolicyCatalog.definition(String(modifier.id)).get("effects",{})
 		if not effects.has(channel): continue
@@ -449,7 +449,7 @@ func policy_effect(channel:String)->float:
 
 func policy_observation(policy:Dictionary)->Dictionary:
 	if policy.is_empty(): return {"summary":"No linked metric baseline is available yet.","metrics":[],"days_elapsed":0.0}
-	if String(policy.get("kind","policy"))=="policy" and not policy.has("ended_reason") and GameState.elapsed_days<=float(policy.get("until_day",INF)):
+	if String(policy.get("kind","policy"))=="policy" and not policy.has("ended_reason") and WorldSimulation.state.elapsed_days<=float(policy.get("until_day",INF)):
 		_refresh_policy_observation_record(policy)
 	var baseline:Dictionary=policy.get("observation_baseline",{})
 	var latest:Dictionary=policy.get("observation_latest",{})
@@ -470,8 +470,8 @@ func policy_observation(policy:Dictionary)->Dictionary:
 		var delta:=current_value-baseline_value
 		var line:=GovernmentPolicyCatalog.formatted_observation(channel,baseline_value,current_value)
 		if not line.is_empty(): lines.append(line)
-		metrics.append({"channel":channel,"metric":metric,"label":String(spec.get("label",metric)),"baseline":baseline_value,"current":current_value,"delta":delta,"expected_direction":expected_direction,"moving_with_expected_direction":absf(delta)<0.000001 or signf(delta)==expected_direction,"baseline_day":float(baseline_days.get(metric,policy.get("started_day",GameState.elapsed_days)))})
-	var end_day:=minf(GameState.elapsed_days,float(policy.get("ended_day",policy.get("until_day",GameState.elapsed_days)))) if policy.has("ended_reason") else GameState.elapsed_days
+		metrics.append({"channel":channel,"metric":metric,"label":String(spec.get("label",metric)),"baseline":baseline_value,"current":current_value,"delta":delta,"expected_direction":expected_direction,"moving_with_expected_direction":absf(delta)<0.000001 or signf(delta)==expected_direction,"baseline_day":float(baseline_days.get(metric,policy.get("started_day",WorldSimulation.state.elapsed_days)))})
+	var end_day:=minf(WorldSimulation.state.elapsed_days,float(policy.get("ended_day",policy.get("until_day",WorldSimulation.state.elapsed_days)))) if policy.has("ended_reason") else WorldSimulation.state.elapsed_days
 	var days_elapsed:=maxf(0.0,end_day-float(policy.get("started_day",end_day)))
 	return {"summary":" • ".join(lines) if not lines.is_empty() else "Linked metric baseline will form after the next simulation day.","metrics":metrics,"days_elapsed":days_elapsed,"updated_day":float(policy.get("observation_updated_day",policy.get("started_day",end_day))),"disclaimer":"Observed movement also reflects staffing, resources, environment, conflict, discoveries, and other policies."}
 
@@ -483,9 +483,9 @@ func _capture_policy_observation(effects:Dictionary)->Dictionary:
 		if metric.is_empty(): continue
 		var value:Variant
 		if metric.begins_with("stockpile:"):
-			value=GameState.resource_stockpiles.get(metric.trim_prefix("stockpile:"),0.0)
-		elif GameState.simulation_metrics.has(metric):
-			value=GameState.simulation_metrics[metric]
+			value=WorldSimulation.state.resource_stockpiles.get(metric.trim_prefix("stockpile:"),0.0)
+		elif WorldSimulation.state.simulation_metrics.has(metric):
+			value=WorldSimulation.state.simulation_metrics[metric]
 		else:
 			continue
 		if value is float or value is int: snapshot[metric]=float(value)
@@ -500,28 +500,28 @@ func _refresh_policy_observation_record(policy:Dictionary)->void:
 	for metric in current:
 		if not baseline.has(metric):
 			baseline[metric]=current[metric]
-			baseline_days[metric]=GameState.elapsed_days
+			baseline_days[metric]=WorldSimulation.state.elapsed_days
 	policy["observation_baseline"]=baseline
 	policy["observation_baseline_days"]=baseline_days
 	policy["observation_latest"]=current
-	policy["observation_updated_day"]=GameState.elapsed_days
+	policy["observation_updated_day"]=WorldSimulation.state.elapsed_days
 
 func _refresh_all_policy_observations()->void:
-	for modifier_variant in GameState.active_modifiers:
+	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
-		if String(modifier.get("kind",""))!="policy" or modifier.has("ended_reason") or GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		if String(modifier.get("kind",""))!="policy" or modifier.has("ended_reason") or WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
 		_refresh_policy_observation_record(modifier)
 
 func active_policies()->Array[Dictionary]:
 	refresh_policy_lifecycle()
 	var result:Array[Dictionary]=[]
-	for modifier_variant in GameState.active_modifiers:
+	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("kind",""))!="policy": continue
-		if GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		if WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
 		var policy:=modifier.duplicate(true)
 		if (policy.get("effects",{}) as Dictionary).is_empty() and GovernmentPolicyCatalog.has_policy(String(policy.get("id",""))): policy["effects"]=GovernmentPolicyCatalog.definition(String(policy.id)).get("effects",{})
-		policy["remaining_days"]=maxf(0.0,float(policy.get("until_day",GameState.elapsed_days))-GameState.elapsed_days)
+		policy["remaining_days"]=maxf(0.0,float(policy.get("until_day",WorldSimulation.state.elapsed_days))-WorldSimulation.state.elapsed_days)
 		result.append(policy)
 	result.sort_custom(func(a:Dictionary,b:Dictionary): return float(a.get("until_day",INF))<float(b.get("until_day",INF)))
 	return result
@@ -548,10 +548,10 @@ func governance_metrics()->Dictionary:
 	return {"active_policy_count":active.size(),"administrative_load":administrative_load,"policy_churn":churn,"directive_resistance_pressure":clampf(resistance_pressure,0.0,0.35),"directive_compliance":compliance_weighted/directive_weight if directive_weight>0.0001 else 1.0,"council_support":_council_support(),"office_policy_counts":offices}
 
 func _council_support()->float:
-	if GameState.advisor_roster.is_empty(): return 0.5
+	if WorldSimulation.state.advisor_roster.is_empty(): return 0.5
 	var total:=0.0
 	var count:=0
-	for advisor_variant in GameState.advisor_roster:
+	for advisor_variant in WorldSimulation.state.advisor_roster:
 		var advisor:Dictionary=advisor_variant
 		var relationship:Dictionary=advisor.get("relationships",{}).get("sovereign",{})
 		if relationship.is_empty(): continue
@@ -561,43 +561,43 @@ func _council_support()->float:
 
 func process_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
-	if GameState.resource_settlement_id=="": refresh_policy_lifecycle()
-	GameState.synchronize_population_allocations()
-	var previous: Dictionary = GameState.simulation_metrics.duplicate(true)
-	var traveling:=bool(context.get("traveling",GameState.convoy_traveling))
-	GameState.convoy_traveling=traveling
-	var population := maxf(1.0,GameState.population_exact)
-	var able_population := maxf(1.0,float(GameState.able_population()))
-	var food_workers := float(GameState.population_allocations.get("Food",0))
-	var surveyors := float(GameState.population_allocations.get("Survey",0))
-	var extractors := float(GameState.population_allocations.get("Extraction",0))
-	var builders := float(GameState.population_allocations.get("Construction",0))
-	var makers := float(GameState.population_allocations.get("Crafting",0))
-	var military_campaign:=get_node_or_null("/root/MilitaryCampaign")
+	if WorldSimulation.state.resource_settlement_id=="": refresh_policy_lifecycle()
+	WorldSimulation.state.synchronize_population_allocations()
+	var previous: Dictionary = WorldSimulation.state.simulation_metrics.duplicate(true)
+	var traveling:=bool(context.get("traveling",WorldSimulation.state.convoy_traveling))
+	WorldSimulation.state.convoy_traveling=traveling
+	var population := maxf(1.0,WorldSimulation.state.population_exact)
+	var able_population := maxf(1.0,float(WorldSimulation.state.able_population()))
+	var food_workers := float(WorldSimulation.state.population_allocations.get("Food",0))
+	var surveyors := float(WorldSimulation.state.population_allocations.get("Survey",0))
+	var extractors := float(WorldSimulation.state.population_allocations.get("Extraction",0))
+	var builders := float(WorldSimulation.state.population_allocations.get("Construction",0))
+	var makers := float(WorldSimulation.state.population_allocations.get("Crafting",0))
+	var military_campaign:=WorldSimulation.system("MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
-	var carriers := float(GameState.population_allocations.get("Logistics",0))
-	var observers := float(GameState.population_allocations.get("Knowledge",0))
-	var stewards := float(GameState.population_allocations.get("Administration",0))
-	var guards := float(GameState.population_allocations.get("Defense",0))
-	var dynamics:=GameState.society_capacities
+	var carriers := float(WorldSimulation.state.population_allocations.get("Logistics",0))
+	var observers := float(WorldSimulation.state.population_allocations.get("Knowledge",0))
+	var stewards := float(WorldSimulation.state.population_allocations.get("Administration",0))
+	var guards := float(WorldSimulation.state.population_allocations.get("Defense",0))
+	var dynamics:=WorldSimulation.state.society_capacities
 	var governance:=governance_metrics()
 	var administrative_load:=float(governance.administrative_load)
 	var policy_churn:=float(governance.policy_churn)
 	var directive_resistance:=float(governance.get("directive_resistance_pressure",0.0))
 	var council_support:=float(governance.council_support)
-	var foreign_effects:Dictionary=CivilizationSystem.player_effects()
+	var foreign_effects:Dictionary=WorldSimulation.world.player_effects()
 
-	var prior_health := float(previous.get("health",GameState.population_health))
+	var prior_health := float(previous.get("health",WorldSimulation.state.population_health))
 	var prior_cohesion := float(previous.get("cohesion",0.58))
-	var permanent_housing_ratio := clampf(float(GameState.housing_capacity)/population,0.15,1.12)
+	var permanent_housing_ratio := clampf(float(WorldSimulation.state.housing_capacity)/population,0.15,1.12)
 	var mobile_shelter_ratio:=clampf(0.20+carriers/maxf(1.0,population*0.10)*0.27+builders/maxf(1.0,population*0.12)*0.17,0.18,0.72)
-	mobile_shelter_ratio+=DiscoverySystem.effect("mobile_shelter")
+	mobile_shelter_ratio+=WorldSimulation.discovery.effect("mobile_shelter")
 	mobile_shelter_ratio=clampf(mobile_shelter_ratio,0.18,0.86)
 	var housing_ratio := mobile_shelter_ratio if traveling else permanent_housing_ratio
 	var labor_efficiency := clampf(0.34+prior_health*0.34+prior_cohesion*0.18+housing_ratio*0.12,0.25,1.08)
 	labor_efficiency*=lerpf(0.82,1.08,clampf(float(dynamics.get("labor",0.5)),0.0,1.0))
-	labor_efficiency*=(1.0+policy_effect("labor_multiplier")+GameState.founding_effect("labor_multiplier")+ProgressionSystem.effect("labor_efficiency"))*(1.0-administrative_load)
+	labor_efficiency*=(1.0+policy_effect("labor_multiplier")+WorldSimulation.state.founding_effect("labor_multiplier")+WorldSimulation.progression.effect("labor_efficiency"))*(1.0-administrative_load)
 	# Scouts, envoys, and moving settlement populations are real aggregate
 	# commitments absent from ordinary work until they arrive or return. One
 	# bounded ratio changes output without traveler or person records.
@@ -613,69 +613,69 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var heat_pressure:=clampf(float(environmental_hazards.get("heat",0.0)),0.0,1.0)
 	var storm_pressure:=clampf(float(environmental_hazards.get("storm",0.0)),0.0,1.0)
 	var environmental_resilience:=clampf(float(environment.get("ecological_resilience",0.5)),0.0,1.0)
-	var industrial_activity:=clampf(float(GameState.material_metrics.get("extracted_today",0.0))/maxf(1.0,population*0.08),0.0,2.0)
+	var industrial_activity:=clampf(float(WorldSimulation.state.material_metrics.get("extracted_today",0.0))/maxf(1.0,population*0.08),0.0,2.0)
 	var food_production:=float(food_result.food_production)
 	var food_consumption:=float(food_result.food_consumption)
-	var food_stored:=float(GameState.resource_stockpiles.get("Food",0.0))
+	var food_stored:=float(WorldSimulation.state.resource_stockpiles.get("Food",0.0))
 	var food_days:=float(food_result.food_days)
 	var production_ratio:=float(food_result.food_balance)+1.0
 	var intake_ratio:=float(food_result.food_intake_ratio)
 	var malnutrition:=float(food_result.malnutrition_burden)
-	var water_intake:=clampf(float(GameState.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
+	var water_intake:=clampf(float(WorldSimulation.state.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
 	if intake_ratio<0.95:
-		GameState.consecutive_food_shortage_days+=1.0
+		WorldSimulation.state.consecutive_food_shortage_days+=1.0
 	else:
-		GameState.consecutive_food_shortage_days=maxf(0.0,GameState.consecutive_food_shortage_days-2.0)
+		WorldSimulation.state.consecutive_food_shortage_days=maxf(0.0,WorldSimulation.state.consecutive_food_shortage_days-2.0)
 	if water_intake<0.98:
-		GameState.consecutive_water_shortage_days+=1.0
+		WorldSimulation.state.consecutive_water_shortage_days+=1.0
 	else:
-		GameState.consecutive_water_shortage_days=maxf(0.0,GameState.consecutive_water_shortage_days-2.0)
+		WorldSimulation.state.consecutive_water_shortage_days=maxf(0.0,WorldSimulation.state.consecutive_water_shortage_days-2.0)
 	if traveling and housing_ratio<0.68:
-		GameState.convoy_exposure_days+=1.0-housing_ratio
+		WorldSimulation.state.convoy_exposure_days+=1.0-housing_ratio
 	else:
-		GameState.convoy_exposure_days=maxf(0.0,GameState.convoy_exposure_days-1.5)
-	var food_security_target := clampf(0.05+minf(1.0,food_days/45.0)*0.30+minf(1.15,production_ratio)*0.25+intake_ratio*0.18+float(food_result.food_diet_quality)*0.12+GameState.nutrition_reserve*0.10-malnutrition*0.24,0.02,0.98)
-	GameState.food_security = lerpf(GameState.food_security,food_security_target,0.055)
+		WorldSimulation.state.convoy_exposure_days=maxf(0.0,WorldSimulation.state.convoy_exposure_days-1.5)
+	var food_security_target := clampf(0.05+minf(1.0,food_days/45.0)*0.30+minf(1.15,production_ratio)*0.25+intake_ratio*0.18+float(food_result.food_diet_quality)*0.12+WorldSimulation.state.nutrition_reserve*0.10-malnutrition*0.24,0.02,0.98)
+	WorldSimulation.state.food_security = lerpf(WorldSimulation.state.food_security,food_security_target,0.055)
 
-	var clean_water_bonus := DiscoverySystem.effect("health_protection")+DiscoverySystem.effect("water_safety")*0.25-DiscoverySystem.effect("disease_exposure")*0.18
+	var clean_water_bonus := WorldSimulation.discovery.effect("health_protection")+WorldSimulation.discovery.effect("water_safety")*0.25-WorldSimulation.discovery.effect("disease_exposure")*0.18
 	var water_health_penalty:=pow(1.0-water_intake,1.35)*0.62
 	var shelter_bonus := 0.0
-	if "Hearth Circle" in GameState.settlement_completed: shelter_bonus += 0.05
-	if "Lean-to Shelters" in GameState.settlement_completed: shelter_bonus += 0.12
+	if "Hearth Circle" in WorldSimulation.state.settlement_completed: shelter_bonus += 0.05
+	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed: shelter_bonus += 0.12
 	var travel_health_penalty:=0.0
 	if traveling:
-		travel_health_penalty=0.08+maxf(0.0,0.62-housing_ratio)*0.30+minf(0.24,GameState.consecutive_food_shortage_days*0.009)
-	var process_health_cost:=(DiscoverySystem.effect("health_risk")+DiscoverySystem.effect("pollution")*0.22+DiscoverySystem.effect("water_pollution")*0.18)*industrial_activity
-	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-DiscoverySystem.effect("sanitation"))*0.045+(cold_pressure*0.024+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
-	var health_target := clampf(0.18+GameState.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+GameState.founding_effect("health_target")+ProgressionSystem.effect("health_protection")*0.12-ProgressionSystem.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
-	GameState.population_health = lerpf(GameState.population_health,health_target,0.022)
-	GameState.simulation_metrics["water_intake_ratio"]=water_intake
-	GameState.simulation_metrics["water_days"]=float(GameState.water_metrics.get("days",0.0))
-	GameState.simulation_metrics["environment_profile"]=environment.duplicate(true)
-	GameState.simulation_metrics["environmental_health_cost"]=environmental_health_cost
+		travel_health_penalty=0.08+maxf(0.0,0.62-housing_ratio)*0.30+minf(0.24,WorldSimulation.state.consecutive_food_shortage_days*0.009)
+	var process_health_cost:=(WorldSimulation.discovery.effect("health_risk")+WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity
+	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
+	var health_target := clampf(0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
+	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,0.022)
+	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
+	WorldSimulation.state.simulation_metrics["water_days"]=float(WorldSimulation.state.water_metrics.get("days",0.0))
+	WorldSimulation.state.simulation_metrics["environment_profile"]=environment.duplicate(true)
+	WorldSimulation.state.simulation_metrics["environmental_health_cost"]=environmental_health_cost
 
 	var admin_coverage := clampf(stewards/maxf(1.0,population*0.035),0.0,1.25)
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
-	var economic_social_pressure:=float(GameState.economy_metrics.get("social_pressure",0.0))
-	var cohesion_target := clampf(0.24+GameState.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+DiscoverySystem.effect("state_capacity")*0.08+DiscoverySystem.effect("cohesion")*0.10+ProgressionSystem.effect("cohesion")*0.10+ProgressionSystem.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")+GameState.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"cohesion"),0.08,0.96)
+	var economic_social_pressure:=float(WorldSimulation.state.economy_metrics.get("social_pressure",0.0))
+	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
 	var cohesion := lerpf(prior_cohesion,cohesion_target,0.014)
 
 	var inquiry_points := 0
-	for value in GameState.research_allocations.values(): inquiry_points += int(value)
+	for value in WorldSimulation.state.research_allocations.values(): inquiry_points += int(value)
 	var focus_quality := 1.0 if inquiry_points <= maxi(1,int(observers)) else clampf(observers/maxf(1.0,float(inquiry_points)),0.15,1.0)
 	var knowledge := float(previous.get("knowledge",0.18))
-	var knowledge_gain := observers*labor_efficiency*focus_quality/maxf(3000.0,population*92.0)*(1.0+DiscoverySystem.effect("knowledge_rate"))*lerpf(0.55,1.45,GameState.combined_intelligence)
-	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth")+policy_effect("knowledge_gain")+GameState.founding_effect("knowledge_gain")+ProgressionSystem.effect("knowledge_rate")+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"knowledge"))
+	var knowledge_gain := observers*labor_efficiency*focus_quality/maxf(3000.0,population*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,WorldSimulation.state.combined_intelligence)
+	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth")+policy_effect("knowledge_gain")+WorldSimulation.state.founding_effect("knowledge_gain")+WorldSimulation.progression.effect("knowledge_rate")+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"knowledge"))
 	knowledge += float(foreign_effects.knowledge_exchange)/365.0
-	knowledge += float(GameState.known_discoveries.size())/240000.0
+	knowledge += float(WorldSimulation.state.known_discoveries.size())/240000.0
 	knowledge = clampf(knowledge,0.0,1.0)
 
 	var accessible_count := 0
-	for deposit in GameState.resource_deposits:
+	for deposit in WorldSimulation.state.resource_deposits:
 		if String(deposit.get("stage","unknown")) in ["accessible","developed"]: accessible_count += 1
 	var workshop_function:=0.0
 	var storage_function:=0.0
-	for plot in GameState.settlement_plots:
+	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) not in ["active","stressed","damaged"]: continue
 		var use:=String(plot.get("land_use",""))
 		if use not in ["workshop","storage"]: continue
@@ -686,21 +686,21 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	workshop_function=clampf(workshop_function/3.0,0.0,1.0)
 	storage_function=clampf(storage_function/3.0,0.0,1.0)
 	var craft_coverage := clampf(makers/maxf(1.0,population*0.05),0.0,1.25)
-	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+DiscoverySystem.effect("tool_quality")*0.30+DiscoverySystem.effect("craft_output")*0.22+ProgressionSystem.effect("tool_quality")*0.22+ProgressionSystem.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+GameState.founding_effect("material_target"),0.02,0.96)
-	if "Open Work Area" in GameState.settlement_completed: material_target += 0.08
+	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+WorldSimulation.discovery.effect("tool_quality")*0.30+WorldSimulation.discovery.effect("craft_output")*0.22+WorldSimulation.progression.effect("tool_quality")*0.22+WorldSimulation.progression.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+WorldSimulation.state.founding_effect("material_target"),0.02,0.96)
+	if "Open Work Area" in WorldSimulation.state.settlement_completed: material_target += 0.08
 	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,0.012)
-	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+DiscoverySystem.effect("haul_capacity")*0.18+DiscoverySystem.effect("route_speed")*0.12+ProgressionSystem.effect("haul_capacity")*0.14+ProgressionSystem.effect("route_speed")*0.10+policy_effect("logistics_target")+GameState.founding_effect("logistics_target")+float(foreign_effects.market_access_bonus)*0.24,0.03,0.95)
+	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+WorldSimulation.discovery.effect("haul_capacity")*0.18+WorldSimulation.discovery.effect("route_speed")*0.12+WorldSimulation.progression.effect("haul_capacity")*0.14+WorldSimulation.progression.effect("route_speed")*0.10+policy_effect("logistics_target")+WorldSimulation.state.founding_effect("logistics_target")+float(foreign_effects.market_access_bonus)*0.24,0.03,0.95)
 	var logistics := lerpf(float(previous.get("logistics",0.16)),logistics_target,0.016)
-	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+DiscoverySystem.effect("warfare_readiness")*0.14+ProgressionSystem.effect("warfare_readiness")*0.12+ProgressionSystem.effect("security_efficiency")*0.10-modifier_strength("migratory_pressure")+policy_effect("security_target")+GameState.founding_effect("security_target")+float(foreign_effects.security_support)-float(foreign_effects.hostile_pressure)*0.18+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"security"),0.04,0.96)
+	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+WorldSimulation.discovery.effect("warfare_readiness")*0.14+WorldSimulation.progression.effect("warfare_readiness")*0.12+WorldSimulation.progression.effect("security_efficiency")*0.10-modifier_strength("migratory_pressure")+policy_effect("security_target")+WorldSimulation.state.founding_effect("security_target")+float(foreign_effects.security_support)-float(foreign_effects.hostile_pressure)*0.18+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"security"),0.04,0.96)
 	var security := lerpf(float(previous.get("security",0.38)),security_target,0.016)
 
 	var extraction_pressure := extractors/able_population
 	var foraging_pressure := maxf(0.0,food_workers/able_population-0.48)
-	var ecology_delta := 0.00010+(environmental_resilience-ecology)*0.00018+modifier_strength("sacred_land")*0.00032+policy_effect("ecology_delta")+GameState.founding_effect("ecology_delta")+ProgressionSystem.effect("ecology_recovery")*0.00040-ProgressionSystem.effect("ecological_pressure")*0.00024-ProgressionSystem.effect("pollution")*0.00018+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"ecology")*0.00040
+	var ecology_delta := 0.00010+(environmental_resilience-ecology)*0.00018+modifier_strength("sacred_land")*0.00032+policy_effect("ecology_delta")+WorldSimulation.state.founding_effect("ecology_delta")+WorldSimulation.progression.effect("ecology_recovery")*0.00040-WorldSimulation.progression.effect("ecological_pressure")*0.00024-WorldSimulation.progression.effect("pollution")*0.00018+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"ecology")*0.00040
 	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105
-	ecology_delta-=(DiscoverySystem.effect("pollution")+DiscoverySystem.effect("water_pollution"))*industrial_activity*0.0009
+	ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009
 	ecology = clampf(ecology+ecology_delta,0.04,1.0)
-	var legitimacy_target := clampf(0.12+GameState.food_security*0.26+GameState.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+DiscoverySystem.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")-administrative_load*0.12-policy_churn*0.18-directive_resistance*0.24+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(GameState.societal_values,"legitimacy"),0.06,0.96)
+	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")-administrative_load*0.12-policy_churn*0.18-directive_resistance*0.24+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
 	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,0.012)
 
 	# Mortality is accumulated as population-level risk, while reproduction is
@@ -711,44 +711,44 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		# Natural mortality is derived from the same age-specific life table shown
 		# to the player. An older population therefore produces more deaths than a
 		# younger one under otherwise identical conditions.
-		"Natural causes":GameState.current_natural_mortality_rate(housing_ratio),
+		"Natural causes":WorldSimulation.state.current_natural_mortality_rate(housing_ratio),
 		"Hunger":0.0,
-		"Illness":maxf(0.0,0.50-GameState.population_health)*0.055*maxf(0.35,1.0+DiscoverySystem.effect("disease_exposure")-DiscoverySystem.effect("sanitation"))+disease_pressure*maxf(0.10,1.0-DiscoverySystem.effect("sanitation"))*0.005,
+		"Illness":maxf(0.0,0.50-WorldSimulation.state.population_health)*0.055*maxf(0.35,1.0+WorldSimulation.discovery.effect("disease_exposure")-WorldSimulation.discovery.effect("sanitation"))+disease_pressure*maxf(0.10,1.0-WorldSimulation.discovery.effect("sanitation"))*0.005,
 		"Exposure":maxf(0.0,0.68-housing_ratio)*(0.24 if traveling else 0.040)+(cold_pressure*0.018+heat_pressure*0.012+storm_pressure*0.006)*maxf(0.0,0.92-housing_ratio),
 		"Travel exhaustion":0.0,
 		"Insecurity":maxf(0.0,0.30-security)*0.025
 	}
-	mortality_components["Dehydration"]=_dehydration_mortality_rate(water_intake,GameState.consecutive_water_shortage_days)
-	mortality_components["Work accidents"]=(0.002+extraction_pressure*0.025)*industrial_activity*maxf(0.15,1.0+DiscoverySystem.effect("disaster_risk")-DiscoverySystem.effect("mine_safety"))
+	mortality_components["Dehydration"]=_dehydration_mortality_rate(water_intake,WorldSimulation.state.consecutive_water_shortage_days)
+	mortality_components["Work accidents"]=(0.002+extraction_pressure*0.025)*industrial_activity*maxf(0.15,1.0+WorldSimulation.discovery.effect("disaster_risk")-WorldSimulation.discovery.effect("mine_safety"))
 	if intake_ratio<0.98 or malnutrition>0.05:
-		var shortage_ramp:=clampf((GameState.consecutive_food_shortage_days-5.0)/45.0,0.0,1.0)
+		var shortage_ramp:=clampf((WorldSimulation.state.consecutive_food_shortage_days-5.0)/45.0,0.0,1.0)
 		mortality_components["Hunger"]=maxf(0.0,1.0-intake_ratio)*(0.08+shortage_ramp*0.90)+malnutrition*0.42
 	if traveling:
-		var exhaustion_ramp:=clampf((GameState.convoy_exposure_days-4.0)/45.0,0.0,1.0)
+		var exhaustion_ramp:=clampf((WorldSimulation.state.convoy_exposure_days-4.0)/45.0,0.0,1.0)
 		mortality_components["Travel exhaustion"]=maxf(0.0,0.72-housing_ratio)*(0.08+exhaustion_ramp*0.32)
 	var annual_death_rate := 0.0
 	for component_rate in mortality_components.values():
 		annual_death_rate+=float(component_rate)
-	GameState.simulation_metrics["annual_death_rate"]=annual_death_rate
-	GameState.simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
-	GameState.death_progress+=population*annual_death_rate/365.0
-	var deaths_today:=floori(GameState.death_progress)
-	GameState.death_progress-=deaths_today
-	if GameState.population_total-deaths_today<1:
-		deaths_today=maxi(0,GameState.population_total-1)
+	WorldSimulation.state.simulation_metrics["annual_death_rate"]=annual_death_rate
+	WorldSimulation.state.simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
+	WorldSimulation.state.death_progress+=population*annual_death_rate/365.0
+	var deaths_today:=floori(WorldSimulation.state.death_progress)
+	WorldSimulation.state.death_progress-=deaths_today
+	if WorldSimulation.state.population_total-deaths_today<1:
+		deaths_today=maxi(0,WorldSimulation.state.population_total-1)
 	var dominant_cause := "Natural causes"
 	for cause in mortality_components:
 		if float(mortality_components[cause])>float(mortality_components[dominant_cause]):
 			dominant_cause=String(cause)
 	var mortality_result:Dictionary={}
 	if deaths_today>0:
-		mortality_result=GameState.register_population_deaths(deaths_today,dominant_cause)
-	var reproduction:=GameState.process_reproduction_day({
-		"health":GameState.population_health,"food_security":GameState.food_security,
+		mortality_result=WorldSimulation.state.register_population_deaths(deaths_today,dominant_cause)
+	var reproduction:=WorldSimulation.state.process_reproduction_day({
+		"health":WorldSimulation.state.population_health,"food_security":WorldSimulation.state.food_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
-		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(SettlementModel.national_population())),
-		"conception_support":DiscoverySystem.effect("conception_support")+policy_effect("conception_support")+GameState.founding_effect("conception_support")+ProgressionSystem.effect("conception_support"),
-		"maternal_safety":DiscoverySystem.effect("maternal_safety"),"neonatal_survival":DiscoverySystem.effect("neonatal_survival")
+		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(WorldSimulation.settlements.national_population())),
+		"conception_support":WorldSimulation.discovery.effect("conception_support")+policy_effect("conception_support")+WorldSimulation.state.founding_effect("conception_support")+WorldSimulation.progression.effect("conception_support"),
+		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival")
 	})
 	var births_today:=int(reproduction.get("births_count",0))
 	var events: Array[Dictionary] = []
@@ -771,36 +771,36 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		events.append(_add_event("Stillbirths","%d births were lost at delivery under current maternal and neonatal conditions." % stillbirths,"population","warning"))
 	var annual_birth_rate:=float(reproduction.get("projected_birth_rate",0.0))
 
-	var settlement_score := clampf(float(GameState.settlement_completed.size())/8.0,0.0,1.0)
-	GameState.simulation_metrics = {
-		"health":GameState.population_health,"housing_ratio":housing_ratio,"housing_capacity":GameState.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
+	var settlement_score := clampf(float(WorldSimulation.state.settlement_completed.size())/8.0,0.0,1.0)
+	WorldSimulation.state.simulation_metrics = {
+		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"housing_capacity":WorldSimulation.state.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
 		"material_capacity":material_capacity,"logistics":logistics,"security":security,"ecology":ecology,"legitimacy":legitimacy,
 		"governance_administrative_load":administrative_load,"governance_policy_churn":policy_churn,"governance_council_support":council_support,"governance_active_policies":int(governance.active_policy_count),
-		"resource_access":float(accessible_count),"settlement":settlement_score,"population":GameState.population_exact,
+		"resource_access":float(accessible_count),"settlement":settlement_score,"population":WorldSimulation.state.population_exact,
 		"annual_birth_rate":annual_birth_rate,"annual_death_rate":annual_death_rate,"traveling":traveling,
 		"mortality_components":mortality_components.duplicate(true),
 		"active_pregnancies":int(reproduction.get("active_pregnancies",0)),"eligible_parents":int(reproduction.get("eligible_parents",0)),
 		"annual_conceptions_expected":float(reproduction.get("annual_conceptions_expected",0.0)),"projected_live_births":float(reproduction.get("projected_live_births",0.0)),
 		"births_expected_next_year":float(reproduction.get("births_expected_next_year",0.0)),
-		"mobile_shelter_ratio":mobile_shelter_ratio,"food_shortage_days":GameState.consecutive_food_shortage_days,
-		"water_intake_ratio":water_intake,"water_days":float(GameState.water_metrics.get("days",0.0)),"water_shortage_days":GameState.consecutive_water_shortage_days,
-		"water_collected_today":float(GameState.water_metrics.get("collected_today",0.0)),"water_required_today":float(GameState.water_metrics.get("required_today",population)),"water_source_distance_km":float(GameState.water_metrics.get("source_distance_km",-1.0)),
-		"travel_speed_factor":_travel_speed_factor(GameState.population_health,GameState.food_security,production_ratio,food_stored,traveling),
-		"survey_capacity":surveyors*labor_efficiency*(1.0+GameState.founding_effect("survey_output")+ProgressionSystem.effect("knowledge_rate")*0.35),"construction_capacity":builders*labor_efficiency*(1.0+workshop_function*0.10)*(1.0+GameState.founding_effect("construction_output")+ProgressionSystem.effect("construction_rate")),"combined_intelligence":GameState.combined_intelligence,
+		"mobile_shelter_ratio":mobile_shelter_ratio,"food_shortage_days":WorldSimulation.state.consecutive_food_shortage_days,
+		"water_intake_ratio":water_intake,"water_days":float(WorldSimulation.state.water_metrics.get("days",0.0)),"water_shortage_days":WorldSimulation.state.consecutive_water_shortage_days,
+		"water_collected_today":float(WorldSimulation.state.water_metrics.get("collected_today",0.0)),"water_required_today":float(WorldSimulation.state.water_metrics.get("required_today",population)),"water_source_distance_km":float(WorldSimulation.state.water_metrics.get("source_distance_km",-1.0)),
+		"travel_speed_factor":_travel_speed_factor(WorldSimulation.state.population_health,WorldSimulation.state.food_security,production_ratio,food_stored,traveling),
+		"survey_capacity":surveyors*labor_efficiency*(1.0+WorldSimulation.state.founding_effect("survey_output")+WorldSimulation.progression.effect("knowledge_rate")*0.35),"construction_capacity":builders*labor_efficiency*(1.0+workshop_function*0.10)*(1.0+WorldSimulation.state.founding_effect("construction_output")+WorldSimulation.progression.effect("construction_rate")),"combined_intelligence":WorldSimulation.state.combined_intelligence,
 		"workshop_function":workshop_function,"storage_function":storage_function
 	}
-	for dynamic_name in GameState.society_capacities:
-		GameState.simulation_metrics["society_"+String(dynamic_name)]=GameState.society_capacities[dynamic_name]
+	for dynamic_name in WorldSimulation.state.society_capacities:
+		WorldSimulation.state.simulation_metrics["society_"+String(dynamic_name)]=WorldSimulation.state.society_capacities[dynamic_name]
 	for food_metric in food_result:
-		GameState.simulation_metrics[food_metric]=food_result[food_metric]
-	for material_metric in GameState.material_metrics:
-		GameState.simulation_metrics["material_"+String(material_metric)]=GameState.material_metrics[material_metric]
+		WorldSimulation.state.simulation_metrics[food_metric]=food_result[food_metric]
+	for material_metric in WorldSimulation.state.material_metrics:
+		WorldSimulation.state.simulation_metrics["material_"+String(material_metric)]=WorldSimulation.state.material_metrics[material_metric]
 	_refresh_all_policy_observations()
-	GameState.simulation_trends.clear()
-	for key in GameState.simulation_metrics:
-		if previous.has(key) and GameState.simulation_metrics[key] is float:
-			GameState.simulation_trends[key]=float(GameState.simulation_metrics[key])-float(previous[key])
-	GameState.record_health_history()
+	WorldSimulation.state.simulation_trends.clear()
+	for key in WorldSimulation.state.simulation_metrics:
+		if previous.has(key) and WorldSimulation.state.simulation_metrics[key] is float:
+			WorldSimulation.state.simulation_trends[key]=float(WorldSimulation.state.simulation_metrics[key])-float(previous[key])
+	WorldSimulation.state.record_health_history()
 
 	var forecast_90:Dictionary=food_result.get("food_forecast_90",{})
 	var forecast_shortage:=int(forecast_90.get("first_shortage_day",-1))
@@ -810,14 +810,14 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var famine_title:="Hunger on the Road" if traveling else "Hunger in the Camp"
 		var famine_description:="The convoy has nearly exhausted its provisions. Travel, health, and population are now at immediate risk." if traveling else "Food stores are nearly gone. Health and population will now deteriorate rapidly."
 		_threshold_event(events,"famine",famine_title,famine_description,"health","critical",12)
-	if traveling and food_stored<=0.001 and intake_ratio<0.98: _threshold_event(events,"convoy_without_provisions","The Convoy Is Living Hand to Mouth","No provisions remain. Route foraging supplies only %d%% of today's need; body reserves are at %d%%." % [roundi(intake_ratio*100.0),roundi(GameState.nutrition_reserve*100.0)],"food","critical",7)
+	if traveling and food_stored<=0.001 and intake_ratio<0.98: _threshold_event(events,"convoy_without_provisions","The Convoy Is Living Hand to Mouth","No provisions remain. Route foraging supplies only %d%% of today's need; body reserves are at %d%%." % [roundi(intake_ratio*100.0),roundi(WorldSimulation.state.nutrition_reserve*100.0)],"food","critical",7)
 	if water_intake<0.95:
-		var source_distance:=float(GameState.water_metrics.get("source_distance_km",-1.0))
+		var source_distance:=float(WorldSimulation.state.water_metrics.get("source_distance_km",-1.0))
 		var water_place:="No reachable drinking-water source is recorded." if source_distance<0.0 else "The nearest usable source is %.1f km away." % source_distance
-		var water_severity:="critical" if water_intake<0.65 or (water_intake<0.82 and GameState.consecutive_water_shortage_days>=2.0) else "warning"
-		var water_remedy:="River access remains intact; increase collection or distribution capacity." if String(GameState.water_metrics.get("source_origin",""))=="mapped_hydrology" and source_distance<=1.5 else "Increase Food or Logistics work, or move closer to visible water."
+		var water_severity:="critical" if water_intake<0.65 or (water_intake<0.82 and WorldSimulation.state.consecutive_water_shortage_days>=2.0) else "warning"
+		var water_remedy:="River access remains intact; increase collection or distribution capacity." if String(WorldSimulation.state.water_metrics.get("source_origin",""))=="mapped_hydrology" and source_distance<=1.5 else "Increase Food or Logistics work, or move closer to visible water."
 		_threshold_event(events,"water_shortfall","Drinking Water Is Short","Collection supplied only %d%% of today's need. %s %s" % [roundi(water_intake*100.0),water_place,water_remedy],"health",water_severity,2)
-	if GameState.population_health < 0.46: _threshold_event(events,"ill_health","Widespread Illness","Poor nutrition, exposure, and water conditions are reducing effective labor.","health","danger",45)
+	if WorldSimulation.state.population_health < 0.46: _threshold_event(events,"ill_health","Widespread Illness","Poor nutrition, exposure, and water conditions are reducing effective labor.","health","danger",45)
 	if ecology < 0.55: _threshold_event(events,"ecology_strain","The Land Is Thinning","Gatherers report longer journeys and diminishing returns near the settlement.","ecology","warning",120)
 	if legitimacy < 0.42: _threshold_event(events,"authority_strain","Directives Meet Resistance","Hardship and weak administration are eroding compliance with sovereign priorities.","legitimacy","warning",60)
 	return events
@@ -832,21 +832,21 @@ func _dehydration_mortality_rate(water_intake:float,shortage_days:float)->float:
 	return pow(deficit,3.0)*(0.35+shortage_ramp*5.0)
 
 func _population_location() -> String:
-	if GameState.convoy_traveling:
-		return "the traveling people in %s" % GameState.province_name
-	if GameState.settlement_completed.is_empty():
-		return "the halted founding convoy in %s" % GameState.province_name
-	if GameState.settlement_name.strip_edges()!="":
-		return "%s in %s" % [GameState.settlement_name,GameState.province_name]
-	if GameState.settlement_completed.size()<3:
-		return "the founding camp in %s" % GameState.province_name
-	return "the settlement in %s" % GameState.province_name
+	if WorldSimulation.state.convoy_traveling:
+		return "the traveling people in %s" % WorldSimulation.state.province_name
+	if WorldSimulation.state.settlement_completed.is_empty():
+		return "the halted founding convoy in %s" % WorldSimulation.state.province_name
+	if WorldSimulation.state.settlement_name.strip_edges()!="":
+		return "%s in %s" % [WorldSimulation.state.settlement_name,WorldSimulation.state.province_name]
+	if WorldSimulation.state.settlement_completed.size()<3:
+		return "the founding camp in %s" % WorldSimulation.state.province_name
+	return "the settlement in %s" % WorldSimulation.state.province_name
 
 func _record_demographic_change(kind: String,count: int,cause: String,food_days: float,production_ratio: float,housing_ratio: float,affected_cohorts:Dictionary={}) -> Dictionary:
 	var location:=_population_location()
-	var day:=int(GameState.elapsed_days)
-	var water_intake:=clampf(float(GameState.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
-	var water_distance:=float(GameState.water_metrics.get("source_distance_km",-1.0))
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var water_intake:=clampf(float(WorldSimulation.state.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
+	var water_distance:=float(WorldSimulation.state.water_metrics.get("source_distance_km",-1.0))
 	var cause_detail:=""
 	match cause:
 		"Hunger": cause_detail="Food stores were exhausted and daily production met only %d%% of need." % roundi(production_ratio*100.0)
@@ -861,21 +861,21 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 		"Neonatal complications": cause_detail="The newborn died during the immediate period after birth."
 		_: cause_detail="No exceptional crisis outweighed ordinary mortality."
 	var cohort_detail:=" Affected cohorts: %s." % ", ".join(PackedStringArray(affected_cohorts.keys())) if not affected_cohorts.is_empty() else ""
-	var description:="%s %s Health: %d%%. Stored provisions: %.1f days. Food today: %d%%. Drinking water today: %d%%. Shelter: %d%%.%s" % [cause_detail,"Location: %s." % location,roundi(GameState.population_health*100.0),food_days,roundi(production_ratio*100.0),roundi(water_intake*100.0),roundi(housing_ratio*100.0),cohort_detail]
+	var description:="%s %s Health: %d%%. Stored provisions: %.1f days. Food today: %d%%. Drinking water today: %d%%. Shelter: %d%%.%s" % [cause_detail,"Location: %s." % location,roundi(WorldSimulation.state.population_health*100.0),food_days,roundi(production_ratio*100.0),roundi(water_intake*100.0),roundi(housing_ratio*100.0),cohort_detail]
 	var noun:="birth" if kind=="birth" else "death"
 	var title:="%d %s%s at %s" % [count,noun,"" if count==1 else "s",location]
 	var record:={
-		"id":"demographic_%s_%d_%d" % [kind,day,GameState.demographic_ledger.size()],
-		"settlement_id":SettlementModel._primary_settlement_id(),"day":day,"start_day":day,"end_day":day,"title":title,"description":description,
+		"id":"demographic_%s_%d_%d" % [kind,day,WorldSimulation.state.demographic_ledger.size()],
+		"settlement_id":WorldSimulation.settlements._primary_settlement_id(),"day":day,"start_day":day,"end_day":day,"title":title,"description":description,
 		"domain":"population","severity":"demographic","kind":kind,"count":count,
 		"cause":cause,"location":location,"food_days":food_days,"production_ratio":production_ratio,"water_intake_ratio":water_intake,"water_source_distance_km":water_distance,
-		"health":GameState.population_health,"housing_ratio":housing_ratio,"population_after":GameState.population_total,"affected_cohorts":affected_cohorts.duplicate(true),
-		"traveling":GameState.convoy_traveling,"food_shortage_days":GameState.consecutive_food_shortage_days
+		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"population_after":WorldSimulation.state.population_total,"affected_cohorts":affected_cohorts.duplicate(true),
+		"traveling":WorldSimulation.state.convoy_traveling,"food_shortage_days":WorldSimulation.state.consecutive_food_shortage_days
 	}
 	# Consecutive changes from the same pressure are grouped into a readable
 	# episode while preserving its first and last day.
-	if not GameState.demographic_ledger.is_empty():
-		var recent:Dictionary=GameState.demographic_ledger[0]
+	if not WorldSimulation.state.demographic_ledger.is_empty():
+		var recent:Dictionary=WorldSimulation.state.demographic_ledger[0]
 		if String(recent.get("settlement_id",""))==String(record.settlement_id) and String(recent.get("kind",""))==kind and String(recent.get("cause",""))==cause and String(recent.get("location",""))==location and day-int(recent.get("end_day",day))<=14:
 			recent["count"]=int(recent.get("count",0))+count
 			recent["end_day"]=day
@@ -884,9 +884,9 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 			recent["production_ratio"]=production_ratio
 			recent["water_intake_ratio"]=water_intake
 			recent["water_source_distance_km"]=water_distance
-			recent["health"]=GameState.population_health
+			recent["health"]=WorldSimulation.state.population_health
 			recent["housing_ratio"]=housing_ratio
-			recent["population_after"]=GameState.population_total
+			recent["population_after"]=WorldSimulation.state.population_total
 			var recent_cohorts:Dictionary=recent.get("affected_cohorts",{})
 			for cohort in affected_cohorts:
 				recent_cohorts[cohort]=float(recent_cohorts.get(cohort,0.0))+float(affected_cohorts[cohort])
@@ -894,16 +894,16 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 			var total:=int(recent.count)
 			recent["title"]="%d %s%s at %s" % [total,noun,"" if total==1 else "s",location]
 			recent["description"]=description
-			GameState.demographic_ledger[0]=recent
-			for i in GameState.simulation_events.size():
-				if String(GameState.simulation_events[i].get("id",""))==String(recent.id):
-					GameState.simulation_events[i]=recent
+			WorldSimulation.state.demographic_ledger[0]=recent
+			for i in WorldSimulation.state.simulation_events.size():
+				if String(WorldSimulation.state.simulation_events[i].get("id",""))==String(recent.id):
+					WorldSimulation.state.simulation_events[i]=recent
 					break
 			return recent
-	GameState.demographic_ledger.push_front(record)
-	if GameState.demographic_ledger.size()>120: GameState.demographic_ledger.resize(120)
-	GameState.simulation_events.push_front(record)
-	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+	WorldSimulation.state.demographic_ledger.push_front(record)
+	if WorldSimulation.state.demographic_ledger.size()>120: WorldSimulation.state.demographic_ledger.resize(120)
+	WorldSimulation.state.simulation_events.push_front(record)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 	return record
 
 func _travel_speed_factor(health: float,food_security: float,production_ratio: float,food_stored: float,traveling: bool) -> float:
@@ -912,32 +912,32 @@ func _travel_speed_factor(health: float,food_security: float,production_ratio: f
 	var factor:=0.22+health*0.46+food_security*0.24
 	if food_stored<=0.001:
 		factor*=clampf(0.24+production_ratio*0.62,0.22,0.78)
-	factor*=1.0-clampf(GameState.convoy_exposure_days/240.0,0.0,0.28)
+	factor*=1.0-clampf(WorldSimulation.state.convoy_exposure_days/240.0,0.0,0.28)
 	return clampf(factor,0.12,1.0)
 
 func discovery_multiplier() -> float:
 	initialize()
-	return clampf(0.40+float(GameState.simulation_metrics.get("knowledge",0.18))*0.45+float(GameState.simulation_metrics.get("labor_efficiency",0.72))*0.18+GameState.combined_intelligence*0.55+DiscoverySystem.effect("observation_rate")*0.20,0.35,1.65)
+	return clampf(0.40+float(WorldSimulation.state.simulation_metrics.get("knowledge",0.18))*0.45+float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*0.18+WorldSimulation.state.combined_intelligence*0.55+WorldSimulation.discovery.effect("observation_rate")*0.20,0.35,1.65)
 
 func tools_factor() -> float:
 	initialize()
-	return clampf(0.18+float(GameState.simulation_metrics.get("material_capacity",0.12))*0.92,0.18,1.10)
+	return clampf(0.18+float(WorldSimulation.state.simulation_metrics.get("material_capacity",0.12))*0.92,0.18,1.10)
 
 func survey_factor() -> float:
-	return clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72))*(1.0+modifier_strength("mineral_signs")),0.25,1.45)
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*(1.0+modifier_strength("mineral_signs")),0.25,1.45)
 
 
 func _threshold_event(events: Array[Dictionary],id: String,title: String,description: String,domain: String,severity: String,cooldown: int) -> void:
-	var last_day := int(GameState.last_simulation_event_days.get(id,-100000))
-	if int(GameState.elapsed_days)-last_day<cooldown: return
-	GameState.last_simulation_event_days[id]=int(GameState.elapsed_days)
+	var last_day := int(WorldSimulation.state.last_simulation_event_days.get(id,-100000))
+	if int(WorldSimulation.state.elapsed_days)-last_day<cooldown: return
+	WorldSimulation.state.last_simulation_event_days[id]=int(WorldSimulation.state.elapsed_days)
 	var event := _add_event(title,description,domain,severity)
 	event["condition_id"]=id
 	event["recurring_condition"]=true
 	events.append(event)
 
 func _add_event(title: String,description: String,domain: String,severity: String) -> Dictionary:
-	var event := {"day":int(GameState.elapsed_days),"title":title,"description":description,"domain":domain,"severity":severity}
-	GameState.simulation_events.push_front(event)
-	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+	var event := {"day":int(WorldSimulation.state.elapsed_days),"title":title,"description":description,"domain":domain,"severity":severity}
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 	return event

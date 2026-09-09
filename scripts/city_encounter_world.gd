@@ -10,10 +10,10 @@ static func terrain(node:Node)->Node:
 
 static func focus(world:Node,region:String)->void:
 	if world==null:return
-	if not region.is_empty() and not CivilizationSystem.city_intelligence.known("player",region).is_empty():
+	if not region.is_empty() and not WorldSimulation.world.city_intelligence.known("player",region).is_empty():
 		world._focus_known_city(region)
 	else:
-		world._set_camera_target(GameState.settlement_founded_at)
+		world._set_camera_target(WorldSimulation.state.settlement_founded_at)
 		world.camera.size=.28
 	world._set_game_speed(0)
 

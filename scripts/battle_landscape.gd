@@ -17,18 +17,18 @@ static func encounter_position(engagement:Dictionary)->Vector2:
 	if target.has("x") and target.has("z"): return Vector2(target.x,target.z)
 	var region_id:=String(threat.get("target_region_id",""))
 	if not region_id.is_empty():
-		for destination:Dictionary in CivilizationSystem.military_movement_destinations():
+		for destination:Dictionary in WorldSimulation.world.military_movement_destinations():
 			if String(destination.id)==region_id:
 				var p:Dictionary=destination.position
 				return Vector2(float(p.x),float(p.z))
 	var army_id:=int(engagement.get("home_force_id",0))
 	if army_id>0:
-		for army:Dictionary in MilitaryCampaign.field_armies_snapshot().get("armies",[]):
+		for army:Dictionary in WorldSimulation.military.field_armies_snapshot().get("armies",[]):
 			if int(army.get("army_id",0))==army_id:
 				var p:Variant=army.get("position",{})
 				if p is Vector3: return Vector2(p.x,p.z)
 				if p is Dictionary and p.has("x"): return Vector2(p.x,p.get("z",0))
-	return Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	return Vector2(WorldSimulation.state.settlement_founded_at.x,WorldSimulation.state.settlement_founded_at.z)
 
 func build(center:Vector2,query:Callable=Callable())->void:
 	for child in get_children(): child.free()
@@ -69,7 +69,7 @@ func build(center:Vector2,query:Callable=Callable())->void:
 	material.set_shader_parameter("ground_texture",preload("res://assets/terrain/temperate_ground_albedo_v1.png"))
 	ground.material_override=material
 	# Trees and stones are bounded habitat representatives, not invented cover.
-	var rng:=RandomNumberGenerator.new(); rng.seed=GameState.world_seed^int(center.x*1000)^int(center.y*7919)
+	var rng:=RandomNumberGenerator.new(); rng.seed=WorldSimulation.state.world_seed^int(center.x*1000)^int(center.y*7919)
 	var tree_mesh:=SphereMesh.new(); tree_mesh.radius=2.8; tree_mesh.height=5; tree_mesh.radial_segments=10; tree_mesh.rings=5
 	var rock_mesh:=SphereMesh.new(); rock_mesh.radius=1; rock_mesh.height=1.4; rock_mesh.radial_segments=7; rock_mesh.rings=3
 	var trees:Array[Transform3D]=[]; var trunks:Array[Transform3D]=[]; var rocks:Array[Transform3D]=[]

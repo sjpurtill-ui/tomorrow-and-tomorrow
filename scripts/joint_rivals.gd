@@ -12,16 +12,17 @@ func personnel(owner:String)->int:
 	return count
 
 func spend(owner:String,cost:float)->bool:
-	var index=CivilizationSystem._civilization_index(owner)
+	var index=WorldSimulation.world._civilization_index(owner)
 	if index<0:return false
-	var civ:Dictionary=CivilizationSystem.civilizations[index]
+	var civ:Dictionary=WorldSimulation.world.civilizations[index]
 	if float(civ.get("military_stockpile",0))<cost:return false
 	civ.military_stockpile=float(civ.get("military_stockpile",0))-cost
 	return true
 
 func advance(day:int)->void:
+	if WorldSimulation.enabled:return
 	if not op.state.has("rival_orders"):op.state.rival_orders={}
-	for civ:Dictionary in CivilizationSystem.civilizations:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
 		var owner=String(civ.id)
 		var known:Array=civ.get("discovery_profile",{}).get("technologies",[])
 		if known.is_empty():continue
@@ -62,8 +63,8 @@ func _base(civ:Dictionary,domain:String)->Dictionary:
 	for base:Dictionary in op.state.bases:
 		if base.owner==civ.id and base.domain==domain:return base
 	if op.state.bases.size()>=256:return {}
-	var id=CivilizationSystem.city_intelligence.primary_id(String(civ.id))
-	var city=CivilizationSystem.city_intelligence.site(id)
+	var id=WorldSimulation.world.city_intelligence.primary_id(String(civ.id))
+	var city=WorldSimulation.world.city_intelligence.site(id)
 	if city.is_empty():return {}
 	var position:Dictionary=city.position
 	if domain=="navy":
@@ -81,7 +82,7 @@ func _order(force:Dictionary,civ:Dictionary)->void:
 	if float(force.training)<1 or not force.get("route",[]).is_empty():return
 	var target=op.point(base)
 	if bool(civ.player_relation.at_war):
-		var reports:Array=CivilizationSystem.city_intelligence.known_cities(String(civ.id),"player",false)
+		var reports:Array=WorldSimulation.world.city_intelligence.known_cities(String(civ.id),"player",false)
 		if not reports.is_empty():target=op.point(reports[0])
 	if op.point(base).distance_to(target)>op.range_km(force):return
 	var region:Dictionary=force.get("region",{})

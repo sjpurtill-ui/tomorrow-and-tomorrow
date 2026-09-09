@@ -439,6 +439,11 @@ func _ready() -> void:
 	var founding_biome:=_biome_at(world_start_position.x,world_start_position.z,world_start_position.y)
 	GameState.province_terrain=String(founding_biome.get("label","unknown terrain")).capitalize()
 	CivilizationSystem.register_player_origin(Vector2(world_start_position.x,world_start_position.z))
+	WorldSimulation.water_provider=Callable(self,"_surface_water_site_near")
+	WorldSimulation.context_provider=Callable(self,"_civilization_geography")
+	WorldSimulation.start_provider=Callable(self,"_civilization_start")
+	WorldSimulation.route_provider=Callable(self,"_analyze_convoy_route")
+	WorldSimulation.start_world()
 	_refresh_discovery_mask(true)
 	_trace_load("world configured start=%s river_x=%.1f height=%.2f" % [world_start_position,_world_river_x(world_start_position.z),world_start_position.y])
 	if SEAMLESS_WORLD:
@@ -977,21 +982,24 @@ func advance_world_time(days_advanced:float)->void:
 	while last_discovery_day < current_discovery_day and (game_speed>0.0 or GeneralCampaign.active):
 		last_discovery_day += 1
 		GameState.elapsed_days=float(last_discovery_day)
-		GameState.convoy_traveling=travel_active
-		CivilizationSystem.advance_to_day(last_discovery_day)
-		if MilitaryCampaign.recovery.home_unavailable():
+		GameState.convoy_traveling=bool(GameState.founding_journey.get("active",false)) if WorldSimulation.enabled else travel_active
+		if not WorldSimulation.enabled:CivilizationSystem.advance_to_day(last_discovery_day)
+		if not WorldSimulation.enabled and MilitaryCampaign.recovery.home_unavailable():
 			MilitaryCampaign.recovery.advance(last_discovery_day)
 			_process_other_city_resources()
 			continue
 		var daily_context := _discovery_context()
-		var discoveries := DiscoverySystem.process_day(daily_context)
-		var resource_events := ResourceSystem.process_day(daily_context)
-		if not discoveries.is_empty() or not resource_events.is_empty():
-			footprint_population = -1
-		var simulation_events := _process_population_day(daily_context)
-		var economy_events:Array[Dictionary] = SettlementModel.with_local_population(func()->Array[Dictionary]:return EconomySystem.process_day(daily_context))
-		simulation_events.append_array(economy_events)
-		simulation_events.append_array(GovernmentPeopleSystem.process_day(last_discovery_day))
+		for city in GameState.player_settlements:
+			if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
+		var day_result:=WorldSimulation.advance_day(last_discovery_day,daily_context,_process_local_settlement_day) if WorldSimulation.enabled else preload("res://scripts/civilization_day.gd").advance(last_discovery_day,daily_context,_process_local_settlement_day)
+		var discoveries:Array[Dictionary]=day_result.discoveries
+		var resource_events:Array[Dictionary]=day_result.resources
+		var simulation_events:Array[Dictionary]=day_result.events
+		var progression_events:Array[Dictionary]=day_result.progression
+		if not (day_result.get("arrival",{}) as Dictionary).is_empty():_show_convoy_arrival(day_result.arrival)
+		if not discoveries.is_empty() or not resource_events.is_empty():footprint_population=-1
+		AdvisorSystem.refresh_pronouncement_statuses()
+		_refresh_population_allocations()
 		_refresh_event_report()
 		for consequence in simulation_events:
 			if String(consequence.get("severity","")) in ["danger","critical","warning"]:
@@ -999,11 +1007,7 @@ func advance_world_time(days_advanced:float)->void:
 		for resource_event in resource_events:
 			if String(resource_event.get("title","")) in ["Resource Flow Constrained","Material Losses","Resource Accessible"]:
 				AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
-		_process_settlement_day()
-		_process_other_city_resources()
 		preload("res://scripts/strategic_history.gd").sample()
-		SettlementModel.with_local_population(func()->void:_settlement_model().process_month(_settlement_spatial_context(daily_context)))
-		var progression_events:=ProgressionSystem.process_day(last_discovery_day)
 		_refresh_discovered_resource_overlays()
 		_refresh_settlement_footprint()
 		if not progression_events.is_empty() and travel_status_label:
@@ -1019,24 +1023,20 @@ func advance_world_time(days_advanced:float)->void:
 		days_advanced=maxf(0.0,days_advanced-(requested_world_day-float(last_discovery_day)))
 		requested_world_day=float(last_discovery_day)
 	GameState.elapsed_days=requested_world_day
-	if travel_active:
-		var travel_speed_factor:=clampf(float(GameState.simulation_metrics.get("travel_speed_factor",1.0)),0.12,1.0)
-		travel_days_elapsed += days_advanced*travel_speed_factor
-		var progress := clampf(travel_days_elapsed / travel_days_total, 0.0, 1.0)
-		var position := travel_start.lerp(travel_target, progress)
-		position.y = _height_at(position.x, position.z) + 0.002
-		settler_marker.position = position
-		CivilizationSystem.record_player_travel(Vector2(position.x,position.z))
+	if not GameState.founding_journey.is_empty():
+		var journey:=GameState.founding_journey
+		travel_days_elapsed=float(journey.elapsed)
+		travel_days_total=float(journey.duration_days)
+		var progress:=clampf(travel_days_elapsed/travel_days_total,0,1)
+		var point:Vector2=journey.origin.lerp(journey.destination,progress)
+		settler_marker.position=Vector3(point.x,_height_at(point.x,point.y)+.002,point.y)
+		var was_traveling:=travel_active
+		travel_active=bool(journey.active)
 		_check_travel_milestone_reports(progress)
-		if progress >= 1.0:
-			travel_active = false
-			GameState.convoy_traveling=false
-			GameState.convoy_emergency_halt_reason=""
-			settler_marker.position = travel_target
-			if route_mesh:
-				route_mesh.visible = false
+		if was_traveling and not travel_active:
+			if route_mesh:route_mesh.visible=false
 			_update_resource_proximity()
-			_issue_travel_council_report("arrival",1.0)
+			_issue_travel_council_report("arrival" if progress>=1 else "halt",progress,GameState.convoy_emergency_halt_reason)
 	_process_settlement_convoy()
 	for project in construction_projects:
 		if project.complete:
@@ -1306,49 +1306,20 @@ func _commit_live_report_replacements()->void:
 		assert(stable_root.get_instance_id()==int(record.get("root_id",0)))
 
 
-func _discovery_context() -> Dictionary:
-	var context := {"foraging":0.78 if travel_active else 1.0, "food":1.0, "exploration":0.8 if travel_active else 0.5, "travel":1.0 if travel_active else 0.1, "fiber":0.5, "fire":0.6, "administration":0.5, "defense":0.3}
-	context["traveling"]=travel_active
+func _civilization_geography(origin:Vector2)->Dictionary:
+	var ground:=_survey_ground_at(origin)
+	var water_distance:=_river_distance_at(origin.x,origin.y)*KM_PER_WORLD_UNIT
+	var catchments:=_surface_material_catchments(Vector3(origin.x,0,origin.y))
+	return {"environment_profile":PlanetEnvironment.profile_at(origin,ground),"surface_water_distance_km":water_distance,"surface_water_recognized":water_distance<=72.0,"surface_material_catchments":catchments,"woodland_catchment":catchments.Timber,"terrain_height_at":Callable(self,"_height_at"),"buildable_land_at":func(x:float,z:float)->bool:return _height_at(x,z)>SEA_LEVEL+.012,"river_distance_at":Callable(self,"_river_distance_at"),"drainage_tangent_at":Callable(self,"_drainage_tangent_at"),"moisture_at":Callable(self,"_land_moisture_at")}
+
+func _discovery_context()->Dictionary:
+	if WorldSimulation.enabled:
+		var point:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z) if GameState.settlement_site_committed else CivilizationSystem.player_world_origin
+		return preload("res://scripts/civilization_day.gd").context(point,GameState.convoy_traveling)
+	var origin:=GameState.settlement_founded_at if GameState.settlement_site_committed else (settler_marker.position if settler_marker else world_start_position)
+	var context:=preload("res://scripts/civilization_day.gd").context(Vector2(origin.x,origin.z),travel_active)
 	context["travel_days_remaining"]=maxf(0.0,travel_days_total-travel_days_elapsed) if travel_active else 0.0
-	context["travel_distance_remaining_km"]=Vector2(settler_marker.position.x,settler_marker.position.z).distance_to(Vector2(travel_target.x,travel_target.z))*KM_PER_WORLD_UNIT if travel_active and settler_marker else 0.0
-	context["tools"] = ConsequenceEngine.tools_factor()
-	context["insight"] = ConsequenceEngine.discovery_multiplier()
-	# Returned field reports (scout charts, contact accounts) circulate for a
-	# while and genuinely enrich the evidence environment those signals feed.
-	var field_signals:Dictionary=GameState.active_field_observation_signals(int(GameState.elapsed_days))
-	for field_signal in field_signals:
-		context[field_signal]=maxf(float(context.get(field_signal,0.0)),float(field_signals[field_signal]))
-	if settler_marker:
-		var origin:Vector3=GameState.settlement_founded_at if GameState.settlement_site_committed else settler_marker.position
-		context["origin"] = origin
-		var origin_2d:=Vector2(origin.x,origin.z)
-		var environment_profile:=PlanetEnvironment.profile_at(origin_2d,_survey_ground_at(origin_2d))
-		context["environment_profile"]=environment_profile
-		context["surface_material_catchments"]=_surface_material_catchments(origin)
-		context["woodland_catchment"]=context.surface_material_catchments.Timber
-		context["biome"]=String(environment_profile.get("biome","unknown"))
-		context["temperature"]=float(environment_profile.get("temperature",0.5))
-		context["precipitation"]=float(environment_profile.get("precipitation",0.5))
-		context["fertility"]=float(environment_profile.get("fertility",0.0))
-		context["foraging"]=maxf(float(context.get("foraging",0.0)),float(environment_profile.get("forage",0.0)))
-		# The rendered drainage is authoritative geography. A settlement visibly on
-		# a riverbank must not depend on whether a separate random resource marker was
-		# successfully scattered elsewhere in the region.
-		var surface_water_distance_km:=_river_distance_at(origin.x,origin.z)*KM_PER_WORLD_UNIT
-		context["surface_water_distance_km"]=surface_water_distance_km
-		context["surface_water_recognized"]=surface_water_distance_km<=72.0
-		if surface_water_distance_km<=6.0: context["freshwater"]=1.0
-	context["settled"] = GameState.settlement_site_committed
-	if hearth_established:
-		context["construction"] = 1.0
-		context["storage"] = 0.8
-		context["timber"] = 0.7
-	for site in resource_sites:
-		var type: String = site.type
-		if type == "Timber": context["timber"] = 1.0
-		elif type == "Stone": context["stone"] = 1.0
-		elif type == "Fertile": context["food"] = 1.3
-		elif type == "Freshwater": context["freshwater"] = 1.0
+	context["travel_distance_remaining_km"]=Vector2(origin.x,origin.z).distance_to(Vector2(travel_target.x,travel_target.z))*KM_PER_WORLD_UNIT if travel_active else 0.0
 	return context
 
 func _settlement_spatial_context(base:Dictionary={}) -> Dictionary:
@@ -2715,6 +2686,9 @@ func _best_site_for(type:String,rng:RandomNumberGenerator)->Vector3:
 
 
 func _scatter_trees() -> void:
+	if WorldSimulation.enabled:
+		_scatter_owned_resources()
+		return
 	var rng := RandomNumberGenerator.new()
 	rng.seed = terrain_noise.seed ^ 0x27d4eb2d
 	resource_sites.clear()
@@ -9744,53 +9718,13 @@ func _refresh_age_distribution_meter() -> void:
 	age_distribution_summary.tooltip_text="Green bands are productive-age cohorts (14–59). Warm and grey bands are dependents: children under 14 and elders 60 or older. Median age is %.1f." % float(profile.median_age)
 
 func _settlement_definitions() -> Array[Dictionary]:
-	return [
-		{"name":"Hearth Circle", "days":6.0, "requires":[], "minimum":{"Construction":3},"materials":{"Timber":6.0,"Fiber Plants":6.0},"requires_water":true,"effect":"anchors the camp and makes communal work possible"},
-		{"name":"Lean-to Shelters", "days":9.0, "requires":["Hearth Circle"], "minimum":{"Construction":5},"materials":{"Timber":18.0,"Fiber Plants":12.0},"effect":"protects health and expands shelter"},
-		{"name":"Storage Pits", "days":7.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Logistics":4},"materials":{"Timber":4.0,"Fiber Plants":3.0},"effect":"slows spoilage and expands food storage"},
-		{"name":"Open Work Area", "days":12.0, "requires":["Hearth Circle"], "minimum":{"Construction":6, "Crafting":4},"materials":{"Timber":12.0,"Fiber Plants":5.0},"effect":"improves tools and material work"},
-		{"name":"Gathering Yard", "days":10.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Extraction":4},"materials":{"Timber":10.0,"Fiber Plants":4.0}, "known_resource":true,"effect":"organizes extraction from known deposits"}
-	]
+	return preload("res://scripts/settlement_construction.gd")._settlement_definitions()
 
 func _settlement_project_available(project: Dictionary) -> bool:
-	if String(project.name) in GameState.settlement_completed:
-		return false
-	for required in project.requires:
-		if String(required) not in GameState.settlement_completed:
-			return false
-	for role in project.minimum:
-		if int(GameState.population_allocations.get(role, 0)) < int(project.minimum[role]):
-			return false
-	if bool(project.get("known_resource", false)) and ResourceSystem.visible_deposits().is_empty():
-		return false
-	if bool(project.get("requires_water",false)) and not bool(GameState.water_metrics.get("source_accessible",false)):
-		return false
-	if _settlement_project_material_plan(project).is_empty(): return false
-	return true
-
+	return preload("res://scripts/settlement_construction.gd")._settlement_project_available(project)
 
 func _settlement_project_material_plan(project:Dictionary)->Dictionary:
-	var required:Dictionary=(project.get("materials",{}) as Dictionary).duplicate(true)
-	var options:Array[Dictionary]=[required]
-	if String(project.get("name",""))=="Lean-to Shelters":
-		# Early shelter must not be hard-locked behind one named plant deposit.
-		# Bark, brush, reeds, earth daub and dry stone are historically plausible
-		# substitutes, with heavier alternatives costing more bulk.
-		options=[
-			required,
-			{"Timber":25.0},
-			{"Timber":15.0,"Clay":10.0},
-			{"Timber":14.0,"Stone":14.0},
-		]
-	for option in options:
-		var affordable:=true
-		for resource_name in option:
-			if float(GameState.resource_stockpiles.get(resource_name,0.0))+0.0001<float(option[resource_name]):
-				affordable=false
-				break
-		if affordable: return option.duplicate(true)
-	return {}
-
+	return preload("res://scripts/settlement_construction.gd")._settlement_project_material_plan(project)
 
 func _shelter_work_status()->String:
 	var population:=maxf(1.0,GameState.population_exact)
@@ -9822,91 +9756,21 @@ func _material_cost_text(cost:Dictionary)->String:
 	return " + ".join(parts)
 
 func _current_settlement_project() -> Dictionary:
-	var available: Array[Dictionary] = []
-	for project in _settlement_definitions():
-		if _settlement_project_available(project): available.append(project)
-	if available.is_empty(): return {}
-	if GameState.settlement_completed.is_empty():
-		for project in available:
-			if String(project.name)=="Hearth Circle": return project
-	var best: Dictionary = available[0]
-	var best_score := -INF
-	for project in available:
-		var score := float(GameState.settlement_projects.get(project.name,0.0))*0.08
-		match String(project.name):
-			"Lean-to Shelters": score+=(1.0-clampf(float(GameState.housing_capacity)/maxf(1.0,GameState.population_exact),0.0,1.0))*4.0+1.1
-			"Storage Pits": score+=(1.0-clampf(float(GameState.simulation_metrics.get("food_days",30.0))/45.0,0.0,1.0))*3.4+float(GameState.population_allocations.get("Logistics",0))/10.0
-			"Open Work Area": score+=float(GameState.population_allocations.get("Crafting",0))/5.0+float(GameState.population_allocations.get("Construction",0))/12.0
-			"Gathering Yard": score+=float(GameState.population_allocations.get("Extraction",0))/4.0+float(ResourceSystem.visible_deposits().size())*0.5
-		if score>best_score:
-			best_score=score
-			best=project
-	return best
+	return preload("res://scripts/settlement_construction.gd")._current_settlement_project()
 
 func _process_settlement_day() -> void:
 	SettlementModel.with_local_population(_process_local_settlement_day)
 
-func _process_local_settlement_day() -> void:
-	if not GameState.settlement_site_committed: return
-	if GameState.resource_settlement_id=="" and (travel_active or settler_marker==null): return
-	if "Lean-to Shelters" in GameState.settlement_completed and GameState.population_total > int(GameState.housing_capacity * 0.80):
-		var builders := float(GameState.population_allocations.get("Construction", 0))
-		GameState.housing_progress += builders / 8.0*float(GameState.simulation_metrics.get("labor_efficiency",0.72))
-		if GameState.housing_progress >= 28.0:
-			GameState.housing_progress -= 28.0
-			GameState.housing_capacity += maxi(24, roundi(GameState.population_total * 0.12))
-	var project := _current_settlement_project()
-	if project.is_empty():
-		_update_settlement_progress_text()
-		return
-	var project_name: String = project.name
-	var builders := float(GameState.population_allocations.get("Construction", 0))
-	var carriers := float(GameState.population_allocations.get("Logistics", 0))
-	var makers := float(GameState.population_allocations.get("Crafting", 0))
-	var daily_work := (builders / 8.0) * (0.82 + carriers / 30.0 + makers / 50.0)*float(GameState.simulation_metrics.get("labor_efficiency",0.72))*(1.0+DiscoverySystem.effect("construction_rate")+ProgressionSystem.effect("construction_rate"))
-	GameState.settlement_projects[project_name] = float(GameState.settlement_projects.get(project_name, 0.0)) + daily_work
-	if float(GameState.settlement_projects[project_name]) >= float(project.days):
-		var material_plan:=_settlement_project_material_plan(project)
-		if material_plan.is_empty():
-			_update_settlement_progress_text()
-			return
-		for resource_name in material_plan:
-			GameState.resource_stockpiles[resource_name]=maxf(0.0,float(GameState.resource_stockpiles.get(resource_name,0.0))-float(material_plan[resource_name]))
-		GameState.settlement_completed.append(project_name)
-		if GameState.resource_settlement_id!="":
-			if project_name=="Lean-to Shelters": GameState.housing_capacity+=roundi(90.0*(1.0+DiscoverySystem.effect("housing_output")+ProgressionSystem.effect("housing_output")))
-			var city:=SettlementModel.settlement_record(GameState.resource_settlement_id)
-			GameState.record_building_event({"settlement_id":String(city.id),"settlement_name":String(city.name),"event":"completed","kind":project_name,"form":"communal_work","land_use":"communal","materials":material_plan.duplicate(true),"counts_materials":true,"condition":1.0,"status":"active"})
-			return
-		footprint_population = -1
-		if project_name == "Hearth Circle":
-			GameState.settlement_founded_at = settler_marker.position
-			GameState.settlement_founded_day=int(floor(GameState.elapsed_days))
-			hearth_established = true
-			_settlement_model().ensure_founded()
-			GovernmentPeopleSystem.initialize()
-			if settlement_visual_root:
-				settlement_visual_root.position = GameState.settlement_founded_at
-		elif project_name=="Lean-to Shelters":
-			GameState.housing_capacity+=roundi(90.0*(1.0+DiscoverySystem.effect("housing_output")+ProgressionSystem.effect("housing_output")))
-		var family:="stone" if material_plan.has("Stone") else ("earth" if material_plan.has("Clay") else "organic")
-		GameState.record_building_event({
-			"day":int(floor(GameState.elapsed_days)),
-			"settlement_name":_settlement_display_name(),
-			"event":"completed",
-			"kind":project_name,
-			"form":"communal_work",
-			"land_use":"communal",
-			"material_family":family,
-			"materials":material_plan.duplicate(true),
-			"counts_materials":true,
-			"condition":1.0,
-			"status":"active",
-			"note":String(project.get("effect","")),
-		})
-		_spawn_settlement_structure(project_name)
-		if travel_status_label:
-			travel_status_label.text = "%s EMERGED FROM THE PEOPLE'S WORK" % project_name.to_upper()
+func _process_local_settlement_day()->void:
+	var completed:=preload("res://scripts/settlement_construction.gd").process_day()
+	if GameState.resource_settlement_id!="":return
+	for event in completed:
+		footprint_population=-1
+		if String(event.kind)=="Hearth Circle":
+			hearth_established=true
+			if settlement_visual_root:settlement_visual_root.position=GameState.settlement_founded_at
+		_spawn_settlement_structure(String(event.kind))
+		if travel_status_label:travel_status_label.text="%s EMERGED FROM THE PEOPLE'S WORK" % String(event.kind).to_upper()
 	_update_settlement_progress_text()
 
 func _update_settlement_progress_text() -> void:
@@ -10176,31 +10040,15 @@ func _move_settlers_to(destination:Vector3)->void:
 		settler_panel.visible = false
 		_inspect_location(destination)
 		return
-	travel_start = settler_marker.position
-	travel_target = destination
-	var route:=_analyze_convoy_route(travel_start,travel_target)
-	if not bool(route.get("valid",false)):
-		_inspect_location(destination)
-		if travel_status_label:
-			travel_status_label.text=String(route.get("reason","ROUTE BLOCKED"))
+	var accepted:=WorldSimulation.submit("player",{"kind":"move","destination":Vector2(destination.x,destination.z)})
+	if accepted.has("error"):
+		if travel_status_label:travel_status_label.text=String(accepted.error)
 		return
-	var distance_km:=float(route.distance_km)
-	var terrain_modifier:=float(route.terrain_modifier)
-	travel_days_total = maxf(0.5, distance_km / (CONVOY_KM_PER_DAY * terrain_modifier))
-	var endurance:=_estimated_convoy_endurance_days()
-	if travel_days_total>endurance:
-		_inspect_location(destination)
-		if travel_status_label:
-			travel_status_label.text="ROUTE UNSUSTAINABLE  •  %.0f km / %.0f days  •  provisions + forage sustain about %.0f days  •  stage the journey" % [distance_km,travel_days_total,endurance]
-		return
-	if float(GameState.simulation_metrics.get("food_days",30.0))<2.0 and float(GameState.simulation_metrics.get("food_balance",-1.0))<0.0:
-		if travel_status_label:
-			travel_status_label.text="NO MARCHING RESERVE  •  increase FOOD work and rebuild at least 2 days of provisions"
-		return
-	travel_days_elapsed = 0.0
-	travel_active = true
-	GameState.convoy_traveling=true
-	GameState.convoy_emergency_halt_reason=""
+	travel_start=settler_marker.position
+	travel_target=destination
+	travel_days_total=float(accepted.duration_days)
+	travel_days_elapsed=0.0
+	travel_active=true
 	travel_reported_milestones.clear()
 	_draw_route(travel_start, travel_target)
 	settler_panel.visible = false
@@ -10670,6 +10518,10 @@ func _process_settlement_convoy()->void:
 	_refresh_settlement_convoy_marker()
 	if progress<1.0: return
 	var completed:Dictionary=_settlement_model().complete_settlement_convoy(destination)
+	_show_convoy_arrival(completed)
+
+func _show_convoy_arrival(completed:Dictionary)->void:
+	var destination:Vector2=completed.get("settlement",{}).get("position",Vector2.ZERO)
 	if route_mesh: route_mesh.visible=false
 	_refresh_settlement_convoy_marker()
 	_refresh_settlement_network(true)
@@ -10709,6 +10561,7 @@ func _start_settlement_here() -> void:
 		route_progress=clampf(travel_days_elapsed/maxf(0.001,travel_days_total),0.0,1.0)
 	travel_active=false
 	GameState.convoy_traveling=false
+	GameState.founding_journey.clear()
 	GameState.convoy_emergency_halt_reason=""
 	GameState.simulation_metrics["traveling"]=false
 	GameState.simulation_metrics["travel_speed_factor"]=0.0
@@ -11082,34 +10935,12 @@ func _find_camp_position() -> Vector3:
 				best = Vector3(x, height + 0.002, z)
 	return best
 
-func _find_world_start_position() -> Vector3:
-	var best:=Vector3.ZERO
-	var best_score:=INF
-	# The seed defines the planet, but the founding convoy begins in a viable
-	# temperate watershed instead of being dropped arbitrarily into ocean or ice.
-	for z_step in 61:
-		for x_step in 61:
-			var x:=(float(x_step)-30.0)*5.0
-			var z:=(float(z_step)-30.0)*5.0
-			var height:=_height_at(x,z)
-			if height<0.08 or height>4.8:
-				continue
-			var slope:=_terrain_slope_at(x,z,1.2)
-			if slope>0.48:
-				continue
-			var river_x:=_world_river_x(z)
-			var river_distance:=absf(x-river_x) if river_x!=INF else 9999.0
-			if river_distance<1.2 or river_distance>18.0:
-				continue
-			var moisture:=moisture_noise.get_noise_2d(x,z)
-			var score:=Vector2(x,z).length()*0.012+absf(river_distance-5.5)*1.8+slope*38.0+absf(height-0.55)*1.2-maxf(0.0,moisture)*3.0
-			if score<best_score:
-				best_score=score
-				best=Vector3(x,height+0.002,z)
-	if best_score==INF:
-		var fallback_height:=_height_at(0.0,0.0)
-		return Vector3(0.0,maxf(0.05,fallback_height)+0.002,0.0)
-	return best
+func _civilization_start(origin:Vector2)->Vector2:
+	return preload("res://scripts/civilization_start.gd").choose(origin,Callable(self,"_survey_ground_at"))
+
+func _find_world_start_position()->Vector3:
+	var point:=_civilization_start(preload("res://scripts/civilization_start.gd").candidate(GameState.world_seed,0))
+	return Vector3(point.x,_height_at(point.x,point.y)+.002,point.y)
 
 func _create_building(parent: Node3D, offset: Vector3, size: Vector3, color: Color) -> void:
 	var building := MeshInstance3D.new()
@@ -19602,6 +19433,14 @@ func _open_world_menu()->void:
 	world_seed_input.custom_minimum_size=Vector2(0,38)
 	world_seed_input.add_theme_font_size_override("font_size",15)
 	content.add_child(world_seed_input)
+	var opponent_label:=Label.new();opponent_label.text="OPPONENT CIVILIZATIONS · NEW GAMES";content.add_child(opponent_label)
+	var opponent_options:=OptionButton.new()
+	for count:int in [6,12,24,36]:
+		opponent_options.add_item("%d opponents%s" % [count," · standard" if count==12 else (" · dense" if count==36 else "")],count)
+		if count==GameState.opponent_count:opponent_options.select(opponent_options.item_count-1)
+	opponent_options.item_selected.connect(func(index:int)->void:GameState.opponent_count=opponent_options.get_item_id(index))
+	opponent_options.tooltip_text="Changes the number of starting opponents in the next new world. Everyone uses the same rules; current civilizations are unchanged."
+	content.add_child(opponent_options)
 	world_seed_status=Label.new()
 	world_seed_status.text="Seed %d defines terrain, resources, founders, and historical possibilities. Starting again permanently erases this civilization." % GameState.world_seed
 	world_seed_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -20267,6 +20106,10 @@ func _on_score_interval_timeout()->void:
 	score_player.play()
 
 func _initialize_city_resource_sites(settlement_id:String)->void:
+	if WorldSimulation.enabled:
+		var record:=SettlementModel.settlement_record(settlement_id)
+		if not record.is_empty():SettlementModel.with_city_resources(settlement_id,func()->void:preload("res://scripts/civilization_resources.gd").initialize(record.position))
+		return
 	var model:=_settlement_model()
 	var city:Dictionary=model.settlement_record(settlement_id)
 	if city.is_empty() or bool(city.get("primary",false)) : return
@@ -20360,3 +20203,18 @@ func _focus_known_city(city_id:String)->void:
 	set_camera_distance_level(0)
 	_set_camera_target(Vector3(float(report.position.x),0,float(report.position.z)))
 	_refresh_contact_encounter_markers()
+
+func _scatter_owned_resources()->void:
+	var origin:=Vector2(world_start_position.x,world_start_position.z)
+	preload("res://scripts/civilization_resources.gd").initialize(origin)
+	resource_sites.clear()
+	var rng:=RandomNumberGenerator.new();rng.seed=GameState.world_seed
+	for deposit in GameState.resource_deposits:
+		if String(deposit.resource) not in ResourceSystem.FOUNDING_SURFACE_RESOURCES:continue
+		var type:=String(deposit.resource)
+		if type=="Fertile Soil":type="Fertile"
+		var center:Vector3=deposit.position;center.y=_height_at(center.x,center.z)
+		resource_sites.append({"type":type,"position":center,"range":13.0,"potential":float(deposit.environment_potential),"initially_observed":_world_position_is_revealed(center)})
+		if type=="Timber":_create_forest_patch(center,rng)
+		elif type=="Stone":_create_stone_patch(center,rng)
+		else:_create_resource_marker(type,center)
