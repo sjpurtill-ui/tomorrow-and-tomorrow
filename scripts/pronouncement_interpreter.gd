@@ -181,7 +181,7 @@ func _api_config()->Dictionary:
 	if api_key.is_empty(): api_key=OS.get_environment("OPENAI_API_KEY").strip_edges()
 	var model:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
 	if model.is_empty(): model=DEFAULT_API_MODEL
-	if endpoint.is_empty() and not api_key.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
+	if endpoint.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
 	if endpoint.is_empty() or api_key.is_empty() or model.is_empty(): return {}
 	if not bool(_endpoint_security(endpoint).get("allowed",false)): return {}
 	var structured_output:=_structured_output_enabled(endpoint)
@@ -195,7 +195,7 @@ func configuration_status()->Dictionary:
 	if api_key.is_empty(): api_key=OS.get_environment("OPENAI_API_KEY").strip_edges()
 	var model:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
 	if model.is_empty(): model=DEFAULT_API_MODEL
-	if endpoint.is_empty() and not api_key.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
+	if endpoint.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
 	var missing:Array[String]=[]
 	if endpoint.is_empty(): missing.append("LEVIATHAN_AI_ENDPOINT")
 	if model.is_empty(): missing.append("LEVIATHAN_AI_MODEL")
@@ -206,6 +206,48 @@ func configuration_status()->Dictionary:
 	var configured:=missing.is_empty() and issues.is_empty()
 	var structured:=configured and _structured_output_enabled(endpoint)
 	return {"enabled":true,"configured":configured,"mode":"strict structured API" if structured else "compatible JSON API" if configured else "deterministic offline","model":_safe_diagnostic_text(model,80),"endpoint_host":_endpoint_host(endpoint),"transport_security":String(security.get("label","not configured")),"structured_output":structured,"missing":missing,"issues":issues}
+
+func configure_connection(key:String,model:String,endpoint:String)->Dictionary:
+	var clean:=key.strip_edges();var selected_model:=model.strip_edges();var selected_endpoint:=endpoint.strip_edges()
+	if selected_endpoint.is_empty():selected_endpoint="https://api.openai.com/v1/chat/completions"
+	if selected_model.is_empty():selected_model=DEFAULT_API_MODEL
+	if clean.is_empty():clean=OS.get_environment("LEVIATHAN_AI_API_KEY").strip_edges()
+	if clean.is_empty():clean=OS.get_environment("OPENAI_API_KEY").strip_edges()
+	if clean.is_empty():return {"error":"Enter your API key on this device. The Windows setup does not configure the Mac."}
+	if "\n" in clean or "\r" in clean or clean.length()>8192:return {"error":"The key contains invalid characters."}
+	if selected_model.length()>120 or "\n" in selected_model:return {"error":"Enter a valid model name."}
+	var security:=_endpoint_security(selected_endpoint)
+	if not bool(security.get("allowed",false)):return {"error":String(security.get("issue","Choose a secure API endpoint."))}
+	# Session-only credentials: never place keys in campaign saves or the project.
+	OS.set_environment("LEVIATHAN_AI_API_KEY",clean)
+	OS.set_environment("LEVIATHAN_AI_ENDPOINT",selected_endpoint)
+	OS.set_environment("LEVIATHAN_AI_MODEL",selected_model)
+	set_api_enabled(true)
+	return {"ok":true,"message":"Ready to retry your conversation. The key is kept only for this game session."}
+
+func connection_problem()->String:
+	var config:=configuration_status()
+	if not bool(config.enabled):return "AI is switched off. Open Menu → AI Connection to enable live conversations."
+	if not config.issues.is_empty():return "AI connection settings need attention: "+" ".join(PackedStringArray(config.issues))
+	if not bool(config.configured):return "No API key is configured on this device. Open Menu → AI Connection and enter your key. A Windows setup does not carry over to the Mac."
+	return ""
+
+func connection_response_problem(http_code:int,transport_result:int)->String:
+	if transport_result!=HTTPRequest.RESULT_SUCCESS:return "The connection timed out or could not reach the service. Check your connection and retry."
+	match http_code:
+		401:return "The service rejected the API key. Update it in Menu → AI Connection."
+		403:return "This API account does not have permission for the request. Check the key's project and model access."
+		404:return "The configured model or endpoint was not found. Check Menu → AI Connection."
+		429:return "The API account reached a rate or usage limit. Check its usage and retry when available."
+	if http_code>=500:return "The API service returned a server error. Your message is saved for retry."
+	if http_code>=400:return "The API rejected the request (HTTP %d). Check the model and connection settings." % http_code
+	return "The service returned a reply the game could not use. Your message is saved for retry."
+
+var connection_panel:CanvasLayer
+func open_connection_settings()->void:
+	if is_instance_valid(connection_panel):return
+	connection_panel=preload("res://scripts/hud/ai_connection_panel.gd").new()
+	add_child(connection_panel)
 
 func _structured_output_enabled(endpoint:String)->bool:
 	var setting:=OS.get_environment("LEVIATHAN_AI_STRUCTURED_OUTPUT").strip_edges().to_lower()
@@ -520,7 +562,8 @@ func _conversation_service_failure(previous:Dictionary)->Dictionary:
 	result["policies"]=[]
 	result["service_failure"]=true
 	result["non_directive"]=true
-	result["answer"]="The conversation connection failed before a usable reply arrived. Your discussion is preserved and this message changed nothing. Say ‘retry’ to try this message again, or revise what you want to ask."
+	var problem:=connection_problem()
+	result["answer"]=(problem if not problem.is_empty() else "The conversation connection failed before a usable reply arrived.")+" Your discussion is preserved and this message changed nothing. Say ‘retry’ after restoring the connection, or revise your question."
 	return result
 
 func _parse_api_body(body:PackedByteArray,pronouncement_text:String="")->Dictionary:

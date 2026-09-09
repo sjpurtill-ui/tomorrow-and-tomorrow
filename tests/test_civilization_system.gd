@@ -11,6 +11,12 @@ func before_test()->void:
 	MilitaryCampaign.reset_for_new_world()
 	system=auto_free(CIVILIZATION_SYSTEM_SCRIPT.new())
 	system.reset_for_new_world()
+	# These diplomacy/conquest cases use an established five-city realm.
+	# Fresh-world parity is tested separately in test_civilization_player_independence.
+	var fixture_rng:=RandomNumberGenerator.new();fixture_rng.seed=112358
+	for civ:Dictionary in system.civilizations:
+		civ.strategic_regions=system._create_strategic_regions(String(civ.id),String(civ.name),float(civ.population),float(civ.territory),fixture_rng)
+		civ.settlement_count=5
 	system.set_scout_geography_authority(func(_position:Vector2)->bool: return true)
 	_set_all_contacted_and_located()
 
@@ -552,15 +558,13 @@ func test_war_declaration_begins_when_the_carried_message_arrives_not_at_departu
 	assert_str(String(system.diplomatic_mission_status().stage)).is_equal("returning")
 
 
-func test_planetary_geography_prevents_automatic_early_contact()->void:
+func test_world_seeding_does_not_grant_automatic_early_contact()->void:
 	_hide_all_contacts()
+	var homes:Array=[]
+	for civ in system.civilizations:homes.append(system._civilization_world_position(civ))
 	system.register_player_origin(Vector2.ZERO)
-	var nearest_home:=INF
-	for civ in system.civilizations: nearest_home=minf(nearest_home,system._civilization_world_position(civ).length())
-	assert_float(nearest_home).is_greater_equal(2000.0)
-	for formation in system.foreign_formations:
-		var closest:=Geometry2D.get_closest_point_to_segment(Vector2.ZERO,formation.point_a,formation.point_b)
-		assert_float(closest.length()).is_greater(1000.0)
+	# Neither forced proximity nor a player-centered exclusion ring is a rule.
+	for i in homes.size():assert_vector(system._civilization_world_position(system.civilizations[i])).is_equal(homes[i])
 	assert_bool(bool(system.dispatch_scouts(180).get("ok",false))).is_true()
 	system.advance_to_day(180)
 	assert_int(int(system.known_competition_snapshot().contacted_count)).is_equal(0)
@@ -1012,6 +1016,8 @@ func test_war_exhaustion_ripples_into_player_effects_and_recovers_in_peace()->vo
 
 
 func test_same_seed_produces_the_same_competitors()->void:
+	system.reset_for_new_world()
+	_set_all_contacted_and_located()
 	var first:Array=system.export_state().civilizations
 	system.reset_for_new_world()
 	_set_all_contacted_and_located()
@@ -1032,6 +1038,7 @@ func test_strategic_turn_changes_population_strategy_and_power_without_growing_s
 
 func test_player_foreign_policy_changes_real_trade_and_war_state()->void:
 	var civ:Dictionary=system.civilizations[0]
+	civ.strategic_regions[0].fortification=.3
 	civ.player_relation["opinion"]=0.40
 	system.civilizations[0]=civ
 	var trade:Dictionary=system.conduct_player_action(String(civ.id),"open_trade",true)
@@ -1075,6 +1082,7 @@ func test_food_aid_is_removed_from_authoritative_typed_stores_and_cannot_reappea
 
 func test_peace_removes_queued_incidents_and_stale_incidents_are_never_consumed()->void:
 	var civ:Dictionary=system.civilizations[0]
+	civ.military_population=70.0;civ.military_readiness=.95;civ.command_readiness=.95
 	civ.player_relation["at_war"]=true
 	civ.player_relation["treaty"]="war"
 	civ.player_relation["opinion"]=0.60

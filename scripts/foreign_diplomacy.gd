@@ -1,6 +1,7 @@
 extends Node
 
 const NAMES=preload("res://scripts/historical_name_generator.gd")
+const PERSONALITY=preload("res://scripts/leader_personality.gd")
 const TEMPERAMENTS=["Bridge-builder","Proud guardian","Practical organizer","Restless visionary"]
 const TONES={"equals":"Speak as equals","honor":"Honor their standing","firm":"Make a firm case"}
 const ACCORDS={
@@ -38,9 +39,11 @@ func leader(id:String)->Dictionary:
 		var serial:=posmod(hash(id),10000)
 		var traditions:Array=NAMES.POOLS.keys()
 		var identity:Dictionary=NAMES.make(seed_value,serial,serial%2==0,traditions[serial%4],{})
-		var temperament:String=TEMPERAMENTS[serial%4]
+		var temperament:String=PERSONALITY.temperament(PERSONALITY.foreign(seed_value,id))
 		var past:Array=["Earned a hearing by settling a bitter dispute between families.","Rose to prominence defending the community's right to govern itself.","Won support by organizing work that rival households could not finish alone.","Gathered followers by bringing unfamiliar ideas home from a long journey."]
 		leaders[id]={"name":identity.name,"temperament":temperament,"bio":past[serial%4],"trust":0.0,"memories":[],"accord":{},"counter":{},"next_day":0,"serial":0,"resolved":0}
+	leaders[id]["personality"]=PERSONALITY.foreign(seed_value,id)
+	leaders[id]["goals"]=PERSONALITY.agenda(civ,leaders[id].personality)
 	return leaders[id]
 
 func situation(id:String)->Dictionary:
@@ -53,7 +56,8 @@ func situation(id:String)->Dictionary:
 	if not (person.counter as Dictionary).is_empty(): return {"title":"An answer with conditions","line":"I can defend this agreement before my people if yours carries more of the burden. Those are the terms I can offer.","priority":person.counter.accord}
 	if String(relation.get("treaty","none"))=="trade": return {"title":"More than exchanging goods","line":"Our traders already meet. Let us make those journeys useful to the people who come after them.","priority":"routes"}
 	if int(person.resolved)==0: return {"title":"Two peoples, one first impression","line":"Your envoys have a seat by our fire. Tell me what you want us to build together—and what you are willing to give.","priority":"exchange"}
-	return {"title":"What comes after the promise?","line":"We remember how you dealt with us. Show me how this proposal serves both our communities.","priority":"exchange" if String(civ.get("strategy",""))=="inquiry" else "routes"}
+	var goal:Dictionary=person.goals[0]
+	return {"title":String(goal.title),"line":"We remember how you dealt with us. My priority is to %s. Show me how your proposal helps us do that." % String(goal.title).to_lower(),"priority":String(goal.accord)}
 
 func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictionary:
 	var p:=leader(id); var civ:=civilization(id)

@@ -22,17 +22,27 @@ var timer:=0.0
 var sections:Array[Control]=[]
 var section_buttons:Array[Button]=[]
 var audience_cost:Label
+var pause=preload("res://scripts/hud/simulation_pause.gd").new()
 
 func _ready()->void:
+	pause.acquire(get_tree().current_scene)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var bg:=ColorRect.new();bg.color=Color("122128");bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(bg)
+	var bg:=ColorRect.new();bg.color=Color("071015d9");bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(bg)
+	bg.gui_input.connect(func(event:InputEvent):
+		if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed:queue_free())
 	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,20)
+	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,32)
+	margin.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	add_child(margin)
-	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);margin.add_child(root)
+	var card:=PanelContainer.new();margin.add_child(card)
+	var style:=StyleBoxFlat.new();style.bg_color=Color("122128");style.set_corner_radius_all(10)
+	for side in [SIDE_LEFT,SIDE_RIGHT,SIDE_TOP,SIDE_BOTTOM]:style.set_content_margin(side,20)
+	card.add_theme_stylebox_override("panel",style)
+	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);card.add_child(root)
 	var top:=HBoxContainer.new();root.add_child(top)
+	var flag:=TextureRect.new();flag.texture=preload("res://scripts/city_map_identity.gd").foreign(civ_id).texture;flag.custom_minimum_size=Vector2(48,30);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;top.add_child(flag)
 	heading=label(top,23);heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	button(top,"RETURN",func():queue_free())
+	button(top,"Close ×",func():queue_free())
 	var navigation:=HBoxContainer.new();root.add_child(navigation)
 	for index in 3:
 		var selected:=index
@@ -43,6 +53,7 @@ func _ready()->void:
 		var section:=VBoxContainer.new();section.size_flags_vertical=Control.SIZE_EXPAND_FILL;section.add_theme_constant_override("separation",10);body.add_child(section);sections.append(section)
 	var audience:=sections[0]
 	access_note=label(audience,14)
+	button(audience,"AI Connection…",func():PronouncementInterpreter.open_connection_settings())
 	audience_cost=label(audience,14)
 	audience_button=button(audience,"SEND DELEGATES FOR AN AUDIENCE",func():
 		var result:=ForeignDiplomacy.send_audience(civ_id)
@@ -87,6 +98,13 @@ func _ready()->void:
 func show_section(index:int)->void:
 	for i in sections.size():sections[i].visible=i==index;section_buttons[i].disabled=i==index
 
+func _unhandled_input(event:InputEvent)->void:
+	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
+		get_viewport().set_input_as_handled();queue_free()
+
+func _exit_tree()->void:
+	pause.release()
+
 func label(parent:Node,font:int)->Label:
 	var l:=Label.new(); l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; l.add_theme_font_size_override("font_size",font); parent.add_child(l); return l
 func button(parent:Node,text:String,action:Callable)->Button:
@@ -109,6 +127,7 @@ func refresh()->void:
 	if p.is_empty(): queue_free(); return
 	heading.text=String(p.name).to_upper()+" · "+String(civ.name)
 	personal.text="%s\n\n%s\n\nPersonal trust: %s" % [p.temperament,p.bio,"earned" if float(p.trust)>.1 else ("damaged" if float(p.trust)<-.1 else "untested")]
+	for goal:Dictionary in p.get("goals",[]):personal.text+="\n• "+String(goal.title)
 	if not (p.accord as Dictionary).is_empty(): personal.text+="\n\n%s\n%d days of cooperation remain." % [ForeignDiplomacy.ACCORDS[p.accord.kind].name,maxi(0,int(p.accord.until)-int(GameState.elapsed_days))]
 	page=clampi(page,0,maxi(0,p.memories.size()-1))
 	memory.text="Your dealings will leave a record here." if p.memories.is_empty() else "Day %d · %d of %d\n%s" % [int(p.memories[page].day),page+1,p.memories.size(),String(p.memories[page].text)]

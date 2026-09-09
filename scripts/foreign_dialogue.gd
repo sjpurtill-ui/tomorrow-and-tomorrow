@@ -68,13 +68,13 @@ func known_context(id:String)->Dictionary:
 		observations.append({"day":int(record.returned_day),"observations":record.get("observations",[]),"outcome":String(record.get("outcome",""))})
 		if observations.size()>=3: break
 	var civ:=ForeignDiplomacy.civilization(id); var relation:Dictionary=civ.player_relation
-	return {"day":int(GameState.elapsed_days),"leader":{"name":person.name,"temperament":person.temperament,"bio":person.bio},"community":civ.name,"communicated_position":ForeignDiplomacy.situation(id),"relationship":{"at_war":bool(relation.get("at_war",false)),"treaty":String(relation.get("treaty","none"))},"memories":person.memories,"counteroffer":person.counter,"understanding":person.accord,"current_draft":thread(id).draft,"returned_reports":observations,"access":access(id),"commitments":ForeignDiplomacy.commitments.public_snapshot(id),"active_siege":ForeignDiplomacy.commitments.siege_info("current"),"city_reports":CivilizationSystem.city_intelligence.known_cities("player",id)}
+	return {"day":int(GameState.elapsed_days),"leader":{"name":person.name,"temperament":person.temperament,"bio":person.bio,"personality":person.personality,"stated_goals":person.goals},"community":civ.name,"communicated_position":ForeignDiplomacy.situation(id),"relationship":{"at_war":bool(relation.get("at_war",false)),"treaty":String(relation.get("treaty","none"))},"memories":person.memories,"counteroffer":person.counter,"understanding":person.accord,"current_draft":thread(id).draft,"returned_reports":observations,"access":access(id),"commitments":ForeignDiplomacy.commitments.public_snapshot(id),"active_siege":ForeignDiplomacy.commitments.siege_info("current"),"city_reports":CivilizationSystem.city_intelligence.known_cities("player",id)}
 
 func _request(id:String)->void:
 	var gate:=access(id)
 	if not bool(gate.ok): _failure(id,String(gate.reason)); return
 	var config:Dictionary=PronouncementInterpreter._api_config()
-	if config.is_empty(): _failure(id,"The conversation service is unavailable or switched off. Your message and draft are saved. Enable the connection and retry, or use the envoy proposal controls."); return
+	if config.is_empty(): _failure(id,PronouncementInterpreter.connection_problem()+" Your message and draft are saved. Restore the connection and retry."); return
 	var messages:Array=[{"role":"system","content":PROMPT+" The Timber amounts are paid only by the player, not by each side. Do not invent an equal matching contribution or specific foreign stores. "+COMMITMENT_PROMPT},{"role":"system","content":"KNOWN GAME DATA: "+JSON.stringify(known_context(id))}]
 	for record:Dictionary in thread(id).messages: messages.append({"role":record.role,"content":record.content})
 	var http:=HTTPRequest.new(); add_child(http); http.timeout=45; http.max_redirects=0; http.body_size_limit=131072
@@ -123,7 +123,7 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 				if msg is Dictionary:
 					var content:String=PronouncementInterpreter._content_text(msg.get("content",""))
 					valid=accept(id,JSON.parse_string(content.trim_prefix("```json").trim_suffix("```").strip_edges()))
-	if not valid: _failure(id,"No usable reply arrived. Your discussion and draft are intact. Retry this message or change your proposal.")
+	if not valid: _failure(id,PronouncementInterpreter.connection_response_problem(code,result)+" Your discussion and draft are intact.")
 	changed.emit(id)
 
 func export_state()->Dictionary:

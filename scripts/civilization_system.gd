@@ -22,8 +22,7 @@ const INCIDENT_LIMIT:=4
 const AGE_COHORTS:=["children","youth","early_adults","established_adults","mature_adults","elders"]
 const COHORT_DURATION_TURNS:={"children":168.0,"youth":132.0,"early_adults":120.0,"established_adults":120.0,"mature_adults":180.0}
 const STRATEGIES:=["sustenance","growth","inquiry","commerce","fortification","expansion"]
-const CIV_PREFIXES:=["ASHEN","BRIGHTWATER","CEDAR","DEEP VALLEY","EASTERN","HIGH PLAIN","IRONWOOD","LONG RIVER","AMBER COAST","BLACK FEN","COLDSPRING","DUSTWIND","EMBER HILL","FALLOW MOOR","GREYSTONE","HOLLOW PINE","JADE MARSH","KESTREL RIDGE","LOW COUNTRY","MIRROR LAKE","NORTH SHOAL","OXBOW","PALE CLIFF","QUIET WATER","REEDBANK","SALT MEADOW","THORNFIELD","UPLAND","VIOLET GORGE","WHITE BIRCH","WINTER GATE","YELLOW REED","ZENITH PLAIN","BROKEN TOOTH","CINDER VALE","DRIFTWOOD"]
-const CIV_FORMS:=["COMPACT","ASSEMBLIES","COMMONWEALTH","LEAGUE","FEDERATION","CONFEDERACY","DOMINION","COVENANT"]
+const IDENTITIES=preload("res://scripts/civilization_identity.gd")
 const REGION_ROLES:=["frontier","granary","market","works","capital"]
 const REGION_TITLES:={"frontier":"MARCH","granary":"BREADLANDS","market":"RIVER GATE","works":"FOUNDRY DISTRICT","capital":"HIGH SEAT"}
 const REGION_POPULATION_SHARES:=[0.07,0.11,0.14,0.13,0.20]
@@ -195,7 +194,8 @@ func reset_for_new_world()->void:
 		var food_days:=rng.randf_range(24.0,64.0)
 		var military_share:=rng.randf_range(0.025,0.105)
 		var founding_focus_id:=String(GameState.FOUNDING_FOCUS_ORDER[(index+abs(seed_value))%GameState.FOUNDING_FOCUS_ORDER.size()])
-		var name:="%s %s" % [CIV_PREFIXES[index],CIV_FORMS[(index+abs(seed_value))%CIV_FORMS.size()]]
+		var identity:Dictionary=IDENTITIES.roster(seed_value)[index]
+		var name:=String(identity.name)
 		var civ_id:="civ_%02d" % (index+1)
 		var territory:=rng.randf_range(0.65,1.55)
 		var desired_world_position:=Vector2(cos(angle)*distance*CIVILIZATION_WORLD_RADIUS_X_KM,sin(angle)*distance*CIVILIZATION_WORLD_RADIUS_Z_KM)
@@ -229,7 +229,7 @@ func reset_for_new_world()->void:
 			"societal_values":SOCIETAL_VALUES_MODEL.initial_state(founding_focus_id,seed_value,civ_id)
 		}
 		civ=_apply_rival_founding_focus_start(civ)
-		civ["strategic_regions"]=_create_strategic_regions(civ_id,CIV_PREFIXES[index],population,territory,rng)
+		civ["strategic_regions"]=_create_strategic_regions(civ_id,name,population,territory,rng,identity.cities)
 		civilizations.append(civ)
 		contender_dominance_turns[civ_id]=0
 	_initialize_relations(seed_value)
@@ -263,14 +263,14 @@ func _apply_rival_founding_focus_start(civ:Dictionary)->Dictionary:
 	return civ
 
 
-func _create_strategic_regions(civ_id:String,prefix:String,population:float,territory:float,rng:RandomNumberGenerator)->Array[Dictionary]:
+func _create_strategic_regions(civ_id:String,prefix:String,population:float,territory:float,rng:RandomNumberGenerator,city_names:Array=[])->Array[Dictionary]:
 	var regions:Array[Dictionary]=[]
 	for index in STRATEGIC_REGIONS_PER_CIV:
 		var role:=String(REGION_ROLES[index])
 		var fortification_base:={"frontier":0.42,"granary":0.18,"market":0.28,"works":0.34,"capital":0.62}
 		regions.append({
 			"id":"%s_region_%02d" % [civ_id,index+1],
-			"name":"%s %s" % [prefix,String(REGION_TITLES[role])],
+			"name":String(city_names[index]) if index<city_names.size() else "%s %s" % [prefix,String(REGION_TITLES[role])],
 			"role":role,
 			"approach_index":index,
 			"original_controller":civ_id,
@@ -615,29 +615,14 @@ func register_player_origin(position:Vector2)->void:
 	# clear the founding reveal and move the live fog origin back to (0, 0).
 	initialize()
 	player_world_origin=position
-	_generate_founding_neighborhood()
 	if revealed_areas.is_empty(): _add_revealed_area(position,72.0,"founding knowledge")
 	_process_local_observation(int(GameState.elapsed_days),true)
 
 
 func _generate_founding_neighborhood()->void:
-	# Only unobserved new worlds receive regional founding geography. Old worlds
-	# keep their recorded positions; no relocation follows the moving player.
-	if neighborhood_generated or GameState.elapsed_days>0 or not revealed_areas.is_empty() or not scout_land_authority.is_valid():return
-	neighborhood_generated=true
-	var sites:=preload("res://scripts/nearby_society_geography.gd").sites(player_world_origin,scout_land_authority,GameState.world_seed,3)
-	for index in mini(sites.size(),civilizations.size()):
-		var civ:Dictionary=civilizations[index]
-		if int(civ.player_relation.get("contact_level",0))>0:continue
-		var position:Vector2=sites[index]
-		civ.world_position=position;civ.position=Vector2(position.x/CIVILIZATION_WORLD_RADIUS_X_KM,position.y/CIVILIZATION_WORLD_RADIUS_Z_KM);civ.distance=civ.position.length()
-		var environment:Dictionary=PlanetEnvironment.profile_at(position)
-		civ.environment_profile=environment;civ.resource_endowment=environment.get("resource_potentials",{}).duplicate(true)
-		civ.food_capacity=float(civ.population)*lerpf(.92,1.20,float(environment.get("food_potential",.5)))
-		civ["founding_region"]=true
-	# The normal formation generator uses these actual homes. It grants no
-	# contact, located settlement, rumor, revealed ground or player destination.
-	_initialize_foreign_formations(GameState.world_seed)
+	# Retained for older callers. Starting a player must not relocate rivals.
+	# Their homes were generated from the world seed before player placement.
+	pass
 
 
 func record_player_travel(position:Vector2)->void:
@@ -1394,6 +1379,10 @@ func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goo
 		return {"error":"The selected gift changed before the envoy could depart."}
 	var day:=int(GameState.elapsed_days)
 	diplomatic_mission={"civ_id":civ_id,"civilization":String(quote.civilization),"purpose":String(quote.purpose),"purpose_label":String(quote.purpose_label),"personnel":int(quote.personnel),"population_sources":{"support":int(quote.personnel)},"provisions":provisions,"gift_resource":String(gift.resource),"gift_amount":delivered,"origin_position":quote.origin_position,"target_position":quote.target_position,"target_kind":String(quote.target_kind),"depart_day":day,"arrival_day":day+int(quote.travel_days),"return_day":day+int(quote.total_days),"stage":"outbound","arrival_resolved":false,"distance_km":float(quote.distance_km)}
+	diplomatic_mission["destination"]="Reported home of %s" % String(quote.civilization)
+	for known:Dictionary in city_intelligence.known_cities("player",civ_id):
+		if city_intelligence.vector(known.position).distance_to(city_intelligence.vector(quote.target_position))<1.0:
+			diplomatic_mission.destination=String(known.name);break
 	rumor_network.prepare(diplomatic_mission,"player",day)
 	var gift_phrase:=" with no material gift" if delivered<=0.0 else " carrying %.1f %s" % [delivered,String(gift.resource)]
 	var message:="%d envoys depart for %s to %s%s. The proposal does not take effect until they travel there and carry a response home; %.1f travel rations were issued." % [int(quote.personnel),String(quote.civilization),String(quote.purpose_label).to_lower(),gift_phrase,provisions]
@@ -1405,7 +1394,10 @@ func diplomatic_mission_status()->Dictionary:
 	if diplomatic_mission.is_empty():
 		return {"active":false,"history_count":diplomatic_history.size(),"latest":diplomatic_history[0].duplicate(true) if not diplomatic_history.is_empty() else {}}
 	var day:=int(GameState.elapsed_days)
-	return {"active":true,"civilization":String(diplomatic_mission.get("civilization","FOREIGN POLITY")),"civ_id":String(diplomatic_mission.get("civ_id","")),"purpose":String(diplomatic_mission.get("purpose","goodwill")),"purpose_label":String(diplomatic_mission.get("purpose_label","DIPLOMATIC MISSION")),"personnel":int(diplomatic_mission.get("personnel",0)),"provisions":float(diplomatic_mission.get("provisions",0.0)),"gift_resource":String(diplomatic_mission.get("gift_resource","")),"gift_amount":float(diplomatic_mission.get("gift_amount",0.0)),"stage":String(diplomatic_mission.get("stage","outbound")),"days_remaining":maxi(0,int(diplomatic_mission.get("return_day",day))-day),"arrival_days_remaining":maxi(0,int(diplomatic_mission.get("arrival_day",day))-day),"target_kind":String(diplomatic_mission.get("target_kind","rendezvous"))}
+	var status:Dictionary={"active":true,"civilization":String(diplomatic_mission.get("civilization","FOREIGN POLITY")),"civ_id":String(diplomatic_mission.get("civ_id","")),"purpose":String(diplomatic_mission.get("purpose","goodwill")),"purpose_label":String(diplomatic_mission.get("purpose_label","DIPLOMATIC MISSION")),"personnel":int(diplomatic_mission.get("personnel",0)),"provisions":float(diplomatic_mission.get("provisions",0.0)),"gift_resource":String(diplomatic_mission.get("gift_resource","")),"gift_amount":float(diplomatic_mission.get("gift_amount",0.0)),"stage":String(diplomatic_mission.get("stage","outbound")),"days_remaining":maxi(0,int(diplomatic_mission.get("return_day",day))-day),"arrival_days_remaining":maxi(0,int(diplomatic_mission.get("arrival_day",day))-day),"target_kind":String(diplomatic_mission.get("target_kind","rendezvous"))}
+
+	status.merge(preload("res://scripts/diplomatic_journey.gd").describe(diplomatic_mission,day),true)
+	return status
 
 
 func _process_diplomatic_mission(day:int)->void:
@@ -1475,9 +1467,9 @@ func _process_diplomatic_mission(day:int)->void:
 		var observations:Array=diplomatic_report.get("observations",[])
 		var report_text:=" No defensible observation survived the return journey." if observations.is_empty() else " RETURNED OBSERVATIONS: %s" % " • ".join(PackedStringArray(observations))
 		var message:="The envoys return from %s. %s%s" % [String(civ.name),outcome,report_text]
-		_record_world_event("Diplomatic mission returns",message,"diplomacy",day)
 		GameState.simulation_events.push_front({"day":day,"title":"DIPLOMATS RETURN","description":message,"domain":"diplomacy","severity":"major"})
 		diplomatic_mission.clear()
+		_record_world_event("Diplomatic mission returns",message,"diplomacy",day,{"kind":"diplomatic_return","civ_id":civ_id,"outcome":outcome})
 	civ["player_relation"]=relation
 	civilizations[index]=civ
 
@@ -2879,6 +2871,8 @@ func _choose_strategy(civ:Dictionary)->String:
 	var inherited:=String(focus_strategy.get(String(civ.get("founding_focus","")),""))
 	var civ_number:=int(String(civ.id).trim_prefix("civ_"))
 	if inherited!="" and (turn_index+civ_number)%3!=0: return inherited
+	var personality=preload("res://scripts/leader_personality.gd")
+	var goals:Array[Dictionary]=personality.agenda(civ,personality.foreign(last_world_seed,String(civ.id)))
 	var resources:Dictionary=environment.get("resource_potentials",{})
 	if float(environment.get("food_potential",0.5))<0.36 and float(civ.food_days)<72.0: return "sustenance"
 	if float(environment.get("construction_potential",0.5))>0.72 and maxf(float(resources.get("Copper Ore",0.0)),float(resources.get("Iron Ore",0.0)))>0.62: return "commerce"
@@ -2894,7 +2888,7 @@ func _choose_strategy(civ:Dictionary)->String:
 	if float(civ.food_capacity)<population*1.06: return "growth"
 	if _friendly_relation_count(civ)>=2 and float(civ.diplomacy)>0.48: return "commerce"
 	if float(civ.aggression)+float(civ.adaptability)*0.35>0.78: return "expansion"
-	return STRATEGIES[(turn_index+int(String(civ.id).trim_prefix("civ_")))%STRATEGIES.size()]
+	return String(goals[0].strategy)
 
 
 func _external_threat(civ:Dictionary) -> float:

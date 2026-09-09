@@ -1015,6 +1015,9 @@ func advance_world_time(days_advanced:float)->void:
 		elif not simulation_events.is_empty() and travel_status_label:
 			travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
 		_evaluate_travel_survival()
+	if last_discovery_day<current_discovery_day:
+		days_advanced=maxf(0.0,days_advanced-(requested_world_day-float(last_discovery_day)))
+		requested_world_day=float(last_discovery_day)
 	GameState.elapsed_days=requested_world_day
 	if travel_active:
 		var travel_speed_factor:=clampf(float(GameState.simulation_metrics.get("travel_speed_factor",1.0)),0.12,1.0)
@@ -10860,6 +10863,10 @@ func _issue_travel_council_report(stage: String,progress: float,reason:="") -> v
 	travel_council_notice_until_msec=Time.get_ticks_msec()+(13000 if urgency>0.7 else 8500)
 
 func _on_diplomatic_event(event:Dictionary)->void:
+	if String(event.get("kind",""))=="diplomatic_return":
+		if is_instance_valid(diplomat_dispatch_panel):_close_diplomat_dispatch_panel()
+		ForeignDiplomacy.open(String(event.get("civ_id","")))
+		return
 	# Routine formations already have persistent map counters and a World badge.
 	# Only the historically meaningful first direct contact interrupts play;
 	# threats, war declarations, and battles use their own decision surfaces.
@@ -17644,11 +17651,12 @@ func _dispatch_scout_from_actions(duration_days:int,target_id:String="open_world
 
 
 func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="goodwill")->void:
-	if diplomat_dispatch_panel and is_instance_valid(diplomat_dispatch_panel): diplomat_dispatch_panel.queue_free()
+	var replacing:=is_instance_valid(diplomat_dispatch_panel)
+	if replacing: diplomat_dispatch_panel.queue_free()
 	if civ_id!="": pending_diplomat_civ_id=civ_id
 	pending_diplomat_action=purpose.strip_edges().to_lower().replace(" ","_")
 	if pending_diplomat_action!="goodwill" and pending_diplomat_action not in CivilizationSystem.CARRIED_DIPLOMATIC_ACTIONS: pending_diplomat_action="goodwill"
-	diplomat_dispatch_previous_speed=game_speed
+	if not replacing:diplomat_dispatch_previous_speed=game_speed
 	_set_game_speed(0.0)
 	diplomat_dispatch_panel=Control.new()
 	diplomat_dispatch_panel.name="DiplomatDispatchModal"
@@ -17657,16 +17665,24 @@ func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="goodwill")->
 	diplomat_dispatch_panel.z_index=72
 	interface_layer.add_child(diplomat_dispatch_panel)
 	var dimmer:=ColorRect.new(); dimmer.size=diplomat_dispatch_panel.size; dimmer.color=Color(0.005,0.010,0.012,0.88); dimmer.mouse_filter=Control.MOUSE_FILTER_STOP; diplomat_dispatch_panel.add_child(dimmer)
-	var modal:=PanelContainer.new(); modal.size=Vector2(minf(720.0,diplomat_dispatch_panel.size.x-80.0),minf(530.0,diplomat_dispatch_panel.size.y-64.0)); modal.position=(diplomat_dispatch_panel.size-modal.size)*0.5; modal.add_theme_stylebox_override("panel",_population_report_style(Color("#9b8761"))); diplomat_dispatch_panel.add_child(modal)
+	dimmer.gui_input.connect(func(event:InputEvent):
+		if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed:_close_diplomat_dispatch_panel())
+	var modal:=PanelContainer.new(); modal.mouse_filter=Control.MOUSE_FILTER_STOP; modal.size=Vector2(minf(720.0,diplomat_dispatch_panel.size.x-80.0),minf(530.0,diplomat_dispatch_panel.size.y-64.0)); modal.position=(diplomat_dispatch_panel.size-modal.size)*0.5; modal.add_theme_stylebox_override("panel",_population_report_style(Color("#9b8761"))); diplomat_dispatch_panel.add_child(modal)
 	var root:=VBoxContainer.new(); root.add_theme_constant_override("separation",9); modal.add_child(root)
 	var purpose_label:=String(CivilizationSystem.DIPLOMATIC_PURPOSE_LABELS.get(pending_diplomat_action,"SEND DIPLOMATS"))
 	var heading:=Label.new(); heading.text=purpose_label; heading.add_theme_font_size_override("font_size",22); heading.add_theme_color_override("font_color",Color("#e4d3ac")); root.add_child(heading)
-	var explanation:=Label.new(); explanation.text="Diplomats require a settlement physically located by a returned report. They travel at the speed of people: nothing is agreed at departure, and their route, response, and observations become knowledge only when they return."; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#aeb6b1")); root.add_child(explanation)
+	var explanation:=Label.new(); explanation.text="Choose a destination and send a delegation. When their reply comes home, the game pauses and opens your conversation."; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#aeb6b1")); root.add_child(explanation)
 	var status:=CivilizationSystem.diplomatic_mission_status()
 	if bool(status.get("active",false)):
-		var cargo:="NO MATERIAL GIFT" if float(status.get("gift_amount",0.0))<=0.0 else "%.1f %s GIFT" % [float(status.get("gift_amount",0.0)),String(status.get("gift_resource",""))]
-		var journey_status:="REACHES DESTINATION IN %d DAYS  •  ANSWER STILL UNKNOWN" % int(status.get("arrival_days_remaining",0)) if String(status.get("stage","outbound"))=="outbound" else "RETURNING WITH THE RESPONSE"
-		var active:=Label.new(); active.text="%s  •  %s\n%d ENVOYS  •  %.1f FOOD TRAVEL RATIONS  •  %s\n%s\n%d DAYS UNTIL HOME" % [String(status.get("purpose_label","DIPLOMATIC MISSION")),String(status.get("civilization","FOREIGN POLITY")).to_upper(),int(status.get("personnel",0)),float(status.get("provisions",0.0)),cargo,journey_status,int(status.get("days_remaining",0))]; active.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; active.size_flags_vertical=Control.SIZE_EXPAND_FILL; active.add_theme_font_size_override("font_size",15); active.add_theme_color_override("font_color",Color("#d6bf87")); root.add_child(active)
+		var journey=preload("res://scripts/hud/diplomatic_journey_card.gd").new()
+		journey.status=status;root.add_child(journey)
+		var actions:=HBoxContainer.new();root.add_child(actions)
+		var show:=Button.new();show.text="Show destination on map";actions.add_child(show)
+		show.pressed.connect(func():
+			_close_diplomat_dispatch_panel();_focus_known_world_point(String(status.civ_id),"settlement"))
+		var talk:=Button.new();talk.text="View leader & conversation";actions.add_child(talk)
+		talk.pressed.connect(func():
+			_close_diplomat_dispatch_panel();ForeignDiplomacy.open(String(status.civ_id)))
 	else:
 		var contacts:Array[Dictionary]=[]
 		for profile_variant in CivilizationSystem.known_competition_snapshot().get("leaders",[]):
@@ -17677,8 +17693,8 @@ func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="goodwill")->
 		else:
 			var latest:Dictionary=status.get("latest",{})
 			var latest_observations:Array=latest.get("observations",[])
-			if not latest_observations.is_empty():
-				var returned_report:=Label.new(); returned_report.text="LAST RETURNED REPORT • %s\n%s" % [String(latest.get("civilization","FOREIGN POLITY")).to_upper(),"  •  ".join(PackedStringArray(latest_observations))]; returned_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; returned_report.add_theme_font_size_override("font_size",10); returned_report.add_theme_color_override("font_color",Color("#9fc1b8")); root.add_child(returned_report)
+			if not latest.is_empty():
+				var returned_report:=Label.new(); returned_report.text="REPLY FROM %s\n%s" % [String(latest.get("civilization","FOREIGN POLITY")),String(latest.get("outcome","Your envoys returned."))]; returned_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; returned_report.add_theme_font_size_override("font_size",10); returned_report.add_theme_color_override("font_color",Color("#9fc1b8")); root.add_child(returned_report)
 			var selector:=OptionButton.new(); selector.custom_minimum_size=Vector2(0,38); root.add_child(selector)
 			var selected_index:=0
 			for contact_index in contacts.size():
@@ -17731,7 +17747,8 @@ func _dispatch_diplomat_from_actions(civ_id:String,gift_resource:String,purpose:
 			diplomat_dispatch_status.add_theme_color_override("font_color",Color("#d77a68"))
 		return
 	if travel_status_label: travel_status_label.text="DIPLOMATS DEPARTED  •  %s  •  RESPONSE DUE ONLY ON RETURN" % String(CivilizationSystem.DIPLOMATIC_PURPOSE_LABELS.get(purpose,"MISSION"))
-	_close_diplomat_dispatch_panel()
+	_open_diplomat_dispatch_panel(civ_id,purpose)
+	if diplomat_dispatch_status:diplomat_dispatch_status.text=String(result.get("message","Delegation dispatched."))
 	_update_time_interface()
 
 
@@ -19571,6 +19588,7 @@ func _open_world_menu()->void:
 	civic_ai_button.pressed.connect(_toggle_world_menu_civic_ai.bind(civic_ai_button))
 	save_row.add_child(civic_ai_button)
 	_refresh_world_menu_civic_ai_button(civic_ai_button)
+	var ai_settings:=Button.new();ai_settings.text="AI Connection…";ai_settings.custom_minimum_size.y=38;ai_settings.pressed.connect(PronouncementInterpreter.open_connection_settings);save_row.add_child(ai_settings)
 	content.add_child(HSeparator.new())
 	var seed_label:=Label.new()
 	seed_label.text="NEW GAME  •  WORLD SEED"
@@ -19704,7 +19722,7 @@ func _refresh_world_menu_civic_ai_button(button:Button)->void:
 	var enabled:=bool(GameState.civic_api_enabled)
 	var configured:=bool(status.get("configured",false))
 	button.text="AI · ON" if enabled and configured else ("AI · NO KEY" if enabled else "AI · OFF")
-	button.tooltip_text="Civics AI is enabled and ready. Click to turn it off; OFF sends zero API requests." if enabled and configured else ("Civics AI is enabled, but this game process has no usable API credential. Click to turn it off, or relaunch through tools/launch_game.ps1 after saving." if enabled else "Civics AI is disabled by you. Click to turn it on; configured Terra interpretation will resume when credentials are available.")
+	button.tooltip_text="Civics AI is enabled and ready. Click to turn it off; OFF sends zero API requests." if enabled and configured else ("Civics AI is enabled, but this device has no usable API key. Open AI Connection to configure it." if enabled else "Civics AI is disabled by you. Click to turn it on; configured Terra interpretation will resume when credentials are available.")
 	button.add_theme_color_override("font_color",Color("#8fc28e") if enabled and configured else (Color("#d5ad58") if enabled else Color("#8f9994")))
 
 func _restart_with_entered_seed()->void:

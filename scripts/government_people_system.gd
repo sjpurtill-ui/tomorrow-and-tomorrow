@@ -339,7 +339,7 @@ func _generate_person(person_id:int)->Dictionary:
 	var trait_a:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	var trait_b:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	while trait_b==trait_a: trait_b=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
-	var personality:Dictionary={"openness":rng.randf_range(0.12,0.92),"discipline":rng.randf_range(0.12,0.92),"empathy":rng.randf_range(0.12,0.92),"assertiveness":rng.randf_range(0.12,0.92),"risk_tolerance":rng.randf_range(0.12,0.92)}
+	var personality:Dictionary=preload("res://scripts/leader_personality.gd").generate(rng)
 	var doctrine:="directive" if float(personality.assertiveness)>0.68 else ("representative" if float(personality.empathy)>0.68 else ("measured" if float(personality.discipline)>0.66 else ("territorial" if float(personality.risk_tolerance)<0.36 else "federated")))
 	var background:=_background_for_skills(skills)
 	var settlements:=GameState.player_settlements

@@ -8,7 +8,7 @@ func before_test()->void:
 	GameState.reset_for_new_world(424242)
 	CivilizationSystem.reset_for_new_world();CivilizationSystem.initialize()
 func reported_city()->Dictionary:
-	var id:=String(CivilizationSystem.civilizations[0].strategic_regions[0].id)
+	var id:=String(CivilizationSystem.civilizations[0].strategic_regions[-1].id)
 	var intel= CivilizationSystem.city_intelligence
 	intel.publish("player",intel.capture("player",id,.85,10,"Scout report","physical_visit"),12)
 	return intel.known("player",id)
@@ -51,7 +51,7 @@ func test_map_summary_reads_reported_estimates_and_leaves_full_report_optional()
 	var before:Dictionary=provider.tab(0)
 	assert_str(String(provider.meta().title)).is_equal(String(city.name))
 	assert_int(before.blocks[0].items.size()).is_equal(7)
-	CivilizationSystem.civilizations[0].strategic_regions[0].population*=100
+	CivilizationSystem.civilizations[0].strategic_regions[-1].population*=100
 	assert_array(provider.tab(0).blocks[0].items).is_equal(before.blocks[0].items)
 	assert_bool(is_instance_valid(CivilizationSystem.city_intelligence.screen_layer)).is_false()
 
