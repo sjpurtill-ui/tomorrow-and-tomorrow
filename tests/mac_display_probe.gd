@@ -44,6 +44,8 @@ func _ready()->void:
 			var content:=scroll.get_children().filter(func(child:Node):return child is VBoxContainer)[0] as Control
 			check(scroll.size.y<content.size.y,"long menu remains scrollable")
 			check(content.size.x<=scroll.size.x,"menu does not overflow horizontally")
+			var pan_slider:=content.get_node("MapScrollSpeed") as HSlider
+			check(scroll.get_global_rect().encloses(pan_slider.get_global_rect()),"map speed slider is visible immediately on opening menu")
 			if "--capture-display" in OS.get_cmdline_user_args() and scale==1.75:
 				await RenderingServer.frame_post_draw
 				window.get_texture().get_image().save_png("res://artifacts/display-%dx%d.png"%[pixels.x,pixels.y])

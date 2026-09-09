@@ -1,11 +1,15 @@
 extends Node
-## Machine-local display choices, deliberately separate from world saves.
+## Machine-local display and input choices, separate from world saves.
 const SETTINGS_PATH:="user://display.cfg"
+const DEFAULT_MAP_SCROLL_SPEED:=4.0
+const MIN_MAP_SCROLL_SPEED:=0.5
+const MAX_MAP_SCROLL_SPEED:=12.0
 var ui_scale:=1.25
 var render_scale:=0.75
 var shadows:=false
 var frame_limit:=60
 var music_volume:=1.0
+var map_scroll_speed:=DEFAULT_MAP_SCROLL_SPEED
 var config_path:=SETTINGS_PATH
 var applying:=false
 
@@ -17,6 +21,9 @@ func _ready()->void:
 		shadows=bool(config.get_value("display","shadows",false))
 		frame_limit=int(config.get_value("display","frame_limit",60))
 		music_volume=clampf(float(config.get_value("display","music_volume",1.0)),0.0,1.0)
+		var saved_speed:Variant=config.get_value("camera","map_scroll_speed",DEFAULT_MAP_SCROLL_SPEED)
+		if (saved_speed is float or saved_speed is int) and is_finite(float(saved_speed)):
+			map_scroll_speed=clampf(float(saved_speed),MIN_MAP_SCROLL_SPEED,MAX_MAP_SCROLL_SPEED)
 		if frame_limit not in [30,60,120]:frame_limit=60
 	get_window().size_changed.connect(apply)
 	apply()
@@ -60,7 +67,22 @@ func apply_music()->void:
 func persist()->void:
 	var config:=ConfigFile.new()
 	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume"]:config.set_value("display",key,get(key))
-	if config.save(config_path)!=OK:push_warning("Display settings apply this session but could not be saved.")
+	config.set_value("camera","map_scroll_speed",map_scroll_speed)
+	if config.save(config_path)!=OK:push_warning("Settings apply this session but could not be saved.")
+
+func add_navigation_controls(parent:Node)->void:
+	var heading:=Label.new();heading.text="MAP CONTROLS";heading.add_theme_font_size_override("font_size",16);parent.add_child(heading)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);parent.add_child(row)
+	var label:=Label.new();label.text="Map scroll speed · %.1f×"%map_scroll_speed
+	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(label)
+	var reset:=Button.new();reset.text="Default";reset.custom_minimum_size.y=38;row.add_child(reset)
+	var slider:=HSlider.new();slider.name="MapScrollSpeed"
+	slider.min_value=MIN_MAP_SCROLL_SPEED;slider.max_value=MAX_MAP_SCROLL_SPEED;slider.step=0.5
+	slider.value=map_scroll_speed;slider.custom_minimum_size.y=32
+	slider.tooltip_text="Two-finger map panning. Changes apply immediately and are remembered between games."
+	slider.value_changed.connect(func(value:float):map_scroll_speed=value;label.text="Map scroll speed · %.1f×"%value;persist())
+	reset.pressed.connect(func():slider.value=DEFAULT_MAP_SCROLL_SPEED)
+	parent.add_child(slider)
 
 func _choice(parent:Node,label:String,labels:Array,current:int,callback:Callable)->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);parent.add_child(row)

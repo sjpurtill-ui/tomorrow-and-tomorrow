@@ -48,6 +48,7 @@ func _reset(level:=1)->void:
 func _run()->void:
 	root.size=Vector2i(1000,700)
 	map=MapInput.new();map.camera=Camera3D.new();map.add_child(map.camera)
+	map.world_width=map.PLANET_WIDTH_KM;map.world_depth=map.PLANET_DEPTH_KM
 	map.camera.projection=Camera3D.PROJECTION_PERSPECTIVE
 	root.add_child(map)
 	await get_tree().process_frame
@@ -77,7 +78,7 @@ func _run()->void:
 	for level in range(4):
 		_reset(level);_pan(Vector2(20,10))
 		var fraction:=map.camera_target.length()/map.camera.size
-		_check(is_equal_approx(fraction,Vector2(20,10).length()/root.get_visible_rect().size.y),"pan has consistent screen speed at distance "+str(level))
+		_check(is_equal_approx(fraction,4.0*Vector2(20,10).length()/root.get_visible_rect().size.y),"default pan is four times faster at distance "+str(level))
 	_reset();_key(KEY_UP)
 	_check(map.camera_distance_level()==0,"Up zooms in one distance")
 	_check(map.zoom_pointer==root.get_visible_rect().size*.5,"arrow zoom centers on view")

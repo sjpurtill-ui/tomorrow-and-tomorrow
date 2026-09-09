@@ -42,6 +42,8 @@ The project declares Godot 4.7 and was validated on Windows with 4.7.2. It uses 
 
 Slide two fingers on the trackpad to pan the map horizontally or vertically. Pan direction follows the Mac's scrolling preference, and movement scales with the current view. Finger movement, including a small accidental pinch, does not change altitude. Scrolling over a panel stays with that panel.
 
+Open **Menu → Map Controls → Map scroll speed** to adjust two-finger panning from **0.5× to 12×**. The default is **4×** the original pace. The slider applies immediately and is remembered between games; **Default** restores 4×. It does not change the four zoom distances or scrolling inside panels.
+
 With the pointer over the map, press **Up** to zoom in and **Down** to zoom out through the four distances: **10,000 ft → 50,000 ft → Region → Continent**. Each press advances one level with a smooth transition; holding the key does not repeat. Text fields, panel controls and menus retain their keyboard input.
 
 Middle-drag and WASD also pan; Left/Right arrows move sideways. Mouse-wheel and `+`/`-` zoom remain available, with Shift for fine adjustment. Command/Control/Option shortcuts do not activate keyboard zoom. N resets north-up.

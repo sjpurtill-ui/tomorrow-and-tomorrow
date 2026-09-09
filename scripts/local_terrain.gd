@@ -3252,6 +3252,7 @@ func _update_world_streaming() -> void:
 func _process_camera_navigation(delta: float) -> void:
 	if not SEAMLESS_WORLD or camera==null:
 		return
+	if is_instance_valid(world_menu_panel):return
 	var focus:=get_viewport().gui_get_focus_owner()
 	if focus is LineEdit or focus is TextEdit: return
 	var turn:=(1.0 if Input.is_physical_key_pressed(KEY_Q) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_E) else 0.0)
@@ -3296,7 +3297,8 @@ func _pan_camera_gesture(delta:Vector2)->void:
 	if camera==null or not delta.is_finite() or delta.is_zero_approx():return
 	# Native pan deltas use scroll direction, opposite to grab-and-drag.
 	# Preserve fractional movement in both axes and scale it to this view.
-	var units_per_pixel:=camera.size/maxf(1.0,get_viewport().get_visible_rect().size.y)
+	var speed:=float(display_preferences.map_scroll_speed) if is_instance_valid(display_preferences) else preload("res://scripts/display_preferences.gd").DEFAULT_MAP_SCROLL_SPEED
+	var units_per_pixel:=camera.size*speed/maxf(1.0,get_viewport().get_visible_rect().size.y)
 	var movement:=_camera_keyboard_movement(delta,_camera_ground_screen_right(),_camera_ground_screen_up(),units_per_pixel)
 	camera_input_msec=Time.get_ticks_msec()
 	_set_camera_target(camera_target+movement)
@@ -19502,6 +19504,7 @@ func _open_world_menu()->void:
 	explanation.add_theme_font_size_override("font_size",15)
 	explanation.add_theme_color_override("font_color",Color("#a6ada8"))
 	content.add_child(explanation)
+	if display_preferences:display_preferences.add_navigation_controls(content)
 	content.add_child(HSeparator.new())
 	var save_title:=Label.new()
 	save_title.text="SAVE, LOAD & CIVICS AI"
