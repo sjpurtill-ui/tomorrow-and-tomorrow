@@ -51,7 +51,10 @@ func _assess(position:Vector3)->Dictionary:
 		if candidate_distance<distance:
 			nearest=source;distance=candidate_distance
 	if nearest.is_empty() or distance>COLLECTION_LIMIT_KM:
-		result.merge({"title":"NO USABLE WATER CONFIRMED","reason":"No known fresh water within the 6 km collection limit. Choose another site or scout more ground before founding."},true)
+		result.merge({"title":"NO USABLE WATER CONFIRMED","reason":"No known fresh water within the 6 km collection limit. Choose a marked site or scout further."},true)
+		if _known_open_water_near(position):
+			result["source_text"]="Open water nearby · fresh water unconfirmed"
+			result["reason"]="The nearby open water is not a confirmed drinking source. Find fresh water on dry land within 6 km before founding."
 		return result
 	var ratio:=WorldSimulation.resources._household_surface_water_access_ratio(distance)
 	var nearby:=distance<=NEAR_WATER_KM
@@ -63,6 +66,13 @@ func _assess(position:Vector3)->Dictionary:
 		if ratio>=1.0:detail="Water is usable, but a longer daily carry. Moving closer leaves more time for other work."
 	result.merge({"valid":true,"recommended":nearby,"status":"good" if nearby else "caution","color":GOOD if nearby else CAUTION,"title":"NEARBY FRESH WATER" if nearby else "LONG WATER CARRY","reason":detail,"source_text":source_text,"source_position":nearest.position,"source_kind":nearest.kind,"distance_km":distance,"household_ratio":ratio},true)
 	return result
+
+func _known_open_water_near(origin:Vector3)->bool:
+	for radius:float in [.25,.5,1.0,2.0]:
+		for spoke:int in 8:
+			var point:=origin+Vector3(cos(TAU*spoke/8.0)*radius,0,sin(TAU*spoke/8.0)*radius)
+			if terrain._world_position_is_revealed(point) and terrain._height_at(point.x,point.z)<=0.0:return true
+	return false
 
 func suggestions(origin:Vector3,later_city:bool=false)->Array[Dictionary]:
 	var found:Array[Dictionary]=[]

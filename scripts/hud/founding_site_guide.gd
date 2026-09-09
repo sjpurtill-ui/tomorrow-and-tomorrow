@@ -3,6 +3,8 @@ extends Control
 const Advice:=preload("res://scripts/founding_site_advice.gd")
 var terrain:Node3D
 var panel:PanelContainer
+var body:VBoxContainer
+var scroll:ScrollContainer
 var heading:Label
 var source:Label
 var explanation:Label
@@ -34,14 +36,17 @@ func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	var top:=HBoxContainer.new();root.add_child(top)
 	var title:=Label.new();title.text="SETTLEMENT SITE";title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
 	var close:=Button.new();close.text="×";close.custom_minimum_size=Vector2(36,32);close.tooltip_text="Close site review · Escape";close.pressed.connect(_close);top.add_child(close)
-	heading=_label(root,19);source=_label(root,14);explanation=_label(root,14)
-	meter_label=_label(root,12)
-	meter=ProgressBar.new();meter.custom_minimum_size.y=8;meter.show_percentage=false;root.add_child(meter)
-	neighbor_label=_label(root,13)
-	search_status=_label(root,12)
-	options=HBoxContainer.new();options.add_theme_constant_override("separation",8);root.add_child(options)
-	var find_sites:=Button.new();find_sites.text="SHOW NEARBY SUITABLE SITES";find_sites.custom_minimum_size.y=34;find_sites.pressed.connect(_search);root.add_child(find_sites)
-	action=Button.new();action.custom_minimum_size.y=42;action.pressed.connect(_act);root.add_child(action)
+	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;root.add_child(scroll)
+	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",8);scroll.add_child(body)
+	heading=_label(body,18);source=_label(body,14);explanation=_label(body,14)
+	meter_label=_label(body,12)
+	meter=ProgressBar.new();meter.custom_minimum_size.y=8;meter.show_percentage=false;body.add_child(meter)
+	neighbor_label=_label(body,13)
+	search_status=_label(body,12)
+	options=HBoxContainer.new();options.add_theme_constant_override("separation",8);body.add_child(options)
+	var find_sites:=Button.new();find_sites.text="Find nearby sites";find_sites.add_theme_font_size_override("font_size",14);find_sites.custom_minimum_size.y=34;find_sites.pressed.connect(_search);body.add_child(find_sites)
+	action=Button.new();action.custom_minimum_size.y=42;action.add_theme_font_size_override("font_size",14);action.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;action.pressed.connect(_act);root.add_child(action)
 	update_site(position)
 	_layout()
 	_search()
@@ -50,7 +55,7 @@ func _label(parent:Node,font_size:int)->Label:
 	var label:=Label.new()
 	# Establish wrapping width before assigning text; zero-width labels otherwise
 	# cache a many-thousand-pixel minimum height on the first container pass.
-	label.custom_minimum_size.x=minf(380.0,get_viewport_rect().size.x-120.0)-32.0
+	label.custom_minimum_size.x=minf(350.0,get_viewport_rect().size.x-120.0)-48.0
 	label.size.x=label.custom_minimum_size.x
 	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.add_theme_font_size_override("font_size",font_size);label.add_theme_color_override("font_color",Color("d9e2df"));parent.add_child(label);return label
 
@@ -58,13 +63,12 @@ func _layout()->void:
 	var view:=get_viewport_rect().size
 	if view==layout_size:return
 	layout_size=view
-	var width:=minf(380.0,view.x-120.0)
-	panel.size.x=width
+	var width:=minf(350.0,view.x-120.0)
+	panel.size=Vector2(width,minf(530.0,view.y-198.0))
 	panel.position=Vector2(view.x-width-18.0,108.0)
 	panel.get_child(0).custom_minimum_size.x=width-32.0
-	for child:Node in panel.get_child(0).get_children():
-		if child is Label:child.custom_minimum_size.x=width-32.0;child.size.x=width-32.0
-	panel.reset_size()
+	for child:Node in body.get_children():
+		if child is Label:child.custom_minimum_size.x=width-48.0;child.size.x=width-48.0
 
 func update_site(position:Vector3,suggestion:bool=false,siting:Dictionary={})->void:
 	selected=terrain._founding_site_advice(position)
@@ -92,18 +96,16 @@ func _refresh()->void:
 	elif selected_suggestion:action.text="MOVE CONVOY TO THIS SITE"
 	elif float(neighbors.penalty)>0:action.text="FOUND HERE · PROVOKE NEIGHBOR"
 	else:action.text="FOUND HERE" if bool(selected.water_recommended) else "FOUND HERE · WATER HAULING NEEDED"
-	panel.reset_size.call_deferred()
 	queue_redraw()
 
 func _search()->void:
 	var origin:Vector3=selected.position
 	sites=terrain._founding_advisor().suggestions(origin,later_city)
 	for child:Node in options.get_children():options.remove_child(child);child.queue_free()
-	search_status.text="Green = nearby water, dry ground, no known city within 30 km."
-	if sites.is_empty():search_status.text="No site with nearby water and no known border friction found within 12 km. Compare the tradeoffs or scout further."
+	search_status.text="Marked sites: nearby fresh water, dry ground and no known neighbor within 30 km."
+	if sites.is_empty():search_status.text="No suitable site confirmed within 12 km. Scout further or compare the water and neighbor warnings."
 	for index:int in sites.size():
 		var choose:=Button.new();choose.text="%d · %.1f km" % [index+1,float(sites[index].travel_distance_km)];choose.custom_minimum_size.y=34;choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.pressed.connect(_select.bind(index));options.add_child(choose)
-	panel.reset_size.call_deferred()
 	queue_redraw()
 
 func _select(index:int)->void:

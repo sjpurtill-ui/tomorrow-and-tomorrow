@@ -221,3 +221,39 @@ func test_review_fits_small_canvas_and_map_click_closes_without_moving()->void:
 	assert_bool(map._dismiss_map_panels()).is_true()
 	assert_bool(GameState.settlement_site_committed).is_false()
 	assert_bool(map.travel_active).is_false()
+
+class CoastMap extends Map:
+	func _height_at(x:float,_z:float)->float:return -1.0 if x<0 else 1.0
+	func _world_river_x(_z:float)->float:return INF
+	func _local_drainage_distance_at(_x:float,_z:float)->float:return .4
+	func _local_drainage_channel_x(_index:int,_z:float)->float:return -.2
+	func _founding_water_sources(point:Vector3)->Array[Dictionary]:return _surface_water_sources(point,6.0)
+
+func test_submerged_drainage_is_not_drinking_water_in_either_daily_math_or_site_review()->void:
+	var coast:CoastMap=auto_free(CoastMap.new())
+	# Course sentinel avoids generating unrelated seeded tributaries in this isolated coast.
+	coast.world_tributary_courses=[[]]
+	var position:=Vector3(.4,1,0)
+	assert_bool(is_inf(coast._river_distance_at(position.x,position.z))).is_true()
+	var site:=coast._founding_site_advice(position,true)
+	assert_bool(site.valid).is_false()
+	assert_str(site.source_text).contains("Open water nearby")
+	assert_str(site.reason).contains("not a confirmed drinking source")
+	coast.charted_to=-1
+	assert_str(coast._founding_site_advice(position,true).title).is_equal("WATER SUPPLY UNKNOWN")
+
+func test_excessive_review_text_scrolls_while_close_and_action_stay_visible_on_resize()->void:
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1024,640);add_child(viewport)
+	var map:Map=auto_free(Map.new());viewport.add_child(map)
+	map.settler_marker=Area3D.new();map.settler_marker.position=Vector3(6,1,0);map.add_child(map.settler_marker)
+	var guide:Control=auto_free(Guide.new());viewport.add_child(guide)
+	guide.setup(map,map.settler_marker.position,false)
+	guide.explanation.text="Long site explanation with water and terrain details. ".repeat(80)
+	for canvas:Vector2i in [Vector2i(1024,640),Vector2i(1280,720),Vector2i(1024,640)]:
+		viewport.size=canvas;guide._layout()
+		await await_idle_frame();await await_idle_frame()
+		assert_float(guide.panel.get_global_rect().end.y).is_less_equal(float(canvas.y)-80)
+		assert_float(guide.action.get_global_rect().end.y).is_less_equal(guide.panel.get_global_rect().end.y)
+		assert_float(guide.action.get_global_rect().position.y).is_greater_equal(guide.scroll.get_global_rect().end.y)
+		assert_bool(guide.scroll.get_v_scroll_bar().visible).is_true()
+		assert_bool(guide.action.disabled).is_false()

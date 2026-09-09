@@ -2,6 +2,8 @@ extends GdUnitTestSuite
 const Labels=preload("res://scripts/hud/city_labels.gd")
 class Map extends "res://scripts/local_terrain.gd":
 	var army_picked:=false
+	var site_review_opened:=false
+	func _on_settlement_action_pressed()->void:site_review_opened=true
 	func _ready()->void:pass
 	func _process(_delta:float)->void:pass
 	func _height_at(_x:float,_z:float)->float:return 0.0
@@ -115,3 +117,41 @@ func test_owned_and_foreign_cards_share_layout_and_relocated_cards_select_the_ri
 	assert_int(map.city_labels.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 	labels[1].hide();map.city_labels.refresh()
 	assert_array(map.city_labels.cards).has_size(2)
+
+func test_founding_card_tracks_convoy_at_all_distances_and_opens_site_review()->void:
+	GameState.reset_for_new_world(741991);CivilizationSystem.reset_for_new_world()
+	var map:Node3D=auto_free(Map.new());add_child(map)
+	map.camera=Camera3D.new();map.add_child(map.camera)
+	map.camera.projection=Camera3D.PROJECTION_PERSPECTIVE
+	map.settler_marker=Area3D.new();map.add_child(map.settler_marker)
+	var label:=Label3D.new();map.settler_marker.add_child(label);map.convoy_map_label=label
+	label.text="Founding convoy  •  110"
+	label.set_meta("city_map_id","__founding_convoy__");label.set_meta("city_civilization_id","player")
+	label.set_meta("map_annotation_kind","founding_convoy");label.set_meta("map_status","Fresh water unconfirmed · Review site")
+	map._update_city_flag(label)
+	for level:Dictionary in map.CAMERA_DISTANCE_LEVELS:
+		map.camera.size=float(level.width_km);map._update_camera();map.city_labels.refresh()
+		assert_array(map.city_labels.cards).has_size(1)
+		var card:Dictionary=map.city_labels.cards[0]
+		assert_str(card.title).is_equal("Founding convoy")
+		assert_str(card.population).is_equal("Population 110")
+		assert_float(card.rect.size.x).is_less_equal(350.0)
+		assert_float(card.rect.size.y).is_less_equal(70.0)
+		assert_int(label.layers).is_equal(0)
+		assert_int((label.get_node("CivilizationFlag") as Sprite3D).layers).is_equal(0)
+		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true;click.position=card.rect.get_center()
+		map._unhandled_input(click)
+		assert_bool(map.site_review_opened).is_true();assert_bool(map.army_picked).is_false()
+	map.settler_marker.position=Vector3(.1,0,.1);map.city_labels.refresh()
+	assert_vector(map.city_labels.cards[0].anchor).is_equal(map.camera.unproject_position(map.settler_marker.global_position))
+	label.hide();map.city_labels.refresh();assert_array(map.city_labels.cards).is_empty()
+
+func test_map_cards_avoid_site_review_panel_as_well_as_other_cards()->void:
+	var bounds:=Rect2(90,100,914,470)
+	var review:=Rect2(656,108,350,430)
+	var entries:Array[Dictionary]=[entry("convoy",Vector2(700,400),false),entry("neighbor",Vector2(600,400))]
+	var reserved:Array[Rect2]=[review]
+	var result:Dictionary=Labels.arrange(entries,bounds,{},reserved)
+	assert_array(result.cards).has_size(2)
+	for card:Dictionary in result.cards:assert_bool(card.rect.intersects(review)).is_false()
+	assert_separate(result.cards,bounds)

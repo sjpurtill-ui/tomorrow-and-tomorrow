@@ -31,7 +31,7 @@ func register_label(label:Label3D,id:String,foreign:bool,anchor:Vector3)->void:
 	var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
 	if flag:flag.layers=0
 
-static func arrange(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={})->Dictionary:
+static func arrange(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={},reserved:Array[Rect2]=[])->Dictionary:
 	var placed:Array[Dictionary]=[];var hidden:Array[Dictionary]=[];var memory:Dictionary={}
 	var ordered:=entries.duplicate()
 	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
@@ -59,6 +59,8 @@ static func arrange(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={})->D
 			var rect:=Rect2(pos,extent)
 			if not bounds.encloses(rect):continue
 			var blocked:=false
+			for obstacle:Rect2 in reserved:
+				if rect.grow(GAP).intersects(obstacle):blocked=true;break
 			for other:Dictionary in placed:
 				if rect.grow(GAP*.5).intersects(other.rect.grow(GAP*.5)):blocked=true;break
 			if blocked:continue
@@ -79,29 +81,38 @@ func refresh()->void:
 	var camera:Camera3D=terrain.camera
 	var viewport_size:=get_viewport().get_visible_rect().size
 	var bounds:=Rect2(Vector2(90,100),(viewport_size-Vector2(110,170)).max(Vector2(100,100)))
+	var reserved:Array[Rect2]=[]
+	if is_instance_valid(terrain.get("founding_site_guide")):
+		var guide:Control=terrain.get("founding_site_guide")
+		if guide.is_visible_in_tree():reserved.append(guide.panel.get_global_rect())
 	var entries:Array[Dictionary]=[]
 	var font:=ThemeDB.fallback_font
-	var signature:=str(viewport_size)
+	var signature:=str(viewport_size)+str(reserved)
 	for id in sources.keys():
 		var source:Dictionary=sources[id]
 		var label:Label3D=source.label.get_ref()
 		if not is_instance_valid(label) or label.is_queued_for_deletion():sources.erase(id);continue
+		var kind:=String(label.get_meta("map_annotation_kind","city"))
+		if kind=="founding_convoy" and is_instance_valid(terrain.get("settler_marker")):
+			source.anchor=terrain.settler_marker.global_position
 		if not label.is_visible_in_tree() or camera.is_position_behind(source.anchor):continue
 		var anchor:=camera.unproject_position(source.anchor)
 		if not Rect2(Vector2.ZERO,viewport_size).has_point(anchor):continue
 		var parts:=label.text.split("  •  ",true,1)
 		var title:=String(parts[0]);var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
 		if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
+		var status:=String(label.get_meta("map_status",""))
 		var affiliation:=CivilizationSystem.city_intelligence.controller_label(String(label.get_meta("city_civilization_id",""))) if bool(source.foreign) else ""
 		var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
 		var width:=maxf(font.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,font.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20
 		for line:String in lines:width=maxf(width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+54)
+		width=maxf(width,font.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 		var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
-		entries.append({"id":String(id),"foreign":source.foreign,"anchor":anchor,"title":title,"lines":lines,"population":count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"extent":Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0))})
-		signature+=String(id)+str(anchor)+affiliation+label.text+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
+		entries.append({"id":String(id),"kind":kind,"status":status,"foreign":source.foreign,"anchor":anchor,"title":title,"lines":lines,"population":count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"extent":Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0))})
+		signature+=String(id)+str(anchor)+affiliation+status+label.text+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	if signature==layout_signature:return
 	layout_signature=signature
-	var result:=arrange(entries,bounds,previous)
+	var result:=arrange(entries,bounds,previous,reserved)
 	cards=result.cards;overflow=result.overflow;previous=result.memory
 	_update_overflow(viewport_size)
 	queue_redraw()
@@ -135,19 +146,20 @@ func _update_overflow(viewport_size:Vector2)->void:
 	list_panel.position=Vector2(viewport_size.x-340,120);list_panel.size=Vector2(320,maxf(100,viewport_size.y-190))
 	if overflow.is_empty():list_panel.hide()
 	var signature:=""
-	for entry:Dictionary in overflow:signature+=String(entry.id)+String(entry.title)+String(entry.population)+String(entry.get("affiliation",""))+str(entry.color)+str(entry.flag.get_instance_id() if entry.flag else 0)
+	for entry:Dictionary in overflow:signature+=String(entry.id)+String(entry.title)+String(entry.population)+String(entry.get("status",""))+String(entry.get("affiliation",""))+str(entry.color)+str(entry.flag.get_instance_id() if entry.flag else 0)
 	if signature==list_signature:return
 	list_signature=signature
 	for child in list_rows.get_children():list_rows.remove_child(child);child.queue_free()
 	var close:=Button.new();close.text="Close city list";close.pressed.connect(func():list_panel.hide());list_rows.add_child(close)
 	for entry:Dictionary in overflow:
-		var button:=Button.new();button.text=String(entry.title)+( "\n"+String(entry.affiliation) if not String(entry.get("affiliation","")).is_empty() else "")+"\n"+String(entry.population)
+		var button:=Button.new();button.text=String(entry.title)+( "\n"+String(entry.affiliation) if not String(entry.get("affiliation","")).is_empty() else "")+"\n"+String(entry.population)+( "\n"+String(entry.get("status","")) if not String(entry.get("status","")).is_empty() else "")
 		button.icon=entry.flag;button.expand_icon=true;button.add_theme_constant_override("icon_max_width",28)
 		button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_color_override("font_color",entry.color);button.custom_minimum_size.y=54
 		button.pressed.connect(func():
 			list_panel.hide()
-			if entry.foreign:terrain._show_city_intel_summary(String(entry.id))
+			if String(entry.get("kind",""))=="founding_convoy":terrain._on_settlement_action_pressed()
+			elif entry.foreign:terrain._show_city_intel_summary(String(entry.id))
 			else:terrain._focus_settlement_from_screen(entry.anchor,false,String(entry.id)))
 		list_rows.add_child(button)
 
@@ -166,9 +178,14 @@ func _draw()->void:
 			style.set_border_width_all(1);style.set_corner_radius_all(4);styles[color]=style
 		draw_style_box(styles[color],box)
 		draw_rect(Rect2(box.position+Vector2(0,5),Vector2(3,box.size.y-10)),color)
-		if card.flag!=null:draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,6),Vector2(30,20)),false)
+		if card.flag!=null:
+			var flag_size:Vector2=card.flag.get_size()
+			flag_size*=minf(30.0/flag_size.x,20.0/flag_size.y)
+			draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,2)+(Vector2(30,20)-flag_size)*.5,flag_size),false)
 		var y:=box.position.y+19
 		for line:String in card.lines:
 			draw_string(font,Vector2(box.position.x+46,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,color);y+=20
-		if not String(card.get("affiliation","")).is_empty():draw_string(font,Vector2(box.position.x+10,box.end.y-27),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color(color,.85))
-		draw_string(font,Vector2(box.position.x+10,box.end.y-9),card.population,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("d1dad7"))
+		var status_height:=20.0 if not String(card.get("status","")).is_empty() else 0.0
+		if status_height>0:draw_string(font,Vector2(box.position.x+10,box.end.y-9),String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("e9bf70"))
+		if not String(card.get("affiliation","")).is_empty():draw_string(font,Vector2(box.position.x+10,box.end.y-27-status_height),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color(color,.85))
+		draw_string(font,Vector2(box.position.x+10,box.end.y-9-status_height),card.population,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("d1dad7"))

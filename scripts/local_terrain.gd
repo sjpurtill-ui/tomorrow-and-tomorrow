@@ -2841,7 +2841,7 @@ func _place_settlers() -> void:
 	convoy_map_icon.add_child(convoy_banner_sprite)
 	convoy_map_label=Label3D.new()
 	convoy_map_label.name="PeopleMapLabel"
-	convoy_map_label.text="FOUNDING CONVOY  •  %s" % _compact_population(GameState.population_total)
+	convoy_map_label.text="Founding convoy  •  %s" % _compact_population(GameState.population_total)
 	convoy_map_label.font_size=13
 	convoy_map_label.outline_size=5
 	convoy_map_label.modulate=Color("#ead9ad")
@@ -2852,6 +2852,10 @@ func _place_settlers() -> void:
 	convoy_map_label.render_priority=10
 	convoy_map_label.position=Vector3(0,0.32,0)
 	marker_root.add_child(convoy_map_label)
+	convoy_map_label.set_meta("city_map_id","__founding_convoy__")
+	convoy_map_label.set_meta("map_annotation_kind","founding_convoy")
+	convoy_map_label.set_meta("city_civilization_id","player")
+	_update_city_flag(convoy_map_label)
 	convoy_detail_root = Node3D.new()
 	convoy_detail_root.name = "ConvoyPhysicalDetail"
 	convoy_detail_root.scale = Vector3.ONE * CONVOY_DETAIL_SCALE
@@ -2939,10 +2943,10 @@ func _update_scale_lod() -> void:
 	if settler_map_ring:
 		settler_map_ring.visible=not GameState.settlement_site_committed
 	if convoy_map_icon:
-		convoy_map_icon.visible = not close_view and _founding_camp_marker_active()
+		convoy_map_icon.visible = false # The shared screen-space card owns the flag.
 		convoy_map_icon.scale = Vector3.ONE * maxf(0.045, camera.size / 28.0)
 	if convoy_map_label:
-		convoy_map_label.visible=not close_view and _founding_camp_marker_active()
+		convoy_map_label.visible=_founding_camp_marker_active()
 		convoy_map_label.position.y=-camera.size*0.035
 	if convoy_detail_root:
 		convoy_detail_root.visible = close_view and _founding_camp_marker_active()
@@ -3115,7 +3119,9 @@ func _register_city_card(label:Label3D)->void:
 	var id:=String(label.get_meta("city_map_id",""))
 	var foreign:=bool(label.get_meta("city_map_foreign",false))
 	var anchor:Vector3=label.get_meta("city_map_anchor",label.global_position)
-	if label==settlement_map_label:
+	if label==convoy_map_label and is_instance_valid(settler_marker):
+		anchor=settler_marker.global_position
+	elif label==settlement_map_label:
 		for city:Dictionary in GameState.player_settlements:
 			if bool(city.get("primary",false)):id=String(city.id);break
 		if is_instance_valid(settlement_blip):anchor=settlement_blip.global_position
@@ -9315,12 +9321,10 @@ func _create_land_patch(center: Vector3, radius: float, color: Color, segments: 
 	parent.add_child(patch)
 
 func _river_distance_at(x: float, z: float) -> float:
-	# Every rendered watercourse counts: the main river, its nine tributaries,
-	# and intermittent swales. Water math must agree with the water the player
-	# can actually see, or a convoy camped on a tributary reads as waterless.
-	var nearest:=_local_drainage_distance_at(x,z) if SEAMLESS_WORLD else INF
-	nearest=minf(nearest,_main_river_distance_at(x,z))
-	return minf(nearest,_nearest_tributary_distance_at(Vector2(x,z)))
+	var nearest:=INF
+	for source:Dictionary in _surface_water_sources(Vector3(x,0,z)):
+		nearest=minf(nearest,float(source.distance_km))
+	return nearest
 
 
 func _main_river_distance_at(x:float,z:float)->float:
@@ -9374,11 +9378,14 @@ func _founding_site_advice(position:Vector3,fresh:bool=false)->Dictionary:
 	return _founding_advisor().assess(position,fresh)
 
 func _founding_water_sources(origin:Vector3)->Array[Dictionary]:
+	return _surface_water_sources(origin,6.0)
+
+func _surface_water_sources(origin:Vector3,limit:float=INF)->Array[Dictionary]:
 	# Project onto the same authored sources used by daily water collection.
 	# No point deposits, sea water, hidden wells or invented rivers are substituted.
 	var sources:Array[Dictionary]=[]
 	var river_x:=_world_river_x(origin.z)
-	if is_finite(river_x) and absf(origin.x-river_x)<=6.0:
+	if is_finite(river_x) and absf(origin.x-river_x)<=limit:
 		var height:=_height_at(river_x,origin.z)
 		if height>SEA_LEVEL:sources.append({"position":Vector3(river_x,height,origin.z),"distance_km":absf(origin.x-river_x),"kind":"River"})
 	if world_tributary_courses.is_empty():world_tributary_courses=_seeded_world_tributaries()
@@ -9390,13 +9397,13 @@ func _founding_water_sources(origin:Vector3)->Array[Dictionary]:
 			var start:Vector3=course[i];var finish:Vector3=course[i+1]
 			var sample:=Geometry2D.get_closest_point_to_segment(point,Vector2(start.x,start.z),Vector2(finish.x,finish.z))
 			var candidate_distance:=point.distance_to(sample)
-			if candidate_distance<minf(distance,6.001) and _world_position_is_revealed(Vector3(sample.x,0,sample.y)):
+			if candidate_distance<minf(distance,limit+.001):
 				distance=candidate_distance;nearest=sample
-		if distance<=6.0:
+		if is_finite(distance) and distance<=limit:
 			var height:=_height_at(nearest.x,nearest.y)
 			if height>SEA_LEVEL:sources.append({"position":Vector3(nearest.x,height,nearest.y),"distance_km":distance,"kind":"Tributary"})
 	var drainage_distance:=_local_drainage_distance_at(origin.x,origin.z)
-	if drainage_distance<=6.0:
+	if is_finite(drainage_distance) and drainage_distance<=limit:
 		var phase:=float(posmod(GameState.world_seed,10007))/10007.0
 		var index:=roundi((origin.x-(phase-.5)*2.4)/2.4)
 		var channel_x:=_local_drainage_channel_x(index,origin.z)
@@ -10936,7 +10943,10 @@ func _find_camp_position() -> Vector3:
 	return best
 
 func _civilization_start(origin:Vector2)->Vector2:
-	return preload("res://scripts/civilization_start.gd").choose(origin,Callable(self,"_survey_ground_at"))
+	return preload("res://scripts/civilization_start.gd").choose(origin,func(point:Vector2)->Dictionary:
+		var sample:=_survey_ground_at(point)
+		sample["founding_valid"]=bool(_settlement_surface_assessment(Vector3(point.x,0,point.y)).valid)
+		return sample)
 
 func _find_world_start_position()->Vector3:
 	var point:=_civilization_start(preload("res://scripts/civilization_start.gd").candidate(GameState.world_seed,0))
@@ -11593,7 +11603,7 @@ func _map_help_presentation(site_committed:bool,targeting:bool,settlement_convoy
 	if not site_committed:
 		return {
 			"title":"FIND A HOME",
-			"body":"Click land to move the convoy.\nWhen you like the location, press FOUND SETTLEMENT on the toolbar below."
+			"body":"Click land to move the convoy.\nClick its card to review water and nearby settlement sites."
 		}
 	if settlement_convoy_active:
 		return {
@@ -11684,9 +11694,9 @@ func _camera_scale_band() -> String:
 func _convoy_water_readout()->String:
 	if settler_marker==null: return "WATER: UNKNOWN"
 	var advice:=_founding_site_advice(settler_marker.position)
-	if not advice.has("source_text"):
-		return "%s  •  REVIEW FOUNDING SITE" % String(advice.title)
-	return "%s  •  %s" % [String(advice.source_text).to_upper(),"NEARBY WATER" if bool(advice.water_recommended) else "LONG DAILY CARRY"]
+	if not bool(advice.valid):
+		return "Fresh water unconfirmed · Review site"
+	return "Water %.1f km · %s" % [float(advice.distance_km),"Review site" if bool(advice.water_recommended) else "Long carry"]
 
 
 func _north_screen_arrow() -> String:
@@ -18188,14 +18198,10 @@ func _update_time_interface() -> void:
 			materials_button.text="MATERIALS %.0f" % material_bulk
 			materials_button.tooltip_text="%.1f bulk of carried and settled materials  •  %d recognized occurrences.\nThis is physical inventory, not a market value. Foreign trade does not exist without a returned emissary contract.\nOpen recognized sources, extraction, hauling, losses, and storage." % [material_bulk,known_count]
 	if convoy_map_label:
-		var settlement_classification:String = String(_settlement_model().classification()).to_upper() if "Hearth Circle" in GameState.settlement_completed else ""
-		var defense_name:=String(MilitaryCampaign.settlement_defense_snapshot().get("short","Open ground")).to_upper()
-		var primary_population:=roundi(_settlement_model().primary_population_exact()) if "Hearth Circle" in GameState.settlement_completed else GameState.population_total
-		convoy_map_label.text="%s  •  %s  •  %s\nDEFENSE: %s" % [_settlement_display_name(),settlement_classification,_compact_population(primary_population),defense_name] if settlement_classification!="" else "%s  •  %s\nDEFENSE: %s" % [_settlement_display_name(),_compact_population(primary_population),defense_name]
-		# A convoy lives or dies by reachable drinking water; the map must say how
-		# far away it is before the ledger records dehydration.
-		if not GameState.settlement_site_committed:
-			convoy_map_label.text+="\n%s" % _convoy_water_readout()
+		var title:="Founding convoy" if not GameState.settlement_site_committed else _settlement_display_name().capitalize()
+		convoy_map_label.text=_city_map_label(title,GameState.population_total)
+		convoy_map_label.set_meta("map_status",_convoy_water_readout() if not GameState.settlement_site_committed else "Establishing home · View progress")
+		_update_city_flag(convoy_map_label)
 	if people_panel_title:
 		people_panel_title.text=_settlement_display_name()
 	if people_summary_label:
@@ -19887,7 +19893,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if is_instance_valid(city_labels):
 			var card:Dictionary=city_labels.city_at(event.position)
 			if not card.is_empty():
-				if card.foreign:_show_city_intel_summary(String(card.id))
+				if String(card.get("kind",""))=="founding_convoy":_on_settlement_action_pressed()
+				elif card.foreign:_show_city_intel_summary(String(card.id))
 				else:_focus_settlement_from_screen(event.position,event.double_click,String(card.id))
 				get_viewport().set_input_as_handled();return
 		for marker:Node3D in player_field_army_markers.values():
