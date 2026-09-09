@@ -1,6 +1,6 @@
 # Cancel orders for the selected command
 
-READY for integration. Worktree `/Users/seanpurtill/Documents/Codex/tt-command-order-state`, branch `codex/scoped-command-cancellation`, base `63e62ab0148bade874b7c70ec5f75ce9ae87c5bb`.
+INTEGRATED as `49ef49c`; all 97 canonical tests pass (`/tmp/tt-scoped-cancel-canonical.log`). Worktree `/Users/seanpurtill/Documents/Codex/tt-command-order-state`, branch `codex/scoped-command-cancellation`, base `63e62ab0148bade874b7c70ec5f75ce9ae87c5bb`.
 
 The command panel previously passed only a force ID to Cancel orders, discarding the selected subdivision. Cancelling a virtual squad or team therefore cancelled its entire parent force. Naval and air cancellation also ignored service refusals, so a headquarters could report cancellation while some subordinates kept their missions, or stop earlier subordinates before a later refusal.
 

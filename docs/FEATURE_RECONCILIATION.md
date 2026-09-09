@@ -1,3 +1,11 @@
+## September 8 — cancellation respects the selected military command
+
+INTEGRATED `49ef49c` by conflict-free fast-forward from `63e62ab` into canonical Mac main. Cancel orders now retains the selected subdivision path, detaches only that available branch and leaves sibling objectives executing. Changed-strength or busy subdivisions are refused without cancelling their parents; unassigned subdivisions stay read-only. Whole naval/air stand-down validates all subordinates before committing, reports convoy/route refusals and distinguishes port, airbase/carrier and land behavior. Already committed land battles continue resolving.
+
+All **97 canonical tests pass**, zero errors/failures/skips/orphans across six suites (`/tmp/tt-scoped-cancel-canonical.log`). Seven new regressions cover the actual cancel button, exact selection, conserved assets and saved overrides, independent sibling execution, refusal/no-op cases, atomic naval/air cancellation and continued battle resolution. Existing command, service, carrier, transport, siege and layout/dismissal checks pass. No save schema changes or shared hotspot conflicts; see SCOPED_COMMAND_CANCELLATION_HANDOFF.md. Owned test overrides removed.
+
+Player PID 6076 and editor PID 2812 remain running from the canonical checkout; neither was interrupted or relaunched. Native visual verification and receipt by the already-running game are not claimed. The next normal project launch loads the integrated scripts. Virtual subdivisions still require an available assembled force before they can detach.
+
 ## September 8 — live founding-overlay correction
 
 INTEGRATED `bd247db` by conflict-free fast-forward from `465390d`. Native inspection of player PID 6076 found the full-size map overlay was incorrectly captured by the global modal fitting contract, collapsing the card. The overlay now opts into its own existing responsive-layout convention. The regression invokes that actual shared contract, verifies the card remains unwrapped and visible, and still checks small-window bounds.
