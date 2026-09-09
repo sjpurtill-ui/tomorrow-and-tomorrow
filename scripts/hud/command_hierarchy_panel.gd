@@ -3,6 +3,7 @@ extends CanvasLayer
 const Overlay=preload("res://scripts/hud/service_world_overlay.gd")
 const CommandTree=preload("res://scripts/hud/command_tree.gd")
 const OrderBrief=preload("res://scripts/hud/command_order_brief.gd")
+const Preparation=preload("res://scripts/hud/command_preparation.gd")
 var domain:="army"
 var terrain:Node
 var command:RefCounted
@@ -31,6 +32,11 @@ var details:VBoxContainer
 var details_toggle:Button
 var finish_button:Button
 var cancel_boundary_button:Button
+var preparation_box:VBoxContainer
+var preparation_meters:Dictionary={}
+var preparation_values:Dictionary={}
+var preparation_fuel:Label
+var preparation_note:Label
 func _ready()->void:
 	layer=82;command=MilitaryCampaign.command_hierarchy
 	if domain=="army":command.land.refresh_claims()
@@ -67,6 +73,7 @@ func _ready()->void:
 	cities=OptionButton.new();cities.clip_text=true;controls.add_child(cities)
 	region_label=_label(controls,"Zone: select on map or draw below")
 	region_label.max_lines_visible=1
+	_build_preparation(controls)
 	var drawing:=_row(controls);_button(drawing,"Draw zone · D",_draw_zone)
 	finish_button=_button(drawing,"Finish",func():map.finish_boundary(area_name.text))
 	cancel_boundary_button=_button(drawing,"Cancel drawing",func():map.cancel_boundary())
@@ -98,6 +105,39 @@ func _ready()->void:
 	_refresh_targets()
 func _row(parent:Node)->HBoxContainer:
 	var result:=HBoxContainer.new();result.add_theme_constant_override("separation",6);parent.add_child(result);return result
+
+func _build_preparation(parent:Node)->void:
+	preparation_box=VBoxContainer.new();preparation_box.add_theme_constant_override("separation",4);parent.add_child(preparation_box);preparation_box.hide()
+	var row:=_row(preparation_box)
+	for entry:Array in [["training","Training",Color("7eb5df")],["condition","Condition",Color("91cbb5")],["coverage","Coverage",Color("e4bd72")]]:
+		var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",3);row.add_child(column)
+		var label:=_label(column,String(entry[1]),12);label.autowrap_mode=TextServer.AUTOWRAP_OFF;preparation_values[entry[0]]=label
+		var meter:=ProgressBar.new();meter.show_percentage=false;meter.custom_minimum_size.y=6
+		var fill:=StyleBoxFlat.new();fill.bg_color=entry[2];fill.set_corner_radius_all(2);meter.add_theme_stylebox_override("fill",fill)
+		var background:=StyleBoxFlat.new();background.bg_color=Color("293b47");background.set_corner_radius_all(2);meter.add_theme_stylebox_override("background",background)
+		column.add_child(meter);preparation_meters[entry[0]]=meter
+	preparation_fuel=_label(preparation_box,"",12)
+	preparation_note=_label(preparation_box,"",12);preparation_note.max_lines_visible=2
+
+func _update_preparation()->void:
+	if not is_instance_valid(preparation_box):return
+	if domain=="army" or selected.is_empty() or _mission()=="hold":preparation_box.hide();return
+	var prepared:Dictionary=Preparation.snapshot(command,selected,map.selected)
+	preparation_box.visible=bool(prepared.visible)
+	if not preparation_box.visible:return
+	for key:String in preparation_meters:
+		preparation_meters[key].value=clampf(float(prepared[key])*100,0,100)
+		preparation_values[key].text="%s %d%%" % [key.capitalize(),roundi(float(prepared[key])*100)]
+		preparation_meters[key].tooltip_text=String(prepared.tooltip)
+	preparation_fuel.text="Full missions: %d fuel/day · shared reserve %d" % [int(prepared.fuel),int(prepared.reserve)]
+	preparation_fuel.modulate=Color("efa092") if int(prepared.shortage)>0 else Color("afbbc3")
+	preparation_note.text=String(prepared.summary);preparation_note.tooltip_text=String(prepared.tooltip)
+	preparation_note.modulate=Color("e4bd72") if prepared.warning else Color("a7d8c2")
+	var unavailable:=String(mission_reasons.get(_mission(),""))
+	if unavailable!="":
+		preparation_note.text="This command cannot perform the selected objective."
+		preparation_note.tooltip_text=unavailable+"\n\n"+String(prepared.tooltip);preparation_note.modulate=Color("efa092")
+	preparation_box.tooltip_text=String(prepared.tooltip)
 func _label(parent:Node,text:String,size:int=14)->Label:
 	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",size);parent.add_child(result);return result
 func _button(parent:Node,text:String,callback:Callable)->Button:
@@ -184,6 +224,7 @@ func _refresh_mission_availability()->void:
 	apply_button.disabled=blocked!="";apply_button.tooltip_text=blocked if blocked!="" else "Give this objective to the selected command. Staff report preparation and supply delays."
 	mission_hint.text=blocked.get_slice("\n",0);mission_hint.tooltip_text=blocked
 	mission_hint.visible=blocked!="" and not selected.is_empty()
+	_update_preparation()
 	# Never replace a player's draft when selection or equipment changes.
 	# A retained but unavailable draft is explained and cannot be submitted.
 func _refresh_targets()->void:

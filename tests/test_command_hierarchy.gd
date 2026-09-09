@@ -344,6 +344,7 @@ func test_order_action_stays_reachable_when_optional_details_and_feedback_are_lo
 		for service:String in ["army","navy","air"]:
 			var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain=service;add_child(panel)
 			panel._selected(command.preview(service))
+			if service!="army":panel.mission.select(1);panel._refresh_mission_availability();assert_bool(panel.preparation_box.visible).is_true()
 			panel.current_order_label.text="Now: Encircle · A long named frontier with subordinate exceptions ".repeat(12)
 			panel.mission_hint.text="This command lacks the required equipment for the selected objective. ".repeat(4);panel.mission_hint.show()
 			panel.details_toggle.pressed.emit()
@@ -869,3 +870,101 @@ func test_subdivision_mission_ui_and_craft_tooltip_update_without_issuing_orders
 	assert_str(panel.selected_label.tooltip_text).contains("1 × Fighters").contains("3 × "+String(op.C.UNITS.observation_balloon.label))
 	assert_str(panel._mission()).is_equal("air_superiority")
 	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_selected_air_headquarters_budget_uses_shared_fuel_once_without_issuing_orders()->void:
+	var first:=_craft("air",4);first.units={"fighter":4};first.authorized=first.units.duplicate();first.training=1.0
+	# Commission through the available early equipment, then install the test craft.
+	MilitaryCampaign.military_inventory[op.C.UNITS.observation_balloon.equipment]=4
+	var created:Dictionary=op.commission(int(first.base_id),"observation_balloon",4,"Second wing")
+	assert_bool(created.has("ok")).is_true()
+	var second:Dictionary=op.force(int(created.id));second.units={"fighter":4};second.authorized=second.units.duplicate();second.training=1.0
+	command.sync();MilitaryCampaign.military_consumables.fuel=6
+	var area:Dictionary=op.create_region("air",command.R.rectangle(Vector2(0,5),3)).region
+	var before:Dictionary=MilitaryCampaign.export_state()
+	var result:Dictionary=CommandPanel.Preparation.snapshot(command,command.preview("air"),area)
+	assert_int(int(result.commands)).is_equal(2)
+	assert_int(int(result.fuel)).is_equal(8);assert_int(int(result.shortage)).is_equal(2)
+	assert_str(String(result.summary)).contains("Fuel short by 2")
+	assert_str(String(result.tooltip)).contains("shared reserve")
+	assert_float(float(result.training)).is_equal(1.0)
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_virtual_air_preparation_uses_only_its_craft_and_reports_assembly_without_splitting()->void:
+	var actual:=_craft("air",12);actual.units={"fighter":6,"observation_balloon":6};actual.authorized=actual.units.duplicate();actual.training=.5
+	command.sync();var id:=String(command.children("air")[0].id)
+	var area:Dictionary=op.create_region("air",command.R.rectangle(Vector2(0,300),3)).region
+	MilitaryCampaign.military_consumables.fuel=4
+	var before:Dictionary=MilitaryCampaign.export_state()
+	var result:Dictionary=CommandPanel.Preparation.snapshot(command,command.preview(id,[2]),area)
+	assert_int(int(result.fuel)).is_equal(4)
+	assert_float(float(result.coverage)).is_equal(1.0)
+	assert_float(float(result.training)).is_equal(.5)
+	assert_str(String(result.tooltip)).not_contains("beyond operating range")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	actual.mission="reconnaissance";before=MilitaryCampaign.export_state()
+	result=CommandPanel.Preparation.snapshot(command,command.preview(id,[2]),area)
+	assert_str(String(result.tooltip)).contains("Subdivide this force at its ready home base")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_next_zone_preparation_does_not_borrow_old_region_and_respects_suspended_instruction()->void:
+	var actual:=_craft("air",4);actual.training=.5
+	var area:Dictionary=op.create_region("air",command.R.rectangle(Vector2(0,5),3)).region
+	actual.region=area;actual.mission="reconnaissance"
+	MilitaryCampaign.training_staff.set_policy("air","suspended")
+	var id:=String(command.children("air")[0].id);var before:Dictionary=MilitaryCampaign.export_state()
+	var result:Dictionary=CommandPanel.Preparation.snapshot(command,command.preview(id),{})
+	assert_float(float(result.coverage)).is_equal(0.0)
+	assert_str(String(result.summary)).contains("Choose the next operating zone")
+	assert_str(String(result.tooltip)).contains("Initial instruction is suspended")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+
+func test_preparation_meters_update_with_staff_progress_and_resupply_without_changing_drafts()->void:
+	var actual:=_craft("air",4);actual.units={"fighter":4};actual.authorized=actual.units.duplicate();actual.training=.5;actual.condition=.7
+	MilitaryCampaign.military_consumables.fuel=0
+	var area:Dictionary=op.create_region("air",command.R.rectangle(Vector2(0,5),3)).region
+	var id:=String(command.children("air")[0].id)
+	var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain="air";add_child(panel)
+	panel._selected(command.preview(id));_select_draft_mission(panel,"air_superiority");panel._region(area)
+	assert_bool(panel.preparation_box.visible).is_true()
+	assert_float(panel.preparation_meters.training.value).is_equal_approx(50.0,.0001)
+	assert_float(panel.preparation_meters.condition.value).is_equal_approx(70.0,.0001)
+	assert_str(panel.preparation_note.text).contains("Fuel short")
+	assert_str(panel.preparation_note.tooltip_text).contains("Repairs required")
+	# A valid objective can wait for staff and supplies, without another training click.
+	assert_bool(panel.apply_button.disabled).is_false()
+	actual.training=1.0;actual.condition=1.0;MilitaryCampaign.military_consumables.fuel=100
+	var before:Dictionary=MilitaryCampaign.export_state();panel._process(1.1)
+	assert_float(panel.preparation_meters.training.value).is_equal_approx(100.0,.0001)
+	assert_float(panel.preparation_meters.condition.value).is_equal_approx(100.0,.0001)
+	assert_str(panel.preparation_note.text).contains("No listed preparation blockers")
+	assert_str(panel.preparation_fuel.text).contains("4 fuel/day").contains("reserve 100")
+	assert_str(panel._mission()).is_equal("air_superiority")
+	assert_str(String(actual.mission)).is_equal("hold")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	_select_draft_mission(panel,"strategic_bombing");panel._refresh_targets()
+	assert_str(panel.preparation_note.text).contains("cannot perform")
+	assert_bool(panel.apply_button.disabled).is_true()
+
+func test_readiness_matches_staff_repair_threshold_and_ignores_absent_craft_training_time()->void:
+	var actual:=_craft("air",2);actual.training=.5
+	var baseline:Dictionary=op.readiness(int(actual.id))
+	actual.units.fighter=0;actual.authorized.fighter=0;actual.condition=.7
+	var before:Dictionary=MilitaryCampaign.export_state()
+	var ready:Dictionary=op.readiness(int(actual.id))
+	assert_int(int(ready.training_days)).is_equal(int(baseline.training_days))
+	assert_str("\n".join(ready.blockers)).contains("Repairs required")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	op.advance(1)
+	assert_bool(bool(actual.repairing)).is_true()
+
+func test_naval_preparation_is_separate_from_air_and_preserves_land_command_view()->void:
+	var navy:=_craft("navy",2);navy.units={"torpedo_boat":2};navy.authorized=navy.units.duplicate();navy.training=1.0
+	var air:=_craft("air",4);air.units={"fighter":4};air.authorized=air.units.duplicate();air.training=.25
+	MilitaryCampaign.military_consumables.fuel=3
+	var area:Dictionary=op.create_region("navy",command.R.rectangle(Vector2(0,-20),3)).region
+	var result:Dictionary=CommandPanel.Preparation.snapshot(command,command.preview("navy"),area)
+	assert_int(int(result.commands)).is_equal(1)
+	assert_int(int(result.fuel)).is_equal(op.fuel_cost(navy))
+	assert_float(float(result.training)).is_equal(1.0)
+	var id:=_home(10)
+	assert_bool(CommandPanel.Preparation.snapshot(command,command.preview(id),{}).visible).is_false()

@@ -372,7 +372,10 @@ func mission_factors(record:Dictionary,region:Dictionary,day:int)->Dictionary:
 	return {"coverage":coverage,"crowding":crowding,"weather":weather,"base_condition":base_condition,"condition":float(record.condition),"stationed":stationed,"capacity":int(capacity),"efficiency":coverage*crowding*weather*base_condition*float(record.condition)}
 
 func readiness(id:int,region:Dictionary={})->Dictionary:
-	var record:=force(id)
+	return readiness_for(force(id),region)
+
+func readiness_for(record:Dictionary,region:Dictionary={})->Dictionary:
+	# Accept a read-only detachment preview without replacing the live force.
 	if record.is_empty():return {"blockers":["Select a task force or air wing."],"efficiency":0.0}
 	var area:Dictionary=region if not region.is_empty() else record.get("region",{})
 	var result:=mission_factors(record,area,maxi(0,int(state.last_day)))
@@ -384,12 +387,13 @@ func readiness(id:int,region:Dictionary={})->Dictionary:
 	result.missing_equipment=missing
 	if hardware(record)==0:blockers.append("No equipment — produce replacements for this force.")
 	var training_days:=1.0
-	for type_id:String in record.units:training_days=maxf(training_days,host.training_staff.service_days(float(C.UNITS[type_id].training_days))/maxf(.001,float(host.training_staff.policy(String(record.domain),String(record.owner)).intake)))
+	for type_id:String in record.units:
+		if int(record.units[type_id])>0:training_days=maxf(training_days,host.training_staff.service_days(float(C.UNITS[type_id].training_days))/maxf(.001,float(host.training_staff.policy(String(record.domain),String(record.owner)).intake)))
 	result.training_days=ceili((1.0-float(record.training))*training_days)
 	if float(record.training)<1 and host.training_staff.policy(String(record.domain),String(record.owner)).id=="suspended":
 		result.training_days=-1;blockers.append("Initial instruction is suspended by service policy.")
 	elif int(result.training_days)>0:blockers.append("Training: about %d days before supply and base-capacity delays." % int(result.training_days))
-	if bool(record.get("repairing",false)) or float(record.condition)<float(record.repair_threshold):blockers.append("Repairs required at home base before resuming the mission.")
+	if bool(record.get("repairing",false)) or float(record.condition)<maxf(.8,float(record.repair_threshold)):blockers.append("Repairs required at home base before resuming the mission.")
 	if not record.get("route",[]).is_empty():blockers.append("Under way — mission starts after arrival.")
 	if area.is_empty():blockers.append("No region assigned — draw or select a region on the map.")
 	elif float(result.coverage)<=0:blockers.append("Selected region is beyond operating range.")
