@@ -1,6 +1,6 @@
 extends RefCounted
 ## Routes are sampled from the same land authority as scouts and armies.
-## Computed when orders change; never a per-frame planet scan.
+## Routes are computed on orders and daily search steps, never per frame.
 var land_query:Callable
 var route_cache:Dictionary={}
 
@@ -72,6 +72,38 @@ func sea_point(region:Dictionary,from:Vector2)->Dictionary:
 			if not is_land(candidate) and candidate.distance_to(from)<distance:
 				best=pack(candidate);distance=candidate.distance_to(from)
 	return best
+
+func patrol_route(region:Dictionary,from:Vector2,home:Vector2,reach:float,step:float,seed:int)->Dictionary:
+	# Search locally within a day's sailing distance. All candidates and every
+	# accepted leg stay inside the drawn area and the home port's range.
+	if region.is_empty() or reach<=0 or step<=0 or from.distance_to(home)>reach:return {}
+	var points:=PackedVector2Array()
+	for vertex:Dictionary in region.get("vertices",[]):points.append(unpack(vertex))
+	var center:=unpack(region.get("position",{}))
+	var box:=Rect2(center-Vector2.ONE*250,Vector2.ONE*500)
+	if points.size()>=3:
+		box=Rect2(points[0],Vector2.ZERO)
+		for vertex:Vector2 in points:box=box.expand(vertex)
+		if not Geometry2D.is_point_in_polygon(from,points):return {}
+	elif not box.has_point(from):return {}
+	box=box.intersection(Rect2(home-Vector2.ONE*reach,Vector2.ONE*reach*2))
+	box=box.intersection(Rect2(from-Vector2.ONE*step,Vector2.ONE*step*2))
+	if not box.has_area():return {}
+	# A coprime stride visits each of 64 cells once in a stable daily order.
+	# No global RNG or additional saved patrol state is needed.
+	for i in 64:
+		var cell:=posmod(seed+i*37,64)
+		var target:=box.position+Vector2((cell%8+.5)/8.0,(cell/8+.5)/8.0)*box.size
+		var distance:=from.distance_to(target)
+		if distance<.1 or distance>step or target.distance_to(home)>reach or target.distance_to(home)<2:continue
+		if points.size()>=3:
+			if not Geometry2D.is_point_in_polygon(target,points):continue
+			var crosses:=false
+			for edge in points.size():
+				if Geometry2D.segment_intersects_segment(from,target,points[edge],points[(edge+1)%points.size()])!=null:crosses=true;break
+			if crosses:continue
+		if sea_edge(from,target):return {"points":[pack(from),pack(target)],"distance":distance}
+	return {}
 
 static func pack(value:Vector2)->Dictionary:return {"x":value.x,"z":value.y}
 static func unpack(value:Dictionary)->Vector2:return Vector2(float(value.get("x",0)),float(value.get("z",0)))

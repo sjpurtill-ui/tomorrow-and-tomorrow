@@ -43,6 +43,137 @@ func test_water_route_goes_around_island_and_rejects_land_destination()->void:
 	for i in range(1,route.points.size()):assert_bool(map.sea_edge(G.unpack(route.points[i-1]),G.unpack(route.points[i]))).is_true()
 	assert_bool(map.sea_route(Vector2(-40,0),Vector2.ZERO).has("error")).is_true()
 
+func test_patrol_and_raiders_keep_searching_after_their_first_arrival()->void:
+	MilitaryCampaign.training_staff.set_policy("navy","suspended")
+	var region:Dictionary=op.create_region("navy",op.R.rectangle(Vector2(0,-50),30),"Coastal search").region
+	var patrol:=_ready_force("war_canoe");var raider:=_ready_force("torpedo_boat")
+	assert_bool(op.assign(int(patrol.id),region,"patrol").has("ok")).is_true()
+	assert_bool(op.assign(int(raider.id),region,"convoy_raiding").has("ok")).is_true()
+	op.advance(1)
+	var visited:Dictionary={}
+	for day in range(2,8):
+		var before:Array=[op.force_position(patrol),op.force_position(raider)]
+		op.advance(day)
+		for i in 2:
+			var ship:Dictionary=[patrol,raider][i];var position:Vector2=op.force_position(ship)
+			assert_float(position.distance_to(before[i])).is_greater(.1)
+			assert_float(position.distance_to(before[i])).is_less_equal(op.speed(ship))
+			assert_bool(op.R.contains(region,position)).is_true()
+			assert_bool(op.geography.sea_edge(before[i],position)).is_true()
+			assert_float(float(ship.efficiency)).is_greater(0.0)
+			visited[str(i)+str(position)]=true
+	assert_int(visited.size()).is_greater_equal(8)
+	assert_str(String(patrol.status)).contains("Patrolling")
+	assert_str(String(raider.status)).contains("Searching for convoys")
+
+func test_search_legs_respect_islands_concave_boundaries_range_and_daily_speed()->void:
+	var map:=G.new()
+	map.land_query=func(point:Vector2)->bool:return point.distance_to(Vector2(-65,-80))<12
+	var vertices:Array=[]
+	for point:Vector2 in [Vector2(-100,-20),Vector2(-20,-20),Vector2(-20,-100),Vector2(100,-100),Vector2(100,-200),Vector2(-100,-200)]:vertices.append(G.pack(point))
+	var region:Dictionary=op.create_region("navy",vertices,"Island approaches").region
+	var home:=Vector2(-100,-100);var position:=Vector2(-80,-50);var visited:Dictionary={}
+	for day in 30:
+		var route:=map.patrol_route(region,position,home,140,35,day*1237)
+		assert_bool(route.is_empty()).is_false()
+		if route.is_empty():return
+		var target:=G.unpack(route.points.back())
+		assert_float(position.distance_to(target)).is_between(.1,35)
+		for sample in 41:
+			var location:=position.lerp(target,sample/40.0)
+			assert_bool(op.R.contains(region,location)).is_true()
+			assert_bool(map.is_land(location)).is_false()
+			assert_float(location.distance_to(home)).is_less_equal(140)
+		visited[str(target)]=true;position=target
+	assert_int(visited.size()).is_greater(8)
+	# An isolated pocket cannot invent a route through land to another cell.
+	map.land_query=func(point:Vector2)->bool:return point.distance_to(position)>.01
+	assert_dict(map.patrol_route(region,position,home,140,35,1)).is_empty()
+	assert_dict(map.patrol_route(region,Vector2(1000,1000),home,140,35,1)).is_empty()
+
+func test_patrol_fuel_shortage_and_saved_orders_resume_without_reissuing()->void:
+	MilitaryCampaign.training_staff.set_policy("navy","suspended")
+	var ship:=_ready_force("torpedo_boat")
+	var region:Dictionary=op.create_region("navy",op.R.rectangle(Vector2(0,-50),30),"Fuel patrol").region
+	assert_bool(op.assign(int(ship.id),region,"patrol").has("ok")).is_true()
+	op.advance(1)
+	var stopped:Vector2=op.force_position(ship)
+	MilitaryCampaign.military_consumables.fuel=0
+	op.advance(2)
+	assert_vector(op.force_position(ship)).is_equal(stopped)
+	assert_int(int(ship.fuel_used)).is_equal(0)
+	assert_float(float(ship.efficiency)).is_equal(0.0)
+	assert_str(String(ship.status)).contains("No fuel")
+	assert_array(ship.route).is_not_empty()
+	var saved:Dictionary=JSON.parse_string(JSON.stringify(op.export_state()))
+	assert_str(op.validate(saved)).is_empty()
+	MilitaryCampaign.military_consumables.fuel=6
+	op.advance(3);op.advance(4)
+	var expected:Vector2=op.force_position(ship)
+	assert_float(expected.distance_to(stopped)).is_greater(.1)
+	assert_int(int(MilitaryCampaign.military_consumables.fuel)).is_equal(2)
+	var id:=int(ship.id)
+	op.import_state(saved);ship=op.force(id)
+	MilitaryCampaign.military_consumables.fuel=6
+	op.advance(3);op.advance(4)
+	assert_vector(op.force_position(ship)).is_equal(expected)
+	assert_int(int(MilitaryCampaign.military_consumables.fuel)).is_equal(2)
+	assert_str(String(ship.mission)).is_equal("patrol")
+	assert_str(String(ship.region.id)).is_equal(String(region.id))
+	op.advance(4)
+	assert_vector(op.force_position(ship)).is_equal(expected)
+	assert_int(int(MilitaryCampaign.military_consumables.fuel)).is_equal(2)
+
+func test_contacts_interrupt_search_then_patrol_resumes_and_strike_force_returns()->void:
+	MilitaryCampaign.training_staff.set_policy("navy","suspended")
+	var patrol:=_ready_force("torpedo_boat");var strike:=_ready_force("torpedo_boat")
+	var region:Dictionary=op.create_region("navy",op.R.rectangle(Vector2(0,-100),80),"Contact search").region
+	assert_bool(op.assign(int(patrol.id),region,"patrol").has("ok")).is_true()
+	assert_bool(op.assign(int(strike.id),region,"strike_force").has("ok")).is_true()
+	op.advance(1)
+	var home:Vector2=op.point(op.base(port))
+	assert_vector(op.force_position(strike)).is_equal(home)
+	assert_int(int(strike.fuel_used)).is_equal(0)
+	assert_str(String(strike.status)).contains("waiting for a patrol contact")
+	var rival:Dictionary={"id":"patrol_test_enemy","player_relation":{"at_war":true},"strategic_regions":[]}
+	CivilizationSystem.civilizations.append(rival)
+	var reported:=Vector2(50,-130)
+	op.state.contacts["player:999"]={"observer":"player","target":999,"region":region.id,"day":1,"name":"Reported hostile","position":G.pack(reported),"owner":rival.id,"domain":"navy"}
+	for day in [2,3]:
+		op.advance(day)
+		assert_vector(op.force_position(patrol)).is_equal(reported)
+		assert_vector(op.force_position(strike)).is_equal(reported)
+	op.advance(4)
+	assert_float(op.force_position(patrol).distance_to(reported)).is_greater(.1)
+	assert_vector(op.force_position(strike)).is_equal(home)
+	op.advance(5)
+	assert_vector(op.force_position(strike)).is_equal(home)
+	assert_int(int(strike.fuel_used)).is_equal(0)
+	CivilizationSystem.civilizations.erase(rival)
+
+func test_patrol_repair_and_stand_down_override_search_movement()->void:
+	MilitaryCampaign.training_staff.set_policy("navy","suspended")
+	var ship:=_ready_force("torpedo_boat")
+	var region:Dictionary=op.create_region("navy",op.R.rectangle(Vector2(0,-50),30),"Repair patrol").region
+	assert_bool(op.assign(int(ship.id),region,"patrol").has("ok")).is_true()
+	op.advance(1)
+	ship.condition=.5;ship.repairing=true
+	op.advance(2)
+	var home:Vector2=op.point(op.base(port))
+	assert_vector(op.force_position(ship)).is_equal(home)
+	assert_str(String(ship.status)).contains("Returning for repairs")
+	op.advance(3)
+	assert_vector(op.force_position(ship)).is_equal(home)
+	assert_int(int(ship.fuel_used)).is_equal(0)
+	ship.condition=1.0;ship.repairing=false
+	assert_bool(op.assign(int(ship.id),{},"hold").has("ok")).is_true()
+	op.advance(4)
+	assert_vector(op.force_position(ship)).is_equal(home)
+	for day in [5,6]:
+		op.advance(day)
+		assert_vector(op.force_position(ship)).is_equal(home)
+		assert_int(int(ship.fuel_used)).is_equal(0)
+
 func test_transport_delivers_withdrawn_food_once_then_returns()->void:
 	var force:=_ready_force("convoy_transport")
 	var before:=FoodSystem.total_stored()

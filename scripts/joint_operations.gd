@@ -502,6 +502,13 @@ func advance(day:int)->void:
 			if destination.distance_to(force_position(record))>2:
 				var route:=set_route(record,destination)
 				if route.has("error"):record.status=String(route.error);continue
+		var naval_activity:=""
+		if record.domain=="navy" and record.mission in ["patrol","convoy_raiding"] and not bool(record.get("repairing",false)) and record.get("route",[]).is_empty() and not record.region.is_empty() and latest_naval_contact(record).is_empty():
+			var search:Dictionary=geography.patrol_route(record.region,force_position(record),point(origin),range_km(record),speed(record),hash("%d:%d:%d" % [GameState.world_seed,int(record.id),day]))
+			if not search.is_empty():
+				record.route=search.points
+				naval_activity="Patrolling" if record.mission=="patrol" else "Searching for convoys"
+			else:naval_activity="On station · no clear search leg"
 		if record.mission=="hold" and record.get("route",[]).is_empty():record.status="Standing by on carrier deck" if not carrier.is_empty() else "Standing by at base";continue
 		var factors:Dictionary={}
 		# A moving carrier can take a standing air order out of range. Ground
@@ -525,7 +532,7 @@ func advance(day:int)->void:
 		if factors.is_empty():factors=mission_factors(record,record.region,day)
 		if float(factors.coverage)<=0:record.status="Area outside current base range";continue
 		record.efficiency=float(factors.efficiency)*(1.0-float(record.get("training_attending",0))/maxf(1,crew(record))*.5)
-		record.status="On mission · %d%% efficiency" % roundi(float(record.efficiency)*100)
+		record.status="%s · %d%% efficiency" % ["On mission" if naval_activity.is_empty() else naval_activity,roundi(float(record.efficiency)*100)]
 		record.experience=minf(1,float(record.experience)+.001)
 	_detect_and_fight()
 	effects.advance(day)
