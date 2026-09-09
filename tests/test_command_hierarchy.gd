@@ -344,6 +344,7 @@ func test_order_action_stays_reachable_when_optional_details_and_feedback_are_lo
 		for service:String in ["army","navy","air"]:
 			var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain=service;add_child(panel)
 			panel._selected(command.preview(service))
+			panel.current_order_label.text="Now: Encircle · A long named frontier with subordinate exceptions ".repeat(12)
 			panel.details_toggle.pressed.emit()
 			panel._draw_zone()
 			panel._report({"error":"Supply and route information with enough detail to wrap across several lines. ".repeat(8)})
@@ -351,6 +352,8 @@ func test_order_action_stays_reachable_when_optional_details_and_feedback_are_lo
 			panel._process(0)
 			await get_tree().process_frame
 			assert_bool(panel.orders_scroll.get_global_rect().encloses(panel.mission.get_global_rect())).is_true()
+			assert_bool(panel.orders_scroll.get_global_rect().encloses(panel.current_order_label.get_global_rect())).is_true()
+			assert_bool(panel.orders_scroll.get_global_rect().encloses(panel.edit_order_button.get_global_rect())).is_true()
 			panel.orders_scroll.scroll_vertical=10000
 			await get_tree().process_frame
 			var button:Rect2=panel.apply_button.get_global_rect();var bounds:Rect2=panel.panel.get_global_rect()
@@ -562,3 +565,129 @@ func test_cancelling_during_a_real_battle_preserves_the_current_engagement()->vo
 	var completed:=MilitaryCampaign.battle_history.size();command.battle.advance_all()
 	assert_int(command.data.battles.size()+MilitaryCampaign.battle_history.size()-completed).is_equal(1)
 	for engagement:Dictionary in command.data.battles:assert_int(int(engagement.round)).is_equal(1)
+
+func _select_draft_mission(panel:CanvasLayer,id:String)->void:
+	for index in panel.mission.item_count:
+		if panel.mission.get_item_metadata(index)==id:panel.mission.select(index);return
+	assert_bool(false).override_failure_message("Missing mission "+id).is_true()
+
+func test_current_order_and_next_draft_stay_separate_until_explicit_edit()->void:
+	var id:=_home(144);var issued_area:=_zone();issued_area.name="North frontier"
+	assert_bool(command.assign(id,[],issued_area,"defend","","Hold the crossings").has("ok")).is_true()
+	var draft_area:=_zone(Vector2(150,0));draft_area.name="Southern approach"
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	_select_draft_mission(panel,"encircle");panel._region(draft_area);panel.vision.text="Keep my new plan"
+	var before:Dictionary=MilitaryCampaign.export_state()
+	panel._selected(command.preview(id));panel._process(1.1)
+	assert_str(panel.current_order_label.text).contains("Now: Defend").contains("North frontier")
+	assert_str(panel.current_order_label.tooltip_text).contains("Hold the crossings")
+	assert_bool(panel.mission.get_item_text(panel.mission.selected).begins_with("Next:")).is_true()
+	assert_str(panel._mission()).is_equal("encircle");assert_str(panel.map.selected.id).is_equal(draft_area.id)
+	assert_str(panel.vision.text).is_equal("Keep my new plan")
+	assert_bool(panel.edit_order_button.disabled).is_false();panel.edit_order_button.pressed.emit()
+	assert_str(panel._mission()).is_equal("defend");assert_str(panel.map.selected.id).is_equal(issued_area.id)
+	assert_str(panel.vision.text).is_equal("Hold the crossings")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	assert_str(panel.feedback.text).contains("Give objective applies changes")
+
+func test_current_order_distinguishes_parent_overrides_inheritance_and_mixed_headquarters()->void:
+	var id:=_home(144);var zone:=_zone();zone.name="Border watch"
+	assert_bool(command.assign(id,[],zone,"defend").has("ok")).is_true()
+	var child:Dictionary=command.assign(id,[0],zone,"defeat");assert_bool(child.has("ok")).is_true()
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel)
+	panel._selected(command.preview(id))
+	assert_str(panel.current_order_label.text).contains("Defend").contains("1 override")
+	assert_str(panel.current_order_label.tooltip_text).contains("replaces those orders")
+	for leaf:Dictionary in command.leaves(id):
+		if leaf.id==child.id:continue
+		panel._selected(command.preview(leaf.id))
+		assert_str(panel.current_order_label.tooltip_text).contains("Inherited from")
+		panel._selected(command.preview(leaf.id,[0]))
+		assert_str(panel.current_order_label.tooltip_text).contains("shares its parent force's order")
+		break
+	panel._selected(command.preview("army"))
+	assert_str(panel.current_order_label.text).contains("Mixed orders")
+	assert_str(panel.current_order_label.tooltip_text).contains("Defend").contains("Defeat").contains("Border watch")
+	assert_bool(panel.edit_order_button.disabled).is_true()
+	command.assign(id,[],zone,"defend");panel._update_current_order()
+	assert_str(panel.current_order_label.text).contains("Defend").not_contains("Mixed")
+	assert_bool(panel.edit_order_button.disabled).is_false()
+	assert_str(panel.current_order_label.tooltip_text).contains("subordinate commands share this order")
+
+func test_service_order_strip_tracks_external_orders_without_overwriting_drafts()->void:
+	for domain:String in ["navy","air"]:
+		var actual:=_craft(domain,12);var id:=String(command.children(domain)[0].id)
+		var center:=Vector2(0,-20) if domain=="navy" else Vector2(0,5)
+		var region:Dictionary=op.create_region(domain,command.R.rectangle(center,4),"Coastal patrol" if domain=="navy" else "Sky watch").region
+		var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain=domain;add_child(panel)
+		panel._selected(command.preview(id));panel.vision.text="Uncommitted brief"
+		var task:="patrol" if domain=="navy" else "reconnaissance"
+		assert_bool(op.assign(int(actual.id),region,task).has("ok")).is_true()
+		command.sync();var before:Dictionary=MilitaryCampaign.export_state()
+		panel._process(1.1)
+		assert_str(panel.current_order_label.text).contains(task.capitalize()).contains(region.name)
+		assert_str(panel._mission()).is_equal("hold");assert_dict(panel.map.selected).is_empty()
+		assert_str(panel.vision.text).is_equal("Uncommitted brief")
+		panel.edit_order_button.pressed.emit()
+		assert_str(panel._mission()).is_equal(task);assert_str(panel.map.selected.id).is_equal(region.id)
+		assert_str(panel.map.selected.domain).is_equal(domain)
+		assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+		assert_bool(op.assign(int(actual.id),{},"hold").has("ok")).is_true()
+		panel._process(1.1)
+		assert_str(panel.current_order_label.text).is_equal("Now: Hold")
+		assert_str(panel._mission()).is_equal(task)
+		panel.edit_order_button.pressed.emit()
+		assert_str(panel._mission()).is_equal("hold");assert_dict(panel.map.selected).is_empty()
+		panel.queue_free();await get_tree().process_frame
+
+func test_city_order_edit_retains_reported_target_and_never_reads_hidden_city_changes()->void:
+	CivilizationSystem.initialize();var intel=CivilizationSystem.city_intelligence
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	for index in 2:
+		var city_id:=String(civ.strategic_regions[index].id)
+		intel.publish("player",intel.capture("player",city_id,.8,0,"test visit","test_visit"),0)
+	var target:=String(civ.strategic_regions[1].id);var report:Dictionary=intel.known("player",target)
+	var id:=_home(144);var zone:=_zone(command.G.unpack(report.position),500)
+	var assigned:Dictionary=command.assign(id,[],zone,"capture",target,"Secure the city")
+	assert_bool(assigned.has("ok")).override_failure_message(str(assigned)).is_true()
+	civ.strategic_regions[1].name="Hidden replacement name"
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel);panel._selected(command.preview(id))
+	var before:Dictionary=MilitaryCampaign.export_state()
+	assert_str(panel.current_order_label.text).contains(report.name).not_contains("Hidden replacement")
+	panel.edit_order_button.pressed.emit()
+	assert_bool(panel.cities.visible).is_true();assert_str(panel.cities.get_item_metadata(panel.cities.selected)).is_equal(target)
+	assert_str(panel.vision.text).is_equal("Secure the city")
+	assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+	intel.records.player.erase(target);panel._update_current_order()
+	assert_str(panel.current_order_label.text).contains("Unreported city").not_contains("Hidden replacement")
+	assert_bool(panel.edit_order_button.disabled).is_true()
+
+func test_missing_zone_and_cancelled_orders_do_not_load_a_misleading_draft()->void:
+	var id:=_home(10);var zone:=_zone()
+	assert_bool(command.assign(id,[],zone,"defend").has("ok")).is_true()
+	var panel:CanvasLayer=auto_free(CommandPanel.new());add_child(panel);panel._selected(command.preview(id))
+	panel.vision.text="Keep draft";_select_draft_mission(panel,"withdraw")
+	command.data.zones.clear();panel._update_current_order()
+	assert_bool(panel.edit_order_button.disabled).is_true()
+	assert_str(panel.current_order_label.tooltip_text).contains("assigned zone is unavailable")
+	panel._edit_current_order()
+	assert_str(panel._mission()).is_equal("withdraw");assert_str(panel.vision.text).is_equal("Keep draft")
+	panel._cancel_orders()
+	assert_str(panel.current_order_label.text).is_equal("Now: Holding")
+	assert_bool(panel.edit_order_button.disabled).is_true()
+	panel._selected({})
+	assert_str(panel.current_order_label.text).is_equal("Now: No command selected")
+	assert_bool(panel.edit_order_button.disabled).is_true()
+
+func test_transport_order_is_identified_without_loading_an_unsupported_mission()->void:
+	for service:String in ["navy","air"]:
+		var actual:=_craft(service,2);actual.mission="transport";command.sync()
+		var panel:CanvasLayer=auto_free(CommandPanel.new());panel.domain=service;add_child(panel)
+		panel._selected(command.preview(command.children(service)[0].id))
+		assert_str(panel.current_order_label.text).is_equal("Now: Transport")
+		assert_str(panel.current_order_label.tooltip_text).contains("Ports & ships" if service=="navy" else "Airbases & aircraft")
+		assert_bool(panel.edit_order_button.disabled).is_true()
+		var before:Dictionary=MilitaryCampaign.export_state();panel._edit_current_order()
+		assert_str(panel._mission()).is_equal("hold");assert_str(actual.mission).is_equal("transport")
+		assert_dict(MilitaryCampaign.export_state()).is_equal(before)
+		panel.queue_free();await get_tree().process_frame

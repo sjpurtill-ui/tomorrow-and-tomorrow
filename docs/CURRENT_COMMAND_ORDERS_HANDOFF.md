@@ -1,0 +1,17 @@
+# Issued military orders and the next draft
+
+READY for integration. Worktree `/Users/seanpurtill/Documents/Codex/tt-command-order-state`, branch `codex/current-command-orders`, base `d312ad061e7d4ed62c50c2cdedbb5103b6f6cf76`.
+
+Selecting a command previously showed a default mission dropdown and whichever zone was last selected, with no compact account of that command's actual objective. The dropdown could consequently look like the existing order even when the unit was doing something else.
+
+Army, Fleet and Air Force command panels now have a compact colored **Now** line showing the issued objective and its zone or reported city. The mission dropdown explicitly says **Next**. The current-order tooltip includes the full objective, zone, city, brief and inheritance. Headquarters distinguish common subordinate orders, mixed orders and exceptions to a parent objective. Changing selection or refreshing current information leaves the next-order draft intact.
+
+**Edit** explicitly loads the current mission, zone, reported target city and brief into the draft and highlights that zone on the existing world map. It issues no order, moves no force, splits no unit and changes no personnel or equipment. Give objective or the existing right-click assignment commits a draft. Missing zones, unavailable city reports, cancelled orders and transport orders do not silently load an unrelated/default mission. Transport remains in the distinct service controls. The summary reads reported city names and does not reveal hidden changes.
+
+Owned files: `scripts/hud/command_order_brief.gd`, `scripts/hud/command_hierarchy_panel.gd`, `tests/test_command_hierarchy.gd`, and this handoff. The new helper only prepares presentation data. There are no simulation, camera, progression, training, save-schema or shared integration hotspot changes; no expected conflicts with the current base.
+
+All **53 worktree tests pass**, with zero errors, failures, skips or orphans (`/tmp/tt-current-orders-tests-final.log`). Godot 4.7.2 ran headless with the explicit worktree path and `GdUnitCmdTool.gd --ignoreHeadlessMode`, covering command hierarchy, main-map services and map-panel dismissal. Six new cases cover read-only draft loading, inheritance/parent exceptions/mixed headquarters, real Navy/Air mission changes, reported-city targeting and hidden-name isolation, unavailable/cancelled orders, and transport controls. Existing 1280×720 and 1024×640 layout checks additionally verify that long current-order text, Edit and the mission picker fit; primary actions remain reachable. Existing selection, conservation, autonomous execution, cancellation and dismissal checks pass.
+
+The owned temporary test-userdata override is removed before commit; generated UID files are excluded. No player/editor UI actions or restart were performed. Native visual appearance is not claimed. Already-open panels tolerate the missing new strip during script reload and receive it when recreated. The next normal project launch loads the integrated source.
+
+Limits: this displays issued objectives rather than proving readiness or successful execution. Mixed headquarters require selecting a subordinate to edit its particular objective; a new headquarters-wide objective still replaces subordinate exceptions. Long summaries use a clipped single line with full details in the tooltip. No HOI4 numerical or combat-system parity is claimed.

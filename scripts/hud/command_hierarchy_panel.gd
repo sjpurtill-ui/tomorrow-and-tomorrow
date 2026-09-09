@@ -2,6 +2,7 @@ extends CanvasLayer
 ## One service at a time, over the same terrain and camera as the game.
 const Overlay=preload("res://scripts/hud/service_world_overlay.gd")
 const CommandTree=preload("res://scripts/hud/command_tree.gd")
+const OrderBrief=preload("res://scripts/hud/command_order_brief.gd")
 var domain:="army"
 var terrain:Node
 var command:RefCounted
@@ -10,6 +11,8 @@ var panel:PanelContainer
 var tree:Tree
 var selected:Dictionary={}
 var selected_label:Label
+var current_order_label:Label
+var edit_order_button:Button
 var mission:OptionButton
 var cities:OptionButton
 var area_name:LineEdit
@@ -47,11 +50,16 @@ func _ready()->void:
 	var controls:=VBoxContainer.new();controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_theme_constant_override("separation",8);scroll.add_child(controls)
 	selected_label=_label(controls,"Select a command in the hierarchy",16)
 	selected_label.autowrap_mode=TextServer.AUTOWRAP_OFF;selected_label.clip_text=true
+	var current_row:=_row(controls)
+	current_order_label=_label(current_row,"Now: no command selected",14)
+	current_order_label.autowrap_mode=TextServer.AUTOWRAP_OFF;current_order_label.clip_text=true
+	edit_order_button=_button(current_row,"Edit",_edit_current_order);edit_order_button.custom_minimum_size.y=22;edit_order_button.size_flags_horizontal=Control.SIZE_SHRINK_END;edit_order_button.disabled=true
 	mission=OptionButton.new();mission.clip_text=true;controls.add_child(mission)
+	mission.tooltip_text="Next objective. Selecting or editing this draft does not issue an order; use Give objective or right-click a zone on the map."
 	var catalog:Dictionary=command.LAND_MISSIONS if domain=="army" else MilitaryCampaign.joint_operations.MISSIONS[domain]
 	for id:String in catalog:
 		if id=="transport":continue
-		mission.add_item(String(catalog[id]));mission.set_item_metadata(mission.item_count-1,id)
+		mission.add_item("Next: "+String(catalog[id]));mission.set_item_metadata(mission.item_count-1,id)
 	mission.item_selected.connect(func(_index:int):_refresh_targets())
 	cities=OptionButton.new();cities.clip_text=true;controls.add_child(cities)
 	region_label=_label(controls,"Zone: select on map or draw below")
@@ -93,6 +101,7 @@ func _button(parent:Node,text:String,callback:Callable)->Button:
 	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(result);return result
 func _selected(entry:Dictionary)->void:
 	selected=entry
+	_update_current_order()
 	if entry.is_empty():
 		selected_label.text="Select a command in the hierarchy";selected_label.tooltip_text=""
 		map.selected_force=0;status.text="";status.hide();return
@@ -105,7 +114,30 @@ func _select_force(id:int)->void:
 	for entry:Dictionary in command.data.nodes.values():
 		if entry.service==domain and int(entry.force_id)==id:tree.rebuild(String(entry.id));return
 func _region(region:Dictionary)->void:
-	map.selected=region;region_label.text="Zone: "+String(region.name);region_label.tooltip_text=region_label.text;_refresh_targets()
+	map.selected=region;region_label.text="Zone: "+String(region.get("name","select on map or draw below"));region_label.tooltip_text=region_label.text;_refresh_targets()
+
+func _update_current_order()->void:
+	# Existing live panels may not contain this strip until they are reopened.
+	if not is_instance_valid(current_order_label):return
+	var brief:Dictionary=OrderBrief.snapshot(command,selected)
+	current_order_label.text="Now: "+String(brief.summary);current_order_label.tooltip_text=String(brief.tooltip)
+	current_order_label.modulate=Color("e9c277") if brief.mixed or int(brief.overrides)>0 else Color("acd8c5") if not brief.order.is_empty() else Color("afbbc3")
+	edit_order_button.disabled=not bool(brief.editable)
+	edit_order_button.tooltip_text="Copy this issued order into the next-objective draft and highlight its zone on the main map. Give objective commits changes." if brief.editable else String(brief.tooltip)
+
+func _edit_current_order()->void:
+	command.sync()
+	var brief:Dictionary=OrderBrief.snapshot(command,selected)
+	if not bool(brief.editable):_update_current_order();return
+	var issued:Dictionary=brief.order
+	for index in mission.item_count:
+		if mission.get_item_metadata(index)==issued.mission:mission.select(index);break
+	_region(brief.region)
+	for index in cities.item_count:
+		if cities.get_item_metadata(index)==issued.get("target",""):cities.select(index);break
+	vision.text=String(issued.get("vision",""))
+	_update_current_order()
+	_report({"message":"Current order loaded for editing. Give objective applies changes."})
 func _draw_zone()->void:
 	map.begin_boundary();_report({"message":"Click boundary points on the main map. Enter finishes; right-click undoes; Escape cancels."})
 func _mission()->String:return String(mission.get_item_metadata(mission.selected))
@@ -173,7 +205,7 @@ func _process(delta:float)->void:
 	if is_instance_valid(finish_button):finish_button.visible=map.drawing
 	if is_instance_valid(cancel_boundary_button):cancel_boundary_button.visible=map.drawing
 	tick+=delta
-	if tick>=1:tick=0;tree.refresh();_update_status()
+	if tick>=1:tick=0;tree.refresh();_update_status();_update_current_order()
 func handle_early_input(event:InputEvent)->bool:
 	if not event is InputEventKey or not event.pressed:return false
 	if event.keycode==KEY_ESCAPE:
