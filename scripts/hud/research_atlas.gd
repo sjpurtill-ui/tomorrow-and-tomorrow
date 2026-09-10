@@ -174,7 +174,7 @@ func _build_cards()->void:
 	for item:Dictionary in records:
 		var frame:=PanelContainer.new();frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;frame.custom_minimum_size.x=250;grid.add_child(frame)
 		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",0);frame.add_child(box)
-		var painting:=Art.paint(box,item.domain,104)
+		var painting:=Art.paint_discovery(box,item,104)
 		var margin:=MarginContainer.new()
 		for edge:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,10)
 		box.add_child(margin)
@@ -214,7 +214,7 @@ func select(id:String,open_detail:bool=false)->void:
 	for child in detail_body.get_children():detail_body.remove_child(child);child.queue_free()
 	for item:Dictionary in records:
 		if item.id!=id:continue
-		Art.paint(detail_body,item.domain,116 if not main.vertical else 64)
+		Art.paint_discovery(detail_body,item,116 if not main.vertical else 64)
 		Art.label(detail_body,Art.name_for(item.domain).to_upper(),11,Art.color(item.domain))
 		Art.label(detail_body,item.name,21,T.INK,true)
 		Art.label(detail_body,Art.status(item),13,Art.color(item.domain))

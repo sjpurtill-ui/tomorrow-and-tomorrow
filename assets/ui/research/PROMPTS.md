@@ -1,4 +1,4 @@
-# Research field illustrations
+# Research illustrations
 
 Generated with the built-in image_gen tool. Twelve representative field illustrations, not portraits of named leaders or proof that a depicted technology has been discovered. Full original assets are retained; game imports are limited to 768px with mipmaps.
 
@@ -73,3 +73,13 @@ Use case: historical-scene. Asset type: painted illustration for a premium civil
 Saved asset: `assets/ui/research/culture-v1.png`
 
 Use case: historical-scene. Asset type: painted illustration for a premium civilization strategy game's research cards. Landscape 3:2 composition, tightly framed readable main subject, realistic painterly concept art, exquisite natural materials and atmospheric light, rich restrained ochre and deep teal palette matching sophisticated military strategy artwork. Not a UI mockup. No text, letters, symbols, borders, logos, national flags or watermarks. No blocky, voxel, Minecraft or cartoon geometry. Depict practical investigation rather than a finished futuristic invention. An elder teaching a younger maker to weave an intricate natural-dyed textile, a simple string instrument and fired clay figures nearby, warm hearth light. Cultural learning, memory and skilled hands, sophisticated museum-quality painting. No legible writing.
+
+## Stone Selection — discovery-specific illustration
+
+Generated with the built-in image_gen tool, new-image mode. Assigned only to the exposed `stone_sorting` discovery. Other topics retain explicitly labeled representative field art.
+
+Saved asset: `assets/ui/research/stone-selection-v1.png` (1536 × 1024 original; game import limited to 768px with mipmaps).
+
+Final prompt:
+
+Use case: historical-scene. Create one finished raster illustration for the Stone Selection discovery in the civilization strategy game Tomorrow and Tomorrow. Wide landscape 3:2 composition, premium realistic painterly historical game art, detailed natural textures, restrained ochre and deep teal palette, warm natural daylight. The subject is people learning which local rocks make good tools: close view of two early craftspeople's hands comparing a dark flint nodule with a freshly exposed sharp edge, a rounded hammerstone, and several different rough local rock samples on a flat stone slab outdoors. A few chipped flakes on the slab show edge and fracture quality. One person holds a rock sample for inspection; another tests a sample carefully with the rounded hammerstone. Natural earth, rough stone, simple unornamented cloth and hide clothing. Keep the important rock samples and hands in the middle horizontal band so they remain clearly visible in a wide banner crop. Beautiful atmospheric light and material detail, visually readable at small sizes. No pottery, ceramic vessels, clay, potter's wheel, kiln, metal tools, metal jewelry, industrial machinery, text, writing, lettering, logos, borders, flags, watermarks, cartoon, voxel or blocky geometry. This illustrates selection and comparison of stone material, not advanced polished or hafted equipment.

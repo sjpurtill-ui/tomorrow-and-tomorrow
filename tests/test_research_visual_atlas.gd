@@ -97,3 +97,8 @@ func test_every_research_field_has_a_distinct_painted_asset()->void:
 		var texture:=Art.art(id);assert_object(texture).is_not_null()
 		if texture:paths[texture.resource_path]=true
 	assert_int(paths.size()).is_equal(12)
+func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
+	GameState.known_discoveries.append("stone_sorting")
+	var view:=fixture();view.set_view("known");view.select("stone_sorting")
+	assert_str(view.bindings.stone_sorting.painting.texture.resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+	assert_str(view.detail_body.get_child(0).texture.resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")

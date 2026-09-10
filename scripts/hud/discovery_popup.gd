@@ -72,7 +72,7 @@ func render()->void:
 	for child in body.get_children():body.remove_child(child);child.queue_free()
 	effect_cards.clear()
 	var domain:=String(current.get("dynamic","knowledge"))
-	hero=Art.paint(body,domain,210 if get_viewport().get_visible_rect().size.y>=750 else 142)
+	hero=Art.paint_discovery(body,current,210 if get_viewport().get_visible_rect().size.y>=750 else 142)
 	var label_row:=HBoxContainer.new();body.add_child(label_row)
 	Art.label(label_row,Art.name_for(domain).to_upper(),11,Art.color(domain)).size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	Art.label(label_row,"Year %d · Day %d" % [int(current.get("day",0))/365+1,int(current.get("day",0))%365+1],11,T.MUTED).custom_minimum_size.x=112
