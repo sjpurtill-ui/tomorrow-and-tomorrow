@@ -696,7 +696,7 @@ func discovery_definition(discovery_id:String)->Dictionary:
 	initialize()
 	return catalog_by_id.get(discovery_id,{})
 
-func _leader_factor(direction: String) -> float:
+func research_leadership(direction:String)->Dictionary:
 	# The named-person government has seven canonical aptitudes. Specific fields
 	# of inquiry still differ, but they are composed from those visible skills so
 	# an excellent Scholar or Steward actually changes research throughput.
@@ -709,7 +709,28 @@ func _leader_factor(direction: String) -> float:
 		"security":["Marshal",["Defense","Administration"]],"culture":["Envoy",["Diplomacy","Knowledge"]]
 	}
 	var assignment: Array = mapping.get(direction,["Scholar",["Knowledge"]])
-	return WorldSimulation.advisors.execution_modifier(assignment[0],assignment[1])*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)
+	var requested:=String(assignment[0])
+	var actual:=WorldSimulation.government.executing_office(requested)
+	var person:Dictionary=WorldSimulation.state.leadership_positions.get(actual,{})
+	return {"requested_office":requested,"office":actual,"name":String(person.get("name","Vacant office")),"person_id":int(person.get("person_id",person.get("id",0))),"vacant":person.is_empty(),"acting":actual!=requested,"skills":assignment[1].duplicate()}
+
+func _leader_factor(direction:String)->float:
+	var leadership:=research_leadership(direction)
+	return WorldSimulation.advisors.execution_modifier(leadership.requested_office,leadership.skills)*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)
+
+func research_assignment(discovery:Dictionary)->Dictionary:
+	# Read the same assignment and capacity used by the daily simulation. Opening
+	# the research UI must never refresh targets or redistribute anyone's time.
+	var domain:=String(discovery.get("dynamic",""))
+	var subcategory:=String(discovery.get("subcategory",""))
+	var capacity:=research_capacity_for(domain,subcategory)
+	var leadership:=research_leadership(domain)
+	var id:=String(discovery.get("id",""))
+	var channel:=_channel_key(domain,subcategory)
+	var active:=String(WorldSimulation.state.active_investigations.get(channel,""))==id
+	var evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
+	return {"leader":leadership,"capacity":capacity,"active":active,"channel":channel,"current_target":String(WorldSimulation.state.active_investigations.get(channel,"")),"bottleneck":_investigation_bottleneck(discovery,int(capacity.weight),_leader_factor(domain),evidence,float(WorldSimulation.state.discovery_progress.get(id,0)),capacity) if active else "","method":_project_method(discovery) if active else ""}
+
 
 func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
 	return int((WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{}) as Dictionary).get(subcategory,0))

@@ -15,8 +15,15 @@ func _ready()->void:
 			var layer:CanvasLayer=terrain.hud.get_meta("knowledge_atlas")
 			var atlas=layer.get_child(0)
 			assert(not terrain.hud.dock.visible)
-			assert(atlas.plot.size.x>=700 and atlas.plot.size.y>=130)
-			assert(get_viewport().get_visible_rect().encloses(atlas.action.get_global_rect()))
+			if mode=="inquiry":
+				assert(atlas.view_mode=="active")
+				atlas.set_view("tree")
+				for frame in 4:await get_tree().process_frame
+				assert(atlas.plot.size.x>=400 and atlas.plot.size.y>=130)
+				assert(get_viewport().get_visible_rect().encloses(atlas.panel.get_global_rect()))
+			else:
+				assert(atlas.plot.size.x>=700 and atlas.plot.size.y>=130)
+				assert(get_viewport().get_visible_rect().encloses(atlas.action.get_global_rect()))
 			for item:Dictionary in atlas.records:
 				if item.status=="LOCKED":assert(item.name=="Unexplored question" and item.effects.is_empty())
 			atlas.plot.fit();atlas.step(1);atlas.plot.fit()
@@ -29,7 +36,7 @@ func _ready()->void:
 	terrain.hud.open_dock("inquiry",1)
 	await get_tree().process_frame
 	var atlas=terrain.hud.get_meta("knowledge_atlas").get_child(0)
-	atlas.domain="";atlas.refresh(true)
+	atlas.domain="";atlas.set_view("tree");atlas.refresh(true)
 	var chosen:=""
 	for item:Dictionary in atlas.records:
 		if item.ready:chosen=String(item.id);break
@@ -37,5 +44,19 @@ func _ready()->void:
 	atlas.select(chosen);atlas.action.pressed.emit()
 	assert(chosen in GameState.research_targets.values())
 	assert(GameState.known_discoveries==known_before)
+	# Exercise the real calendar completion hook, not a synthetic HUD notification.
+	GameState.population_allocations["Knowledge"]=24
+	DiscoverySystem.select_research_target("tallies")
+	GameState.discovery_progress["tallies"]=0.9999999
+	terrain._set_game_speed(3)
+	terrain.advance_world_time(1.0)
+	assert("tallies" in GameState.known_discoveries)
+	assert(terrain.hud.has_meta("discovery_popup"))
+	var popup=terrain.hud.get_meta("discovery_popup")
+	assert(popup.current.id=="tallies")
+	assert(terrain.game_speed==0)
+	popup.close()
+	assert(terrain.game_speed==3)
+	terrain._set_game_speed(0)
 	print("KNOWLEDGE_ATLAS_PASS: real tabs open expanded surfaces; two sizes, selection, controls, preserved ledger, hidden outcomes withheld")
 	get_tree().quit()

@@ -24,7 +24,8 @@ static func open(terrain_node:Node,hud_node:Node,kind:String)->void:
 	if is_instance_valid(old): old.queue_free()
 	var canvas:=CanvasLayer.new();canvas.layer=88;hud_node.add_child(canvas)
 	hud_node.set_meta("knowledge_atlas",canvas)
-	var view:=new();view.mode=kind;view.domain="nutrition" if kind=="inquiry" else "";view.terrain=terrain_node;view.hud=hud_node;view.layer=canvas
+	var view:Control=preload("res://scripts/hud/research_atlas.gd").new() if kind=="inquiry" else new()
+	view.mode=kind;view.terrain=terrain_node;view.hud=hud_node;view.layer=canvas
 	canvas.add_child(view)
 func _ready()->void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
