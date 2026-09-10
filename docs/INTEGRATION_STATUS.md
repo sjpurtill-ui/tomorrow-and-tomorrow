@@ -1,3 +1,11 @@
+## September 9 — Stone Selection artwork correction
+
+INTEGRATED `786390de07ad031ead4de6185fdd4a7b4d8165fa` by conflict-free fast-forward from canonical Mac `4928607e19e202ab3c978b64c7ce20aff0962980`. Stone Selection now shows people selecting/testing rocks in discovery announcements, research cards, inspector and tree. The old pottery image came from the generic Craft & Industry field assignment; the discovery name and effects were already correct. Other generic illustrations are explicitly labeled FIELD ILLUSTRATION. Hidden subjects retain generic art.
+
+All **29 canonical focused tests pass**, zero errors/failures/skips/orphans (`/tmp/tt-discovery-art-canonical-tests.log`). Native capture-only verification passes Stone Selection and Clay Vessels at 1200 × 900 and 800 × 600, plus research card/tree captures. Artwork, visible labels, exact effects and dismissal controls were inspected; the probe exits. See `DISCOVERY_ART_HANDOFF.md` and `assets/ui/research/PROMPTS.md` for scope and built-in image-generation provenance.
+
+Normal standalone release target **2026.09.09.11** is packaged through `tools/launch_game_macos.py --build-only`; `build.ok` records its integrated source revision. Owned overrides removed. Player PID 74445 remains on 2026.09.09.9, untouched; the updated art requires a normal relaunch. Save schema, simulation effects and human/opponent mechanics are unchanged. This is a specific Stone Selection correction, not individual artwork for every discovery. Landscape iteration remains ACTIVE as recorded below.
+
 ## September 9 — landscape iteration 6: climate-driven seasonal cover
 
 INTEGRATED `80c79a2e9ffd940e62d356c8dd83b1869b5624ad` by conflict-free fast-forward from canonical Mac `d07dc6e01b3404ccc70ff40876bdd605ee69c39c`. Ground cover, scrub and woodland now change with the existing climate/calendar temperature. The hemispheres reverse; bare drylands and warm tropical cover retain their appropriate appearance. Material updates leave tree positions, counts, resources and meshes fixed. The HUD now shares food's ambient-temperature model, correcting its separate north-only seasonal calculation. Existing food/profile arithmetic and human/opponent rules are unchanged.
