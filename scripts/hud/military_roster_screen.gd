@@ -1,11 +1,19 @@
 extends CanvasLayer
-## A broad, visual service ledger over the existing world; no secondary map.
+## Visual service roster over the real world. All figures come from the existing reports.
+const Art=preload("res://scripts/hud/military_roster_visuals.gd")
+const Gauge=preload("res://scripts/hud/military_roster_gauge.gd")
+const TEXT:=Color("e9ede6")
+const MUTED:=Color("9eafb4")
+const GOOD:=Color("83bea1")
+const WARNING:=Color("e2a078")
 var service:String="army"
 var training_view:=false
 var panel:PanelContainer
 var body:VBoxContainer
 var policy_status:Label
 var policy_buttons:Dictionary={}
+var policy_cards:Dictionary={}
+var service_buttons:Dictionary={}
 var service_indicators:Dictionary={}
 var bindings:Array[Dictionary]=[]
 var rows_signature:=""
@@ -15,135 +23,250 @@ var selected_row:Dictionary={}
 var heading:Label
 var close_button:Button
 var management_button:Button
+var portraits:Node
+var hero_values:Dictionary={}
+var policy_shortcut:Button
+var policy_grid:GridContainer
+var roster_filter:="all"
+var summary_costs:Dictionary={}
+var layout_size:=Vector2.ZERO
+var roster_button:Button
+var training_button:Button
+var inspection_labels:Dictionary={}
+
 func _ready()->void:
-	layer=87
+	layer=87;portraits=Art.new();add_child(portraits)
 	panel=PanelContainer.new();add_child(panel)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	panel.anchor_left=.055;panel.anchor_right=.945;panel.anchor_top=.12;panel.anchor_bottom=.92
-	var skin:=StyleBoxFlat.new();skin.bg_color=Color("101b21");skin.border_color=Color("52666c");skin.set_border_width_all(1);skin.set_content_margin_all(18);skin.corner_radius_top_left=8;skin.corner_radius_top_right=8
-	panel.add_theme_stylebox_override("panel",skin);panel.add_theme_font_size_override("font_size",15)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);panel.add_child(column)
-	var header:=HBoxContainer.new();column.add_child(header)
-	heading=_label(header,"FORCES",23);heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	for domain in ["army","navy","air"]:
-		var selected_service:=String(domain)
-		_button(header,selected_service.capitalize(),func():service=selected_service;selected_row={};_build_body())
-	close_button=_button(header,"Close ×",queue_free);close_button.custom_minimum_size=Vector2(86,40)
-	var nav:=HBoxContainer.new();column.add_child(nav)
-	_button(nav,"Forces roster",func():training_view=false;selected_row={};_build_body())
-	_button(nav,"Training strategy",func():training_view=true;selected_row={};_build_body())
-	management_button=_button(nav,"Army builds",func():_management(1))
+	panel.add_theme_stylebox_override("panel",_skin(Color("0e1b22"),Color("3d545a"),18))
+	panel.add_theme_font_size_override("font_size",15)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",10);panel.add_child(column)
+	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",7);column.add_child(header)
+	heading=_label(header,"FORCES",22);heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	for domain:String in ["army","navy","air"]:
+		var choice:=domain
+		var button:=_button(header,{"army":"Army","navy":"Navy","air":"Air Force"}[domain],func():service=choice;selected_row={};roster_filter="all";scroll.scroll_vertical=0;_build_body())
+		button.icon=Art.symbol(domain,Art.COLORS[domain],22)
+		button.toggle_mode=true;service_buttons[domain]=button
+	close_button=_button(header,"×",queue_free);close_button.custom_minimum_size=Vector2(40,38);close_button.tooltip_text="Close · Escape or click the map"
+	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav)
+	roster_button=_button(nav,"Forces",func():training_view=false;selected_row={};_build_body());roster_button.toggle_mode=true
+	training_button=_button(nav,"Training strategy",func():training_view=true;selected_row={};_build_body());training_button.toggle_mode=true
+	management_button=_button(nav,"Recruit & equip",func():_management(1))
 	_button(nav,"Supply",func():_management(3))
-	var map_button:=_button(nav,"Command on map",func():
-		queue_free()
-		MilitaryCampaign.joint_operations.open_hierarchy(service))
-	map_button.tooltip_text="Close this overview and return to the actual world map. Navy and Air retain their distinct command controls."
+	var map_button:=_button(nav,"Command on map ↗",func():queue_free();MilitaryCampaign.joint_operations.open_hierarchy(service))
+	map_button.tooltip_text="Give objectives to this service on the world map. Leaders execute them."
 	scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
-	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",12);scroll.add_child(body)
-	_build_body()
+	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",8);scroll.add_child(body)
+	_layout();_build_body()
+
+func _skin(bg:Color,border:Color=Color.TRANSPARENT,margin:int=10)->StyleBoxFlat:
+	var style:=StyleBoxFlat.new();style.bg_color=bg;style.border_color=border;style.set_border_width_all(1)
+	style.set_corner_radius_all(7);style.set_content_margin_all(margin);return style
+
+func _layout()->void:
+	var view:=get_viewport().get_visible_rect().size
+	if view!=layout_size:
+		layout_size=view
+		var inset:=maxf(16,view.x*.045)
+		panel.position=Vector2(inset,64);panel.size=Vector2(view.x-inset*2,view.y-100)
+	if is_instance_valid(body):
+		var column:VBoxContainer=panel.get_child(0)
+		var content_height:=36.0+column.get_theme_constant("separation")*(column.get_child_count()-1)+body.get_combined_minimum_size().y
+		for child:Control in column.get_children():
+			if child!=scroll:content_height+=child.get_combined_minimum_size().y
+		panel.size.y=clampf(content_height+2,300,maxf(300,view.y-100))
+	if is_instance_valid(policy_grid):policy_grid.columns=4 if panel.size.x>=920 else 2
+
 func _management(sub:int)->void:
-	if service!="army":
-		queue_free();MilitaryCampaign.joint_operations.open_service(service);return
+	if service!="army":queue_free();MilitaryCampaign.joint_operations.open_service(service);return
 	var scene:=get_tree().current_scene
 	if scene!=null and "hud" in scene and scene.hud:scene.hud.open_dock("military",sub,false)
 	queue_free()
+
 func _input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
 		get_viewport().set_input_as_handled();queue_free()
 	elif event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and not panel.get_global_rect().has_point(event.position):
 		get_viewport().set_input_as_handled();queue_free()
+
 func _process(delta:float)->void:
-	timer+=delta
+	_layout();timer+=delta
 	if timer<.5:return
 	timer=0
 	if training_view:_update_policy();return
-	var rows:=_rows()
-	if _signature(rows)!=rows_signature:_build_body();return
-	for i in mini(rows.size(),bindings.size()):_update_row(bindings[i],rows[i])
-func _label(parent:Node,text:String,size:int=15)->Label:
-	var node:=Label.new();node.text=text;node.add_theme_font_size_override("font_size",size);parent.add_child(node);return node
+	var rows:=_rows();_update_hero(rows)
+	var visible:=_filtered(rows)
+	if _signature(visible)!=rows_signature:_build_body();return
+	for i in mini(visible.size(),bindings.size()):_update_row(bindings[i],visible[i])
+	for row:Dictionary in rows:
+		if row.id==selected_row.get("id",""):selected_row=row;_update_inspection();break
+
+func _label(parent:Node,text:String,size:int=15,color:Color=TEXT)->Label:
+	var node:=Label.new();node.text=text;node.add_theme_font_size_override("font_size",size);node.add_theme_color_override("font_color",color);parent.add_child(node);return node
+func _wrapped(parent:Node,text:String,size:int=14,color:Color=MUTED)->Label:
+	var node:=_label(parent,text,size,color);node.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;return node
 func _button(parent:Node,text:String,callback:Callable)->Button:
-	var node:=Button.new();node.text=text;node.pressed.connect(callback);parent.add_child(node);return node
-func _bar(parent:Node,color:Color)->ProgressBar:
-	var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size=Vector2(105,8);bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var fill:=StyleBoxFlat.new();fill.bg_color=color;bar.add_theme_stylebox_override("fill",fill)
-	var track:=StyleBoxFlat.new();track.bg_color=Color("35464b");bar.add_theme_stylebox_override("background",track);parent.add_child(bar);return bar
+	var node:=Button.new();node.text=text;node.custom_minimum_size.y=34;node.add_theme_font_size_override("font_size",14)
+	node.add_theme_color_override("font_color",TEXT);node.add_theme_color_override("font_pressed_color",Art.COLORS[service])
+	node.add_theme_stylebox_override("normal",_skin(Color("182a33"),Color("2b434c"),9))
+	node.add_theme_stylebox_override("hover",_skin(Color("28404a"),Color("708b8d"),9))
+	node.add_theme_stylebox_override("pressed",_skin(Color("293936"),Art.COLORS[service],9))
+	node.add_theme_stylebox_override("focus",_skin(Color.TRANSPARENT,Art.COLORS[service],9))
+	node.pressed.connect(callback);parent.add_child(node);return node
+func _bar(parent:Node,color:Color,mode:String="segments")->ProgressBar:
+	var bar:ProgressBar=Gauge.new();bar.ink=color;bar.mode=mode;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(bar);return bar
 func _clear()->void:
 	for child in body.get_children():body.remove_child(child);child.queue_free()
-	bindings.clear();policy_buttons.clear();service_indicators.clear()
+	bindings.clear();policy_buttons.clear();policy_cards.clear();service_indicators.clear();hero_values.clear();summary_costs.clear();inspection_labels.clear();policy_grid=null
+
 func _build_body()->void:
-	_clear();heading.text=service.to_upper()+" · "+("TRAINING STRATEGY" if training_view else "FORCES")
-	management_button.text="Army builds" if service=="army" else "Ports & shipbuilding" if service=="navy" else "Airbases & aircraft"
-	if training_view:_policy();return
-	var rows:=_rows();rows_signature=_signature(rows)
-	var intro:=HBoxContainer.new();body.add_child(intro)
-	var text:=_label(intro,"%d formations · Staff training: %s" % [rows.size(),MilitaryCampaign.training_staff.policy(service).label],16);text.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	_button(intro,"How much should we train?",func():training_view=true;_build_body())
-	if not selected_row.is_empty():_inspection()
+	var saved_scroll:=scroll.scroll_vertical
+	_clear();heading.text={"army":"ARMY","navy":"FLEET","air":"AIR FORCE"}[service]
+	management_button.text={"army":"Recruit & equip","navy":"Ports & ships","air":"Bases & aircraft"}[service]
+	for domain in service_buttons:
+		service_buttons[domain].set_pressed_no_signal(domain==service)
+		service_buttons[domain].add_theme_color_override("font_pressed_color",Art.COLORS[domain])
+		service_buttons[domain].add_theme_stylebox_override("pressed",_skin(Color("293936"),Art.COLORS[domain],9))
+	for button:Button in [roster_button,training_button]:
+		button.add_theme_color_override("font_pressed_color",Art.COLORS[service])
+		button.add_theme_stylebox_override("pressed",_skin(Color("293936"),Art.COLORS[service],9))
+	roster_button.set_pressed_no_signal(not training_view);training_button.set_pressed_no_signal(training_view)
+	var rows:=_rows();_hero(rows)
+	if training_view:_policy();scroll.set_deferred("scroll_vertical",saved_scroll);return
+	var filters:=HBoxContainer.new();filters.add_theme_constant_override("separation",6);body.add_child(filters)
+	for definition:Array in [["all","All forces"],["attention","Needs attention"],["training","In training"]]:
+		var choice:=String(definition[0]);var button:=_button(filters,String(definition[1]),func():roster_filter=choice;_build_body())
+		button.toggle_mode=true;button.set_pressed_no_signal(roster_filter==choice)
+	var visible:=_filtered(rows);rows_signature=_signature(visible)
 	if rows.is_empty():
-		_label(body,"No formations in this service yet.",19)
-		var note:=_label(body,"Set a training policy now. Staff apply it automatically as formations enter service.",15);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		return
-	var headers:=HBoxContainer.new();body.add_child(headers)
-	for title in ["UNIT / COMMAND","PERSONNEL","EQUIPMENT","SKILLS","STAFF ACTIVITY"]:
-		var label:=_label(headers,title,12);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_stretch_ratio=2.1 if title=="UNIT / COMMAND" else 1.0
-	for data:Dictionary in rows:
-		var row:=HBoxContainer.new();row.custom_minimum_size.y=70;row.add_theme_constant_override("separation",14);body.add_child(row)
-		var identity:=HBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.size_flags_stretch_ratio=2.1;row.add_child(identity)
-		var emblem:=_label(identity,String(data.glyph),30);emblem.custom_minimum_size.x=42;emblem.add_theme_color_override("font_color",Color("dfb967"))
-		var names:=VBoxContainer.new();names.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.add_child(names)
-		var chosen:=data.duplicate(true)
-		var name_button:=_button(names,String(data.name),func():selected_row=chosen;_build_body());name_button.alignment=HORIZONTAL_ALIGNMENT_LEFT;name_button.clip_text=true
-		var location:=_label(names,String(data.location),12);location.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		var binding:Dictionary={}
-		for key in ["personnel","equipment","skill","activity"]:
-			var cell:=VBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(cell)
-			binding[key]=_label(cell,"",14);binding[key].text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-			binding[key+"_bar"]=_bar(cell,Color("88b6ce") if key=="skill" else Color("88c5a6"))
-			binding[key+"_note"]=_label(cell,"",12);binding[key+"_note"].text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		bindings.append(binding);_update_row(binding,data)
+		var empty:=PanelContainer.new();empty.add_theme_stylebox_override("panel",_skin(Color("14252d")));body.add_child(empty)
+		var content:=VBoxContainer.new();content.add_theme_constant_override("separation",10);empty.add_child(content)
+		_label(content,{"army":"Build your first formation","navy":"Your fleet starts here","air":"Prepare your first air wing"}[service],21)
+		_wrapped(content,"Choose a training commitment now. Staff will prepare eligible units as they enter service.")
+		_button(content,"Set training strategy",func():training_view=true;_build_body())
+	elif visible.is_empty():_wrapped(body,"No forces match this filter.")
+	for data:Dictionary in visible:
+		_unit_card(data)
+		if data.id==selected_row.get("id",""):selected_row=data;_inspection()
+	scroll.set_deferred("scroll_vertical",saved_scroll)
+
+func _hero(rows:Array[Dictionary])->void:
+	var hero:=PanelContainer.new();hero.custom_minimum_size.y=76;hero.clip_contents=true
+	hero.add_theme_stylebox_override("panel",_skin(Color("17272d"),Color("354951"),0));body.add_child(hero)
+	var image:=TextureRect.new();image.texture=Art.artwork(service);image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE;hero.add_child(image)
+	var margin:=MarginContainer.new()
+	for edge:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,12)
+	hero.add_child(margin)
+	var summary:=HBoxContainer.new();summary.add_theme_constant_override("separation",22);margin.add_child(summary)
+	for definition:Array in [["formations",{"army":"FORMATIONS","navy":"TASK FORCES","air":"AIR WINGS"}[service]],["strength",{"army":"LISTED SOLDIERS","navy":"VESSELS","air":"AIRCRAFT"}[service]],["attention","NEED ATTENTION"]]:
+		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);summary.add_child(box)
+		hero_values[definition[0]]=_label(box,"0",24)
+		_label(box,definition[1],10,Color("c3ced1"))
+	var space:=Control.new();space.size_flags_horizontal=Control.SIZE_EXPAND_FILL;summary.add_child(space)
+	policy_shortcut=_button(summary,"",func():training_view=true;_build_body());policy_shortcut.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	_update_hero(rows)
+func _update_hero(rows:Array[Dictionary])->void:
+	if hero_values.is_empty():return
+	var strength:=0;var attention:=0;var unknown:=false
+	for row:Dictionary in rows:
+		strength+=int(row.count);attention+=int(_attention(row));unknown=unknown or bool(row.get("unknown",false))
+	hero_values.formations.text=str(rows.size());hero_values.strength.text=str(strength)+( "+" if unknown else "")
+	hero_values.strength.tooltip_text="Includes dated field reports; unreported strength is not guessed."
+	hero_values.attention.text=str(attention);hero_values.attention.add_theme_color_override("font_color",WARNING if attention else GOOD)
+	policy_shortcut.text="Training · %s ›" % MilitaryCampaign.training_staff.policy(service).label
+
+func _attention(data:Dictionary)->bool:
+	return bool(data.get("unknown",false)) or float(data.get("equipment",0))<.8 or float(data.get("condition",0))<.75 or "waiting" in String(data.get("activity","")).to_lower() or "paused" in String(data.get("activity","")).to_lower()
+func _filtered(rows:Array[Dictionary])->Array[Dictionary]:
+	if roster_filter=="attention":return rows.filter(_attention)
+	if roster_filter=="training":return rows.filter(func(data:Dictionary)->bool:return bool(data.get("in_training",false)))
+	return rows
 func _signature(rows:Array)->String:
 	var keys:Array=[]
-	for row:Dictionary in rows:keys.append([row.name,row.location])
+	for row:Dictionary in rows:keys.append([row.id,row.get("type_id",""),row.get("unknown",false)])
 	return str(keys)
+
+func _unit_card(data:Dictionary)->void:
+	var selected:bool=data.id==selected_row.get("id","")
+	var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",_skin(Color("182b32"),Art.COLORS[service] if selected else Color("2b444d"),7));body.add_child(card)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
+	var art:=PanelContainer.new();art.custom_minimum_size=Vector2(68,82);art.clip_contents=true
+	art.add_theme_stylebox_override("panel",_skin(Color("0e1d25"),Color("344c55"),0));row.add_child(art)
+	var portrait:TextureRect=portraits.portrait(String(data.get("type_id","")),service,bool(data.get("unknown",false)));art.add_child(portrait)
+	var names:=VBoxContainer.new();names.custom_minimum_size.x=118;names.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	names.size_flags_vertical=Control.SIZE_SHRINK_CENTER;names.add_theme_constant_override("separation",4);row.add_child(names)
+	var title:=_label(names,String(data.name),16);title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.tooltip_text=String(data.name)
+	var location:=_label(names,String(data.location),11,MUTED);location.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;location.tooltip_text=String(data.location)
+	var binding:Dictionary={"title":title,"location":location,"card":card,"portrait":portrait}
+	for key:String in ["personnel","equipment","skill"]:
+		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=84;cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		cell.add_theme_constant_override("separation",2);row.add_child(cell)
+		var heading_row:=HBoxContainer.new();cell.add_child(heading_row)
+		var icon:=TextureRect.new();icon.texture=Art.symbol({"personnel":"people","equipment":"equipment","skill":"skill"}[key],MUTED);icon.custom_minimum_size=Vector2(14,14);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;heading_row.add_child(icon)
+		_label(heading_row,{"personnel":"STRENGTH","equipment":"GEAR","skill":"DRILL"}[key],9,MUTED)
+		binding[key]=_label(cell,"",16)
+		binding[key+"_bar"]=_bar(cell,Art.COLORS[service] if key=="skill" else GOOD,{"personnel":"people","equipment":"segments","skill":"chevrons"}[key])
+		binding[key+"_bar"].marks=5
+		binding[key+"_note"]=_label(cell,"",10,MUTED);binding[key+"_note"].text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	var activity:=VBoxContainer.new();activity.custom_minimum_size.x=104;activity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;activity.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(activity)
+	binding.activity=_label(activity,"",12,Art.COLORS[service]);binding.activity.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	binding.activity_bar=_bar(activity,Art.COLORS[service]);binding.activity_bar.custom_minimum_size.x=70
+	binding.activity_note=_label(activity,"",10,MUTED);binding.activity_note.visible=false
+	var chosen:=data.duplicate(true)
+	var select:=func():selected_row={} if selected else chosen;_build_body()
+	var details:=_button(row,"⌃" if selected else "›",select);details.custom_minimum_size=Vector2(26,32);details.size_flags_vertical=Control.SIZE_SHRINK_CENTER;details.tooltip_text="Formation details"
+	card.mouse_filter=Control.MOUSE_FILTER_STOP
+	card.gui_input.connect(func(event:InputEvent):
+		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:card.accept_event();select.call())
+	bindings.append(binding);_update_row(binding,data)
+
 func _update_row(binding:Dictionary,data:Dictionary)->void:
+	binding.title.text=String(data.name);binding.location.text=String(data.location)
 	if bool(data.get("unknown",false)):
 		binding.personnel.text="%d reported" % int(data.count) if int(data.count)>0 else "Unreported"
-		binding.equipment.text="Not reported";binding.skill.text="Not reported";binding.activity.text="Awaiting report"
-		for key in ["personnel","equipment","skill","activity"]:binding[key+"_bar"].visible=false;binding[key+"_note"].text=""
+		binding.equipment.text="Not reported";binding.skill.text="Not reported";binding.activity.text="◌ Awaiting report"
+		for key:String in ["personnel","equipment","skill","activity"]:binding[key+"_bar"].visible=false;binding[key+"_note"].text=""
 		return
 	binding.personnel.text="%d / %d" % [data.count,data.authorized];binding.personnel_bar.value=float(data.count)/maxf(1,data.authorized)*100
+	binding.personnel_bar.marks=clampi(int(data.authorized),1,5)
 	binding.personnel_note.text="Condition %d%%" % roundi(data.condition*100)
-	binding.equipment.text="%d%% equipped" % roundi(data.equipment*100);binding.equipment_bar.value=data.equipment*100
-	binding.equipment_note.text=String(data.equipment_note)
-	binding.skill.text="Drill %d%%" % roundi(data.skill*100);binding.skill_bar.value=data.skill*100
+	binding.equipment.text="%d%%" % roundi(data.equipment*100);binding.equipment_bar.value=data.equipment*100
+	binding.equipment_bar.ink=WARNING if data.equipment<.8 else GOOD;binding.equipment.add_theme_color_override("font_color",WARNING if data.equipment<.8 else TEXT)
+	binding.equipment_note.text=String(data.equipment_note);binding.equipment_note.tooltip_text=String(data.equipment_note)
+	binding.skill.text="%d%%" % roundi(data.skill*100);binding.skill_bar.value=data.skill*100
 	binding.skill_note.text="Experience %d%%" % roundi(data.experience*100)
-	binding.activity.text=String(data.activity);binding.activity_bar.value=data.progress*100
-	binding.activity_note.text=String(data.training_note)
+	var activity:=String(data.activity)
+	if activity=="On duty / reserve":activity="Needs gear" if data.equipment<.8 else "Reserve"
+	binding.activity.text=("!  " if _attention(data) else "●  ")+activity;binding.activity_bar.value=data.progress*100
+	binding.activity_bar.visible=data.progress>0 and bool(data.get("in_training",false))
+	binding.activity_note.text=String(data.training_note);binding.activity.tooltip_text=String(data.activity)+"\n"+String(data.training_note)
+	binding.activity_note.visible=false
+	for key:String in ["personnel","equipment","skill"]:binding[key+"_bar"].queue_redraw()
 func _rows()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	var campaign=MilitaryCampaign
 	if service=="army":
-		var forces:Array=[{"force":campaign.home_army,"location":"Home reserve"}]
+		var forces:Array=[{"force":campaign.home_army,"location":"Home reserve","key":"home"}]
 		var snapshot:Dictionary=campaign.field_armies_snapshot()
 		for army:Dictionary in snapshot.get("armies",[]):
 			var home:bool=String(army.get("location_id",""))=="player_home" and army.get("status","")=="stationed"
 			var report:Dictionary=army.get("last_report",{})
 			if not home and not bool(snapshot.get("live_reports",false)):
 				if report.get("formations",[]).is_empty():
-					result.append({"name":String(army.get("name","Field army")),"glyph":"⚑","location":"Awaiting formation report","count":int(report.get("troops",0)),"unknown":true});continue
-				forces.append({"force":report,"location":"%s · report %dd old" % [army.get("name","Field army"),maxi(0,int(GameState.elapsed_days)-int(report.get("day",0)))]})
-			else:forces.append({"force":army,"location":army.get("name","Field army")})
-		for occupation:Dictionary in campaign.occupation_forces:forces.append({"force":occupation,"location":"Occupation garrison"})
+					result.append({"id":"field:%s" % army.get("army_id",army.get("id",0)),"type_id":"","name":String(army.get("name","Field army")),"glyph":"⚑","location":"Awaiting formation report","count":int(report.get("troops",0)),"unknown":true});continue
+				forces.append({"force":report,"key":"field:%s" % army.get("army_id",army.get("id",0)),"location":"%s · report %dd old" % [army.get("name","Field army"),maxi(0,int(GameState.elapsed_days)-int(report.get("day",0)))]})
+			else:forces.append({"force":army,"key":"field:%s" % army.get("army_id",army.get("id",0)),"location":army.get("name","Field army")})
+		for occupation:Dictionary in campaign.occupation_forces:forces.append({"force":occupation,"key":"garrison:%s" % campaign.occupation_forces.find(occupation),"location":"Occupation garrison"})
 		for group:Dictionary in forces:
 			for unit:Dictionary in group.force.get("formations",[]):
 				var count:=int(unit.get("count",0));var attending:=int(unit.get("training_attending",0)) if not "report" in String(group.location) else 0
 				var type_id:=String(unit.get("unit","levy"))
 				var glyph:="♞" if type_id in ["cavalry","horse_archer","mounted_archer"] else "➶" if String(unit.get("weapon",""))=="bow" else "⚔"
-				result.append({"name":campaign.UnitCatalog.archetype(type_id).get("label",type_id),"glyph":glyph,"location":group.location,"count":count,"authorized":int(unit.get("authorized_count",count)),"condition":float(unit.get("personnel_condition",1)),"equipment":float(unit.get("equipment",0))/maxf(1,unit.get("equipment_required",count)),"equipment_note":"Ammo %d / %d" % [unit.get("ammunition",0),unit.get("ammunition_required",0)],"skill":float(unit.get("training",0)),"experience":float(unit.get("experience",0)),"activity":"Staff training" if attending>0 else "On duty / reserve","progress":float(campaign.training_program.get("progress_days",0))/maxf(1,campaign.training_program.get("duration_days",1)) if attending>0 else 0.0,"training_note":"%d soldiers rotating" % attending if attending>0 else "Policy: "+String(campaign.training_staff.policy(service).label)})
+				result.append({"id":"%s:%s" % [group.key,unit.get("id",group.force.get("formations",[]).find(unit))],"type_id":type_id,"purpose":campaign.UnitCatalog.archetype(type_id).get("purpose",""),"weapon":String(unit.get("weapon","")),"name":campaign.UnitCatalog.archetype(type_id).get("label",type_id),"glyph":glyph,"location":group.location,"count":count,"authorized":int(unit.get("authorized_count",count)),"condition":float(unit.get("personnel_condition",1)),"equipment":float(unit.get("equipment",0))/maxf(1,unit.get("equipment_required",count)),"equipment_note":("Ammo %d / %d" % [unit.get("ammunition",0),unit.get("ammunition_required",0)] if int(unit.get("ammunition_required",0))>0 else "No ammo needed"),"skill":float(unit.get("training",0)),"experience":float(unit.get("experience",0)),"in_training":attending>0,"activity":"Staff training" if attending>0 else "On duty / reserve","progress":float(campaign.training_program.get("progress_days",0))/maxf(1,campaign.training_program.get("duration_days",1)) if attending>0 else 0.0,"training_note":"%d soldiers rotating" % attending if attending>0 else "Policy: "+String(campaign.training_staff.policy(service).label)})
 		for trainee:Dictionary in campaign.training_queue:
 			var count:=int(trainee.get("count",0));var days:=float(trainee.get("required_days",1));var progress:=float(trainee.get("progress_days",0))
-			result.append({"name":campaign.UnitCatalog.archetype(String(trainee.get("unit","levy"))).get("label","Recruits"),"glyph":"◇","location":"Initial instruction","count":count,"authorized":int(trainee.get("initial_count",count)),"condition":float(trainee.get("personnel_condition",1)),"equipment":float(trainee.get("equipment_access_today",0)),"equipment_note":"Training equipment access","skill":0.0,"experience":float(trainee.get("experience",0)),"activity":"Initial training","progress":progress/maxf(1,days),"training_note":"%.0f / %.0f instruction days" % [progress,days]})
+			result.append({"id":"recruit:%s" % trainee.get("id",campaign.training_queue.find(trainee)),"type_id":String(trainee.get("unit","levy")),"name":campaign.UnitCatalog.archetype(String(trainee.get("unit","levy"))).get("label","Recruits"),"glyph":"◇","location":"Initial instruction","count":count,"authorized":int(trainee.get("initial_count",count)),"condition":float(trainee.get("personnel_condition",1)),"equipment":float(trainee.get("equipment_access_today",0)),"equipment_note":"Training equipment access","skill":0.0,"experience":float(trainee.get("experience",0)),"in_training":true,"activity":"Initial training","progress":progress/maxf(1,days),"training_note":"%.0f / %.0f instruction days" % [progress,days]})
 	else:
 		var op=campaign.joint_operations
 		for unit:Dictionary in op.state.forces:
@@ -156,53 +279,80 @@ func _rows()->Array[Dictionary]:
 			var activity:=staff_status if exercising else String(unit.status)
 			var note:=String(unit.status) if exercising else staff_status
 			if note==activity or note=="":note="Policy: "+String(campaign.training_staff.policy(service).label)
-			result.append({"name":unit.name,"glyph":"⚓" if service=="navy" else "✈","location":op.base(int(unit.base_id)).get("name","Base unavailable"),"count":op.hardware(unit),"authorized":authorized,"condition":float(unit.condition),"equipment":float(op.hardware(unit))/maxf(1,authorized),"equipment_note":"%d crew" % op.crew(unit),"skill":float(unit.get("proficiency",.45 if float(unit.training)>=1 else 0)),"experience":float(unit.experience),"activity":activity,"progress":float(unit.training),"training_note":note})
+			var type_id:="";var largest:=0
+			for kind:String in unit.units:
+				if int(unit.units[kind])>largest:type_id=kind;largest=int(unit.units[kind])
+			result.append({"id":"%s:%s" % [service,unit.id],"type_id":type_id,"purpose":String(op.C.UNITS.get(type_id,{}).get("purpose","")),"name":unit.name,"glyph":"⚓" if service=="navy" else "✈","location":op.base(int(unit.base_id)).get("name","Base unavailable"),"count":op.hardware(unit),"authorized":authorized,"condition":float(unit.condition),"equipment":float(op.hardware(unit))/maxf(1,authorized),"equipment_note":"%d crew" % op.crew(unit),"skill":float(unit.get("proficiency",.45 if float(unit.training)>=1 else 0)),"experience":float(unit.experience),"in_training":staff_report.group=="training","activity":activity,"progress":float(unit.training) if float(unit.training)<1.0 else 0.0,"training_note":note})
 	return result
 func _inspection()->void:
-	var box:=HBoxContainer.new();body.add_child(box)
-	_label(box,String(selected_row.glyph),48)
-	var details:=VBoxContainer.new();details.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_child(details)
-	_label(details,String(selected_row.name),21)
+	var panel_detail:=PanelContainer.new();panel_detail.add_theme_stylebox_override("panel",_skin(Color("11242c"),Color("43616a"),16));body.add_child(panel_detail)
+	var layout:=VBoxContainer.new();layout.add_theme_constant_override("separation",9);panel_detail.add_child(layout)
+	_label(layout,{"army":"FORMATION BRIEF","navy":"TASK FORCE BRIEF","air":"AIR WING BRIEF"}[service],11,Art.COLORS[service])
+	inspection_labels.name=_label(layout,String(selected_row.name),21)
 	if bool(selected_row.get("unknown",false)):
-		_label(details,"Awaiting a dated report of this army’s formations and equipment.",14);return
-	_label(details,"Drill %d%%   ·   Experience %d%%   ·   Condition %d%%" % [selected_row.skill*100,selected_row.experience*100,selected_row.condition*100])
-	var note:=_label(details,"Service staff choose exercises under your standing policy. New recruits attend full-time instruction.",14);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	_button(box,"Training policy",func():training_view=true;selected_row={};_build_body())
+		_wrapped(layout,"Awaiting a dated report of this army’s formations and equipment.");return
+	inspection_labels.purpose=_wrapped(layout,String(selected_row.get("purpose","Service staff prepare this force under your standing policy.")),15,TEXT)
+	inspection_labels.skills=_label(layout,"",14,Art.COLORS[service])
+	inspection_labels.activity=_wrapped(layout,"",14)
+	var buttons:=HFlowContainer.new();layout.add_child(buttons)
+	_button(buttons,"Adjust training commitment",func():training_view=true;selected_row={};_build_body())
+	_button(buttons,"Command on map ↗",func():queue_free();MilitaryCampaign.joint_operations.open_hierarchy(service))
+	_update_inspection()
+func _update_inspection()->void:
+	if inspection_labels.is_empty() or selected_row.is_empty():return
+	inspection_labels.name.text=String(selected_row.name)
+	if bool(selected_row.get("unknown",false)):return
+	inspection_labels.skills.text="Drill %d%%  ·  Experience %d%%  ·  Condition %d%%" % [selected_row.skill*100,selected_row.experience*100,selected_row.condition*100]
+	inspection_labels.activity.text=String(selected_row.activity)+". "+String(selected_row.training_note)
+
 func _policy()->void:
-	_label(body,"HOW MUCH SHOULD WE TRAIN?",24)
-	var note:=_label(body,"You set the commitment. Staff select units, organize exercises and stop for shortages or emergencies.",15);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	var grid:=GridContainer.new();grid.columns=4;grid.add_theme_constant_override("h_separation",12);body.add_child(grid)
+	_label(body,"How much should we train?",23)
+	_wrapped(body,"Choose the commitment. Service staff rotate units, run exercises and pause for shortages or emergencies.")
+	policy_grid=GridContainer.new();policy_grid.columns=4 if panel.size.x>=920 else 2
+	policy_grid.add_theme_constant_override("h_separation",10);policy_grid.add_theme_constant_override("v_separation",10);body.add_child(policy_grid)
 	for id:String in MilitaryCampaign.training_staff.POLICIES:
 		var definition:Dictionary=MilitaryCampaign.training_staff.POLICIES[id]
-		var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_constant_override("separation",10);grid.add_child(card)
+		var outer:=PanelContainer.new();outer.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		outer.add_theme_stylebox_override("panel",_skin(Color("172b33"),Color("314950"),12));policy_grid.add_child(outer);policy_cards[id]=outer
+		var card:=VBoxContainer.new();card.add_theme_constant_override("separation",9);outer.add_child(card)
 		var choice:=id
-		var button:=_button(card,String(definition.label),func():MilitaryCampaign.training_staff.set_policy(service,choice);_update_policy());button.toggle_mode=true;button.custom_minimum_size.y=44;policy_buttons[id]=button
-		_label(card,"%d%% rotating" % roundi(float(definition.share)*100),20)
-		var bar:=_bar(card,Color("dfb967"));bar.value=float(definition.share)*100
-		_label(card,"Drill target: %d%%" % roundi(float(definition.target)*100),14)
-		var description:=_label(card,String(definition.description),13);description.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;description.custom_minimum_size.x=135
+		var button:=_button(card,String(definition.label),func():MilitaryCampaign.training_staff.set_policy(service,choice);_update_policy())
+		button.toggle_mode=true;button.custom_minimum_size.y=38;policy_buttons[id]=button
+		var icons:ProgressBar=_bar(card,Art.COLORS[service],"people");icons.marks=20;icons.value=float(definition.share)*100;icons.custom_minimum_size.y=26
+		_label(card,"%d%% rotate" % roundi(float(definition.share)*100),23)
+		_label(card,"Target drill  %d%%" % roundi(float(definition.target)*100),13,Art.COLORS[service])
+		var skill:=_bar(card,Art.COLORS[service],"chevrons");skill.value=float(definition.target)*100
+		var description:=_wrapped(card,String(definition.description),12);description.custom_minimum_size.x=140
+		var effort:=_label(card,{"suspended":"CONSERVE STORES","maintain":"LOW COMMITMENT","regular":"SUSTAINED COMMITMENT","intensive":"HIGH COMMITMENT"}[id],10,MUTED)
+		effort.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	if service!="army":
-		var overview:=GridContainer.new();overview.columns=4;overview.add_theme_constant_override("h_separation",12);body.add_child(overview)
-		for definition in [["training","TRAINING","88c5a6"],["assigned","ON ASSIGNMENT","88b6ce"],["target","TARGET MET","dfb967"],["paused","PAUSED","dc9a7e"]]:
+		var overview:=GridContainer.new();overview.columns=4;overview.add_theme_constant_override("h_separation",10);body.add_child(overview)
+		for definition:Array in [["training","TRAINING","88c5a6"],["assigned","ASSIGNED","88b6ce"],["target","TARGET MET","dfb967"],["paused","PAUSED","dc9a7e"]]:
 			var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(card)
-			var value:=_label(card,"0",28);value.add_theme_color_override("font_color",Color(definition[2]))
-			_label(card,String(definition[1]),12)
-			var bar:=_bar(card,Color(definition[2]))
-			service_indicators[definition[0]]={"value":value,"bar":bar,"card":card}
-		var report_note:=_label(body,"Counts are task forces or air wings. Staff apply policy changes at their next daily review.",12);report_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	policy_status=_label(body,"",16);policy_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	_label(body,"TRAINING INVESTMENT",17)
-	var costs:=_label(body,"Initial instruction: at least 45 effective days for land forces; naval and air crews require at least 90 effective days of full-time instruction. Army exercises run 72–252 effective days. Higher commitments consume more food, training materials and fuel, and leave fewer personnel on immediate duty.",14);costs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	var protection:=_label(body,"Staff protect a seven-day civilian food reserve. Shortages pause progress; repeated orders never accelerate it.",14);protection.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			var value:=_label(card,"0",27,Color(definition[2]));_label(card,String(definition[1]),10,MUTED)
+			var bar:=_bar(card,Color(definition[2]));service_indicators[definition[0]]={"value":value,"bar":bar,"card":card}
+		_wrapped(body,"Counts are task forces or wings. Staff review policy each day.",12)
+	policy_status=_wrapped(body,"",14,TEXT)
+	var investment:=HFlowContainer.new();investment.add_theme_constant_override("h_separation",16);body.add_child(investment)
+	for definition:Array in [["food","EXTRA RATIONS USED","supply"],["materials","TRAINING MATERIALS USED","equipment"],["time","INITIAL INSTRUCTION","calendar"]]:
+		var box:=PanelContainer.new();box.add_theme_stylebox_override("panel",_skin(Color("17282f")));box.custom_minimum_size.x=180;investment.add_child(box)
+		var content:=HBoxContainer.new();content.add_theme_constant_override("separation",9);box.add_child(content)
+		var icon:=TextureRect.new();icon.texture=Art.symbol(definition[2],Art.COLORS[service]);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.custom_minimum_size=Vector2(30,30);content.add_child(icon)
+		var text:=VBoxContainer.new();content.add_child(text);summary_costs[definition[0]]=_label(text,"",21);_label(text,definition[1],10,MUTED)
+	_wrapped(body,"Instruction takes effective training days; shortages pause progress. Army exercises take 72–252 effective days. Staff protect seven days of civilian food.",12)
 	_update_policy()
 func _update_policy()->void:
 	var state:Dictionary=MilitaryCampaign.training_staff.snapshot(service)
-	for id in policy_buttons:policy_buttons[id].set_pressed_no_signal(id==state.id)
+	_update_hero(_rows())
+	for id in policy_buttons:
+		policy_buttons[id].set_pressed_no_signal(id==state.id)
+		policy_cards[id].add_theme_stylebox_override("panel",_skin(Color("223632") if id==state.id else Color("172b33"),Art.COLORS[service] if id==state.id else Color("314950"),12))
 	for group in service_indicators:
 		var indicator:Dictionary=service_indicators[group]
 		indicator.value.text=str(state.groups[group]);indicator.bar.value=float(state.groups[group])/maxf(1,state.forces)*100
-		var tips:Dictionary={"training":"Crews in initial instruction or training rotations; other qualified crews may still operate.","assigned":"Forces committed to missions or travel without a training rotation.","target":"Crews at home whose proficiency meets the selected training target.","paused":String(state.get("pause_details","No paused training."))}
-		indicator.card.tooltip_text=tips[group]
-		indicator.value.tooltip_text=tips[group];indicator.bar.tooltip_text=tips[group]
-	policy_status.text=String(state.status)+"\nTraining spent to date: %.1f extra rations · %.1f base materials" % [state.food_spent,state.materials_spent]
-	if service=="army" and not state.active.is_empty():policy_status.text+="\n%s · %.0f / %.0f effective days · %.1f extra rations used" % [state.active.label,state.active.progress_days,state.active.duration_days,state.active.food_consumed_total]
+		var tips:Dictionary={"training":"Crews in instruction or training rotations; other qualified crews may still operate.","assigned":"Forces committed to missions or travel without a training rotation.","target":"Crews at home whose proficiency meets the selected target.","paused":String(state.get("pause_details","No paused training."))}
+		indicator.card.tooltip_text=tips[group];indicator.value.tooltip_text=tips[group];indicator.bar.tooltip_text=tips[group]
+	policy_status.text=String(state.status)
+	if service=="army" and not state.active.is_empty():policy_status.text+="\n%s · %.0f / %.0f effective days" % [state.active.label,state.active.progress_days,state.active.duration_days]
+	summary_costs.food.text="%.1f" % state.food_spent;summary_costs.materials.text="%.1f" % state.materials_spent
+	summary_costs.time.text="45+ days" if service=="army" else "90+ days"

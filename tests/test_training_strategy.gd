@@ -311,6 +311,18 @@ func test_roster_keeps_operational_activity_and_repair_shortages_visible()->void
 	assert_str(String(screen._rows()[0].activity)).is_equal("Under way")
 	assert_str(String(screen._rows()[0].training_note)).contains("return to home base")
 
+func test_roster_training_filter_includes_qualified_exercises_without_fake_course_progress()->void:
+	for domain:String in ["navy","air"]:
+		var unit:=_craft(domain);unit.training=1.0;unit.proficiency=.2
+		op.advance(int(op.state.last_day)+1)
+		var screen:CanvasLayer=auto_free(Roster.new());screen.service=domain;screen.roster_filter="training";add_child(screen)
+		assert_int(screen.bindings.size()).is_equal(1)
+		assert_bool(screen._rows()[0].in_training).is_true()
+		assert_bool(screen.bindings[0].activity_bar.visible).is_false()
+		MilitaryCampaign.training_staff.set_policy(domain,"suspended")
+		op.advance(int(op.state.last_day)+1);screen._process(.6)
+		assert_int(screen.bindings.size()).is_equal(0)
+
 func _additional_service_force(original:Dictionary)->Dictionary:
 	var type_id:String=original.units.keys()[0]
 	MilitaryCampaign.military_inventory[op.C.UNITS[type_id].equipment]=2
