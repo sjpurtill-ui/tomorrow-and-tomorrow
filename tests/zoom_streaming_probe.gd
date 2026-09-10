@@ -1,4 +1,5 @@
 extends Node
+const LOD:=preload("res://scripts/terrain_lod.gd")
 var terrain:Node
 var results:Array=[]
 var label:="baseline"
@@ -40,14 +41,15 @@ func _ready()->void:
 				await get_tree().process_frame
 				var now:=Time.get_ticks_usec()
 				frames.append(float(now-last_frame)/1000.0); last_frame=now
-				var desired:=clampf(float(step.size)*2.9/clampf(sin(absf(terrain.camera_pitch)),0.42,1.0),1.2,920.0)
+				var view_size:=get_viewport().get_visible_rect().size
+				var desired:=LOD.view_span(float(step.size),view_size.x/maxf(1.0,view_size.y),terrain.camera_pitch)
 				var center:Vector2=Vector2(terrain.camera_target.x,terrain.camera_target.z)
 				var covered:=_view_is_covered()
 				if not covered and not terrain.province_terrain_mesh.visible: uncovered+=1
 				if covered and first_coverage<0: first_coverage=Time.get_ticks_msec()-started
-				var bucket:=clampf(pow(1.5,ceil(log(maxf(0.9,desired))/log(1.5))),0.9,920.0)
+				var bucket:=LOD.bucket(desired)
 				var installed_resolution:Variant=terrain.get("regional_patch_resolution")
-				var full_detail:=installed_resolution==null or int(installed_resolution)>33
+				var full_detail:=installed_resolution!=null and int(installed_resolution)==LOD.resolution_for(bucket)
 				if terrain.terrain_patch_job==null and covered and full_detail and is_equal_approx(terrain.regional_patch_span,bucket) and first_ready<0: first_ready=Time.get_ticks_msec()-started
 				if frame==8 and population==120:
 					await _capture("transition-"+str(step.size))

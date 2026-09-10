@@ -70,7 +70,8 @@ void fragment() {
 	// it becomes a flickering white coastline at distant map scales.
 	float wash = (1.0-smoothstep(0.0003,0.0015,depth))*surveyed_surface*ripple_detail;
 	water = mix(water,vec3(0.39,0.43,0.38),wash*0.24);
-	ALBEDO = mix(vec3(0.004,0.010,0.013),water,visible);
+	ALBEDO = water*visible;
+	EMISSION = vec3(0.006,0.012,0.014)*(1.0-visible);
 	NORMAL_MAP = vec3(normal_wave*visible,1.0)*0.5+0.5;
 	ROUGHNESS = 0.44;
 	SPECULAR = 0.18*visible;

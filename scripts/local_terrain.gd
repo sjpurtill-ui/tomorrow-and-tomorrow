@@ -110,6 +110,7 @@ var terrain_patch_cancellations:=0
 var terrain_patch_last_slice_usec:int=0
 var terrain_patch_last_commit_usec:int=0
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
+const TERRAIN_LOD:=preload("res://scripts/terrain_lod.gd")
 var dragging := false
 var rotating_camera := false
 var grid_x := 80
@@ -1689,10 +1690,9 @@ func _build_terrain() -> void:
 func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	if not SEAMLESS_WORLD: return
 	# Stable geometric buckets avoid rebuilding for each interpolated zoom frame.
-	span=clampf(pow(1.5,ceil(log(maxf(0.9,span))/log(1.5))),0.9,920.0)
-	var snap_step:=maxf(0.04,span/12.0)
-	var snapped:=Vector2(round(center.x/snap_step)*snap_step,round(center.y/snap_step)*snap_step)
-	var resolution:=385 if span<=14.0 else (257 if span<=32.0 else (201 if span<=110.0 else 161))
+	span=TERRAIN_LOD.bucket(span)
+	var snapped:=TERRAIN_LOD.center_for(center,span)
+	var resolution:=TERRAIN_LOD.resolution_for(span)
 	if terrain_patch_job!=null:
 		if terrain_patch_job.center==snapped and is_equal_approx(terrain_patch_job.span,span): return
 		# Latest view wins. Do not finish/upload a mesh for a camera already gone.
@@ -1704,9 +1704,9 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 			_install_regional_patch(cached)
 			return
 	# A geographic low-density pass fills the current view first. It uses the same
-	# height/color authorities and is replaced by the original full-density mesh.
+	# height/color authorities and is replaced by the final full-density mesh.
 	var same_patch:=regional_terrain_patch!=null and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span)
-	var next_resolution:=resolution if same_patch else 33
+	var next_resolution:=TERRAIN_LOD.next_resolution(span,regional_patch_resolution if same_patch else 0)
 	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at)
 
 func _advance_terrain_patch()->void:
@@ -1717,9 +1717,7 @@ func _advance_terrain_patch()->void:
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
 	terrain_patch_job=null
 	_install_regional_patch(completed)
-	if int(completed.resolution)>33:
-		terrain_patch_cache.push_front(completed)
-		if terrain_patch_cache.size()>4: terrain_patch_cache.pop_back()
+	TERRAIN_LOD.retain(terrain_patch_cache,completed)
 	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
 
 func _install_regional_patch(completed:Dictionary)->void:
@@ -1891,6 +1889,9 @@ void vertex() {
 }
 
 void fragment() {
+	// A continental patch can straddle the finite planet map. Never extrapolate
+	// procedural land beyond the playable geography. Legacy custom meshes lack UV fields.
+	if (UV.x>=0.999 && (abs(world_position.x)>fog_world_size.x*0.5 || abs(world_position.z)>fog_world_size.y*0.5)) { discard; }
 	if (streamed_cutout.w > 0.5 && abs(world_position.x-streamed_cutout.x)<streamed_cutout.z*0.5 && abs(world_position.z-streamed_cutout.y)<streamed_cutout.z*0.5) { discard; }
 	float broad = organic_noise(world_position.xz * 0.052);
 	float regional = organic_noise(world_position.xz * 0.17 + vec2(17.0, -9.0));
@@ -2032,8 +2033,11 @@ void fragment() {
 	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float discovered=max(texture(discovery_mask,fog_uv).r,current_visibility);
 	vec3 unknown_ground=vec3(0.006,0.012,0.014);
-	earth=mix(unknown_ground,earth,smoothstep(0.06,0.62,discovered));
-	ALBEDO = earth;
+	float reveal=smoothstep(0.06,0.62,discovered);
+	// Unexplored land and water share one unlit veil. Normals must not reveal
+	// unseen mountain ranges or coastlines as geometric detail improves.
+	ALBEDO = earth*reveal;
+	EMISSION = unknown_ground*(1.0-reveal);
 	ROUGHNESS = 0.96;
 }
 """
@@ -3084,10 +3088,10 @@ func _update_scale_lod() -> void:
 		# Keep geographic coverage outside the streamed mesh during pan/zoom. The
 		# coarse shader cuts out only the installed patch to avoid coplanar seams.
 		province_terrain_mesh.visible = true
-		var cutout:=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,1.0) if regional_terrain_patch!=null and camera.size<=820.0 else Vector4.ZERO
+		var cutout:=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,1.0) if regional_terrain_patch!=null else Vector4.ZERO
 		(province_terrain_mesh.material_override as ShaderMaterial).set_shader_parameter("streamed_cutout",cutout)
 	if regional_terrain_patch:
-		regional_terrain_patch.visible = camera.size<=820.0
+		regional_terrain_patch.visible = true
 	# At country and continental footprints the coarse world mesh cannot drape a
 	# hundred-metre ribbon without gaps or z artifacts. Drainage remains in the
 	# albedo and relief; explicit water geometry enters with the regional mesh.
@@ -3282,13 +3286,13 @@ func _update_convoy_marker_animation() -> void:
 		settler_map_ring.scale*=1.0+wave*0.07
 
 func _update_world_streaming() -> void:
-	if not SEAMLESS_WORLD or camera==null or camera.size>760.0:
+	if not SEAMLESS_WORLD or camera==null:
 		return
 	# An oblique orthographic frustum covers much more ground in its forward axis
 	# than camera.size alone suggests. Expand the streamed patch with tilt so the
 	# high-resolution terrain never ends inside the visible frame.
-	var tilt_coverage:=1.0/clampf(sin(absf(camera_pitch)),0.42,1.0)
-	var desired_span:=clampf(camera.size*2.9*tilt_coverage,1.2,920.0)
+	var view_size:=get_viewport().get_visible_rect().size
+	var desired_span:=TERRAIN_LOD.view_span(camera.size,view_size.x/maxf(1.0,view_size.y),camera_pitch)
 	_rebuild_regional_terrain_patch(Vector2(camera_target.x,camera_target.z),desired_span)
 
 func _process_camera_navigation(delta: float) -> void:
