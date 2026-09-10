@@ -1,3 +1,11 @@
+## September 10 — mature-campaign performance
+
+INTEGRATED `84dcddb8b95e53aed1527dd74d407182f1f8dd45` by conflict-free fast-forward from canonical Mac `418869c8e7a1efe362c0c878f1c705c223c428cd`. Daily city/observer history copies and unchanged secondary building/resource mesh rebuilds are removed. Climate, geography, claim shape and social presentation caches retain live simulation rules. The ordinary calendar counts monotonic wall time rather than capped frame delta; save payloads omit repeated catalogue definitions and safely retain state after a UI node is freed.
+
+All **60 canonical regression cases pass**, zero errors/failures/skips/orphans (`/tmp/tt-year20-canonical-tests.log`). A private copy of the actual day-6531 campaign with 12 opponents falls from roughly 0.87–1.11 seconds to 0.30–0.31 seconds of ordinary daily CPU. The standalone test measures **2.998 days/second headless and 2.887 with the map rendered** at the 3 days/second setting. The map capture was inspected and the owned probe exited. This does not promise a steady 3 days/second or smooth frame rate: synchronous daily work still stalls frames. All 13 civilizations' compared outcomes match apart from ten negligible cohort rounding differences (maximum about 1.4e-14); exact save round-trip passes, with a 62.7 MB save. No actor, turn, population or resource simulation was skipped. See `YEAR20_PERFORMANCE_HANDOFF.md`.
+
+No player/editor was interrupted or relaunched. Release target **2026.09.10.1** awaits the normal build-only packaging step after the companion leader-decision change. The separate subject-art worktree remains unfinished and is not part of this delivery.
+
 ## September 9 — Stone Selection artwork correction
 
 INTEGRATED `786390de07ad031ead4de6185fdd4a7b4d8165fa` by conflict-free fast-forward from canonical Mac `4928607e19e202ab3c978b64c7ce20aff0962980`. Stone Selection now shows people selecting/testing rocks in discovery announcements, research cards, inspector and tree. The old pottery image came from the generic Craft & Industry field assignment; the discovery name and effects were already correct. Other generic illustrations are explicitly labeled FIELD ILLUSTRATION. Hidden subjects retain generic art.
