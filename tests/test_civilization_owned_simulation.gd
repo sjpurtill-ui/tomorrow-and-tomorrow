@@ -78,6 +78,9 @@ func _equivalent(a:Variant,b:Variant)->bool:
 func test_new_world_uses_paid_founding_and_real_city_register()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(9241)
+	# Match the normal new-world entry point: the complete save also captures
+	# player military state, including any previous test's sample bases.
+	MilitaryCampaign.reset_for_new_world()
 	CivilizationSystem.reset_for_new_world()
 	# A two-seat fixture uses the normal creation and controller path.
 	CivilizationSystem.civilizations.assign(CivilizationSystem.civilizations.slice(0,2))
