@@ -1707,7 +1707,7 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	# height/color authorities and is replaced by the original full-density mesh.
 	var same_patch:=regional_terrain_patch!=null and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span)
 	var next_resolution:=resolution if same_patch else 33
-	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at)
+	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at)
 
 func _advance_terrain_patch()->void:
 	if terrain_patch_job==null: return
@@ -1838,7 +1838,6 @@ render_mode diffuse_burley, specular_disabled;
 
 uniform sampler2D ground_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D forest_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D regional_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size = vec2(40075.0, 20004.0);
 uniform vec2 fog_current_origin = vec2(0.0);
@@ -1851,9 +1850,13 @@ uniform vec4 streamed_cutout = vec4(0.0);
 varying vec3 world_normal;
 
 float hash21(vec2 p) {
-	p = fract(p * vec2(123.34, 345.45));
-	p += dot(p, p + 34.345);
-	return fract(p.x * p.y);
+	// Integer cell hashing avoids loss of fractional precision near the far
+	// sides of a 40,075 km world. Floating multiply/fract made distant soil band.
+	uvec2 cell=uvec2(ivec2(p));
+	uint h=(cell.x*1597334677u)^(cell.y*3812015801u);
+	h=(h^(h>>16u))*2246822519u;
+	h=(h^(h>>13u))*3266489917u;
+	return float(h^(h>>16u))/4294967295.0;
 }
 
 float value_noise(vec2 p) {
@@ -1880,6 +1883,8 @@ float organic_noise(vec2 p) {
 	return fbm(p + (warp - vec2(0.5)) * 2.15);
 }
 
+#include "res://scripts/ground_surface.gdshaderinc"
+
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
@@ -1899,13 +1904,8 @@ void fragment() {
 	float regional_detail = 1.0 - smoothstep(0.050, 0.55, pixel_world);
 	float local_detail = 1.0 - smoothstep(0.008, 0.075, pixel_world);
 	float close_detail = 1.0 - smoothstep(0.0009, 0.008, pixel_world);
-	vec2 country_uv = world_position.xz * 0.00072;
-	vec2 country_uv_rotated = vec2(-country_uv.y, country_uv.x) * 1.19 + vec2(0.317, 0.681);
-	vec2 map_uv = world_position.xz * 0.0068;
-	vec2 map_uv_rotated = vec2(-map_uv.y, map_uv.x) * 1.31 + vec2(0.317, 0.681);
-	// The relief-bearing satellite source is useful at country scale, but magnifying
-	// it into a five-kilometre view duplicates mountains that do not match the
-	// generated height field. Neutral aerial ground/forest tiles bridge that band.
+	// Neutral ground/forest tiles bridge regional and close views without baked
+	// mountains or a photographic coastline that contradicts the terrain mesh.
 	vec2 local_ground_uv = world_position.xz * 0.52;
 	vec2 local_ground_uv_rotated = vec2(-local_ground_uv.y, local_ground_uv.x) * 0.87 + vec2(0.29, -0.41);
 	vec2 local_forest_uv = world_position.xz * 0.23;
@@ -1923,31 +1923,21 @@ void fragment() {
 	climate_ground *= 0.91 + (organic_noise(world_position.xz*0.0024)-0.5)*0.15;
 	vec3 procedural_ground = mix(climate_ground, mix(vec3(0.255,0.245,0.165), vec3(0.405,0.385,0.245), broad * 0.62 + biome_patch * 0.38), country_detail*0.38);
 	procedural_ground *= 0.92 + (soil_patch - 0.5) * mix(0.04,0.17,country_detail);
-	vec3 country_a = texture(regional_albedo, country_uv).rgb;
-	vec3 country_b = texture(regional_albedo, country_uv_rotated).rgb;
-	vec3 country_map = mix(country_a, country_b, 0.16);
-	vec3 satellite_a = texture(regional_albedo, map_uv).rgb;
-	vec3 satellite_b = texture(regional_albedo, map_uv_rotated * 0.79 + vec2(0.41, 0.13)).rgb;
-	vec3 satellite_map = mix(satellite_a, satellite_b, 0.08);
-	// The photographic map textures carry detail, but the BIOME (vertex color)
-	// owns the hue — steppe reads tan, wetland teal, woodland deep green at
-	// every zoom instead of one endless satellite green.
+	// Ground textures carry grain, while the generated climate owns color and
+	// mesh normals own landform. A satellite photo containing other mountains
+	// must not draw nonexistent ridges over this planet's actual geometry.
 	vec3 biome_hue = vertex_tint / max(dot(vertex_tint, vec3(0.28, 0.57, 0.15)), 0.05);
-	country_map *= mix(vec3(1.0), biome_hue, 0.52);
-	satellite_map *= mix(vec3(1.0), biome_hue, 0.58);
 	vec3 local_ground_a = texture(ground_albedo, local_ground_uv).rgb;
 	vec3 local_ground_b = texture(ground_albedo, local_ground_uv_rotated).rgb;
 	vec3 local_ground_map = mix(local_ground_a, local_ground_b, 0.22);
 	vec3 local_forest_a = texture(forest_albedo, local_forest_uv).rgb;
 	vec3 local_forest_b = texture(forest_albedo, local_forest_uv_rotated).rgb;
 	vec3 local_forest_map = mix(local_forest_a, local_forest_b, 0.18);
-	vec3 ground_map = mix(procedural_ground, country_map, country_detail * 0.72);
-	ground_map = mix(ground_map, satellite_map, regional_detail * (1.0-local_detail) * 0.72);
-	ground_map = mix(ground_map, local_ground_map, local_detail * 0.72);
+	vec3 ground_map = procedural_ground;
+	ground_map = mix(ground_map, local_ground_map, max(local_detail*0.72,regional_detail*0.34));
 	vec3 procedural_forest = mix(vec3(0.055,0.105,0.070), vec3(0.155,0.205,0.125), biome_patch * 0.62 + regional * 0.38);
-	vec3 forest_map = mix(procedural_forest, country_map * vec3(0.68,0.84,0.67), country_detail * 0.68);
-	forest_map = mix(forest_map, satellite_map * vec3(0.68,0.84,0.67), regional_detail * (1.0-local_detail) * 0.68);
-	forest_map = mix(forest_map, local_forest_map, local_detail * 0.76);
+	vec3 forest_map = procedural_forest;
+	forest_map = mix(forest_map, local_forest_map, max(local_detail*0.76,regional_detail*0.34));
 	vec3 ground_close = mix(texture(ground_albedo, close_uv).rgb, texture(ground_albedo, close_uv_rotated).rgb, 0.32);
 	vec3 forest_close = mix(texture(forest_albedo, close_uv * 0.72).rgb, texture(forest_albedo, close_uv_rotated * 0.64).rgb, 0.28);
 	vec3 ground_sample = mix(ground_map, ground_close, close_detail * 0.66);
@@ -2007,7 +1997,11 @@ void fragment() {
 	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06;
 	earth *= modulation;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
-	float rock_mask = smoothstep(0.16, 0.56, slope) * smoothstep(-0.8, 4.8, world_position.y);
+	if (UV.x>=0.999) { exposed_rock=geological_rock(world_position.xz,world_position.y,pixel_world,UV2); }
+	// Rock exposure follows steepness, including low coastal cliffs. The old
+	// altitude multiplier disguised steep lowland faces as grassy ground.
+	float rock_mask = smoothstep(0.13,0.43,slope);
+	earth = apply_climate_surface(earth,world_position.xz,pixel_world,forest_mask,vec4(UV,UV2));
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2022,7 +2016,7 @@ void fragment() {
 	float hill_light = dot(normalize(world_normal), normalize(vec3(-0.46, 0.78, -0.42)));
 	vec3 horizontal_sun = normalize(vec3(-0.46, 0.0, -0.42));
 	float directional_slope = dot(normalize(world_normal), horizontal_sun);
-	float hillshade = clamp(1.0 + directional_slope * 5.8 - slope * 0.16, 0.70, 1.22);
+	float hillshade = clamp(1.0 + directional_slope * 2.2 - slope * 0.12, 0.78, 1.16);
 	// Close aerial views still need landform. Suppressing most hillshade at the
 	// exact settlement scale turned real 10–50 m relief into flat colour patches.
 	// Texture supplies surface detail; directional normal shading supplies shape.
@@ -2049,10 +2043,8 @@ void fragment() {
 	_register_woodland_material(material)
 	var ground_texture: Texture2D = load("res://assets/terrain/temperate_ground_albedo_v1.png")
 	var forest_texture: Texture2D = load("res://assets/terrain/temperate_forest_albedo_v1.png")
-	var regional_texture: Texture2D = load("res://assets/terrain/temperate_regional_satellite_v2.png")
 	material.set_shader_parameter("ground_albedo",ground_texture)
 	material.set_shader_parameter("forest_albedo",forest_texture)
-	material.set_shader_parameter("regional_albedo",regional_texture)
 	material.set_shader_parameter("land_resources",1.0 if resource_view_enabled else 0.0)
 	material.set_shader_parameter("woodland_channel",SEAMLESS_WORLD)
 	material.set_shader_parameter("drainage_phase",float(posmod(GameState.world_seed,10007))/10007.0)
@@ -2064,7 +2056,19 @@ func _add_terrain_vertex(surface: SurfaceTool, grid_x: int, grid_z: int) -> void
 	var z := (float(grid_z) / (self.grid_z - 1) - 0.5) * world_depth
 	var height := _height_at(x, z)
 	surface.set_color(_terrain_color_at(x, z, height))
+	var fields:=_terrain_surface_fields_at(x,z,height)
+	surface.set_uv(Vector2(fields.x,fields.y))
+	surface.set_uv2(Vector2(fields.z,fields.w))
 	surface.add_vertex(Vector3(x, height, z))
+
+func _terrain_surface_fields_at(x:float,z:float,height:float)->Vector4:
+	if not SEAMLESS_WORLD:return Vector4.ZERO
+	var climate:=_climate_at(x,z,height)
+	var geology:=PlanetEnvironment.surface_geology_at(Vector2(x,z),height)
+	var total:=maxf(.001,float(geology.sedimentary)+float(geology.igneous)+float(geology.metamorphic))
+	# UV.x >= 1 identifies physical samples; custom/legacy meshes with no fields
+	# keep their existing appearance. COLOR alpha remains woodland density.
+	return Vector4(1.0+clampf(float(climate.precipitation),0,1),clampf(float(climate.temperature),0,1),float(geology.sedimentary)/total,float(geology.igneous)/total)
 
 func _climate_at(x:float,z:float,height:float)->Dictionary:
 	## Earth-logic climate: latitude and altitude set temperature; the moisture
@@ -3366,7 +3370,7 @@ func _request_close_terrain_job(center:Vector3)->void:
 		var step:=0.02
 		var dx:=(_height_at(x+step,z)-_height_at(x-step,z))/(step*2.0)
 		var dz:=(_height_at(x,z+step)-_height_at(x,z-step))/(step*2.0)
-		return [height,Vector3(-dx,1.0,-dz).normalized(),_terrain_color_at(x,z,height)])
+		return [height,Vector3(-dx,1.0,-dz).normalized(),_terrain_color_at(x,z,height)],_terrain_surface_fields_at)
 
 func _advance_close_terrain_job()->void:
 	if close_terrain_job==null: return
@@ -3407,9 +3411,12 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 	var vertices:=PackedVector3Array()
 	var normals:=PackedVector3Array()
 	var colors:=PackedColorArray()
+	var climate_uv:=PackedVector2Array()
+	var geology_uv:=PackedVector2Array()
 	vertices.resize(resolution*resolution)
 	normals.resize(vertices.size())
 	colors.resize(vertices.size())
+	climate_uv.resize(vertices.size());geology_uv.resize(vertices.size())
 	for z in resolution:
 		for x in resolution:
 			var world_x:=center.x+(float(x)/(resolution-1)-0.5)*span
@@ -3422,7 +3429,9 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 			vertices[index]=Vector3(world_x,height,world_z)
 			normals[index]=Vector3(-dx,1.0,-dz).normalized()
 			colors[index]=_terrain_color_at(world_x,world_z,height)
-	var mesh:=preload("res://scripts/close_terrain_mesh.gd").build(resolution,vertices,normals,colors)
+			var fields:=_terrain_surface_fields_at(world_x,world_z,height)
+			climate_uv[index]=Vector2(fields.x,fields.y);geology_uv[index]=Vector2(fields.z,fields.w)
+	var mesh:=preload("res://scripts/close_terrain_mesh.gd").build(resolution,vertices,normals,colors,climate_uv,geology_uv)
 	_install_close_terrain_mesh(mesh,center)
 
 func _near_persistent_settlement_surface(local_point: Vector2) -> bool:

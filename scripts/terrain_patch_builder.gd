@@ -13,22 +13,29 @@ var cursor:=0
 var phase:=0
 var sample_height:Callable
 var sample_color:Callable
+var sample_surface:Callable
+var climate_uv:=PackedVector2Array()
+var geology_uv:=PackedVector2Array()
 var max_slice_usec:=0
 
-func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable)->void:
+func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable,surface_fn:Callable=Callable())->void:
 	resolution=grid_resolution; span=patch_span; center=patch_center
 	sample_height=height_fn; sample_color=color_fn
+	sample_surface=surface_fn
 	heights.resize(resolution*resolution)
 	vertices.resize(resolution*resolution); normals.resize(vertices.size()); colors.resize(vertices.size())
 	indices.resize((resolution-1)*(resolution-1)*6)
+	if sample_surface.is_valid():
+		climate_uv.resize(vertices.size());geology_uv.resize(vertices.size())
 
 func advance(budget_usec:int=2500)->bool:
 	var started:=Time.get_ticks_usec()
 	var total:=vertices.size()
 	var spacing:=span/float(resolution-1)
-	# Close relief uses a twenty-metre derivative baseline so ridge cusps do not
-	# become hard lighting seams. Geometry and authoritative heights are unchanged.
-	var normal_radius:=maxi(1,ceili(0.02/spacing))
+	# Close relief uses a twenty-metre baseline. Coarse regional shading averages
+	# two cells so undersampled ridges do not become alternating bright/dark facets.
+	# Geometry and authoritative heights are unchanged.
+	var normal_radius:=maxi(1,ceili(maxf(0.02,spacing*2.0*smoothstep(0.01,0.15,spacing))/spacing))
 	while phase<2:
 		var x_index:=cursor%resolution
 		var z_index:=cursor/resolution
@@ -39,6 +46,9 @@ func advance(budget_usec:int=2500)->bool:
 			vertices[cursor]=Vector3(x,height,z)
 			heights[cursor]=height
 			colors[cursor]=sample_color.call(x,z,height)
+			if sample_surface.is_valid():
+				var fields:Vector4=sample_surface.call(x,z,height)
+				climate_uv[cursor]=Vector2(fields.x,fields.y);geology_uv[cursor]=Vector2(fields.z,fields.w)
 		else:
 			var left:=maxi(0,x_index-normal_radius); var right:=mini(resolution-1,x_index+normal_radius)
 			var up:=maxi(0,z_index-normal_radius); var down:=mini(resolution-1,z_index+normal_radius)
@@ -61,6 +71,8 @@ func commit()->ArrayMesh:
 	var arrays:Array=[]; arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX]=vertices; arrays[Mesh.ARRAY_NORMAL]=normals
 	arrays[Mesh.ARRAY_COLOR]=colors; arrays[Mesh.ARRAY_INDEX]=indices
+	if not climate_uv.is_empty():
+		arrays[Mesh.ARRAY_TEX_UV]=climate_uv;arrays[Mesh.ARRAY_TEX_UV2]=geology_uv
 	var mesh:=ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	return mesh

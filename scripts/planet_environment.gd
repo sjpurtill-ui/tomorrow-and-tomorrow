@@ -234,6 +234,12 @@ func _fertility(biome:String,precipitation:float)->float:
 	return 0.05
 
 
+func surface_geology_at(position:Vector2,height:float)->Dictionary:
+	## Read-only rendering projection of the same geology used by resource profiles.
+	_ensure_configured()
+	return _geology(position,height)
+
+
 func _geology(position:Vector2,height:float)->Dictionary:
 	var a:=(_geology_a.get_noise_2d(position.x,position.y)+1.0)*0.5
 	var b:=(_geology_b.get_noise_2d(position.x-5300.0,position.y+2100.0)+1.0)*0.5

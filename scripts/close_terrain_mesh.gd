@@ -1,6 +1,6 @@
 extends RefCounted
 ## Fixed-diagonal close grid, sampled once per vertex and indexed directly.
-static func build(resolution:int,vertices:PackedVector3Array,normals:PackedVector3Array,colors:PackedColorArray)->ArrayMesh:
+static func build(resolution:int,vertices:PackedVector3Array,normals:PackedVector3Array,colors:PackedColorArray,climate_uv:PackedVector2Array=PackedVector2Array(),geology_uv:PackedVector2Array=PackedVector2Array())->ArrayMesh:
 	assert(resolution>=2 and vertices.size()==resolution*resolution)
 	assert(normals.size()==vertices.size() and colors.size()==vertices.size())
 	var indices:=PackedInt32Array()
@@ -24,6 +24,10 @@ static func build(resolution:int,vertices:PackedVector3Array,normals:PackedVecto
 	arrays[Mesh.ARRAY_NORMAL]=normals
 	arrays[Mesh.ARRAY_COLOR]=colors
 	arrays[Mesh.ARRAY_INDEX]=indices
+	if not climate_uv.is_empty():
+		assert(climate_uv.size()==vertices.size() and geology_uv.size()==vertices.size())
+		arrays[Mesh.ARRAY_TEX_UV]=climate_uv
+		arrays[Mesh.ARRAY_TEX_UV2]=geology_uv
 	var mesh:=ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	return mesh
