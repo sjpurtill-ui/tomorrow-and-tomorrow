@@ -38,19 +38,17 @@ static func commit_enemy(result:Dictionary)->void:
 	mirrored.commander_managed=id!="player"
 	WorldSimulation.scoped(id,func()->void:WorldSimulation.military._commit_campaign_battle(mirrored))
 
-static func troop_views(observer:String)->Array[Dictionary]:
-	var result:Array[Dictionary]=[]
+static func troop_catalog()->Dictionary:
+	var catalog:Dictionary={}
 	var ids:Array=WorldSimulation.actors.keys();ids.append("player");ids.sort()
 	for id:String in ids:
-		if id==observer:continue
+		var result:Array[Dictionary]=[]
 		var visible_id:="human" if id=="player" else id
 		WorldSimulation.scoped(id,func()->void:
 			var day:=int(WorldSimulation.state.elapsed_days)
 			for mission:Dictionary in WorldSimulation.world.scout_missions:
 				var start:=int(mission.get("start_day",day));var finish:=int(mission.get("actual_return_day",mission.get("return_day",day+1)))
-				var progress:=clampf(float(day-start)/maxf(1,finish-start),0,1)
-				var fraction:=progress*2 if progress<=.5 else (1-progress)*2
-				var point:Vector2=WorldSimulation.world.city_intelligence.route_position(mission.get("route",[]),fraction)
+				var point:Vector2=WorldSimulation.world.city_intelligence.mission_position(mission,day)
 				var scouting:Dictionary={"id":"%s:scout:%d" % [visible_id,int(mission.mission_id)],"civ_id":visible_id,"kind":"scout","point_a":WorldSimulation.world.player_world_origin,"point_b":point,"command_position":{"x":point.x,"z":point.y},"depart_day":start,"leg_days":maxf(1,float(finish-start)*.5),"strength_share":float(mission.personnel)/maxf(1,WorldSimulation.state.population_exact),"readiness":.5,"actual_troops":int(mission.personnel),"owned_mission":int(mission.mission_id),"route":mission.get("route",[]).duplicate(true),"concealment":.7,"evasion":.8,"last_report_cycle":0,"disabled_until_day":0,"evaded_until_day":int(mission.get("evaded_until_day",0)),"last_interception_day":int(mission.get("last_interception_day",-9999)),"search_sequence":0}
 				result.append(scouting)
 			for force in WorldSimulation.military.field_armies:
@@ -58,6 +56,15 @@ static func troop_views(observer:String)->Array[Dictionary]:
 				var point:Vector2=WorldSimulation.military.command_hierarchy.land.point(force)
 				result.append({"id":"%s:army:%d" % [visible_id,int(force.army_id)],"civ_id":visible_id,"kind":"expedition","point_a":point,"point_b":point,"command_position":{"x":point.x,"z":point.y},"depart_day":0,"leg_days":1.0,"strength_share":float(force.troops)/maxf(1,WorldSimulation.military._mobilized_count()),"readiness":float(force.get("readiness",0)),"actual_troops":int(force.troops),"owned_force_id":int(force.army_id)})
 		)
+		catalog[id]=result
+	return catalog
+
+static func troop_views(observer:String,catalog:Dictionary={})->Array[Dictionary]:
+	var current:=troop_catalog() if catalog.is_empty() else catalog
+	var result:Array[Dictionary]=[]
+	for id:String in current:
+		if id==observer:continue
+		for entry:Dictionary in current[id]:result.append(entry.duplicate(true))
 	return result
 
 static func civilian_deaths(civ:Dictionary,region_id:String,requested:int)->Dictionary:

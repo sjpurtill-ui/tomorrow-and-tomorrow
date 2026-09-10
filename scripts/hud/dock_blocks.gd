@@ -26,6 +26,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"recruitment_brief":
+				var brief:=preload("res://scripts/hud/recruitment_brief.gd").new()
+				section.add_child(brief);brief.setup(block)
 			"scout_archive":
 				var archive:=preload("res://scripts/hud/scout_archive_widget.gd").new()
 				archive.records=block.get("reports",[])
@@ -385,6 +388,7 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		Live.attach(button,"tooltip_text",item.get("live_tip"))
 		var column:=VBoxContainer.new()
 		column.set_anchors_preset(Control.PRESET_FULL_RECT)
+		column.offset_left=8;column.offset_right=-8
 		column.alignment=BoxContainer.ALIGNMENT_CENTER
 		column.add_theme_constant_override("separation",1)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE

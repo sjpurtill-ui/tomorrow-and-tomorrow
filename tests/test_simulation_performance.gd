@@ -152,3 +152,21 @@ func test_candidate_existence_keeps_material_and_day_gates()->void:
 			for channel in research.catalog_by_channel:
 				assert_bool(research._channel_has_candidate(channel,day)).is_equal(not research._best_candidate_for_channel(channel,day).is_empty())
 	)
+
+func test_shared_troop_catalog_keeps_every_observer_and_owner_independent()->void:
+	WorldSimulation.clear();WorldSimulation.create_actor("alpha",717);WorldSimulation.create_actor("beta",717)
+	WorldSimulation.scoped("alpha",func()->void:
+		WorldSimulation.state.elapsed_days=5
+		WorldSimulation.world.scout_missions.assign([{"mission_id":1,"start_day":0,"return_day":20,"personnel":3,"route":[{"x":0.0,"z":0.0},{"x":100.0,"z":0.0}]}])
+	)
+	var views=preload("res://scripts/civilization_combat.gd")
+	var catalog:Dictionary=views.troop_catalog()
+	var beta:Array[Dictionary]=views.troop_views("beta",catalog)
+	var player:Array[Dictionary]=views.troop_views("player",catalog)
+	assert_int(views.troop_views("alpha",catalog).size()).is_equal(0)
+	assert_int(beta.size()).is_equal(1);assert_int(player.size()).is_equal(1)
+	assert_dict(beta[0]).is_equal(player[0])
+	beta[0].route[0].x=500.0;beta[0].command_position.x=500.0
+	assert_float(float(player[0].route[0].x)).is_equal(0.0)
+	assert_float(float(catalog.alpha[0].command_position.x)).is_equal(50.0)
+	WorldSimulation.scoped("alpha",func()->void:assert_float(float(WorldSimulation.world.scout_missions[0].route[0].x)).is_equal(0.0))

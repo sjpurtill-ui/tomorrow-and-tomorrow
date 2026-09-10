@@ -70,3 +70,31 @@ func test_scrub_appearance_and_density_follow_real_climate()->void:
 	assert_float(Cover.scrub_density(dry)).is_less(Cover.scrub_density(wet))
 	var dry_color:=Cover.scrub_tint(dry,.5);var wet_color:=Cover.scrub_tint(wet,.5)
 	assert_float(dry_color.r).is_greater(dry_color.g);assert_float(wet_color.g).is_greater(wet_color.r)
+
+func test_hidden_close_vegetation_waits_for_a_visible_distance()->void:
+	var terrain:=fixture()
+	terrain.camera=Camera3D.new();terrain.add_child(terrain.camera);terrain.camera.size=50
+	terrain._rebuild_close_vegetation(Vector3.ZERO)
+	assert_object(terrain.close_vegetation_root).is_null()
+	terrain.camera.size=1.0;terrain._rebuild_close_vegetation(Vector3.ZERO)
+	assert_object(terrain.close_vegetation_root).is_not_null()
+	var original:=terrain.close_vegetation_root.get_instance_id()
+	terrain.camera.size=50;GameState.morphology_revision+=1
+	GameState.settlement_routes.append({"points":PackedVector2Array([Vector2(-.1,0),Vector2(.1,0)]),"width_m":4.0})
+	terrain._rebuild_close_vegetation(Vector3.ZERO)
+	assert_int(terrain.close_vegetation_root.get_instance_id()).is_equal(original)
+	terrain.camera.size=1.0;terrain._rebuild_close_vegetation(Vector3.ZERO)
+	assert_int(terrain.close_vegetation_root.get_instance_id()).is_not_equal(original)
+
+func test_upkeep_does_not_replant_trees_but_physical_clearance_changes_do()->void:
+	var terrain:=fixture()
+	GameState.settlement_plots.append({"id":1,"land_use":"residential_compound","status":"active","centroid":Vector2.ZERO,"condition":.9,"roof_coverage":.2})
+	terrain._rebuild_close_vegetation(Vector3.ZERO)
+	var original:=terrain.close_vegetation_root.get_instance_id();var before:=crowns(terrain)
+	GameState.settlement_plots[0].condition=.8;GameState.morphology_revision+=1
+	terrain._rebuild_close_vegetation(Vector3.ZERO)
+	assert_int(terrain.close_vegetation_root.get_instance_id()).is_equal(original)
+	assert_dict(crowns(terrain)).is_equal(before)
+	GameState.settlement_plots[0].roof_coverage=.5;GameState.morphology_revision+=1
+	terrain._rebuild_close_vegetation(Vector3.ZERO)
+	assert_int(terrain.close_vegetation_root.get_instance_id()).is_not_equal(original)

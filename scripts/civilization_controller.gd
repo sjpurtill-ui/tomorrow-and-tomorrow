@@ -137,10 +137,9 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
 	var world:=WorldSimulation.world
 	var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0))
-	if world.scout_missions.is_empty() and food_days>float(plan.scout_food):
-		for duration in [180,90,30]:
-			if duration>int(plan.scout_days):continue
-			if not WorldSimulation.submit(id,{"kind":"scout","days":duration,"target":"open_world"}).has("error"):break
+	var scout_share:=.02 if int(plan.scout_days)==30 else .05 if int(plan.scout_days)==90 else .08
+	var scout_focus:="recruitment" if float(plan.personality.empathy)>.65 else "exploration"
+	WorldSimulation.submit(id,{"kind":"scouting_policy","share":scout_share,"focus":scout_focus})
 	if not world.diplomatic_mission.is_empty():return
 	var candidates:Array[Dictionary]=[]
 	var campaign_enemy:="";var campaign_urgency:=-INF

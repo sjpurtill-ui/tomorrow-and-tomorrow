@@ -1347,76 +1347,9 @@ func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)-
 
 
 func template_training_quote(template_id:int)->Dictionary:
-	var index:=_template_index(template_id)
-	if index<0:return {"error":"Build not found."}
-	var template:Dictionary=army_templates[index]
-	var required:=0;var missing:=0;var active:=0;var shortfalls:Array[Dictionary]=[]
-	var blockers:Array[String]=[];var equipment:Dictionary={};var baseline_days:=0.0
-	for entry:Dictionary in template.get("entries",[]):
-		var unit:=String(entry.unit);var weapon:=String(entry.weapon);var count:=int(entry.count)
-		var gate:=_training_gate(unit,weapon)
-		if gate.has("error"):blockers.append(String(gate.error))
-		var home:=_matching_home_count(unit,weapon);var training:=_matching_training_count(unit,weapon)
-		var need:=maxi(0,count-home-training)
-		if bool(gate.get("prototype",false)) and need>PROTOTYPE_COHORT_LIMIT:blockers.append("Prototype intake exceeds the experimental cohort limit.")
-		required+=count;missing+=need;active+=training
-		if need>0:shortfalls.append({"unit":unit,"weapon":weapon,"missing":need})
-		baseline_days=maxf(baseline_days,UnitCatalog.training_days(unit))
-		var held:=0
-		for formation:Dictionary in home_army.get("formations",[]):
-			if String(formation.get("unit",""))==unit and String(formation.get("weapon",""))==weapon:held+=int(formation.get("equipment",0))
-		equipment[weapon]=int(equipment.get(weapon,0))+maxi(0,_equipment_required_for(unit,count)-held)
-	if active>0:blockers.append("%d people are already training; the next full intake waits for their outcome." % active)
-	if required>training_capacity()-_queued_trainees():blockers.append("This class needs %d training places; only %d are free. Prioritize watch and training in a city, wait for an existing class to finish, or reduce this army design." % [required,maxi(0,training_capacity()-_queued_trainees())])
-	var people_room:=aggregate_recruits+maxi(0,recruitment_capacity()-_mobilized_count())
-	if missing>people_room:blockers.append("%d recruits needed; %d available. Military service already uses %d of %d places, including field armies and recovering soldiers. More able adults or established watch/levy practices raise this limit; waiting alone does not." % [missing,people_room,_mobilized_count(),recruitment_capacity()])
-	for weapon:String in equipment:
-		var shortfall:=maxi(0,int(equipment[weapon])-int(military_inventory.get(weapon,0)))
-		if shortfall>0:blockers.append("%d %s equipment sets missing; produce them in Supply." % [shortfall,weapon.replace("_"," ")])
-	var food:=float(required)*baseline_days
-	if WorldSimulation.food.total_stored()<food:blockers.append("At least %.0f rations needed for the full class; %.0f stored." % [food,WorldSimulation.food.total_stored()])
-	if not active_engagement.is_empty() or not pending_aftermath.is_empty():blockers.append("Resolve the battle or aftermath first.")
-	if recovery.home_unavailable():blockers.append("Home is occupied.")
-	return {"can_start":blockers.is_empty() and missing>0,"missing":missing,"required":required,"shortfalls":shortfalls,"blockers":blockers,"food":food,"people_room":people_room,"training_places":maxi(0,training_capacity()-_queued_trainees()),"equipment":equipment,"active_training":active}
+	return preload("res://scripts/army_recruitment.gd").new(self).quote(template_id)
 func queue_template_training(template_id:int,retain_order:bool=true)->Dictionary:
-	var index:=_template_index(template_id)
-	if index<0:return {"error":"Build not found."}
-	var template:Dictionary=army_templates[index]
-	if retain_order:template.recruitment_requested=true
-	var quote:=template_training_quote(template_id)
-	if int(quote.get("missing",0))<=0:return {"ok":true,"queued":0,"message":"The build's people are assembled or already training. Check condition and equipment before deployment."}
-	if not bool(quote.get("can_start",false)):
-		return {"ok":true,"queued":0,"waiting":true,"message":"WAITING — no partial intake started. "+" ".join(quote.get("blockers",[]))}
-	# All entries pass together before any people or equipment move.
-	var needed:=int(quote.missing)
-	if aggregate_recruits<needed:raise_recruits(needed-aggregate_recruits)
-	var queued:=0
-	for entry:Dictionary in template.get("entries",[]):
-		var unit:=String(entry.unit);var weapon:=String(entry.weapon);var count:=int(entry.count)
-		var existing:=mini(count,_matching_home_count(unit,weapon))
-		var detached:Array[Dictionary]=[]
-		if existing>0:detached=_detach_matching_formations([{"unit":unit,"weapon":weapon,"count":existing}])
-		var experience_sum:=0.0;var condition_sum:=float(count-existing)*_trainee_condition();var skill_sum:=0.0
-		for formation:Dictionary in detached:
-			var people:=int(formation.count)
-			experience_sum+=float(formation.get("experience",0))*people
-			condition_sum+=float(formation.get("personnel_condition",1))*people
-			skill_sum+=float(formation.get("training",0))*people
-			military_inventory[weapon]=int(military_inventory.get(weapon,0))+int(formation.get("equipment",0))
-			# Ammunition remains in the home stock, not lost during instruction.
-			var ammo:=_ammunition_type_for(weapon)
-			if ammo!="":military_consumables[ammo]=int(military_consumables.get(ammo,0))+int(formation.get("ammunition",0))
-		aggregate_recruits+=existing
-		var result:=start_training(unit,weapon,count)
-		var order:Dictionary=training_queue[-1]
-		order.build_batch=template_id;order.experience=experience_sum/maxi(1,count)
-		order.prior_skill=skill_sum/maxi(1,existing);order.prior_personnel=existing
-		order.personnel_condition=condition_sum/maxi(1,count)
-		var reserved:=_equipment_required_for(unit,count)
-		order.reserved_equipment=reserved
-		military_inventory[weapon]=int(military_inventory.get(weapon,0))-reserved
-		queued+=int(result.get("accepted",0))
-	return {"ok":true,"queued":queued,"message":"All %d soldiers entered the build's training together, including existing personnel. Equipment is reserved; the complete intake finishes together." % queued}
+	return preload("res://scripts/army_recruitment.gd").new(self).enroll(template_id,retain_order)
 
 
 func _detach_matching_formations(entries:Array)->Array[Dictionary]:

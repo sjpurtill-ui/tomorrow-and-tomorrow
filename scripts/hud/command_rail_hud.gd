@@ -893,9 +893,10 @@ func _refresh_toolbar()->void:
 	var diplomat:Button=toolbar_action_buttons.get("diplomat")
 	var convoy:Button=toolbar_action_buttons.get("convoy")
 	var convoy_active:=bool(GameState.settlement_convoy.get("active",false))
-	var exploration:Dictionary=CivilizationSystem.exploration_status()
-	var scout_quote:Dictionary=CivilizationSystem.scout_mission_quote(30,"open_world") if not bool(exploration.get("active",false)) else {}
-	var scout_presentation:Dictionary=terrain._scout_action_presentation(exploration,scout_quote)
+	var scouting:Dictionary=CivilizationSystem.scouting_staff.snapshot()
+	# The toolbar reports standing orders. Route planning belongs to departures,
+	# never to a HUD refresh.
+	var scout_presentation:Dictionary={"label":"SCOUTING · %.1f%% · %d AWAY" % [float(scouting.share)*100,int(scouting.away)],"disabled":false,"tooltip":"Set the population allocation and focus. Staff organize future scouting parties."}
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var known_destinations:=0
 	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
@@ -924,7 +925,7 @@ func _refresh_toolbar()->void:
 	# toolbar slot; it appears when it becomes possible. Away-mission states
 	# stay visible because their countdown IS the information.
 	var settle_visible:=not settle_disabled
-	var scouts_visible:=not bool(scout_presentation.disabled) or bool(exploration.get("active",false))
+	var scouts_visible:=GameState.settlement_site_committed or int(scouting.away)>0
 	var diplomat_visible:=not bool(diplomat_presentation.disabled) or bool(diplomatic_status.get("active",false))
 	var signature:="%s|%s|%s|%s|%s|%s|%s" % [settle_text,String(scout_presentation.label),String(diplomat_presentation.label),convoy_active,settle_visible,scouts_visible,diplomat_visible]
 	if signature==_toolbar_signature: return
@@ -933,8 +934,7 @@ func _refresh_toolbar()->void:
 	settle.tooltip_text=settle_tooltip
 	settle.disabled=settle_disabled
 	settle.visible=settle_visible
-	# The presentation is the single authority on the label — it carries the
-	# soonest return countdown (or OVERDUE) whenever any party is out.
+	# Keep the allocation visible even between departures.
 	scouts.text=String(scout_presentation.label)
 	scouts.disabled=bool(scout_presentation.disabled)
 	scouts.tooltip_text=String(scout_presentation.tooltip)

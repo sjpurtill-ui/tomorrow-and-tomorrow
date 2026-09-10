@@ -265,6 +265,7 @@ func project(civ:Dictionary)->void:
 
 func refresh_views()->void:
 	preload("res://scripts/civilization_relations.gd").synchronize()
+	var troops:=preload("res://scripts/civilization_combat.gd").troop_catalog()
 	for id:String in actors:
 		var observer:Node=actors[id].systems.CivilizationSystem
 		var old_relations:Dictionary={}
@@ -284,8 +285,8 @@ func refresh_views()->void:
 			human.player_relation=observer._relation_with_strategy_defaults(old_relations.get("human",{}),human)
 			_localize_controllers(human,id)
 			observer.civilizations.append(human)
-		observer.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views(id))
-	CivilizationSystem.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views("player"))
+		observer.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views(id,troops))
+	CivilizationSystem.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views("player",troops))
 
 
 func _updated_observer_view(source:Dictionary,previous:Dictionary)->Dictionary:
@@ -330,6 +331,7 @@ func capture_actor(id:String)->Dictionary:
 		payload["city_intelligence"]=world.city_intelligence.records.duplicate(true)
 		payload["rumor_books"]=world.rumor_network.books.duplicate(true)
 		payload["chronicle"]=world.chronicle.data.duplicate(true)
+		payload["scouting_staff"]=world.scouting_staff.data.duplicate(true)
 		payload["relations"]={}
 		for civ in world.civilizations:payload.relations[String(civ.id)]=civ.player_relation.duplicate(true)
 		return payload
@@ -372,6 +374,7 @@ func validate_payload(payload:Dictionary)->String:
 				if not property_types.has(field):return "Unknown civilization field: "+field
 				var saved_type:=typeof(actor.state[name][field]);var expected_type:=int(property_types[field])
 				if expected_type!=TYPE_NIL and saved_type!=expected_type and not (saved_type in [TYPE_INT,TYPE_FLOAT] and expected_type in [TYPE_INT,TYPE_FLOAT]):return "Invalid civilization field type: "+field
+		if not CivilizationSystem.scouting_staff.valid(actor.state.get("scouting_staff",{})):return "Invalid civilization scouting allocation."
 		var armed:Dictionary=actor.state.MilitaryCampaign
 		for field in ["aggregate_recruits","training_injury_pool","next_field_army_id"]:
 			var number:Variant=armed.get(field,0)
@@ -417,6 +420,7 @@ func _restore_state(payload:Dictionary)->Dictionary:
 			world.city_intelligence.records=saved.state.get("city_intelligence",{}).duplicate(true)
 			world.rumor_network.books=saved.state.get("rumor_books",{}).duplicate(true)
 			world.chronicle.data=saved.state.get("chronicle",world.chronicle.data).duplicate(true)
+			world.scouting_staff.restore(saved.state.get("scouting_staff",{}))
 			for other:String in saved.state.get("relations",{}):world.civilizations.append({"id":other,"player_relation":saved.state.relations[other].duplicate(true)})
 		)
 	if not failures.is_empty():return {"error":"; ".join(failures)}

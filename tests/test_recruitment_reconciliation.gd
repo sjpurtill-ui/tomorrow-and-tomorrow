@@ -61,27 +61,27 @@ func test_moderate_supplied_home_duty_recovers_strain_and_condition()->void:
 	assert_float(MilitaryCampaign._force_personnel_condition(MilitaryCampaign.home_army)).is_greater(before)
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
 
-func test_full_intake_reserves_equipment_and_cancel_returns_it()->void:
+func test_missing_recruits_reserve_only_their_equipment_and_cancel_returns_it()->void:
 	GameState.population_allocations.Defense=20
 	MilitaryCampaign.military_inventory.improvised=8
 	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
 	var before:=GameState.population_total
-	assert_int(int(MilitaryCampaign.queue_template_training(1).get("queued",0))).is_equal(8)
-	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(0)
-	assert_int(int(MilitaryCampaign.training_queue[0].reserved_equipment)).is_equal(8)
+	assert_int(int(MilitaryCampaign.queue_template_training(1).get("queued",0))).is_equal(2)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(6)
+	assert_int(int(MilitaryCampaign.training_queue[0].reserved_equipment)).is_equal(2)
 	MilitaryCampaign.cancel_training(int(MilitaryCampaign.training_queue[0].id))
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(8)
 	assert_int(GameState.population_total).is_equal(before)
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(8)
 
-func test_full_batch_completes_together_with_reserved_equipment_and_no_people_created()->void:
+func test_top_up_completes_without_retraining_existing_soldiers_or_creating_people()->void:
 	GameState.population_allocations.Defense=20
 	MilitaryCampaign.military_inventory.improvised=8
 	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
 	var before:=GameState.population_total
 	MilitaryCampaign.queue_template_training(1)
-	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(0)
-	assert_int(MilitaryCampaign._queued_trainees()).is_equal(8)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
+	assert_int(MilitaryCampaign._queued_trainees()).is_equal(2)
 	var payload:Dictionary=JSON.parse_string(JSON.stringify(MilitaryCampaign.export_state()))
 	assert_bool(MilitaryCampaign.import_state(payload).has("ok")).is_true()
 	for day in 100:
@@ -90,7 +90,7 @@ func test_full_batch_completes_together_with_reserved_equipment_and_no_people_cr
 	assert_array(MilitaryCampaign.training_queue).is_empty()
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(8)
 	assert_int(GameState.population_total).is_equal(before)
-	assert_int(int(MilitaryCampaign.home_army.formations[0].equipment)).is_equal(8)
+	assert_int(int(MilitaryCampaign.home_army.formations[-1].equipment)).is_equal(2)
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(8)
 
 func test_batch_holds_finished_members_and_cancels_all_members()->void:
@@ -104,3 +104,67 @@ func test_batch_holds_finished_members_and_cancels_all_members()->void:
 	assert_int(int(MilitaryCampaign.cancel_training(101).returned)).is_equal(8)
 	assert_array(MilitaryCampaign.training_queue).is_empty()
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(8)
+
+func test_capacity_limits_new_groups_and_staff_refill_without_repeat_clicks()->void:
+	GameState.ensure_population_total(5000);GameState.initialize_population_model()
+	GameState.population_allocations.Defense=49
+	MilitaryCampaign.army_templates[0].entries[0].count=50
+	MilitaryCampaign.home_army.formations[0].experience=.8
+	MilitaryCampaign.military_inventory.improvised=100
+	FoodSystem.initialize();FoodSystem.receive_external_food(100000)
+	var places:=MilitaryCampaign.training_capacity()
+	var before:=MilitaryCampaign.home_army.duplicate(true)
+	var population:=GameState.population_total
+	var quote:=MilitaryCampaign.template_training_quote(1)
+	assert_int(int(quote.start_now)).is_equal(mini(44,places))
+	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(mini(44,places))
+	assert_array(MilitaryCampaign.home_army.formations).is_equal(before.formations)
+	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(0)
+	# Each completion releases places for the next daily staff intake.
+	for cycle in 4:
+		assert_int(MilitaryCampaign._queued_trainees()).is_less_equal(places)
+		for order:Dictionary in MilitaryCampaign.training_queue:MilitaryCampaign._complete_training(order)
+		MilitaryCampaign.training_queue.clear()
+		MilitaryCampaign._process_requested_templates()
+	assert_int(MilitaryCampaign._matching_home_count("levy","improvised")+MilitaryCampaign._queued_trainees()).is_equal(50)
+	assert_int(GameState.population_total).is_equal(population)
+	assert_float(float(MilitaryCampaign.home_army.formations[0].experience)).is_equal(.8)
+
+func test_equipment_limits_intake_without_reserving_missing_stock()->void:
+	GameState.population_allocations.Defense=30
+	MilitaryCampaign.military_inventory.improvised=1
+	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
+	var first:=MilitaryCampaign.queue_template_training(1)
+	assert_int(int(first.queued)).is_equal(1)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(0)
+	assert_int(MilitaryCampaign._queued_trainees()).is_equal(1)
+	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(0)
+	MilitaryCampaign.military_inventory.improvised=1
+	MilitaryCampaign._process_requested_templates()
+	assert_int(MilitaryCampaign._queued_trainees()).is_equal(2)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
+
+func test_suspended_training_and_civilian_food_reserve_block_new_intake()->void:
+	GameState.population_allocations.Defense=30;MilitaryCampaign.military_inventory.improvised=100
+	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
+	MilitaryCampaign.training_staff.set_policy("army","suspended")
+	assert_bool(MilitaryCampaign.template_training_quote(1).can_start).is_false()
+	MilitaryCampaign.training_staff.set_policy("army","regular")
+	GameState.resource_stockpiles.Food=1;GameState.food_stocks={"Preserved food":1}
+	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(0)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
+
+func test_shared_weapon_stock_is_presented_once_for_multiple_unit_types()->void:
+	GameState.population_allocations.Defense=30
+	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
+	MilitaryCampaign.military_inventory.spear=8
+	MilitaryCampaign.army_templates[0].entries[0].weapon="spear"
+	MilitaryCampaign.army_templates[0].entries.append({"unit":"line_infantry","weapon":"spear","count":5})
+	for formation:Dictionary in MilitaryCampaign.home_army.formations:formation.weapon="spear"
+	MilitaryCampaign.home_army.formations[0].equipment=1
+	var quote:=MilitaryCampaign.template_training_quote(1)
+	assert_int(quote.equipment_rows.size()).is_equal(1)
+	assert_int(int(quote.equipment_rows[0].stored)).is_equal(8)
+	assert_int(int(quote.equipment_rows[0].needed)).is_equal(7)
+	assert_int(int(quote.equipment_rows[0].issued)).is_equal(1)
+	assert_int(int(MilitaryCampaign.military_inventory.spear)).is_equal(8)

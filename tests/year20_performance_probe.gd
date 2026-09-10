@@ -6,7 +6,7 @@ class QuietAnnouncements extends CanvasLayer:
 	func enqueue(events:Array[Dictionary])->void:notices+=events.size()
 
 func _ready()->void:
-	if not OS.get_user_data_dir().ends_with("TomorrowYear20PerformanceTests"):
+	if not OS.get_user_data_dir().ends_with("TomorrowYear20PerformanceTests") and not OS.get_user_data_dir().ends_with("TomorrowCityReportTests"):
 		push_error("Performance probes require isolated TomorrowYear20PerformanceTests userdata.")
 		get_tree().quit(2);return
 	DisplayServer.window_set_title("Performance check — isolated save copy")
@@ -35,6 +35,7 @@ func _ready()->void:
 	CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	await get_tree().process_frame
 	_report("PERF_READY day=",GameState.elapsed_days," actors=",WorldSimulation.actors.size())
+	_report("PERF_VIEWPORT ",get_viewport().get_visible_rect().size," physical=",get_window().size)
 	if "--paced" in OS.get_cmdline_user_args():
 		if PeopleDirection.needs_century_choice():PeopleDirection.choose("makers")
 		if is_instance_valid(PeopleDirection.panel):PeopleDirection.panel.queue_free();PeopleDirection.panel=null
@@ -44,7 +45,9 @@ func _ready()->void:
 			terrain.hud.set_meta("discovery_popup",quiet)
 		terrain.set_process(true)
 		var warmup:=Time.get_ticks_usec()
+		var warmup_frames:=Engine.get_process_frames()
 		while Time.get_ticks_usec()-warmup<5000000:await get_tree().process_frame
+		_report("PERF_PAUSED_WARMUP ",JSON.stringify({"frames":Engine.get_process_frames()-warmup_frames,"seconds":(Time.get_ticks_usec()-warmup)/1000000.0}))
 		terrain._set_game_speed(5)
 		var start_day:=GameState.elapsed_days
 		var start_time:=Time.get_ticks_usec()

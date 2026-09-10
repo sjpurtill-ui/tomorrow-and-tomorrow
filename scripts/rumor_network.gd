@@ -118,8 +118,7 @@ func sample(day:int)->void:
 	for mission:Dictionary in system.scout_missions:
 		var start:=int(mission.start_day); var end:=int(mission.get("actual_return_day",mission.return_day))
 		if day<start or day>=end: continue
-		var f:=float(day-start)/maxf(1,end-start)
-		visit_at(mission,"player",system.city_intelligence.route_position(mission.route,f*2 if f<=.5 else (1-f)*2),hosts,day)
+		visit_at(mission,"player",system.city_intelligence.mission_position(mission,day),hosts,day)
 	for mission:Dictionary in system.foreign_formations:
 		if mission.kind not in ["scout","expedition"] or day<int(mission.depart_day) or day<int(mission.get("disabled_until_day",0)) or bool(mission.get("rumor_waiting",false)): continue
 		var observer:=String(mission.civ_id)

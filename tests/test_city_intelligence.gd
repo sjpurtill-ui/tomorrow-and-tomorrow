@@ -58,7 +58,7 @@ func test_scout_carries_observations_until_return_and_does_not_resample_on_deliv
 	civ().strategic_regions[0].population*=10
 	intel().deliver(mission,"player",40)
 	var city:Dictionary=intel().known("player",region(),10)
-	assert_dict(city.fields.population).is_equal(saved.fields.population.merged({"age_days":0,"stale":false}))
+	assert_dict(city.fields.population).is_equal(saved.fields.population.merged({"age_days":0,"stale":false,"observed_low":float(saved.fields.population.low),"observed_high":float(saved.fields.population.high)}))
 	assert_int(city.observed_day).is_equal(10)
 	assert_int(city.reported_day).is_equal(40)
 
@@ -189,3 +189,77 @@ func test_location_only_report_supports_named_army_movement_without_revealing_co
 	assert_bool(MilitaryCampaign.move_field_army(991,region()).has("ok")).is_true()
 	assert_str(String(MilitaryCampaign.field_armies[0].location_id)).is_equal(region())
 	assert_int(int(MilitaryCampaign.field_armies[0].troops)).is_equal(6)
+
+func test_population_evidence_is_stable_and_ages_less_than_stores()->void:
+	civ().strategic_regions[0].population=58.0
+	observe(region(),.8,10)
+	var old:Dictionary=intel().records.player[region()].duplicate(true)
+	var seen:Dictionary=intel().known("player",region(),10).fields.population
+	var annual:Dictionary=intel().known("player",region(),375).fields.population
+	assert_float(annual.observed_low).is_equal(seen.observed_low)
+	assert_float(annual.observed_high).is_equal(seen.observed_high)
+	assert_float(float(annual.high)-float(seen.high)).is_less(15.0)
+	assert_float(float(annual.low)).is_greater(25.0)
+	assert_dict(intel().records.player[region()]).is_equal(old)
+	var view=preload("res://scripts/hud/city_report_visuals.gd")
+	assert_str(view.estimate("population",annual)).is_equal(view.estimate("population",old.fields.population))
+	var dock:=preload("res://scripts/hud/content/dock_detail_foreign_city.gd").new(null,null,region())
+	GameState.elapsed_days=375
+	assert_str(dock.tab(0).blocks[0].items[0].value).is_equal(view.estimate("population",annual)+" people")
+
+func test_days_physically_observing_sharpen_small_city_count_not_ticks_or_travel()->void:
+	civ().strategic_regions[0].population=58.0
+	var mission:Dictionary={}
+	var location:Vector2=intel().vector(intel().site(region()).position)
+	intel().stage(mission,"player",location,.7,10,"watch")
+	var first:Dictionary=mission.city_observations[region()].duplicate(true)
+	for i in 10:intel().stage(mission,"player",location,.7,10,"watch")
+	assert_int(mission.city_observations[region()].observation_days).is_equal(1)
+	intel().stage(mission,"player",location+Vector2(10000,0),.7,100,"watch")
+	assert_dict(mission.city_observations[region()]).is_equal(first)
+	for day in range(101,131):intel().stage(mission,"player",location,.7,day,"watch")
+	var report:Dictionary=mission.city_observations[region()]
+	assert_int(report.observation_days).is_equal(31)
+	assert_float(float(report.fields.population.high)-float(report.fields.population.low)).is_less_equal(8.0)
+	assert_float(float(first.fields.population.high)-float(first.fields.population.low)).is_greater(25.0)
+	assert_dict(intel().known("player",region())).is_empty()
+	assert_bool(intel().valid_carried(mission)).is_true()
+	intel().deliver(mission,"player",160)
+	assert_int(intel().known("player",region()).observation_days).is_equal(31)
+
+func test_targeted_scouts_spend_spare_days_on_site_then_return()->void:
+	CivilizationSystem.set_scout_geography_authority(func(_p:Vector2)->bool:return true)
+	var destination:=CivilizationSystem.player_world_origin+Vector2(60,0)
+	civ().strategic_regions[0].position=destination
+	observe(region(),.7,0);GameState.elapsed_days=2
+	var short:=CivilizationSystem.scout_mission_quote(30,"city:"+region())
+	var long:=CivilizationSystem.scout_mission_quote(90,"city:"+region())
+	assert_bool(long.can_dispatch).override_failure_message(str(long)).is_true()
+	assert_int(long.travel_leg_days).is_equal(short.travel_leg_days)
+	assert_int(long.observation_days-short.observation_days).is_equal(60)
+	assert_int(long.travel_leg_days*2+long.observation_days).is_equal(90)
+	var result:=CivilizationSystem.dispatch_scouts(90,"city:"+region())
+	assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
+	var mission:Dictionary=CivilizationSystem.scout_missions[-1]
+	var start:=int(mission.start_day);var end:=int(mission.actual_return_day)
+	assert_vector(intel().mission_position(mission,start)).is_equal(CivilizationSystem.player_world_origin)
+	assert_vector(intel().mission_position(mission,start+20)).is_equal(destination)
+	assert_vector(intel().mission_position(mission,end-20)).is_equal(destination)
+	assert_vector(intel().mission_position(mission,end)).is_equal(CivilizationSystem.player_world_origin)
+	intel().sample_missions(start+20)
+	var snapshot:=CivilizationSystem.export_state()
+	assert_bool(CivilizationSystem.import_state(JSON.parse_string(JSON.stringify(snapshot))).get("ok",false)).is_true()
+	var restored:Dictionary=CivilizationSystem.scout_missions[-1]
+	assert_int(int(restored.travel_leg_days)).is_equal(int(mission.travel_leg_days))
+	assert_int(int(restored.city_observations[region()].observation_days)).is_equal(1)
+	assert_vector(intel().mission_position(restored,start+20)).is_equal(destination)
+
+func test_old_mission_timing_and_new_observation_fields_round_trip()->void:
+	var mission:Dictionary={"start_day":0,"return_day":90,"route":[{"x":0,"z":0},{"x":100,"z":0}]}
+	assert_vector(intel().mission_position(mission,45)).is_equal(Vector2(100,0))
+	assert_vector(intel().mission_position(mission,90)).is_equal(Vector2.ZERO)
+	var report:Dictionary=intel().capture("player",region(),.8,40,"test","saved",30)
+	assert_bool(intel().valid_observation(report)).is_true()
+	assert_bool(intel().valid_observation(JSON.parse_string(JSON.stringify(report)))).is_true()
+	report.observation_days=-1
+	assert_bool(intel().valid_observation(report)).is_false()

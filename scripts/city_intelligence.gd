@@ -82,7 +82,7 @@ func truth(city_id:String)->Dictionary:
 	place["values"]=values
 	return place
 
-func capture(observer:String,city_id:String,quality:float,day:int,source:String,reference:String)->Dictionary:
+func capture(observer:String,city_id:String,quality:float,day:int,source:String,reference:String,observation_days:int=1)->Dictionary:
 	var actual:=truth(city_id)
 	if actual.is_empty() or actual.civ_id==observer: return {}
 	quality=clampf(quality,0, .9)
@@ -91,15 +91,18 @@ func capture(observer:String,city_id:String,quality:float,day:int,source:String,
 		if quality<float(FIELDS[key].threshold) or not actual.values.has(key) or float(actual.values[key])<0: continue
 		var value:=float(actual.values[key])
 		var rng:=RandomNumberGenerator.new(); rng.seed=hash(observer+city_id+key+reference)^day^WorldSimulation.state.world_seed
-		var error:=lerpf(.65,.16,quality)
-		var quantum:=.05 if FIELDS[key].unit=="capacity" else maxf(1,pow(10,floor(log(maxf(1,value))/log(10))-1))
+		# Repeated days of physically present observation improve counting, not
+		# days spent travelling. Stores remain harder to assess than inhabitants.
+		var days:=clampi(observation_days,1,366)
+		var error:=maxf(.035,lerpf(.65,.16,quality)/sqrt(float(days))) if key=="population" else maxf(.10,lerpf(.65,.16,quality)/pow(float(days),.25))
+		var quantum:=.025 if FIELDS[key].unit=="capacity" else maxf(1,pow(10,floor(log(maxf(1,value))/log(10))-2))
 		var width:=maxf(quantum,value*error)
 		var center:=value+rng.randf_range(-.3,.3)*width
 		var low:=maxf(0,floor((center-width)/quantum)*quantum)
 		var high:float=ceil((center+width)/quantum)*quantum
 		if FIELDS[key].unit=="capacity": high=minf(1,high)
-		fields[key]={"low":low,"high":high,"observed_day":day,"quality":quality,"source":source,"reference":reference}
-	return {"city_id":city_id,"civ_id":String(actual.civ_id) if quality>=.35 else "","name":String(actual.name) if quality>=.35 else "Unidentified settlement","position":actual.position.duplicate(true),"controller":String(actual.controller) if quality>=.35 else "","observed_day":day,"reported_day":day,"quality":quality,"source":source,"reference":reference,"fields":fields}
+		fields[key]={"low":low,"high":high,"observed_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366)}
+	return {"city_id":city_id,"civ_id":String(actual.civ_id) if quality>=.35 else "","name":String(actual.name) if quality>=.35 else "Unidentified settlement","position":actual.position.duplicate(true),"controller":String(actual.controller) if quality>=.35 else "","observed_day":day,"reported_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366),"fields":fields}
 
 func location_record(place:Dictionary,day:int,source:String,reference:String)->Dictionary:
 	return {"city_id":String(place.city_id),"civ_id":String(place.get("civ_id","")),"name":String(place.get("name","Reported settlement")),"position":place.position.duplicate(true),"controller":"","observed_day":day,"reported_day":day,"quality":.15,"source":source,"reference":reference,"fields":{}}
@@ -141,9 +144,15 @@ func known(observer:String,city_id:String,day:int=-1)->Dictionary:
 	for key:String in result.fields:
 		var field:Dictionary=result.fields[key]
 		var age:=maxi(0,today-int(field.observed_day))
-		var spread:=minf(1.5,float(age)/365.0)
-		field.low=maxf(0,float(field.low)*(1.0-minf(.9,spread)))
-		field.high=float(field.high)*(1.0+spread)
+		# Original evidence stays intact. This planning band is an unverified
+		# projection, with separate rates for residents, troops, stores and fabric.
+		field["observed_low"]=float(field.low);field["observed_high"]=float(field.high)
+		var rate:float={"population":.20,"garrison":2.0,"supply":4.0,"fortification":.15,"production":.40,"logistics":.20,"damage":.50}[key]
+		var center:float=(float(field.low)+float(field.high))*.5
+		var scale:=1.0 if FIELDS[key].unit=="capacity" else maxf(1,center)
+		var drift:=scale*rate*minf(3.0,float(age)/365.0)
+		field.low=maxf(0,float(field.low)-drift)
+		field.high=float(field.high)+drift
 		if FIELDS[key].unit=="capacity": field.high=minf(1,field.high)
 		field["age_days"]=age; field["stale"]=age>180
 	return result
@@ -200,7 +209,11 @@ func stage(mission:Dictionary,observer:String,position:Vector2,quality:float,day
 	for place:Dictionary in sites():
 		if place.civ_id==observer: continue
 		if position.distance_to(vector(place.position))>SIGHT_RADIUS: continue
-		var observation:=capture(observer,place.city_id,quality,day,"physical reconnaissance",reference)
+		var prior:Dictionary=mission.city_observations.get(place.city_id,{})
+		if int(prior.get("observed_day",-1))>=day:continue
+		var days:=mini(366,int(prior.get("observation_days",0))+1)
+		var practiced:=clampf(quality+.18*(1.0-exp(-float(days-1)/10.0)),0,.9)
+		var observation:=capture(observer,place.city_id,practiced,day,"physical reconnaissance",reference,days)
 		if not observation.is_empty(): mission.city_observations[place.city_id]=observation
 
 func route_position(route:Array,fraction:float)->Vector2:
@@ -213,13 +226,24 @@ func route_position(route:Array,fraction:float)->Vector2:
 		remaining-=distance
 	return vector(route[-1])
 
+func mission_position(mission:Dictionary,day:float)->Vector2:
+	var start:=float(mission.get("start_day",day))
+	var end:=float(mission.get("actual_return_day",mission.get("return_day",start+1)))
+	var total:=maxf(1,end-start)
+	var elapsed:=clampf(day-start,0,total)
+	# Older active missions retain their original timing; new targeted missions
+	# persist the travel allowance from their dispatch quote.
+	if bool(mission.get("circuit",false)) and mission.get("route_status","")!="turning_back":return route_position(mission.get("route",[]),elapsed/total)
+	var leg:=clampf(float(mission.get("travel_leg_days",total*.5)),.5,total*.5)
+	if mission.get("route_status","")=="turning_back":leg=total*.5
+	var fraction:=elapsed/leg if elapsed<leg else (1.0 if elapsed<=total-leg else (total-elapsed)/leg)
+	return route_position(mission.get("route",[]),fraction)
+
 func sample_missions(day:int)->void:
 	for mission:Dictionary in system.scout_missions:
 		var start:=int(mission.start_day); var end:=int(mission.get("actual_return_day",mission.return_day))
 		if day<start or day>=end: continue
-		var progress:=float(day-start)/maxf(1,float(end-start))
-		var fraction:=progress*2 if progress<=.5 else (1-progress)*2
-		stage(mission,"player",route_position(mission.route,fraction),.45+clampf(WorldSimulation.state.combined_intelligence,0,1)*.4+(.15 if mission.get("target_kind")=="observe_city" else 0),day,"scout:%s" % str(mission.mission_id))
+		stage(mission,"player",mission_position(mission,day),.45+clampf(WorldSimulation.state.combined_intelligence,0,1)*.4+(.15 if mission.get("target_kind")=="observe_city" else 0),day,"scout:%s" % str(mission.mission_id))
 	for formation:Dictionary in system.foreign_formations:
 		if formation.get("kind")!="scout" or not system._foreign_scout_is_active(formation,day): continue
 		var due:=float(formation.depart_day)+float(formation.leg_days)*2
@@ -286,7 +310,7 @@ func describe(city:Dictionary)->String:
 		var description:="Unknown — no observation supports an estimate."
 		if not field.is_empty():
 			var scale:=100.0 if FIELDS[key].unit=="capacity" else 1.0
-			description="%s–%s %s · observed day %d%s" % [str(roundi(float(field.low)*scale)),str(roundi(float(field.high)*scale)),"%" if scale>1 else String(FIELDS[key].unit),int(field.observed_day)," · stale" if bool(field.stale) else ""]
+			description="%s–%s %s · observed day %d%s" % [str(roundi(float(field.get("observed_low",field.low))*scale)),str(roundi(float(field.get("observed_high",field.high))*scale)),"%" if scale>1 else String(FIELDS[key].unit),int(field.observed_day)," · stale" if bool(field.stale) else ""]
 		lines.append("%s: %s" % [String(FIELDS[key].label),description])
 	lines.append("Local deposits and individual stores: unknown. A city's regional supply outlook is not an inventory of its warehouses.")
 	return "\n\n".join(lines)
@@ -313,9 +337,11 @@ func valid_observation(value:Variant)->bool:
 		if not value[key] is String or value[key].length()>200: return false
 	if not valid_point(value.position) or not number(value.quality) or value.quality<0 or value.quality>1 or not number(value.observed_day) or value.observed_day<-1 or not number(value.reported_day) or value.reported_day<value.observed_day: return false
 	if not value.fields is Dictionary or value.fields.size()>FIELDS.size(): return false
+	if value.has("observation_days") and (not number(value.observation_days) or value.observation_days<1 or value.observation_days>366):return false
 	for key in value.fields:
 		var field:Variant=value.fields[key]
 		if not FIELDS.has(key) or not field is Dictionary or not field.has_all(["low","high","observed_day","quality","source","reference"]): return false
+		if field.has("observation_days") and (not number(field.observation_days) or field.observation_days<1 or field.observation_days>366):return false
 		for metric:String in ["low","high","observed_day","quality"]:
 			if not number(field[metric]): return false
 		if field.low<0 or field.high<field.low or field.high>1e15 or field.observed_day<0 or field.quality<0 or field.quality>1 or not field.source is String or field.source.length()>200 or not field.reference is String or field.reference.length()>200: return false

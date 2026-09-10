@@ -102,6 +102,10 @@ func refresh()->void:
 		var title:=String(parts[0]);var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
 		if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
 		var status:=String(label.get_meta("map_status",""))
+		if bool(source.foreign):
+			var record:Dictionary=CivilizationSystem.city_intelligence.records.get("player",{}).get(String(id),{})
+			var population_field:Dictionary=record.get("fields",{}).get("population",{})
+			status=preload("res://scripts/hud/city_report_visuals.gd").age_text(int(population_field.get("observed_day",record.get("observed_day",-1))),int(GameState.elapsed_days))
 		var affiliation:=CivilizationSystem.city_intelligence.controller_label(String(label.get_meta("city_civilization_id",""))) if bool(source.foreign) else ""
 		var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
 		var width:=maxf(font.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,font.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20

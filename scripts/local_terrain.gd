@@ -200,6 +200,7 @@ var close_terrain_last_slice_usec:=0
 var close_terrain_last_finish_usec:=0
 var close_vegetation_root: Node3D
 var close_vegetation_revision := -1
+var close_vegetation_surface_signature:=""
 var close_vegetation_center:=Vector2(INF,INF)
 var close_vegetation_seed:=0
 var convoy_map_icon: Node3D
@@ -3128,6 +3129,8 @@ func _update_scale_lod() -> void:
 		_request_close_terrain_job(settler_marker.position)
 	if detail_terrain_patch:
 		detail_terrain_patch.visible = detail_visible
+	if detail_visible and settler_marker and not _camera_in_motion():
+		_rebuild_close_vegetation(GameState.settlement_founded_at if "Hearth Circle" in GameState.settlement_completed else settler_marker.position)
 	if close_vegetation_root:
 		close_vegetation_root.visible = detail_visible
 		var canopy_lod_fade:=clampf((0.76-camera.size)/0.56,0.18,1.0)
@@ -3548,8 +3551,22 @@ func _near_persistent_settlement_surface(local_point: Vector2) -> bool:
 	return false
 
 func _rebuild_close_vegetation(center: Vector3) -> void:
+	# Detailed plants are invisible above this distance. Do not regenerate them
+	# on monthly settlement updates while the player is looking at the region.
+	# The LOD transition checks again before showing close vegetation.
+	if camera!=null and camera.size>1.8:return
 	if is_instance_valid(close_vegetation_root) and not close_vegetation_root.is_queued_for_deletion() and close_vegetation_revision == GameState.morphology_revision and close_vegetation_center==Vector2(center.x,center.z) and close_vegetation_seed==GameState.world_seed:
 		return
+	var surface_fields:Array=[]
+	for plot:Dictionary in GameState.settlement_plots:
+		surface_fields.append([plot.get("polygon",PackedVector2Array()),plot.get("centroid",Vector2.ZERO),plot.get("land_use",""),plot.get("status","active"),plot.get("reclamation",0.0),plot.get("fabric_generation",0),plot.get("roof_coverage",0.0)])
+	for route:Dictionary in GameState.settlement_routes:
+		surface_fields.append([route.get("active",true),route.get("points",PackedVector2Array()),route.get("hierarchy",route.get("kind","path")),route.get("surface_tier",0),route.get("width_m",1.2)])
+	var surface_signature:=str(hash(surface_fields))
+	if is_instance_valid(close_vegetation_root) and not close_vegetation_root.is_queued_for_deletion() and close_vegetation_surface_signature==surface_signature and close_vegetation_center==Vector2(center.x,center.z) and close_vegetation_seed==GameState.world_seed:
+		close_vegetation_revision=GameState.morphology_revision
+		return
+	close_vegetation_surface_signature=surface_signature
 	if is_instance_valid(close_vegetation_root):
 		close_vegetation_root.queue_free()
 	close_vegetation_root = Node3D.new()
@@ -10272,12 +10289,10 @@ func _refresh_actions_menu()->void:
 		actions_menu_settlement_button.tooltip_text="Enter temporary destination-selection mode. Route and cost are reviewed before anything is committed."
 		actions_menu_settlement_button.disabled=false
 	if actions_menu_scout_button:
-		var exploration:=CivilizationSystem.exploration_status()
-		var scout_quote:=CivilizationSystem.scout_mission_quote(30,"open_world") if not bool(exploration.get("active",false)) else {}
-		var scout_presentation:=_scout_action_presentation(exploration,scout_quote)
-		actions_menu_scout_button.text=String(scout_presentation.label)
-		actions_menu_scout_button.disabled=bool(scout_presentation.disabled)
-		actions_menu_scout_button.tooltip_text=String(scout_presentation.tooltip)
+		var scouting:Dictionary=CivilizationSystem.scouting_staff.snapshot()
+		actions_menu_scout_button.text="SCOUTING · %.1f%% · %d AWAY" % [float(scouting.share)*100,int(scouting.away)]
+		actions_menu_scout_button.disabled=false
+		actions_menu_scout_button.tooltip_text="Set a standing population allocation and focus. Leaders organize the parties and future departures."
 	if actions_menu_diplomat_button:
 		var diplomatic_status:=CivilizationSystem.diplomatic_mission_status()
 		var known_destinations:=0
@@ -13680,7 +13695,7 @@ func _hide_map_selection(generation:int)->void:
 
 func _map_inspection_summary(position:Vector3)->String:
 	if not _world_position_is_revealed(position):
-		return "UNCHARTED LAND SELECTED  •  no returned report describes this ground  •  NEXT: ACTIONS → SEND SCOUT PARTY"
+		return "UNCHARTED LAND SELECTED  •  no returned report describes this ground  •  NEXT: ACTIONS → SCOUTING"
 	var surface_assessment:=_settlement_surface_assessment(position)
 	if not bool(surface_assessment.get("valid",false)):
 		return "%s  •  SETTLEMENT BLOCKED  •  NEXT: choose dry ground beyond the visible bank" % String(surface_assessment.get("reason","WATER SELECTED"))
@@ -13689,7 +13704,7 @@ func _map_inspection_summary(position:Vector3)->String:
 		if String(contact.get("point_kind","encounter"))=="settlement":
 			return "%s SETTLEMENT SELECTED  •  location confirmed, current conditions require another returned report  •  NEXT: open WORLD" % String(contact.get("name","FOREIGN")).to_upper()
 		var home_note:="home settlement known" if bool(contact.get("home_location_known",false)) else "home settlement still unlocated"
-		return "%s ENCOUNTER SITE SELECTED  •  %s  •  NEXT: ACTIONS → SEND SCOUT PARTY" % [String(contact.get("name","FOREIGN")).to_upper(),home_note]
+		return "%s ENCOUNTER SITE SELECTED  •  %s  •  NEXT: ACTIONS → SCOUTING" % [String(contact.get("name","FOREIGN")).to_upper(),home_note]
 	if GameState.settlement_site_committed and "Hearth Circle" in GameState.settlement_completed:
 		var settlement:Dictionary=_settlement_model().settlement_at_world(Vector2(position.x,position.z))
 		if not settlement.is_empty() and bool(settlement.get("inside_border",false)):
@@ -13757,7 +13772,7 @@ func _inspect_location_local(position: Vector3) -> void:
 		entries = ResourceSystem.lens_entries(position, 18.0, KM_PER_WORLD_UNIT)
 	var settlement_plot:=_settlement_plot_at(position) if revealed else {}
 	if not revealed:
-		var unknown_action:="Dispatch a timed scout party and wait for its return before planning settlement here." if GameState.settlement_site_committed else "Travel here with the founding convoy or dispatch a timed scout party and wait for its return."
+		var unknown_action:="Allocate people to scouting and wait for their reports before planning settlement here." if GameState.settlement_site_committed else "Travel here with the founding convoy or allocate people to scouting and wait for their reports."
 		lens_body.text="[color=#777f7c][font_size=18]UNCHARTED[/font_size][/color]\n\nNo returned traveler or scout report describes this ground. Terrain, water, resources, settlements, and foreign activity remain unknown.\n\n[color=#c4aa70]%s[/color]" % unknown_action
 	elif not contact_context.is_empty():
 		if String(contact_context.get("point_kind","encounter"))=="settlement":
@@ -17526,73 +17541,12 @@ func _interrogate_captured_scouts(civ_id:String,method:String)->void:
 
 
 func _open_scout_dispatch_panel()->void:
-	if scout_dispatch_panel and is_instance_valid(scout_dispatch_panel): scout_dispatch_panel.queue_free()
-	scout_dispatch_previous_speed=game_speed
-	_set_game_speed(0.0)
-	scout_dispatch_panel=Control.new()
-	scout_dispatch_panel.name="ScoutDispatchModal"
-	scout_dispatch_panel.size=get_viewport().get_visible_rect().size
-	scout_dispatch_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	scout_dispatch_panel.z_index=70
+	if is_instance_valid(scout_dispatch_panel):scout_dispatch_panel.queue_free()
+	scout_dispatch_previous_speed=game_speed;_set_game_speed(0.0)
+	scout_dispatch_panel=preload("res://scripts/hud/scouting_policy_panel.gd").new()
+	scout_dispatch_panel.name="ScoutingPolicy";scout_dispatch_panel.z_index=70
+	scout_dispatch_panel.close_requested.connect(_close_scout_dispatch_panel)
 	interface_layer.add_child(scout_dispatch_panel)
-	var dimmer:=ColorRect.new(); dimmer.size=scout_dispatch_panel.size; dimmer.color=Color(0.005,0.010,0.012,0.84); dimmer.mouse_filter=Control.MOUSE_FILTER_STOP; scout_dispatch_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.name="ScoutDispatchCard"
-	# This screen owns its bounded scroll layout. The generic every-frame fit
-	# wrapper otherwise alternates wrapped text width and scale indefinitely.
-	modal.set_meta("viewport_fit_hosted",true)
-	modal.size=Vector2(minf(900,scout_dispatch_panel.size.x-40),scout_dispatch_panel.size.y-48)
-	modal.position=(scout_dispatch_panel.size-modal.size)*.5
-	modal.add_theme_stylebox_override("panel",_population_report_style(Color("#7ca39d")))
-	scout_dispatch_panel.add_child(modal)
-	var shell:=VBoxContainer.new();shell.add_theme_constant_override("separation",9);modal.add_child(shell)
-	var scroll:=ScrollContainer.new();scroll.name="ScoutContentScroll"
-	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
-	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;shell.add_child(scroll)
-	var root:=VBoxContainer.new();root.size_flags_horizontal=Control.SIZE_EXPAND_FILL;root.add_theme_constant_override("separation",9);scroll.add_child(root)
-	var heading:=Label.new(); heading.text="DISPATCH SCOUT PARTY"; heading.add_theme_font_size_override("font_size",22); heading.add_theme_color_override("font_color",Color("#d9c99e")); root.add_child(heading)
-	var explanation:=Label.new(); explanation.text="Choose the total time away, including surveying and the return journey. Let the party choose a route, or give a heading. Scouts use nearby land when longer routes are blocked. Distances show the planned outward route; dangers ahead remain unknown." ; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#b7bfba")); root.add_child(explanation)
-	var exploration:=CivilizationSystem.exploration_status()
-	if bool(exploration.get("active",false)):
-		# Several parties can range at once; list each without blocking new ones.
-		var party_lines:Array[String]=[]
-		for party_variant in (exploration.get("parties",[]) as Array):
-			var party:Dictionary=party_variant
-			var overdue_days:=int(party.get("overdue_days",0))
-			var ordered_heading:=String(party.get("ordered_heading","")).to_upper()
-			var direction_text:="  •  ORDERED %s" % ordered_heading if ordered_heading!="" else "  •  CORRIDOR %s" % String(party.get("planned_heading","UNKNOWN")).to_upper()
-			if overdue_days>0:
-				party_lines.append("%d PEOPLE  •  %s%s  •  OVERDUE %d DAY%s — STILL ON THE ROAD" % [int(party.get("personnel",0)),String(party.get("target_label","OPEN EXPLORATION")),direction_text,overdue_days,"" if overdue_days==1 else "S"])
-			else:
-				party_lines.append("%d PEOPLE  •  %s%s  •  RETURNS IN ~%d DAYS" % [int(party.get("personnel",0)),String(party.get("target_label","OPEN EXPLORATION")),direction_text,int(party.get("days_remaining",0))])
-		var active_status:=Label.new(); active_status.text="%d OF %d PARTIES AWAY\n%s" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1)),"\n".join(party_lines)]; active_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; active_status.add_theme_font_size_override("font_size",12); active_status.add_theme_color_override("font_color",Color("#d5bd82")); root.add_child(active_status)
-	if not bool(exploration.get("can_begin",true)):
-		var capacity_note:=Label.new(); capacity_note.text="Every party this population can organize is away. New parties become possible as the population grows or a party returns."; capacity_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; capacity_note.size_flags_vertical=Control.SIZE_EXPAND_FILL; capacity_note.add_theme_font_size_override("font_size",12); capacity_note.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(capacity_note)
-	else:
-		var target_options:=CivilizationSystem.scout_target_options()
-		var target_picker:=preload("res://scripts/hud/scout_target_picker.gd").new()
-		root.add_child(target_picker);target_picker.setup(target_options,pending_scout_target_id)
-		var target_selector:OptionButton=target_picker.selector
-		pending_scout_target_id=String(target_selector.get_item_metadata(target_selector.selected))
-		var heading_selector:=OptionButton.new(); heading_selector.custom_minimum_size=Vector2(0,34); heading_selector.tooltip_text="Dictate the party's outward heading, or let it choose. Blocked ground still bends the route."; root.add_child(heading_selector)
-		heading_selector.add_item("HEADING · LET THE PARTY CHOOSE"); heading_selector.set_item_metadata(0,"")
-		var heading_index:=1
-		for heading_id in CivilizationSystem.SCOUT_HEADINGS:
-			heading_selector.add_item("HEADING · %s" % String(heading_id).to_upper()); heading_selector.set_item_metadata(heading_index,String(heading_id))
-			if String(heading_id)==pending_scout_heading: heading_selector.select(heading_index)
-			heading_index+=1
-		var directional_target:=pending_scout_target_id in ["open_world","recruit_people"]
-		heading_selector.disabled=not directional_target
-		if not directional_target: heading_selector.tooltip_text="This mission has a fixed known destination; its route follows the land to that place."
-		var duration_grid:=GridContainer.new(); duration_grid.columns=2; duration_grid.size_flags_vertical=Control.SIZE_EXPAND_FILL; duration_grid.add_theme_constant_override("h_separation",8); duration_grid.add_theme_constant_override("v_separation",8); root.add_child(duration_grid)
-		_populate_scout_duration_buttons(duration_grid,pending_scout_target_id)
-		heading_selector.item_selected.connect(_select_scout_heading.bind(heading_selector,duration_grid,target_selector))
-		target_selector.item_selected.connect(_select_scout_target.bind(target_selector,duration_grid,heading_selector))
-	scout_dispatch_status=Label.new(); scout_dispatch_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; scout_dispatch_status.add_theme_font_size_override("font_size",11); scout_dispatch_status.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(scout_dispatch_status)
-	var footer:=HBoxContainer.new(); footer.alignment=BoxContainer.ALIGNMENT_END; shell.add_child(footer)
-	var reports:=Button.new(); reports.text="ALL CITY REPORTS"; reports.custom_minimum_size=Vector2(180,38); reports.pressed.connect(func(): CivilizationSystem.city_intelligence.open()); footer.add_child(reports)
-	var close:=Button.new(); close.text="CLOSE"; close.custom_minimum_size=Vector2(140,38); close.pressed.connect(_close_scout_dispatch_panel); footer.add_child(close)
 
 
 func _close_scout_dispatch_panel()->void:
@@ -17632,7 +17586,8 @@ func _populate_scout_duration_buttons(duration_grid:GridContainer,target_id:Stri
 
 
 func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
-	var text:="SEND FOR %d DAYS\n%d SCOUTS  •  %.1f FOOD" % [duration,int(quote.get("personnel",0)),float(quote.get("provisions",0.0))]
+	var text:="%d-DAY EXPEDITION\n%d SCOUTS  •  %.1f FOOD" % [int(quote.get("duration_days",duration)),int(quote.get("personnel",0)),float(quote.get("provisions",0.0))]
+	if bool(quote.get("shortened",false)):text+="\nLOCAL SURVEY · shorter route, lower cost"
 	var plan:Dictionary=quote.get("route_plan",{})
 	if bool(plan.get("ok",false)):
 		text+="\nOUTWARD ROUTE ~%s KM" % _compact_population(roundi(float(quote.get("planned_outward_km",plan.get("distance_km",0.0)))))
