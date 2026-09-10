@@ -203,6 +203,7 @@ var close_vegetation_revision := -1
 var close_vegetation_surface_signature:=""
 var close_vegetation_center:=Vector2(INF,INF)
 var close_vegetation_seed:=0
+var close_vegetation_fade:=-1.0
 var convoy_map_icon: Node3D
 var convoy_banner_sprite: Sprite3D
 var convoy_map_label: Label3D
@@ -3132,13 +3133,16 @@ func _update_scale_lod() -> void:
 	if detail_visible and settler_marker and not _camera_in_motion():
 		_rebuild_close_vegetation(GameState.settlement_founded_at if "Hearth Circle" in GameState.settlement_completed else settler_marker.position)
 	if close_vegetation_root:
-		close_vegetation_root.visible = detail_visible
-		var canopy_lod_fade:=clampf((0.76-camera.size)/0.56,0.18,1.0)
-		for vegetation_child in close_vegetation_root.get_children():
-			if not String(vegetation_child.name).begins_with("TreeCanopies_"): continue
-			var canopy_instance:=vegetation_child as MultiMeshInstance3D
-			if canopy_instance and canopy_instance.material_override is ShaderMaterial:
-				(canopy_instance.material_override as ShaderMaterial).set_shader_parameter("lod_fade",canopy_lod_fade)
+		var viewport_size:=get_viewport().get_visible_rect().size
+		var foliage_fade:=LandscapeCover.detail_strength(camera.size,viewport_size.x/maxf(1.0,viewport_size.y))
+		close_vegetation_root.visible=foliage_fade>0.001
+		if not is_equal_approx(foliage_fade,close_vegetation_fade):
+			close_vegetation_fade=foliage_fade
+			# Crowns, scrub and forest floor are one detail layer. Leaving either
+			# of the latter opaque exposed the square sampling boundary on zoom.
+			for child:Node in close_vegetation_root.get_children():
+				if child is GeometryInstance3D and child.material_override is ShaderMaterial:
+					child.material_override.set_shader_parameter("lod_fade",foliage_fade)
 	if province_terrain_mesh:
 		# The streamed regional mesh is the same planet at higher sampling density.
 		# Rendering both layers together causes kilometre-scale diagonal z seams.
@@ -3575,13 +3579,14 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 	close_vegetation_revision = GameState.morphology_revision
 	close_vegetation_center=Vector2(center.x,center.z)
 	close_vegetation_seed=GameState.world_seed
+	close_vegetation_fade=-1.0
 	var rng := RandomNumberGenerator.new()
 	var canopy_transforms: Array[Transform3D] = []
 	var canopy_colors: Array[Color] = []
 	var scrub_transforms: Array[Transform3D] = []
 	var scrub_colors: Array[Color] = []
 	var understory_patches:Array[Dictionary]=[]
-	for candidate:Dictionary in LandscapeCover.candidates(Vector2(center.x,center.z),.235,.008,GameState.world_seed):
+	for candidate:Dictionary in LandscapeCover.candidates(Vector2(center.x,center.z),LandscapeCover.PATCH_RADIUS_KM,.008,GameState.world_seed):
 		rng.seed=int(candidate.seed)
 		var point:Vector2=candidate.point
 		var local_point:=point-Vector2(center.x,center.z)
@@ -3682,6 +3687,7 @@ func _create_woodland_understory(center:Vector3,patches:Array[Dictionary])->void
 	instance.mesh=mesh
 	var material:=_vegetation_surface_material(2)
 	material.set_shader_parameter("fallback_climate",_vegetation_climate(center))
+	_set_close_vegetation_boundary(material)
 	material.render_priority=1
 	instance.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.material_override=material
@@ -3728,10 +3734,16 @@ func _spawn_vegetation_multimesh(node_name:String,mesh:Mesh,transforms:Array[Tra
 	instance.name = node_name
 	instance.multimesh = multi
 	instance.material_override=_vegetation_surface_material(kind,atlas_variant)
+	_set_close_vegetation_boundary(instance.material_override)
 	# The canopy atlas already contains crown-scale occlusion. Kilometre-world
 	# directional shadows collapsed small crowns into near-black map speckles.
 	instance.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	close_vegetation_root.add_child(instance)
+
+func _set_close_vegetation_boundary(material:ShaderMaterial)->void:
+	# The sampling budget stays fixed. A continuous circular feather hides its
+	# rectangular edge without moving any surviving plant or adding geometry.
+	material.set_shader_parameter("close_patch",Vector4(close_vegetation_center.x,close_vegetation_center.y,LandscapeCover.PATCH_INNER_KM,LandscapeCover.PATCH_RADIUS_KM))
 
 func _vegetation_surface_material(kind:int,atlas_variant:=-1)->ShaderMaterial:
 	if vegetation_surface_shader==null:
@@ -3749,9 +3761,11 @@ varying vec4 plant_climate;
 uniform vec4 canopy_tint : source_color = vec4(1.0);
 uniform int atlas_variant = -1;
 uniform float lod_fade = 1.0;
+uniform vec4 close_patch = vec4(0.0);
 uniform sampler2D canopy_atlas : source_color, filter_linear_mipmap, repeat_disable;
 varying float tree_keep;
 varying vec3 world_position;
+varying vec2 patch_position;
 float vh(vec2 p) {
 	p=fract(p*vec2(123.34,456.21));
 	p+=dot(p,p+45.32);
@@ -3766,12 +3780,14 @@ float filtered_vn(vec2 point) {
 	float footprint=max(length(dFdx(point)),length(dFdy(point)));
 	return mix(vn(point),0.5,smoothstep(0.35,1.1,footprint));
 }
-void vertex() { plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
+void vertex() { plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; patch_position=world_position.xz-close_patch.xy; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
 void fragment() {
 	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float revealed=max(texture(discovery_mask,fog_uv).r,1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin)));
 	if(revealed<0.06) discard;
 	if(vegetation_kind==0 && tree_keep<0.5) discard;
+	float boundary=close_patch.w>0.0?1.0-smoothstep(close_patch.z,close_patch.w,length(patch_position)):1.0;
+	ALPHA=1.0;
 	float crown=filtered_vn(world_position.xz*410.0+vec2(17.0,-31.0));
 	float leaf=filtered_vn(world_position.xz*1350.0+vec2(-73.0,29.0));
 	float gap=smoothstep(0.68,0.92,filtered_vn(world_position.xz*780.0+vec2(91.0,7.0)));
@@ -3786,8 +3802,9 @@ void fragment() {
 			vec3 restrained_canopy=mix(vec3(canopy_luma),canopy.rgb,0.42)*vec3(0.72,0.77,0.66);
 			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.16);
 			base*=0.82+crown*0.16;
-			ALPHA=canopy.a*lod_fade;
-			ALPHA_SCISSOR_THRESHOLD=0.16;
+			// Keep texture coverage separate from the distance fade. Scissoring
+			// an already faded alpha left opaque black pinpricks at aerial scale.
+			ALPHA=canopy.a;
 		}
 		base=mix(base,base*vec3(0.64,0.78,0.61),gap*0.42);
 		base=mix(base,base*vec3(1.08,1.12,0.78),smoothstep(0.76,0.94,leaf)*0.18);
@@ -3795,6 +3812,8 @@ void fragment() {
 		base=mix(base,base*vec3(1.12,1.02,0.69),gap*0.36);
 	}
 	if(vegetation_kind==2) { base=COLOR.rgb; ALPHA=COLOR.a*woodland_retained(world_position.xz)*smoothstep(0.06,0.62,revealed); }
+	ALPHA*=lod_fade*boundary;
+	if(ALPHA<0.001) discard;
 	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);
 	ALBEDO=mix(vec3(0.006,0.012,0.014),base,smoothstep(0.06,0.62,revealed));
 	ROUGHNESS=1.0;

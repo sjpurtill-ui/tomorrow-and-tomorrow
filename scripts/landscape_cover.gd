@@ -1,6 +1,16 @@
 extends RefCounted
 ## Presentation derived from the surveyed biome, never a second resource model.
 ## Stable world cells keep existing plants fixed when a convoy or patch moves.
+const PATCH_RADIUS_KM:=.235
+const PATCH_INNER_KM:=.13
+
+static func detail_strength(vertical_span:float,aspect:float)->float:
+	# Hand physical crowns back to continuous woodland albedo before the finite
+	# detail patch becomes a dot on the map. Use its physical footprint, so the
+	# same aerial distance cannot gain a square of trees on a wider display.
+	var footprint:=maxf(0.0,vertical_span)*maxf(1.0,aspect)
+	return 1.0-smoothstep(.45,2.40,footprint)
+
 static func cell_seed(cell:Vector2i,world_seed:int,salt:int=0)->int:
 	return hash("%d:%d:%d:%d:vegetation" % [world_seed,cell.x,cell.y,salt])
 static func candidates(center:Vector2,radius:float,spacing:float,world_seed:int)->Array[Dictionary]:
