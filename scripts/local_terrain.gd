@@ -110,6 +110,7 @@ var terrain_patch_cancellations:=0
 var terrain_patch_last_slice_usec:int=0
 var terrain_patch_last_commit_usec:int=0
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
+const SURFACE_PRECISION:=preload("res://scripts/surface_precision.gd")
 const TERRAIN_LOD:=preload("res://scripts/terrain_lod.gd")
 var dragging := false
 var rotating_camera := false
@@ -1846,6 +1847,8 @@ uniform bool woodland_channel = true;
 varying vec3 world_position;
 uniform vec4 streamed_cutout = vec4(0.0);
 varying vec3 world_normal;
+varying vec3 relative_position;
+varying vec2 surface_position;
 
 float hash21(vec2 p) {
 	// Integer cell hashing avoids loss of fractional precision near the far
@@ -1881,11 +1884,14 @@ float organic_noise(vec2 p) {
 	return fbm(p + (warp - vec2(0.5)) * 2.15);
 }
 
+#include "res://scripts/surface_precision.gdshaderinc"
 #include "res://scripts/ground_surface.gdshaderinc"
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
+	relative_position = world_position-CAMERA_POSITION_WORLD;
+	surface_position = world_position.xz-floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 }
 
 void fragment() {
@@ -1893,10 +1899,13 @@ void fragment() {
 	// procedural land beyond the playable geography. Legacy custom meshes lack UV fields.
 	if (UV.x>=0.999 && (abs(world_position.x)>fog_world_size.x*0.5 || abs(world_position.z)>fog_world_size.y*0.5)) { discard; }
 	if (streamed_cutout.w > 0.5 && abs(world_position.x-streamed_cutout.x)<streamed_cutout.z*0.5 && abs(world_position.z-streamed_cutout.y)<streamed_cutout.z*0.5) { discard; }
+	vec2 surface_origin=floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 	float broad = organic_noise(world_position.xz * 0.052);
 	float regional = organic_noise(world_position.xz * 0.17 + vec2(17.0, -9.0));
 	float slope = 1.0 - clamp(dot(normalize(world_normal), vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
-	float pixel_world = max(length(dFdx(world_position.xz)), length(dFdy(world_position.xz)));
+	// Interpolate the small camera-relative value. Differencing absolute
+	// 20,000 km positions quantized a sub-metre footprint into alternating bands.
+	float pixel_world = max(length(dFdx(relative_position.xz)), length(dFdy(relative_position.xz)));
 	// The material is a scale hierarchy, not one photograph enlarged forever.
 	// World units are kilometres.  Country and regional imagery only enters once
 	// the projected pixel footprint can actually resolve it; this also prevents
@@ -1907,15 +1916,15 @@ void fragment() {
 	float close_detail = 1.0 - smoothstep(0.0009, 0.008, pixel_world);
 	// Neutral ground/forest tiles bridge regional and close views without baked
 	// mountains or a photographic coastline that contradicts the terrain mesh.
-	vec2 local_ground_uv = world_position.xz * 0.52;
-	vec2 local_ground_uv_rotated = vec2(-local_ground_uv.y, local_ground_uv.x) * 0.87 + vec2(0.29, -0.41);
-	vec2 local_forest_uv = world_position.xz * 0.23;
-	vec2 local_forest_uv_rotated = vec2(-local_forest_uv.y, local_forest_uv.x) * 0.79 + vec2(-0.17, 0.36);
+	vec2 local_ground_uv = periodic_surface_uv(surface_position,surface_origin,52,100,false,vec2(0.0));
+	vec2 local_ground_uv_rotated = periodic_surface_uv(surface_position,surface_origin,4524,10000,true,vec2(0.29,-0.41));
+	vec2 local_forest_uv = periodic_surface_uv(surface_position,surface_origin,23,100,false,vec2(0.0));
+	vec2 local_forest_uv_rotated = periodic_surface_uv(surface_position,surface_origin,1817,10000,true,vec2(-0.17,0.36));
 	// The source albedo contains its own broad photographic mottling. At x18 it
 	// repeated as 55 m rugs; x68 places that content at a believable 10–20 m aerial
 	// scale, while the biome FBM above remains responsible for large land-cover mass.
-	vec2 close_uv = world_position.xz * 68.0;
-	vec2 close_uv_rotated = vec2(-close_uv.y, close_uv.x) * 0.83 + vec2(0.19, -0.27);
+	vec2 close_uv = periodic_surface_uv(surface_position,surface_origin,68,1,false,vec2(0.0));
+	vec2 close_uv_rotated = periodic_surface_uv(surface_position,surface_origin,5644,100,true,vec2(0.19,-0.27));
 	float biome_patch = organic_noise(world_position.xz * 0.011 + vec2(-5.0, 11.0));
 	float soil_patch = organic_noise(world_position.xz * 0.062 + vec2(23.0, -17.0));
 	vec3 vertex_tint = mix(vec3(dot(COLOR.rgb, vec3(0.28,0.57,0.15))), COLOR.rgb, 0.78);
@@ -1940,7 +1949,7 @@ void fragment() {
 	vec3 forest_map = procedural_forest;
 	forest_map = mix(forest_map, local_forest_map, max(local_detail*0.76,regional_detail*0.34));
 	vec3 ground_close = mix(texture(ground_albedo, close_uv).rgb, texture(ground_albedo, close_uv_rotated).rgb, 0.32);
-	vec3 forest_close = mix(texture(forest_albedo, close_uv * 0.72).rgb, texture(forest_albedo, close_uv_rotated * 0.64).rgb, 0.28);
+	vec3 forest_close = mix(texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,4896,100,false,vec2(0.0))).rgb, texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,361216,10000,true,vec2(0.1216,-0.1728))).rgb, 0.28);
 	vec3 ground_sample = mix(ground_map, ground_close, close_detail * 0.66);
 	vec3 forest_sample = mix(forest_map, forest_close, close_detail * 0.60);
 	float ground_luma = dot(ground_sample, vec3(0.28, 0.57, 0.15));
@@ -1957,7 +1966,7 @@ void fragment() {
 	forest_mask*=1.0-smoothstep(0.30,0.72,slope);
 	float retained_woodland=woodland_retained(world_position.xz);
 	forest_mask*=retained_woodland;
-	float crown_shade=value_noise(world_position.xz*90.0);
+	float crown_shade=precise_surface_noise(surface_position,surface_origin,90,1,vec2(0.0));
 	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
@@ -1982,8 +1991,8 @@ void fragment() {
 	float dryland_mass = smoothstep(0.60,0.80,organic_noise(world_position.xz*0.022+vec2(61.0,-47.0))) * (1.0-forest_mask);
 	earth = mix(earth, vec3(0.34,0.37,0.205), open_meadow*0.30*climate_green);
 	earth = mix(earth, vec3(0.43,0.37,0.235), dryland_mass*0.26);
-	float dry_patch = smoothstep(0.63, 0.84, value_noise(world_position.xz * 1.7 + vec2(-31.0, 22.0))) * close_detail;
-	float worn_patch = smoothstep(0.70, 0.91, value_noise(world_position.xz * 7.5 + vec2(8.0, -14.0))) * close_detail;
+	float dry_patch = smoothstep(0.63, 0.84, precise_surface_noise(surface_position,surface_origin,17,10,vec2(-31.0,22.0))) * close_detail;
+	float worn_patch = smoothstep(0.70, 0.91, precise_surface_noise(surface_position,surface_origin,75,10,vec2(8.0,-14.0))) * close_detail;
 	earth = mix(earth, vec3(0.36, 0.315, 0.21), dry_patch * 0.28);
 	earth = mix(earth, vec3(0.25, 0.245, 0.18), worn_patch * 0.12);
 	// At settlement scale introduce coherent tens-of-metres aerial variation.
@@ -1998,11 +2007,11 @@ void fragment() {
 	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06;
 	earth *= modulation;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
-	if (UV.x>=0.999) { exposed_rock=geological_rock(world_position.xz,world_position.y,pixel_world,UV2); }
+	if (UV.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,UV2); }
 	// Rock exposure follows steepness, including low coastal cliffs. The old
 	// altitude multiplier disguised steep lowland faces as grassy ground.
 	float rock_mask = smoothstep(0.13,0.43,slope);
-	earth = apply_climate_surface(earth,world_position.xz,pixel_world,forest_mask,vec4(UV,UV2));
+	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(UV,UV2));
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2320,6 +2329,8 @@ func _refresh_coastal_water_patch()->void:
 	coastal_water_surface.position=Vector3(regional_patch_center.x,0,regional_patch_center.y)
 	_bind_river_terrain(coastal_water_material)
 	_bind_river_terrain(ocean_surface.material_override)
+	SURFACE_PRECISION.configure_water(coastal_water_material,regional_patch_center)
+	SURFACE_PRECISION.configure_water(ocean_surface.material_override,regional_patch_center)
 
 func _province_span_at_v(v: float) -> Vector2:
 	var first := -1.0
@@ -20064,7 +20075,12 @@ func _update_camera() -> void:
 	var display_pitch:=lerpf(camera_pitch,-1.555,continental_nadir) if camera_pitch> -1.56 else camera_pitch
 	var horizontal := cos(display_pitch) * effective_distance
 	camera.position = camera_target + Vector3(cos(camera_yaw) * horizontal, -sin(display_pitch) * effective_distance, sin(camera_yaw) * horizontal)
-	camera.look_at(camera_target, Vector3.UP)
+	# Build orientation from the requested angles, before large world positions
+	# round away the tiny horizontal offset in a near-vertical aerial view.
+	# Subtracting target from position made look_at lose yaw near the map edges.
+	var backward:=Vector3(cos(camera_yaw)*cos(display_pitch),-sin(display_pitch),sin(camera_yaw)*cos(display_pitch)).normalized()
+	var right:=Vector3(sin(camera_yaw),0.0,-cos(camera_yaw))
+	camera.basis=Basis(right,backward.cross(right).normalized(),backward)
 
 func _queue_camera_zoom(pointer:Vector2,steps:float,fast:bool=false)->void:
 	if camera==null: return

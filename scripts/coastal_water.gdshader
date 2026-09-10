@@ -10,11 +10,16 @@ uniform float sea_level = 0.0;
 uniform float wave_speed = 1.0;
 uniform bool regional_surface = false;
 varying vec3 world_position;
+varying vec3 relative_position;
+varying vec2 surface_position;
+uniform vec2 surface_origin = vec2(0.0);
+uniform vec4 wave_phase = vec4(0.0);
+uniform vec2 ripple_phase = vec2(0.0);
 
 // This is the alternating triangle interpolation of TerrainPatchBuilder, not
 // bilinear interpolation or a second noise field. Heights and distances are km.
 float visible_ground(vec2 point) {
-	vec2 cell = clamp(((point-terrain_grid.xy)/terrain_grid.z+0.5)*(terrain_grid.w-1.0),
+	vec2 cell = clamp(((point-(terrain_grid.xy-surface_origin))/terrain_grid.z+0.5)*(terrain_grid.w-1.0),
 		vec2(0.0), vec2(terrain_grid.w-1.001));
 	ivec2 base = ivec2(floor(cell));
 	vec2 f = fract(cell);
@@ -28,19 +33,24 @@ float visible_ground(vec2 point) {
 	return f.x+f.y<=1.0 ? a+(b-a)*f.x+(d-a)*f.y : c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y);
 }
 
-void vertex() { world_position = (MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+void vertex() {
+	world_position = (MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
+	relative_position = world_position-CAMERA_POSITION_WORLD;
+	surface_position = world_position.xz-surface_origin;
+}
 
 void fragment() {
-	vec2 point = world_position.xz;
+	vec2 point = surface_position;
+	vec2 local_grid = terrain_grid.xy-surface_origin;
 	if (!regional_surface && terrain_grid.z>0.0 &&
-		max(abs(point.x-terrain_grid.x),abs(point.y-terrain_grid.y))<terrain_grid.z*0.5) { discard; }
-	vec2 uv = clamp(point/fog_world_size+0.5,vec2(0.0),vec2(1.0));
-	float current_visibility = 1.0-smoothstep(30.0,38.0,distance(point,fog_current_origin));
+		max(abs(point.x-local_grid.x),abs(point.y-local_grid.y))<terrain_grid.z*0.5) { discard; }
+	vec2 uv = clamp(world_position.xz/fog_world_size+0.5,vec2(0.0),vec2(1.0));
+	float current_visibility = 1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float visible = smoothstep(0.06,0.62,max(texture(discovery_mask,uv).r,current_visibility));
 	float depth = 1.0;
 	float surveyed_surface = 0.0;
 	if (terrain_grid.z>0.0 && terrain_grid.w>=2.0) {
-		float edge = max(abs(point.x-terrain_grid.x),abs(point.y-terrain_grid.y))/terrain_grid.z*2.0;
+		float edge = max(abs(point.x-local_grid.x),abs(point.y-local_grid.y))/terrain_grid.z*2.0;
 		if (edge<=1.0) {
 			depth = max(sea_level-visible_ground(point),0.0);
 			// The regional patch extends beyond the camera. Fade its *color* at the
@@ -48,18 +58,19 @@ void fragment() {
 			surveyed_surface = 1.0-smoothstep(0.84,1.0,edge);
 		}
 	}
-	float pixel_world = max(length(dFdx(point)),length(dFdy(point)));
+	float pixel_world = max(length(dFdx(relative_position.xz)),length(dFdy(relative_position.xz)));
 	// At continental distances the streamed bathymetry covers less than the
 	// view. Resolve to ocean color before its moving patch can read as a square.
 	surveyed_surface *= 1.0-smoothstep(0.15,0.65,pixel_world);
 	float wind_detail = 1.0-smoothstep(0.008,0.035,pixel_world);
 	float ripple_detail = 1.0-smoothstep(0.0007,0.004,pixel_world);
 	float time = TIME*wave_speed;
-	float wind_a = dot(point,vec2(76.0,42.0))+sin(dot(point,vec2(9.7,-11.1)))*2.1-time*0.23;
-	float wind_b = dot(point,vec2(-53.0,86.0))+sin(dot(point,vec2(-7.3,5.1)))*1.7+time*0.16;
-	float ripple = dot(point,vec2(780.0,390.0))-time*0.55;
+	float wind_a = dot(point,vec2(76.0,42.0))+wave_phase.x+sin(dot(point,vec2(9.7,-11.1))+wave_phase.z)*2.1-time*0.23;
+	float wind_b = dot(point,vec2(-53.0,86.0))+wave_phase.y+sin(dot(point,vec2(-7.3,5.1))+wave_phase.w)*1.7+time*0.16;
+	float ripple = dot(point,vec2(780.0,390.0))+ripple_phase.x-time*0.55;
+	float ripple_b = dot(point,vec2(631.8,315.9))+ripple_phase.y-time*0.4455;
 	vec2 normal_wave = vec2(cos(wind_a),sin(wind_b))*0.025*wind_detail;
-	normal_wave += vec2(cos(ripple),sin(ripple*0.81))*0.012*ripple_detail;
+	normal_wave += vec2(cos(ripple),sin(ripple_b))*0.012*ripple_detail;
 	vec3 deep = vec3(0.027,0.085,0.13);
 	vec3 shelf = vec3(0.065,0.195,0.23);
 	vec3 shallows = vec3(0.18,0.285,0.26);
