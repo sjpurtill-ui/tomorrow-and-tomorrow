@@ -786,3 +786,8 @@ Integrated 6145949. Region and mission choices survive command-panel refreshes a
 ## September 8 — easier panel closing
 
 Integrated e493ab5; 11 canonical checks pass. Bare map dismisses docks/help without issuing world orders; report backdrops dismiss supported screens. Military drawing remains functional. Map-help text and close label clarified. Running new campaign left untouched after user activity was detected; next launch receives the change. See MAP_DISMISSAL_HANDOFF.md.
+
+
+## September 10 — scouting allocation, city evidence and recruitment groups
+
+Integrated `ce7ed7a` on canonical Mac main, release 2026.09.10.2. Standing scouting replaces repeated general expedition buttons; connected physical routes, paid provisions and returned evidence apply to all civilizations. Compact city intelligence and map labels agree on observed population; targeted observation time improves estimates. Recruitment keeps existing soldiers and fills only missing people in supplied groups that fit free training places. HUD route-planning and hidden monthly vegetation rebuilds are removed; the actual year-31 release replay reaches 2.832 days/second at the 3-day setting. All 158 combined canonical checks pass, plus native UI/click verification. Frame stalls remain; no constant 3-day or smooth-FPS guarantee. See INTEGRATION_STATUS.md and SCOUTING_RECRUITMENT_CLARITY_HANDOFF.md for compatibility, evidence and held work. No player relaunch is part of this delivery.
