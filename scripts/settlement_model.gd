@@ -2066,15 +2066,32 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 	if day%90==0:
 		WorldSimulation.state.morphology_revision+=1
 
+func _completed_work_materials(work_name:String)->Dictionary:
+	for event in WorldSimulation.state.building_ledger:
+		if String(event.get("kind",""))!=work_name or not bool(event.get("counts_materials",false)):continue
+		if String(event.get("settlement_id",""))!=WorldSimulation.state.resource_settlement_id:continue
+		return (event.get("materials",{}) as Dictionary).duplicate(true)
+	return {}
+
+func _apply_completed_work_materials(plot:Dictionary,materials:Dictionary)->void:
+	if materials.is_empty():return # Older records retain their recorded appearance.
+	var family:=preload("res://scripts/construction_materials.gd").family_for(materials)
+	plot["material_family"]=family
+	plot["material_mix"]=preload("res://scripts/construction_materials.gd").mix_for(materials)
+	plot["roof_plan"]=_roof_plan_for(int(plot.get("seed",0)),family,String(plot.form))
+
 func _synchronize_early_works(day:int,events:Array[Dictionary])->void:
 	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed:
+		var shelter_materials:=_completed_work_materials("Lean-to Shelters")
 		for plot in WorldSimulation.state.settlement_plots:
 			if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"] or String(plot.get("form","")) not in ["portable_shelter_cluster","light_shelter_cluster"]: continue
 			plot["form"]="lean_to_household_cluster"
+			_apply_completed_work_materials(plot,shelter_materials)
+			if String(plot.get("material_family","organic"))=="earth":plot["form"]="earthen_household"
 			plot["converted_day"]=day
 			plot["roof_coverage"]=maxf(float(plot.get("roof_coverage",0.0)),0.22)
-			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":"lean_to_household_cluster","cause":"Lean-to Shelters"})
-			_record_plot_building_event(plot,"converted",day,{},false,"Portable shelter became a rooted lean-to household cluster.")
+			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":String(plot.form),"cause":"Shelter construction"})
+			_record_plot_building_event(plot,"converted",day,{},false,"Portable shelter replaced using the completed work’s recorded materials.")
 			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Shelters Took Root","plot_id":int(plot.id)})
 	var work_forms:Dictionary={"Storage Pits":{"use":"storage","from":"guarded_cache","to":"lined_storage_pits"},"Open Work Area":{"use":"workshop","from":"open_work_yard","to":"sheltered_work_area"}}
@@ -2084,6 +2101,7 @@ func _synchronize_early_works(day:int,events:Array[Dictionary])->void:
 		for plot in WorldSimulation.state.settlement_plots:
 			if String(plot.get("land_use",""))!=String(definition.use) or String(plot.get("form",""))!=String(definition.from): continue
 			plot["form"]=definition.to
+			_apply_completed_work_materials(plot,_completed_work_materials(String(work_name)))
 			plot["converted_day"]=day
 			plot["roof_coverage"]=maxf(float(plot.get("roof_coverage",0.0)),0.28)
 			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":definition.to,"cause":work_name})
@@ -2309,16 +2327,18 @@ func _available_functional_recipe(land_use:String)->Dictionary:
 			{"family":"earth","form":"fuel_and_processing_yard","requires":"clay_shaping","cost":{"Clay":6.5,"Timber":2.4,"Stone":1.8},"mix":{"Clay":0.50,"Stone":0.22,"Timber":0.18}},
 			{"family":"stone","form":"heavy_processing_yard","requires":"stone_selection","cost":{"Stone":8.5,"Timber":2.8},"mix":{"Stone":0.62,"Timber":0.22,"Clay":0.08}}
 		]
-	for recipe in recipes:
-		var discovery:=String(recipe.get("requires",""))
-		if not discovery.is_empty() and discovery not in WorldSimulation.state.known_discoveries: continue
-		var available:=true
-		for resource_name in recipe.cost:
-			if float(stocks.get(resource_name,0.0))<float(recipe.cost[resource_name]):
-				available=false
-				break
-		if available: return recipe
-	return {}
+	# Small earthen rooms and reed-covered courts provide timber-free variants.
+	# Industrial fuel/processing yards retain their actual fuel requirements.
+	var fiber_costs:={"workshop":1.6,"market":2.2,"hospitality":2.4,"civic":3.4}
+	if fiber_costs.has(land_use):
+		for recipe:Dictionary in recipes.duplicate(true):
+			if recipe.family!="earth":continue
+			var alternative:Dictionary=recipe.duplicate(true)
+			alternative.cost.erase("Timber")
+			alternative.cost["Clay"]=float(alternative.cost.Clay)*1.25
+			alternative.cost["Fiber Plants"]=float(fiber_costs[land_use])
+			recipes.append(alternative)
+	return preload("res://scripts/construction_materials.gd").choose(recipes,stocks,WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
@@ -2487,18 +2507,12 @@ func _resident_capacity_for_growth()->int:
 	return capacity
 
 func _available_household_recipe()->Dictionary:
-	var stocks:=WorldSimulation.state.resource_stockpiles
-	# A stone-housing directive changes which feasible recipe builders choose; it
-	# cannot bypass the material discovery or the delivered stock requirement.
-	if WorldSimulation.consequences.policy_effect("stone_priority")>0.01 and "stone_selection" in WorldSimulation.state.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
-		return {"family":"stone","form":"dry_stone_household","cost":{"Stone":4.2,"Timber":0.8},"mix":{"Stone":0.72,"Timber":0.12,"Fiber Plants":0.06}}
-	if float(stocks.get("Timber",0.0))>=1.8 and float(stocks.get("Fiber Plants",0.0))>=1.2:
-		return {"family":"organic","form":"timber_and_fibre_household","cost":{"Timber":1.8,"Fiber Plants":1.2},"mix":{"Timber":0.52,"Fiber Plants":0.34,"Clay":0.05}}
-	if "clay_shaping" in WorldSimulation.state.known_discoveries and float(stocks.get("Clay",0.0))>=3.2 and float(stocks.get("Fiber Plants",0.0))>=0.6:
-		return {"family":"earth","form":"earthen_household","cost":{"Clay":3.2,"Fiber Plants":0.6},"mix":{"Clay":0.68,"Fiber Plants":0.16,"Timber":0.08}}
-	if "stone_selection" in WorldSimulation.state.known_discoveries and float(stocks.get("Stone",0.0))>=4.2 and float(stocks.get("Timber",0.0))>=0.8:
-		return {"family":"stone","form":"dry_stone_household","cost":{"Stone":4.2,"Timber":0.8},"mix":{"Stone":0.72,"Timber":0.12,"Fiber Plants":0.06}}
-	return {}
+	var recipes:Array[Dictionary]=[
+		{"family":"organic","form":"timber_and_fibre_household","cost":{"Timber":1.8,"Fiber Plants":1.2}},
+		{"family":"earth","form":"earthen_household","requires":"clay_shaping","cost":{"Clay":3.2,"Fiber Plants":0.6}},
+		{"family":"stone","form":"dry_stone_household","requires":"stone_selection","cost":{"Stone":4.2,"Timber":0.8}}
+	]
+	return preload("res://scripts/construction_materials.gd").choose(recipes,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictionary={},action_index:=0)->bool:
 	if not _can_add_plots(): return false

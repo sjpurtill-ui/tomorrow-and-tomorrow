@@ -30,25 +30,21 @@ static func _settlement_project_available(project: Dictionary) -> bool:
 
 static func _settlement_project_material_plan(project:Dictionary)->Dictionary:
 	var required:Dictionary=(project.get("materials",{}) as Dictionary).duplicate(true)
-	var options:Array[Dictionary]=[required]
-	if String(project.get("name",""))=="Lean-to Shelters":
-		# Early shelter must not be hard-locked behind one named plant deposit.
-		# Bark, brush, reeds, earth daub and dry stone are historically plausible
-		# substitutes, with heavier alternatives costing more bulk.
-		options=[
-			required,
-			{"Timber":25.0},
-			{"Timber":15.0,"Clay":10.0},
-			{"Timber":14.0,"Stone":14.0},
-		]
-	for option in options:
-		var affordable:=true
-		for resource_name in option:
-			if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))+0.0001<float(option[resource_name]):
-				affordable=false
-				break
-		if affordable: return option.duplicate(true)
-	return {}
+	var options:Array[Dictionary]=[{"cost":required}]
+	match String(project.get("name","")):
+		"Hearth Circle":
+			options.append_array([{"cost":{"Stone":8.0,"Fiber Plants":6.0}}, {"cost":{"Clay":10.0,"Fiber Plants":6.0}}])
+		"Lean-to Shelters":
+			options.append_array([
+				{"cost":{"Timber":25.0}}, {"cost":{"Timber":15.0,"Clay":10.0}}, {"cost":{"Timber":14.0,"Stone":14.0}},
+				{"cost":{"Fiber Plants":32.0}},
+				{"cost":{"Clay":32.0,"Fiber Plants":12.0},"requires":"clay_shaping"}
+			])
+		"Storage Pits":options.append({"cost":{"Clay":8.0,"Fiber Plants":3.0}})
+		"Open Work Area":options.append({"cost":{"Clay":16.0,"Fiber Plants":8.0}})
+		"Gathering Yard":options.append_array([{"cost":{"Stone":16.0,"Fiber Plants":4.0}}, {"cost":{"Clay":18.0,"Fiber Plants":4.0}}])
+	var selected:=preload("res://scripts/construction_materials.gd").choose(options,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries)
+	return selected.get("cost",{})
 
 
 static func _current_settlement_project() -> Dictionary:
@@ -99,7 +95,7 @@ static func process_day()->Array[Dictionary]:
 		WorldSimulation.settlements.ensure_founded()
 		WorldSimulation.government.initialize()
 	elif title=="Lean-to Shelters":WorldSimulation.state.housing_capacity+=roundi(90*(1+WorldSimulation.discovery.effect("housing_output")+WorldSimulation.progression.effect("housing_output")))
-	var event:={"day":int(WorldSimulation.state.elapsed_days),"settlement_id":WorldSimulation.state.resource_settlement_id,"settlement_name":WorldSimulation.state.settlement_name,"event":"completed","kind":title,"form":"communal_work","land_use":"communal","material_family":"stone" if materials.has("Stone") else ("earth" if materials.has("Clay") else "organic"),"materials":materials,"counts_materials":true,"condition":1.0,"status":"active","note":String(project.get("effect",""))}
+	var event:={"day":int(WorldSimulation.state.elapsed_days),"settlement_id":WorldSimulation.state.resource_settlement_id,"settlement_name":WorldSimulation.state.settlement_name,"event":"completed","kind":title,"form":"communal_work","land_use":"communal","material_family":preload("res://scripts/construction_materials.gd").family_for(materials),"materials":materials,"counts_materials":true,"condition":1.0,"status":"active","note":String(project.get("effect",""))}
 	WorldSimulation.state.record_building_event(event)
 	events.append(event)
 	return events

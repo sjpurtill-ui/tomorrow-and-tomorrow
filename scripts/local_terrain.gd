@@ -180,6 +180,7 @@ const RENDERED_SURFACE:=preload("res://scripts/rendered_surface_height.gd")
 var river_overlays: Array[MeshInstance3D] = []
 var lens_panel: PanelContainer
 var lens_body: RichTextLabel
+var lens_survey: ScrollContainer
 var lens_location_label: Label
 var lens_ring: MeshInstance3D
 var lens_world_position := Vector3.ZERO
@@ -1938,8 +1939,10 @@ void fragment() {
 	vec3 forest_sample = mix(forest_map, forest_close, close_detail * 0.60);
 	float ground_luma = dot(ground_sample, vec3(0.28, 0.57, 0.15));
 	float forest_luma = dot(forest_sample, vec3(0.28, 0.57, 0.15));
-	vec3 ground_surface = mix(vec3(ground_luma), ground_sample, 0.88);
-	ground_surface = mix(vec3(0.29, 0.30, 0.22), ground_surface, 0.79);
+	// Texture supplies light/dark detail; the surveyed biome supplies the hue.
+	// Tint multiplication alone left green photographs green in dry climates.
+	vec3 ground_surface = mix(vec3(ground_luma) * biome_hue, ground_sample, 0.08);
+	ground_surface = mix(vertex_tint * 0.70, ground_surface, 0.79);
 	vec3 forest_surface = mix(vec3(forest_luma), forest_sample, 0.76);
 	forest_surface = mix(vec3(0.058, 0.108, 0.069), forest_surface, 0.77);
 	// Alpha carries woodland density from the same biome samples used by
@@ -1964,13 +1967,14 @@ void fragment() {
 	float drainage_raw=0.50+sin(world_position.z*1.11+drainage_index*1.73+drainage_phase*31.0)*0.31+sin(world_position.z*0.37-drainage_index*2.41+drainage_phase*67.0)*0.19;
 	float drainage_active=smoothstep(0.29,0.72,drainage_raw);
 	float drainage_distance=abs(world_position.x-drainage_x)+mix(0.075,0.0,drainage_active);
+	float climate_green=smoothstep(-0.018,0.065,COLOR.g-COLOR.r);
 	float riparian=(1.0-smoothstep(0.025,0.115,drainage_distance))*drainage_active;
 	float swale_floor=(1.0-smoothstep(0.006,0.026,drainage_distance))*drainage_active;
-	earth=mix(earth,vec3(0.17,0.275,0.155),riparian*(0.20+local_detail*0.12));
+	earth=mix(earth,vec3(0.17,0.275,0.155),riparian*(0.06+climate_green*(0.14+local_detail*0.12)));
 	earth=mix(earth,vec3(0.225,0.245,0.165),swale_floor*(0.26+close_detail*0.18));
 	float open_meadow = smoothstep(0.58,0.78,soil_patch) * (1.0-forest_mask) * (1.0-close_detail*0.45);
 	float dryland_mass = smoothstep(0.60,0.80,organic_noise(world_position.xz*0.022+vec2(61.0,-47.0))) * (1.0-forest_mask);
-	earth = mix(earth, vec3(0.34,0.37,0.205), open_meadow*0.30);
+	earth = mix(earth, vec3(0.34,0.37,0.205), open_meadow*0.30*climate_green);
 	earth = mix(earth, vec3(0.43,0.37,0.235), dryland_mass*0.26);
 	float dry_patch = smoothstep(0.63, 0.84, value_noise(world_position.xz * 1.7 + vec2(-31.0, 22.0))) * close_detail;
 	float worn_patch = smoothstep(0.70, 0.91, value_noise(world_position.xz * 7.5 + vec2(8.0, -14.0))) * close_detail;
@@ -1983,7 +1987,7 @@ void fragment() {
 	float close_lush_mass = smoothstep(0.47,0.75,organic_noise(world_position.xz*32.0+vec2(37.0,-61.0))) * close_detail * (1.0-slope);
 	float close_clearings = smoothstep(0.62,0.86,organic_noise(world_position.xz*70.0+vec2(11.0,47.0))) * close_detail * (1.0-forest_mask);
 	earth = mix(earth,vec3(0.39,0.335,0.225),close_soil_mass*0.43);
-	earth = mix(earth,vec3(0.19,0.285,0.145),close_lush_mass*0.27);
+	earth = mix(earth,vec3(0.19,0.285,0.145),close_lush_mass*0.27*climate_green);
 	earth = mix(earth,vec3(0.31,0.295,0.205),close_clearings*0.16);
 	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06;
 	earth *= modulation;
@@ -2131,6 +2135,8 @@ func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
 	var stone:=clampf((height/6.0)*(1.0-woodland),0.0,1.0)+(0.3 if id=="upland" else 0.0)
 	# Color: continuous blends so biome borders read as transitions, not tiles.
 	var color:=Color("#7a6c4c").lerp(Color("#5f6a45"),clampf((precipitation-0.18)*3.2,0.0,1.0))
+	var dryness:=1.0-smoothstep(0.30,0.49,precipitation)
+	color=color.lerp(Color("#a48a59"),dryness*0.92)
 	color=color.lerp(Color("#2c4a34"),woodland*0.9)
 	if id=="wetland": color=color.lerp(Color("#3a5348"),0.62)
 	if id=="floodplain": color=color.lerp(Color("#33553c"),0.70)
@@ -13271,8 +13277,9 @@ func _create_warfare_front_marker(front_id:String)->Node3D:
 func _build_lens(layer: CanvasLayer) -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	lens_panel = PanelContainer.new()
-	lens_panel.position = Vector2(viewport_size.x - 344.0, 108.0)
-	lens_panel.size = Vector2(320.0, 342.0)
+	lens_panel.position = Vector2(viewport_size.x - 440.0, 104.0)
+	lens_panel.set_meta("responsive_scroll_layout",true)
+	lens_panel.size = Vector2(minf(420,viewport_size.x-40),minf(500,viewport_size.y-190))
 	lens_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color("#101719ee")
@@ -13282,7 +13289,7 @@ func _build_lens(layer: CanvasLayer) -> void:
 	panel_style.corner_radius_top_right = 2
 	panel_style.corner_radius_bottom_left = 2
 	panel_style.corner_radius_bottom_right = 2
-	panel_style.set_content_margin_all(20)
+	panel_style.set_content_margin_all(12)
 	lens_panel.add_theme_stylebox_override("panel", panel_style)
 	layer.add_child(lens_panel)
 	var column := VBoxContainer.new()
@@ -13291,9 +13298,9 @@ func _build_lens(layer: CanvasLayer) -> void:
 	var lens_header:=HBoxContainer.new()
 	column.add_child(lens_header)
 	var title := Label.new()
-	title.text = "GROUND INSPECTION"
+	title.text = "GROUND SURVEY"
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", 17)
 	title.add_theme_color_override("font_color", Color("#dfd0aa"))
 	lens_header.add_child(title)
 	var close_lens:=Button.new()
@@ -13306,12 +13313,14 @@ func _build_lens(layer: CanvasLayer) -> void:
 	lens_location_label = Label.new()
 	lens_location_label.add_theme_font_size_override("font_size", 12)
 	lens_location_label.add_theme_color_override("font_color", Color("#938c7a"))
+	lens_location_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(lens_location_label)
 	var rule := HSeparator.new()
 	rule.add_theme_color_override("separator", Color("#75694f"))
 	column.add_child(rule)
 	var found_title := Label.new()
-	found_title.text = "RECOGNIZED HERE"
+	found_title.text = ""
+	found_title.visible=false
 	found_title.add_theme_font_size_override("font_size", 13)
 	found_title.add_theme_color_override("font_color", Color("#c5b992"))
 	column.add_child(found_title)
@@ -13325,6 +13334,10 @@ func _build_lens(layer: CanvasLayer) -> void:
 	lens_body.add_theme_font_size_override("normal_font_size", 14)
 	lens_body.add_theme_color_override("default_color", Color("#c7c2b4"))
 	column.add_child(lens_body)
+	lens_survey=preload("res://scripts/hud/resource_survey_card.gd").new()
+	lens_survey.host_panel=lens_panel
+	column.add_child(lens_survey)
+	lens_survey.visible=false
 	lens_panel.visible=false
 
 func _close_lens()->void:
@@ -13565,6 +13578,7 @@ func _inspect_location_local(position: Vector3) -> void:
 	lens_panel.visible = true
 	lens_world_position = position
 	var revealed:=_world_position_is_revealed(position)
+	var survey_advice:Dictionary={}
 	var settlement_context:Dictionary={}
 	if GameState.settlement_site_committed and "Hearth Circle" in GameState.settlement_completed:
 		settlement_context=_settlement_model().settlement_at_world(Vector2(position.x,position.z))
@@ -13634,11 +13648,18 @@ func _inspect_location_local(position: Vector3) -> void:
 	if revealed and contact_context.is_empty():
 		lens_body.text=_surface_resource_report(position)+lens_body.text
 		if settlement_context.is_empty() or not bool(settlement_context.get("inside_border",false)):
-			var advice:=_founding_site_advice(position)
+			survey_advice=_founding_site_advice(position)
+			var advice:=survey_advice
 			var water_text:="[color=#%s][b]%s[/b][/color]\n%s\n%s\n\n" % [(advice.color as Color).to_html(false),String(advice.title),String(advice.get("source_text","No confirmed drinking source")),String(advice.reason)]
 			var neighbors:Dictionary=advice.neighbors
 			water_text+="[color=#e9bf70]%s[/color]\n%s\n\n" % [String(neighbors.title),String(neighbors.text)]
 			lens_body.text=water_text+lens_body.text
+	var graphical:=revealed and contact_context.is_empty() and settlement_plot.is_empty()
+	lens_survey.visible=graphical; lens_body.visible=not graphical
+	if graphical:
+		var biome:=_biome_at(position.x,position.z)
+		var surface:={"id":biome.id,"label":biome.label,"tree_cover":_woodland_density_at(position.x,position.z),"stone":"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","soil":"high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","fiber":"plentiful" if _surface_material_density(biome,"Fiber Plants")>0.4 else "scattered" if _surface_material_density(biome,"Fiber Plants")>=0.08 else "limited"}
+		lens_survey.show_survey(entries,surface,survey_advice)
 
 
 func _retire_primary_screen(panel)->void:
