@@ -1,0 +1,13 @@
+# Landscape iteration 1 — truthful and stable vegetation
+
+Task: `/Users/seanpurtill/Documents/Codex/tt-landscape-cover`, `codex/landscape-cover`, based on integrated main `a5fff97810f36a209307623085f74186e01f4d7a`. Sole integrator; owns vegetation placement/materials in `scripts/local_terrain.gd`, the new `landscape_cover.gd` helper and focused probes.
+
+Broad vegetation formerly chose trees from moisture noise without checking the actual woodland field. It now uses the same biome woodland density as surveys and resource access. Close trees and legacy timber patches reject water/treeless ground. Scrub density/color follows precipitation and temperature. This is a presentation correction, not a new climate, a resource grant or a population change.
+
+Close candidates occupy deterministic world cells. Moving a convoy detail patch or clearing one parcel no longer reseeds unrelated vegetation. Cluster members and atlas variants retain their physical identity. Roughly 3,500 candidate cells replace the old 3,400 random attempts; populations do not increase that work. Existing tree assets remain in use. Regrowth/harvest still comes from saved woodland resource ledgers; the forest-floor material now respects those cuts too.
+
+Trees, scrub and forest floors follow the map's real discovery mask. The old vegetation material had no fog check, allowing greenery over hidden terrain. Weak material references update revealed areas and player origin without retaining every replaced vegetation batch.
+
+Validation: all **36 cases** across cover, landscape resources/visuals, harvest, close mesh/jobs, regional patch and river geometry pass (`/tmp/tt-landscape-final-tests.log`). Headless cover tests capture generated transforms directly because the dummy renderer returns zero MultiMesh transforms. The native capture-only probe separately verifies **803 actual rendered crowns** retain position, shape, color and atlas variant through an overlapping patch move, and verifies hidden vegetation renders exactly like no vegetation. Four climate captures were inspected; drylands and cold barrens contain zero crowns, grassland 548, woodland 1734 in the controlled fixture. These are visual sample counts, not a resource census. Native probe passes, exits and leaves only ignored artifacts. The normal project boots/shuts down headlessly without script errors.
+
+Save schema unchanged. No gameplay or human/opponent rule divergence. Old visual placements refresh on restart from the existing world seed and biome; physical resource amounts are preserved. New texture families, shorelines, seasonal appearance, relief/climate calibration and broader scenic quality remain ongoing landscape work. This first iteration does not claim all landscape realism is finished.

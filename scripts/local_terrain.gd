@@ -19,6 +19,7 @@ const FoundingSiteGuide:=preload("res://scripts/hud/founding_site_guide.gd")
 var founding_site_advisor:RefCounted
 var founding_site_guide:Control
 const SocietalValuesModel:=preload("res://scripts/societal_values_model.gd")
+const LandscapeCover=preload("res://scripts/landscape_cover.gd")
 const WorldDiscoveryMapScript:=preload("res://scripts/world_discovery_map.gd")
 const WarfareMapPresentation:=preload("res://scripts/warfare_map_presentation.gd")
 const SCORE_TRACKS:=[
@@ -344,6 +345,7 @@ const LANDSCAPE_VISUALS:=preload("res://scripts/landscape_resource_visuals.gd")
 var woodland_visual_areas:=PackedVector4Array()
 var woodland_visual_key:=""
 var woodland_harvest_detail:MultiMeshInstance3D
+var vegetation_fog_materials:Array[WeakRef]=[]
 var woodland_visual_materials:Array[WeakRef]=[]
 var terrain_fog_materials:Array[ShaderMaterial]=[]
 var rendered_fog_revision:=-1
@@ -1774,6 +1776,14 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	var snapshot:Dictionary=CivilizationSystem.fog_snapshot()
 	var revision:=int(snapshot.get("revision",0))
 	var current_origin:Dictionary=snapshot.get("current_origin",{})
+	var living_vegetation:Array[WeakRef]=[]
+	for reference:WeakRef in vegetation_fog_materials:
+		var material:=reference.get_ref() as ShaderMaterial
+		if material==null:continue
+		living_vegetation.append(reference)
+		material.set_shader_parameter("discovery_mask",discovery_mask_texture)
+		material.set_shader_parameter("fog_current_origin",Vector2(float(current_origin.get("x",0)),float(current_origin.get("z",0))))
+	vegetation_fog_materials=living_vegetation
 	for material in terrain_fog_materials:
 		if material==null or not is_instance_valid(material): continue
 		material.set_shader_parameter("fog_current_origin",Vector2(float(current_origin.get("x",0.0)),float(current_origin.get("z",0.0))))
@@ -2523,14 +2533,17 @@ func _scatter_landscape_vegetation() -> void:
 		var height := _height_at(x, z)
 		if height < (0.03 if SEAMLESS_WORLD else -1.6) or height > 13.5:
 			continue
+		var biome:=_biome_at(x,z,height)
+		var woodland:=LandscapeCover.canopy_density(biome)
+		if woodland<=0.0:continue
 		var forest_noise := moisture_noise.get_noise_2d(x,z) if SEAMLESS_WORLD else terrain_noise.get_noise_2d(x * 1.35 + 1300.0, z * 1.35 - 800.0)
 		var threshold := -0.03 if SEAMLESS_WORLD else (-0.16 if GameState.province_terrain == "Forest" else 0.03)
-		if forest_noise < threshold or rng.randf() > 0.78:
+		if (not SEAMLESS_WORLD and forest_noise<threshold) or rng.randf()>woodland*.78:
 			continue
 		var scale := rng.randf_range(0.48, 1.06)
 		var basis := Basis().scaled(Vector3(scale * rng.randf_range(0.75, 1.05), scale * rng.randf_range(1.6, 2.45), scale))
 		transforms.append(Transform3D(basis, Vector3(x, height + scale * 0.014, z)))
-		colors.append(Color("#344836").lerp(Color("#5e6743"), rng.randf_range(0.0, 0.42)))
+		colors.append(LandscapeCover.canopy_tint(biome,rng.randf()))
 	if transforms.is_empty():
 		return
 	var canopy_mesh := SphereMesh.new()
@@ -2778,13 +2791,15 @@ func _create_forest_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
 		if not _inside_province(x / world_width + 0.5, z / world_depth + 0.5):
 			continue
 		var y := _height_at(x, z)
+		var biome:=_biome_at(x,z,y)
+		if y<=SEA_LEVEL or LandscapeCover.canopy_density(biome)<=0:continue
 		var tree := MeshInstance3D.new()
 		tree.mesh = shared_crown
 		var scale := rng.randf_range(0.72, 1.45)
 		tree.scale = Vector3(scale * rng.randf_range(0.78, 1.08), scale * rng.randf_range(1.35, 2.0), scale)
 		tree.position = Vector3(x, y + 0.014 * scale, z)
 		var material:=_vegetation_surface_material(0)
-		material.set_shader_parameter("canopy_tint",Color("#304535").lerp(Color("#586044"),rng.randf_range(0.0,0.44)))
+		material.set_shader_parameter("canopy_tint",LandscapeCover.canopy_tint(biome,rng.randf()))
 		tree.material_override=material
 		add_child(tree)
 	_create_resource_marker("Timber", center)
@@ -3461,18 +3476,20 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 	close_vegetation_center=Vector2(center.x,center.z)
 	close_vegetation_seed=GameState.world_seed
 	var rng := RandomNumberGenerator.new()
-	rng.seed = GameState.world_seed ^ int(round(center.x * 100.0)) ^ (int(round(center.z * 100.0)) << 11) ^ 0x31f2a7
 	var canopy_transforms: Array[Transform3D] = []
 	var canopy_colors: Array[Color] = []
 	var scrub_transforms: Array[Transform3D] = []
 	var scrub_colors: Array[Color] = []
 	var understory_patches:Array[Dictionary]=[]
-	for attempt in 3400:
-		var local_point := Vector2(rng.randf_range(-0.235, 0.235), rng.randf_range(-0.235, 0.235))
-		var world_x := center.x + local_point.x
-		var world_z := center.z + local_point.y
+	for candidate:Dictionary in LandscapeCover.candidates(Vector2(center.x,center.z),.235,.008,GameState.world_seed):
+		rng.seed=int(candidate.seed)
+		var point:Vector2=candidate.point
+		var local_point:=point-Vector2(center.x,center.z)
+		var world_x:=point.x
+		var world_z:=point.y
 		if _height_at(world_x, world_z) <= SEA_LEVEL or _near_persistent_settlement_surface(local_point):
 			continue
+		var biome:=_biome_at(world_x,world_z)
 		var moisture := moisture_noise.get_noise_2d(world_x, world_z)
 		# Woodland is nested land cover, not independent tree noise. The previous
 		# x940 sample produced a new decision every ~40 m and peppered every camera
@@ -3492,9 +3509,9 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 		var woodland_chance := 0.002
 		if woodland_field > 0.015:
 			woodland_chance = clampf((woodland_field - 0.015) * 1.08, 0.012, 0.54)
-		woodland_chance*=clampf(float(_biome_at(world_x,world_z).woodland)*2.0,0.0,1.0)
+		woodland_chance*=clampf(LandscapeCover.canopy_density(biome)*2.0,0.0,1.0)
 		var is_canopy := rng.randf() < woodland_chance
-		var scrub_chance := clampf(0.07 + maxf(0.0, woodland_field) * 0.26, 0.05, 0.24)
+		var scrub_chance:=LandscapeCover.scrub_density(biome)*clampf(.65+maxf(0.0,woodland_field),.5,1.4)
 		if not is_canopy and rng.randf() > scrub_chance:
 			continue
 		var height := _close_surface_height_at(world_x, world_z)
@@ -3502,7 +3519,7 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 			var scale := rng.randf_range(0.74, 1.34)
 			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(scale * rng.randf_range(0.72, 1.10), scale * rng.randf_range(0.72, 1.22), scale))
 			canopy_transforms.append(Transform3D(basis, Vector3(world_x, height + 0.00125 * scale, world_z)))
-			canopy_colors.append(Color("#3b5137").lerp(Color("#78815a"), rng.randf_range(0.05, 0.58)))
+			canopy_colors.append(LandscapeCover.canopy_tint(biome,rng.randf()))
 			# Woodland reads from altitude as connected crowns and edge belts, not a
 			# scatter of identical dots. Seed a few overlapping neighbours in strong
 			# moisture/noise pockets while preserving cleared plots and routes.
@@ -3510,21 +3527,25 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 				if rng.randf()<clampf(0.22+woodland_field*0.48,0.20,0.58):
 					understory_patches.append({"center":local_point,"radius":rng.randf_range(0.020,0.046)*(0.86+maxf(0.0,woodland_mass)*0.62),"seed":rng.randi()})
 				for cluster_member in rng.randi_range(2,6):
-					var neighbour_local:=local_point+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.0035,0.011)
+					rng.seed=int(candidate.seed)^(cluster_member*7919+104729)
+					var neighbour_world:=point+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.0035,0.011)
+					var neighbour_local:=neighbour_world-Vector2(center.x,center.z)
 					if _near_persistent_settlement_surface(neighbour_local): continue
-					var neighbour_x:=center.x+neighbour_local.x
-					var neighbour_z:=center.z+neighbour_local.y
+					var neighbour_x:=neighbour_world.x
+					var neighbour_z:=neighbour_world.y
 					if _height_at(neighbour_x,neighbour_z)<=SEA_LEVEL: continue
+					var neighbour_biome:=_biome_at(neighbour_x,neighbour_z)
+					if LandscapeCover.canopy_density(neighbour_biome)<=0:continue
 					var neighbour_scale:=scale*rng.randf_range(0.58,0.96)
 					var neighbour_basis:=Basis().rotated(Vector3.UP,rng.randf()*TAU).scaled(Vector3(neighbour_scale*rng.randf_range(0.78,1.16),neighbour_scale*rng.randf_range(0.72,1.08),neighbour_scale))
 					var neighbour_height:=_close_surface_height_at(neighbour_x,neighbour_z)
 					canopy_transforms.append(Transform3D(neighbour_basis,Vector3(neighbour_x,neighbour_height+0.00125*neighbour_scale,neighbour_z)))
-					canopy_colors.append(Color("#354b33").lerp(Color("#727d55"),rng.randf_range(0.06,0.54)))
+					canopy_colors.append(LandscapeCover.canopy_tint(neighbour_biome,rng.randf()))
 		else:
 			var scale := rng.randf_range(0.42, 1.25)
 			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(scale * rng.randf_range(0.70, 1.45), scale * rng.randf_range(0.42, 0.82), scale))
 			scrub_transforms.append(Transform3D(basis, Vector3(world_x, height + 0.0007 * scale, world_z)))
-			scrub_colors.append(Color("#4c5937").lerp(Color("#83764d"), rng.randf_range(0.0, 0.48)))
+			scrub_colors.append(LandscapeCover.scrub_tint(biome,rng.randf()))
 	_create_close_vegetation_multimesh("TreeCanopies", canopy_transforms, canopy_colors, 0.0037, 0.00235)
 	_create_close_vegetation_multimesh("ShrubAndGrassPatches", scrub_transforms, scrub_colors, 0.0011, 0.00125)
 	_create_woodland_understory(center,understory_patches)
@@ -3559,13 +3580,9 @@ func _create_woodland_understory(center:Vector3,patches:Array[Dictionary])->void
 	var instance:=MeshInstance3D.new()
 	instance.name="WoodlandUnderstory"
 	instance.mesh=mesh
-	var material:=StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo=true
-	material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.roughness=1.0
-	material.cull_mode=BaseMaterial3D.CULL_DISABLED
-	material.no_depth_test=true
+	var material:=_vegetation_surface_material(2)
 	material.render_priority=1
+	instance.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.material_override=material
 	close_vegetation_root.add_child(instance)
 
@@ -3587,7 +3604,7 @@ func _create_close_vegetation_multimesh(node_name: String, transforms: Array[Tra
 			var variant_transforms:Array[Transform3D]=[]
 			var variant_colors:Array[Color]=[]
 			for index in transforms.size():
-				if index%8!=variant: continue
+				if LandscapeCover.crown_variant(transforms[index].origin)!=variant: continue
 				variant_transforms.append(transforms[index])
 				variant_colors.append(colors[index])
 			_spawn_vegetation_multimesh("%s_%d" % [node_name,variant],mesh,variant_transforms,variant_colors,0,variant)
@@ -3619,6 +3636,9 @@ func _vegetation_surface_material(kind:int,atlas_variant:=-1)->ShaderMaterial:
 		vegetation_surface_shader.code="""
 shader_type spatial;
 render_mode blend_mix, depth_prepass_alpha, cull_disabled, diffuse_burley, specular_disabled;
+uniform sampler2D discovery_mask : source_color, filter_linear;
+uniform vec2 fog_world_size=vec2(40075.0,20004.0);
+uniform vec2 fog_current_origin=vec2(0.0);
 uniform int vegetation_kind = 0;
 uniform vec4 canopy_tint : source_color = vec4(1.0);
 uniform int atlas_variant = -1;
@@ -3642,6 +3662,9 @@ float filtered_vn(vec2 point) {
 }
 void vertex() { world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
 void fragment() {
+	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
+	float revealed=max(texture(discovery_mask,fog_uv).r,1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin)));
+	if(revealed<0.06) discard;
 	if(vegetation_kind==0 && tree_keep<0.5) discard;
 	float crown=filtered_vn(world_position.xz*410.0+vec2(17.0,-31.0));
 	float leaf=filtered_vn(world_position.xz*1350.0+vec2(-73.0,29.0));
@@ -3665,7 +3688,8 @@ void fragment() {
 	} else {
 		base=mix(base,base*vec3(1.12,1.02,0.69),gap*0.36);
 	}
-	ALBEDO=base;
+	if(vegetation_kind==2) { base=COLOR.rgb; ALPHA=COLOR.a*woodland_retained(world_position.xz)*smoothstep(0.06,0.62,revealed); }
+	ALBEDO=mix(vec3(0.006,0.012,0.014),base,smoothstep(0.06,0.62,revealed));
 	ROUGHNESS=1.0;
 	AO=0.84+crown*0.14;
 }
@@ -3678,6 +3702,10 @@ void fragment() {
 	material.set_shader_parameter("atlas_variant",atlas_variant)
 	var canopy_texture:=load("res://assets/textures/vegetation_canopy_atlas.png")
 	if canopy_texture: material.set_shader_parameter("canopy_atlas",canopy_texture)
+	material.set_shader_parameter("discovery_mask",discovery_mask_texture)
+	material.set_shader_parameter("fog_world_size",Vector2(world_width,world_depth))
+	material.set_shader_parameter("fog_current_origin",CivilizationSystem.player_world_origin)
+	vegetation_fog_materials.append(weakref(material))
 	return material
 
 func _create_irregular_canopy_mesh(radius:float,height:float)->ArrayMesh:
