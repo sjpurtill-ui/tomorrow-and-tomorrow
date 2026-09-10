@@ -243,7 +243,7 @@ func project(civ:Dictionary)->void:
 			added.role="frontier";added.approach_index=slot
 			regions.append(added)
 		var region:Dictionary=regions[slot]
-		var local:=settlements.city_resource_snapshot(String(city.id))
+		var local:=settlements.city_resource_snapshot(String(city.id),false)
 		region["settlement_founded"]=true
 		region["local_city_id"]=String(city.id)
 		region["position"]=city.position
@@ -268,23 +268,38 @@ func refresh_views()->void:
 	for id:String in actors:
 		var observer:Node=actors[id].systems.CivilizationSystem
 		var old_relations:Dictionary={}
-		for previous:Dictionary in observer.civilizations:old_relations[String(previous.id)]=previous.player_relation
+		var previous_views:Dictionary={}
+		for previous:Dictionary in observer.civilizations:
+			old_relations[String(previous.id)]=previous.player_relation
+			previous_views[String(previous.id)]=previous
 		observer.civilizations.clear()
 		for civ:Dictionary in CivilizationSystem.civilizations:
 			if String(civ.id)==id:continue
-			var visible:=civ.duplicate(true)
-			visible.player_relation=old_relations.get(String(civ.id),(civ.relations as Dictionary).get(id,{})).duplicate(true)
-			visible.player_relation=observer._relation_with_strategy_defaults(visible.player_relation,visible)
+			var visible:=_updated_observer_view(civ,previous_views.get(String(civ.id),{}))
+			visible.player_relation=observer._relation_with_strategy_defaults(old_relations.get(String(civ.id),(civ.relations as Dictionary).get(id,{})),visible)
 			_localize_controllers(visible,id)
 			observer.civilizations.append(visible)
 		if not human_projection.is_empty():
-			var human:=human_projection.duplicate(true)
-			human.player_relation=old_relations.get("human",{}).duplicate(true)
-			human.player_relation=observer._relation_with_strategy_defaults(human.player_relation,human)
+			var human:=_updated_observer_view(human_projection,previous_views.get("human",{}))
+			human.player_relation=observer._relation_with_strategy_defaults(old_relations.get("human",{}),human)
 			_localize_controllers(human,id)
 			observer.civilizations.append(human)
 		observer.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views(id))
 	CivilizationSystem.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views("player"))
+
+
+func _updated_observer_view(source:Dictionary,previous:Dictionary)->Dictionary:
+	var view:Dictionary={}
+	for field in source:
+		# The observer owns its relation; the caller restores and normalizes it.
+		if field=="player_relation":continue
+		var value:Variant=source[field]
+		if value is Dictionary or value is Array:
+			# Equal data is already a private copy belonging to this observer.
+			# Changed data is copied before any observer-local mutations.
+			view[field]=previous[field] if previous.has(field) and previous[field]==value else value.duplicate(true)
+		else:view[field]=value
+	return view
 
 func submit(id:String,order:Dictionary)->Dictionary:
 	if id!="player" and not actors.has(id):return {"error":"Unknown civilization."}
@@ -310,10 +325,8 @@ func capture_actor(id:String)->Dictionary:
 				var skip:Array=SNAPSHOT.REFLECT_SKIP.get(name,[]).duplicate()
 				if name=="CivilizationSystem":skip.append_array(["civilizations","foreign_formations","open_scout_plan_cache"])
 				payload[name]=SNAPSHOT._capture_reflected(instance,skip)
-				for property in instance.get_property_list():
-					if property.usage&PROPERTY_USAGE_SCRIPT_VARIABLE and instance.get(property.name) is RandomNumberGenerator:
-						payload[name]["rng_state:"+String(property.name)]=instance.get(property.name).state
-		payload["society_model"]=SNAPSHOT._capture_reflected(discovery.society_model,[])
+
+		payload["society_model"]=SNAPSHOT._capture_reflected(discovery.society_model,SNAPSHOT.SOCIETY_REFLECT_SKIP)
 		payload["city_intelligence"]=world.city_intelligence.records.duplicate(true)
 		payload["rumor_books"]=world.rumor_network.books.duplicate(true)
 		payload["chronicle"]=world.chronicle.data.duplicate(true)
@@ -400,7 +413,7 @@ func _restore_state(payload:Dictionary)->Dictionary:
 						if String(key).begins_with("rng_state:"):
 							instance.get(String(key).trim_prefix("rng_state:")).state=int(fields[key]);fields.erase(key)
 					SNAPSHOT._apply_reflected(instance,fields)
-			SNAPSHOT._apply_reflected(discovery.society_model,saved.state.get("society_model",{}))
+			SNAPSHOT._apply_reflected(discovery.society_model,saved.state.get("society_model",{}),SNAPSHOT.SOCIETY_REFLECT_SKIP)
 			world.city_intelligence.records=saved.state.get("city_intelligence",{}).duplicate(true)
 			world.rumor_network.books=saved.state.get("rumor_books",{}).duplicate(true)
 			world.chronicle.data=saved.state.get("chronicle",world.chronicle.data).duplicate(true)

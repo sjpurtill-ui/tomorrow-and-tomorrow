@@ -1,5 +1,7 @@
 extends Node
 
+var _forecast_climate_cache:Dictionary={}
+
 # Food is measured internally in adult-equivalent daily rations. One ration is
 # displayed as roughly 2,400 kcal. Demand is calculated from numeric age,
 # labor, pregnancy, lactation, travel, military, and climate cohorts.
@@ -21,6 +23,7 @@ var _environment_cache_key:=""
 var _environment_cache:Dictionary={}
 
 func reset_for_new_world()->void:
+	_forecast_climate_cache.clear()
 	initialized=false
 	_environment_cache_key=""
 	_environment_cache={}
@@ -410,7 +413,12 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	var projected_stocks:Dictionary=WorldSimulation.state.food_stocks.duplicate(true)
 	var current_day:=WorldSimulation.state.elapsed_days
 	var environment:=_environment_mix()
-	var current_weather:=_weather_yield_factor(environment,current_day)
+	var climate_key:=[WorldSimulation.state.world_seed,environment.get("position",Vector2.ZERO),environment.get("seasonality_c",12.0),environment.get("growing_season",0.5),environment.get("precipitation",0.5),environment.get("game",0.4),environment.get("water_access",0.0),environment.get("rainfall_variability",0.35)]
+	if not _forecast_climate_cache.has(climate_key):
+		if _forecast_climate_cache.size()>=16:_forecast_climate_cache.erase(_forecast_climate_cache.keys()[0])
+		_forecast_climate_cache[climate_key]={}
+	var climate_days:Dictionary=_forecast_climate_cache[climate_key]
+	var current_climate:=_forecast_climate(environment,current_day,climate_days)
 	var pre_ration_current:=float(demand_breakdown.get("total",0.0))+float(demand_breakdown.get("rationing",0.0))
 	var non_climate:=maxf(0.0,pre_ration_current-float(demand_breakdown.get("climate",0.0)))
 	var ration_factor:=1.0+_policy_effect("food_demand")
@@ -423,18 +431,18 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	# once instead of re-reading the same society and watershed hundreds of times.
 	var current_seasons:Dictionary={};var current_weather_types:Dictionary={}
 	for food_type in ["Fresh plants","Fresh meat","Fish","Dry staples"]:
-		current_seasons[food_type]=maxf(.05,PlanetEnvironment.food_season_factor(food_type,environment,current_day))
-		current_weather_types[food_type]=maxf(.05,_food_type_weather_multiplier(food_type,current_weather))
+		current_seasons[food_type]=maxf(.05,float(current_climate[food_type][0]))
+		current_weather_types[food_type]=maxf(.05,float(current_climate[food_type][1]))
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	if traveling:storage_multiplier*=1.28
 	for offset in range(1,horizon+1):
 		var future_day:=current_day+float(offset)
-		var future_weather:=_weather_yield_factor(environment,future_day)
+		var future_climate_factors:=_forecast_climate(environment,future_day,climate_days)
 		for food_type in ["Fresh plants","Fresh meat","Fish","Dry staples"]:
 			var current_season:=float(current_seasons[food_type])
-			var future_season:=PlanetEnvironment.food_season_factor(food_type,environment,future_day)
+			var future_season:=float(future_climate_factors[food_type][0])
 			var current_weather_type:=float(current_weather_types[food_type])
-			var future_weather_type:=_food_type_weather_multiplier(food_type,future_weather)
+			var future_weather_type:=float(future_climate_factors[food_type][1])
 			var future_yield:=float(current_harvest.get(food_type,0.0))*future_season/current_season*future_weather_type/current_weather_type
 			projected_stocks[food_type]=float(projected_stocks.get(food_type,0.0))+future_yield
 			total_produced+=future_yield
@@ -452,6 +460,18 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		if offset==30 or offset==horizon:
 			milestones[offset]=_forecast_summary(offset,projected_stocks,current_day,non_climate,ration_factor,inaccessible_army_rations,first_shortage,total_produced,total_required,total_spoiled)
 	return milestones.get(horizon,{})
+
+func _forecast_climate(environment:Dictionary,day:float,days:Dictionary)->Dictionary:
+	# Overlapping forecasts ask about the same future dates. Cache only the
+	# deterministic climate factors; recompute stocks, demand and shortages.
+	if days.has(day):return days[day]
+	var weather:=_weather_yield_factor(environment,day)
+	var result:Dictionary={}
+	for food_type in ["Fresh plants","Fresh meat","Fish","Dry staples"]:
+		result[food_type]=[PlanetEnvironment.food_season_factor(food_type,environment,day),_food_type_weather_multiplier(food_type,weather)]
+	if days.size()>=128:days.erase(days.keys()[0])
+	days[day]=result
+	return result
 
 func _forecast_summary(horizon:int,projected_stocks:Dictionary,current_day:float,non_climate:float,ration_factor:float,inaccessible_army_rations:float,first_shortage:int,total_produced:float,total_required:float,total_spoiled:float)->Dictionary:
 	var ending_total:=0.0

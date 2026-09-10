@@ -324,6 +324,7 @@ var travel_target := Vector3.ZERO
 var travel_days_total := 0.0
 var travel_days_elapsed := 0.0
 var game_speed := 0.0
+var simulation_clock:=preload("res://scripts/simulation_clock.gd").new()
 var world_menu_panel: Control
 var world_seed_input: LineEdit
 var world_seed_status: Label
@@ -383,6 +384,8 @@ var display_preferences:Node
 var quit_dialog:ConfirmationDialog
 var map_snapshot_elapsed:=0.1
 var map_snapshot_refreshes:=0
+var rendered_resource_overlay_signature:=""
+var civilization_geography_cache:Dictionary={}
 var military_attention_dialog:ConfirmationDialog
 var military_attention_seen:Dictionary={}
 
@@ -940,6 +943,7 @@ func _configure_preview_province() -> void:
 	GameState.province_mask = mask
 
 func _process(delta: float) -> void:
+	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0)
 	_advance_physical_army_fronts(delta)
 	_advance_close_terrain_job()
 	_refresh_discovery_mask()
@@ -982,8 +986,7 @@ func _process(delta: float) -> void:
 		return
 	if game_speed <= 0.0:
 		return
-	var days_advanced := delta * _speed_hours_per_second()/24.0
-	advance_world_time(days_advanced)
+	advance_world_time(calendar_days)
 
 func advance_world_time(days_advanced:float)->void:
 	# Stop at the calendar boundary; never simulate part of an unchosen century.
@@ -1319,6 +1322,15 @@ func _commit_live_report_replacements()->void:
 
 
 func _civilization_geography(origin:Vector2)->Dictionary:
+	# The authored ground and catchment potential do not change each day.
+	# Extraction, regrowth and city stores remain in their live resource ledgers.
+	var key:=[GameState.world_seed,origin]
+	if not civilization_geography_cache.has(key):
+		if civilization_geography_cache.size()>=512:civilization_geography_cache.erase(civilization_geography_cache.keys()[0])
+		civilization_geography_cache[key]=_sample_civilization_geography(origin)
+	return civilization_geography_cache[key].duplicate(true)
+
+func _sample_civilization_geography(origin:Vector2)->Dictionary:
 	var ground:=_survey_ground_at(origin)
 	var water_distance:=_river_distance_at(origin.x,origin.y)*KM_PER_WORLD_UNIT
 	var catchments:=_surface_material_catchments(Vector3(origin.x,0,origin.y))
@@ -3936,16 +3948,18 @@ func _refresh_settlement_network(force:=false)->void:
 	var network:Dictionary=_settlement_model().settlement_network_snapshot()
 	if settlement_border_root: settlement_border_root.queue_free()
 	if settlement_network_marker_root: settlement_network_marker_root.queue_free()
-	if settlement_network_fabric_root: settlement_network_fabric_root.queue_free()
+
 	settlement_border_root=Node3D.new()
 	settlement_border_root.name="SettlementTerritoryBorders"
 	add_child(settlement_border_root)
 	settlement_network_marker_root=Node3D.new()
 	settlement_network_marker_root.name="SettlementNetworkMarkers"
 	add_child(settlement_network_marker_root)
-	settlement_network_fabric_root=Node3D.new()
-	settlement_network_fabric_root.name="SettlementNetworkPhysicalFabric"
-	add_child(settlement_network_fabric_root)
+	if not is_instance_valid(settlement_network_fabric_root):
+		settlement_network_fabric_root=Node3D.new()
+		settlement_network_fabric_root.name="SettlementNetworkPhysicalFabric"
+		add_child(settlement_network_fabric_root)
+	settlement_network_fabric_root.visible=true
 	var border_surface:=SurfaceTool.new()
 	border_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var border_halo_surface:=SurfaceTool.new()
@@ -3975,7 +3989,7 @@ func _refresh_settlement_network(force:=false)->void:
 		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,boundary,core_width*2.8,halo_color,0.0045)
 		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,color,0.0065)
 	_create_secondary_settlement_markers(visible_secondary_settlements)
-	_create_secondary_settlement_footprints(visible_secondary_settlements)
+	_create_secondary_settlement_footprints(visible_secondary_settlements,force)
 	if ownership_triangle_count>0:
 		var ownership_mesh:=ownership_surface.commit()
 		var ownership_instance:=MeshInstance3D.new()
@@ -7153,30 +7167,43 @@ func _secondary_settlement_footprint_patch_allocations(settlements:Array[Diction
 	return allocations
 
 
-func _create_secondary_city_design(settlement:Dictionary,parent:Node3D)->bool:
+func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=false)->bool:
 	var record:Dictionary=SettlementModel.settlement_record(String(settlement.get("id","")))
 	if record.is_empty() or bool(record.get("primary",false)): return false
 	SettlementModel._ensure_city_resources(record)
 	var point:Vector2=record.position
 	var center:=Vector3(point.x,0,point.y)
-	var fabric:=Node3D.new();fabric.name="CityDesign_"+String(record.id);parent.add_child(fabric)
-	# Run the same recorded-plot renderer used by the original city, including
-	# inherited early buildings, later forms, fields, lanes and damage.
+	# A city ledger changes daily. Its buildings only need new meshes when
+	# their actual appearance or the camera's detail requirements change.
 	SettlementModel.with_city_resources(String(record.id),func()->void:
 		var lod:=_settlement_morphology_lod()
+		var signature:=str([center,lod,_settlement_morphology_view_signature(lod),_settlement_morphology_visual_signature(),_settlement_architecture_signature(_settlement_architecture_profile())])
+		var fabric:Node3D=null
+		for child in parent.get_children():
+			if String(child.get_meta("city_id",""))==String(record.id):fabric=child;break
+		if not force and fabric!=null and String(fabric.get_meta("visual_signature",""))==signature:return
+		if fabric!=null:parent.remove_child(fabric);fabric.queue_free()
+		fabric=Node3D.new();fabric.name="CityDesign_"+String(record.id)
+		fabric.set_meta("city_id",String(record.id));fabric.set_meta("visual_signature",signature)
+		parent.add_child(fabric)
 		var plots:Array[Dictionary]=SettlementModel.plots_for_lod(lod)
 		_create_plot_fabric(center,plots,lod,fabric)
 		_create_persistent_settlement_routes(center,GameState.settlement_routes,fabric)
 	)
 	return true
 
-func _create_secondary_settlement_footprints(settlements:Array[Dictionary])->void:
+func _create_secondary_settlement_footprints(settlements:Array[Dictionary],force:=false)->void:
 	var parent:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
 	if parent==null:return
+	var visible_ids:Dictionary={}
 	for settlement in settlements:
 		var profile:=_settlement_expansion_visual_profile(settlement)
 		if camera!=null and camera.size>_settlement_stage_landscape_max_zoom(profile):continue
-		_create_secondary_city_design(settlement,parent)
+		visible_ids[String(settlement.id)]=true
+		_create_secondary_city_design(settlement,parent,force)
+	for child in parent.get_children():
+		if child.has_meta("city_id") and not visible_ids.has(String(child.get_meta("city_id",""))):
+			parent.remove_child(child);child.queue_free()
 
 func _secondary_settlement_label_limit()->int:
 	if camera==null: return 24
@@ -7327,7 +7354,7 @@ func _settlement_morphology_visual_signature()->String:
 		roundi(clampf(float(GameState.simulation_metrics.get("material_capacity",0.12)),0.0,1.0)*20.0),
 		roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)*20.0)
 	]
-	var cache_key:="%d:%d:%s" % [GameState.morphology_revision,int(GameState.elapsed_days/365.0),social_condition_key]
+	var cache_key:="%s:%d:%d:%s" % [GameState.resource_settlement_id,GameState.morphology_revision,int(GameState.elapsed_days/365.0),social_condition_key]
 	if cache_key==cached_morphology_visual_signature_key: return cached_morphology_visual_signature
 	var plot_hash:=0
 	for plot in GameState.settlement_plots:
@@ -12002,6 +12029,16 @@ func _refresh_local_resource_overlays() -> void:
 		camera.size,
 		func(position:Vector3)->bool: return _world_position_is_revealed(position)
 	)
+	var visual_fields:Array=[GameState.world_seed,CivilizationSystem.fog_revision,GameState.selected_player_settlement_id]
+	for cluster in clusters:
+		if String(cluster.resource) in ["Timber","Game","Fertile Soil","Fiber Plants"]:continue
+		visual_fields.append([cluster.resource,cluster.position,cluster.visual_stage])
+	var signature:=str(hash(visual_fields))
+	if resource_overlay_root and is_instance_valid(resource_overlay_root) and signature==rendered_resource_overlay_signature:
+		resource_overlay_root.visible=true
+		rendered_resource_overlay_zoom_key=_resource_overlay_view_key()
+		return
+	rendered_resource_overlay_signature=signature
 	if resource_overlay_root and is_instance_valid(resource_overlay_root):
 		resource_overlay_root.queue_free()
 	resource_overlay_root=Node3D.new()
@@ -18387,6 +18424,7 @@ func _set_game_speed(speed: float) -> void:
 		_update_time_interface()
 		return
 	game_speed=clampf(speed,0.0,5.0)
+	simulation_clock.reset(Time.get_ticks_usec())
 	_update_time_interface()
 
 func _speed_hours_per_second() -> float:

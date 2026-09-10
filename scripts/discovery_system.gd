@@ -163,7 +163,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 			WorldSimulation.state.active_investigations.erase(channel)
 			WorldSimulation.state.discovery_progress.erase(discovery_id)
 			results.append(event)
-	_refresh_active_investigations()
+	if not results.is_empty():_refresh_active_investigations()
 	return results
 
 func refresh_investigations()->void:
@@ -331,7 +331,10 @@ func _redistribute_stranded_attention(current_day:int)->void:
 			var allocation:=int(subcategories[subcategory_variant])
 			if allocation<=0: continue
 			var channel:=_channel_key(dynamic_id,subcategory)
-			if not _best_candidate_for_channel(channel,current_day).is_empty(): continue
+			# An existing investigation was validated immediately above. To
+			# detect stranded attention we only need eligibility, not a scored
+			# ranking of every alternative in the same channel.
+			if String(WorldSimulation.state.active_investigations.get(channel,""))!="" or _channel_has_candidate(channel,current_day): continue
 			stranded.append({"dynamic":dynamic_id,"subcategory":subcategory,"count":allocation})
 			subcategories[subcategory_variant]=0
 		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
@@ -404,6 +407,12 @@ func _discovery_is_eligible(discovery:Dictionary,current_day:int)->bool:
 	for requirement in discovery.get("requires",[]):
 		if String(requirement) not in WorldSimulation.state.known_discoveries: return false
 	return _resource_requirements_met(discovery.get("resource_requirements",[]))
+
+
+func _channel_has_candidate(channel:String,current_day:int)->bool:
+	for discovery:Dictionary in (catalog_by_channel.get(channel,[]) as Array):
+		if _discovery_is_eligible(discovery,current_day):return true
+	return false
 
 
 func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:

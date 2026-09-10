@@ -298,9 +298,23 @@ static func organizational_possibilities(known_discoveries:Array,adoption:Dictio
 
 
 static func simulation_effect(state:Dictionary,effect_id:String)->float:
-	var normalized:=normalize_state(state)
-	var lived:Dictionary=normalized.lived
-	var alignment:=float(normalized.alignment)
+	# Effects only read the value axes. Normalizing a complete society here
+	# also copied its history and rebuilt identity/architecture for every query.
+	var source:=initial_state() if state.is_empty() else state
+	var lived:Dictionary={}
+	var official:Dictionary=source.get("official",{})
+	var raw_lived:Dictionary=source.get("lived",{})
+	for axis in VALUE_ORDER:lived[axis]=clampf(float(raw_lived.get(axis,0.5)),0.0,1.0)
+	var institutional:Dictionary=source.get("institutional_orientation",{})
+	if institutional.is_empty():
+		institutional=_institutional_target({"lived":lived,"institutions":_normalize_institution_records(source.get("institutions",{}))})
+	var official_gap:=0.0
+	var institutional_gap:=0.0
+	for axis in VALUE_ORDER:
+		official_gap+=absf(float(lived[axis])-clampf(float(official.get(axis,0.5)),0.0,1.0))
+		institutional_gap+=absf(float(lived[axis])-clampf(float(institutional.get(axis,lived[axis])),0.0,1.0))
+	var tension:=clampf((official_gap*0.56+institutional_gap*0.44)/float(VALUE_ORDER.size()),0.0,1.0)
+	var alignment:=clampf(1.0-tension*1.55,0.0,1.0)
 	match effect_id:
 		"cohesion": return clampf((alignment-0.50)*0.12+(float(lived.collective_obligation)-0.50)*0.035,-0.08,0.09)
 		"legitimacy": return clampf((alignment-0.50)*0.14,-0.09,0.07)
@@ -313,12 +327,26 @@ static func simulation_effect(state:Dictionary,effect_id:String)->float:
 	return 0.0
 
 
+static var _presentation_cache:Dictionary={}
+
+static func _presentation(state:Dictionary)->Dictionary:
+	# These summaries depend on values and institutions, never the historical
+	# journal. Copy cache keys so later simulation changes cannot mutate them.
+	var key:=[state.is_empty(),state.get("lived",{}),state.get("official",{}),state.get("institutional_orientation",{}),state.get("institutions",{})]
+	if _presentation_cache.has(key):return _presentation_cache[key]
+	var input:Dictionary={} if state.is_empty() else {"lived":key[1],"official":key[2],"institutional_orientation":key[3],"institutions":key[4]}
+	var normalized:=normalize_state(input)
+	var result:={"identity":normalized.identity,"architecture":normalized.architecture}
+	if _presentation_cache.size()>=64:_presentation_cache.erase(_presentation_cache.keys()[0])
+	_presentation_cache[key.duplicate(true)]=result
+	return result
+
 static func identity_snapshot(state:Dictionary)->Dictionary:
-	return (normalize_state(state).identity as Dictionary).duplicate(true)
+	return (_presentation(state).identity as Dictionary).duplicate(true)
 
 
 static func architecture_snapshot(state:Dictionary)->Dictionary:
-	return (normalize_state(state).architecture as Dictionary).duplicate(true)
+	return (_presentation(state).architecture as Dictionary).duplicate(true)
 
 
 static func value_definition(axis:String)->Dictionary:

@@ -163,7 +163,12 @@ func process_day(day:int)->Array[Dictionary]:
 	# institutional expansion remain monthly, but survival cannot wait up to thirty
 	# days for the next government tick.
 	if month<=last_processed_month:
+		# initialize(false) has already synchronized today's officials. Local
+		# leader lookups inside delegation must not synchronize the same roster
+		# again for each city.
+		initializing=true
 		_delegate_settlements(day)
+		initializing=false
 		return []
 	last_processed_month=month
 	# Treat the monthly transaction as one synchronization pass. Candidate lookup
@@ -306,8 +311,12 @@ func _desired_pool_size()->int:
 
 func _ensure_pool()->void:
 	var target:=mini(_desired_pool_size(),maxi(1,WorldSimulation.state.population_total))
-	while living_people().size()<target and people.size()<MAX_GOVERNMENT_PEOPLE:
+	var living_count:=0
+	for person in people:
+		if String(person.get("status","active"))=="active":living_count+=1
+	while living_count<target and people.size()<MAX_GOVERNMENT_PEOPLE:
 		people.append(_generate_person(next_person_id))
+		living_count+=1
 		next_person_id+=1
 		revision+=1
 
@@ -531,13 +540,17 @@ func age_years(person:Dictionary,day:int=-1)->int:
 	return maxi(0,floori(float(end_day-int(person.get("born_day",0)))/365.0))
 
 
-func person_snapshot(person_id:int)->Dictionary:
+func _person_record(person_id:int)->Dictionary:
 	for person in people:
-		if int(person.get("person_id",0))==person_id:
-			var snapshot:=person.duplicate(true)
-			snapshot["age"]=age_years(person)
-			return snapshot
+		if int(person.get("person_id",0))==person_id:return person
 	return {}
+
+func person_snapshot(person_id:int)->Dictionary:
+	var person:=_person_record(person_id)
+	if person.is_empty():return {}
+	var snapshot:=person.duplicate(true)
+	snapshot["age"]=age_years(person)
+	return snapshot
 
 
 func adjust_person_relationship(person_id:int,trust_delta:float=0.0,respect_delta:float=0.0,resentment_delta:float=0.0)->Dictionary:
@@ -830,7 +843,7 @@ func _ensure_local_leaders(events:Array[Dictionary]=[])->void:
 	for settlement_index in WorldSimulation.state.player_settlements.size():
 		var settlement:Dictionary=WorldSimulation.state.player_settlements[settlement_index]
 		var settlement_id:=String(settlement.get("id",""))
-		var current:=person_snapshot(int(settlement.get("leader_person_id",0)))
+		var current:=_person_record(int(settlement.get("leader_person_id",0)))
 		if not current.is_empty() and String(current.get("status",""))=="active":
 			settlement["leader_title"]=settlement_leader_title()
 			WorldSimulation.state.player_settlements[settlement_index]=settlement
@@ -1016,17 +1029,22 @@ func _delegate_settlements(_day:int)->void:
 		var settlement:Dictionary=WorldSimulation.state.player_settlements[index]
 		var share:=maxf(0.01,1.0-satellite_share) if bool(settlement.get("primary",false)) else maxf(0.001,float(settlement.get("population_share",0.0)))
 		var auto_manage:=bool(settlement.get("auto_manage",true))
-		var guard:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.id),_survival_guard)
-		var decision:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.id),func()->Dictionary: return _focus_decision_for_settlement(settlement)) if auto_manage else {
-			"id":String(settlement.get("management_focus","balanced")),
-			"label":String(FOCUS_LABELS.get(String(settlement.get("management_focus","balanced")),"BALANCED STEWARDSHIP")),
-			"reason":String(settlement.get("management_focus_reason",_manual_focus_reason(String(settlement.get("management_focus","balanced"))))),
-		}
+		var leader:=_person_record(int(settlement.get("leader_person_id",0)))
+		# Evaluate the city's needs and discretionary allocation inside one
+		# resource scope, without swapping all its ledgers three times.
+		var local:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.id),func()->Dictionary:
+			var guard:=_survival_guard()
+			var decision:=_focus_decision_for_settlement(settlement) if auto_manage else {
+				"id":String(settlement.get("management_focus","balanced")),
+				"label":String(FOCUS_LABELS.get(String(settlement.get("management_focus","balanced")),"BALANCED STEWARDSHIP")),
+				"reason":String(settlement.get("management_focus_reason",_manual_focus_reason(String(settlement.get("management_focus","balanced"))))),
+			}
+			return {"guard":guard,"decision":decision,"allocations":_allocations_for_focus(String(decision.id),leader)}
+		)
+		var guard:Dictionary=local.guard
+		var decision:Dictionary=local.decision
 		var focus:=String(decision.id)
-		var leader:=settlement_leader(String(settlement.get("id","")))
-		# A manual focus governs discretionary work; the leader's food-and-water
-		# safeguard still applies and is recalculated from the latest daily ledger.
-		var allocations:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.id),func()->Dictionary: return _allocations_for_focus(focus,leader))
+		var allocations:Dictionary=local.allocations
 		var skills:Dictionary=leader.get("skills",{})
 		var competence:=clampf(office_competency(leader,"SettlementLeader"),0.18,0.94) if not leader.is_empty() else 0.18
 		var old_signature:="%s|%s|%s" % [String(settlement.get("management_focus","")),bool(settlement.get("survival_guard_active",false)),JSON.stringify(settlement.get("local_allocations",{}))]

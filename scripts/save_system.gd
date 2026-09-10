@@ -8,6 +8,8 @@ extends Node
 
 const SAVE_DIR:="user://saves"
 const SAVE_VERSION:=1
+# Rebuild the fixed catalogue index; it is not campaign history.
+const SOCIETY_REFLECT_SKIP:=["definitions_by_id"]
 const DEFAULT_SLOT:="quicksave"
 
 const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy","GeneralCampaign","WorldSimulation"]
@@ -16,7 +18,8 @@ const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSy
 # saves and freeze stale copies of static content.
 const REFLECT_SKIP:Dictionary={
 	"GameState":["resource_settlement_id"],
-	"SettlementModel":["_local_population_scope"],
+	"SettlementModel":["_local_population_scope","_claim_shape_cache"],
+	"FoodSystem":["_forecast_climate_cache"],
 	"DiscoverySystem":["catalog","catalog_by_id","catalog_by_channel","technology_catalog","technology_limits","initialized","latest_context"],
 	# In-flight HTTP requests contain transient nodes and authorization headers.
 	# They are neither world state nor safe save-file content; the matching civic
@@ -50,7 +53,7 @@ func save_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	}
 	for system_name in REFLECTED_SYSTEMS:
 		payload["reflected_%s" % system_name]=_capture_reflected(get_node("/root/"+system_name),REFLECT_SKIP.get(system_name,[]))
-	payload["reflected_society_model"]=_capture_reflected(DiscoverySystem.society_model,[])
+	payload["reflected_society_model"]=_capture_reflected(DiscoverySystem.society_model,SOCIETY_REFLECT_SKIP)
 	for system_name in CURATED_SYSTEMS:
 		payload["curated_%s" % system_name]=get_node("/root/"+system_name).export_state()
 	var written:=_write_payload(slot_path(slot),payload)
@@ -85,6 +88,13 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	if payload.is_empty(): return {"error":"No readable save exists in that slot."}
 	if int(payload.get("version",-1))!=SAVE_VERSION: return {"error":"This save was written by an incompatible version."}
 	var metadata:Dictionary=payload.get("metadata",{})
+	# Older releases could lose this entire section after its popup was closed.
+	# The missing choice cannot be invented; restore the world and reopen choice.
+	var direction_missing:=payload.has("reflected_PeopleDirection") and payload.reflected_PeopleDirection==null
+	if direction_missing:payload.reflected_PeopleDirection={}
+	for name in REFLECTED_SYSTEMS:
+		if payload.has("reflected_"+name) and not payload["reflected_"+name] is Dictionary:
+			return {"error":"This save has an unreadable "+name+" section."}
 	var parity_check:=WorldSimulation.check_payload(payload.get("curated_WorldSimulation",{}))
 	if parity_check.has("error"):return parity_check
 	var legacy_campaign:=not bool(payload.get("curated_WorldSimulation",{}).get("enabled",false)) and float(metadata.get("elapsed_days",0))>0
@@ -109,7 +119,7 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	PronouncementInterpreter.reset_for_new_world()
 	for system_name in REFLECTED_SYSTEMS:
 		_apply_reflected(get_node("/root/"+system_name),payload.get("reflected_%s" % system_name,{}))
-	_apply_reflected(DiscoverySystem.society_model,payload.get("reflected_society_model",{}))
+	_apply_reflected(DiscoverySystem.society_model,payload.get("reflected_society_model",{}),SOCIETY_REFLECT_SKIP)
 	var errors:Array[String]=[]
 	for system_name in CURATED_SYSTEMS:
 		if system_name=="ForeignDiplomacy" and not payload.has("curated_ForeignDiplomacy"): continue
@@ -117,6 +127,7 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 		if result is Dictionary and (result as Dictionary).has("error"): errors.append("%s: %s" % [system_name,String((result as Dictionary).error)])
 	if not errors.is_empty(): return {"error":"  ".join(errors)}
 	var message:="World restored — day %d, population %d." % [int(GameState.elapsed_days),GameState.population_total]
+	if direction_missing:message+=" This older save did not retain your civilization direction; choose it again when the world opens."
 	if legacy_campaign:message+=" This campaign keeps its original opponent model. Start a new world for equal civilization rules."
 	return {"ok":true,"legacy_campaign":legacy_campaign,"message":message}
 
@@ -143,18 +154,22 @@ static func _capture_reflected(target:Object,skip:Array)->Dictionary:
 		var property_name:=String(property.name)
 		if property_name in skip: continue
 		var value:Variant=target.get(property_name)
-		if value is RandomNumberGenerator:
-			state["rng_state:"+property_name]=value.state
+		# Closed UI nodes may remain as freed references in an autoload. Testing
+		# their class before validity aborts the entire section's capture.
+		if typeof(value)==TYPE_OBJECT:
+			if is_instance_valid(value) and value is RandomNumberGenerator:
+				state["rng_state:"+property_name]=value.state
 			continue
-		if typeof(value) in [TYPE_OBJECT,TYPE_CALLABLE,TYPE_SIGNAL,TYPE_RID,TYPE_NIL]: continue
+		if typeof(value) in [TYPE_CALLABLE,TYPE_SIGNAL,TYPE_RID,TYPE_NIL]: continue
 		state[property_name]=value
 	return state.duplicate(true)
 
 
-static func _apply_reflected(target:Object,state:Dictionary)->void:
+static func _apply_reflected(target:Object,state:Dictionary,skip:Array=[])->void:
 	## Arrays and dictionaries mutate in place so typed properties keep their
 	## element types; scalars assign directly.
 	for property_name in state:
+		if property_name in skip:continue
 		if String(property_name).begins_with("rng_state:"):
 			var generator:Variant=target.get(String(property_name).trim_prefix("rng_state:"))
 			if generator is RandomNumberGenerator:generator.state=int(state[property_name])
@@ -178,7 +193,7 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 		for name in REFLECTED_SYSTEMS:
 			if name not in WorldSimulation.OWNED_SYSTEMS:continue
 			_apply_reflected(WorldSimulation.system(name),payload.get("reflected_"+name,{}))
-		_apply_reflected(WorldSimulation.discovery.society_model,payload.get("reflected_society_model",{}))
+		_apply_reflected(WorldSimulation.discovery.society_model,payload.get("reflected_society_model",{}),SOCIETY_REFLECT_SKIP)
 		for name in CURATED_SYSTEMS:
 			if name=="WorldSimulation":continue
 			if name=="ForeignDiplomacy" and not payload.has("curated_ForeignDiplomacy"):continue

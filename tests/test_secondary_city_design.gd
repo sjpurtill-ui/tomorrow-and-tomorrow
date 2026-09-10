@@ -163,3 +163,32 @@ func assert_roundtrip(actual:Variant,expected:Variant)->void:
 	elif expected is float or expected is int:
 		assert_float(float(actual)).is_equal_approx(float(expected),maxf(.000001,absf(float(expected))*.0000001))
 	else:assert_that(actual).is_equal(expected)
+
+func test_secondary_meshes_survive_ledger_updates_and_refresh_after_real_damage()->void:
+	var terrain:Node3D=auto_free(FlatTerrain.new())
+	var parent:Node3D=auto_free(Node3D.new())
+	terrain._create_secondary_city_design({"id":"second"},parent)
+	var first_id:=parent.get_child(0).get_instance_id()
+	var city:=SettlementModel.settlement_record("second")
+	city.local_resources.economic_ledger.append({"day":100,"amount":2.0})
+	city.local_resources.resource_stockpiles["Food"]=150.0
+	GameState.settlement_network_revision+=1
+	terrain._create_secondary_city_design({"id":"second"},parent)
+	assert_int(parent.get_child_count()).is_equal(1)
+	assert_int(parent.get_child(0).get_instance_id()).is_equal(first_id)
+	city.local_resources.settlement_plots[0]["status"]="damaged"
+	city.local_resources.morphology_revision+=1
+	terrain._create_secondary_city_design({"id":"second"},parent)
+	assert_int(parent.get_child_count()).is_equal(1)
+	assert_int(parent.get_child(0).get_instance_id()).is_not_equal(first_id)
+	var damaged_id:=parent.get_child(0).get_instance_id()
+	city.position=Vector2(11,10)
+	terrain._create_secondary_city_design({"id":"second"},parent)
+	assert_int(parent.get_child(0).get_instance_id()).is_not_equal(damaged_id)
+	var moved_id:=parent.get_child(0).get_instance_id()
+	terrain._create_secondary_city_design({"id":"second"},parent,true)
+	assert_int(parent.get_child(0).get_instance_id()).is_not_equal(moved_id)
+	terrain.settlement_network_fabric_root=parent
+	var empty:Array[Dictionary]=[]
+	terrain._create_secondary_settlement_footprints(empty)
+	assert_int(parent.get_child_count()).is_equal(0)

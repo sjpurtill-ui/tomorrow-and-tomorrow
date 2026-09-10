@@ -46,6 +46,7 @@ const CITY_RESOURCE_DEFAULTS:={
 	"external_trade_exports":0.0,"external_trade_imports":0.0,"external_trade_losses":0.0,"weighed_metal_losses":0.0,"economy_benchmarks":{},"simulation_trends":{}
 }
 const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_conceptions","lifetime_pregnancy_losses","lifetime_stillbirths","lifetime_maternal_deaths","lifetime_neonatal_deaths","observed_death_age_sum"]
+var _claim_shape_cache:Dictionary={}
 var _local_population_scope:=false
 var _national_population_in_scope:=0.0
 
@@ -105,7 +106,7 @@ func _ensure_city_fabric(record:Dictionary)->void:
 	local.next_settlement_plot_id=plots.size()+1
 	local.settlement_nuclei=[{"id":1,"kind":"founding_hearth","position":Vector2.ZERO,"pull":1.0,"active":true,"created_day":int(record.get("founded_day",0)),"absorbed_day":-1}]
 
-func city_resource_snapshot(settlement_id:String)->Dictionary:
+func city_resource_snapshot(settlement_id:String,include_details:bool=true)->Dictionary:
 	var record:=settlement_record(settlement_id)
 	if record.is_empty(): return {}
 	_ensure_city_resources(record)
@@ -113,28 +114,36 @@ func city_resource_snapshot(settlement_id:String)->Dictionary:
 	if bool(record.get("primary",false)):
 		for field in CITY_RESOURCE_DEFAULTS: local[field]=WorldSimulation.state.get(field)
 	else: local=record.local_resources
-	return {"id":settlement_id,"name":String(record.name),"population":_settlement_population(record),"stores":(local.resource_stockpiles as Dictionary).duplicate(true),"deposits":(local.resource_deposits as Array).duplicate(true),"water":(local.water_metrics as Dictionary).duplicate(true),"food_history":(local.food_history as Array).duplicate(true),"metrics":(local.simulation_metrics as Dictionary).duplicate(true)}
+	# Diplomacy/world projections only need the current totals. Detailed city
+	# reports can still request deposits, water and food history explicitly.
+	var result:={"id":settlement_id,"name":String(record.name),"population":_settlement_population(record),"stores":(local.resource_stockpiles as Dictionary).duplicate(true),"metrics":(local.simulation_metrics as Dictionary).duplicate(true)}
+	if include_details:
+		result["deposits"]=(local.resource_deposits as Array).duplicate(true)
+		result["water"]=(local.water_metrics as Dictionary).duplicate(true)
+		result["food_history"]=(local.food_history as Array).duplicate(true)
+	return result
 
 ## Existing resource systems run with bounded local counts. No resident objects,
 ## selected-city dependence enters the tick. Committed vital changes update the total.
 func with_local_population(operation:Callable,commit_demographics:=false)->Variant:
-	if _local_population_scope or WorldSimulation.state.player_settlements.is_empty(): return operation.call()
-	_national_population_in_scope=WorldSimulation.state.population_exact
+	var state:=WorldSimulation.state
+	if _local_population_scope or state.player_settlements.is_empty(): return operation.call()
+	_national_population_in_scope=state.population_exact
 	var saved:Dictionary={}
 	for field in ["population_exact","population_total","population_allocations","population_allocation_percentages","population_cohorts","pregnancy_cohorts","demographic_remainders","death_progress"]:
-		saved[field]=WorldSimulation.state.get(field)
-	var record:=settlement_record(WorldSimulation.state.resource_settlement_id)
+		saved[field]=state.get(field)
+	var record:=settlement_record(state.resource_settlement_id)
 	var local_population:=_settlement_population(record) if not record.is_empty() else primary_population_exact()
 	_local_population_scope=true
-	var ratio:=local_population/maxf(1.0,WorldSimulation.state.population_exact)
-	WorldSimulation.state.population_exact=local_population
-	WorldSimulation.state.population_total=roundi(local_population)
+	var ratio:=local_population/maxf(1.0,state.population_exact)
+	state.population_exact=local_population
+	state.population_total=roundi(local_population)
 	for field in ["population_allocations","population_cohorts","pregnancy_cohorts"]:
 		var scaled:Dictionary=(saved[field] as Dictionary).duplicate(true)
 		for key in scaled: scaled[key]=float(scaled[key])*ratio
-		WorldSimulation.state.set(field,scaled)
+		state.set(field,scaled)
 	if record.is_empty():
-		for candidate in WorldSimulation.state.player_settlements:
+		for candidate in state.player_settlements:
 			if bool(candidate.get("primary",false)): record=candidate; break
 	var population_state:Dictionary=record.get("population_state",{})
 	var local_before:Dictionary={}
@@ -143,77 +152,87 @@ func with_local_population(operation:Callable,commit_demographics:=false)->Varia
 			var values:Dictionary=population_state[field].duplicate(true)
 			var resize:=local_population/maxf(1.0,float(population_state.get("population",local_population)))
 			for key in values: values[key]=float(values[key])*resize
-			WorldSimulation.state.set(field,values)
-		local_before[field]=(WorldSimulation.state.get(field) as Dictionary).duplicate(true)
-	WorldSimulation.state.demographic_remainders=population_state.get("demographic_remainders",{}).duplicate(true)
-	WorldSimulation.state.death_progress=float(population_state.get("death_progress",float(saved.death_progress)*ratio))
+			state.set(field,values)
+		local_before[field]=(state.get(field) as Dictionary).duplicate(true)
+	state.demographic_remainders=population_state.get("demographic_remainders",{}).duplicate(true)
+	state.death_progress=float(population_state.get("death_progress",float(saved.death_progress)*ratio))
 	var percentages:Dictionary=record.get("local_allocations",{})
 	if not percentages.is_empty():
-		WorldSimulation.state.population_allocation_percentages=percentages.duplicate(true)
+		state.population_allocation_percentages=percentages.duplicate(true)
 		var workforce:=0.0
 		for amount in (saved.population_allocations as Dictionary).values(): workforce+=float(amount)*ratio
-		for role in WorldSimulation.state.population_allocations: WorldSimulation.state.population_allocations[role]=workforce*float(percentages.get(role,0.0))/100.0
+		for role in state.population_allocations: state.population_allocations[role]=workforce*float(percentages.get(role,0.0))/100.0
 	var vital_before:Dictionary={}
 	for field in CITY_VITAL_COUNTERS:
-		saved[field]=WorldSimulation.state.get(field)
+		saved[field]=state.get(field)
 		vital_before[field]=population_state.get(field,0)
-		WorldSimulation.state.set(field,vital_before[field])
-	saved["vital_statistics_history"]=WorldSimulation.state.vital_statistics_history
-	saved["vital_statistics_tracking_start_day"]=WorldSimulation.state.vital_statistics_tracking_start_day
+		state.set(field,vital_before[field])
+	saved["vital_statistics_history"]=state.vital_statistics_history
+	saved["vital_statistics_tracking_start_day"]=state.vital_statistics_tracking_start_day
 	var local_vitals:Array[Dictionary]=[];local_vitals.assign(population_state.get("vital_statistics_history",[]))
-	WorldSimulation.state.vital_statistics_history=local_vitals
-	WorldSimulation.state.vital_statistics_tracking_start_day=int(population_state.get("vital_statistics_tracking_start_day",int(WorldSimulation.state.elapsed_days)))
+	state.vital_statistics_history=local_vitals
+	state.vital_statistics_tracking_start_day=int(population_state.get("vital_statistics_tracking_start_day",int(state.elapsed_days)))
 	var result:Variant=operation.call()
-	var after:Dictionary={"population":WorldSimulation.state.population_exact,"population_cohorts":WorldSimulation.state.population_cohorts.duplicate(true),"pregnancy_cohorts":WorldSimulation.state.pregnancy_cohorts.duplicate(true),"demographic_remainders":WorldSimulation.state.demographic_remainders.duplicate(true),"death_progress":WorldSimulation.state.death_progress}
-	for field in CITY_VITAL_COUNTERS: after[field]=WorldSimulation.state.get(field)
-	after["vital_statistics_history"]=WorldSimulation.state.vital_statistics_history.duplicate(true)
-	after["vital_statistics_tracking_start_day"]=WorldSimulation.state.vital_statistics_tracking_start_day
-	for field in saved: WorldSimulation.state.set(field,saved[field])
+	var after:Dictionary={}
 	if commit_demographics:
-		for field in CITY_VITAL_COUNTERS: WorldSimulation.state.set(field,saved[field]+after[field]-vital_before[field])
-		WorldSimulation.state._record_vital_statistics(int(after.lifetime_births)-int(vital_before.lifetime_births),int(after.lifetime_deaths)-int(vital_before.lifetime_deaths))
+		after={"population":state.population_exact,"population_cohorts":state.population_cohorts.duplicate(true),"pregnancy_cohorts":state.pregnancy_cohorts.duplicate(true),"demographic_remainders":state.demographic_remainders.duplicate(true),"death_progress":state.death_progress}
+		for field in CITY_VITAL_COUNTERS: after[field]=state.get(field)
+		# This array belongs to the local scope; restoring the national array
+		# transfers it back to the city without copying every past day again.
+		after["vital_statistics_history"]=state.vital_statistics_history
+		after["vital_statistics_tracking_start_day"]=state.vital_statistics_tracking_start_day
+	for field in saved: state.set(field,saved[field])
+	if commit_demographics:
+		for field in CITY_VITAL_COUNTERS: state.set(field,saved[field]+after[field]-vital_before[field])
+		state._record_vital_statistics(int(after.lifetime_births)-int(vital_before.lifetime_births),int(after.lifetime_deaths)-int(vital_before.lifetime_deaths))
 		var change:=float(after.population)-local_population
 		var overall:=maxf(1.0,float(saved.population_exact)+change)
 		# Preserve every other city's headcount when this city's births/deaths
 		# change the national denominator, including people still in transit.
-		for city in WorldSimulation.state.player_settlements:
+		for city in state.player_settlements:
 			if bool(city.get("primary",false)): continue
 			var count:=float(saved.population_exact)*float(city.get("population_share",0.0))
 			if String(city.id)==String(record.get("id","")): count+=change
 			city.population_share=maxf(0.0,count)/overall
-		if bool(WorldSimulation.state.settlement_convoy.get("active",false)):
-			WorldSimulation.state.settlement_convoy.population_share=float(WorldSimulation.state.settlement_convoy.get("population_share",0.0))*float(saved.population_exact)/overall
-		WorldSimulation.state.population_exact=overall;WorldSimulation.state.population_total=roundi(overall)
+		if bool(state.settlement_convoy.get("active",false)):
+			state.settlement_convoy.population_share=float(state.settlement_convoy.get("population_share",0.0))*float(saved.population_exact)/overall
+		state.population_exact=overall;state.population_total=roundi(overall)
 		for field in ["population_cohorts","pregnancy_cohorts"]:
 			var combined:Dictionary=(saved[field] as Dictionary).duplicate(true)
 			for key in after[field]: combined[key]=maxf(0.0,float(combined.get(key,0.0))+float(after[field][key])-float(local_before[field].get(key,0.0)))
-			WorldSimulation.state.set(field,combined)
+			state.set(field,combined)
 		if not record.is_empty(): record["population_state"]=after
 	_local_population_scope=false
 	return result
 
 func with_city_resources(settlement_id:String,operation:Callable)->Variant:
-	if settlement_id!="" and WorldSimulation.state.resource_settlement_id==settlement_id: return operation.call()
+	var state:=WorldSimulation.state
+	if settlement_id!="" and state.resource_settlement_id==settlement_id: return operation.call()
 	var record:=settlement_record(settlement_id)
 	if record.is_empty() or bool(record.get("primary",false)): return operation.call()
 	_ensure_city_resources(record)
 	var saved:Dictionary={}
 	for field in CITY_RESOURCE_DEFAULTS:
-		saved[field]=WorldSimulation.state.get(field)
+		saved[field]=state.get(field)
 		var value:Variant=record.local_resources[field]
 		# Preserve typed Array fields when assigning serialized/default state.
 		if saved[field] is Array:
-			var typed:Array=(saved[field] as Array).duplicate()
-			typed.assign(value)
-			WorldSimulation.state.set(field,typed)
-		else: WorldSimulation.state.set(field,value)
-	var previous_id:=WorldSimulation.state.resource_settlement_id
-	WorldSimulation.state.resource_settlement_id=settlement_id
+			var template:Array=saved[field]
+			var incoming:Array=value
+			if template.is_same_typed(incoming):
+				state.set(field,incoming)
+			else:
+				var typed:=Array([],template.get_typed_builtin(),template.get_typed_class_name(),template.get_typed_script())
+				typed.assign(incoming)
+				state.set(field,typed)
+		else: state.set(field,value)
+	var previous_id:=state.resource_settlement_id
+	state.resource_settlement_id=settlement_id
 	var result:Variant=operation.call()
 	for field in CITY_RESOURCE_DEFAULTS:
-		record.local_resources[field]=WorldSimulation.state.get(field)
-		WorldSimulation.state.set(field,saved[field])
-	WorldSimulation.state.resource_settlement_id=previous_id
+		record.local_resources[field]=state.get(field)
+		state.set(field,saved[field])
+	state.resource_settlement_id=previous_id
 	return result
 
 func process_city_resources(settlement_id:String,context:Dictionary,daily_work:Callable=Callable())->void:
@@ -731,8 +750,8 @@ func _settlement_classification(record:Dictionary,population:float)->String:
 	if population<10000000.0: return "metropolis"
 	return "megalopolis"
 
-func _base_claim_radius_km(record:Dictionary,population:float)->float:
-	var territory:=_territory_drivers(record,population)
+func _base_claim_radius_km(record:Dictionary,population:float,territory:Dictionary={})->float:
+	if territory.is_empty():territory=_territory_drivers(record,population)
 	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
 	var survey_share:=clampf(WorldSimulation.state.effective_workers("Survey")/maxf(1.0,able*0.10),0.0,1.0)
 	var administration_share:=clampf(WorldSimulation.state.effective_workers("Administration")/maxf(1.0,able*0.08),0.0,1.0)
@@ -774,12 +793,20 @@ func _bounded_claim_radius(index:int,records:Array[Dictionary],base_radius:float
 func _claim_boundary(record:Dictionary,radius:float,drivers:Dictionary={})->PackedVector2Array:
 	var center:=_record_position(record)
 	var seed:=hash("%d:player_settlement_border:%s" % [WorldSimulation.state.world_seed,String(record.get("id","settlement"))])
+	var id:=String(record.get("id","settlement"))
+	var axes:Array=drivers.get("access_axes",[])
+	var cached:Dictionary=_claim_shape_cache.get(id,{})
+	if not cached.is_empty() and cached.seed==seed and cached.axes==axes:
+		var boundary:=PackedVector2Array()
+		for i in cached.directions.size():boundary.append(center+cached.directions[i]*radius*cached.variations[i])
+		return boundary
+	var directions:=PackedVector2Array()
+	var variations:=PackedFloat64Array()
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=seed
 	var rotation:=rng.randf_range(0.0,TAU)
 	var harmonic_a:=rng.randf_range(0.035,0.085)
 	var harmonic_b:=rng.randf_range(0.020,0.055)
-	var axes:Array=drivers.get("access_axes",[])
 	var boundary:=PackedVector2Array()
 	for vertex_index in SETTLEMENT_BORDER_VERTICES:
 		var angle:=rotation+TAU*float(vertex_index)/float(SETTLEMENT_BORDER_VERTICES)
@@ -794,21 +821,30 @@ func _claim_boundary(record:Dictionary,radius:float,drivers:Dictionary={})->Pack
 			var kind_factor:float={"river":0.16,"route":0.13,"travel":0.11,"work":0.10,"terrain":0.08}.get(String(axis.get("kind","travel")),0.10)
 			directional_pull+=alignment*clampf(float(axis.get("influence",0.0)),0.0,1.0)*kind_factor
 		variation*=1.0+minf(0.22,directional_pull)
-		boundary.append(center+Vector2.from_angle(angle)*radius*variation)
+		directions.append(direction);variations.append(variation)
+		boundary.append(center+direction*radius*variation)
+	if _claim_shape_cache.size()>=MAX_PLAYER_SETTLEMENTS and not _claim_shape_cache.has(id):_claim_shape_cache.erase(_claim_shape_cache.keys()[0])
+	_claim_shape_cache[id]={"seed":seed,"axes":axes.duplicate(true),"directions":directions,"variations":variations}
 	return boundary
 
-func settlement_network_snapshot()->Dictionary:
+func settlement_network_snapshot(include_local_state:bool=false)->Dictionary:
 	_ensure_primary_settlement_record()
 	var records:Array[Dictionary]=[]
 	for settlement in WorldSimulation.state.player_settlements:
 		_ensure_settlement_management_fields(settlement)
-		records.append(settlement.duplicate(true))
+		# A map record must not recursively copy years of city economic, food,
+		# material and demographic history. Simulation owns those ledgers.
+		var record:=settlement.duplicate()
+		if not include_local_state:
+			record.erase("local_resources")
+			record.erase("population_state")
+		records.append(record.duplicate(true))
 	var public_settlements:Array[Dictionary]=[]
 	for index in records.size():
 		var record:=records[index]
 		var population:=_settlement_population(record)
-		var radius:=_bounded_claim_radius(index,records,_base_claim_radius_km(record,population))
 		var drivers:=_territory_drivers(record,population)
+		var radius:=_bounded_claim_radius(index,records,_base_claim_radius_km(record,population,drivers))
 		var boundary:=_claim_boundary(record,radius,drivers)
 		record["population"]=roundi(population)
 		record["classification"]=_settlement_classification(record,population)
