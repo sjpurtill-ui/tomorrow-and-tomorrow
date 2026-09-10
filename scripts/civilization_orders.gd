@@ -6,6 +6,12 @@ static func execute(order:Dictionary)->Dictionary:
 			if not order.get("destination") is Vector2:return {"error":"Choose a map destination."}
 			return preload("res://scripts/civilization_travel.gd").begin(order.destination)
 		"ambition":return WorldSimulation.direction.choose(String(order.get("id","")))
+		"research_emphasis":
+			var domain:=String(order.get("domain",""))
+			var weight:=int(order.get("weight",-1))
+			if not WorldSimulation.state.research_subcategory_allocations.has(domain) or weight<0 or weight>12:return {"error":"Choose a research domain and emphasis from 0 to 12."}
+			WorldSimulation.discovery.set_domain_research_priority(domain,weight)
+			return {"ok":true}
 		"found":
 			if WorldSimulation.state.settlement_site_committed:return {"error":"The founding site is already committed."}
 			var origin:=WorldSimulation.world.player_world_origin
@@ -33,6 +39,7 @@ static func execute(order:Dictionary)->Dictionary:
 		"objective":return WorldSimulation.military.command_hierarchy.assign(String(order.get("command","army")),[],order.get("region",{}),String(order.get("mission","defend")),String(order.get("target","")),String(order.get("vision","")))
 		"recruit":return WorldSimulation.military.raise_recruits(int(order.get("count",0)))
 		"train":return WorldSimulation.military.start_training(String(order.get("unit","")),String(order.get("weapon","")),int(order.get("count",0)))
+		"production_target":return WorldSimulation.military.configure_production_line(int(order.get("job",-1)),int(order.get("target",0)),bool(order.get("paused",false)))
 		"production":return WorldSimulation.military.start_production_line(String(order.get("item","")),int(order.get("target",0)))
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))

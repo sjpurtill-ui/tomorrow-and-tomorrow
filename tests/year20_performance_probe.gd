@@ -57,6 +57,14 @@ func _ready()->void:
 		terrain._set_game_speed(0);terrain.set_process(false)
 		var seconds:=float(Time.get_ticks_usec()-start_time)/1000000.0
 		_report("PERF_PACED ",JSON.stringify({"seconds":seconds,"days":GameState.elapsed_days-start_day,"days_per_second":(GameState.elapsed_days-start_day)/seconds,"frames":Engine.get_process_frames()-start_frame,"uninterrupted":quiet!=null,"announcements":quiet.notices if quiet!=null else -1}))
+		if "--strategies" in OS.get_cmdline_user_args():
+			var rulers:Array[Dictionary]=[]
+			for id:String in WorldSimulation.actors:
+				WorldSimulation.scoped(id,func()->void:
+					var plan:=preload("res://scripts/civilization_controller.gd").current_plan(id)
+					rulers.append({"id":id,"goals":plan.goals,"recruit_share":plan.recruit_share,"personnel":WorldSimulation.military._mobilized_count(),"research":WorldSimulation.state.research_allocations.duplicate(true),"training":WorldSimulation.military.training_staff.data.policies.duplicate(true),"orders":WorldSimulation.actors[id].orders.duplicate(true)})
+				)
+			_report("PERF_STRATEGIES ",JSON.stringify(rulers))
 		if "--capture" in OS.get_cmdline_user_args():
 			await RenderingServer.frame_post_draw
 			get_viewport().get_texture().get_image().save_png("user://performance-map.png")

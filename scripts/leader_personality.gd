@@ -24,8 +24,8 @@ static func agenda(civ:Dictionary,p:Dictionary)->Array[Dictionary]:
 		{"id":"exchange","title":"Build dependable ties with other peoples","strategy":"commerce","accord":"routes","weight":float(p.empathy)*.55+float(p.openness)*.45},
 		{"id":"growth","title":"Make room for the next generation","strategy":"growth","accord":"routes","weight":float(p.discipline)*.45+float(p.assertiveness)*.55}
 	]
-	var hungry:=float(civ.get("food_days",30))<16 or float(civ.get("food_capacity",120))<float(civ.get("population",120))*.90
-	var threatened:=bool(civ.get("player_relation",{}).get("at_war",false))
+	var hungry:=float(civ.get("food_days",30))<16 or float(civ.get("food_intake_ratio",1))<.98
+	var threatened:=bool(civ.get("at_war",false)) or bool(civ.get("player_relation",{}).get("at_war",false))
 	for relation:Dictionary in civ.get("relations",{}).values():threatened=threatened or bool(relation.get("at_war",false))
 	for goal:Dictionary in goals:
 		if goal.id=="care" and hungry:goal.weight=3.0
