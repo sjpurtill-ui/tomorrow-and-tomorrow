@@ -174,6 +174,9 @@ var river_course := PackedFloat32Array()
 var world_tributary_courses: Array[Array] = []
 var river_terrain_height_texture:ImageTexture
 var river_terrain_grid:=Vector4.ZERO
+var coastal_water_material:ShaderMaterial
+var ocean_surface:MeshInstance3D
+var coastal_water_surface:MeshInstance3D
 var rendered_regional_heights:=PackedFloat32Array()
 var detail_surface_center:=Vector2.ZERO
 var woodland_harvest_surface_key:=""
@@ -1735,6 +1738,7 @@ func _install_regional_patch(completed:Dictionary)->void:
 	river_terrain_height_texture=ImageTexture.create_from_image(height_image)
 	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(regional_patch_resolution))
 	for river in river_overlays: _bind_river_terrain(river.material_override)
+	_refresh_coastal_water_patch()
 	if previous:
 		previous.visible=false
 		previous.queue_free()
@@ -2268,6 +2272,8 @@ func _inside_province(u: float, v: float) -> bool:
 
 func _build_water() -> void:
 	var water := MeshInstance3D.new()
+	water.name = "OceanSurface"
+	ocean_surface = water
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(world_width * 4.0, world_depth * 4.0)
 	# Planet-spanning triangles lose depth precision over inland valleys in GL.
@@ -2275,29 +2281,37 @@ func _build_water() -> void:
 	plane.subdivide_width = 255
 	plane.subdivide_depth = 255
 	water.mesh = plane
-	water.position.y = SEA_LEVEL+0.012 if SEAMLESS_WORLD else -5.28
-	var shader:=Shader.new()
-	shader.code="""
-shader_type spatial;
-render_mode diffuse_burley, specular_disabled;
-uniform sampler2D discovery_mask : source_color, filter_linear;
-uniform vec2 fog_world_size=vec2(40075.0,20004.0);
-uniform vec2 fog_current_origin=vec2(0.0);
-varying vec3 world_position;
-void vertex(){ world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
-void fragment(){
-	vec2 uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
-	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
-	float discovered=max(texture(discovery_mask,uv).r,current_visibility);
-	ALBEDO=mix(vec3(0.004,0.010,0.013),vec3(0.063,0.165,0.204),smoothstep(0.06,0.62,discovered));
-	ROUGHNESS=0.40;
-}
-"""
+	# World units are kilometres: the old +0.012 flooded twelve metres of dry
+	# coastal ground. Color/detail must never raise the physical water surface.
+	water.position.y = SEA_LEVEL if SEAMLESS_WORLD else -5.28
 	var material:=ShaderMaterial.new()
-	material.shader=shader
+	material.shader=preload("res://scripts/coastal_water.gdshader")
+	material.set_shader_parameter("sea_level",water.position.y)
 	_fog_shader_parameters(material)
 	water.material_override = material
 	add_child(water)
+	coastal_water_material=material.duplicate() as ShaderMaterial
+	coastal_water_material.set_shader_parameter("regional_surface",true)
+	_fog_shader_parameters(coastal_water_material)
+	_refresh_coastal_water_patch()
+
+func _refresh_coastal_water_patch()->void:
+	if ocean_surface==null or river_terrain_height_texture==null: return
+	# A local mesh avoids the precision loss from projecting planet-sized ocean
+	# triangles into a coastal view. The far surface has a matching cutout.
+	if coastal_water_surface==null:
+		coastal_water_surface=MeshInstance3D.new()
+		coastal_water_surface.name="CoastalWaterLOD"
+		coastal_water_surface.material_override=coastal_water_material
+		ocean_surface.add_child(coastal_water_surface)
+	var plane:=PlaneMesh.new()
+	plane.size=Vector2.ONE*regional_patch_span
+	plane.subdivide_width=clampi(regional_patch_resolution-2,0,63)
+	plane.subdivide_depth=clampi(regional_patch_resolution-2,0,63)
+	coastal_water_surface.mesh=plane
+	coastal_water_surface.position=Vector3(regional_patch_center.x,0,regional_patch_center.y)
+	_bind_river_terrain(coastal_water_material)
+	_bind_river_terrain(ocean_surface.material_override)
 
 func _province_span_at_v(v: float) -> Vector2:
 	var first := -1.0
