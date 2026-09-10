@@ -113,6 +113,7 @@ var research_subcategory_allocations:Dictionary={
 	"security":{"Public safety":0,"Organized defense":0,"Military readiness":0,"Crisis resilience":0},
 	"culture":{"Social cohesion":0,"Shared legitimacy":0,"Inquiry breadth":0,"Collective memory":0}
 }
+var society_exchange:Dictionary=preload("res://scripts/society_exchange.gd").empty_state()
 var known_discoveries: Array[String] = []
 var discovery_adoption: Dictionary = {}
 var knowledge_effects: Dictionary = {}
@@ -435,6 +436,7 @@ func reset_for_new_world(new_seed:int)->void:
 		"ecology":{"Land health":1,"Natural recovery":0,"Pollution control":0,"Resource sustainability":0},"institutions":{"Administration":0,"Legitimacy":0,"State capacity":0,"Institutional flexibility":0},
 		"security":{"Public safety":0,"Organized defense":0,"Military readiness":0,"Crisis resilience":0},"culture":{"Social cohesion":0,"Shared legitimacy":0,"Inquiry breadth":0,"Collective memory":0}
 	}
+	society_exchange=preload("res://scripts/society_exchange.gd").empty_state()
 	known_discoveries=[]
 	discovery_adoption={}
 	knowledge_effects={}
@@ -794,7 +796,7 @@ func _mortality_weights_for(cause:String) -> Dictionary:
 		"Neonatal complications": return {"children":1.0,"youth":0.0,"early_adults":0.0,"established_adults":0.0,"mature_adults":0.0,"elders":0.0}
 		_: return {"children":0.8,"youth":0.25,"early_adults":0.32,"established_adults":0.55,"mature_adults":1.25,"elders":3.2}
 
-func _remove_population_exact(amount:float,cause:String,weight_override:Dictionary={}) -> float:
+func _remove_population_exact(amount:float,cause:String,weight_override:Dictionary={},record_mortality:bool=true) -> float:
 	initialize_population_model()
 	var actual:=clampf(amount,0.0,maxf(0.0,population_exact-1.0))
 	last_population_removal_by_cohort={}
@@ -824,8 +826,9 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 			var removed:=minf(available,pass_remaining*basis/weighted_total)
 			population_cohorts[key]=available-removed
 			last_population_removal_by_cohort[key]=float(last_population_removal_by_cohort.get(key,0.0))+removed
-			mortality_by_age_cohort[key]=float(mortality_by_age_cohort.get(key,0.0))+removed
-			observed_death_age_sum+=removed*float(midpoints[key])
+			if record_mortality:
+				mortality_by_age_cohort[key]=float(mortality_by_age_cohort.get(key,0.0))+removed
+				observed_death_age_sum+=removed*float(midpoints[key])
 			removed_this_pass+=removed
 		remaining=maxf(0.0,remaining-removed_this_pass)
 		if removed_this_pass<=0.000001: break
@@ -839,12 +842,12 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 
 var lifetime_departures := 0
 
-func register_population_departures(count:int,reason:String) -> Dictionary:
+func register_population_departures(count:int,reason:String,age_weights:Dictionary={}) -> Dictionary:
 	## People who leave the civilization alive — staying with foreign bands,
 	## marrying out. Reduces the population without touching mortality records.
 	initialize_population_model()
 	var actual:=mini(maxi(0,count),maxi(0,population_total-1))
-	var removed:=_remove_population_exact(float(actual),reason)
+	var removed:=_remove_population_exact(float(actual),reason,age_weights,false)
 	var emitted:=roundi(removed)
 	lifetime_departures+=emitted
 	synchronize_population_allocations()

@@ -135,6 +135,7 @@ func refresh()->void:
 	memory.text="Your dealings will leave a record here." if p.memories.is_empty() else "Day %d · %d of %d\n%s" % [int(p.memories[page].day),page+1,p.memories.size(),String(p.memories[page].text)]
 	# One memory per page keeps long campaign histories off the main screen.
 	memory.max_lines_visible=7; memory.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	personal.text+="\n"+preload("res://scripts/society_exchange.gd").relation_brief(civ_id)
 	var context:Dictionary=WorldSimulation.diplomacy.situation(civ_id); var thread:Dictionary=WorldSimulation.dialogue.thread(civ_id)
 	var gate:=WorldSimulation.dialogue.access(civ_id)
 	returned_note.text="";returned_note.hide()

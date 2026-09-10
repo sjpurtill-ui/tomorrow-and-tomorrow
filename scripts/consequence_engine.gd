@@ -647,7 +647,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		travel_health_penalty=0.08+maxf(0.0,0.62-housing_ratio)*0.30+minf(0.24,WorldSimulation.state.consecutive_food_shortage_days*0.009)
 	var process_health_cost:=(WorldSimulation.discovery.effect("health_risk")+WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity
 	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
-	var health_target := clampf(0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
+	var exchange_pressure:Dictionary=preload("res://scripts/society_exchange.gd").pressure()
+	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,0.022)
 	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
 	WorldSimulation.state.simulation_metrics["water_days"]=float(WorldSimulation.state.water_metrics.get("days",0.0))
@@ -658,6 +659,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
 	var economic_social_pressure:=float(WorldSimulation.state.economy_metrics.get("social_pressure",0.0))
 	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
+	cohesion_target=maxf(.08,cohesion_target-float(exchange_pressure.cohesion_cost)-float(exchange_pressure.administrative_load))
+	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
 	var cohesion := lerpf(prior_cohesion,cohesion_target,0.014)
 
 	var inquiry_points := 0

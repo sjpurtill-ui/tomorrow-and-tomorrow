@@ -185,6 +185,7 @@ static func _apply_reflected(target:Object,state:Dictionary,skip:Array=[])->void
 			target.set(property_name,value)
 
 func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
+	if not preload("res://scripts/society_exchange.gd").valid(payload.get("reflected_GameState",{}).get("society_exchange",preload("res://scripts/society_exchange.gd").empty_state())):return {"error":"Invalid society exchange records."}
 	# Validate in a disposable owner scope before resetting any live civilization.
 	var id:="__save_validation__"
 	if WorldSimulation.actors.has(id):return {"error":"A save validation is already in progress."}

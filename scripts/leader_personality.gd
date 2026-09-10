@@ -29,6 +29,10 @@ static func agenda(civ:Dictionary,p:Dictionary)->Array[Dictionary]:
 	for relation:Dictionary in civ.get("relations",{}).values():threatened=threatened or bool(relation.get("at_war",false))
 	for goal:Dictionary in goals:
 		if goal.id=="care" and hungry:goal.weight=3.0
+		if goal.id=="growth" and float(civ.get("integration_pressure",0))>.12:
+			goal.title="Help arriving households settle and belong";goal.accord="restraint";goal.weight=1.4+float(p.empathy)*.5
+		if goal.id=="learning" and float(civ.get("cultural_exchange",0))>.02:
+			goal.title="Turn foreign knowledge into local skill";goal.weight+=float(p.openness)*.4
 		if goal.id=="security" and threatened:goal.weight=2.0
 	goals.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.weight)>float(b.weight))
 	goals.resize(3)

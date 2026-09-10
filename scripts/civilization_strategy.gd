@@ -16,6 +16,10 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	var goal_domains:Dictionary={"care":{"health":1.5,"demography":.7},"learning":{"knowledge":1.8,"culture":.4},"security":{"security":1.8,"infrastructure":.6,"logistics":.4},"exchange":{"logistics":1.5,"production":.75,"culture":.5},"growth":{"infrastructure":1.5,"demography":1.0,"production":.5}}
 	for domain:String in goal_domains[String(goals[0].id)]:weights[domain]+=float(goal_domains[String(goals[0].id)][domain])
 	if hungry:weights.nutrition+=3.0;weights.health+=1.0;weights.ecology+=.8
+	var integration:=float(situation.get("integration_pressure",0))
+	weights.institutions+=integration*8
+	weights.culture+=integration*5
+	weights.infrastructure+=integration*5
 	if war:weights.security+=1.5;weights.logistics+=1.0
 	var ambitions:={"horizons":open*.65+risk*.35,"makers":discipline*.55+open*.45,"gathering":empathy*.6+(1-assertive)*.4,"inquiry":open*.85+(1-risk)*.15,"military":assertive*.65+discipline*.35,"sustenance":empathy*.4+(1-risk)*.6,"wellbeing":empathy*.85+(1-assertive)*.15,"commerce":open*.45+empathy*.35+risk*.2}
 	if hungry:ambitions.sustenance+=2

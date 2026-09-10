@@ -34,9 +34,9 @@ func test_staff_obey_allocation_depart_once_and_wait_for_returns()->void:
 	system.scouting_staff.set_policy(0,"exploration");system.scouting_staff.advance(100)
 	assert_array(system.scout_missions).is_equal(existing)
 	# Return releases the actual commitment; the policy organizes a replacement.
-	system.scout_missions.clear();system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(101)
+	system.scout_missions.clear();system.scouting_staff.set_policy(.05,"exploration");system.scouting_staff.advance(101)
 	assert_int(system.scout_missions.size()).is_equal(1)
-	assert_str(system.scout_missions[0].target_kind).is_equal("recruit_people")
+	assert_str(system.scout_missions[0].target_kind).is_equal("explore")
 func test_supply_and_founding_checks_prevent_unsustainable_departures()->void:
 	system.scouting_staff.set_policy(.10,"exploration")
 	GameState.settlement_site_committed=false;system.scouting_staff.advance(1)
@@ -75,7 +75,7 @@ func test_long_request_on_small_island_uses_short_trip_and_cost()->void:
 	assert_bool(q.can_dispatch).is_true();assert_int(q.duration_days).is_equal(30)
 	assert_float(float(q.provisions)).is_equal(4*30*.55)
 func test_policy_and_circuit_survive_json_without_duplicate_departure()->void:
-	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
+	system.scouting_staff.set_policy(.05,"exploration");system.scouting_staff.advance(0)
 	var payload:Dictionary=JSON.parse_string(JSON.stringify(system.export_state()))
 	var food:=FoodSystem.total_stored()
 	var copy:Node=auto_free(System.new());copy.reset_for_new_world();copy.set_scout_geography_authority(func(_p:Vector2)->bool:return true)

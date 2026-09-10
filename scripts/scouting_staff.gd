@@ -41,7 +41,10 @@ func advance(day:int)->void:
 	var civilian_reserve:=maxf(1,WorldSimulation.state.population_exact)*.9*7
 	var spendable:=WorldSimulation.food.total_stored()-civilian_reserve
 	if spendable<float(people)*30*.55:data.status="Waiting for provisions; seven days of food stay at home.";return
-	var target:="open_world" if data.focus=="exploration" else "recruit_people"
+	var target:="open_world" if data.focus=="exploration" else preload("res://scripts/society_exchange.gd").recruitment_target(host)
+	if target.is_empty():
+		data.status="Home needs spare housing, water, two weeks of food and reception staff before further invitations." if preload("res://scripts/society_exchange.gd").reception_capacity()<2 else "No unassigned known community to visit. Exploration can establish contact first."
+		return
 	# Start with a short circuit. Extend only when reaching the knowledge frontier
 	# needs it, rather than keeping people away a year for a local walk.
 	var chosen:Dictionary={};var chosen_allowance:=30
@@ -50,6 +53,8 @@ func advance(day:int)->void:
 		if not bool(quote.get("can_dispatch",false)) or float(quote.provisions)>spendable:
 			if chosen.is_empty():data.status=String(quote.get("blocker",quote.get("error","Not enough supplies.")))
 			continue
+		if data.focus=="exploration" and float(quote.route_plan.get("novelty",0))<.38:
+			data.status="No useful uncharted route within current reach. Staff are holding provisions at home.";continue
 		if chosen.is_empty() or float(quote.route_plan.get("novelty",0))>float(chosen.route_plan.get("novelty",0))+.1:chosen=quote;chosen_allowance=days
 		if float(quote.route_plan.get("novelty",0))>.6:break
 	if chosen.is_empty():return
@@ -61,7 +66,7 @@ func advance(day:int)->void:
 
 func returned_influence(mission:Dictionary,reports:Array[Dictionary],day:int)->Array[String]:
 	var outcomes:Array[String]=[]
-	if mission.get("target_kind","")!="recruit_people":return outcomes
+	if mission.get("target_kind","") not in ["recruit_people","recruit_people_visit"]:return outcomes
 	var visited:Dictionary={}
 	for report:Dictionary in reports:
 		var id:=String(report.get("controller",""))

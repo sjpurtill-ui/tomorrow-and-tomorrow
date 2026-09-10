@@ -89,6 +89,7 @@ var competition_winner_id:=""
 var contender_dominance_turns:Dictionary={}
 var player_territory_balance:=0.0
 var scout_missions:Array[Dictionary]=[]
+const Exchange=preload("res://scripts/society_exchange.gd")
 var scouting_staff=preload("res://scripts/scouting_staff.gd").new(self)
 var next_scout_mission_id:=1
 var scout_reports:Array[Dictionary]=[]
@@ -573,6 +574,7 @@ func advance_to_day(target_day:int)->void:
 	if WorldSimulation.enabled:
 		last_processed_day=maxi(last_processed_day,target_day)
 		city_intelligence.sample_missions(target_day)
+		Exchange.sample_missions(self,target_day)
 		_complete_due_scout_missions(target_day)
 		scouting_staff.advance(target_day)
 		_process_diplomatic_mission(target_day)
@@ -590,6 +592,7 @@ func advance_to_day(target_day:int)->void:
 		_process_strategic_turn(last_turn_day)
 	last_processed_day=target_day
 	city_intelligence.sample_missions(target_day)
+	Exchange.sample_missions(self,target_day)
 	rumor_network.sample(target_day)
 	_process_foreign_scout_reports(target_day)
 	_complete_due_scout_missions(target_day)
@@ -1178,6 +1181,8 @@ func scout_target_options()->Array[Dictionary]:
 	for lead:Dictionary in rumor_network.list_leads("player",int(WorldSimulation.state.elapsed_days)):
 		options.append({"id":"lead:"+String(lead.id),"kind":"investigate_lead","lead_id":String(lead.id),"civ_id":String(lead.subject),"label":"INVESTIGATE LEAD · "+String(lead.name),"description":rumor_network.describe(lead),"position":lead.center.duplicate(true)})
 	for city:Dictionary in city_intelligence.known_cities():
+		if String(city.get("controller","")) not in ["","player"]:
+			options.append({"id":"recruit:"+String(city.city_id),"kind":"recruit_people_visit","city_id":city.city_id,"civ_id":city.controller,"label":"VISIT "+String(city.name).to_upper(),"description":"Invite existing households and exchange practices through a physical visit.","position":city.position.duplicate(true)})
 		options.append({"id":"city:"+String(city.city_id),"kind":"observe_city","city_id":city.city_id,"civ_id":city.civ_id,"label":"OBSERVE "+String(city.name).to_upper(),"description":"Revisit this independently reported city. Only a returning party updates its dated estimates.","position":city.position.duplicate(true)})
 	return options
 
@@ -1313,7 +1318,7 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	var planned_heading:=String(route_plan.get("planned_heading",_compass_phrase(player_world_origin,Vector2(float(route[-1].get("x",player_world_origin.x)),float(route[-1].get("z",player_world_origin.y))))))
 	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"ordered_heading":normalized_heading if String(target_option.kind) in ["explore","recruit_people"] else "","planned_heading":planned_heading,"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_city_id":String(target_option.get("city_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
 	if bool(route_plan.get("circuit",false)):mission["circuit"]=true
-	if String(target_option.kind)=="observe_city":mission["travel_leg_days"]=int(quote.travel_leg_days)
+	if String(target_option.kind) in ["observe_city","recruit_people_visit"]:mission["travel_leg_days"]=int(quote.travel_leg_days)
 	# Journeys are not clockwork. The settlement counts down to the planned
 	# day; the road decides the real one. Delay scales with the expedition:
 	# the old fixed 21-day cap made nearly every long overdue party return at
@@ -1472,6 +1477,7 @@ func _process_diplomatic_mission(day:int)->void:
 		if day<=int(diplomatic_mission.return_day):
 			var access:=clampf(.46+float(relation.get("opinion",0))*.24+(.10 if float(diplomatic_mission.get("gift_amount",0))>0 else 0),.22,.85)
 			city_intelligence.stage(diplomatic_mission,"player",city_intelligence.vector(diplomatic_mission.target_position),access,day,"envoy:%s:%d" % [civ_id,int(diplomatic_mission.depart_day)])
+		Exchange.envoy_arrived(self,diplomatic_mission,day)
 		rumor_network.exchange(diplomatic_mission,"player",civ_id,city_intelligence.vector(diplomatic_mission.target_position),day)
 		var origin_city:=city_intelligence.primary_id("player")
 		if origin_city!="": city_intelligence.publish(civ_id,city_intelligence.location_record({"city_id":origin_city,"civ_id":"player","name":"Envoys' reported home","position":diplomatic_mission.origin_position},day,"envoys disclosed their origin","envoy:%d" % int(diplomatic_mission.depart_day)),day)
@@ -1510,6 +1516,8 @@ func _process_diplomatic_mission(day:int)->void:
 		civ=civilizations[index]
 		relation=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 		var diplomatic_report:=_diplomatic_return_report(civ,relation,diplomatic_mission,day)
+		for find:Dictionary in Exchange.returned(diplomatic_mission,day):
+			diplomatic_report.observations.append("Brought home: "+String(find.title)+". "+String(find.consequence))
 		relation["contact_intelligence"]=clampf(float(relation.get("contact_intelligence",0.0))+float(diplomatic_report.get("intelligence_gain",0.0)),0.0,0.95)
 		relation["last_observed_day"]=day
 		var target_position:Dictionary=diplomatic_mission.get("target_position",{})
@@ -2581,85 +2589,13 @@ func _resolve_targeted_scout_report(mission:Dictionary,day:int)->String:
 
 
 func _resolve_scout_recruitment(mission:Dictionary,day:int)->int:
-	var duration:=maxi(1,int(mission.get("duration_days",30)))
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*32452843^duration*49979687^scout_reports.size()*86028121^String(mission.get("target_id","open_world")).hash()
-	var chance:=clampf(0.18+float(duration)/365.0*0.30+(0.05 if String(mission.get("target_kind","explore"))=="explore" else 0.0),0.0,0.55)
-	if String(mission.get("target_kind",""))=="recruit_people": chance=clampf(chance+0.24,0.0,0.72)
-	if rng.randf()>=chance: return 0
-	# Whole families and small bands join, not lone stragglers.
-	var maximum:=clampi(3+duration/45,4,12)
-	var count:=rng.randi_range(2,maximum)
-	# The rare jackpot: an entire band throws in its lot with the party.
-	if rng.randf()<0.12: count+=rng.randi_range(10,clampi(14+duration/30,14,26))
-	WorldSimulation.state.register_population_arrivals(count,"wanderers recruited by returning scouts")
-	return count
+	return Exchange.arrive(mission,day)
 
-
-func _recruitment_return_account(mission:Dictionary,day:int,recruits:int)->Dictionary:
-	## Recruitment is a social mission, not merely exploration with a population
-	## roll attached. Preserve the same mechanical result, then explain what the
-	## party actually encountered and why the offer did or did not persuade them.
-	if String(mission.get("target_kind",""))!="recruit_people": return {}
-	var duration:=maxi(1,int(mission.get("duration_days",30)))
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*49979693^int(mission.get("mission_id",0))*86028157^recruits*104729
-	var group_kinds:=PackedStringArray(["traveling households","a foraging band","several related families","a seasonal camp","a small migrant company"])
-	var group_kind:=String(group_kinds[rng.randi_range(0,group_kinds.size()-1)])
-	var encountered:=0
-	var declined:=0
-	var disposition:="none_found"
-	var reasons:Array[String]=[]
-	var summary:=""
-	var variants:Array[String]=[]
-	if recruits>0:
-		declined=rng.randi_range(0,maxi(1,3+duration/90))
-		encountered=recruits+declined
-		disposition="some_joined" if declined>0 else "all_joined"
-		var housing:=float(WorldSimulation.state.simulation_metrics.get("housing_ratio",1.0))
-		var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
-		var security:=float(WorldSimulation.state.simulation_metrics.get("security",WorldSimulation.state.society_capacities.get("security",0.4)))
-		if housing>=1.08: reasons.append("The promise of room and shelter carried weight.")
-		elif food_days>=45.0: reasons.append("The party could point to dependable stores rather than promises alone.")
-		elif security>=0.62: reasons.append("The settlement's guarded roads made the offer credible.")
-		else: reasons.append("Kin already willing to move trusted the party enough to take the risk.")
-		if declined>0: reasons.append("Others would not abandon kin, obligations, or familiar country.")
-		variants=[
-			"The party found %s. After days of talk, %d chose to return with them%s." % [group_kind,recruits,"; %d declined" % declined if declined>0 else ""],
-			"They shared fires with %s and made the settlement's offer plainly. %d accepted%s." % [group_kind,recruits," while %d stayed behind" % declined if declined>0 else ""],
-			"Word traveled ahead of the party. Among %s, %d people agreed to uproot themselves and come%s." % [group_kind,recruits,"; %d would not" % declined if declined>0 else ""],
-		]
-	else:
-		var met_people:=rng.randf()<clampf(0.42+float(duration)/365.0*0.28,0.0,0.78)
-		if not met_people:
-			summary=[
-				"The party searched paths, smoke, camps, and old fire sites, but found no people willing to be approached.",
-				"They followed signs of passage for days; every camp was cold before they reached it.",
-				"The country held tracks and abandoned hearths, but no one remained to hear the settlement's offer.",
-			][rng.randi_range(0,2)]
-			reasons.append("No offer can persuade people the party never reaches.")
-		else:
-			encountered=rng.randi_range(2,clampi(5+duration/45,5,16))
-			declined=encountered
-			disposition="all_declined"
-			var housing:=float(WorldSimulation.state.simulation_metrics.get("housing_ratio",1.0))
-			var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
-			var security:=float(WorldSimulation.state.simulation_metrics.get("security",WorldSimulation.state.society_capacities.get("security",0.4)))
-			if housing<0.92: reasons.append("They asked where they would sleep; the party could promise no secure place.")
-			elif food_days<18.0: reasons.append("News of thin stores made relocation look more dangerous than staying.")
-			elif security<0.32: reasons.append("They did not believe the road or settlement could protect them.")
-			else:
-				var social_reasons:=PackedStringArray(["They would not leave kin and familiar country.","They distrusted an offer from strangers.","Their seasonal obligations mattered more than an uncertain new home.","They listened, traded news, and chose their independence."])
-				reasons.append(String(social_reasons[rng.randi_range(0,social_reasons.size()-1)]))
-			variants=[
-				"The party spoke with %s—%d people in all. Every one declined the invitation." % [group_kind,encountered],
-				"They found %s and made the settlement's case. All %d chose to remain where they were." % [group_kind,encountered],
-				"For several nights the party negotiated with %s. They returned alone; none of the %d people approached would come." % [group_kind,encountered],
-			]
-			summary=variants[rng.randi_range(0,variants.size()-1)]
-	if recruits>0: summary=variants[rng.randi_range(0,variants.size()-1)]
-	return {"disposition":disposition,"group":group_kind if encountered>0 else "no settled encounter","encountered":encountered,"joined":recruits,"declined":declined,"summary":summary,"reasons":reasons}
-
+func _recruitment_return_account(mission:Dictionary,_day:int,recruits:int)->Dictionary:
+	if String(mission.get("target_kind","")) not in ["recruit_people","recruit_people_visit"]:return {}
+	var reservation:Dictionary=mission.get("migrant_reservation",{})
+	var summary:="%d people arrived from %s. They are the households met on this journey; reception is now under way." % [recruits,String(reservation.get("source_name","the visited community"))] if recruits>0 else String(mission.get("recruitment_reason","No community was physically visited on this journey. No recruitment offer could be made."))
+	return {"disposition":"some_joined" if recruits>0 else "none_joined","encountered":int(reservation.get("count",0)),"joined":recruits,"declined":0,"summary":summary,"reasons":[summary]}
 
 func _resolve_party_fate(mission:Dictionary,day:int)->Dictionary:
 	## The gamble of the road. Usually everyone comes home; sometimes the party
@@ -2675,9 +2611,6 @@ func _resolve_party_fate(mission:Dictionary,day:int)->Dictionary:
 	if personnel>1 and rng.randf()<hazard:
 		lost=mini(rng.randi_range(1,maxi(1,personnel/4)),personnel-1)
 		WorldSimulation.state.register_population_deaths(lost,"lost on a scouting expedition")
-	if personnel-lost>1 and rng.randf()<hazard*0.8:
-		stayed=mini(rng.randi_range(1,maxi(1,personnel/3)),personnel-lost-1)
-		WorldSimulation.state.register_population_departures(stayed,"remained with people met on the road")
 	var line:=""
 	if lost>0 and stayed>0: line="Not all who left came home: %d were lost on the road, and %d chose to remain with people they met." % [lost,stayed]
 	elif lost>0: line="Not all who left came home: %d %s lost on the road." % [lost,"person was" if lost==1 else "people were"]
@@ -2727,45 +2660,13 @@ func _resolve_scout_rumors(_day:int,_recruits:int)->String:
 	return ""
 
 
-func _resolve_nomad_sighting(mission:Dictionary,route:Array,day:int,recruits:int)->String:
-	## A band seen that chose not to join leaves an indicator on the chart,
-	## never a contact record.
-	if recruits>0 or route.size()<4: return ""
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*67867967^int(mission.get("mission_id",0))*122949829
-	var duration:=maxi(1,int(mission.get("duration_days",30)))
-	if rng.randf()>=clampf(0.22+float(duration)/365.0*0.25,0.0,0.55): return ""
-	var waypoint:Dictionary=route[rng.randi_range(route.size()/2,route.size()-1)]
-	var position:=Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0)))
-	var band_hint:String=["a family group","a small band","a large traveling band"][rng.randi_range(0,2)]
-	nomad_sightings.append({"id":"nomads_%d" % next_nomad_sighting_id,"day":day,"position":{"x":position.x,"z":position.y},"band_hint":band_hint})
-	next_nomad_sighting_id+=1
-	if nomad_sightings.size()>NOMAD_SIGHTING_LIMIT: nomad_sightings.pop_front()
-	_record_world_event("Nomads sighted","The party passed %s of nomads near the marked point. The strangers kept their distance and did not join." % band_hint,"diplomacy",day)
-	return "They passed %s of nomads who kept their distance and did not join; the sighting is marked on the chart." % band_hint
+func _resolve_nomad_sighting(_mission:Dictionary,_route:Array,_day:int,_recruits:int)->String:
+	# Historical sightings remain readable. New encounters require real people.
+	return ""
 
-
-func _resolve_taught_knowledge(day:int,recruits:int,contacts:Array)->String:
-	## Occasionally the people met on the road teach something: one live
-	## investigation leaps forward. Meeting people is required — empty ground
-	## teaches through the ordinary evidence channels instead.
-	if recruits<=0 and contacts.is_empty(): return ""
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*179424673^recruits*15487469^scout_reports.size()*32452867
-	if rng.randf()>=0.28: return ""
-	var active:Array=WorldSimulation.state.active_investigations.values()
-	if active.is_empty(): return ""
-	var discovery_id:=String(active[rng.randi_range(0,active.size()-1)])
-	var definition:Dictionary=WorldSimulation.discovery.discovery_definition(discovery_id)
-	if definition.is_empty(): return ""
-	var boost:=rng.randf_range(0.08,0.20)
-	# Cap below completion so the discovery still lands through the normal
-	# daily tick and its established-knowledge event flow.
-	WorldSimulation.state.discovery_progress[discovery_id]=clampf(float(WorldSimulation.state.discovery_progress.get(discovery_id,0.0))+boost,0.0,0.99)
-	var line_name:=String(definition.get("subcategory","an open question")).to_lower()
-	_record_world_event("Taught on the road","People met on the journey showed the party their way of doing things; the inquiry into %s leaps forward." % line_name,"knowledge",day)
-	return "Strangers showed them a better way of doing things, and the inquiry into %s leaps forward." % line_name
-
+func _resolve_taught_knowledge(_day:int,_recruits:int,_contacts:Array)->String:
+	# Specific carried evidence is studied through the ordinary workforce.
+	return ""
 
 const SCOUT_FIND_RESOURCES:Array[String]=["Timber","Stone","Fiber Plants","Fertile Soil","Game"]
 func scout_one_way_range(duration_days:int)->float:
@@ -2824,78 +2725,11 @@ func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->
 		observation_revision+=1
 	return findings
 
-func _resolve_scout_windfalls(mission:Dictionary,route:Array,day:int)->Array[String]:
-	## The concrete wins a returned party can bring home beyond charted ground
-	## and contacts: recognized deposits along the route, field evidence for
-	## running investigations, and salvage carried back.
-	var windfalls:Array[String]=[]
-	var duration:=maxi(1,int(mission.get("duration_days",30)))
-	mission["discoveries"]=[]
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*179424673^duration*15485867^int(mission.get("mission_id",0))*982451653
-	# 1) Recognized deposits: the party marks workable occurrences on its chart.
-	# What they find is what the rendered ground actually is there — timber in
-	# visible woodland, stone on bare high ground, fertile soil by the river.
-	if route.size()>=4:
-		var found_resources:Dictionary={}
-		var find_count:=0
-		var find_chance:=clampf(0.35+float(duration)/365.0*0.40,0.0,0.80)
-		if rng.randf()<find_chance: find_count+=1
-		if duration>=180 and rng.randf()<0.45: find_count+=1
-		if duration>=180: find_count=maxi(1,find_count)
-		for find_index in find_count:
-			var waypoint_index:=rng.randi_range(route.size()/3,route.size()-1)
-			var waypoint:Dictionary=route[waypoint_index]
-			var position:=Vector3(float(waypoint.get("x",0.0))+rng.randf_range(-6.0,6.0),0.0,float(waypoint.get("z",0.0))+rng.randf_range(-6.0,6.0))
-			var resource_name:=""
-			var ground_note:=""
-			var surveyed_ground:Dictionary={}
-			if ground_survey_authority.is_valid():
-				var ground:Dictionary=ground_survey_authority.call(Vector2(position.x,position.z))
-				surveyed_ground=ground
-				var ground_label:=String(ground.get("label","the ground"))
-				ground_note=" on the %s there" % ground_label
-			resource_name=ExpeditionFindings.resource_for(surveyed_ground,day,rng,duration>=180)
-			if resource_name.is_empty() or found_resources.has(resource_name): continue
-			found_resources[resource_name]=true
-			var deposit:Dictionary=WorldSimulation.resources._deposit(resource_name,position,rng.randf_range(0.55,0.95),rng.randf_range(600.0,2400.0),WorldSimulation.state.resource_deposits.size())
-			deposit["stage"]="recognized"
-			deposit["clues"]=1.0
-			deposit["survey"]=0.55
-			WorldSimulation.state.resource_deposits.append(deposit)
-			var origin_distance:=roundi(player_world_origin.distance_to(Vector2(position.x,position.z)))
-			var discovery:=ExpeditionFindings.deposit_card(deposit,origin_distance)
-			(mission.discoveries as Array).append(discovery)
-			windfalls.append("%s — %s %d km from home%s. %s" % [String(discovery.title),String(discovery.description),origin_distance,ground_note,String(discovery.consequence)])
-	# 2) Field evidence: the returned charts and accounts circulate through the
-	# collective mind, raising the evidence signals that ongoing inquiry lines
-	# actually feed on (the same pathway as daily activity) — not a flat bonus
-	# to one lucky project.
-	var circulation_days:=clampi(30+duration/3,30,150)
-	var strength:=clampf(0.45+float(duration)/365.0*0.35,0.45,0.80)
-	var observed_signals:Dictionary={"exploration":strength,"travel":strength*0.85,"survey":strength*0.75,"nature":strength*0.6}
-	var signal_summary:="exploration, travel, and natural-cycle"
-	match String(mission.get("target_kind","explore")):
-		"investigate_contact":
-			observed_signals["administration"]=strength*0.6
-			observed_signals["information"]=strength*0.6
-			signal_summary="route, contact, and organizational"
-		"observe_settlement":
-			observed_signals["defense"]=strength*0.7
-			observed_signals["construction"]=strength*0.5
-			observed_signals["administration"]=strength*0.6
-			signal_summary="defensive works, construction, and organizational"
-	WorldSimulation.state.register_field_observations(observed_signals,day+circulation_days)
-	(mission.discoveries as Array).append({"kind":"knowledge","title":"A wider world, carried home","description":"Their route sketches and field observations become material for your people's ongoing investigations.","consequence":"Field evidence for exploration, travel, surveying and nature circulates for %d days." % circulation_days,"duration_days":circulation_days})
-	windfalls.append("Their charts and accounts circulate for ~%d days, enriching %s evidence for every inquiry that feeds on it." % [circulation_days,signal_summary])
-	# 3) Salvage: hides, cordage fiber, seasoned wood carried home.
-	if rng.randf()<0.45:
-		var salvage_resource:="Fiber Plants" if rng.randf()<0.5 else "Timber"
-		var salvage_amount:=float(3+duration/30)
-		WorldSimulation.state.resource_stockpiles[salvage_resource]=float(WorldSimulation.state.resource_stockpiles.get(salvage_resource,0.0))+salvage_amount
-		windfalls.append("Supplies brought home: %.0f bulk of %s. These are the party's remaining gathered materials, not the value of the country they charted." % [salvage_amount,WorldSimulation.resources.display_name(salvage_resource).to_lower()])
-	return windfalls
-
+func _resolve_scout_windfalls(mission:Dictionary,_route:Array,day:int)->Array[String]:
+	mission["discoveries"]=Exchange.returned(mission,day)
+	var notes:Array[String]=[]
+	for item:Dictionary in mission.discoveries:notes.append("%s — %s" % [String(item.title),String(item.consequence)])
+	return notes
 
 func _process_player_contact(day:int)->void:
 	# Intelligence grows only after a real meeting. A scout mission reveals nothing
@@ -4326,9 +4160,7 @@ func player_population_commitments()->Dictionary:
 	var records:Array[Dictionary]=[]
 	var by_function:Dictionary={"productive":0,"support":0,"mobilized":0,"dependent":0}
 	var mobilization:Dictionary={"total":int(WorldSimulation.state.population_allocations.get("Defense",0)),"allocated_defense":int(WorldSimulation.state.population_allocations.get("Defense",0)),"excess_beyond_defense":0,"records":[],"bounded":true}
-	var military_campaign:Node=null
-	var tree:=Engine.get_main_loop() as SceneTree
-	if tree and tree.root: military_campaign=tree.root.get_node_or_null("MilitaryCampaign")
+	var military_campaign:Node=WorldSimulation.military
 	if military_campaign!=null and military_campaign.has_method("population_commitment_snapshot"):
 		mobilization=military_campaign.population_commitment_snapshot()
 	for mission_variant in scout_missions:
@@ -4359,6 +4191,10 @@ func player_population_commitments()->Dictionary:
 		var sources:Dictionary=survivors.get("functions",{})
 		for function_id in by_function:by_function[function_id]=int(by_function[function_id])+int(sources.get(function_id,0))
 		records.append({"id":"siege_survivors","label":"SIEGE SURVIVORS","kind":"siege_recovery","personnel":int(survivors.people),"source":"mixed","by_function":sources.duplicate(true)})
+	var emigrants:=Exchange.outbound_count()
+	if emigrants>0:
+		by_function.productive=int(by_function.productive)+emigrants
+		records.append({"id":"outbound_households","label":"HOUSEHOLDS TRAVELING TO ANOTHER COMMUNITY","kind":"migration","personnel":emigrants,"source":"productive"})
 	var total_absent:=0
 	var working_absent:=0
 	for function_id in ["productive","support","mobilized","dependent"]:
@@ -5435,6 +5271,7 @@ func validate_state()->Array[String]:
 					if not point is Dictionary or not is_finite(float(point.get("x",NAN))) or not is_finite(float(point.get("z",NAN))): errors.append("Revealed trail contains an invalid point.")
 	for mission_variant in scout_missions:
 		var mission:Dictionary=mission_variant
+		if not Exchange.valid_mission(mission):errors.append("Invalid carried exploration or migration records.")
 		if int(mission.get("duration_days",0)) not in SCOUT_DURATIONS: errors.append("Scout mission duration is invalid.")
 		if int(mission.get("return_day",-1))<=int(mission.get("start_day",-1)): errors.append("Scout mission return day must follow departure.")
 		if mission.has("travel_leg_days") and (not city_intelligence.number(mission.travel_leg_days) or float(mission.travel_leg_days)<1 or float(mission.travel_leg_days)>float(mission.get("duration_days",0))):errors.append("Scout travel allowance must be finite and within the expedition duration.")
@@ -5450,6 +5287,7 @@ func validate_state()->Array[String]:
 			var scout_trait_value:=float(mission.get(scout_trait,NAN))
 			if not is_finite(scout_trait_value) or scout_trait_value<0.0 or scout_trait_value>1.0: errors.append("Scout mission %s must be normalized." % scout_trait)
 	if not diplomatic_mission.is_empty():
+		if not Exchange.valid_mission(diplomatic_mission):errors.append("Invalid carried diplomatic exchange records.")
 		if not ids.has(String(diplomatic_mission.get("civ_id",""))): errors.append("Diplomatic mission references an unknown civilization.")
 		if diplomatic_mission.has("commitment_terms"):
 			var commitment:Variant=diplomatic_mission.commitment_terms

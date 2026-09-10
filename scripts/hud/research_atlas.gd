@@ -150,7 +150,7 @@ func refresh(refit:bool)->void:
 		if view_mode=="tree" and not show_locked and not item.exposed:hidden+=1;continue
 		records.append(item)
 	if view_mode=="active":records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return Art.lead(a)+String(a.name)<Art.lead(b)+String(b.name))
-	legend.text="Named leaders supervise shared teams. Team sizes show equivalent full-time effort; evidence builds as people investigate." if view_mode=="active" else "%d unexplored questions hidden. Lines connect prerequisites; drag to pan, wheel to zoom." % hidden if view_mode=="tree" else "Discoveries your civilization has established. Select a card for its effects."
+	legend.text="Named leaders supervise shared teams. Team sizes show equivalent full-time effort; evidence builds as people investigate." if view_mode=="active" else "%d unexplored questions hidden. Solid lines: original foundations. Dashed lines: alternative approaches; drag to pan, wheel to zoom." % hidden if view_mode=="tree" else "Discoveries your civilization has established. Select a card for its effects."
 	tree_controls.visible=view_mode=="tree";plot.visible=view_mode=="tree" and not records.is_empty();scroll.visible=view_mode!="tree" and not records.is_empty();empty.visible=records.is_empty()
 	if records.is_empty():
 		for child in empty.get_children():empty.remove_child(child);child.queue_free()
@@ -240,6 +240,10 @@ func select(id:String,open_detail:bool=false)->void:
 				for current:Dictionary in all_records:
 					if current.id==current_id and current.exposed:Art.label(detail_body,"This team is currently investigating "+String(current.name)+". Focusing here redirects that team's attention.",12,T.TEXT_SOFT,true)
 		detail=Art.label(detail_body,item.description,13,T.BODY,true)
+		Art.label(detail_body,String(item.get("pathway_description","")),13,T.TEAL,true)
+		for route:Dictionary in item.get("pathways",[]):
+			Art.label(detail_body,("● " if bool(route.ready) else "○ ")+String(route.label),12,T.GREEN if bool(route.ready) else T.MUTED,true)
+		Art.button(detail_body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
 		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",10,T.MUTED)

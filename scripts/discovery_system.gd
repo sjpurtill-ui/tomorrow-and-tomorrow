@@ -1,5 +1,7 @@
 extends Node
 
+const Pathways=preload("res://scripts/knowledge_pathways.gd")
+const Exchange=preload("res://scripts/society_exchange.gd")
 const ResourceKnowledgeCatalog = preload("res://scripts/resource_knowledge_catalog.gd")
 const SocietyKnowledgeCatalog = preload("res://scripts/society_knowledge_catalog.gd")
 const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catalog.gd")
@@ -121,6 +123,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	WorldSimulation.direction.advance(int(WorldSimulation.state.elapsed_days))
 	WorldSimulation.communities.advance(int(WorldSimulation.state.elapsed_days))
 	WorldSimulation.diplomacy.advance(int(WorldSimulation.state.elapsed_days))
+	Exchange.advance(int(WorldSimulation.state.elapsed_days))
 	var effective_context:=context.duplicate(true)
 	var military_campaign:=WorldSimulation.system("MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("military_inquiry_context"):
@@ -149,11 +152,13 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		# knowledge unfolding across generations instead of exhausting an era in months.
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
 		var probability: float = discovery.chance / research_difficulty(discovery,WorldSimulation.state.world_seed) * attention * activity * material_evidence * leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
+		probability*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
 		var progress:=float(WorldSimulation.state.discovery_progress.get(discovery_id,0.0))
 		progress+=probability*rng.randf_range(0.72,1.28)
 		if rng.randf()<probability*0.10: progress+=rng.randf_range(0.025,0.085)
 		WorldSimulation.state.discovery_progress[discovery_id]=clampf(progress,0.0,1.0)
 		if progress>=1.0:
+			Pathways.remember(discovery,current_day)
 			WorldSimulation.state.known_discoveries.append(discovery.id)
 			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
@@ -233,6 +238,7 @@ func active_investigation_records()->Array[Dictionary]:
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
 		var research_capacity:=research_capacity_for(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
 		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
+		baseline_momentum*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
 		discovery["discovery_name"]=String(discovery.get("name","Undetermined discovery"))
 		discovery["name"]=String(discovery.get("name","Investigation"))
 		discovery["progress"]=progress
@@ -402,12 +408,8 @@ func active_investigation_records_shallow()->Array[Dictionary]:
 
 func _discovery_is_eligible(discovery:Dictionary,current_day:int)->bool:
 	var id:=String(discovery.get("id",""))
-	if id in WorldSimulation.state.known_discoveries or current_day<int(discovery.get("day",0)): return false
-	if not _path_is_viable(discovery): return false
-	for requirement in discovery.get("requires",[]):
-		if String(requirement) not in WorldSimulation.state.known_discoveries: return false
-	return _resource_requirements_met(discovery.get("resource_requirements",[]))
-
+	if id in WorldSimulation.state.known_discoveries or not _path_is_viable(discovery):return false
+	return Pathways.ready(discovery,current_day) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 func _channel_has_candidate(channel:String,current_day:int)->bool:
 	for discovery:Dictionary in (catalog_by_channel.get(channel,[]) as Array):
@@ -467,6 +469,7 @@ func _candidate_score(discovery:Dictionary)->float:
 	# Once a society has invested in a viable tradition, its deeper methods have
 	# a modest continuity advantage, but other routes can still overtake it.
 	score+=float(discovery.get("stage_index",0))*3.5
+	score+=Pathways.need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
 	return score
 
 
@@ -856,11 +859,15 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		var id:=String(entry.id)
 		var row:=entry.duplicate(true)
 		var missing:Array[String]=[]
+		row["pathways"]=Pathways.routes(entry)
+		row["pathway_description"]=Pathways.describe(entry)
 		for requirement in entry.get("requires",[]):
 			if String(requirement) not in WorldSimulation.state.known_discoveries: missing.append(String(catalog_by_id.get(String(requirement),{}).get("name",requirement)))
 		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): missing.append("earliest day %d" % int(entry.day))
 		if not _resource_requirements_met(entry.get("resource_requirements",[])):
 			for requirement in entry.get("resource_requirements",[]): missing.append("%s: %s access" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized"))])
+		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
+		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")
 		var known:=id in WorldSimulation.state.known_discoveries
 		row["ready"]=not known and missing.is_empty()
 		row["missing"]=missing

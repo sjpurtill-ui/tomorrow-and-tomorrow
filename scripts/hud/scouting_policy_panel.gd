@@ -52,6 +52,7 @@ func _ready()->void:
 		choice.icon=V.icon("logistics" if key=="exploration" else "population");choice.expand_icon=true;choice.add_theme_constant_override("icon_max_width",24);choice.alignment=HORIZONTAL_ALIGNMENT_LEFT;choice.toggle_mode=true;focus_buttons[key]=choice
 		choice.tooltip_text="Prioritize uncharted ground, resource surveys and field discoveries." if key=="exploration" else "Seek people, invite newcomers and build goodwill through physical visits."
 	status=label(body,"",13,T.TEAL);cost=label(body,"",12,T.TEXT_SOFT)
+	button(body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
 	label(body,"PARTIES IN THE FIELD",11,T.MUTED)
 	parties=VBoxContainer.new();parties.add_theme_constant_override("separation",6);body.add_child(parties)
 	label(body,"Leaders choose the routes and handle repeat departures. People away are unavailable for work at home. Knowledge returns with the people who actually traveled there.",12,T.MUTED)

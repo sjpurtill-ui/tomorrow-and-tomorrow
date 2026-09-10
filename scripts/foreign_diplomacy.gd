@@ -7,7 +7,7 @@ const TONES={"equals":"Speak as equals","honor":"Honor their standing","firm":"M
 const ACCORDS={
 	"exchange":{"name":"Exchange of teachers","domain":"knowledge","purpose":"Let teachers carry useful discoveries between your communities."},
 	"routes":{"name":"Shared waystations","domain":"logistics","purpose":"Coordinate safe stopping places and pass on route knowledge."},
-	"restraint":{"name":"Border understanding","domain":"culture","purpose":"Recognize each other's independence and quiet the frontier."}
+	"restraint":{"name":"Border understanding","domain":"culture","purpose":"Recognize each other's independence, quiet the frontier and pause invitations to each other's households."}
 }
 var seed_value:=-999999
 var leaders:Dictionary={}
@@ -43,7 +43,14 @@ func leader(id:String)->Dictionary:
 		var past:Array=["Earned a hearing by settling a bitter dispute between families.","Rose to prominence defending the community's right to govern itself.","Won support by organizing work that rival households could not finish alone.","Gathered followers by bringing unfamiliar ideas home from a long journey."]
 		leaders[id]={"name":identity.name,"temperament":temperament,"bio":past[serial%4],"trust":0.0,"memories":[],"accord":{},"counter":{},"next_day":0,"serial":0,"resolved":0}
 	leaders[id]["personality"]=PERSONALITY.foreign(seed_value,id)
-	leaders[id]["goals"]=PERSONALITY.agenda(civ,leaders[id].personality)
+	var situation_data:=civ.duplicate()
+	var exchange=preload("res://scripts/society_exchange.gd")
+	if exchange.owner_state(id)!=null:
+		var visitor:=WorldSimulation.actor_id
+		WorldSimulation.scoped(exchange.owner_id(id),func()->void:
+			situation_data["integration_pressure"]=float(exchange.pressure().unsettled_share)
+			situation_data["cultural_exchange"]=float(exchange.known_relation(visitor).get("respect",0)))
+	leaders[id]["goals"]=PERSONALITY.agenda(situation_data,leaders[id].personality)
 	return leaders[id]
 
 func situation(id:String)->Dictionary:
@@ -54,6 +61,8 @@ func situation(id:String)->Dictionary:
 	if bool(relation.get("at_war",false)): return {"title":"Words across a battlefield","line":"While our people fight, promises of shared work ring hollow. Send peace envoys first.","priority":"restraint"}
 	if float(relation.get("border_tension",0))>.45: return {"title":"A frontier on edge","line":"Every movement near the boundary is becoming a rumor. Can we give our people a reason to stop expecting a fight?","priority":"restraint"}
 	if not (person.counter as Dictionary).is_empty(): return {"title":"An answer with conditions","line":"I can defend this agreement before my people if yours carries more of the burden. Those are the terms I can offer.","priority":person.counter.accord}
+	var exchange_position:Dictionary=preload("res://scripts/society_exchange.gd").leader_position(id,person.personality)
+	if not exchange_position.is_empty():return exchange_position
 	if String(relation.get("treaty","none"))=="trade": return {"title":"More than exchanging goods","line":"Our traders already meet. Let us make those journeys useful to the people who come after them.","priority":"routes"}
 	if int(person.resolved)==0: return {"title":"Two peoples, one first impression","line":"Your envoys have a seat by our fire. Tell me what you want us to build together—and what you are willing to give.","priority":"exchange"}
 	var goal:Dictionary=person.goals[0]
@@ -66,7 +75,11 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	var favorite:String={"Bridge-builder":"equals","Proud guardian":"honor","Practical organizer":"firm","Restless visionary":"equals"}[p.temperament]
 	var priority:String=situation(id).priority
 	var score:float=float(relation.get("opinion",0))*.5+float(p.trust)*.4+(.20 if priority==accord else 0)+(.18 if tone==favorite else (-.15 if tone=="firm" else 0)) + (.28 if generous else 0)
+	score+=preload("res://scripts/society_exchange.gd").counterpart_value(id,p.personality)
 	var reasons:Array[String]=[]
+	var ties:Dictionary=preload("res://scripts/society_exchange.gd").known_relation(id)
+	if float(ties.get("respect",0))>.02:reasons.append("Useful knowledge and cultural exchange give this relationship weight.")
+	if float(ties.get("resentment",0))>.02:reasons.append("The movement of households has created political friction.")
 	reasons.append("This addresses their immediate concern." if priority==accord else "Their immediate concern lies elsewhere.")
 	reasons.append("This approach suits their temperament." if tone==favorite else ("A hard line may offend them." if tone=="firm" else "Your approach gives no personal advantage."))
 	if float(p.trust)<-.1: reasons.append("Past dealings have damaged personal trust.")
@@ -129,12 +142,12 @@ func resolve(id:String)->Dictionary:
 		relation.opinion=clampf(float(relation.get("opinion",0))+.08,-1,1)
 		if terms.accord=="restraint": relation.border_tension=maxf(0,float(relation.get("border_tension",0))-.25)
 		civ["gift_value_received"]=float(civ.get("gift_value_received",0))+int(terms.cost)
-		var capability:String="logistics" if terms.accord=="routes" else ("knowledge" if terms.accord=="exchange" else "cohesion")
-		civ[capability]=clampf(float(civ.get(capability,0))+(.04 if terms.generous else .02),0,1)
-		message="%s agrees to %s. Your %s research gains %d%% for two years; their %s rises %d points. War ends the understanding." % [p.name,ACCORDS[terms.accord].name,ACCORDS[terms.accord].domain,roundi(float(f.bonus)*100),capability,4 if terms.generous else 2]
+		preload("res://scripts/society_exchange.gd").accept_accord(id,String(terms.accord),String(f.domain),float(f.bonus),int(p.accord.until))
+		message="%s agrees to %s. Both communities gain %d%% support for %s research for two years. Specific practices still travel with people and require study; war ends the understanding." % [p.name,ACCORDS[terms.accord].name,roundi(float(f.bonus)*100),ACCORDS[terms.accord].domain]
+		if terms.accord=="restraint":message+=" Both societies will pause recruitment visits to each other for those two years."
 	elif outcome=="counter":
 		p.counter={"accord":terms.accord}; p.next_day=int(WorldSimulation.state.elapsed_days)
-		message="%s offers a counterproposal: your people supply 12 Timber and receive an 8%% research benefit; theirs gain four capability points. Send revised terms whenever you wish." % p.name
+		message="%s offers a counterproposal: your people supply 12 Timber and receive an 8%% research benefit; both communities receive the same research support. Send revised terms whenever you wish." % p.name
 	else:
 		p.counter={}; p.next_day=int(WorldSimulation.state.elapsed_days)+90
 		p.trust=clampf(float(p.trust)-.04,-1,1)
@@ -166,8 +179,10 @@ func advance(day:int)->void:
 func multiplier(domain:String)->float:
 	advance(int(WorldSimulation.state.elapsed_days))
 	var bonus:=0.0
-	for p:Dictionary in leaders.values():
+	for id:String in leaders:
+		var p:Dictionary=leaders[id]
 		if not (p.accord as Dictionary).is_empty() and ACCORDS[p.accord.kind].domain==domain: bonus+=float(p.accord.bonus)
+	bonus+=preload("res://scripts/society_exchange.gd").received_accord_bonus(domain)
 	return 1.0+minf(.24,bonus)
 
 func valid_terms(t:Dictionary)->bool:

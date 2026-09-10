@@ -9,6 +9,11 @@ static func current_plan(id:String)->Dictionary:
 	for civ:Dictionary in WorldSimulation.world.civilizations:
 		situation.at_war=bool(situation.at_war) or bool(civ.player_relation.get("at_war",false))
 	# The same sovereign personality supplies the foreign leader's dialogue.
+	situation["integration_pressure"]=float(preload("res://scripts/society_exchange.gd").pressure().unsettled_share)
+	var exchange_value:=0.0
+	for ties:Dictionary in state.society_exchange.connections.values():exchange_value=maxf(exchange_value,float(ties.get("respect",0)))
+	situation["cultural_exchange"]=exchange_value
+	situation["reception_capacity"]=preload("res://scripts/society_exchange.gd").reception_capacity()
 	return STRATEGY.preferences(STRATEGY.PERSONALITY.foreign(state.world_seed,id),situation)
 
 static func review_due(id:String,day:int)->bool:
@@ -138,14 +143,22 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 	var world:=WorldSimulation.world
 	var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0))
 	var scout_share:=.02 if int(plan.scout_days)==30 else .05 if int(plan.scout_days)==90 else .08
-	var scout_focus:="recruitment" if float(plan.personality.empathy)>.65 else "exploration"
+	var reception:=preload("res://scripts/society_exchange.gd").reception_capacity()
+	var strain:=float(preload("res://scripts/society_exchange.gd").pressure().unsettled_share)
+	var migration:="consolidate" if bool(plan.hungry) or strain>.15 else "welcome" if float(plan.personality.empathy)>.65 else "balanced"
+	var sharing:="open" if float(plan.personality.openness)>.65 else "guarded" if float(plan.personality.assertiveness)>.7 and float(plan.personality.openness)<.4 else "selective"
+	WorldSimulation.submit(id,{"kind":"society_policy","migration":migration,"sharing":sharing})
+	if bool(plan.hungry) or strain>.2:scout_share=0
+	var scout_focus:="recruitment" if reception>=2 and float(plan.personality.empathy)>.65 else "exploration"
 	WorldSimulation.submit(id,{"kind":"scouting_policy","share":scout_share,"focus":scout_focus})
 	if not world.diplomatic_mission.is_empty():return
 	var candidates:Array[Dictionary]=[]
 	var campaign_enemy:="";var campaign_urgency:=-INF
 	for civ:Dictionary in world.civilizations:
 		if int(civ.player_relation.get("contact_level",0))<2:continue
-		var action:=STRATEGY.diplomatic_action(civ.player_relation,plan,food_days)
+		var relationship:Dictionary=civ.player_relation.duplicate(true)
+		relationship.opinion=clampf(float(relationship.get("opinion",0))+preload("res://scripts/society_exchange.gd").diplomatic_value(String(civ.id),plan.personality),-1,1)
+		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days)
 		if bool(civ.player_relation.get("at_war",false)) and action!="seek_peace":
 			var urgency:=-float(civ.player_relation.get("opinion",0))
 			if urgency>campaign_urgency:campaign_urgency=urgency;campaign_enemy=String(civ.id)

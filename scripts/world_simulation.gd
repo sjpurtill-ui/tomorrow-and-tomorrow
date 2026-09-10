@@ -374,6 +374,9 @@ func validate_payload(payload:Dictionary)->String:
 				if not property_types.has(field):return "Unknown civilization field: "+field
 				var saved_type:=typeof(actor.state[name][field]);var expected_type:=int(property_types[field])
 				if expected_type!=TYPE_NIL and saved_type!=expected_type and not (saved_type in [TYPE_INT,TYPE_FLOAT] and expected_type in [TYPE_INT,TYPE_FLOAT]):return "Invalid civilization field type: "+field
+		if not preload("res://scripts/society_exchange.gd").valid(actor.state.GameState.get("society_exchange",preload("res://scripts/society_exchange.gd").empty_state())):return "Invalid civilization exchange records."
+		for mission:Variant in actor.state.CivilizationSystem.get("scout_missions",[])+[actor.state.CivilizationSystem.get("diplomatic_mission",{})]:
+			if not mission is Dictionary or not preload("res://scripts/society_exchange.gd").valid_mission(mission):return "Invalid carried exchange records."
 		if not CivilizationSystem.scouting_staff.valid(actor.state.get("scouting_staff",{})):return "Invalid civilization scouting allocation."
 		var armed:Dictionary=actor.state.MilitaryCampaign
 		for field in ["aggregate_recruits","training_injury_pool","next_field_army_id"]:
