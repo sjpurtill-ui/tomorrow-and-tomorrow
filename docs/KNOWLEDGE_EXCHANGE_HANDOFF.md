@@ -1,6 +1,6 @@
 # Exploration, migration and knowledge exchange
 
-Task: `codex/knowledge-exchange`, worktree `/Users/seanpurtill/Documents/Codex/tt-knowledge-exchange`, base `7440a7e5d973f2cee82f15564598f3a3cef188a2`. Sole integrator; no concurrent worker edits. Target normal Mac release: **2026.09.10.3**.
+Task: `codex/knowledge-exchange`, worktree `/Users/seanpurtill/Documents/Codex/tt-knowledge-exchange`, base `7440a7e5d973f2cee82f15564598f3a3cef188a2`. Sole integrator; no concurrent worker edits. Integrated gameplay commit `63ec7dfcfa7753b8d7c4fe7f13fcb9e8bd6114c4`; normal Mac release **2026.09.10.3**.
 
 ## Player behavior
 
@@ -32,7 +32,7 @@ Peaceful envoys carry practices through the same encounter and return system. Re
 
 ## Validation
 
-All **132 combined cases pass**, with zero errors, failures, skips or orphans (`/tmp/tt-exchange-final-tests.log`). The combined regression covers exchange behavior, ordinary research, research UI, standing scouts, ruler strategies, diplomatic journeys, owner parity/save continuation, routes, expedition archive, city intelligence and performance invariants. New cases cover finite/idempotent migration, overlapping invitations, real age/cohort and mortality accounting, human-owner aliases, physical envoy carriage, source adoption/sharing gates, repeated reward prevention, material sampling, alternate foundations, cultural influence, reciprocal agreements and war termination.
+All **132 combined worktree and canonical cases pass**, with zero errors, failures, skips or orphans (`/tmp/tt-exchange-final-tests.log`). The combined regression covers exchange behavior, ordinary research, research UI, standing scouts, ruler strategies, diplomatic journeys, owner parity/save continuation, routes, expedition archive, city intelligence and performance invariants. New cases cover finite/idempotent migration, overlapping invitations, real age/cohort and mortality accounting, human-owner aliases, physical envoy carriage, source adoption/sharing gates, repeated reward prevention, material sampling, alternate foundations, cultural influence, reciprocal agreements and war termination.
 
 Native capture-only verification renders the real collection at 960×720 and 340×640. Panel/filter containment and real map-click/Escape dismissal pass. Captures are in `artifacts/knowledge-exchange/`; the private background guard prevented activation/window ordering, monitored the owned process, and verified it exited without a visible test window or focus change. No player/editor was stopped or relaunched.
 
