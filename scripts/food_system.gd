@@ -186,7 +186,7 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 	var lactation:=total*0.012*0.21
 	var environment:=_environment_mix()
 	var season_wave:=PlanetEnvironment.season_wave(environment,WorldSimulation.state.elapsed_days)
-	var ambient_temperature:=float(environment.get("mean_temperature_c",11.0))+season_wave*float(environment.get("seasonality_c",12.0))
+	var ambient_temperature:=PlanetEnvironment.ambient_temperature_c(environment,WorldSimulation.state.elapsed_days)
 	var cold_load:=clampf((12.0-ambient_temperature)/28.0,0.0,1.0)
 	var heat_load:=clampf((ambient_temperature-31.0)/17.0,0.0,1.0)
 	var climate:=base*(cold_load*0.075+heat_load*0.045)

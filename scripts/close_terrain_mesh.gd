@@ -1,6 +1,6 @@
 extends RefCounted
 ## Fixed-diagonal close grid, sampled once per vertex and indexed directly.
-static func build(resolution:int,vertices:PackedVector3Array,normals:PackedVector3Array,colors:PackedColorArray,climate_uv:PackedVector2Array=PackedVector2Array(),geology_uv:PackedVector2Array=PackedVector2Array())->ArrayMesh:
+static func build(resolution:int,vertices:PackedVector3Array,normals:PackedVector3Array,colors:PackedColorArray,climate_uv:PackedVector2Array=PackedVector2Array(),geology_uv:PackedVector2Array=PackedVector2Array(),seasonal_amplitudes:PackedFloat32Array=PackedFloat32Array())->ArrayMesh:
 	assert(resolution>=2 and vertices.size()==resolution*resolution)
 	assert(normals.size()==vertices.size() and colors.size()==vertices.size())
 	var indices:=PackedInt32Array()
@@ -28,6 +28,11 @@ static func build(resolution:int,vertices:PackedVector3Array,normals:PackedVecto
 		assert(climate_uv.size()==vertices.size() and geology_uv.size()==vertices.size())
 		arrays[Mesh.ARRAY_TEX_UV]=climate_uv
 		arrays[Mesh.ARRAY_TEX_UV2]=geology_uv
+	var flags:=0
+	if not seasonal_amplitudes.is_empty():
+		assert(seasonal_amplitudes.size()==vertices.size())
+		arrays[Mesh.ARRAY_CUSTOM0]=seasonal_amplitudes
+		flags=Mesh.ARRAY_CUSTOM_R_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
 	var mesh:=ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays,[],{},flags)
 	return mesh

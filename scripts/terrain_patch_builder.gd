@@ -14,19 +14,23 @@ var phase:=0
 var sample_height:Callable
 var sample_color:Callable
 var sample_surface:Callable
+var season_sampler:Callable
+var seasonal_amplitudes:=PackedFloat32Array()
 var climate_uv:=PackedVector2Array()
 var geology_uv:=PackedVector2Array()
 var max_slice_usec:=0
 
-func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable,surface_fn:Callable=Callable())->void:
+func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable,surface_fn:Callable=Callable(),season_fn:Callable=Callable())->void:
 	resolution=grid_resolution; span=patch_span; center=patch_center
 	sample_height=height_fn; sample_color=color_fn
 	sample_surface=surface_fn
+	season_sampler=season_fn
 	heights.resize(resolution*resolution)
 	vertices.resize(resolution*resolution); normals.resize(vertices.size()); colors.resize(vertices.size())
 	indices.resize((resolution-1)*(resolution-1)*6)
 	if sample_surface.is_valid():
 		climate_uv.resize(vertices.size());geology_uv.resize(vertices.size())
+	if season_sampler.is_valid():seasonal_amplitudes.resize(vertices.size())
 
 func advance(budget_usec:int=2500)->bool:
 	var started:=Time.get_ticks_usec()
@@ -49,6 +53,7 @@ func advance(budget_usec:int=2500)->bool:
 			if sample_surface.is_valid():
 				var fields:Vector4=sample_surface.call(x,z,height)
 				climate_uv[cursor]=Vector2(fields.x,fields.y);geology_uv[cursor]=Vector2(fields.z,fields.w)
+			if season_sampler.is_valid():seasonal_amplitudes[cursor]=season_sampler.call(x,z,height)
 		else:
 			var left:=maxi(0,x_index-normal_radius); var right:=mini(resolution-1,x_index+normal_radius)
 			var up:=maxi(0,z_index-normal_radius); var down:=mini(resolution-1,z_index+normal_radius)
@@ -73,6 +78,10 @@ func commit()->ArrayMesh:
 	arrays[Mesh.ARRAY_COLOR]=colors; arrays[Mesh.ARRAY_INDEX]=indices
 	if not climate_uv.is_empty():
 		arrays[Mesh.ARRAY_TEX_UV]=climate_uv;arrays[Mesh.ARRAY_TEX_UV2]=geology_uv
+	var flags:=0
+	if not seasonal_amplitudes.is_empty():
+		arrays[Mesh.ARRAY_CUSTOM0]=seasonal_amplitudes
+		flags=Mesh.ARRAY_CUSTOM_R_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
 	var mesh:=ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays,[],{},flags)
 	return mesh

@@ -346,6 +346,8 @@ var civilization_feedback_text:=""
 var world_competition_button:Button
 var capture_render_active:=false
 var discovery_mask_texture:ImageTexture
+var seasonal_materials:Array[WeakRef]=[]
+var last_seasonal_day:=INF
 const LANDSCAPE_VISUALS:=preload("res://scripts/landscape_resource_visuals.gd")
 var woodland_visual_areas:=PackedVector4Array()
 var woodland_visual_key:=""
@@ -942,6 +944,7 @@ func _process(delta: float) -> void:
 	_advance_close_terrain_job()
 	_refresh_discovery_mask()
 	_refresh_woodland_visuals()
+	_refresh_seasonal_visuals()
 	_process_camera_navigation(delta)
 	_process_smooth_camera(delta)
 	_update_world_streaming()
@@ -1708,7 +1711,7 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	# height/color authorities and is replaced by the final full-density mesh.
 	var same_patch:=regional_terrain_patch!=null and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span)
 	var next_resolution:=TERRAIN_LOD.next_resolution(span,regional_patch_resolution if same_patch else 0)
-	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at)
+	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at,_terrain_seasonality_at)
 
 func _advance_terrain_patch()->void:
 	if terrain_patch_job==null: return
@@ -1849,6 +1852,7 @@ uniform vec4 streamed_cutout = vec4(0.0);
 varying vec3 world_normal;
 varying vec3 relative_position;
 varying vec2 surface_position;
+varying float seasonal_amplitude;
 
 float hash21(vec2 p) {
 	// Integer cell hashing avoids loss of fractional precision near the far
@@ -1886,12 +1890,14 @@ float organic_noise(vec2 p) {
 
 #include "res://scripts/surface_precision.gdshaderinc"
 #include "res://scripts/ground_surface.gdshaderinc"
+#include "res://scripts/seasonal_surface.gdshaderinc"
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
 	relative_position = world_position-CAMERA_POSITION_WORLD;
 	surface_position = world_position.xz-floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
+	seasonal_amplitude = CUSTOM0.x;
 }
 
 void fragment() {
@@ -2012,6 +2018,7 @@ void fragment() {
 	// altitude multiplier disguised steep lowland faces as grassy ground.
 	float rock_mask = smoothstep(0.13,0.43,slope);
 	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(UV,UV2));
+	if (UV.x>=0.999 && world_position.y>0.0) { earth=seasonal_ground(earth,UV.y,UV.x-1.0,seasonal_amplitude,world_position.z,forest_mask); }
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2062,17 +2069,46 @@ void fragment() {
 	material.set_shader_parameter("woodland_channel",SEAMLESS_WORLD)
 	material.set_shader_parameter("drainage_phase",float(posmod(GameState.world_seed,10007))/10007.0)
 	_fog_shader_parameters(material)
+	_register_seasonal_material(material)
 	return material
 
 func _add_terrain_vertex(surface: SurfaceTool, grid_x: int, grid_z: int) -> void:
 	var x := (float(grid_x) / (self.grid_x - 1) - 0.5) * world_width
 	var z := (float(grid_z) / (self.grid_z - 1) - 0.5) * world_depth
 	var height := _height_at(x, z)
+	surface.set_custom_format(0,SurfaceTool.CUSTOM_R_FLOAT)
+	surface.set_custom(0,Color(_terrain_seasonality_at(x,z,height),0,0,0))
 	surface.set_color(_terrain_color_at(x, z, height))
 	var fields:=_terrain_surface_fields_at(x,z,height)
 	surface.set_uv(Vector2(fields.x,fields.y))
 	surface.set_uv2(Vector2(fields.z,fields.w))
 	surface.add_vertex(Vector3(x, height, z))
+
+func _terrain_seasonality_at(x:float,z:float,_height:float)->float:
+	return PlanetEnvironment.seasonality_at(Vector2(x,z)) if SEAMLESS_WORLD else 0.0
+
+func _register_seasonal_material(material:ShaderMaterial)->void:
+	seasonal_materials.append(weakref(material))
+	material.set_shader_parameter("season_phase",PlanetEnvironment.season_wave({},GameState.elapsed_days))
+
+func _refresh_seasonal_visuals()->void:
+	# Simulation time only. Pausing freezes the season; no mesh/crown rebuild.
+	var day:=GameState.elapsed_days
+	if is_finite(last_seasonal_day) and absf(day-last_seasonal_day)<0.1:return
+	last_seasonal_day=day
+	var phase:=PlanetEnvironment.season_wave({},day)
+	var living:Array[WeakRef]=[]
+	for reference in seasonal_materials:
+		var material:=reference.get_ref() as ShaderMaterial
+		if material==null:continue
+		living.append(reference)
+		material.set_shader_parameter("season_phase",phase)
+	seasonal_materials=living
+
+func _vegetation_climate(position:Vector3)->Color:
+	var biome:=_biome_at(position.x,position.z)
+	if not biome.has("temperature"):return Color(0,0,0,0)
+	return Color(float(biome.temperature),float(biome.precipitation),_terrain_seasonality_at(position.x,position.z,position.y),0.0)
 
 func _terrain_surface_fields_at(x:float,z:float,height:float)->Vector4:
 	if not SEAMLESS_WORLD:return Vector4.ZERO
@@ -2109,19 +2145,11 @@ func _climate_at(x:float,z:float,height:float)->Dictionary:
 
 
 func site_temperature_c(day:float=-1.0)->float:
-	## Local air temperature in °C for the HUD: the climate field sets the annual
-	## mean, the same seasonal wave the food model consumes sets the swing, and a
-	## deterministic day-scale wobble supplies weather without a second clock.
-	if day<0.0: day=GameState.elapsed_days
+	## Same mean/amplitude/hemisphere as food's ambient-temperature model.
+	if day<0.0:day=GameState.elapsed_days
 	var anchor:Vector3=GameState.settlement_founded_at if GameState.settlement_site_committed else (settler_marker.position if settler_marker else Vector3.ZERO)
-	var baseline:=float(_climate_at(anchor.x,anchor.z,_height_at(anchor.x,anchor.z)).temperature)
-	var annual_mean:=lerpf(-6.0,28.0,baseline)
-	# Warm latitudes swing gently across the year; cold ones swing hard.
-	var seasonal_swing:=lerpf(19.0,6.0,baseline)
-	var season_wave:=sin(fmod(day,365.0)/365.0*TAU)
-	var day_index:=floorf(day)
-	var weather:=sin(day_index*12.9898+float(GameState.world_seed%1009)*0.37)*2.1+sin(day_index*0.61+1.3)*1.5
-	return annual_mean+season_wave*seasonal_swing+weather
+	var climate:=_climate_at(anchor.x,anchor.z,_height_at(anchor.x,anchor.z))
+	return PlanetEnvironment.ambient_temperature_c({"position":Vector2(anchor.x,anchor.z),"mean_temperature_c":lerpf(-6.0,28.0,float(climate.temperature)),"seasonality_c":_terrain_seasonality_at(anchor.x,anchor.z,anchor.y)},day)
 
 
 func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
@@ -2587,11 +2615,13 @@ func _scatter_landscape_vegetation() -> void:
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.use_colors = true
+	multi.use_custom_data = true
 	multi.mesh = canopy_mesh
 	multi.instance_count = transforms.size()
 	for i in transforms.size():
 		multi.set_instance_transform(i, transforms[i])
 		multi.set_instance_color(i, colors[i])
+		multi.set_instance_custom_data(i,_vegetation_climate(transforms[i].origin))
 	var forest := MultiMeshInstance3D.new()
 	forest.name = "WoodlandCanopy"
 	forest.multimesh = multi
@@ -2833,6 +2863,7 @@ func _create_forest_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
 		tree.position = Vector3(x, y + 0.014 * scale, z)
 		var material:=_vegetation_surface_material(0)
 		material.set_shader_parameter("canopy_tint",LandscapeCover.canopy_tint(biome,rng.randf()))
+		material.set_shader_parameter("fallback_climate",_vegetation_climate(Vector3(x,y,z)))
 		tree.material_override=material
 		add_child(tree)
 	_create_resource_marker("Timber", center)
@@ -3385,7 +3416,7 @@ func _request_close_terrain_job(center:Vector3)->void:
 		var step:=0.02
 		var dx:=(_height_at(x+step,z)-_height_at(x-step,z))/(step*2.0)
 		var dz:=(_height_at(x,z+step)-_height_at(x,z-step))/(step*2.0)
-		return [height,Vector3(-dx,1.0,-dz).normalized(),_terrain_color_at(x,z,height)],_terrain_surface_fields_at)
+		return [height,Vector3(-dx,1.0,-dz).normalized(),_terrain_color_at(x,z,height)],_terrain_surface_fields_at,_terrain_seasonality_at)
 
 func _advance_close_terrain_job()->void:
 	if close_terrain_job==null: return
@@ -3428,10 +3459,11 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 	var colors:=PackedColorArray()
 	var climate_uv:=PackedVector2Array()
 	var geology_uv:=PackedVector2Array()
+	var seasonal_amplitudes:=PackedFloat32Array()
 	vertices.resize(resolution*resolution)
 	normals.resize(vertices.size())
 	colors.resize(vertices.size())
-	climate_uv.resize(vertices.size());geology_uv.resize(vertices.size())
+	climate_uv.resize(vertices.size());geology_uv.resize(vertices.size());seasonal_amplitudes.resize(vertices.size())
 	for z in resolution:
 		for x in resolution:
 			var world_x:=center.x+(float(x)/(resolution-1)-0.5)*span
@@ -3446,7 +3478,8 @@ func _build_detail_terrain_patch(center: Vector3) -> void:
 			colors[index]=_terrain_color_at(world_x,world_z,height)
 			var fields:=_terrain_surface_fields_at(world_x,world_z,height)
 			climate_uv[index]=Vector2(fields.x,fields.y);geology_uv[index]=Vector2(fields.z,fields.w)
-	var mesh:=preload("res://scripts/close_terrain_mesh.gd").build(resolution,vertices,normals,colors,climate_uv,geology_uv)
+			seasonal_amplitudes[index]=_terrain_seasonality_at(world_x,world_z,height)
+	var mesh:=preload("res://scripts/close_terrain_mesh.gd").build(resolution,vertices,normals,colors,climate_uv,geology_uv,seasonal_amplitudes)
 	_install_close_terrain_mesh(mesh,center)
 
 func _near_persistent_settlement_surface(local_point: Vector2) -> bool:
@@ -3619,6 +3652,7 @@ func _create_woodland_understory(center:Vector3,patches:Array[Dictionary])->void
 	instance.name="WoodlandUnderstory"
 	instance.mesh=mesh
 	var material:=_vegetation_surface_material(2)
+	material.set_shader_parameter("fallback_climate",_vegetation_climate(center))
 	material.render_priority=1
 	instance.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.material_override=material
@@ -3654,11 +3688,13 @@ func _spawn_vegetation_multimesh(node_name:String,mesh:Mesh,transforms:Array[Tra
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.use_colors = true
+	multi.use_custom_data = true
 	multi.mesh = mesh
 	multi.instance_count = transforms.size()
 	for index in transforms.size():
 		multi.set_instance_transform(index, transforms[index])
 		multi.set_instance_color(index, colors[index])
+		multi.set_instance_custom_data(index,_vegetation_climate(transforms[index].origin))
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
 	instance.multimesh = multi
@@ -3678,6 +3714,9 @@ uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size=vec2(40075.0,20004.0);
 uniform vec2 fog_current_origin=vec2(0.0);
 uniform int vegetation_kind = 0;
+uniform vec4 fallback_climate=vec4(0.0);
+varying vec4 plant_climate;
+#include "res://scripts/seasonal_surface.gdshaderinc"
 uniform vec4 canopy_tint : source_color = vec4(1.0);
 uniform int atlas_variant = -1;
 uniform float lod_fade = 1.0;
@@ -3698,7 +3737,7 @@ float filtered_vn(vec2 point) {
 	float footprint=max(length(dFdx(point)),length(dFdy(point)));
 	return mix(vn(point),0.5,smoothstep(0.35,1.1,footprint));
 }
-void vertex() { world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
+void vertex() { plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
 void fragment() {
 	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float revealed=max(texture(discovery_mask,fog_uv).r,1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin)));
@@ -3727,6 +3766,7 @@ void fragment() {
 		base=mix(base,base*vec3(1.12,1.02,0.69),gap*0.36);
 	}
 	if(vegetation_kind==2) { base=COLOR.rgb; ALPHA=COLOR.a*woodland_retained(world_position.xz)*smoothstep(0.06,0.62,revealed); }
+	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);
 	ALBEDO=mix(vec3(0.006,0.012,0.014),base,smoothstep(0.06,0.62,revealed));
 	ROUGHNESS=1.0;
 	AO=0.84+crown*0.14;
@@ -3736,6 +3776,7 @@ void fragment() {
 	vegetation_surface_shader.code=vegetation_surface_shader.code if "woodland_area_count" in vegetation_surface_shader.code else vegetation_surface_shader.code.replace("varying vec3 world_position;",LANDSCAPE_VISUALS.CUTTING_SHADER+"\nvarying vec3 world_position;")
 	material.shader=vegetation_surface_shader
 	_register_woodland_material(material)
+	_register_seasonal_material(material)
 	material.set_shader_parameter("vegetation_kind",kind)
 	material.set_shader_parameter("atlas_variant",atlas_variant)
 	var canopy_texture:=load("res://assets/textures/vegetation_canopy_atlas.png")

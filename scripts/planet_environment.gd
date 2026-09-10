@@ -162,8 +162,7 @@ func profile_at(position:Vector2,observed:Dictionary={})->Dictionary:
 	var relief:=clampf(absf(float(observed.get("relief",0.0)))*1.8+maxf(0.0,height)/7.0,0.0,1.0)
 	var stone:=clampf(float(observed.get("stone",relief*(1.0-woodland*0.55)+(0.28 if biome=="upland" else 0.0))),0.0,1.0)
 	var mean_temp_c:=lerpf(-6.0,28.0,temperature)
-	var continentality:=clampf(absf(position.x)/(PLANET_WIDTH_KM*0.5)*0.35+interior*1.2,0.0,1.0)
-	var seasonality_c:=lerpf(5.0,22.0,latitude)*lerpf(0.78,1.20,continentality)
+	var seasonality_c:=_seasonality_from_interior(position,interior)
 	var rainfall_mm:=lerpf(160.0,2200.0,precipitation)
 	var rainfall_variability:=clampf(0.18+(1.0-precipitation)*0.46+absf(_geology_c.get_noise_2d(position.x+1900.0,position.y))*0.22,0.08,0.92)
 	var growing_season:=clampf((temperature*1.20)*(0.46+precipitation*0.72),0.04,1.0)
@@ -291,6 +290,19 @@ func _archetype(biome:String,temperature:float,precipitation:float,coastal:bool,
 func environment_signature_from_values(biome:String,temperature:float,precipitation:float,geology:Dictionary,coastal:bool)->String:
 	return "%s:%d:%d:%d:%d" % [biome,roundi(temperature*5.0),roundi(precipitation*5.0),roundi(float(geology.mineralization)*4.0),1 if coastal else 0]
 
+
+func _seasonality_from_interior(position:Vector2,interior:float)->float:
+	var latitude:=clampf(absf(position.y)/(PLANET_DEPTH_KM*0.5),0.0,1.0)
+	var continentality:=clampf(absf(position.x)/(PLANET_WIDTH_KM*0.5)*0.35+interior*1.2,0.0,1.0)
+	return lerpf(5.0,22.0,latitude)*lerpf(0.78,1.20,continentality)
+
+func seasonality_at(position:Vector2)->float:
+	## Lightweight projection of the same amplitude used by stored food profiles.
+	_ensure_configured()
+	return _seasonality_from_interior(position,clampf((_continent.get_noise_2d(position.x,position.y)-0.05)*1.2,0.0,0.5))
+
+func ambient_temperature_c(profile:Dictionary,day:float)->float:
+	return float(profile.get("mean_temperature_c",11.0))+season_wave(profile,day)*float(profile.get("seasonality_c",12.0))
 
 func season_wave(profile:Dictionary,day:float)->float:
 	var position:Vector2=profile.get("position",Vector2.ZERO)
