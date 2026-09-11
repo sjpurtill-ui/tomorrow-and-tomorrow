@@ -10,12 +10,29 @@ var seed_value:=91420
 var output_path:="/tmp/tt-history-pacing.json"
 var profile_enabled:=false
 var timings:Dictionary={}
+var timing_intervals:Array=[]
+var previous_timings:Dictionary={}
+var previous_timing_day:=0
+var previous_timing_usec:=0
 var snapshots:Array=[]
 var discoveries:Array=[]
 func _initialize()->void:call_deferred("run")
 func snapshot(day:int)->Dictionary:
 	var state:Node=simulation.state
-	return {"day":day,"year":float(day)/365.0,"population":state.population_total,"known":state.known_discoveries.size(),"knowledge_workers":state.population_allocations.get("Knowledge",0),"active_inquiries":state.active_investigations.size(),"food_security":state.food_security,"food_intake_ratio":state.simulation_metrics.get("food_intake_ratio",1),"food_eaten":state.simulation_metrics.get("food_eaten",0),"food_demand_breakdown":state.simulation_metrics.get("food_demand_breakdown",{}).duplicate(true),"army_provisions_required":state.simulation_metrics.get("army_provisions_required",0),"army_provisions_delivered":state.simulation_metrics.get("army_provisions_delivered",0),"army_provision_delivery_ratio":state.simulation_metrics.get("army_provision_delivery_ratio",1),"food_consumption":state.simulation_metrics.get("food_consumption",0),"food_days":state.simulation_metrics.get("food_days",0),"settled":state.settlement_site_committed,"completed_buildings":state.settlement_completed.size(),"resource_deposits":state.resource_deposits.size(),"material_stocks":{"Timber":state.resource_stockpiles.get("Timber",0),"Stone":state.resource_stockpiles.get("Stone",0),"Clay":state.resource_stockpiles.get("Clay",0),"Fiber Plants":state.resource_stockpiles.get("Fiber Plants",0)}}
+	return {"day":day,"year":float(day)/365.0,"population":state.population_total,"known":state.known_discoveries.size(),"knowledge_workers":state.population_allocations.get("Knowledge",0),"active_inquiries":state.active_investigations.size(),"food_security":state.food_security,"food_intake_ratio":state.simulation_metrics.get("food_intake_ratio",1),"food_eaten":state.simulation_metrics.get("food_eaten",0),"food_demand_breakdown":state.simulation_metrics.get("food_demand_breakdown",{}).duplicate(true),"army_provisions_required":state.simulation_metrics.get("army_provisions_required",0),"army_provisions_delivered":state.simulation_metrics.get("army_provisions_delivered",0),"army_provision_delivery_ratio":state.simulation_metrics.get("army_provision_delivery_ratio",1),"food_consumption":state.simulation_metrics.get("food_consumption",0),"food_days":state.simulation_metrics.get("food_days",0),"settled":state.settlement_site_committed,"completed_buildings":state.settlement_completed.size(),"settlement_plots":state.settlement_plots.size(),"plot_history_records":state.settlement_plot_history.size(),"resource_deposits":state.resource_deposits.size(),"material_stocks":{"Timber":state.resource_stockpiles.get("Timber",0),"Stone":state.resource_stockpiles.get("Stone",0),"Clay":state.resource_stockpiles.get("Clay",0),"Fiber Plants":state.resource_stockpiles.get("Fiber Plants",0)}}
+func timing_interval(day:int)->Dictionary:
+	if not profile_enabled or day<=previous_timing_day:return {}
+	var now:=Time.get_ticks_usec()
+	var stages:Dictionary={}
+	for phase:String in timings:
+		if not timings[phase] is Dictionary:continue
+		var prior:Dictionary=previous_timings.get(phase,{"calls":0,"microseconds":0})
+		stages[phase]={"calls":int(timings[phase].calls)-int(prior.calls),"microseconds":int(timings[phase].microseconds)-int(prior.microseconds)}
+	var interval:={"from_day":previous_timing_day,"to_day":day,"wall_microseconds":now-previous_timing_usec,"stages":stages}
+	timing_intervals.append(interval)
+	previous_timings=timings.duplicate(true);previous_timing_day=day;previous_timing_usec=now
+	return interval
+
 func bottlenecks()->Dictionary:
 	var material_states:Dictionary={}
 	for deposit:Dictionary in simulation.state.resource_deposits:
@@ -53,6 +70,7 @@ func run()->void:
 	var actor:Dictionary=simulation.create_actor("pacing_reference",seed_value,Vector2.ZERO)
 	simulation.enabled=true # Normal resource days initialize owned world geology.
 	actor.systems.CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return true
+	previous_timing_usec=Time.get_ticks_usec() if profile_enabled else 0
 	var start:=Time.get_ticks_msec()
 	var day:=0;var reason:="target reached";var catalog_count:=0
 	simulation.scoped("pacing_reference",func()->void:snapshots.append(snapshot(0)))
@@ -73,14 +91,18 @@ func run()->void:
 			if day==1 or day%365==0:snapshots.append(snapshot(day))
 			return simulation.state.population_total<=1
 		)
-		if day%365==0:print(JSON.stringify({"progress":day,"year":float(day)/365.0,"snapshot":snapshots.back()}))
+		if day%365==0:
+			var progress:={"progress":day,"year":float(day)/365.0,"snapshot":snapshots.back()}
+			if profile_enabled:progress["timing_interval"]=timing_interval(day)
+			print(JSON.stringify(progress))
 		if extinct:reason="population collapse";break
 		if day%30==0:await process_frame
+	if profile_enabled:timing_interval(day)
 	var final:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return snapshot(day))
 	catalog_count=actor.systems.DiscoverySystem.technology_catalog.size()
 	var elapsed:=float(Time.get_ticks_msec()-start)/1000.0
 	var diagnostic:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return bottlenecks())
-	var report:={"schema":6,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
+	var report:={"schema":7,"timing_intervals":timing_intervals,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
 	var file:=FileAccess.open(output_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write pacing diagnostic: "+output_path);quit(1);return
 	file.store_string(JSON.stringify(report,"  "));file.close()

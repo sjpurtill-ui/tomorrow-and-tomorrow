@@ -752,3 +752,10 @@ Base `fdb0cd8`. Added reviewed built-in-generated images for Fiber Pulp Beating 
 The 250-year-target process launched against `909be10` is now terminal: handle 66487 exited 0, stop reason wall-time budget, 3,600.128 seconds elapsed, 55,930 simulated days (153.2329 years). It did not reach 91,250 target days. Final population 6,346; 144 of its loaded 361 discoveries known; 216 Knowledge workers; three active inquiries. Food stock cover 92.51 days with intake ratio 0.979815; Stone 15.75, Timber 71.64, Clay 44.93. The founding-project count of five is not the full construction inventory.
 
 Archived report: [agronomy-wall-limited-153-years.json](pacing/agronomy-wall-limited-153-years.json). It predates delivery-priority changes, textiles, production licenses, paper and stage profiling. Concurrency affects wall-clock throughput; no isolated performance claim. This extends observed uninterrupted simulation beyond the completed century run, but proves neither a completed 250-year diagnostic nor millennial viability. No long-run process remains active on that handle. Next measurement should profile a current-code longer run, inspect costs at growing populations, and preserve the full 2,500–3,000-year acceptance requirement.
+
+
+## 65. Annual stage costs and actual settlement size
+
+Base `89b2823`. Pacing schema 7 adds non-overlapping annual/final-partial timing intervals and actual settlement plot/history counts. Annual progress logs expose each finished interval while cumulative totals remain in the final report. No gameplay, save or daily simulation-order changes.
+
+Validation: matched 400-day profiling-on/off runs completed with equal initial/final/annual snapshots, discovery events and bottlenecks. The two intervals cover 0–365 and 365–400 exactly; every stage's calls and microseconds sum to its cumulative total, with 400 calls per stage. Profiling-off intervals and totals are empty. Evidence archived in `pacing/stage-interval-verification.json`. No claim of late-game performance from this short comparison. Integration conflict: pacing harness only; canonical integration remains pending.

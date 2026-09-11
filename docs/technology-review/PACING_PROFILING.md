@@ -1,6 +1,6 @@
 # Optional pacing stage measurements
 
-The pacing harness accepts `--profile` and writes schema 6 reports with `profiling_enabled` and a `timings` dictionary. The ordinary simulation takes the same steps in the same order. A new optional final dictionary argument on `CivilizationDay.advance` collects timings only when nonempty; existing callers continue using an empty default, with no clock reads or saved state.
+The pacing harness accepts `--profile` and writes schema 7 reports with `profiling_enabled` and a `timings` dictionary. The ordinary simulation takes the same steps in the same order. A new optional final dictionary argument on `CivilizationDay.advance` collects timings only when nonempty; existing callers continue using an empty default, with no clock reads or saved state.
 
 Example, from the implementation worktree:
 
@@ -19,3 +19,10 @@ In this sample, settlements consumed 24.2% of measured stage time, consequences 
 Next use: profile longer runs once the existing 250-year-target process terminates, compare stage shares at larger populations and knowledge catalogs, and optimize only measured costs while retaining deterministic behavior. The active process loaded older scripts and is not instrumented by this change. Neither this first-year comparison nor partial output from that process verifies the required 2,500–3,000-year progression.
 
 No save format or player UI change. Integration conflicts: `scripts/civilization_day.gd` and `tools/audit_history_pacing.gd`. Changes remain isolated pending the designated integrator.
+
+
+## Annual intervals and morphology counts
+
+Schema 7 adds `timing_intervals`: non-overlapping intervals ending at each simulated year and at the final partial year. Each contains from/to days, elapsed wall microseconds and per-stage call/time deltas. Interval sums exactly reproduce cumulative stage totals. Annual progress output includes the just-completed interval, so a live process can be inspected without pretending its target has completed. Disabled profiling produces no intervals. Annual/final snapshots also record the actual settlement plot count and plot-history record count, separate from founding projects.
+
+A matched 400-day profiled/control pair completed with identical initial/final/annual snapshots, discoveries and bottleneck dictionaries. Intervals are exactly days 0–365 and 365–400; all fourteen stage sums equal the final totals, each with 400 samples. Evidence: [stage-interval-verification.json](pacing/stage-interval-verification.json). The endpoint has 19 settlement plots and 41 plot-history records. This checks instrumentation semantics, not full-history performance.
