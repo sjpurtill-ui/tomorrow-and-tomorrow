@@ -2,7 +2,8 @@ extends RefCounted
 ## Shared rules for physical encounters, finite household migration and learning.
 ## All records belong to GameState and therefore to the current civilization.
 const PERSONALITY=preload("res://scripts/leader_personality.gd")
-const COLLECTION_LIMIT:=1024
+const COLLECTION_LIMIT:=32768 # Multiple acquisition records across the 5,000-discovery history.
+const CONTACT_LIMIT:=1024
 const CONTACT_RADIUS:=2.0
 const OBJECTS:={"clay_shaping":["Clay trial vessel","Clay"],"pit_firing":["Fired clay trial piece","Clay"],"cordage":["Braided cord sample","Fiber Plants"],"basketry":["Woven container sample","Fiber Plants"],"stone_sorting":["Selected cutting stone","Stone"],"joinery":["Fitted timber joint","Timber"],"tallies":["Marked counting stick","Timber"]}
 const CULTURE:=["oral_epics","festival_calendar","public_theatre","civic_games","comparative_chronicles","public_libraries","customary_law"]
@@ -23,7 +24,7 @@ static func valid(value:Variant)->bool:
 	if not preload("res://scripts/scholar_visits.gd").valid(value.get("scholar_visits",{})):return false
 	if not value.has_all(empty_state().keys()):return false
 	for key:String in ["collections","evidence","origins","connections","outbound"]:
-		if not value[key] is Dictionary or value[key].size()>COLLECTION_LIMIT:return false
+		if not value[key] is Dictionary or value[key].size()>(CONTACT_LIMIT if key in ["connections","outbound"] else COLLECTION_LIMIT):return false
 	if value.migration_policy not in ["balanced","welcome","consolidate"] or value.sharing_policy not in ["open","selective","guarded"]:return false
 	if not number(value.last_day) or not number(value.exposure) or value.exposure<0 or value.exposure>1:return false
 	if not value.integration is Array or value.integration.size()>128 or not value.history is Array or value.history.size()>64:return false
@@ -472,7 +473,8 @@ static func advance(day:int)->void:
 	# Study competes within the existing Knowledge workforce, not a free team.
 	var study_work:=WorldSimulation.state.effective_workers("Knowledge")*.15*elapsed*food
 	for item:Dictionary in data().collections.values():
-		if float(item.study)>=1 or study_work<=0 or day<int(item.returned_day):continue
+		if study_work<=0:break
+		if float(item.study)>=1 or day<int(item.returned_day):continue
 		var spent:=minf(study_work,(1-float(item.study))*float(item.work))
 		item.study=minf(1,float(item.study)+spent/float(item.work));study_work-=spent
 		if item.study>=1:
