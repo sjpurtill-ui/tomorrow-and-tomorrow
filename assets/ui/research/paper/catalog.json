@@ -2936,12 +2936,60 @@
       "id": "woven_dressings",
       "name": "Woven Dressings",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spinning_wheels.png",
+      "description": "A hand-driven wheel transfers rotation to a spindle so drafting fibers need not stop for every fresh spin.",
+      "domain": "production",
+      "id": "spinning_wheels",
+      "name": "Spinning Wheels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flyer_spinning.png",
+      "description": "A rotating flyer and bobbin coordinate twisting with winding instead of treating them as entirely separate operations.",
+      "domain": "production",
+      "id": "flyer_spinning",
+      "name": "Flyer Spinning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/multi_spindle_spinning.png",
+      "description": "A shared hand-driven frame coordinates multiple spindles while the worker draws out their fiber supply.",
+      "domain": "production",
+      "id": "multi_spindle_spinning",
+      "name": "Multi-Spindle Spinning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mule_spinning.png",
+      "description": "A moving spindle carriage combines controlled drawing and twisting with a return stroke for winding the yarn.",
+      "domain": "production",
+      "id": "mule_spinning",
+      "name": "Mule Spinning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flying_shuttles.png",
+      "description": "A guided shuttle travels across the warp under cord control, reducing the need to pass each weft directly from hand to hand.",
+      "domain": "production",
+      "id": "flying_shuttles",
+      "name": "Flying Shuttles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_power_looms.png",
+      "description": "A motor coordinates shedding, shuttle movement and beating while operators tend breaks and material supply.",
+      "domain": "production",
+      "id": "electric_power_looms",
+      "name": "Electric Power Looms",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 367,
+  "live_count": 373,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 343,
+  "queued_count": 349,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

@@ -2,6 +2,14 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"wheel_spun_yarn":{"name": "Wheel-spun yarn", "output": "Spun Yarn", "gate": "spinning_wheels", "materials": {"Prepared Fibers": 1.0}, "days": 2.0, "tooling": {"Timber": 4.0, "Stone": 1.0, "Fiber Plants": 1.0}},
+	"flyer_spun_yarn":{"name": "Flyer-spun yarn", "output": "Spun Yarn", "gate": "flyer_spinning", "materials": {"Prepared Fibers": 1.0}, "days": 1.5, "tooling": {"Shaft Bearings": 1.0, "Timber": 4.0}},
+	"frame_spun_yarn":{"name": "Hand-frame spun yarn", "output": "Spun Yarn", "gate": "multi_spindle_spinning", "materials": {"Combed Fibers": 1.0}, "days": 1.0, "tooling": {"Timber": 8.0, "Wrought Iron": 2.0}},
+	"hand_mule_yarn":{"name": "Hand-mule spun yarn", "output": "Spun Yarn", "gate": "mule_spinning", "materials": {"Combed Fibers": 0.9}, "days": 0.85, "tooling": {"Wrought Iron": 4.0, "Gear Sets": 1.0, "Shaft Bearings": 1.0}},
+	"electric_mule_yarn":{"name": "Motor-driven mule yarn", "output": "Spun Yarn", "gate": "mule_spinning", "materials": {"Combed Fibers": 0.9}, "days": 0.5, "power": 2.0, "daily_power": 1.0, "tooling": {"Electric Motors": 1.0, "Gear Sets": 2.0, "Shaft Bearings": 2.0, "Steel": 5.0}},
+	"shuttle_woven_cloth":{"name": "Flying-shuttle cloth", "output": "Woven Cloth", "gate": "flying_shuttles", "materials": {"Spun Yarn": 2.0}, "days": 2.5, "tooling": {"Loom Weights": 2.0, "Timber": 6.0, "Fiber Plants": 1.0}},
+	"power_woven_cloth":{"name": "Electric-loom cloth", "output": "Woven Cloth", "gate": "electric_power_looms", "materials": {"Spun Yarn": 2.0}, "days": 1.0, "power": 2.0, "daily_power": 1.0, "tooling": {"Electric Motors": 1.0, "Crank Assemblies": 1.0, "Shaft Bearings": 2.0, "Steel": 5.0}},
+
 	"retted_fibers":{"name": "Prepared plant fibers", "output": "Prepared Fibers", "gate": "fiber_retting", "materials": {"Fiber Plants": 2.0, "Freshwater": 2.0}, "days": 3.0, "tooling": {"Clay": 3.0, "Timber": 2.0}},
 	"combed_fibers":{"name": "Combed plant fibers", "output": "Combed Fibers", "gate": "fiber_combing", "materials": {"Prepared Fibers": 1.0}, "days": 1.5, "tooling": {"Timber": 2.0, "Stone": 1.0}},
 	"spun_yarn":{"name": "Spindle-spun yarn", "output": "Spun Yarn", "gate": "drop_spindles", "materials": {"Prepared Fibers": 1.0}, "days": 3.0, "tooling": {"Clay": 1.0, "Timber": 1.0}},
