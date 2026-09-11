@@ -6,6 +6,8 @@ const STRATEGY=preload("res://scripts/civilization_strategy.gd")
 static func current_plan(id:String)->Dictionary:
 	var state:=WorldSimulation.state
 	var situation:={"food_days":float(state.simulation_metrics.get("food_days",30)),"food_intake_ratio":float(state.simulation_metrics.get("food_intake_ratio",1)),"at_war":false}
+	for metric:String in ["food_consumption","army_provisions_required","army_provision_delivery_ratio"]:
+		if state.simulation_metrics.has(metric):situation[metric]=state.simulation_metrics[metric]
 	for civ:Dictionary in WorldSimulation.world.civilizations:
 		situation.at_war=bool(situation.at_war) or bool(civ.player_relation.get("at_war",false))
 	# The same sovereign personality supplies the foreign leader's dialogue.

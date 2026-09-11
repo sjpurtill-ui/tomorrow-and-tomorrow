@@ -622,3 +622,14 @@ CivilizationStrategy and LeaderPersonality currently classify hunger from reserv
 A separate 250-year-target diagnostic is running with the pre-instrumentation harness and 361-discovery simulation at 909be10: session 66487, /tmp/tt-agronomy-250-year.log, planned output /tmp/tt-agronomy-250-year.json, 3,600-second wall cap. A target request is not completed evidence; poll the live process before reporting its status. No millennial or full-world acceptance is implied.
 
 Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 909be10. Scope: pacing harness and review evidence only. Catalog 361, images 21, canonical integration outstanding.
+
+
+## 51. Research priorities distinguish food supply from ration delivery
+
+AI situation reports now pass measured total food demand, military demand and military delivery ratio into a shared food-constraint classifier. The classifier attributes at most the observed intake gap to transport exclusion (military demand × undeliverable fraction / total demand). Low reserves or a remaining intake deficit below 0.98 retain food-shortage priorities. Missing metrics retain the conservative prior response. Mixed shortages receive both nutrition and logistics emphasis.
+
+When transport exclusion explains hunger and reserves suffice, the ruler's care goal becomes delivery of available food, extra research emphasis goes to logistics, and commerce receives ambition weight. The plan still reports hunger and suspends training. No additional research points, food, workers or delivery capability are granted. General-led battlefield operation is unchanged. This fixes a response mismatch identified by the one-year provision diagnostic, not a proven millennial-pacing problem.
+
+Validation: 30 cases pass, zero errors, failures, skips or orphans: 15 strategy (four new delivery/mixed/missing-metric/owned-controller cases), five shared-foundation, seven material-planner, three research-viability. Logs /tmp/tt-provision-strategy.log and /tmp/tt-provision-test*.log. The new cases cover continued training suspension, correct extra research domain, preserved low-reserve response, absence of resource mutation and actual owner-metric propagation. The existing research-budget tests still pass.
+
+No save shape changes. Scope: CivilizationController metric propagation, CivilizationStrategy priorities, LeaderPersonality shared classification/agenda, tests and review tracking. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 3d8404f. The running 250-year-target diagnostic remains at earlier 909be10 and cannot validate this change. Longer/varied behavioral pacing remains outstanding. Counts remain 361 discoveries / 21 images; canonical integration pending.

@@ -149,3 +149,38 @@ func test_stated_security_goal_receives_research_even_with_small_budget()->void:
 	var plan:=Strategy.preferences(cautious_guard,{"food_days":120,"food_intake_ratio":1})
 	assert_str(plan.goals[0].id).is_equal("security")
 	assert_int(Strategy.research_plan(plan.research_weights,4).security).is_greater(0)
+
+func test_delivery_hunger_prioritizes_logistics_without_resuming_training()->void:
+	var situation:={"food_days":120,"food_intake_ratio":.94,"food_consumption":100.0,"army_provisions_required":10.0,"army_provision_delivery_ratio":.4}
+	var plan:=Strategy.preferences(Martial,situation)
+	assert_bool(plan.hungry).is_true()
+	assert_bool(plan.food_shortage).is_false()
+	assert_bool(plan.delivery_shortage).is_true()
+	assert_str(plan.training).is_equal("suspended")
+	assert_str(plan.goals[0].title).is_equal("Deliver available food to people waiting for rations")
+	assert_float(float(plan.research_weights.logistics)).is_greater(float(plan.research_weights.nutrition))
+	var baseline:=Strategy.preferences(Martial,{"food_days":120,"food_intake_ratio":1})
+	assert_float(float(plan.research_weights.nutrition)).is_equal(float(baseline.research_weights.nutrition))
+func test_mixed_food_and_delivery_shortages_keep_both_responses()->void:
+	var plan:=Strategy.preferences(Martial,{"food_days":120,"food_intake_ratio":.8,"food_consumption":100.0,"army_provisions_required":10.0,"army_provision_delivery_ratio":.4})
+	assert_bool(plan.food_shortage).is_true()
+	assert_bool(plan.delivery_shortage).is_true()
+	assert_str(plan.goals[0].title).is_equal("Keep our people fed and healthy")
+	assert_str(plan.training).is_equal("suspended")
+	var low_reserves:=Strategy.preferences(Martial,{"food_days":5,"food_intake_ratio":.94,"food_consumption":100.0,"army_provisions_required":10.0,"army_provision_delivery_ratio":.4})
+	assert_bool(low_reserves.food_shortage).is_true()
+func test_unknown_delivery_and_complete_transport_keep_food_hunger_classification()->void:
+	for situation:Dictionary in [{"food_days":120,"food_intake_ratio":.9},{"food_days":120,"food_intake_ratio":.9,"food_consumption":100.0,"army_provisions_required":20.0,"army_provision_delivery_ratio":1.0}]:
+		var plan:=Strategy.preferences(Martial,situation)
+		assert_bool(plan.food_shortage).is_true()
+		assert_bool(plan.delivery_shortage).is_false()
+func test_owned_controller_uses_actual_provision_metrics_read_only()->void:
+	WorldSimulation.create_actor("provision_strategy",997)
+	WorldSimulation.scoped("provision_strategy",func()->void:
+		WorldSimulation.state.simulation_metrics.merge({"food_days":120,"food_intake_ratio":.94,"food_consumption":100.0,"army_provisions_required":10.0,"army_provision_delivery_ratio":.4},true)
+		var stocks:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		var plan:=Controller.current_plan("provision_strategy")
+		assert_bool(plan.food_shortage).is_false()
+		assert_bool(plan.delivery_shortage).is_true()
+		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(stocks)
+	)
