@@ -34,10 +34,18 @@ static func research_orders(id:String,plan:Dictionary)->void:
 	if not viable.is_empty():
 		for domain:String in STRATEGY.DOMAINS:
 			if not viable.has(domain):priorities[domain]=0.0
+	var support:Dictionary=preload("res://scripts/research_supply_planner.gd").recommendation() if budget>0 else {}
 	var weights:=STRATEGY.research_plan(priorities,budget)
+	if not support.is_empty() and int(weights.get(support.domain,0))==0:
+		var donor:=""
+		for domain:String in weights:
+			if int(weights[domain])>int(weights.get(donor,0)):donor=domain
+		if donor!="":weights[donor]=int(weights[donor])-1;weights[support.domain]=1
 	for domain:String in weights:
 		if int(WorldSimulation.state.research_allocations.get(domain,0))!=int(weights[domain]):
 			WorldSimulation.submit(id,{"kind":"research_emphasis","domain":domain,"weight":weights[domain],"reason":String(plan.goals[0].title)})
+
+	if not support.is_empty():WorldSimulation.submit(id,{"kind":"research_target","id":support.id,"reason":"Investigate foundations for working "+String(support.resource)})
 
 static func choose_orders(id:String)->void:
 	if String(WorldSimulation.actors[id].controller)!="ai":return

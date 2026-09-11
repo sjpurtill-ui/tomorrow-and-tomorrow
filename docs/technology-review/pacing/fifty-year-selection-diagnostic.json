@@ -2051,6 +2051,7 @@
   "diagnostic_notes": [
     "Schema 5 adds selection-state reporting only; the subsequent 6bc4712 artwork commit changes no simulation behavior.",
     "Stone Selection and Twisted Cordage are eligible with zero progress in production::Material supply; active Pit Firing scores 81.18 versus 59.03 and 44.17 respectively.",
-    "Candidate scoring does not trace material shortages through missing prerequisite routes. This is a diagnosis, not verification of a correction."
+    "Candidate scoring does not trace material shortages through missing prerequisite routes. This is a diagnosis, not verification of a correction.",
+    "Construction-counter correction: completed_buildings counts only the five founding projects defined by SettlementConstruction. A constant five is not evidence that the broader settlement construction system is stalled."
   ]
 }

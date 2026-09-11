@@ -12,6 +12,10 @@ static func execute(order:Dictionary)->Dictionary:
 			if not WorldSimulation.state.research_subcategory_allocations.has(domain) or weight<0 or weight>12:return {"error":"Choose a research domain and emphasis from 0 to 12."}
 			WorldSimulation.discovery.set_domain_research_priority(domain,weight)
 			return {"ok":true}
+		"research_target":
+			var entry:Dictionary=WorldSimulation.discovery.discovery_definition(String(order.get("id","")))
+			if entry.is_empty() or int(WorldSimulation.state.research_allocations.get(String(entry.get("dynamic","")),0))<=0:return {"error":"Assign field attention before selecting this investigation."}
+			return WorldSimulation.discovery.select_research_target(String(entry.id))
 		"found":
 			if WorldSimulation.state.settlement_site_committed:return {"error":"The founding site is already committed."}
 			var origin:=WorldSimulation.world.player_world_origin
