@@ -1,4 +1,5 @@
 extends Control
+const ArtifactArt=preload("res://scripts/hud/artifact_visuals.gd")
 const A=preload("res://scripts/artifact_collection.gd")
 var pause=preload("res://scripts/hud/simulation_pause.gd").new()
 var page:=0
@@ -88,7 +89,11 @@ func refresh(force:bool)->void:
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 		var icon:=TextureRect.new();icon.texture=V.icon("population" if item.kind=="culture" else "production" if item.kind in ["artifact","specimen"] else "logistics");icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(36,36);row.add_child(icon)
 		var content:=VBoxContainer.new();content.size_flags_horizontal=SIZE_EXPAND_FILL;row.add_child(content)
-		label(content,String(item.kind).to_upper(),10,T.GOLD);label(content,String(item.name),18,T.INK)
+		var artwork:=ArtifactArt.texture(item)
+		if artwork!=null:
+			icon.visible=false
+			var illustration:=TextureRect.new();illustration.texture=artwork;illustration.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;illustration.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;illustration.custom_minimum_size.y=240;illustration.size_flags_horizontal=SIZE_EXPAND_FILL;content.add_child(illustration)
+		label(content,"PREHISTORIC FIND" if item.get("artifact_origin","")=="prehistoric" else "CIVILIZATION-MADE" if item.get("artifact_origin","")=="civilization" else String(item.kind).to_upper(),10,T.GOLD);label(content,String(item.name),18,T.INK)
 		label(content,"%s · encountered day %d · home day %d" % [item.source_name,int(item.observed_day),int(item.returned_day)],12,T.TEXT_SOFT)
 		var bar:=ProgressBar.new();bar.show_percentage=false;bar.value=float(item.study)*100;bar.custom_minimum_size.y=6;content.add_child(bar)
 		var definition:=DiscoverySystem.discovery_definition(String(item.discovery_id))

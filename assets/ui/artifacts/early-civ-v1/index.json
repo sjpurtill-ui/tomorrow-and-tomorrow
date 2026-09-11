@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "expected_count": 4096,
+  "approved": {
+    "0": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0000.png",
+      "sha256": "bd08903afb351bc978d6a1136443bd2d2d1d1fce2ca925e508c7c797dec16b82"
+    },
+    "1": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0001.png",
+      "sha256": "e6ca61f611b0564f52f8ef3b95b35917c6701955cbd3d01e5688441112b01d70"
+    },
+    "2": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0002.png",
+      "sha256": "b815b5c21dc9a4f23460c7ed155be678f7f68a08f284cd28b538dbb273a15135"
+    },
+    "3": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0003.png",
+      "sha256": "1cc4a5304f3d7b1c5e3faf8dcdf76d861667843f5ea1f252d6767704fb0bc1ac"
+    },
+    "4": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0004.png",
+      "sha256": "fd247bcb60bac6dffa07088117ec90de22fccda432eb50c66c8254bb147ad4e9"
+    },
+    "5": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0005.png",
+      "sha256": "22eb14324166c78bdede8b2fb75b6aa03a2964ca4b99ded3482e2080dd85e734"
+    },
+    "6": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0006.png",
+      "sha256": "084f5a271f2bb43beae041e934b3e54311365fa477e734a80e2daa9c00d79fea"
+    },
+    "7": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0007.png",
+      "sha256": "7b1cb99141b66e42a28b30452d21726f9b8699894338b7ae5e1e09976df0d7d7"
+    }
+  }
+}
