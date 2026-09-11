@@ -37,3 +37,20 @@ A paired 400-day comparison against the 383-discovery catalog completed with exa
 Measured shares in that run: secondary settlements 22.845%, city trade 1.547%, primary morphology 0.699%. The endpoint has two settlements: the primary contains about 81.03 people and 19 plots; the secondary about 40.70 people and 13 plots, last processed on day 400. Secondary processing executes resources, consequences/demographics, economy, construction and morphology for its own population and stocks. It must not be removed as though it were duplicate primary-city work.
 
 This changes the next optimization target from primary morphology to identifying repeated computations within the full secondary-city day. The running 250-year-target process loaded the earlier fourteen-group implementation; its combined settlement measurements cannot be retroactively separated. No performance improvement or late-game scaling result is claimed from this attribution pass.
+
+## Terminal result: profiled 250-year target, 377-discovery build
+
+The process launched at `49fe572` and tracked as session 29066 exited successfully after its one-hour wall budget. It simulated **53,896 days / 147.6603 years**, discovered **150 technologies**, and ended with population **4,441**. Its requested 91,250-day / 250-year target was **not reached**. Archive: [profiled-wall-limited-147-years.json](pacing/profiled-wall-limited-147-years.json). Every timing interval is contiguous, and interval call/time sums exactly reproduce cumulative totals.
+
+| Completed annual interval | Population | Known discoveries | Primary plots | Combined settlement ms/day |
+| --- | ---: | ---: | ---: | ---: |
+| Year 1 | 121 | 0 | 19 | 2.774 |
+| Year 50 | 318 | 42 | 24 | 17.493 |
+| Year 100 | 1,126 | 92 | 38 | 65.510 |
+| Year 147 | 4,353 | 149 | 85 | 142.036 |
+
+Combined settlements account for 74.94% of cumulative measured stage time. This is the principal measured scaling problem in this run, not proof that primary morphology alone is responsible. Schema 7 did not count all cities or separate secondary processing, trade and primary morphology. Population growth, city proliferation and their internal operations remain confounded.
+
+Endpoint food is 93.47 days, intake ratio 0.97923, army delivery ratio 0.89242. Stone 112.71, Timber 181.87, Clay 72.28, Fiber Plants 510.77. There were 87 primary plots and 578 primary plot-history records. The five founding projects are not a total building count. This run predates glassworking, electronics, digital logic, AI civilian/acquisition decisions, survey-pass reuse and monthly-scope optimization. It is not a controlled speed comparison with another build, and no millennial or full-world acceptance follows from it.
+
+A replacement diagnostic was launched from `6bc29be` with the current 400-discovery catalog and schema 8: session **95746**, target 91,250 days, wall limit 3,600 seconds, `/tmp/tt-current-400catalog-250-profile.json` and `.log`. It includes sixteen timing groups and city counts. It is a new live run, not a completed result. The previous handle 29066 is terminal and must not be restarted or described as still running.
