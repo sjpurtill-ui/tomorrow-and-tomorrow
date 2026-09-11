@@ -3,12 +3,12 @@ extends RefCounted
 ## and commissioning. No power, workers or technology are granted by planning.
 const Ops=preload("res://scripts/technology_operations.gd")
 const Supply=preload("res://scripts/civilian_production_planner.gd")
-static func recommendation()->Dictionary:
+static func recommendation(proposed_demand:float=0.0)->Dictionary:
 	var state=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1)
 	if condition<=0:return {}
-	var demand:=Ops.workshop_power_demand()
+	var demand:=Ops.workshop_power_demand()+maxf(0,proposed_demand)
 	var capacity:=0.0;var operators:=0.0
 	for id:String in Ops.data().plants:
 		var record:Dictionary=Ops.data().plants[id];var spec:Dictionary=Ops.PLANTS[id]
@@ -42,3 +42,31 @@ static func recommendation()->Dictionary:
 			if first.is_empty():first=part
 		if possible and not first.is_empty() and upstream.is_empty():upstream=first
 	return upstream
+
+## Check commissioned capacity, not today's remaining dispatch: a first line
+## has no dispatch yet. Require current fuel and leave a worker for production.
+static func can_supply(proposed_demand:float)->bool:
+	var state=WorldSimulation.state
+	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return false
+	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1)
+	if condition<=0:return false
+	var workers:=maxf(0,state.effective_workers("Crafting")+Ops.reserved_workers(state)-1.0)
+	var demand:=Ops.workshop_power_demand()+maxf(0,proposed_demand)
+	var capacity:=0.0
+	for id:String in Ops.PLANTS:
+		var record:Dictionary=Ops.data().plants.get(id,{})
+		if record.is_empty() or not bool(record.enabled):continue
+		var spec:Dictionary=Ops.PLANTS[id]
+		if float(spec.power)>0:
+			demand+=int(record.installed)*float(spec.power)*condition
+			workers=maxf(0,workers-int(record.installed)*float(spec.workers))
+	for id:String in ["solar_array","steam_generator"]:
+		var record:Dictionary=Ops.data().plants.get(id,{})
+		if record.is_empty() or not bool(record.enabled):continue
+		var spec:Dictionary=Ops.PLANTS[id]
+		var units:=minf(float(record.installed),workers/float(spec.workers))*condition
+		for resource:String in spec.inputs:
+			units=minf(units,float(state.resource_stockpiles.get(resource,0))/float(spec.inputs[resource]))
+		capacity+=units*float(spec.services.electricity)
+		workers=maxf(0,workers-units/condition*float(spec.workers))
+	return demand>0 and capacity+.000001>=demand

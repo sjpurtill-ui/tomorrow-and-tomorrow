@@ -87,3 +87,50 @@ func test_affordable_solar_preference_respects_disabled_and_adequate_capacity()-
 		Ops.data().plants.solar_array.enabled=true
 		assert_dict(F.recommendation()).is_empty()
 	)
+func prepare_first_industry()->void:
+	prepare()
+	WorldSimulation.military.cancel_equipment_job(int(WorldSimulation.military.equipment_queue[0].id))
+	learn("paper_making")
+	WorldSimulation.state.population_allocations.Knowledge=20
+	WorldSimulation.state.resource_stockpiles["Fiber Plants"]=20.0
+	WorldSimulation.state.resource_stockpiles["Paper Pulp"]=0.0
+	WorldSimulation.state.resource_stockpiles.Paper=0.0
+	preload("res://scripts/society_exchange.gd").data().collections["study"]={"study":0.0,"work":240.0,"returned_day":0}
+func test_first_powered_industry_builds_generation_then_retools_into_finished_paper()->void:
+	WorldSimulation.scoped("power_ruler",func()->void:
+		prepare_first_industry();var state=WorldSimulation.state
+		assert_array(WorldSimulation.military.equipment_queue).is_empty()
+		C.civilian_orders("power_ruler",{})
+		assert_int(int(Ops.data().plants.steam_generator.building)).is_equal(1)
+		assert_array(WorldSimulation.military.equipment_queue).is_empty()
+		for day in range(1,31):
+			state.elapsed_days=day;Ops.advance(day)
+			C.civilian_orders("power_ruler",{})
+			for job:Dictionary in WorldSimulation.military.equipment_queue:P.advance(WorldSimulation.military,job,1.0)
+		assert_float(float(state.resource_stockpiles.Paper)).is_equal(2.0)
+		assert_int(int(Ops.data().plants.steam_generator.installed)).is_equal(1)
+		assert_int(int(Ops.data().plants.steam_generator.building)).is_equal(0)
+		assert_int(WorldSimulation.military.equipment_queue.size()).is_equal(1)
+		assert_str(String(WorldSimulation.military.equipment_queue[0].item)).is_equal("handmade_paper")
+		assert_float(float(state.resource_stockpiles.Coal)).is_less(100.0)
+	)
+func test_unaffordable_generation_retains_an_unpowered_production_route()->void:
+	WorldSimulation.scoped("power_ruler",func()->void:
+		prepare_first_industry();learn("fiber_pulp_beating")
+		WorldSimulation.state.resource_stockpiles.Coal=0.0
+		WorldSimulation.state.resource_stockpiles.Stone=100.0;WorldSimulation.state.resource_stockpiles.Clay=100.0
+		C.civilian_orders("power_ruler",{})
+		assert_dict(Ops.data().plants).is_empty()
+		assert_str(String(WorldSimulation.military.equipment_queue[0].item)).is_equal("beaten_pulp")
+	)
+func test_uncommissioned_unfueled_and_unstaffed_generation_does_not_authorize_first_line()->void:
+	WorldSimulation.scoped("power_ruler",func()->void:
+		prepare_first_industry()
+		Ops.data().plants.steam_generator={"installed":0,"building":1,"work":0.0,"enabled":true}
+		assert_bool(F.can_supply(1.0)).is_false()
+		Ops.data().plants.steam_generator.installed=1;Ops.data().plants.steam_generator.building=0
+		assert_bool(F.can_supply(1.0)).is_true()
+		WorldSimulation.state.resource_stockpiles.Coal=0.0;assert_bool(F.can_supply(1.0)).is_false()
+		WorldSimulation.state.resource_stockpiles.Coal=100.0;WorldSimulation.state.population_allocations.Crafting=1
+		assert_bool(F.can_supply(1.0)).is_false()
+	)

@@ -5,7 +5,7 @@ const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const E=preload("res://scripts/society_exchange.gd")
 const S=preload("res://scripts/paper_study.gd")
-static func recommendation()->Dictionary:
+static func recommendation(plan_power:bool=false)->Dictionary:
 	var state=WorldSimulation.state
 	if state.effective_workers("Knowledge")<=0:return {}
 	var remaining:=0.0
@@ -15,13 +15,13 @@ static func recommendation()->Dictionary:
 	var printed_target:=mini(10,ceili(remaining*S.PAPER_PER_WORK/(1.0+S.PRINTED_BONUS)))
 	remaining=maxf(0.0,remaining-maxf(0.0,float(state.resource_stockpiles.get("Printed Sheets",0.0)))*(1.0+S.PRINTED_BONUS)/S.PAPER_PER_WORK)
 	if remaining<=0.0:return {}
-	var printed:=supply("Printed Sheets",printed_target,{})
+	var printed:=supply("Printed Sheets",printed_target,{},plan_power)
 	if not printed.is_empty():return printed
 	var target:=mini(10,ceili(remaining*S.PAPER_PER_WORK/(1.0+S.BONUS)))
 	if target<=0 or float(state.resource_stockpiles.get("Paper",0.0))>=target:return {}
-	return supply("Paper",target,{})
+	return supply("Paper",target,{},plan_power)
 
-static func supply(resource:String,target:int,path:Dictionary)->Dictionary:
+static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=false)->Dictionary:
 	if path.has(resource) or path.size()>=24:return {}
 	var next:=path.duplicate();next[resource]=true
 	var candidates:Array[String]=[]
@@ -37,7 +37,7 @@ static func supply(resource:String,target:int,path:Dictionary)->Dictionary:
 	for item:String in candidates:
 		var recipe:=P.recipe(WorldSimulation.military,item)
 		if recipe.has("error"):continue
-		if float(I.PRODUCTS[item].get("power",0.0))>0.0 and preload("res://scripts/technology_operations.gd").service("electricity")<=0.0:continue
+		if not plan_power and float(I.PRODUCTS[item].get("power",0.0))>0.0 and preload("res://scripts/technology_operations.gd").service("electricity")<=0.0:continue
 		var batches:=maxi(1,ceili(target-float(WorldSimulation.state.resource_stockpiles.get(resource,0.0))))
 		# A line may begin with one batch in hand; the target is not an upfront
 		# reservation. Plan upstream only when the next batch cannot be made.
@@ -57,7 +57,7 @@ static func supply(resource:String,target:int,path:Dictionary)->Dictionary:
 		var work:=float(recipe.work_per_item)*batches
 		for input:String in needed:
 			if float(WorldSimulation.state.resource_stockpiles.get(input,0.0))>=float(needed[input]):continue
-			var upstream:=supply(input,ceili(float(needed[input])),next)
+			var upstream:=supply(input,ceili(float(needed[input])),next,plan_power)
 			if upstream.is_empty():possible=false;break
 			work+=float(upstream.get("work",0.0))
 			if first.is_empty():first=upstream

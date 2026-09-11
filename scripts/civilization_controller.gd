@@ -102,6 +102,17 @@ static func choose_orders(id:String)->void:
 static func civilian_orders(id:String,plan:Dictionary)->void:
 	if bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)):return
 	var recommendation:=preload("res://scripts/power_investment_planner.gd").recommendation()
+	if recommendation.is_empty():
+		var candidate:=preload("res://scripts/civilian_production_planner.gd").recommendation(true)
+		if not candidate.is_empty():
+			var recipe:=preload("res://scripts/civilian_industry.gd").product(String(candidate.item))
+			if float(recipe.get("power",0))<=0:recommendation=candidate
+			else:
+				var added_demand:=float(recipe.get("daily_power",0))
+				for job:Dictionary in WorldSimulation.military.equipment_queue:
+					if String(job.get("item",""))==String(candidate.item):added_demand=0.0;break
+				if preload("res://scripts/power_investment_planner.gd").can_supply(added_demand):recommendation=candidate
+				else:recommendation=preload("res://scripts/power_investment_planner.gd").recommendation(added_demand)
 	if String(recommendation.get("kind",""))=="plant_install":
 		WorldSimulation.submit(id,recommendation);return
 	if recommendation.is_empty():recommendation=preload("res://scripts/civilian_production_planner.gd").recommendation()
