@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the owned canopy/landscape captures without presenting a player window."""
+"""Run the owned landscape and scouting captures without presenting a player window."""
 import argparse
 import fcntl
 import os
@@ -12,10 +12,11 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(__file__).resolve().parent
 BUILD = ROOT / 'artifacts' / 'macos-background-capture'
 GODOT = Path('/Applications/Godot.app/Contents/MacOS/Godot')
-ALLOWED = {'canopy_transition_probe', 'seasonal_landscape_probe', 'terrain_lod_probe'}
+ALLOWED = {'canopy_transition_probe', 'seasonal_landscape_probe', 'terrain_lod_probe', 'ancient_scouting_probe'}
 MARKERS = {'canopy_transition_probe': 'CANOPY_TRANSITION_CAPTURE PASS',
            'seasonal_landscape_probe': 'SEASONAL_LANDSCAPE_CAPTURE PASS',
-           'terrain_lod_probe': 'TERRAIN_LOD_CAPTURE PASS'}
+           'terrain_lod_probe': 'TERRAIN_LOD_CAPTURE PASS',
+           'ancient_scouting_probe': 'ANCIENT_SCOUTING_CAPTURE PASS'}
 
 
 def main():
@@ -24,8 +25,9 @@ def main():
     parser.add_argument('--preflight-only', action='store_true')
     args = parser.parse_args()
     override = ROOT / 'override.cfg'
-    if not override.is_file() or 'config/custom_user_dir_name="TomorrowCanopyTransitionTests"' not in override.read_text():
-        raise RuntimeError('The owned TomorrowCanopyTransitionTests userdata override is required.')
+    userdata = 'TomorrowAncientScoutingTests' if args.probe == 'ancient_scouting_probe' else 'TomorrowCanopyTransitionTests'
+    if not override.is_file() or f'config/custom_user_dir_name="{userdata}"' not in override.read_text():
+        raise RuntimeError('The owned ' + userdata + ' userdata override is required.')
     if ROOT == Path('/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow'):
         raise RuntimeError('Native capture harness must run in its explicit task worktree.')
     BUILD.mkdir(parents=True, exist_ok=True)
