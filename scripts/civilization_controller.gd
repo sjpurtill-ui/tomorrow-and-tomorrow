@@ -75,6 +75,7 @@ static func choose_orders(id:String)->void:
 	var plan:=current_plan(id)
 	research_orders(id,plan)
 	military_orders(id,plan)
+	civilian_orders(id,plan)
 	foreign_orders(id,plan)
 	if bool(plan.hungry) or bool(plan.at_war) or float(WorldSimulation.state.simulation_metrics.get("food_days",0))<float(plan.expansion_food):return
 	if bool(WorldSimulation.state.settlement_convoy.get("active",false)):return
@@ -97,6 +98,11 @@ static func choose_orders(id:String)->void:
 		value+=float(environment.get("water_access",0))*(.4+float(p.openness))
 		if value>best_value:best={"kind":"settle","destination":point};best_value=value
 	if not best.is_empty():WorldSimulation.submit(id,best)
+
+static func civilian_orders(id:String,plan:Dictionary)->void:
+	if bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)):return
+	var recommendation:=preload("res://scripts/civilian_production_planner.gd").recommendation()
+	if not recommendation.is_empty():ensure_line(id,String(recommendation.item),int(recommendation.target))
 
 static func military_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
