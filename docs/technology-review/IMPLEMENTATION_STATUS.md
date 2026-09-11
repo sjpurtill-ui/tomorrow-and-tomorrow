@@ -268,3 +268,12 @@ Validation: **58 cases pass**: six new chemistry, twelve civilian-industry, nine
 Save compatibility: old recipe definitions and stored job formats are unchanged. The old aggregate salt-fed silicon process remains available as an abstraction; the explicit reagent chain is an alternative. New co-product yields are derived from the current recipe, so no migration or saved output multipliers are required. Existing completion, cancellation and retooling semantics remain. Native presentation and full-campaign balance are not established by these headless tests.
 
 Handoff scope: chemical-process module and suite, civilian recipes, persistent-production output and description, production-line panel, DiscoverySystem registration (shared hotspot), graph audit, art manifest and progress records. Work remains in `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration remains outstanding and the full overhaul stays active.
+
+
+## 17. Chlor-alkali subject illustration
+
+Generated and visually inspected a square chlor-alkali workshop illustration with the built-in imagegen tool, using the approved apprentice image as the style reference. Two industrial workers, closed cells, collection vessels and a plain instrument panel occupy the lower portion; warm ivory paper, matte restrained pigments and broad negative space preserve the approved aesthetic. The scene is an illustration rather than an engineering diagram. Exact prompt and provenance are saved in `assets/ui/research/paper/CHLORALKALI_PROMPT.md`.
+
+The new `chloralkali_cells.png` source is saved in this worktree and explicitly bound to its production identity. Its import uses the established 768-pixel limit with mipmaps; the full-resolution 1254-pixel source remains available. The atlas suite passes all eleven cases, including this texture's binding and whole-square presentation. No errors, failures, skipped cases or orphans; import and diff checks pass. Logs: `/tmp/tt-chloralkali-*.log`. Native player rendering has not been launched or verified.
+
+Current count: 292 live discoveries, eight verified subject images, 284 queued live images. The 5,000-discovery and image objective remains unfinished. Save behavior is unchanged. Handoff scope: one PNG and import sidecar, provenance, explicit research-visual binding, atlas test list, regenerated manifest and status records. Canonical integration remains outstanding; branch and worktree discipline are unchanged.

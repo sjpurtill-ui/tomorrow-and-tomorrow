@@ -2327,7 +2327,7 @@
       "domain": "production",
       "id": "chloralkali_cells",
       "name": "Chlor-Alkali Cells",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/hydrogen_chloride_synthesis.png",
@@ -2341,9 +2341,9 @@
   "live_art_complete": false,
   "live_count": 292,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 285,
+  "queued_count": 284,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 7
+  "verified_count": 8
 }
