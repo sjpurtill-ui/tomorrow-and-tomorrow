@@ -19,7 +19,7 @@ SCENES=[
 'A roughly fractured natural cave-wall limestone fragment bearing a partial crude ochre animal outline reminiscent of prehistoric cave painting. A few rough strokes suggest a wild bovine back, uneven legs and horned head, with a faint palm smear nearby. Follow the natural rock, not a prepared plaque.',
 'A broken unpolished bone fragment with three faint short isolated abrasion scratches, far apart at unrelated angles. The marks never touch, cross, join or form V shapes. They read as incidental wear, never glyphs or writing. No standardized counting scale, elaborate carvings, letters or decorative pictogram.',
 'A splinter of bone crudely rubbed toward an uneven point, with the broken end still rough. No needle eye, turned surface, engineered fitting, or elaborate decoration.',
-'A worn animal tooth fragment with a few irregular scratches and earth in its natural crevices. No polished pendant, metal fitting or sophisticated drilled decoration.',
+'A worn animal tooth fragment with naturally mottled enamel and earth in its natural crevices. No intentional scratches, engraving, letters, notches, polished pendant, metal fitting or drilled decoration.',
 'A small lopsided pinch of sun-dried, UNFIRED clay retaining crude fingertip impressions. It is a shapeless or barely human-like experimental lump, never a finished ceramic figurine or vessel.',
 'A rough cracked cobble with ancient soot, scorching and ash lodged in the fractures, beside a tiny charcoal crumb. No formal fireplace, kiln or later architecture.'
 ]
