@@ -518,3 +518,14 @@ No new save fields; existing research targets and allocations persist ordinary c
 Two new square illustrations distinguish hand-built coil pottery from pottery fired in an open earthen pit. Both were generated with the built-in image tool and visually reviewed against the approved matte gouache, fibrous ivory paper, muted palette and low composition. Each has an explicit discovery binding, 768-pixel import limit and mipmaps. Prompt records: assets/ui/research/paper/CLAY_SHAPING_PROMPT.md and PIT_FIRING_PROMPT.md.
 
 Headless import and all eleven atlas cases pass with zero errors, failures, skips or orphans; logs /tmp/tt-pottery-import.log and /tmp/tt-pottery-atlas.log. The manifest reports 333 live discoveries, eighteen verified images and 315 queued live subjects; the 5,000 target remains unchanged. Native player presentation is unverified. No save or simulation changes. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 4d9f5f7. Canonical integration remains pending.
+
+
+## 40. Completed fifty-year material-access comparison
+
+The post-planner diagnostic completed 18,250 days in 333.543 seconds against 4d9f5f7. Final population 334, twelve Knowledge workers, 37 discoveries, three active inquiries and 52 occurrences. Final stocks: Stone 10.54, Timber 366.02, Clay 200.81 and Fiber Plants 240.55; food reserves 121.80 days. Full report: pacing/fifty-year-supply-planner.json. Log: /tmp/tt-supply-fifty-year.log. The process exited successfully.
+
+The targeted causal improvement is visible: Stone Selection learned day 10,081, Joinery day 15,636, and all four non-surface Stone deposits reached developed with access 1.00381 and no blockers. The preceding run left these surveyed below access threshold and ended with Stone 2.51. No stock, knowledge or population rescue was injected.
+
+The result is not a universal acceleration: nine identities absent from the old endpoint were learned, while Route Memory, Household Councils, Graded Roads, Basketry, Root Cellars and Pack Animals were delayed beyond this endpoint. Twisted Cordage still was not learned by fifty years. Population is one lower and food reserves are similar. The planner restores a useful causal route in this scenario while consuming attention that could support other work.
+
+This remains one isolated ruler with synthetic nearby water and no foreign acquisition or war. It does not verify 2,500–3,000-year progression, diverse geography, military campaigns or aggregate world performance. The five founding-project counter is not a broader construction-stall indicator. No additional simulation or save changes in this report checkpoint. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 3ba7b56; canonical integration remains pending.
