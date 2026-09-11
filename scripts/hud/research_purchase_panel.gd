@@ -11,6 +11,13 @@ var resources:OptionButton
 var summary:Label
 var send:Button
 
+static func visible_for(topic:String, exposed:bool, known:bool)->bool:
+	if not exposed:return false
+	var license_needed:=Licenses.available() and topic in Licenses.subjects() and not Licenses.independent(topic)
+	if license_needed:return true
+	if known and not Partnerships.pending(topic):return false
+	return Purchase.available() or Scholars.available() or Partnerships.available() or Materials.available(topic)
+
 func _ready()->void:
 	var title:=Label.new();title.text="Arrange foreign research support";add_child(title)
 	modes=OptionButton.new();add_child(modes)

@@ -181,3 +181,19 @@ func test_research_support_panel_offers_license_with_real_quote()->void:
 	assert_bool(panel.send.disabled).is_false()
 	assert_dict(L.records()).is_empty()
 	panel.free()
+
+func test_known_but_unadopted_technology_keeps_license_renewal_visible()->void:
+	prepare();license_trip()
+	CivilizationSystem.diplomatic_mission.clear()
+	GameState.known_discoveries.append("glassmaking")
+	GameState.discovery_adoption.glassmaking=.05
+	GameState.elapsed_days=int(L.records().glassmaking.expires_day)-30
+	const Panel=preload("res://scripts/hud/research_purchase_panel.gd")
+	assert_bool(Panel.visible_for("glassmaking",true,true)).is_true()
+	assert_bool(Panel.visible_for("glassmaking",false,true)).is_false()
+	var panel:=Panel.new();panel.subject="glassmaking";add_child(panel)
+	assert_str(String(panel.modes.get_selected_metadata())).is_equal("license")
+	assert_bool(panel.send.disabled).is_false()
+	panel.free()
+	GameState.discovery_adoption.glassmaking=.10
+	assert_bool(Panel.visible_for("glassmaking",true,true)).is_false()

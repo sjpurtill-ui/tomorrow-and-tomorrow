@@ -279,7 +279,7 @@ func select(id:String,open_detail:bool=false)->void:
 				detail_body.add_child(examine)
 		var license_note:=preload("res://scripts/research_licenses.gd").describe(String(item.id))
 		if not license_note.is_empty():Art.label(detail_body,license_note,12,T.TEXT_SOFT,true)
-		if item.exposed and (not item.known or preload("res://scripts/research_partnerships.gd").pending(String(item.id))) and ((preload("res://scripts/research_licenses.gd").available() and String(item.id) in preload("res://scripts/research_licenses.gd").subjects()) or preload("res://scripts/research_purchase.gd").available() or preload("res://scripts/scholar_visits.gd").available() or preload("res://scripts/research_materials.gd").available(String(item.id))):
+		if preload("res://scripts/hud/research_purchase_panel.gd").visible_for(String(item.id), bool(item.exposed), bool(item.known)):
 			var purchase:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
 			purchase.subject=String(item.id);detail_body.add_child(purchase)
 		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)
