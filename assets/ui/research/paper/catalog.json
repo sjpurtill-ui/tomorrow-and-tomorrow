@@ -2543,7 +2543,7 @@
       "domain": "ecology",
       "id": "mineral_streak_tests",
       "name": "Mineral Streak Tests",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/mineral_cleavage.png",
@@ -2575,7 +2575,7 @@
       "domain": "ecology",
       "id": "relative_stratigraphy",
       "name": "Relative Stratigraphy",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/lithologic_correlation.png",
@@ -2669,9 +2669,9 @@
   "live_art_complete": false,
   "live_count": 333,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 320,
+  "queued_count": 318,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 13
+  "verified_count": 15
 }

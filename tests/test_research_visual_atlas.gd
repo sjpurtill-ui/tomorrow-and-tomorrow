@@ -105,7 +105,7 @@ func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
 
 func test_reviewed_paper_images_are_specific_and_preserve_the_full_square()->void:
 	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
-	for id:String in ["stone_sorting","apprentice_contracts","oral_epics","festival_calendar","wayfinding_stars","photovoltaic_power","public_schools","chloralkali_cells","gear_ratios","compound_pulleys","mine_airways","controlled_flaking","well_siting"]:
+	for id:String in ["stone_sorting","apprentice_contracts","oral_epics","festival_calendar","wayfinding_stars","photovoltaic_power","public_schools","chloralkali_cells","gear_ratios","compound_pulleys","mine_airways","controlled_flaking","well_siting","relative_stratigraphy","mineral_streak_tests"]:
 		var item:Dictionary={"id":id,"domain":"knowledge","exposed":true}
 		var picture:=Art.paint_discovery(parent,item,104)
 		assert_str(picture.texture.resource_path).is_equal("res://assets/ui/research/paper/"+id+".png")
