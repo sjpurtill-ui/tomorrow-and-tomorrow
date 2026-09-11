@@ -1,5 +1,7 @@
 # Canopy transition — ready for integration
 
+Integration receipt: source `14eb89050a60d835cb320d2decb56f9091a6e3e4` is now integrated into canonical Mac main by fast-forward from the base below. All 41 canonical focused cases and the isolated normal-entry headless boot pass. Both owned overrides are removed. Release target: `2026.09.10.5`. See `INTEGRATION_STATUS.md`; the worktree delivery and native evidence below remain the reviewed source record.
+
 Worktree: `/Users/seanpurtill/Documents/Codex/tt-canopy-transition`
 Branch: `codex/canopy-transition`
 Base: `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`
