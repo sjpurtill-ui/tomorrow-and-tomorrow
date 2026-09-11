@@ -7,6 +7,7 @@ import fcntl
 import prehistoric as p
 from catalogue import write_document
 from experiment_families import BRIEFS as MORE_BRIEFS
+from experiment_episodes import EPISODES, TRACE_FAMILIES
 BRIEFS = [
 ('The shell that held a seam','shell and plant fiber','oral_epics','A ragged shell disc with one crudely abraded hole, caught in a short loop of twisted grass beside two scraps of hide. Close overhead view; emphasize the practical fastening, no bead necklace or decorative motif.','A hole turns a brittle shell into a fastening point. It invites experiments in joining flexible materials.'),
 ('Night in a hollow stone','sandstone and animal fat','charcoal','A palm-sized naturally hollow sandstone holding a tiny pool of dull yellow rendered fat and a charred moss wick, one low flame. Side view against a broad charcoal cave wash that fades into ivory paper. Uneven uncarved lip, no pottery or metal.','Fuel held beside a wick suggests a portable source of light.'),
@@ -46,11 +47,24 @@ def extend():
     path=p.bank.ROOT/'data/artifacts/prehistoric_experiments.json'
     authored=json.loads(path.read_text()) if path.exists() else {}
     manifest=json.loads(p.bank.MANIFEST.read_text())
-    for offset,(name,material,subject,scene,insight) in enumerate(BRIEFS + MORE_BRIEFS):
+    families=BRIEFS+MORE_BRIEFS
+    assert len(families)==123
+    for offset in range(3936):
+        family=offset%123
+        episode=offset//123
+        name,material,subject,scene,insight=families[family]
         i=160+offset
+        if episode:
+            label,construction,trace,question=EPISODES[episode]
+            name+=' · '+label.lower()
+            direction=trace if 160+family in TRACE_FAMILIES else construction
+            scene+=' Distinct experiment for this specimen (takes precedence over the base arrangement): '+direction
+            scene+=' Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.'
+            insight+=' '+question
+        assert len(insight)<=600
         definition={'name':name,'form':name.lower(),'material':material,'discovery_id':subject,'artifact_origin':'prehistoric','art_collection':'prehistoric-v1','catalogue_id':i,'insight':insight}
         row=manifest['entries'][i]
-        if row['status']!='pending':
+        if row['status']!='pending' or row.get('prompt_override'):
             assert authored.get(str(i))==definition, 'Never change a generated concept silently'
             continue
         authored[str(i)]=definition
