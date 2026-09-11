@@ -124,6 +124,7 @@ var society_subcategories:Dictionary={}
 ## it never grows with population.
 var societal_values:Dictionary=SOCIETAL_VALUES_MODEL.initial_state("",world_seed,"player")
 var combined_intelligence:=0.18
+var research_notification_mode:="milestones"
 var discovery_log: Array[Dictionary] = []
 var active_observations: Array[String] = []
 var research_targets:Dictionary={}
@@ -444,6 +445,7 @@ func reset_for_new_world(new_seed:int)->void:
 	society_subcategories={}
 	societal_values=SOCIETAL_VALUES_MODEL.initial_state("",world_seed,"player")
 	combined_intelligence=0.18
+	research_notification_mode="milestones"
 	discovery_log=[]
 	active_observations=[]
 	research_targets={}

@@ -1008,7 +1008,7 @@ func advance_world_time(days_advanced:float)->void:
 			if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
 		var day_result:=WorldSimulation.advance_day(last_discovery_day,daily_context,_process_local_settlement_day) if WorldSimulation.enabled else preload("res://scripts/civilization_day.gd").advance(last_discovery_day,daily_context,_process_local_settlement_day)
 		var discoveries:Array[Dictionary]=day_result.discoveries
-		if not discoveries.is_empty():preload("res://scripts/hud/discovery_popup.gd").announce(self,hud,discoveries)
+		if not discoveries.is_empty():preload("res://scripts/hud/research_announcements.gd").announce(self,hud,discoveries)
 		var resource_events:Array[Dictionary]=day_result.resources
 		var simulation_events:Array[Dictionary]=day_result.events
 		var progression_events:Array[Dictionary]=day_result.progression

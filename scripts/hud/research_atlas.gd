@@ -45,6 +45,7 @@ var detail_selected:=""
 var leader_options:Array=[]
 var detail_revision:=""
 var narrow_details:=false
+var announcements:OptionButton
 var detail_back:Button
 func _ready()->void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -56,6 +57,13 @@ func _ready()->void:
 	Art.label(header,"RESEARCH · PEOPLE & IDEAS",23,T.INK).size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	Art.button(header,"Research staffing",_staffing)
 	var close:=Art.button(header,"×",_close);close.custom_minimum_size.x=38;close.tooltip_text="Close · Escape or click outside"
+	var notification_row:=HBoxContainer.new();box.add_child(notification_row)
+	Art.label(notification_row,"Discovery pauses",12,T.TEXT_SOFT)
+	announcements=OptionButton.new();notification_row.add_child(announcements)
+	for spec:Array in [["milestones","Major milestones"],["all","Every discovery"],["quiet","Digest only"]]:
+		announcements.add_item(spec[1]);announcements.set_item_metadata(announcements.item_count-1,spec[0])
+		if GameState.research_notification_mode==spec[0]:announcements.select(announcements.item_count-1)
+	announcements.item_selected.connect(func(index:int)->void:GameState.research_notification_mode=String(announcements.get_item_metadata(index)))
 	var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",8);box.add_child(navigation)
 	for spec:Array in [["active","Being researched"],["tree","Knowledge tree"],["known","Established"]]:
 		var id:=String(spec[0]);tabs[id]=Art.button(navigation,spec[1],func()->void:set_view(id))
