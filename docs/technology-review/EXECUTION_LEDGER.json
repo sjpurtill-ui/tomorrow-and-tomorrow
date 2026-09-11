@@ -60,7 +60,8 @@
     "AI research acquisition requests paid 60-day scholar visits from examined leads before formal purchasing is available, reserving travel and board through the existing workforce-conserving contract",
     "Eight printing-material/form/press discoveries and nine paid recipes produce Printed Sheets, a finite nonstacking alternative to Paper during collection examination; AI plans its supply chain",
     "AI can retain paid scholar visits after formal purchasing becomes available when active inquiry support precedes a long local examination queue; ordinary board, travel, supplier acceptance and payment remain required",
-    "Six authored intaglio methods and nine recipes with distinct plate stocks, finite method-specific wear and reconvergent printed-sheet output"
+    "Six authored intaglio methods and nine recipes with distinct plate stocks, finite method-specific wear and reconvergent printed-sheet output",
+    "Burin engraving and rolling intaglio printing have reviewed subject-specific paper-and-gouache assets, square framing and bounded mipmapped imports"
   ],
   "unfinished": [
     "Remaining 4586 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
@@ -86,8 +87,8 @@
   ],
   "art": {
     "live_subjects": 414,
-    "verified_subject_images": 34,
-    "queued_live_images": 380,
+    "verified_subject_images": 36,
+    "queued_live_images": 378,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

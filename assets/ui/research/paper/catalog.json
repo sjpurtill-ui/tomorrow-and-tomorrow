@@ -3279,7 +3279,7 @@
       "domain": "production",
       "id": "burin_engraving",
       "name": "Burin Engraving",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/drypoint_printmaking.png",
@@ -3311,15 +3311,15 @@
       "domain": "production",
       "id": "rolling_intaglio_printing",
       "name": "Rolling Intaglio Printing",
-      "status": "queued"
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
   "live_count": 414,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 380,
+  "queued_count": 378,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 34
+  "verified_count": 36
 }
