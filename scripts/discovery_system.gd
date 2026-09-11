@@ -111,6 +111,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/glassworking_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/electronic_components.gd").entries())
 	catalog.append_array(preload("res://scripts/digital_logic_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/computing_memory_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/printing_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/intaglio_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())

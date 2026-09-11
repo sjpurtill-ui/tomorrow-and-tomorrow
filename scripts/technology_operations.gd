@@ -8,7 +8,8 @@ const PLANTS={
 	"cold_store":{"name":"Electric cold store","gate":"mechanical_refrigeration","requires":["electric_motors"],"cost":{"Electric Motors":1.0,"Pressure Vessels":1.0,"Glass":1.0},"work":12.0,"workers":1.0,"inputs":{"Bitumen":.01},"power":3.0,"services":{"cold_storage":200.0}},
 	"powered_workshop":{"name":"Motor-driven workshop","gate":"electric_motors","requires":["electrical_generators"],"cost":{"Electric Motors":1.0,"Insulated Cable":2.0,"Wrought Iron":2.0},"work":10.0,"workers":1.0,"inputs":{},"power":2.0,"services":{"mechanical_work":3.0}},
 	"controlled_workshop":{"name":"Electronically controlled workshop","gate":"electronic_machine_control","requires":["electric_motors"],"cost":{"Electronic Controllers":1.0,"Electric Motors":1.0,"Insulated Cable":2.0,"Steel":2.0},"work":15.0,"workers":1.5,"inputs":{},"power":2.5,"services":{"mechanical_work":4.5}},
-	"sequenced_workshop":{"name":"Hardwired sequencing workshop","gate":"hardwired_sequence_control","requires":["electric_motors"],"cost":{"Sequence Controllers":1.0,"Electric Motors":1.0,"Insulated Cable":2.0,"Steel":3.0},"work":18.0,"workers":1.5,"inputs":{},"power":3.0,"services":{"mechanical_work":5.0}}
+	"sequenced_workshop":{"name":"Hardwired sequencing workshop","gate":"hardwired_sequence_control","requires":["electric_motors"],"cost":{"Sequence Controllers":1.0,"Electric Motors":1.0,"Insulated Cable":2.0,"Steel":3.0},"work":18.0,"workers":1.5,"inputs":{},"power":3.0,"services":{"mechanical_work":5.0}},
+	"programmable_workshop":{"name": "Programmable machine workshop", "gate": "stored_program_control", "requires": ["electric_motors"], "cost": {"Programmable Controllers": 1.0, "Electric Motors": 1.0, "Insulated Cable": 2.0, "Steel": 3.0}, "work": 20.0, "workers": 1.5, "inputs": {}, "power": 4.0, "services": {"mechanical_work": 6.0}}
 }
 static func empty_state()->Dictionary:return {"last_day":-1,"plants":{},"services":{},"workers":0.0,"inputs":{}}
 static func data()->Dictionary:return WorldSimulation.state.technology_operations
@@ -136,15 +137,15 @@ static func valid(value:Variant)->bool:
 	if not value.plants is Dictionary or value.plants.size()>PLANTS.size():return false
 	for field:String in ["last_day","workers"]:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
-	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>12000:return false
+	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>14000:return false
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
 			if field=="services" and key not in ["electricity","cold_storage","mechanical_work"]:return false
 			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":12500.0}:
-		if float(value.services.get(name,0))>float({"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":12500.0}[name])+.000001:return false
+	for name:String in {"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":18500.0}:
+		if float(value.services.get(name,0))>float({"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":18500.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]

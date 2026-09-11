@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 414,
+    "live": 422,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -63,13 +63,14 @@
     "Six authored intaglio methods and nine recipes with distinct plate stocks, finite method-specific wear and reconvergent printed-sheet output",
     "Burin engraving and rolling intaglio printing have reviewed subject-specific paper-and-gouache assets, square framing and bounded mipmapped imports",
     "AI commissions paid solar or steam generation for existing machinery demand, plans missing manufactured components, waits for commissioning and respects actual fuel/operator/workshop constraints",
-    "AI can commission generation before its first powered study-supply line, verify fueled/staffed installed capacity without requiring prior dispatch, retain an unpowered fallback and retool completed pulp into paper in one slot"
+    "AI can commission generation before its first powered study-supply line, verify fueled/staffed installed capacity without requiring prior dispatch, retain an unpowered fallback and retool completed pulp into paper in one slot",
+    "Eight authored memory/control capabilities, ten physical assembly recipes and a seventh programmable workshop plant with shared power, operator labor and bounded save validation"
   ],
   "unfinished": [
-    "Remaining 4586 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4578 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
-    "Civilian and future operating models beyond six primary-settlement plants; solar weather, storage and night-time balancing",
+    "Civilian and future operating models beyond seven primary-settlement plants; solar weather, storage and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 88 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline"
@@ -89,9 +90,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 414,
+    "live_subjects": 422,
     "verified_subject_images": 36,
-    "queued_live_images": 378,
+    "queued_live_images": 386,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

@@ -3202,6 +3202,70 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/relay_registers.png",
+      "description": "Interlocked relay contacts retain a binary word while the register is powered.",
+      "domain": "production",
+      "id": "relay_registers",
+      "name": "Relay Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/parallel_register_banks.png",
+      "description": "Grouped bistable circuits retain several words with separate access connections.",
+      "domain": "production",
+      "id": "parallel_register_banks",
+      "name": "Parallel Register Banks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/memory_address_decoding.png",
+      "description": "A pattern on address lines selects one storage location rather than every location at once.",
+      "domain": "production",
+      "id": "memory_address_decoding",
+      "name": "Memory Address Decoding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/read_write_memory.png",
+      "description": "Selection and write control let a stored word be retrieved or replaced without manually rewiring its representation.",
+      "domain": "production",
+      "id": "read_write_memory",
+      "name": "Addressable Read/Write Memory",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/instruction_registers.png",
+      "description": "A dedicated register holds the current instruction while control circuits interpret it.",
+      "domain": "production",
+      "id": "instruction_registers",
+      "name": "Instruction Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/program_counters.png",
+      "description": "A counter retains and advances the address from which the next instruction is fetched.",
+      "domain": "production",
+      "id": "program_counters",
+      "name": "Program Counters",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/conditional_branch_circuits.png",
+      "description": "A tested arithmetic condition selects between the sequential instruction address and a branch destination.",
+      "domain": "production",
+      "id": "conditional_branch_circuits",
+      "name": "Conditional Branch Circuits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stored_program_control.png",
+      "description": "Stored instructions, addressed memory and conditional transfers coordinate a machine through a changeable sequence.",
+      "domain": "production",
+      "id": "stored_program_control",
+      "name": "Stored-Program Control",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/seed_oil_pressing.png",
       "description": "Pressure separates oil from collected oil-bearing seeds; the resulting oil can serve as a printing-ink vehicle.",
       "domain": "production",
@@ -3315,9 +3379,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 414,
+  "live_count": 422,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 378,
+  "queued_count": 386,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
