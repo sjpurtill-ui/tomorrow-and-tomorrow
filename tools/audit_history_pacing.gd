@@ -33,7 +33,7 @@ func bottlenecks()->Dictionary:
 func run()->void:
 	for argument:String in OS.get_cmdline_user_args():
 		if argument.begins_with("--days="):target_days=clampi(argument.trim_prefix("--days=").to_int(),1,3650000)
-		elif argument.begins_with("--wall-seconds="):wall_seconds=clampf(argument.trim_prefix("--wall-seconds=").to_float(),1,300)
+		elif argument.begins_with("--wall-seconds="):wall_seconds=clampf(argument.trim_prefix("--wall-seconds=").to_float(),1,3600)
 		elif argument.begins_with("--seed="):seed_value=argument.trim_prefix("--seed=").to_int()
 		elif argument.begins_with("--out="):output_path=argument.trim_prefix("--out=")
 	for name:String in ["GameState","CivilizationSystem","MilitaryCampaign"]:root.get_node(name).set_process(false)
