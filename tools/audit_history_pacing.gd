@@ -46,6 +46,7 @@ func run()->void:
 		for resource:String in ["Timber","Stone","Fiber Plants"]:
 			fields[resource]={"density":clampf(float(profile.get("resource_potentials",{}).get(resource,0)),0,1),"area_km2":9.0,"position":Vector3(point.x,0,point.y)}
 		return {"environment_profile":profile,"surface_water_distance_km":.1,"surface_water_recognized":true,"surface_material_catchments":fields,"woodland_catchment":fields.Timber}
+	simulation.water_provider=func(point:Vector3)->Vector3:return point+Vector3(.1,0,0)
 	var actor:Dictionary=simulation.create_actor("pacing_reference",seed_value,Vector2.ZERO)
 	simulation.enabled=true # Normal resource days initialize owned world geology.
 	actor.systems.CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return true
@@ -73,7 +74,7 @@ func run()->void:
 	catalog_count=actor.systems.DiscoverySystem.technology_catalog.size()
 	var elapsed:=float(Time.get_ticks_msec()-start)/1000.0
 	var diagnostic:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return bottlenecks())
-	var report:={"schema":3,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
+	var report:={"schema":4,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
 	var file:=FileAccess.open(output_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write pacing diagnostic: "+output_path);quit(1);return
 	file.store_string(JSON.stringify(report,"  "));file.close()

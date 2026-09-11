@@ -877,7 +877,10 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		row["requires"]=entry.get("requires_all",entry.get("requires",[])).duplicate()
 		row["pathway_description"]=Pathways.describe(entry)
 		if not _resource_requirements_met(entry.get("resource_requirements",[])):
-			for requirement in entry.get("resource_requirements",[]): missing.append("%s: %s access" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized"))])
+			for requirement:Dictionary in entry.get("resource_requirements",[]):
+				if _resource_requirements_met([requirement]):continue
+				var alternative:=" or a returned, studied specimen" if bool(requirement.get("sample_sufficient",false)) and String(requirement.get("stage","recognized")) in ["recognized","surveyed"] else ""
+				missing.append("%s: %s access%s" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized")),alternative])
 		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
 		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")
 		var known:=id in WorldSimulation.state.known_discoveries

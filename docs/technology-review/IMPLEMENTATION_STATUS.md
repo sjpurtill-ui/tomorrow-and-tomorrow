@@ -411,3 +411,10 @@ Validation: 69 cases pass with zero errors, failures, skips or orphans: five new
 
 
 Dependency-audit negative control: `--exclude=mine_airways` leaves coal surveyed and blocks 71 discoveries, including Coke Firing, while the normal audit reaches all 317. This verifies that the audit detects the repaired coal dependency rather than assuming every material gate passes. Optional exclusions affect only this disposable headless authoring audit. Logs: /tmp/tt-dependency-positive.log and /tmp/tt-dependency-negative.log.
+
+
+Schema-3 follow-up reached day 16,606 (45.50 years), with 285 people, ten Knowledge workers, 30 discoveries, four inquiries and five buildings before its 300-second limit. All overlapping annual snapshots and discovery events match the earlier run exactly. Its detailed report is pacing/causal-resources-diagnostic.json. However, the new diagnostics expose a second harness limitation: the synthetic river context supported drinking, but no water_provider was installed, so the ordinary hydrology deposit initializer could not supply the Freshwater record needed by water research. These reports are explicitly annotated and must not be used to judge water-research pacing. Schema 4 supplies the matching synthetic nearest-water provider; ordinary initialization then creates the occurrence without granting discovery or stock.
+
+The atlas now lists only unsatisfied material conditions and explicitly offers a returned, studied specimen when that investigation permits one. Nine existing technology-tree tests pass; no native UI interaction is claimed.
+
+Schema-4 one-year probe completed 365 days and verified 52 occurrences including one accessible Freshwater record. Population 121, five buildings, three inquiries, no completed discovery yet. Report: pacing/hydrology-enabled-reference.json. This confirms hydrology initialization, not longer progression.

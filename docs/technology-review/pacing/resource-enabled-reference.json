@@ -208,5 +208,6 @@
     "annual_snapshots": true,
     "discoveries": true
   },
-  "full_goal_complete": false
+  "full_goal_complete": false,
+  "diagnostic_limitation": "Synthetic water supported drinking but no water_provider was installed, so Freshwater research gates lacked a hydrology deposit. Superseded for water-research pacing by schema 4."
 }
