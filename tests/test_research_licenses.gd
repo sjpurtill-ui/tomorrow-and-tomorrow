@@ -1,0 +1,183 @@
+extends GdUnitTestSuite
+const E=preload("res://scripts/society_exchange.gd")
+const P=preload("res://scripts/knowledge_pathways.gd")
+const Purchase=preload("res://scripts/research_purchase.gd")
+const L=preload("res://scripts/research_licenses.gd")
+const Production=preload("res://scripts/persistent_production.gd")
+func before_test()->void:
+	WorldSimulation.clear()
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	GameState.reset_for_new_world(777);DiscoverySystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();FoodSystem.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.ensure_population_total(200);GameState.settlement_site_committed=true;GameState.housing_capacity=280
+	GameState.population_allocations.Knowledge=30;GameState.population_allocations.Administration=12
+	GameState.food_security=1;GameState.population_health=.95;GameState.water_metrics={"intake_ratio":1.0}
+	GameState.simulation_metrics={"food_days":60,"food_intake_ratio":1.0,"security":.9,"cohesion":.9}
+	GameState.resource_stockpiles.Food=20000;GameState.food_stocks={"Preserved food":20000.0}
+	CivilizationSystem.set_scout_geography_authority(func(_p:Vector2)->bool:return true)
+	WorldSimulation.create_actor("neighbor",777,Vector2(30,0));WorldSimulation.actors.neighbor.controller="manual"
+	WorldSimulation.scoped("neighbor",func()->void:
+		WorldSimulation.state.ensure_population_total(200);WorldSimulation.state.settlement_site_committed=true;WorldSimulation.state.housing_capacity=140
+		WorldSimulation.state.food_security=.6;WorldSimulation.state.population_health=.7
+		WorldSimulation.state.simulation_metrics={"food_days":30,"food_intake_ratio":1.0,"security":.3,"cohesion":.3}
+		WorldSimulation.state.population_allocations.Crafting=8
+		WorldSimulation.state.resource_stockpiles.Clay=20.0;WorldSimulation.state.resource_stockpiles.Food=20000
+		WorldSimulation.state.food_stocks={"Preserved food":20000.0}
+		WorldSimulation.state.known_discoveries.assign(["clay_shaping"]);WorldSimulation.state.discovery_adoption.clay_shaping=1.0
+		E.policy("balanced","open"))
+	CivilizationSystem.civilizations.clear();CivilizationSystem.civilizations.append({"id":"neighbor","name":"Neighbor","world_position":Vector2(30,0),"strategic_regions":[],"player_relation":{"opinion":.3,"at_war":false}})
+	DiscoverySystem.initialize()
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+
+func after_test()->void:
+	GameState.elapsed_days=0
+	WorldSimulation.clear();GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
+
+
+func prepare()->void:
+	GameState.elapsed_days=100000
+	GameState.known_discoveries.assign(["workshop_standards","material_accounting"])
+	E.owner_state("neighbor").known_discoveries.append("glassmaking");E.owner_state("neighbor").discovery_adoption.glassmaking=1.0
+	GameState.population_allocations.Crafting=20
+	GameState.resource_stockpiles.merge({"Fine Sand":20.0,"Limestone":20.0,"Timber":50.0,"Clay":20.0},true)
+	GameState.resource_stockpiles.Stone=1000.0
+	CivilizationSystem.civilizations[0].merge({"population":200,"production":.5,"logistics":.5,"food_days":30,"military_population":10},true)
+	E.owner_state("neighbor").population_allocations.Knowledge=20
+	CivilizationSystem.civilizations[0].player_relation.merge({"contact_level":2,"home_location_known":true,"home_position":{"x":30.0,"z":0.0}},true)
+	CivilizationSystem.civilizations[0].strategic_regions=[{"id":"neighbor_city","role":"capital","name":"Neighbor city","map_x":.5,"map_y":.5,"position":Vector2(30,0),"controller":"neighbor","fortification":.2,"damage":0.0,"population":200,"strategic_weight":1.0}]
+
+func license_trip()->Dictionary:
+	assert_bool(L.dispatch("neighbor","glassmaking","Stone").get("ok",false)).is_true()
+	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day))
+	Purchase.prepare_return(mission)
+	GameState.elapsed_days=int(mission.return_day)
+	E.returned(mission,int(mission.return_day))
+	return mission
+func test_paid_contract_arrives_once_without_granting_knowledge()->void:
+	prepare()
+	var before:=float(GameState.resource_stockpiles.Stone)
+	assert_bool(L.dispatch("neighbor","glassmaking","Stone").get("ok",false)).is_true()
+	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(before-float(mission.gift_amount))
+	assert_bool(L.active("glassmaking")).is_false()
+	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
+	E.returned(mission,int(mission.return_day)-1)
+	assert_dict(L.records()).is_empty()
+	GameState.elapsed_days=int(mission.return_day);E.returned(mission,int(mission.return_day))
+	assert_bool(L.active("glassmaking")).is_true()
+	var expires:=int(L.records().glassmaking.expires_day)
+	E.returned(mission,int(mission.return_day)+100)
+	assert_int(int(L.records().glassmaking.expires_day)).is_equal(expires)
+	assert_bool("glassmaking" in GameState.known_discoveries).is_false()
+	assert_bool(E.valid(JSON.parse_string(JSON.stringify(E.data())))).is_true()
+func test_licensed_work_pays_inputs_at_reduced_rate_and_expiry_stops_it()->void:
+	prepare();license_trip()
+	assert_bool(MilitaryCampaign.start_production_line("glass_batch",10).get("ok",false)).is_true()
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	var sand:=float(GameState.resource_stockpiles["Fine Sand"])
+	Production.advance(MilitaryCampaign,job,3.0)
+	assert_int(int(job.completed)).is_equal(0)
+	assert_float(float(job.progress_days)).is_equal_approx(1.95,.000001)
+	assert_float(float(GameState.resource_stockpiles["Fine Sand"])).is_equal_approx(sand-1.3,.000001)
+	var view:=Production.snapshot(MilitaryCampaign,job,3.0,1.0)
+	assert_bool(view.licensed).is_true()
+	assert_float(float(view.forecast_output_per_day)).is_greater(0.0)
+	GameState.elapsed_days=int(L.records().glassmaking.expires_day)
+	var stocks:=GameState.resource_stockpiles.duplicate(true)
+	Production.advance(MilitaryCampaign,job,100.0)
+	assert_dict(GameState.resource_stockpiles).is_equal(stocks)
+	GameState.known_discoveries.append("glassmaking");GameState.discovery_adoption.glassmaking=1.0
+	Production.advance(MilitaryCampaign,job,1.05)
+	assert_int(int(job.completed)).is_equal(1)
+	assert_bool(Production.snapshot(MilitaryCampaign,job,3.0,1.0).licensed).is_false()
+func test_supplier_withdrawal_and_war_interrupt_without_erasing_goods()->void:
+	prepare();license_trip();GameState.resource_stockpiles.Glass=2.0
+	E.owner_state("neighbor").society_exchange.sharing_policy="guarded"
+	assert_bool(L.active("glassmaking")).is_false()
+	E.owner_state("neighbor").society_exchange.sharing_policy="open"
+	CivilizationSystem.civilizations[0].player_relation.at_war=true
+	assert_bool(L.active("glassmaking")).is_false()
+	CivilizationSystem.civilizations[0].player_relation.at_war=false
+	assert_bool(L.active("glassmaking")).is_true()
+	assert_float(float(GameState.resource_stockpiles.Glass)).is_equal(2.0)
+func test_refusal_returns_payment_once_and_quote_hides_supplier_knowledge()->void:
+	prepare()
+	var offer:=L.quote("neighbor","glassmaking","Stone")
+	E.owner_state("neighbor").known_discoveries.clear()
+	assert_dict(L.quote("neighbor","glassmaking","Stone")).is_equal(offer)
+	var before:=float(GameState.resource_stockpiles.Stone)
+	var mission:=license_trip()
+	assert_bool(mission.research_refused).is_true()
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(before)
+	E.returned(mission,int(mission.return_day)+1)
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(before)
+	assert_dict(L.records()).is_empty()
+func test_invalid_contract_terms_and_cross_mode_flags_are_rejected()->void:
+	prepare();var mission:=license_trip()
+	var saved:Dictionary=JSON.parse_string(JSON.stringify(E.data()))
+	saved.production_licenses.glassmaking.expires_day+=1
+	assert_bool(E.valid(saved)).is_false()
+	var invalid:=mission.duplicate(true);invalid.research_mode="purchase"
+	assert_bool(E.valid_mission(invalid)).is_false()
+	invalid=mission.duplicate(true);invalid.license_authorized=false
+	assert_bool(E.valid_mission(invalid)).is_false()
+func test_missing_local_workshop_capability_and_nonproduction_subjects_are_rejected()->void:
+	prepare()
+	assert_bool(L.quote("neighbor","formation_drill","Stone").has("error")).is_true()
+	GameState.known_discoveries.erase("material_accounting")
+	assert_bool(L.dispatch("neighbor","glassmaking","Stone").has("error")).is_true()
+func test_normal_envoy_processing_pays_supplier_and_renewal_requires_new_trip()->void:
+	prepare();WorldSimulation.enabled=true
+	var supplier:=E.owner_state("neighbor")
+	var before:=float(supplier.resource_stockpiles.get("Stone",0))
+	assert_bool(L.dispatch("neighbor","glassmaking","Stone").get("ok",false)).is_true()
+	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	var payment:=float(mission.gift_amount)
+	GameState.elapsed_days=int(mission.arrival_day);CivilizationSystem._process_diplomatic_mission(int(mission.arrival_day))
+	assert_float(float(supplier.resource_stockpiles.get("Stone",0))).is_equal(before)
+	GameState.elapsed_days=int(mission.return_day);CivilizationSystem._process_diplomatic_mission(int(mission.return_day))
+	assert_float(float(supplier.resource_stockpiles.Stone)).is_equal_approx(before+payment,.000001)
+	assert_bool(L.active("glassmaking")).is_true()
+	assert_bool(L.quote("neighbor","glassmaking","Stone").has("error")).is_true()
+	GameState.elapsed_days=int(L.records().glassmaking.expires_day)-30
+	assert_bool(L.quote("neighbor","glassmaking","Stone").has("error")).is_false()
+	var expires:=int(L.records().glassmaking.expires_day)
+	license_trip()
+	assert_int(int(L.records().glassmaking.expires_day)).is_greater(expires)
+func test_licensed_power_demand_is_real_and_zero_power_blocks_consumption()->void:
+	prepare()
+	var supplier:=E.owner_state("neighbor");supplier.known_discoveries.append("chloralkali_cells");supplier.discovery_adoption.chloralkali_cells=1.0
+	E.data()["production_licenses"]={"chloralkali_cells":{"source":"neighbor","issued_day":100000,"expires_day":100365}}
+	var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product("chloralkali_batch")
+	for material:String in recipe.materials:GameState.resource_stockpiles[material]=20.0
+	for material:String in recipe.tooling:GameState.resource_stockpiles[material]=20.0
+	assert_bool(MilitaryCampaign.start_production_line("chloralkali_batch",1).get("ok",false)).is_true()
+	assert_float(preload("res://scripts/technology_operations.gd").workshop_power_demand()).is_equal(2.0)
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	var before:=GameState.resource_stockpiles.duplicate(true)
+	Production.advance(MilitaryCampaign,job,100.0)
+	assert_dict(GameState.resource_stockpiles).is_equal(before)
+	assert_int(int(job.completed)).is_equal(0)
+func test_saved_licensed_job_and_register_remain_separate_from_mastery()->void:
+	prepare();license_trip()
+	assert_bool(MilitaryCampaign.start_production_line("glass_batch",1).get("ok",false)).is_true()
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	Production.advance(MilitaryCampaign,job,1.0)
+	var saved_register:Dictionary=JSON.parse_string(JSON.stringify(E.data()))
+	var saved_job:Dictionary=JSON.parse_string(JSON.stringify(job))
+	assert_bool(E.valid(saved_register)).is_true()
+	assert_str(Production.validate_saved({"equipment_queue":[saved_job]})).is_empty()
+	GameState.society_exchange=saved_register
+	assert_bool(L.active("glassmaking")).is_true()
+	Production.advance(MilitaryCampaign,saved_job,4.0)
+	assert_int(int(saved_job.completed)).is_equal(1)
+	assert_bool("glassmaking" in GameState.known_discoveries).is_false()
+func test_research_support_panel_offers_license_with_real_quote()->void:
+	prepare()
+	var panel:=preload("res://scripts/hud/research_purchase_panel.gd").new()
+	panel.subject="glassmaking";add_child(panel)
+	assert_str(String(panel.modes.get_selected_metadata())).is_equal("license")
+	assert_bool(panel.summary.text.contains("365 days")).is_true()
+	assert_bool(panel.send.disabled).is_false()
+	assert_dict(L.records()).is_empty()
+	panel.free()

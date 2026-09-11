@@ -23,6 +23,7 @@ static func valid(value:Variant)->bool:
 	if value.is_empty():return false
 	if not preload("res://scripts/scholar_visits.gd").valid(value.get("scholar_visits",{})):return false
 	if not value.has_all(empty_state().keys()):return false
+	if not preload("res://scripts/research_licenses.gd").valid(value.get("production_licenses",{})):return false
 	for key:String in ["collections","evidence","origins","connections","outbound"]:
 		if not value[key] is Dictionary or value[key].size()>(CONTACT_LIMIT if key in ["connections","outbound"] else COLLECTION_LIMIT):return false
 	if value.migration_policy not in ["balanced","welcome","consolidate"] or value.sharing_policy not in ["open","selective","guarded"]:return false
@@ -91,7 +92,10 @@ static func valid_mission(mission:Dictionary)->bool:
 	if (mission.has("research_mode") or mission.has("scholar_contract") or mission.has("scholar_provisions")) and not mission.has("research_subject"):return false
 	if mission.has("scholar_contract") and mission.get("research_mode","")!="scholar":return false
 	if mission.has("scholar_provisions") and mission.get("research_mode","")!="scholar":return false
-	if mission.get("research_mode","purchase") not in ["purchase","scholar","partnership","materials"]:return false
+	if mission.get("research_mode","purchase") not in ["purchase","scholar","partnership","materials","license"]:return false
+	for field:String in ["license_authorized","license_delivered"]:
+		if mission.has(field) and mission.get("research_mode","")!="license":return false
+	if mission.get("research_mode","")=="license" and not preload("res://scripts/research_licenses.gd").valid_mission(mission):return false
 	var materials:bool=mission.get("research_mode","")=="materials"
 	for field:String in ["materials_requested","material_cargo","materials_delivered"]:
 		if mission.has(field) and not materials:return false
@@ -405,8 +409,9 @@ static func sample_ground(system:Node,mission:Dictionary,position:Vector2,day:in
 static func returned(mission:Dictionary,day:int)->Array[Dictionary]:
 	var records:Array[Dictionary]=[]
 	if bool(mission.get("exchange_returned",false)):return records
-	if mission.get("research_mode","")=="materials" and day<int(mission.get("return_day",day+1)):return records
+	if mission.get("research_mode","") in ["materials","license"] and day<int(mission.get("return_day",day+1)):return records
 	mission["exchange_returned"]=true
+	if mission.get("research_mode","")=="license":records.append_array(preload("res://scripts/research_licenses.gd").deliver(mission,day))
 	if mission.get("research_mode","")=="materials":records.append_array(preload("res://scripts/research_materials.gd").deliver(mission,day))
 	preload("res://scripts/research_purchase.gd").refund(mission)
 	for item:Dictionary in mission.get("carried_collections",[]):

@@ -11,6 +11,7 @@ static func recipe(host: Node, item: String) -> Dictionary:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
 	if not Industry.product(item).is_empty():
 		definition=Industry.product(item);gate=host._knowledge_gate(String(definition.gate),.10);kind="civilian"
+		if not gate.get("unlocked",false) and preload("res://scripts/research_licenses.gd").active(String(definition.gate)):gate={"unlocked":true}
 	elif not joint.is_empty():
 		gate=host._knowledge_gate(String(joint.gate),.10);definition={"materials":joint.materials,"days":float(joint.work_days)}
 	elif item=="transport_cart":
@@ -159,6 +160,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
 	if not eligible(host,job) or work<=0:
 		return
+	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var per_item:=float(job.work_per_item)
 	var units:=work/per_item
 	if int(job.target_stock)>0:
@@ -194,7 +196,8 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> Dictionary:
 	var result:=job.duplicate(true)
 	result["state"]=state(host,job);result["stock"]=stock(host,job);result["share"]=share
-	result["daily_work"]=rate*share*float(job.efficiency)
+	result["licensed"]=preload("res://scripts/research_licenses.gd").uses_license(String(job.item))
+	result["daily_work"]=rate*share*float(job.efficiency)*(.65 if result.licensed else 1.0)
 	if result.state=="Working" and float(result.daily_work)<=0:
 		var staff:=workforce()
 		if host.production_labor_share<=0:result.state="No workshop crafting share"

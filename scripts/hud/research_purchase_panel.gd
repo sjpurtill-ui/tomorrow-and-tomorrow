@@ -1,4 +1,5 @@
 extends VBoxContainer
+const Licenses=preload("res://scripts/research_licenses.gd")
 const Purchase=preload("res://scripts/research_purchase.gd")
 const Partnerships=preload("res://scripts/research_partnerships.gd")
 const Materials=preload("res://scripts/research_materials.gd")
@@ -13,6 +14,7 @@ var send:Button
 func _ready()->void:
 	var title:=Label.new();title.text="Arrange foreign research support";add_child(title)
 	modes=OptionButton.new();add_child(modes)
+	if Licenses.available() and subject in Licenses.subjects():modes.add_item("Negotiate one-year production license");modes.set_item_metadata(modes.item_count-1,"license")
 	if Purchase.available():modes.add_item("Purchase a validated study");modes.set_item_metadata(modes.item_count-1,"purchase")
 	if Scholars.available():modes.add_item("Invite a scholar for 60 days");modes.set_item_metadata(modes.item_count-1,"scholar")
 	if Partnerships.available():modes.add_item("Joint investigation and findings exchange");modes.set_item_metadata(modes.item_count-1,"partnership")
@@ -43,6 +45,7 @@ func refresh()->void:
 
 func support()->Script:
 	match modes.get_selected_metadata():
+		"license":return Licenses
 		"materials":return Materials
 		"scholar":return Scholars
 		"partnership":return Partnerships

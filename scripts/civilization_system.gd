@@ -1429,12 +1429,13 @@ func diplomatic_mission_quote(civ_id:String,gift_resource:String="",purpose:Stri
 
 func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goodwill",research_subject:String="",research_mode:String="purchase")->Dictionary:
 	if research_subject!="" and purpose!="goodwill":return {"error":"Research purchases need a peaceful research delegation."}
-	if research_mode not in ["purchase","scholar","partnership","materials"]:return {"error":"Unknown research proposal."}
+	if research_mode not in ["purchase","scholar","partnership","materials","license"]:return {"error":"Unknown research proposal."}
 	if research_mode!="purchase" and research_subject.is_empty():return {"error":"Choose a subject for this research proposal."}
 	var quote:Dictionary
 	if research_subject.is_empty():quote=diplomatic_mission_quote(civ_id,gift_resource,purpose)
 	else:
 		match research_mode:
+			"license":quote=preload("res://scripts/research_licenses.gd").quote(civ_id,research_subject,gift_resource)
 			"materials":quote=preload("res://scripts/research_materials.gd").quote(civ_id,research_subject,gift_resource)
 			"scholar":quote=preload("res://scripts/scholar_visits.gd").quote(civ_id,research_subject,gift_resource)
 			"partnership":quote=preload("res://scripts/research_partnerships.gd").quote(civ_id,research_subject,gift_resource)

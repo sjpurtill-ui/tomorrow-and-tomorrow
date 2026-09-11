@@ -49,7 +49,7 @@ static func workshop_power_demand()->float:
 		if not bool(job.get("persistent",false)) or bool(job.get("paused",false)):continue
 		var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(job.get("item","")))
 		if float(recipe.get("power",0))<=0:continue
-		if recipe.gate not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(String(recipe.gate))<.10:continue
+		if (recipe.gate not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(String(recipe.gate))<.10) and not preload("res://scripts/research_licenses.gd").active(String(recipe.gate)):continue
 		if int(job.get("target_stock",0))>0 and float(WorldSimulation.state.resource_stockpiles.get(recipe.output,0))>=int(job.target_stock):continue
 		var supplied:=true
 		for item:String in recipe.materials:

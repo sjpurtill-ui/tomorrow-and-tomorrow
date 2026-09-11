@@ -39,6 +39,8 @@ static func key(source:String,subject:String)->String:
 static func negotiate(mission:Dictionary,source:String,source_name:String,position:Dictionary,day:int)->void:
 	if not mission.has("research_subject") or mission.has("research_refused"):return
 	if Exchange.owner_id(String(mission.get("civ_id","")))!=Exchange.owner_id(source) or day<int(mission.get("arrival_day",day+1)):return
+	if mission.get("research_mode","purchase")=="license":
+		preload("res://scripts/research_licenses.gd").negotiate(mission,source,day);return
 	if mission.get("research_mode","purchase")=="materials":
 		preload("res://scripts/research_materials.gd").negotiate(mission,source,day);return
 	if mission.get("research_mode","purchase")=="scholar":
@@ -63,6 +65,8 @@ static func negotiate(mission:Dictionary,source:String,source_name:String,positi
 
 static func prepare_return(mission:Dictionary)->void:
 	if not mission.has("research_subject"):return
+	if mission.get("research_mode","purchase")=="license":
+		preload("res://scripts/research_licenses.gd").prepare_return(mission);return
 	if mission.get("research_mode","purchase")=="materials":
 		preload("res://scripts/research_materials.gd").prepare_return(mission);return
 	if mission.get("research_mode","purchase")=="scholar":
