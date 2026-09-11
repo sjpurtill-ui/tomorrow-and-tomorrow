@@ -39,7 +39,7 @@
       "domain": "production",
       "id": "cordage",
       "name": "Twisted Cordage",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/basketry.png",
@@ -2669,9 +2669,9 @@
   "live_art_complete": false,
   "live_count": 333,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 318,
+  "queued_count": 317,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 15
+  "verified_count": 16
 }
