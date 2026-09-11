@@ -37,7 +37,10 @@ static func product_description(item:String)->String:
 		var definition:=Industry.product(item);var parts:Array[String]=[]
 		for resource:String in definition.tooling:parts.append("%.1f %s" % [float(definition.tooling[resource]),resource])
 		var power_note:=" Each batch also consumes %.1f electricity from the shared daily supply." % float(definition.power) if float(definition.get("power",0))>0 else ""
-		return ("Produces %s in the settlement stock ledger. Line setup consumes %s; batch inputs and workshop time are consumed during production. Machinery must be deployed separately to provide a service." % [definition.output,", ".join(parts)])+power_note
+		var joint_outputs:Array[String]=[]
+		for resource:String in definition.get("co_products",{}):joint_outputs.append("%.2f %s" % [float(definition.co_products[resource]),resource])
+		var co_note:=" Each completed batch also yields "+", ".join(joint_outputs)+"; the stock target tracks "+String(definition.output)+"." if not joint_outputs.is_empty() else ""
+		return ("Produces %s in the settlement stock ledger. Line setup consumes %s; batch inputs and workshop time are consumed during production. Machinery must be deployed separately to provide a service." % [definition.output,", ".join(parts)])+power_note+co_note
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
 	if not joint.is_empty():return "%s equipment. %d crew per hull or aircraft; commission through %s operations." % [String(joint.purpose),int(joint.crew),String(joint.domain)]
 	if item=="improvised":return "Basic wooden clubs and makeshift hand weapons for levies. One set equips one levy; this produces equipment, not a trained unit."
@@ -178,7 +181,13 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.completed=int(job.completed)+produced;job.last_output=produced;job.last_work=possible*per_item
 	if String(job.job_type)=="consumable": host.military_consumables[String(job.item)]=stock(host,job)+produced
 	elif String(job.job_type)=="transport": WorldSimulation.state.resource_stockpiles["Transport Carts"]=stock(host,job)+produced
-	elif String(job.job_type)=="civilian":WorldSimulation.state.resource_stockpiles[String(Industry.product(String(job.item)).output)]=float(WorldSimulation.state.resource_stockpiles.get(String(Industry.product(String(job.item)).output),0))+produced
+	elif String(job.job_type)=="civilian":
+		# Yield belongs to the authored recipe, never mutable saved job metadata.
+		var definition:=Industry.product(String(job.item))
+		var yields:Dictionary=definition.get("co_products",{}).duplicate()
+		yields[String(definition.output)]=1.0
+		for resource:String in yields:
+			WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))+produced*float(yields[resource])
 	else: host.military_inventory[String(job.item)]=stock(host,job)+produced
 	if possible>0: job.efficiency=move_toward(float(job.efficiency),1.0,.0025*(.65+host._adoption("workshop_standards"))*minf(1,possible/maxf(.000001,units)))
 
@@ -192,6 +201,7 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 		elif float(staff.workers)<=0:result.state="No available craftspeople"
 		elif float(staff.workplace_condition)<=0:result.state="No usable workplaces"
 		else:result.state="Workforce unable to work"
+	if String(job.job_type)=="civilian":result["co_products"]=Industry.product(String(job.item)).get("co_products",{}).duplicate()
 	result["output_per_day"]=float(result.daily_work)/float(job.work_per_item)
 	result["inputs_per_day"]={}
 	for resource in job.materials: result.inputs_per_day[resource]=float(job.materials[resource])*float(result.output_per_day)

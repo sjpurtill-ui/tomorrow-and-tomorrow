@@ -2,6 +2,11 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"purified_brine":{"name": "Purified brine", "output": "Purified Brine", "gate": "brine_purification", "materials": {"Salt": 1.0, "Freshwater": 3.0}, "days": 3.0, "tooling": {"Glass": 2.0, "Clay": 4.0}},
+	"chloralkali_batch":{"name": "Chlor-alkali batches", "output": "Chlorine", "co_products": {"Caustic Soda": 1.0, "Hydrogen": 1.0}, "gate": "chloralkali_cells", "materials": {"Purified Brine": 1.0, "Freshwater": 1.0, "Graphite": 0.02}, "days": 5.0, "power": 4.0, "daily_power": 2.0, "tooling": {"Pressure Vessels": 3.0, "Glass": 4.0, "Insulated Cable": 4.0}},
+	"hydrogen_chloride":{"name": "Hydrogen chloride", "output": "Hydrogen Chloride", "gate": "hydrogen_chloride_synthesis", "materials": {"Chlorine": 1.0, "Hydrogen": 1.0}, "days": 3.0, "tooling": {"Pressure Vessels": 2.0, "Glass": 3.0}},
+	"reagent_refined_silicon":{"name": "Silicon from prepared reagents", "output": "Purified Silicon", "gate": "chlorosilane_purification", "materials": {"Metallurgical Silicon": 1.0, "Hydrogen Chloride": 0.5, "Hydrogen": 0.25, "Freshwater": 1.0}, "days": 6.0, "power": 3.0, "daily_power": 1.5, "tooling": {"Pressure Vessels": 3.0, "Glass": 3.0, "Steel": 5.0}},
+
 	"silicon_feedstock":{"name": "Metallurgical silicon", "output": "Metallurgical Silicon", "gate": "silicon_smelting", "materials": {"Fine Sand": 3.0, "Coal": 2.0, "Graphite": 0.1}, "days": 6.0, "power": 6.0, "daily_power": 2.0, "tooling": {"Steel": 8.0, "Refractory Clay": 10.0, "Insulated Cable": 4.0}},
 	"purified_silicon":{"name": "Purified silicon", "output": "Purified Silicon", "gate": "chlorosilane_purification", "materials": {"Metallurgical Silicon": 1.0, "Salt": 0.5, "Freshwater": 2.0}, "days": 8.0, "power": 4.0, "daily_power": 1.5, "tooling": {"Pressure Vessels": 3.0, "Glass": 3.0, "Steel": 5.0}},
 	"silicon_boules":{"name": "Silicon crystal boules", "output": "Silicon Boules", "gate": "single_crystal_growth", "materials": {"Purified Silicon": 1.0, "Graphite": 0.1}, "days": 8.0, "power": 4.0, "daily_power": 1.5, "tooling": {"Pressure Vessels": 1.0, "Glass": 2.0, "Steel": 4.0}},

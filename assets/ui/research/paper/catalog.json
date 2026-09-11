@@ -2312,12 +2312,36 @@
       "id": "dimensional_metrology",
       "name": "Precision Dimensional Metrology",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/brine_purification.png",
+      "description": "Settling and filtered clarification remove suspended contamination from prepared salt solutions.",
+      "domain": "production",
+      "id": "brine_purification",
+      "name": "Brine Purification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/chloralkali_cells.png",
+      "description": "Separated electrolysis compartments recover chlorine, caustic soda and hydrogen from the same brine feed.",
+      "domain": "production",
+      "id": "chloralkali_cells",
+      "name": "Chlor-Alkali Cells",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hydrogen_chloride_synthesis.png",
+      "description": "Contained gas processing combines recovered hydrogen and chlorine into an industrial silicon-processing reagent.",
+      "domain": "production",
+      "id": "hydrogen_chloride_synthesis",
+      "name": "Hydrogen Chloride Synthesis",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 289,
+  "live_count": 292,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 282,
+  "queued_count": 285,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
