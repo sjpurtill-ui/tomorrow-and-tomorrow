@@ -548,3 +548,10 @@ Scope: FieldMedicine and tests, DiscoverySystem/catalog contract/graph audit, Mi
 The military supply view now shows equipped medical capacity, recoverable wounded, supply-limited service and the current limiting factor. FieldMedicine.quote provides the same calculation used by the paying provide operation, so viewing capabilities or opening the report cannot spend materials or advance recovery. The text specifies care during recovery at home. No forward-care capability is implied.
 
 All eleven focused medical tests pass with no errors, failures, skips or orphans, retaining the eight operating tests and adding quote/service equivalence, read-only capability inspection and supply-panel content. Log: /tmp/tt-medicine-report.log. Native rendering remains unverified. No save shape or research identity change. Scope: FieldMedicine quote/description, MilitaryCampaign capabilities, military supply content and tests. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base e82909e. Canonical integration remains pending.
+
+
+## 43. Bearer drill and casualty-record illustrations
+
+Added two subject illustrations in the approved square ivory-paper gouache style. Litter Bearer Drill shows two coordinated carriers supporting a resting person. Casualty Transfer Records shows a record handover beside a living patient; a targeted edit clarified the patient's visible face. Both final images were visually inspected and installed with explicit bindings, 768-pixel limits and mipmaps. Built-in prompt records: assets/ui/research/paper/LITTER_BEARER_PROMPT.md and CASUALTY_RECORDS_PROMPT.md.
+
+Headless import and all eleven atlas tests pass, zero errors, failures, skips or orphans. Logs /tmp/tt-medical-art-import.log and /tmp/tt-medical-art-atlas.log. Manifest: 341 live discoveries, twenty verified illustrations, 321 queued live subjects, unchanged 5,000 target. No simulation or save change. Native presentation remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 190cdcc; no canonical integration or player launch.

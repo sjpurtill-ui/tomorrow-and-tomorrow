@@ -68,8 +68,8 @@
   ],
   "art": {
     "live_subjects": 341,
-    "verified_subject_images": 18,
-    "queued_live_images": 323,
+    "verified_subject_images": 20,
+    "queued_live_images": 321,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

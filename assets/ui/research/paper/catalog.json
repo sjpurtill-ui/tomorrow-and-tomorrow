@@ -2671,7 +2671,7 @@
       "domain": "security",
       "id": "litter_bearer_drill",
       "name": "Litter Bearer Drill",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/casualty_collection_posts.png",
@@ -2687,7 +2687,7 @@
       "domain": "security",
       "id": "casualty_transfer_records",
       "name": "Casualty Transfer Records",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/evacuation_relays.png",
@@ -2733,9 +2733,9 @@
   "live_art_complete": false,
   "live_count": 341,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 323,
+  "queued_count": 321,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 18
+  "verified_count": 20
 }
