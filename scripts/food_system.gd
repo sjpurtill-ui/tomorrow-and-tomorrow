@@ -440,6 +440,9 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	if traveling:storage_multiplier*=1.28
 	var preservation:Dictionary={}
 	for food_type:String in FOOD_TYPES:preservation[food_type]=WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)
+	# A projection mutates only projected food, never installed services. With
+	# no current cooling, none of its future days can promise refrigeration.
+	var has_cooling:=not traveling and Operations.service("cold_storage")>0.0
 	for offset in range(1,horizon+1):
 		var future_day:=current_day+float(offset)
 		var future_climate_factors:=_forecast_climate(environment,future_day,climate_days)
@@ -455,7 +458,7 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		var future_climate:=non_climate*maxf(0.0,-season_wave)*0.06
 		var future_required:=maxf(0.0,(non_climate+future_climate)*ration_factor-inaccessible_army_rations)
 		total_required+=future_required
-		var cooling:=Operations.refrigeration_multiplier(Operations.forecast_service("cold_storage",offset) if not traveling else 0.0,projected_stocks)
+		var cooling:=Operations.refrigeration_multiplier(Operations.forecast_service("cold_storage",offset),projected_stocks) if has_cooling else 1.0
 		for food_type in FOOD_TYPES:
 			var amount:=float(projected_stocks.get(food_type,0.0))
 			var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*float(preservation[food_type])*(cooling if food_type in ["Fresh plants","Fresh meat","Fish"] else 1.0)
