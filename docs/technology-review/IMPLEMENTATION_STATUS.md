@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the third checkpoint: **209 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the fourth checkpoint: **217 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -97,3 +97,20 @@ Save compatibility: existing IDs and saved ownership remain unchanged; the catal
 Limits: water improvements use existing aggregate water-access/safety effects, not site-specific hydraulic structures or treatment plants. Food processes use the existing five broad food categories; their recipes, dedicated buildings, salt/acid inputs and process labor are not separately consumed or scheduled. Earliest dates and magnitudes are initial design values. Full 2,500–3,000-year pacing, modern/future infrastructure, military expansion, 5,000 authored identities, artwork and native visual review remain outstanding. This slice must not be described as the completed historical technology system.
 
 Shared integration files: DiscoverySystem, FoodSystem and the research inspector, plus the existing graph audit. New files: `scripts/food_water_knowledge.gd`, `scripts/technology_catalog_contract.gd`, and `tests/test_food_water_knowledge.gd`. No GameState, SaveSystem, terrain, project settings or military ownership changes in this checkpoint. No known conflicts against the branch's preceding checkpoint; integration with other branches has not been attempted.
+
+
+## Fourth checkpoint: military education by role
+
+Continues from `24fcf88` on the same isolated worktree/branch (original base `940d5a2`). READY for integrator review; not merged or launched in the canonical game.
+
+Eight production discoveries: Skirmish Pair Drill, Mounted Remount School, Siege Crew Rehearsals, Mountain Field School, Range Estimation Drill, Gun Detachment School, Engineer Demonstration Ranges, and Mechanized Crew School. They connect military roles to existing weapons, handling, surveying/measurement, craft, staff and teaching foundations. All eight pass the production contract and causal graph audits. The live catalog is **217**, with 24 explicit learning routes and zero graph errors.
+
+Each teaching practice specifies the land roles it helps. Full adoption reduces newly scheduled training time by 15% for those roles; partial adoption scales the benefit. Overlapping practices multiply, with a 30% total reduction ceiling. The existing training scheduler retains recruits, weapons, training places, provisions, prototype restrictions and day advancement. Existing queued orders retain their recorded duration; discovering a school does not instantaneously train soldiers or rewrite an underway commitment. Recruitment quotations use the same duration calculation, including their food estimate. The inspector explains the affected roles and new-order restriction. Each civilization reads its own knowledge/adoption.
+
+This strengthens the training dimension of the existing 50 land archetypes. It does not add unit archetypes or claim new tactical behavior. Naval and air crew education, distinct battlefield doctrine, richer maneuver/countermeasure behaviors, dedicated school facilities, instructor qualifications, full military content breadth and balance remain outstanding. The existing 21 naval and 16 air types remain unchanged. General-led operational control is untouched.
+
+Verification: **111 tests passed** across 11 separately executed headless suites. Seven new education cases cover valid graph/roles, role-specific adoption scaling, alternate foundations, actual training-order creation without rewriting older orders, recruit and equipment-knowledge gates, independent rival ownership and explanatory text. Regression suites cover training accounting (10), staff strategy (27), staffing actions (2), recruitment reconciliation (13), all land/naval/air equipment catalogs and production (6), food/water (10), technology requirements (9), technology tree (9), discovery projects (9), and research interface (9). No errors, failures, skips or orphan nodes. One pre-existing training-accounting assertion expected the obsolete phrase “Prototype intake”; it now checks the existing “Experimental units are limited” message, retaining its recruit-conservation and empty-queue assertions. Logs: `/tmp/tt-education-*.log`; summary: `artifacts/technology-implementation/military-education-test-results.json`. Graph log: `/tmp/tt-military-graph.log`. `git diff --check` passes.
+
+Compatibility: stable existing unit and discovery identities, no new save fields, no instant equipment or training upgrades. Old saves load new definitions through the existing discovery catalog. Existing training orders keep their saved schedules; newly scheduled orders can use adopted teaching. No guarantees for loading newly discovered IDs in an older executable.
+
+Shared integration files: `scripts/discovery_system.gd`, `scripts/military_unit_catalog.gd`, the research inspector, production validator and graph audit. New files: military education catalog and its test suite. The training-accounting test has the wording correction above. No MilitaryCampaign, combat simulator, GameState, SaveSystem, terrain or project settings edits. No known conflicts against the preceding branch checkpoint; cross-branch integration remains unverified. Whole-campaign pacing, the remaining 4,783 target discoveries, artwork and canonical integration are unfinished.

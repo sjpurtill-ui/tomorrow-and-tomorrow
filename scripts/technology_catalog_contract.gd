@@ -2,6 +2,7 @@ extends RefCounted
 ## Validate production additions before they enter the live catalog. Existing
 ## legacy records are retained without inventing retrospective authoring notes.
 const Society=preload("res://scripts/society_model.gd")
+const Land=preload("res://scripts/military_unit_catalog.gd")
 const FOODS=["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"]
 static func validate(additions:Array,catalog:Array)->Array[String]:
 	var errors:Array[String]=[]
@@ -33,5 +34,11 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 			if food not in FOODS:errors.append(id+": unsupported food category")
 			var value:Variant=profile[food]
 			if not (value is float or value is int) or not is_finite(float(value)) or float(value)<=0 or float(value)>.5:errors.append(id+": invalid preservation reduction")
-		if effects.is_empty() and profile.is_empty():errors.append(id+": no implemented consequence")
+		var training:Variant=entry.get("training_profile",{})
+		if not training is Dictionary:errors.append(id+": training must be a dictionary");continue
+		for unit:Variant in training:
+			if not Land.ARCHETYPES.has(unit):errors.append(id+": unsupported training role")
+			var value:Variant=training[unit]
+			if not (value is float or value is int) or not is_finite(float(value)) or float(value)<=0 or float(value)>.25:errors.append(id+": invalid training reduction")
+		if effects.is_empty() and profile.is_empty() and training.is_empty():errors.append(id+": no implemented consequence")
 	return errors

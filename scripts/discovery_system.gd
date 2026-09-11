@@ -94,6 +94,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/joint_force_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
 	catalog.append_array(preload("res://scripts/food_water_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/military_education_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -985,10 +986,24 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
-	var summary:=_effect_summary(entry.get("effects",{}))
+	var summary:=_effect_summary(entry.get("effects",{})) if not entry.get("effects",{}).is_empty() else ""
 	var profile:Dictionary=entry.get("preservation_profile",{})
 	if not profile.is_empty():
 		var parts:Array[String]=[]
 		for food:String in profile:parts.append("%s %.0f%%" % [food,float(profile[food])*100])
 		summary+="\nSettled storage spoilage reductions at full adoption: "+", ".join(parts)+". Requires Logistics or Crafting workers; unavailable during travel."
-	return summary
+	var training:Dictionary=entry.get("training_profile",{})
+	if not training.is_empty():
+		var parts:Array[String]=[]
+		for unit:String in training:parts.append("%s %.0f%%" % [unit.replace("_"," "),float(training[unit])*100])
+		summary+="\nShorter new training orders at full adoption: "+", ".join(parts)+". Requires normal staff, personnel, equipment and provisions. Existing orders retain their schedule."
+	return summary if not summary.is_empty() else "Unlocks a prerequisite used by later practical methods."
+
+
+func military_training_multiplier(unit:String)->float:
+	var result:=1.0
+	for id:String in WorldSimulation.state.known_discoveries:
+		var definition:Dictionary=catalog_by_id.get(id,{})
+		var reduction:=clampf(float(definition.get("training_profile",{}).get(unit,0)),0,.25)
+		result*=1.0-reduction*adoption(id)
+	return maxf(.7,result)
