@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 245,
+    "live": 246,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -19,10 +19,11 @@
     "civilian science without military prerequisites",
     "saved notification preference and non-pausing digest",
     "physical civilian intermediate production",
-    "commissioned primary-settlement power, cooling and workshop services"
+    "commissioned primary-settlement power, cooling and workshop services",
+    "Shared daily electrical budget for powered manufacturing; electric-arc steel alternative"
   ],
   "unfinished": [
-    "Remaining 4755 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4754 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Research partnerships, licensing, reverse engineering and imported-service dependence",
     "Civilian and future operating models beyond three primary-settlement plants",

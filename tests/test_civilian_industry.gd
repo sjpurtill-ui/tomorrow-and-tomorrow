@@ -106,3 +106,72 @@ func test_products_are_visible_only_after_their_own_research()->void:
 	assert_bool("glass_batch" in choices).is_true()
 	assert_bool("electrical_generator" in choices).is_false()
 	assert_str(Production.product_description("glass_batch")).contains("Line setup consumes")
+
+const Ops=preload("res://scripts/technology_operations.gd")
+func electric_line()->Dictionary:
+	prepare("electric_arc_steel")
+	GameState.resource_stockpiles.Steel=100.0
+	GameState.settlement_site_committed=true;GameState.convoy_traveling=false
+	GameState.technology_operations=Ops.empty_state()
+	GameState.technology_operations.plants.steam_generator={"installed":1,"building":0,"work":0.0,"enabled":true}
+	GameState.resource_stockpiles.Coal=100.0;GameState.resource_stockpiles.Freshwater=100.0
+	assert_bool(MilitaryCampaign.start_production_line("electric_arc_steel",0).get("ok",false)).is_true()
+	return MilitaryCampaign.equipment_queue.back()
+
+func power_day(day:int)->void:
+	GameState.elapsed_days=day;Ops.advance(day)
+
+func test_electric_furnace_cannot_spend_materials_without_power()->void:
+	var job:=electric_line()
+	var stocks:=GameState.resource_stockpiles.duplicate(true)
+	Production.advance(MilitaryCampaign,job,100.0)
+	assert_str(Production.state(MilitaryCampaign,job)).is_equal("Waiting for electricity")
+	assert_dict(GameState.resource_stockpiles).is_equal(stocks)
+	assert_float(float(job.progress_days)).is_equal(0.0)
+
+func test_electric_furnace_consumes_shared_daily_energy_and_resumes_after_blackout()->void:
+	var job:=electric_line();power_day(1)
+	assert_float(Ops.service("electricity")).is_equal(2.0)
+	var iron:float=GameState.resource_stockpiles["Wrought Iron"]
+	Production.advance(MilitaryCampaign,job,100)
+	assert_float(Ops.service("electricity")).is_equal(0.0)
+	assert_float(absf(float(GameState.resource_stockpiles["Wrought Iron"])-(iron-2.0/3.0))).is_less(.000001)
+	var progress:float=job.progress_days
+	GameState.resource_stockpiles.Coal=0.0;power_day(2)
+	Production.advance(MilitaryCampaign,job,100)
+	assert_float(float(job.progress_days)).is_equal(progress)
+	GameState.resource_stockpiles.Coal=100.0
+	for day in [3,4]:
+		power_day(day);Production.advance(MilitaryCampaign,job,100)
+	assert_float(float(GameState.resource_stockpiles.Steel)).is_equal(93.0)
+	assert_int(int(job.completed)).is_equal(1)
+
+func test_two_furnace_lines_cannot_each_spend_the_whole_power_supply()->void:
+	var first:=electric_line()
+	var second:=first.duplicate(true);second.id=int(first.id)+1
+	MilitaryCampaign.equipment_queue.append(second)
+	power_day(1)
+	assert_float(Ops.service("electricity")).is_equal(4.0)
+	Production.advance(MilitaryCampaign,first,100)
+	Production.advance(MilitaryCampaign,second,100)
+	assert_float(absf(float(first.last_work)+float(second.last_work)-4.0/6.0*4.0)).is_less(.000001)
+	assert_float(Ops.service("electricity")).is_equal(0.0)
+
+func test_paused_starved_or_satisfied_furnace_does_not_request_generation()->void:
+	var job:=electric_line();job.paused=true
+	power_day(1)
+	assert_float(Ops.service("electricity")).is_equal(0.0)
+	job.paused=false;GameState.resource_stockpiles.Graphite=0.0;power_day(2)
+	assert_float(Ops.service("electricity")).is_equal(0.0)
+	GameState.resource_stockpiles.Graphite=100.0;job.target_stock=1;power_day(3)
+	assert_float(Ops.service("electricity")).is_equal(0.0)
+
+func test_power_cost_comes_from_authored_recipe_after_save_round_trip()->void:
+	var job:=electric_line()
+	var saved:Dictionary=JSON.parse_string(JSON.stringify(job));saved["power"]=0.0
+	assert_float(Production.power_per_item(saved)).is_equal(6.0)
+	power_day(1)
+	var forecast:=Production.snapshot(MilitaryCampaign,saved,100,1.0)
+	assert_float(absf(float(forecast.forecast_output_per_day)-1.0/3.0)).is_less(.000001)
+	Production.advance(MilitaryCampaign,saved,100)
+	assert_float(Ops.service("electricity")).is_equal(0.0)

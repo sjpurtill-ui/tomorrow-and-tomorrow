@@ -40,6 +40,25 @@ static func reserved_workers(state:Node)->float:
 static func service(name:String)->float:
 	if not WorldSimulation.state.resource_settlement_id.is_empty() or int(data().last_day)!=int(WorldSimulation.state.elapsed_days):return 0.0
 	return maxf(0,float(data().services.get(name,0)))
+static func workshop_power_demand()->float:
+	var demand:=0.0
+	var host:=WorldSimulation.military
+	if host.production_labor_share<=0:return 0.0
+	for job:Dictionary in host.equipment_queue:
+		if not bool(job.get("persistent",false)) or bool(job.get("paused",false)):continue
+		var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(job.get("item","")))
+		if float(recipe.get("power",0))<=0:continue
+		if recipe.gate not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(String(recipe.gate))<.10:continue
+		if int(job.get("target_stock",0))>0 and float(WorldSimulation.state.resource_stockpiles.get(recipe.output,0))>=int(job.target_stock):continue
+		var supplied:=true
+		for item:String in recipe.materials:
+			if float(recipe.materials[item])>0 and float(WorldSimulation.state.resource_stockpiles.get(item,0))<=.000000001:supplied=false
+		if supplied:demand+=float(recipe.daily_power)
+	return demand
+static func consume_electricity(amount:float)->float:
+	var used:=minf(maxf(0,amount),service("electricity"))
+	if used>0:data().services.electricity-=used
+	return used
 static func advance(day:int)->void:
 	var ledger:=data()
 	if day<=int(ledger.last_day):return
@@ -50,7 +69,7 @@ static func advance(day:int)->void:
 	var available:float=state.effective_workers("Crafting")
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1.0)
 	if condition<=0 or available<=0:return
-	var demand:=0.0
+	var demand:=workshop_power_demand()
 	for id:String in PLANTS:
 		var record:Dictionary=ledger.plants.get(id,{})
 		if not record.is_empty() and record.enabled:demand+=int(record.installed)*float(PLANTS[id].power)*condition

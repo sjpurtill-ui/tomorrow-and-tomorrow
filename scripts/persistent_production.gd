@@ -23,6 +23,9 @@ static func recipe(host: Node, item: String) -> Dictionary:
 	if not bool(gate.get("unlocked",false)): return {"error":String(gate.get("reason","Adopt the required production practice first."))}
 	return {"item":item,"job_type":kind,"materials":definition.materials.duplicate(true),"work_per_item":float(definition.days),"tooling":definition.get("tooling",{}).duplicate(true)}
 
+static func power_per_item(job:Dictionary)->float:
+	return float(Industry.product(String(job.get("item",""))).get("power",0)) if String(job.get("job_type",""))=="civilian" else 0.0
+
 static func product_name(item:String)->String:
 	if not Industry.product(item).is_empty():return String(Industry.product(item).name)
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
@@ -33,7 +36,8 @@ static func product_description(item:String)->String:
 	if not Industry.product(item).is_empty():
 		var definition:=Industry.product(item);var parts:Array[String]=[]
 		for resource:String in definition.tooling:parts.append("%.1f %s" % [float(definition.tooling[resource]),resource])
-		return "Produces %s in the settlement stock ledger. Line setup consumes %s; batch inputs and workshop time are consumed during production. Machinery must be deployed separately to provide a service." % [definition.output,", ".join(parts)]
+		var power_note:=" Each batch also consumes %.1f electricity from the shared daily supply." % float(definition.power) if float(definition.get("power",0))>0 else ""
+		return ("Produces %s in the settlement stock ledger. Line setup consumes %s; batch inputs and workshop time are consumed during production. Machinery must be deployed separately to provide a service." % [definition.output,", ".join(parts)])+power_note
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
 	if not joint.is_empty():return "%s equipment. %d crew per hull or aircraft; commission through %s operations." % [String(joint.purpose),int(joint.crew),String(joint.domain)]
 	if item=="improvised":return "Basic wooden clubs and makeshift hand weapons for levies. One set equips one levy; this produces equipment, not a trained unit."
@@ -122,6 +126,7 @@ static func state(host: Node, job: Dictionary) -> String:
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
 	for resource in job.materials:
 		if float(job.materials[resource])>0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
+	if power_per_item(job)>0 and preload("res://scripts/technology_operations.gd").service("electricity")<=.000000001:return "Waiting for electricity"
 	return "Working"
 
 static func eligible(host: Node, job: Dictionary) -> bool:
@@ -159,7 +164,10 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	for resource in job.materials:
 		var cost:=float(job.materials[resource])
 		if cost>0: possible=minf(possible,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0)))/cost)
+	var power:=power_per_item(job)
+	if power>0:possible=minf(possible,preload("res://scripts/technology_operations.gd").service("electricity")/power)
 	possible=maxf(0,possible)
+	if power>0:preload("res://scripts/technology_operations.gd").consume_electricity(possible*power)
 	for resource in job.materials:
 		var consumed:=float(job.materials[resource])*possible
 		WorldSimulation.state.resource_stockpiles[resource]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0))-consumed)
@@ -194,6 +202,9 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 		if cost>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),stored/cost)
 		result.materials_status.append({"resource":resource,"name":WorldSimulation.resources.display_name(resource),"stored":stored,"per_item":cost,"per_day":float(result.inputs_per_day[resource])})
 	if int(job.target_stock)>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),maxf(0,int(job.target_stock)-int(result.stock)-float(job.progress_days)/float(job.work_per_item)))
+	var power:=power_per_item(job)
+	result["electricity_per_item"]=power
+	if power>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),preload("res://scripts/technology_operations.gd").service("electricity")/power)
 	return result
 
 static func validate_saved(payload: Dictionary) -> String:
