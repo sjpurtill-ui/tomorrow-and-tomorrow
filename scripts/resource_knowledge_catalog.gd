@@ -60,4 +60,6 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 	if id in ["stone_sorting","controlled_flaking","timber_grading","fiber_grading","clay_testing","salt_working","ore_assaying","iron_assaying","coal_grading"]:
 		for requirement:Dictionary in resource_requirements:
 			if requirement.stage in ["recognized","surveyed"]:requirement["sample_sufficient"]=true
-	return {"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}
+	var result:={"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}
+	if id=="mine_airways":result["production_contract"]="Clears the coal ventilation access blocker after mine-airway knowledge is learned. Routes, construction staffing, logistics, access preparation and extraction labor remain required; no coal stock is granted. Adopted practice also contributes bounded mine safety."
+	return result

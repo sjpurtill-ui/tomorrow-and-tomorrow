@@ -440,3 +440,5 @@ The six-case specimen suite additionally verifies that a studied imported sample
 ## 31. Well Siting subject art
 
 Added and visually inspected the Well Siting illustration: villagers compare damp soil from a shallow trial pit with nearby reeds and stream terrain. The scene uses the established low composition, warm ivory paper, matte ochre/olive gouache and simple figures; it contains no dowsing device, text or modern drilling machinery. The explicit research binding and 768-pixel mipmapped import pass all eleven atlas tests with no errors, failures, skips or orphans. Native presentation remains unverified. The manifest now contains 317 discoveries, thirteen verified images and 304 queued live subjects. Prompt: assets/ui/research/paper/WELL_SITING_PROMPT.md. No save or simulation changes.
+
+Mine Airways now carries an explicit production contract and is included in the production authoring validator despite residing alongside legacy resource discoveries. The graph/contract audit passes at 317 identities and 105 explicit routes. This does not retrospectively claim the legacy catalog has full new-contract coverage. Log: /tmp/tt-airways-contract.log.
