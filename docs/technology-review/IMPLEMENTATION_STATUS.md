@@ -732,3 +732,14 @@ Base `515f630`. Added four authored discoveries and five workshop recipes coveri
 Validation: 67 cases passed across paper (5), civilian industry (12), society exchange (28), licenses (11), and visual atlas (11), all with zero errors, failures, skips or orphans. Graph: 377 identities / 151 explicit routes / no errors. Idealized resource audit reaches all 377; campaign viability remains unproven. Manifest: 25 reviewed images and 352 queued live images.
 
 No new save fields; stock/job structures carry new goods and recipe IDs, which older builds cannot operate. Shared integration conflicts: DiscoverySystem, SocietyExchange, CivilianIndustry, collection panel, graph audit. No canonical integration or player launch. Outstanding 4,623 authored identities and the rest of the full overhaul remain active work.
+
+
+## 63. Optional daily-stage pacing profiling
+
+Base `1dbd445`. The harness now accepts `--profile` and records fourteen execution intervals as sample counts and accumulated microseconds in schema 6 reports. CivilizationDay accepts an optional timing dictionary; ordinary calls do not read the clock or add serialized state. Simulation order and rules are unchanged. See [PACING_PROFILING.md](PACING_PROFILING.md).
+
+Validation: matched 365-day profiled and unprofiled runs against 377 discoveries completed, with exactly equal initial/final/annual snapshots, discovery events and bottleneck dictionaries. All fourteen intervals contain 365 samples; control timings are empty. Archived comparison: `pacing/one-year-stage-timing.json`. All 19 owned-simulation tests passed with zero errors, failures, skips or orphans.
+
+First-year measured shares: settlements 24.2%, consequences 18.7%, discovery 18.0%, resources 9.6%. Groups include intervening bookkeeping and wrappers. Concurrent process scheduling and the small initial population limit interpretation; these are not late-game performance or full-history acceptance results. The previously launched 250-year-target process remains live and predates this instrumentation. No new long run was started.
+
+Save compatibility: unchanged. Integration conflicts: CivilizationDay and pacing harness. Catalog remains 377; no canonical integration or player launch. Goal remains active.

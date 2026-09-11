@@ -20,7 +20,8 @@ static func context(origin:Vector2,traveling:bool=false)->Dictionary:
 	result.merge(WorldSimulation.state.active_field_observation_signals(int(WorldSimulation.state.elapsed_days)))
 	return result
 
-static func advance(day:int,daily_context:Dictionary,construction:Callable=Callable())->Dictionary:
+static func advance(day:int,daily_context:Dictionary,construction:Callable=Callable(),timings:Dictionary={})->Dictionary:
+	var stamp:=Time.get_ticks_usec() if not timings.is_empty() else 0
 	WorldSimulation.state.elapsed_days=day
 	WorldSimulation.state.convoy_traveling=bool(daily_context.get("traveling",false))
 	if WorldSimulation.military.recovery.home_unavailable():
@@ -31,27 +32,39 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 		return {"discoveries":[],"resources":[],"events":[],"progression":[],"arrival":{}}
 	WorldSimulation.state.synchronize_population_allocations()
 	preload("res://scripts/technology_operations.gd").advance(day)
+	stamp=record_timing(timings,"operations",stamp)
 	var discoveries:=WorldSimulation.discovery.process_day(daily_context)
+	stamp=record_timing(timings,"discovery",stamp)
 	var resource_events:=WorldSimulation.resources.process_day(daily_context)
+	stamp=record_timing(timings,"resources",stamp)
 	WorldSimulation.state.synchronize_population_allocations()
 	var events:Array[Dictionary]=WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.consequences.process_day(daily_context),true)
+	stamp=record_timing(timings,"consequences",stamp)
 	events.append_array(WorldSimulation.civics.process_day(day))
+	stamp=record_timing(timings,"civics",stamp)
 	events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context)))
+	stamp=record_timing(timings,"economy",stamp)
 	events.append_array(WorldSimulation.government.process_day(day))
+	stamp=record_timing(timings,"government",stamp)
 	var build:=construction if construction.is_valid() else func()->void:BUILD.process_day()
 	WorldSimulation.settlements.with_local_population(build)
+	stamp=record_timing(timings,"construction",stamp)
 	for city in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
 		var local_context:=context(city.position)
 		WorldSimulation.settlements.process_city_resources(String(city.id),local_context,build)
 	WorldSimulation.settlements.process_city_trade()
 	WorldSimulation.settlements.with_local_population(func()->void:WorldSimulation.settlements.process_month(daily_context))
+	stamp=record_timing(timings,"settlements",stamp)
 	var progression_events:=WorldSimulation.progression.process_day(day)
+	stamp=record_timing(timings,"progression",stamp)
 	if WorldSimulation.military.last_processed_day<day:
 		WorldSimulation.military.last_processed_day=day
 		WorldSimulation.military._process_military_day()
 	preload("res://scripts/civilization_travel.gd").advance(1.0)
+	stamp=record_timing(timings,"military_and_travel",stamp)
 	var arrival:=advance_convoy()
+	stamp=record_timing(timings,"convoy",stamp)
 	return {"discoveries":discoveries,"resources":resource_events,"events":events,"progression":progression_events,"arrival":arrival}
 
 static func advance_convoy()->Dictionary:
@@ -63,3 +76,10 @@ static func advance_convoy()->Dictionary:
 	WorldSimulation.settlements.update_settlement_convoy(origin.lerp(destination,progress),progress)
 	if progress<1:return {}
 	return WorldSimulation.settlements.complete_settlement_convoy(destination)
+
+static func record_timing(timings:Dictionary,phase:String,start:int)->int:
+	if timings.is_empty():return 0
+	var now:=Time.get_ticks_usec()
+	var record:Dictionary=timings.get(phase,{"calls":0,"microseconds":0})
+	record.calls+=1;record.microseconds+=now-start;timings[phase]=record
+	return now
