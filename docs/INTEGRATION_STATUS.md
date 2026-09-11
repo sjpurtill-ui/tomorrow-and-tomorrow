@@ -1,3 +1,13 @@
+## September 11 — skip invisible terrain shading
+
+INTEGRATED `f3345c92c25d85ba2c1f45d4b3d229b56f66abfc` by reviewed, conflict-free fast-forward from canonical Mac `ef3eb8701ddc7bce05648da0268731440162aa29`. The terrain shader now skips full surface calculations under completely opaque fog, and close soil/clearing detail when its existing influence is exactly zero. Physical terrain, climate, resources, season, woodland scale, fog boundaries and four viewing distances remain unchanged. No new assets, geometry, cache budgets, simulation rules or save schema.
+
+All **41 worktree and 41 canonical cases pass**, zero errors/failures/flaky cases/skips/orphans. Ordinary imports and normal-entry headless boots are clean. Guarded native baseline/candidate comparisons and the complete terrain LOD probe pass; real woodland, dryland, coast/fog-edge and full landscape captures were inspected. Hidden images are byte-identical; visible images are identical or differ by one 8-bit channel value in at most 9 of 921,600 pixels. See `TERRAIN_SHADER_COST_HANDOFF.md` for reproduction, raw evidence and the narrow rounding tolerance.
+
+The isolated native material comparison at 1280×720 measured **30–34% lower frame intervals on known distant terrain**, and **86–91% lower on fully hidden terrain**, with baseline/candidate/candidate/baseline ordering. These are uncapped render-loop timings, not populated-campaign FPS or GPU timer results; the Compatibility GPU timer is unavailable. Synchronous simulation-day stalls and broader landscape quality remain ongoing work.
+
+Normal standalone release target **2026.09.11.3** is packaged through the canonical build-only launcher after removing both owned test overrides; `build.ok` identifies the exact source revision. No player/editor was launched, stopped or restarted. The separate technology audit was left alone. This is a landscape-only delivery. Old discovery/portrait/window-art work remains STOPPED and unintegrated; no other worker changes are included.
+
 ## September 11 — readable woodland at aerial distance
 
 INTEGRATED `0c33647568e8ba3a0868ca274460384d76618b40` by reviewed, conflict-free fast-forward from canonical Mac `2f695346b9c525a2c3b5bba1cbc9ad97fb24a210`. The forest crown layer now uses one physically consistent scale, with roughly 10–20 m crowns and retained crown-top/shadow contrast at the actual 10,000-foot view. Existing mipmaps and pixel-footprint filtering blend it into broad cover at distance. No new imagery, geometry, vegetation records, resource quantities, simulation rules or cache budgets are introduced.

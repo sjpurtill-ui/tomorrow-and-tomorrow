@@ -52,4 +52,4 @@ Keep probes private and remove the owned override before delivery. An initial fr
 
 ## Integration
 
-READY after worktree validation. Review the small shared-shader diff, integrate this source alone, run combined canonical checks, remove test overrides and package with the normal Mac launcher in build-only mode. Do not restart a player/editor. Old discovery/portrait/window-art work remains stopped and unintegrated. No save schema or player/opponent rule changes; no shared-file conflicts against the stated base.
+INTEGRATED source `f3345c92c25d85ba2c1f45d4b3d229b56f66abfc` by reviewed, conflict-free fast-forward from the stated base. All 41 canonical cases and the ordinary canonical import pass; the release receipt records the normal-entry boot and build-only packaging. Canonical logs are in `artifacts/terrain-shader-cost/`. Remove both owned test overrides before packaging release 2026.09.11.3. No player/editor restart. Old discovery/portrait/window-art work remains stopped and unintegrated. No save schema or player/opponent rule changes; no other worktree integrated.
