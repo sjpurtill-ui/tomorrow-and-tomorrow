@@ -2104,12 +2104,220 @@
       "id": "infantry_tank_cooperation",
       "name": "Infantry–Tank Cooperation",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fractional_quantities.png",
+      "description": "Parts of a measured whole are named and compared so shares and remainders can be recorded.",
+      "domain": "knowledge",
+      "id": "fractional_quantities",
+      "name": "Fractional Quantities",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ratio_proportion.png",
+      "description": "Equivalent ratios connect mixtures, scale, exchange and measured quantities.",
+      "domain": "knowledge",
+      "id": "ratio_proportion",
+      "name": "Ratios and Proportions",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/straightedge_compass.png",
+      "description": "Lines and circles generate repeatable geometric constructions without relying on a drawing by eye.",
+      "domain": "knowledge",
+      "id": "straightedge_compass",
+      "name": "Straightedge and Compass Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/similar_triangles.png",
+      "description": "Corresponding sides of equal-angle triangles permit indirect measurement across inaccessible distances.",
+      "domain": "knowledge",
+      "id": "similar_triangles",
+      "name": "Similar Triangles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/trigonometry.png",
+      "description": "Tabulated relationships between angles and side lengths support calculations of height, direction and distance.",
+      "domain": "knowledge",
+      "id": "trigonometry",
+      "name": "Trigonometric Methods",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/symbolic_algebra.png",
+      "description": "Unknown quantities are represented and manipulated while preserving the equality of expressions.",
+      "domain": "knowledge",
+      "id": "symbolic_algebra",
+      "name": "Symbolic Algebra",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polynomial_equations.png",
+      "description": "Powers of unknown quantities are organized into equations whose roots describe possible solutions.",
+      "domain": "knowledge",
+      "id": "polynomial_equations",
+      "name": "Polynomial Equations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/logarithms.png",
+      "description": "Multiplicative relationships are represented on additive scales for calculation and comparison.",
+      "domain": "knowledge",
+      "id": "logarithms",
+      "name": "Logarithms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coordinate_geometry.png",
+      "description": "Numerical coordinates connect geometric shapes to equations and measured positions.",
+      "domain": "knowledge",
+      "id": "coordinate_geometry",
+      "name": "Coordinate Geometry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/differential_calculus.png",
+      "description": "Limiting changes describe instantaneous rates, local slopes and sensitivity to variation.",
+      "domain": "knowledge",
+      "id": "differential_calculus",
+      "name": "Differential Calculus",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/integral_calculus.png",
+      "description": "Accumulations are described by limits of sums, connecting local variation with total quantities.",
+      "domain": "knowledge",
+      "id": "integral_calculus",
+      "name": "Integral Calculus",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/differential_equations.png",
+      "description": "Relations involving rates of change describe evolving mechanical and physical systems.",
+      "domain": "knowledge",
+      "id": "differential_equations",
+      "name": "Differential Equations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/complex_numbers.png",
+      "description": "An extended number system represents solutions and transformations unavailable on the real number line.",
+      "domain": "knowledge",
+      "id": "complex_numbers",
+      "name": "Complex Numbers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vector_analysis.png",
+      "description": "Magnitude and direction are combined in calculations of forces, motion and changing fields.",
+      "domain": "knowledge",
+      "id": "vector_analysis",
+      "name": "Vector Analysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/matrix_algebra.png",
+      "description": "Rectangular arrays organize coupled linear equations and transformations.",
+      "domain": "knowledge",
+      "id": "matrix_algebra",
+      "name": "Matrix Algebra",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/combinatorics.png",
+      "description": "Arrangements and selections are counted without listing every possibility.",
+      "domain": "knowledge",
+      "id": "combinatorics",
+      "name": "Combinatorial Counting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/probability_theory.png",
+      "description": "Uncertain outcomes are represented by coherent numerical likelihoods rather than single predictions.",
+      "domain": "knowledge",
+      "id": "probability_theory",
+      "name": "Probability Theory",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/statistical_sampling.png",
+      "description": "Selected observations are used to estimate a larger population while accounting for sampling variation.",
+      "domain": "knowledge",
+      "id": "statistical_sampling",
+      "name": "Statistical Sampling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/least_squares_estimation.png",
+      "description": "Model parameters are fitted to observations by minimizing squared residual differences.",
+      "domain": "knowledge",
+      "id": "least_squares_estimation",
+      "name": "Least-Squares Estimation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/measurement_uncertainty.png",
+      "description": "Measured values are reported with assessed uncertainty from instruments, procedures and repeated observations.",
+      "domain": "knowledge",
+      "id": "measurement_uncertainty",
+      "name": "Measurement Uncertainty",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/dimensional_analysis.png",
+      "description": "Physical equations are checked and scaled using dimensions and dimensionless relationships.",
+      "domain": "knowledge",
+      "id": "dimensional_analysis",
+      "name": "Dimensional Analysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/numerical_root_finding.png",
+      "description": "Successive numerical approximations locate equation solutions that lack a convenient exact expression.",
+      "domain": "knowledge",
+      "id": "numerical_root_finding",
+      "name": "Numerical Root Finding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/numerical_integration.png",
+      "description": "Weighted samples approximate accumulated quantities when direct symbolic integration is impractical.",
+      "domain": "knowledge",
+      "id": "numerical_integration",
+      "name": "Numerical Integration",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/constrained_optimization.png",
+      "description": "Design choices are compared against an objective while respecting explicit limits on available quantities.",
+      "domain": "knowledge",
+      "id": "constrained_optimization",
+      "name": "Constrained Optimization",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/harmonic_analysis.png",
+      "description": "Signals and spatial patterns are decomposed into oscillating components for analysis.",
+      "domain": "knowledge",
+      "id": "harmonic_analysis",
+      "name": "Harmonic Analysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/dimensional_metrology.png",
+      "description": "Reference standards, calibrated instruments and uncertainty budgets make small dimensions comparable between workshops.",
+      "domain": "knowledge",
+      "id": "dimensional_metrology",
+      "name": "Precision Dimensional Metrology",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 263,
+  "live_count": 289,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 256,
+  "queued_count": 282,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

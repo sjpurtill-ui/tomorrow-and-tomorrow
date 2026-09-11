@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the eighth checkpoint: **245 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the mathematics checkpoint: **289 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -229,3 +229,16 @@ Validation: **102 cases pass**: 13 new doctrine cases, 20 combat-simulator, 15 g
 Save compatibility: optional formation `doctrines` dictionaries default empty for older forces; existing save version is retained. Values are checked before military-state mutation, and full export/import preserves rehearsed levels. Normalization retains these dictionaries through combat and force reconstruction. Limits: no comprehensive all-era doctrine balance, no new unit types in this checkpoint, no spatial or communications simulation for these support contributions, and no new live-model or native UI validation.
 
 Handoff scope: new `combined_arms_doctrine.gd` and suite; combat normalization/evaluation/preparation, `military_campaign.gd`, `general_campaign.gd`, discovery registration and summary, authoring contract/audit, art manifest and progress records. MilitaryCampaign and DiscoverySystem are shared integration hotspots. Work remains in `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration and player launch remain outstanding; the full overhaul stays active.
+
+
+## 14. Mathematical foundations and optional engineering models
+
+The catalog contains **289 / 5,000 discoveries**. Twenty-six distinct mathematical capabilities connect fractions and ratios through geometry, algebra, calculus, probability, estimation, numerical methods and dimensional metrology. Fifteen existing investigations gain a model-assisted route at 1.2 times their original research rate. Existing empirical routes, common prerequisites and alternative practical approaches remain available. This is a subject-specific research advantage; it does not create equipment or increase industrial output automatically. Sampling accepts either census observations or case records. All 263 earlier discoveries remain reachable with the new mathematics identities excluded.
+
+Applications include similar-triangle surveying, coordinate maps, calibrated measurement, structural models, fluid-flow models, dimensional wind-tunnel experiments, thermal calculations, spectroscopy, reactor calculations, precision machining and semiconductor theory. The mechanism draws on NASA's [similarity-parameter explanation](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/similarity-parameters/) and NIST's [measurement uncertainty principles](https://www.nist.gov/publications/concepts-principles-and-methods-assessment-measurement-uncertainty). The 20% advantage and exact research dependencies are game design choices, not historical measurements or claims that practical discovery requires formal theory.
+
+Validation: **71 cases pass**, comprising eight mathematics, nine prerequisite, seven civilian-science, seven semiconductor, ten purchased-research, ten partnership, nine technology-tree and eleven atlas cases. Zero errors, failures, skipped cases or orphans. Tests check practical-route preservation, model advantage, physical prerequisites despite foreign evidence, reconvergence, idempotent overlays, and preservation of old progress and recorded origins. The initial test parse failure was corrected with an explicit Dictionary type before rerunning. Logs: `/tmp/tt-mathematics-tests.log` and `/tmp/tt-math-*.log`. Graph audit: 289 identities, 76 explicit learning routes, no contract or graph errors. Art manifest: seven verified images, 282 queued live subjects.
+
+Save compatibility: no new saved fields; existing discovery identifiers, progress and origins remain intact. Limitations: no calibrated full-history pacing or full-catalog performance evidence; mathematical models currently accelerate investigations rather than offering an interactive calculation system. The overhaul remains unfinished with 4,711 identities still to implement.
+
+Handoff scope: mathematics module and tests, discovery registration/route overlay, graph audit, art manifest and progress documents. DiscoverySystem is a shared integration hotspot. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration and player launch remain outstanding.
