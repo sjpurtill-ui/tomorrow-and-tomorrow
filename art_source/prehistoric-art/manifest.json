@@ -2354,11 +2354,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0128.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0128: Pitted rough stone bowl · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A lumpy gray cobble with a shallow, barely pecked depression: a very crude stone bowl. Uneven thick battered rim, coarse pitting, no circular symmetry, no ornament.\nMaterial: coarse stone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "generated",
+      "status": "approved",
       "sha256": "eafad118d29968c8a559568278109c31925d8617609e657ec335ccca93fb0993",
       "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-b5ecf30e-1371-45b3-b72d-df1951d58dfb.png",
       "width": 1254,
-      "height": 1254
+      "height": 1254,
+      "review": "Pitted crude stone bowl, thick irregular rim and no ornament."
     },
     {
       "catalogue_id": 129,
@@ -2371,7 +2372,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0129.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0129: Pitted battered hammerstone · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A naturally rounded stone heavily bruised and battered at one end from simple pounding, neither shaped nor engraved, lying alone in earth dust.\nMaterial: river cobble. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "e62744ce7534082097d554fdce2453d2329d77b2d178d280f2c6ca76a25a3b1f",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-07f9b559-7278-4a6c-9de3-2fdbb240a087.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted rounded hammerstone, natural material and battered end."
     },
     {
       "catalogue_id": 130,
@@ -2384,7 +2390,12 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0130.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0130: Pitted thick stone flake · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A thick irregular flint flake with accidental-looking chipped edges and a coarse striking platform. NOT a perfected symmetrical blade or polished handaxe.\nMaterial: flint. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "12c1097b9cfa00e6d87689280b1dd55a9d74370d1b880ff4035b0b46b3a4dc14",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-34708722-a544-42ad-86ae-d1ecf73627a7.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Thick stone flake with rough cortex and broad fracture faces, no refined craft."
     },
     {
       "catalogue_id": 131,
@@ -2397,7 +2408,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0131.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0131: Pitted crude pebble chopper · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A fist-sized rough pebble with only a few large crude chips removed from one side to make a chopping edge. Most of the original lumpy cortex remains.\nMaterial: coarse stone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "eff194aa4c2d4ebe6b3a0e5a14f6668305a57f284cef7169d6447d5c0172b824",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-32546f15-3f3a-44c7-8d47-8879a4cacad2.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted pebble chopper with crude chipped edge and no ornament."
     },
     {
       "catalogue_id": 132,
@@ -2410,7 +2426,12 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0132.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0132: Pitted unfinished pointed stone · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: An unfinished thick pointed piece of flint, badly asymmetrical with coarse flake scars and blunt areas, abandoned before finishing. No handle or haft.\nMaterial: flint. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "1fd177824115de725f306df0423f285e004fe1793dc3d97507c6161a50621533",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-3bba56a0-2969-4fc3-b073-72dc8516f76c.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted pointed stone with broad uneven flaking, no refined haft."
     },
     {
       "catalogue_id": 133,
@@ -2423,7 +2444,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0133.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0133: Pitted worn grinding slab · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A coarse flat sandstone slab with an irregular shallow worn patch from repeated rubbing; a few crushed seeds nearby. No manufactured milling mechanism.\nMaterial: sandstone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "5bebe3885efb568238c0fba3304aea708575acad36682e7d84a9edc98b21ab1c",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-c92570b6-dab4-463b-94c1-573e76b353b0.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Rough shallow grinding slab and crushed seeds, natural irregular pits."
     },
     {
       "catalogue_id": 134,
@@ -2436,7 +2462,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0134.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0134: Pitted ochre lump · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A rough, friable lump of red ochre with a scraped corner and a small smear of loose red earth pigment in the dust. The mineral is the artifact, not a manufactured paint pot.\nMaterial: red earth pigment. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "fe0b1ff1eb8a5cc249bf1c9c75454f231b30d7850c4ff50c48d081b77db5d702",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-c4213095-a083-415a-a14c-c3de5df346ca.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted ochre lump with rubbed face and loose red pigment."
     },
     {
       "catalogue_id": 135,
@@ -2449,7 +2480,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0135.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0135: Pitted pigment grinding pebble · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A small naturally irregular grinding pebble stained with rubbed-in ochre pigment at its blunt end; a few primitive pigment crumbs beside it.\nMaterial: coarse stone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "acec5dc058603a4279e524105a7d6eeb5dad01ae50f0f6ab2c988bcd1082cf56",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-cad11b74-a6d1-42df-a0cb-9feeff0516cf.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted rounded grinding pebble with red pigment residue."
     },
     {
       "catalogue_id": 136,
@@ -2462,7 +2498,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0136.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0136: Pitted charcoal-marked rock · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: An irregular broken rock face bearing a few hesitant faded charcoal strokes. These are crude nonlinguistic traces, not writing, measures or an ornamental pattern.\nMaterial: limestone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "7b061a0d2c11535786cf2a3d42dff2a407ac7c9048db223bb47f9c3b2f53f808",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-8608a155-d565-4807-9135-88aa02d97759.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Charcoal smears on pitted rock fragment, no legible glyphs."
     },
     {
       "catalogue_id": 137,
@@ -2475,7 +2516,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0137.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0137: Pitted handprint rock fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A roughly fractured natural cave-wall rock flake carrying a faint primitive ochre palm print with uneven fingertips, weathered almost away; no prepared plaque.\nMaterial: limestone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "fba7f8305f05553554a54067802db38f7cd9b6650398aff74a0da20b3170a506",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-0f14b896-f0d9-4d90-993f-cfd458e05e93.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered ochre handprint on rough pitted rock."
     },
     {
       "catalogue_id": 138,
@@ -2488,7 +2534,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0138.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0138: Pitted animal-painting rock fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A roughly fractured natural cave-wall limestone fragment bearing a partial crude ochre animal outline reminiscent of prehistoric cave painting. A few rough strokes suggest a wild bovine back, uneven legs and horned head, with a faint palm smear nearby. Follow the natural rock, not a prepared plaque.\nMaterial: limestone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "81db5274862d58496f6ede7fedabc938b8762254841e1250b831a7e915a3dd95",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-2f54b176-1790-430a-af21-429a0971a2f0.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Crude ochre bovine and handprint on broken cave-rock surface."
     },
     {
       "catalogue_id": 139,
@@ -2501,7 +2552,12 @@
       "discovery_id": "tallies",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0139.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0139: Pitted scratched bone fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A broken unpolished bone fragment with three faint short isolated abrasion scratches, far apart at unrelated angles. The marks never touch, cross, join or form V shapes. They read as incidental wear, never glyphs or writing. No standardized counting scale, elaborate carvings, letters or decorative pictogram.\nMaterial: bone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "ad5fe1832ecd5d5c8a2042be67f506aae65d392e75cc65f75ee1cf3b25d201a0",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-dcb3f6ac-6542-4f70-9d71-b11510324bbb.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted broken bone with three separate short scratches; no glyphs."
     },
     {
       "catalogue_id": 140,
@@ -2514,7 +2570,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0140.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0140: Pitted rough bone point · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A splinter of bone crudely rubbed toward an uneven point, with the broken end still rough. No needle eye, turned surface, engineered fitting, or elaborate decoration.\nMaterial: bone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "b8acf0ced8cab95eaf62293482866e322d1be4d548b9a6586e582317b98d0790",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-117599b3-1638-4773-9475-56cb1427b73a.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Rough porous bone point with broken base, no refined fittings."
     },
     {
       "catalogue_id": 141,
@@ -2527,7 +2588,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0141.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0141: Pitted worn tooth fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A worn animal tooth fragment with naturally mottled enamel and earth in its natural crevices. No intentional scratches, engraving, letters, notches, polished pendant, metal fitting or drilled decoration.\nMaterial: tooth. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "3533f16f3debcef7123f0409e35079e709d66055840fa21cb0e12948082cddd6",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-5ed3c8d9-bd5f-48f4-a37c-29b5938f911d.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Broken tooth with natural enamel and root wear, no intentional marks."
     },
     {
       "catalogue_id": 142,
@@ -2540,7 +2606,12 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0142.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0142: Pitted pinched unfired clay lump · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A small lopsided pinch of sun-dried, UNFIRED clay retaining crude fingertip impressions. It is a shapeless or barely human-like experimental lump, never a finished ceramic figurine or vessel.\nMaterial: unfired clay. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "f99d4b3953dce9aa5efef50552626ca39a0ba8e2dc9a0a153f241fe4bf0963f8",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-45526191-e84d-4401-adc7-0ae54fb9ee48.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Rough pinched clay lump with finger depressions and cracks."
     },
     {
       "catalogue_id": 143,
@@ -2553,7 +2624,12 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0143.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0143: Pitted burnt hearth stone · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A rough cracked cobble with ancient soot, scorching and ash lodged in the fractures, beside a tiny charcoal crumb. No formal fireplace, kiln or later architecture.\nMaterial: coarse stone. Distinguishing physical variant: pitted. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "3ebd0bd6df8cc93c0d84bff4b5cc4445c56d0c3c5009f21c5b13824e1d7ee242",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-60ebdfe5-16ba-4cfd-89b8-b12bbd59f232.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted heat-cracked hearthstone with soot and charcoal."
     },
     {
       "catalogue_id": 144,
@@ -2566,7 +2642,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0144.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0144: Weathered rough stone bowl · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A lumpy gray cobble with a shallow, barely pecked depression: a very crude stone bowl. Uneven thick battered rim, coarse pitting, no circular symmetry, no ornament.\nMaterial: coarse stone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "020fc04837cd179a575f197ac92cf5fe6a8127d3658b6f331055b8bc246968f6",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-6f515908-9443-400f-be2d-a5cf24d20e56.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered crude stone bowl with thick uneven rim, no ornament."
     },
     {
       "catalogue_id": 145,
@@ -2579,7 +2660,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0145.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0145: Weathered battered hammerstone · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A naturally rounded stone heavily bruised and battered at one end from simple pounding, neither shaped nor engraved, lying alone in earth dust.\nMaterial: river cobble. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "7c0944e834c49f5cc53a21fc848c448c9cdeb432e37f4f07a710e12955795b5a",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-f52d65aa-a0d4-425d-a2d7-a3c84ecd7dc4.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered hammerstone with battered end, no haft."
     },
     {
       "catalogue_id": 146,
@@ -2592,7 +2678,12 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0146.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0146: Weathered thick stone flake · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A thick irregular flint flake with accidental-looking chipped edges and a coarse striking platform. NOT a perfected symmetrical blade or polished handaxe.\nMaterial: flint. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "4715886a7686cacc30da6c8e8df113c0b07367405b73018e520f9495b4440863",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-c68fc65c-67a7-4013-9d1f-3565e289590c.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Rough thick flake with broad chipped faces and cortex."
     },
     {
       "catalogue_id": 147,
@@ -2605,7 +2696,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0147.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0147: Weathered crude pebble chopper · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A fist-sized rough pebble with only a few large crude chips removed from one side to make a chopping edge. Most of the original lumpy cortex remains.\nMaterial: coarse stone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "6611e08f332c40001d31c6abf13fb69dc8bd24d7a28a46cfba295d8632c31cbc",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-11869505-c349-4b53-a567-0f7ad19542be.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Crude weathered pebble chopper with a few coarse edge flakes."
     },
     {
       "catalogue_id": 148,
@@ -2618,7 +2714,12 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0148.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0148: Weathered unfinished pointed stone · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: An unfinished thick pointed piece of flint, badly asymmetrical with coarse flake scars and blunt areas, abandoned before finishing. No handle or haft.\nMaterial: flint. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "ea1e2de800f49f0109fd8093202a16c8ffaf061997b398cf7e5547d86708c983",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-c8b7b78c-83d5-40f0-b9e5-a1ad71dd6564.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Unfinished pointed stone with irregular large flake scars."
     },
     {
       "catalogue_id": 149,
@@ -2631,7 +2732,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0149.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0149: Weathered worn grinding slab · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A coarse flat sandstone slab with an irregular shallow worn patch from repeated rubbing; a few crushed seeds nearby. No manufactured milling mechanism.\nMaterial: sandstone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "55f5a05e1e2e3e99c11cf63a16f37fbff2d728a00a2519aac95fd6ac4caaf25f",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-313f71d5-cac5-4647-b796-79f456850291.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Shallow worn grinding slab with crushed seeds and rough edges."
     },
     {
       "catalogue_id": 150,
@@ -2644,7 +2750,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0150.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0150: Weathered ochre lump · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A rough, friable lump of red ochre with a scraped corner and a small smear of loose red earth pigment in the dust. The mineral is the artifact, not a manufactured paint pot.\nMaterial: red earth pigment. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "60f4566dfcee9599d11d9fc8301d93f92638d9498e80232551bd74f098720931",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-058bb639-9a67-4f47-9132-137df939aad0.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered ochre lump with rubbed face and loose powder."
     },
     {
       "catalogue_id": 151,
@@ -2657,7 +2768,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0151.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0151: Weathered pigment grinding pebble · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A small naturally irregular grinding pebble stained with rubbed-in ochre pigment at its blunt end; a few primitive pigment crumbs beside it.\nMaterial: coarse stone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "8dcb0a4616b093138ae7227c4cf72a731d36cb5315d1fb1ff00e5888371d2bf2",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-55b92dcc-b6fd-47e2-884b-d42795b7900d.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered pigment-grinding pebble with red staining, no ornament."
     },
     {
       "catalogue_id": 152,
@@ -2670,7 +2786,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0152.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0152: Weathered charcoal-marked rock · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: An irregular broken rock face bearing a few hesitant faded charcoal strokes. These are crude nonlinguistic traces, not writing, measures or an ornamental pattern.\nMaterial: limestone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "b8b05d0a25ac5400999c400ae5059f431de163674c95026ced162975a81c1d63",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-b155d5e6-b9d8-48a4-8ed4-589517c2ec70.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered charcoal smears on rock, no legible writing or refined decoration."
     },
     {
       "catalogue_id": 153,
@@ -2683,7 +2804,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0153.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0153: Weathered handprint rock fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A roughly fractured natural cave-wall rock flake carrying a faint primitive ochre palm print with uneven fingertips, weathered almost away; no prepared plaque.\nMaterial: limestone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "59155c6b2dd5ae346a7f794f8bceff778c2973c32bd2427cedec2243a7571e1c",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-c64b55ed-ecc1-45bb-bf21-0edbd196dc90.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Faded ochre handprint on fractured rock surface."
     },
     {
       "catalogue_id": 154,
@@ -2696,7 +2822,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0154.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0154: Weathered animal-painting rock fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A roughly fractured natural cave-wall limestone fragment bearing a partial crude ochre animal outline reminiscent of prehistoric cave painting. A few rough strokes suggest a wild bovine back, uneven legs and horned head, with a faint palm smear nearby. Follow the natural rock, not a prepared plaque.\nMaterial: limestone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "8b1e637324e9cbf3a39c0f69f31b6966f1cdc9a342921bde0560f19cdc631555",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-88d7955e-8e8d-4470-81a3-5fa371e7d943.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered ochre bovine and faint handprint on irregular cave-rock fragment."
     },
     {
       "catalogue_id": 155,
@@ -2709,7 +2840,12 @@
       "discovery_id": "tallies",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0155.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0155: Weathered scratched bone fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A broken unpolished bone fragment with three faint short isolated abrasion scratches, far apart at unrelated angles. The marks never touch, cross, join or form V shapes. They read as incidental wear, never glyphs or writing. No standardized counting scale, elaborate carvings, letters or decorative pictogram.\nMaterial: bone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "254456b84384dd6aed9c9289282155d874a3de8660b9d057a2b24d1604a4a167",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-8f042062-29c3-4861-a6dc-f941a62dd04a.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered bone fragment with three isolated scratches; no connected glyphs."
     },
     {
       "catalogue_id": 156,
@@ -2722,7 +2858,12 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0156.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0156: Weathered rough bone point · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A splinter of bone crudely rubbed toward an uneven point, with the broken end still rough. No needle eye, turned surface, engineered fitting, or elaborate decoration.\nMaterial: bone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "176419044897dd8fc333c5fbfc7435bebbcb4e00c4cd751199681dbef80aeb0c",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-0f78e9fe-2c3b-4b55-87f7-cbeb835d19ac.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Rough bone point with broken porous base and no refined fittings."
     },
     {
       "catalogue_id": 157,
@@ -2735,7 +2876,12 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0157.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0157: Weathered worn tooth fragment · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A worn animal tooth fragment with naturally mottled enamel and earth in its natural crevices. No intentional scratches, engraving, letters, notches, polished pendant, metal fitting or drilled decoration.\nMaterial: tooth. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "6cc53614690c577b2d7d616c092803bb9c10f2e0af6401fa4fa7f133b14b84b2",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-bf791d77-11e2-46ac-ae69-7c5c7213dd99.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Weathered tooth with natural enamel cracks and broken root, no carvings."
     },
     {
       "catalogue_id": 158,
@@ -2748,7 +2894,12 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0158.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0158: Weathered pinched unfired clay lump · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A small lopsided pinch of sun-dried, UNFIRED clay retaining crude fingertip impressions. It is a shapeless or barely human-like experimental lump, never a finished ceramic figurine or vessel.\nMaterial: unfired clay. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "b2238c0bf01bf627e658b69c7d3b3a0deb566cf47cd2801183bb2031f9aa8c0e",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-1d185a95-0fd8-467d-862c-a361292715ff.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Crude clay lump with thumb depressions and irregular outline."
     },
     {
       "catalogue_id": 159,
@@ -2761,7 +2912,12 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-0159.png",
       "prompt": "Use case: historical-scene. Prehistoric exploration artifact 0159: Weathered burnt hearth stone · earth-darkened.\nThe four supplied reference images define ONLY the painting aesthetic: warm ivory textured paper, restrained flat matte gouache and dry brush, coarse broken pigment edges, muted earth colors and charcoal, generous untouched paper. These finds PRE-DATE THE LIVING CIVILIZATIONS IN THE GAME. They must be VERY CRUDE, humble, irregular and worn. No refined craftsmanship, symmetrical shapes, polished ornamental surfaces, formal repeated decorations, seals, writing, standardized tools, fired pottery, woven cloth, metal, workshops, benches, buildings or clothed figures. No people needed. No automatic river motif. Show the object clearly in the lower half, with sparse bare dust, coarse stone or cave traces; upper half and broad margins remain cream paper. Painterly illustration, never photography, glossy 3D, vector icon, text, frame or grid. One distinct square image.\nSpecific subject: A rough cracked cobble with ancient soot, scorching and ash lodged in the fractures, beside a tiny charcoal crumb. No formal fireplace, kiln or later architecture.\nMaterial: coarse stone. Distinguishing physical variant: weathered. Surface preservation: earth-darkened; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all.",
-      "status": "pending"
+      "status": "approved",
+      "sha256": "90a0daa81f84cd0adb9076f74a3be8e2f074af1a7469b7f13c38928520560dca",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e79-dbce-7d73-8fc3-6ed85fb8f155/exec-463de296-f9d7-4b81-8b2a-5376c63ce3b6.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Heat-cracked hearthstone with soot and charcoal, no ornament."
     },
     {
       "catalogue_id": 160,
