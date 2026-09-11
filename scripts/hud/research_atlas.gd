@@ -218,6 +218,9 @@ func select(id:String,open_detail:bool=false)->void:
 		Art.label(detail_body,Art.name_for(item.domain).to_upper(),11,Art.color(item.domain))
 		Art.label(detail_body,item.name,21,T.INK,true)
 		Art.label(detail_body,Art.status(item),13,Art.color(item.domain))
+		if item.exposed:
+			var definition:Dictionary=WorldSimulation.discovery.discovery_definition(String(item.id))
+			if not definition.get("preservation_profile",{}).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),11,T.TEXT_SOFT,true)
 		var assignment:Dictionary=item.assignment
 		if not assignment.is_empty():
 			var leader:Dictionary=assignment.leader

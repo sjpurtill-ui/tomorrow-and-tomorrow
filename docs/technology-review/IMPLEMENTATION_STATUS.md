@@ -2,6 +2,8 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
+Current branch state after the third checkpoint: **209 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+
 ## First checkpoint: routes and purchased studies
 
 Implementation worktree: `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`
@@ -74,3 +76,24 @@ Payment settles through the ordinary embassy counterpart ledger. A refused visit
 Verification: nine new scholar cases plus the previous 77 regression cases passed in separate headless processes, with zero errors, failures, skipped cases or orphan nodes. Tests cover arrival-gated teaching, subject specificity, departure/return boundaries, staffing and overbooking, real bilateral payment, refusal refunds, population conservation, serialized state and malformed metadata, war and host staff requirements, hidden supplier knowledge, and the panel's real invitation action. Logs: `/tmp/tt-scholar-<suite>.log`. Native visual inspection, full save-file loading, automatic opponent invitation strategy, whole-campaign balance, and map travel interception remain unverified or unimplemented.
 
 Additional shared integration hotspot: `scripts/game_state.gd`, limited to subtracting absent scholars from effective Knowledge capacity. Other changes: scholar contract helper and tests, existing embassy dispatch, purchase return/refund hooks, exchange validation/pruning, pathway multiplier and research inspector. Civic labor allocation remains under its existing authority. No terrain, project settings, military command or SaveSystem changes. The live discovery catalog is still 197; this checkpoint does not implement the 5,000-entry catalog, military expansion, or artwork.
+
+
+## Third checkpoint: first production catalog expansion
+
+Continues from `722b319a41a7cabea71a4e9f0dd8c640dae34b13`, same worktree and branch, original base `940d5a2`. READY for integrator review; no canonical merge or player launch.
+
+Twelve authored discoveries are now included in the live catalog: Root Cellars, Raised Granaries, Hermetic Grain Storage, Brine Fermentation, Vinegar Pickling, Dated Stock Rotation, Protected Wellheads, Rainwater Cisterns, Water Settling Basins, Slow Sand Filtration, Water Service Inspections, and Separate Clean-Water Storage. They retain separate mechanisms and individual production notes; existing drying, smoking, salting and general fermentation identities were preserved. Total live discoveries: **209**.
+
+Every addition uses explicit common foundations and an authored learning route. Cistern lining can follow vessels, lime mortar or bitumen; water inspections can build on protected wells or cisterns while still requiring records and measures. The full causal audit includes all existing alternatives and reports zero errors. This does not establish environmental feasibility or measured campaign completion times.
+
+Six storage methods have food-category preservation profiles, rather than applying the same spoilage reduction to every food. Root cellars protect plants; raised granaries and hermetic bins protect dry staples. Profiles scale with adoption, combine multiplicatively, require a settled community and Logistics or Crafting capacity, and do not apply while traveling. Current spoilage and forecasts both use the profiles; forecast factors are calculated once per forecast. The research inspector and discovery summaries describe the full-adoption values and limits. Rival owners read their own knowledge and adoption.
+
+A new production-contract audit rejects duplicate identities, missing descriptions/contract notes, unsupported aggregate effect keys, invalid magnitudes, unsupported food categories and additions with no implemented consequence. It complements the causal graph audit. It is an authoring check, not a historical or full simulation feasibility proof.
+
+**96 cases passed** in separate headless processes: 10 food/water production tests and all 86 preceding regression cases. New cases check global graph/contract validity, alternate cistern and inspection foundations, category-specific actual food losses, adoption and absent staffing, travel/settlement restrictions, matching forecasts without stock mutation, independent rival ownership, malformed authoring data and explanatory text. Logs: `/tmp/tt-food-<suite>.log`; graph result: `/tmp/tt-food-graph.log`; test summary: `artifacts/technology-implementation/food-water-test-results.json`. No script errors, failures, skipped cases or orphan nodes. `git diff --check` passes.
+
+Save compatibility: existing IDs and saved ownership remain unchanged; the catalog additions become available under the existing research rules when this executable loads a world. Preservation profiles are definition data, not a new save authority. Existing research and adoption dictionaries remain authoritative. The food system now applies these new known methods to actual stocks.
+
+Limits: water improvements use existing aggregate water-access/safety effects, not site-specific hydraulic structures or treatment plants. Food processes use the existing five broad food categories; their recipes, dedicated buildings, salt/acid inputs and process labor are not separately consumed or scheduled. Earliest dates and magnitudes are initial design values. Full 2,500–3,000-year pacing, modern/future infrastructure, military expansion, 5,000 authored identities, artwork and native visual review remain outstanding. This slice must not be described as the completed historical technology system.
+
+Shared integration files: DiscoverySystem, FoodSystem and the research inspector, plus the existing graph audit. New files: `scripts/food_water_knowledge.gd`, `scripts/technology_catalog_contract.gd`, and `tests/test_food_water_knowledge.gd`. No GameState, SaveSystem, terrain, project settings or military ownership changes in this checkpoint. No known conflicts against the branch's preceding checkpoint; integration with other branches has not been attempted.

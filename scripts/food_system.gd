@@ -334,7 +334,7 @@ func _spoil(traveling: bool) -> Dictionary:
 	if traveling: storage_multiplier*=1.28
 	for food_type in FOOD_TYPES:
 		var amount:=float(WorldSimulation.state.food_stocks.get(food_type,0.0))
-		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier
+		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)
 		WorldSimulation.state.food_stocks[food_type]=maxf(0.0,amount-loss)
 		result[food_type]=loss
 	return result
@@ -435,6 +435,8 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		current_weather_types[food_type]=maxf(.05,float(current_climate[food_type][1]))
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	if traveling:storage_multiplier*=1.28
+	var preservation:Dictionary={}
+	for food_type:String in FOOD_TYPES:preservation[food_type]=WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)
 	for offset in range(1,horizon+1):
 		var future_day:=current_day+float(offset)
 		var future_climate_factors:=_forecast_climate(environment,future_day,climate_days)
@@ -452,7 +454,7 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		total_required+=future_required
 		for food_type in FOOD_TYPES:
 			var amount:=float(projected_stocks.get(food_type,0.0))
-			var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier
+			var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*float(preservation[food_type])
 			projected_stocks[food_type]=maxf(0.0,amount-loss)
 			total_spoiled+=loss
 		var eaten:=_consume_projection(projected_stocks,future_required)

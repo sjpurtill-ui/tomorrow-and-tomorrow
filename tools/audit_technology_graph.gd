@@ -12,6 +12,7 @@ func run()->void:
 	var graph:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:graph.append(pathways.graph_entry(entry))
 	var errors:Array=requirements.validate(graph)
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/food_water_knowledge.gd").entries(),discovery.technology_catalog))
 	var authored_routes:=0
 	for entry:Dictionary in discovery.technology_catalog:
 		authored_routes+=(entry.get("learning_routes",[]) as Array).size()

@@ -93,6 +93,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/settlement_architecture_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/joint_force_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
+	catalog.append_array(preload("res://scripts/food_water_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -163,7 +164,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 			WorldSimulation.state.known_discoveries.append(discovery.id)
 			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
-			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_effect_summary(discovery.get("effects",{})),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
+			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_discovery_effect_summary(discovery),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
 			WorldSimulation.state.discovery_log.push_front(event)
 			if WorldSimulation.state.discovery_log.size()>512: WorldSimulation.state.discovery_log.resize(512)
 			WorldSimulation.state.active_investigations.erase(channel)
@@ -251,7 +252,7 @@ func active_investigation_records()->Array[Dictionary]:
 		discovery["material_evidence"]=material_evidence
 		discovery["project_goal"]=_project_goal(discovery)
 		discovery["project_method"]=_project_method(discovery)
-		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_effect_summary(discovery.get("effects",{}))
+		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_discovery_effect_summary(discovery)
 		discovery["bottleneck"]=_investigation_bottleneck(discovery,allocation,leader_factor,material_evidence,progress,research_capacity)
 		discovery["estimated_days"]=ceili((1.0-progress)/maxf(0.000001,baseline_momentum))
 		records.append(discovery)
@@ -506,7 +507,7 @@ func player_facing_discovery_event(source:Dictionary)->Dictionary:
 	event["subcategory"]=String(definition.get("subcategory",event.get("subcategory","Established practice")))
 	event["description"]=String(definition.get("causal_mechanism",definition.get("observation",event.get("description",""))))
 	event["effects"]=(definition.get("effects",event.get("effects",{})) as Dictionary).duplicate(true)
-	event["effect_summary"]=_effect_summary(event["effects"])
+	event["effect_summary"]=_discovery_effect_summary(definition)
 	return event
 
 
@@ -968,3 +969,26 @@ func _research_draw(id:String,seed_value:int,purpose:String)->float:
 	var random:=RandomNumberGenerator.new()
 	random.seed=hash(id+":"+purpose)^(seed_value*0x45d9f3b)
 	return random.randf()
+
+
+func food_storage_multiplier(food_type:String,traveling:bool)->float:
+	# These are settlement practices, not portable refrigerators. Knowledge
+	# persists when stores are abandoned; its storage benefit does not travel.
+	if traveling or not WorldSimulation.state.settlement_site_committed:return 1.0
+	if WorldSimulation.state.effective_workers("Logistics")+WorldSimulation.state.effective_workers("Crafting")<1:return 1.0
+	var result:=1.0
+	for id:String in WorldSimulation.state.known_discoveries:
+		var definition:Dictionary=catalog_by_id.get(id,{})
+		var reduction:=clampf(float(definition.get("preservation_profile",{}).get(food_type,0)),0,.5)
+		result*=1.0-reduction*adoption(id)
+	return maxf(.3,result)
+
+
+func _discovery_effect_summary(entry:Dictionary)->String:
+	var summary:=_effect_summary(entry.get("effects",{}))
+	var profile:Dictionary=entry.get("preservation_profile",{})
+	if not profile.is_empty():
+		var parts:Array[String]=[]
+		for food:String in profile:parts.append("%s %.0f%%" % [food,float(profile[food])*100])
+		summary+="\nSettled storage spoilage reductions at full adoption: "+", ".join(parts)+". Requires Logistics or Crafting workers; unavailable during travel."
+	return summary
