@@ -3191,7 +3191,7 @@
       "domain": "production",
       "id": "binary_adders",
       "name": "Binary Adders",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/hardwired_sequence_control.png",
@@ -3199,15 +3199,15 @@
       "domain": "production",
       "id": "hardwired_sequence_control",
       "name": "Hardwired Sequence Control",
-      "status": "queued"
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
   "live_count": 400,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 368,
+  "queued_count": 366,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 32
+  "verified_count": 34
 }
