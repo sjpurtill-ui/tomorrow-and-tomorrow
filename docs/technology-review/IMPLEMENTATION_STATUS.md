@@ -389,3 +389,8 @@ The combined resource/technology fixed-point audit (`tools/audit_resource_techno
 
 
 Pacing diagnostic schema 3 additionally records the final resource stages/access scores/blockers, actual labor and research allocations, known IDs and causally ready questions with unsatisfied material requirements. A one-day headless smoke run completed and its 51 occurrence records, known-count consistency and new diagnostic shape were checked. This adds observability without changing the daily simulation. Longer schema-2 reports retain their original scope.
+
+
+## 26. Mine Airways subject art
+
+Added and visually inspected a square paper-and-gouache illustration: two miners observe a linen airflow indicator and adjust a timber partition outside an early mine. The low composition, warm ivory texture, olive/ochre earth and simplified figures follow the approved reference. It is explicitly bound to mine_airways and imported at a 768-pixel limit with mipmaps. Eleven atlas tests pass with no errors, failures, skips or orphans; headless import passes. Native player rendering remains unverified. The live manifest now has 317 subjects, eleven verified images and 306 queued images. Prompt and source asset are recorded in assets/ui/research/paper. No save behavior changes.
