@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 361,
+    "live": 367,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -46,7 +46,8 @@
     "Twenty agronomy discoveries with staffed cultivation, family-bounded effects, soil protection and labor/land tradeoffs",
     "Destructive examination of seventeen explicit military equipment examples consumes unassigned serviceable owner inventory and requires local study; doctrine and organization are excluded",
     "AI research priorities distinguish measured ration-delivery exclusion from inadequate food supply, preserve mixed-shortage responses and continue suspending training during hunger",
-    "Research collection capacity expanded to 32,768 with bounded forty-card pagination; 5,001-record serialization validation passes without counting synthetic records as discoveries"
+    "Research collection capacity expanded to 32,768 with bounded forty-card pagination; 5,001-record serialization validation passes without counting synthetic records as discoveries",
+    "Six textile discoveries and seven paid workshop recipes connect plant fibers to yarn, loom weights, cloth and consumable medical dressings, preserving the raw-fiber care route"
   ],
   "unfinished": [
     "Remaining 4667 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
@@ -71,9 +72,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 361,
+    "live_subjects": 367,
     "verified_subject_images": 22,
-    "queued_live_images": 339,
+    "queued_live_images": 345,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

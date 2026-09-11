@@ -2,6 +2,14 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"retted_fibers":{"name": "Prepared plant fibers", "output": "Prepared Fibers", "gate": "fiber_retting", "materials": {"Fiber Plants": 2.0, "Freshwater": 2.0}, "days": 3.0, "tooling": {"Clay": 3.0, "Timber": 2.0}},
+	"combed_fibers":{"name": "Combed plant fibers", "output": "Combed Fibers", "gate": "fiber_combing", "materials": {"Prepared Fibers": 1.0}, "days": 1.5, "tooling": {"Timber": 2.0, "Stone": 1.0}},
+	"spun_yarn":{"name": "Spindle-spun yarn", "output": "Spun Yarn", "gate": "drop_spindles", "materials": {"Prepared Fibers": 1.0}, "days": 3.0, "tooling": {"Clay": 1.0, "Timber": 1.0}},
+	"combed_yarn":{"name": "Yarn from combed fibers", "output": "Spun Yarn", "gate": "drop_spindles", "materials": {"Combed Fibers": 0.75}, "days": 2.5, "tooling": {"Clay": 1.0, "Timber": 1.0}},
+	"loom_weights":{"name": "Clay loom weights", "output": "Loom Weights", "gate": "warp_weighted_looms", "materials": {"Clay": 1.0, "Timber": 0.5}, "days": 2.0, "tooling": {"Stone": 2.0}},
+	"woven_cloth":{"name": "Plain-woven cloth", "output": "Woven Cloth", "gate": "plain_weaving", "materials": {"Spun Yarn": 2.0}, "days": 4.0, "tooling": {"Loom Weights": 2.0, "Timber": 4.0}},
+	"woven_dressings":{"name": "Prepared woven dressings", "output": "Woven Dressings", "gate": "woven_dressings", "materials": {"Woven Cloth": 0.2, "Freshwater": 1.0}, "days": 2.0, "tooling": {"Clay": 2.0}},
+
 	"gear_sets":{"name": "Metal gear sets", "output": "Gear Sets", "gate": "gear_ratios", "materials": {"Steel": 2.0}, "days": 5.0, "tooling": {"Steel": 4.0, "Timber": 4.0}},
 	"shaft_bearings":{"name": "Shaft bearings", "output": "Shaft Bearings", "gate": "bearing_surfaces", "materials": {"Refined Copper": 1.0, "Steel": 0.5, "Graphite": 0.05}, "days": 4.0, "tooling": {"Steel": 3.0, "Timber": 2.0}},
 	"crank_assemblies":{"name": "Crank assemblies", "output": "Crank Assemblies", "gate": "crank_linkages", "materials": {"Steel": 2.0, "Shaft Bearings": 1.0}, "days": 4.0, "tooling": {"Steel": 4.0, "Timber": 3.0}},

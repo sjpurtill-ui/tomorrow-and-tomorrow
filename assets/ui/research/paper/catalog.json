@@ -2888,12 +2888,60 @@
       "id": "soil_moisture_scheduling",
       "name": "Soil Moisture Scheduling",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_retting.png",
+      "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
+      "domain": "production",
+      "id": "fiber_retting",
+      "name": "Fiber Retting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_combing.png",
+      "description": "Repeated combing aligns long fibers and separates short tangled material from a spinnable bundle.",
+      "domain": "production",
+      "id": "fiber_combing",
+      "name": "Fiber Combing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drop_spindles.png",
+      "description": "A weighted rotating spindle draws and twists fibers into a continuous thread of manageable thickness.",
+      "domain": "production",
+      "id": "drop_spindles",
+      "name": "Drop Spindles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/warp_weighted_looms.png",
+      "description": "Clay weights tension hanging warp threads while a supporting frame keeps the weaving accessible.",
+      "domain": "production",
+      "id": "warp_weighted_looms",
+      "name": "Warp-Weighted Looms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plain_weaving.png",
+      "description": "Alternating over-and-under crossings bind warp and weft into a repeatable sheet of cloth.",
+      "domain": "production",
+      "id": "plain_weaving",
+      "name": "Plain Weaving",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/woven_dressings.png",
+      "description": "Cloth is cleaned, cut and packed into consistent care supplies before it is needed.",
+      "domain": "production",
+      "id": "woven_dressings",
+      "name": "Woven Dressings",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 361,
+  "live_count": 367,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 339,
+  "queued_count": 345,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
