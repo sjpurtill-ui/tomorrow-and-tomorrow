@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 408,
+    "live": 414,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -59,10 +59,11 @@
     "AI rulers commission paid stronger studies from physically returned and examined evidence, with ordinary travel/payment/refusal and no hidden supplier-knowledge lookup",
     "AI research acquisition requests paid 60-day scholar visits from examined leads before formal purchasing is available, reserving travel and board through the existing workforce-conserving contract",
     "Eight printing-material/form/press discoveries and nine paid recipes produce Printed Sheets, a finite nonstacking alternative to Paper during collection examination; AI plans its supply chain",
-    "AI can retain paid scholar visits after formal purchasing becomes available when active inquiry support precedes a long local examination queue; ordinary board, travel, supplier acceptance and payment remain required"
+    "AI can retain paid scholar visits after formal purchasing becomes available when active inquiry support precedes a long local examination queue; ordinary board, travel, supplier acceptance and payment remain required",
+    "Six authored intaglio methods and nine recipes with distinct plate stocks, finite method-specific wear and reconvergent printed-sheet output"
   ],
   "unfinished": [
-    "Remaining 4592 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4586 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
     "Civilian and future operating models beyond six primary-settlement plants; solar weather, storage and night-time balancing",
@@ -84,9 +85,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 408,
+    "live_subjects": 414,
     "verified_subject_images": 34,
-    "queued_live_images": 374,
+    "queued_live_images": 380,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

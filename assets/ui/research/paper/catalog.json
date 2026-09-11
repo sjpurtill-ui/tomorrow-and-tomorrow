@@ -3264,12 +3264,60 @@
       "id": "cylinder_press_printing",
       "name": "Cylinder-Press Printing",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/copperplate_preparation.png",
+      "description": "Hammering, flattening and polishing copper produces a smooth plate that can carry a reproducible recessed image.",
+      "domain": "production",
+      "id": "copperplate_preparation",
+      "name": "Copperplate Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/burin_engraving.png",
+      "description": "A controlled cutting tool removes narrow metal shavings to leave recessed lines that retain ink.",
+      "domain": "production",
+      "id": "burin_engraving",
+      "name": "Burin Engraving",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drypoint_printmaking.png",
+      "description": "A pointed tool scratches a plate and leaves raised burrs beside the furrows; both hold ink for a soft-edged impression.",
+      "domain": "production",
+      "id": "drypoint_printmaking",
+      "name": "Drypoint Printmaking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mezzotint_printmaking.png",
+      "description": "A serrated rocker roughens the plate; selective scraping and burnishing reduce retained ink to build tonal images.",
+      "domain": "production",
+      "id": "mezzotint_printmaking",
+      "name": "Mezzotint Printmaking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steelplate_engraving.png",
+      "description": "Engravers adapt controlled cutting to steel plates, providing another metal supply route for recessed printing images.",
+      "domain": "production",
+      "id": "steelplate_engraving",
+      "name": "Steelplate Engraving",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
+      "description": "A rolling press forces damp paper against an inked, wiped plate, drawing ink out of recesses.",
+      "domain": "production",
+      "id": "rolling_intaglio_printing",
+      "name": "Rolling Intaglio Printing",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 408,
+  "live_count": 414,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 374,
+  "queued_count": 380,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
