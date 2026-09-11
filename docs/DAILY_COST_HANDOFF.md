@@ -1,6 +1,8 @@
 # Mature-campaign research cost
 
-Status: READY for sole-integrator review. Worktree `/Users/seanpurtill/Documents/Codex/tt-daily-cost`, branch `codex/daily-cost`, base `61da5e4310c4154fa7d80a915c69c2bf86602b66`. Source hash is supplied in the integration record after committing this task.
+Status: INTEGRATED. The sole integrator reviewed and fast-forwarded source `613eb98aaad3ad2daaa7fdf3539c06c19799f67b` from canonical base `61da5e4310c4154fa7d80a915c69c2bf86602b66`. All 69 canonical cases pass with zero errors/failures/flaky cases/skips/orphans (52.384 seconds). The canonical 24-day replay also matches the complete original saved outcome; daily CPU averages 213.524 ms, median 212.162 ms, p95 229.080 ms, maximum 271.222 ms. Canonical import and normal-entry boot are clean. Release target 2026.09.11.1 is packaged through the normal build-only launcher after removing the owned overrides. No player/editor restart was performed. Canonical logs: `artifacts/daily-cost/canonical-{import,tests,replay,boot}.log`.
+
+The worker record follows. Worktree `/Users/seanpurtill/Documents/Codex/tt-daily-cost`, branch `codex/daily-cost`, base `61da5e4310c4154fa7d80a915c69c2bf86602b66`.
 
 ## Behavior and cause
 
