@@ -759,3 +759,8 @@ Archived report: [agronomy-wall-limited-153-years.json](pacing/agronomy-wall-lim
 Base `89b2823`. Pacing schema 7 adds non-overlapping annual/final-partial timing intervals and actual settlement plot/history counts. Annual progress logs expose each finished interval while cumulative totals remain in the final report. No gameplay, save or daily simulation-order changes.
 
 Validation: matched 400-day profiling-on/off runs completed with equal initial/final/annual snapshots, discovery events and bottlenecks. The two intervals cover 0–365 and 365–400 exactly; every stage's calls and microseconds sum to its cumulative total, with 400 calls per stage. Profiling-off intervals and totals are empty. Evidence archived in `pacing/stage-interval-verification.json`. No claim of late-game performance from this short comparison. Integration conflict: pacing harness only; canonical integration remains pending.
+
+
+### Current profiled long-run launch
+
+Launched against committed `49fe572`, catalog 377, seed 91420, target 91,250 days, wall cap 3,600 seconds, with `--profile`. Process handle 29066 was polled and confirmed live. Output paths: `/tmp/tt-current-250-profile.log` and final report `/tmp/tt-current-250-profile.json`. This is a new current-code diagnostic after the previous process terminated, not a restart of a live process. Its final outcome is pending; annual intervals are evidence of completed intervals only. Do not count this launch as 250-year acceptance. The older 361-discovery report remains archived separately.
