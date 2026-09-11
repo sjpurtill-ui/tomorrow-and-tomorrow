@@ -102,7 +102,17 @@ static func choose_orders(id:String)->void:
 static func civilian_orders(id:String,plan:Dictionary)->void:
 	if bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)):return
 	var recommendation:=preload("res://scripts/civilian_production_planner.gd").recommendation()
-	if not recommendation.is_empty():ensure_line(id,String(recommendation.item),int(recommendation.target))
+	if recommendation.is_empty():return
+	var campaign:=WorldSimulation.military
+	var item:=String(recommendation.item)
+	var exists:=false
+	for job:Dictionary in campaign.equipment_queue:
+		if String(job.get("item",""))==item:exists=true;break
+	if not exists and campaign.equipment_queue.size()>=campaign.production_line_capacity():
+		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line()
+		if reusable<0:return
+		if WorldSimulation.submit(id,{"kind":"production_retool","job":reusable,"item":item}).has("error"):return
+	ensure_line(id,item,int(recommendation.target))
 
 static func military_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)

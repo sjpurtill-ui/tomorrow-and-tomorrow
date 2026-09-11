@@ -45,6 +45,7 @@ static func execute(order:Dictionary)->Dictionary:
 		"objective":return WorldSimulation.military.command_hierarchy.assign(String(order.get("command","army")),[],order.get("region",{}),String(order.get("mission","defend")),String(order.get("target","")),String(order.get("vision","")))
 		"recruit":return WorldSimulation.military.raise_recruits(int(order.get("count",0)))
 		"train":return WorldSimulation.military.start_training(String(order.get("unit","")),String(order.get("weapon","")),int(order.get("count",0)))
+		"production_retool":return WorldSimulation.military.retool_production_line(int(order.get("job",-1)),String(order.get("item","")))
 		"production_target":return WorldSimulation.military.configure_production_line(int(order.get("job",-1)),int(order.get("target",0)),bool(order.get("paused",false)))
 		"production":return WorldSimulation.military.start_production_line(String(order.get("item","")),int(order.get("target",0)))
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
