@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the mechanics checkpoint: **316 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the resource-access checkpoint: **317 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -374,3 +374,12 @@ Requirements apply only to unknown occurrences. Previously recognized deposits r
 Validation: **64 cases pass**: six new resource-recognition, eleven landscape-resource, twelve city-resource, nineteen civilization-owned-simulation, seven civilian-science and nine technology-tree cases. Zero errors, failures, skipped cases or orphans. New checks exercise day-zero ordinary recognition, failure of a far-future date to bypass absent methods, both uranium approaches without reactor knowledge, preservation of saved recognition, observation work before recognition, no free stock, and existing named foundations without direct self-resource prerequisites. Logs: `/tmp/tt-recognition-*.log`. These tests do not establish the absence of every possible longer combined resource/research dependency cycle; a full cross-system reachability audit remains desirable.
 
 Save compatibility: deposit shapes, resource IDs and saved recognition are unchanged. Newly eligible unknown occurrences may begin accumulating clues earlier; previously calendar-blocked survey and extraction no longer wait for a date. No discovery identities or images were added: totals remain 316 / 5,000 and ten verified images. Limitations: material-specific assay tools, reagent costs during recognition, fuller sensory evidence and whole-campaign pacing remain incomplete. Handoff scope: ResourceSystem identification rules/process gate, new suite and status documents. Canonical integration and the full overhaul remain outstanding.
+
+
+## 25. Resolve permanent underground access blockers
+
+The access audit found two unconditional blockers: every coal occurrence remained ventilation-blocked forever, and every deep aquifer remained lifting-blocked forever. Added the distinct Mine Airways discovery, grounded in mine shoring, controlled investigation and surveyed coal. It does not require coal extraction, coke, steam or electricity. Its learned knowledge clears the ventilation blocker. Existing Mine Drainage, which requires only recognized deep water, clears the aquifer lifting blocker. Neither change grants stock, routes, workers or automatic extraction. Processing knowledge remains an access-score contribution, not a hard prerequisite.
+
+Validation: 40 cases pass (eight resource-recognition/access, eleven landscape, twelve city-resource and nine technology-tree), with no errors, failures, skips or orphans. Coverage includes unresolved/resolved blockers, construction and specialist requirements after research, and surveyed coal as the new discovery's material requirement. Graph audit reports 317 identities, 105 explicit routes and no errors. The art manifest reports ten verified images and 307 queued subjects. These checks do not establish full campaign reachability or pacing. Ventilation and lifting remain aggregate capabilities; per-mine constructed airways, machinery, gas measurements and maintenance are unfinished.
+
+Save compatibility: no shape changes; existing surveyed occurrences can become accessible after their causal knowledge and operational requirements are met. Scope: ResourceSystem, resource discovery catalog, regression suite and manifests. This work remains on codex/technology-implementation, original base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9, in /Users/seanpurtill/Documents/Codex/tt-technology-implementation. ResourceSystem is the shared-file integration touchpoint. Canonical integration is outstanding; no player game was launched.

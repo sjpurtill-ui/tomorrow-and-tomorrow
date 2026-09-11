@@ -47,3 +47,22 @@ func test_identification_still_needs_accumulated_observation_and_never_awards_st
 	assert_str(String(clay.stage)).is_equal("unknown")
 	assert_float(float(clay.clues)).is_greater(0.0)
 	assert_float(float(GameState.resource_stockpiles.get("Refractory Clay",0))).is_equal(0.0)
+
+func test_coal_ventilation_can_be_resolved_without_previously_extracting_coal()->void:
+	var coal:=deposit("Coal");coal.stage="surveyed";coal.route=1.0
+	GameState.population_allocations.Construction=10;GameState.population_allocations.Logistics=4
+	assert_array(ResourceSystem._access_blockers(coal,ResourceSystem.catalog["Coal"],{})).contains(["safe underground ventilation is unknown"])
+	GameState.known_discoveries.append("mine_airways")
+	assert_array(ResourceSystem._access_blockers(coal,ResourceSystem.catalog["Coal"],{})).is_empty()
+	GameState.population_allocations.Construction=0
+	assert_array(ResourceSystem._access_blockers(coal,ResourceSystem.catalog["Coal"],{})).contains(["mining works have not been developed"])
+	var entry:=DiscoverySystem.discovery_definition("mine_airways")
+	assert_str(String(entry.resource_requirements[0].stage)).is_equal("surveyed")
+func test_aquifer_lifting_uses_drainage_knowledge_but_still_needs_specialists()->void:
+	var water:=deposit("Deep Aquifer");water.route=1.0
+	GameState.known_discoveries.assign(["well_siting"]);GameState.population_allocations.Knowledge=5
+	assert_array(ResourceSystem._access_blockers(water,ResourceSystem.catalog["Deep Aquifer"],{})).contains(["deep lifting machinery is unavailable"])
+	GameState.known_discoveries.append("mine_drainage")
+	assert_array(ResourceSystem._access_blockers(water,ResourceSystem.catalog["Deep Aquifer"],{})).is_empty()
+	GameState.population_allocations.Knowledge=0
+	assert_array(ResourceSystem._access_blockers(water,ResourceSystem.catalog["Deep Aquifer"],{})).contains(["specialist knowledge is unavailable"])

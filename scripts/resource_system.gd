@@ -379,13 +379,13 @@ func _access_blockers(deposit: Dictionary, definition: Dictionary, context: Dict
 			blockers.append("specialist knowledge is unavailable")
 		elif requirement == "mine" and (float(deposit.route) < 0.8 or int(WorldSimulation.state.population_allocations.get("Construction",0)) < 10):
 			blockers.append("mining works have not been developed")
-		elif requirement == "ventilation":
+		elif requirement == "ventilation" and "mine_airways" not in WorldSimulation.state.known_discoveries:
 			blockers.append("safe underground ventilation is unknown")
 		elif requirement == "containers" and "clay_shaping" not in WorldSimulation.state.known_discoveries:
 			blockers.append("suitable containers are unavailable")
 		elif requirement == "well_siting" and "well_siting" not in WorldSimulation.state.known_discoveries:
 			blockers.append("deep-water siting is not understood")
-		elif requirement == "lifting":
+		elif requirement == "lifting" and "mine_drainage" not in WorldSimulation.state.known_discoveries:
 			blockers.append("deep lifting machinery is unavailable")
 	return blockers
 

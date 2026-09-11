@@ -450,6 +450,14 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/mine_airways.png",
+      "description": "Separate intake and return passages guide air through workings; crews compare flow and restrict poorly ventilated headings.",
+      "domain": "infrastructure",
+      "id": "mine_airways",
+      "name": "Mine Airways",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/mine_drainage.png",
       "description": "Sumps, channels, and lifting chains keep deeper workings usable.",
       "domain": "infrastructure",
@@ -2531,9 +2539,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 316,
+  "live_count": 317,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 306,
+  "queued_count": 307,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
