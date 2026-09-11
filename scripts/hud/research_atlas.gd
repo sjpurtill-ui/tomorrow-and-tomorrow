@@ -270,7 +270,7 @@ func select(id:String,open_detail:bool=false)->void:
 			for specimen:String in preload("res://scripts/reverse_engineering.gd").specimens(String(item.id)):
 				var subject:=String(item.id)
 				var terms:Dictionary=preload("res://scripts/reverse_engineering.gd").quote(subject,specimen)
-				var examine:=Button.new();examine.clip_text=true;examine.text="Consume 1 batch for study: "+String(preload("res://scripts/civilian_industry.gd").product(specimen).output)
+				var examine:=Button.new();examine.clip_text=true;examine.text="Consume 1 example for study: "+String(preload("res://scripts/research_specimens.gd").definition(specimen).output)
 				examine.disabled=terms.has("error");examine.tooltip_text=String(terms.get("message",terms.get("error","")))
 				examine.pressed.connect(func()->void:
 					var result:Dictionary=preload("res://scripts/reverse_engineering.gd").begin(subject,specimen)

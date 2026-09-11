@@ -6,6 +6,7 @@ func before_test()->void:
 	WorldSimulation.clear();GameState.reset_for_new_world(91417);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.elapsed_days=0;GameState.food_security=1;GameState.population_health=1
+	MilitaryCampaign.military_inventory.clear();MilitaryCampaign.damaged_equipment.clear()
 	GameState.known_discoveries.assign(["apprentice_contracts","workshop_standards","kiln_control","salt_working"])
 	GameState.resource_stockpiles.Glass=2.0
 func after_test()->void:
@@ -65,3 +66,53 @@ func test_another_civilizations_specimen_does_not_supply_local_examination()->vo
 	GameState.resource_stockpiles.Glass=0.0
 	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
 	assert_float(float(WorldSimulation.scoped("specimen_owner",func()->float:return WorldSimulation.state.resource_stockpiles.Glass))).is_equal(10.0)
+
+func _crossbow_foundations()->void:
+	GameState.known_discoveries.append_array(["bow_craft","joinery"])
+func test_military_example_consumes_only_unassigned_serviceable_inventory()->void:
+	_crossbow_foundations()
+	MilitaryCampaign.military_inventory.crossbow=2
+	MilitaryCampaign.damaged_equipment.crossbow=4
+	assert_bool(R.quote("crossbow_mechanism","military:crossbow").has("error")).is_false()
+	assert_int(int(MilitaryCampaign.military_inventory.crossbow)).is_equal(2)
+	assert_bool(R.begin("crossbow_mechanism","military:crossbow").get("ok",false)).is_true()
+	assert_int(int(MilitaryCampaign.military_inventory.crossbow)).is_equal(1)
+	assert_int(int(MilitaryCampaign.damaged_equipment.crossbow)).is_equal(4)
+	assert_bool(R.begin("crossbow_mechanism","military:crossbow").has("error")).is_true()
+	assert_int(int(MilitaryCampaign.military_inventory.crossbow)).is_equal(1)
+	assert_bool("crossbow_mechanism" in GameState.known_discoveries).is_false()
+	assert_bool(E.valid(JSON.parse_string(JSON.stringify(E.data())))).is_true()
+func test_damaged_and_foreign_equipment_cannot_supply_examination()->void:
+	_crossbow_foundations()
+	MilitaryCampaign.damaged_equipment.crossbow=8
+	WorldSimulation.create_actor("military_specimen_owner",984)
+	WorldSimulation.scoped("military_specimen_owner",func()->void:WorldSimulation.military.military_inventory.crossbow=7)
+	assert_bool(R.begin("crossbow_mechanism","military:crossbow").has("error")).is_true()
+	assert_int(int(WorldSimulation.scoped("military_specimen_owner",func()->int:return WorldSimulation.military.military_inventory.crossbow))).is_equal(7)
+	assert_dict(E.data().collections).is_empty()
+func test_military_examination_requires_local_foundations_and_study()->void:
+	MilitaryCampaign.military_inventory.crossbow=1
+	assert_bool(R.begin("crossbow_mechanism","military:crossbow").has("error")).is_true()
+	_crossbow_foundations()
+	assert_bool(R.begin("crossbow_mechanism","military:crossbow").get("ok",false)).is_true()
+	GameState.population_allocations.Knowledge=0
+	E.advance(1);GameState.elapsed_days=1
+	assert_float(float(E.data().collections["reverse:crossbow_mechanism"].study)).is_equal(0.0)
+	GameState.population_allocations.Knowledge=20
+	for day in range(2,402):GameState.elapsed_days=day;E.advance(day)
+	assert_float(P.multiplier(DiscoverySystem.discovery_definition("crossbow_mechanism"))).is_equal(1.35)
+	assert_bool("crossbow_mechanism" in GameState.known_discoveries).is_false()
+func test_military_specimen_catalog_is_explicit_and_save_subject_cannot_be_forged()->void:
+	const S=preload("res://scripts/research_specimens.gd")
+	const U=preload("res://scripts/military_unit_catalog.gd")
+	assert_int(S.MILITARY.size()).is_equal(17)
+	for equipment:String in S.MILITARY:
+		assert_str(String(U.EQUIPMENT_GATES.get(equipment,""))).is_equal(String(S.MILITARY[equipment]))
+		assert_dict(DiscoverySystem.discovery_definition(S.MILITARY[equipment])).is_not_empty()
+	assert_dict(S.definition("military:medical_kit")).is_empty()
+	assert_dict(S.definition("military:fighter_equipment")).is_empty()
+	_crossbow_foundations();MilitaryCampaign.military_inventory.crossbow=1
+	R.begin("crossbow_mechanism","military:crossbow")
+	var data:Dictionary=JSON.parse_string(JSON.stringify(E.data()))
+	data.collections["reverse:crossbow_mechanism"].specimen_item="military:machine_gun"
+	assert_bool(E.valid(data)).is_false()

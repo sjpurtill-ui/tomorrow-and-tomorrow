@@ -593,3 +593,14 @@ The run at simulation base 584e233 completed 18,250 days in 334.478 seconds, usi
 Food reserves were 121.68 days, but actual intake was 0.969772 of demand (110.006 eaten / 113.435 demanded). Composite food security near 0.98 must not substitute for this intake metric. No hunger threshold was changed. The completed-building counter represents five founding projects, not total construction.
 
 This demonstrates shared foundations being learned in this scenario. The earlier supply-planner comparison used 333 discoveries, so the changed frontier prevents attributing all endpoint differences solely to the fallback. No foreign research, war, varied geography or millennial progression is tested. Current catalog remains 361 with twenty images. No simulation or save changes in this evidence commit. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base 8c56c76. Canonical integration remains outstanding.
+
+
+## 48. Destructive military specimen examination
+
+Seventeen explicit equipment-to-technology mappings extend the existing civilian examination flow. Spare serviceable owner inventory supplies one consumed example; damaged, foreign and assigned equipment do not. Local causal foundations, apprenticeship and workshop standards remain required. Researchers must complete 180 study-work before the existing 1.35× evidence multiplier applies. Repeated assignments and stronger existing evidence prevent wasted inventory. The atlas lists the new examples through its ordinary examination buttons. Tactics and organizational gates are deliberately absent from the physical specimen map. See MILITARY_SPECIMEN_RESEARCH.md.
+
+Validation: 48 cases passed, zero errors, failures, skips or orphans: 11 reverse-engineering (four new military cases), 26 society-exchange, 11 atlas. Logs /tmp/tt-military-specimens.log and /tmp/tt-specimens-test*.log. Cases verify physical payment, zero-work withholding, owner isolation, absent foundations, matching production gates and forged contract rejection. Native presentation remains unverified. No new discovery or art count: 361 discoveries, 20 images.
+
+Save compatibility: existing collection shape and civilian IDs retained; military specimen IDs use an explicit military: namespace validated against subject. Older builds cannot validate these new examples. Equipment units remain the existing aggregate abstraction; component salvage, variable sample quality, procurement extensions, licensing and imported operating services remain unfinished. No battlefield command behavior changes.
+
+Scope: ResearchSpecimens, ReverseEngineering, SocietyExchange save validation, atlas action labels, tests and review documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 88f429d. Shared-file conflicts: SocietyExchange and research atlas. Canonical integration remains pending.

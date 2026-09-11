@@ -70,7 +70,7 @@ static func valid_item(item:Variant)->bool:
 		if not item.reverse_engineered is bool or item.kind!="artifact":return false
 		if item.reverse_engineered:
 			if item.get("work")!=180.0 or item.get("id")!="reverse:"+String(item.get("discovery_id","")):return false
-			var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(item.get("specimen_item","")))
+			var recipe:Dictionary=preload("res://scripts/research_specimens.gd").definition(String(item.get("specimen_item","")))
 			if recipe.is_empty() or recipe.gate!=item.discovery_id:return false
 			if item.get("research_purchase",false) or item.get("research_partnership",false) or item.get("partnership_protocol",false):return false
 	if item.has("research_purchase") and (not item.research_purchase is bool or item.kind!="knowledge"):return false
