@@ -17,7 +17,7 @@ SCENES=[
 'An irregular broken rock face bearing a few hesitant faded charcoal strokes. These are crude nonlinguistic traces, not writing, measures or an ornamental pattern.',
 'A roughly fractured natural cave-wall rock flake carrying a faint primitive ochre palm print with uneven fingertips, weathered almost away; no prepared plaque.',
 'A roughly fractured natural cave-wall limestone fragment bearing a partial crude ochre animal outline reminiscent of prehistoric cave painting. A few rough strokes suggest a wild bovine back, uneven legs and horned head, with a faint palm smear nearby. Follow the natural rock, not a prepared plaque.',
-'A broken unpolished bone fragment with a few shallow, hesitant, uneven scratches. No standardized counting scale, elaborate carvings, letters or decorative pictogram.',
+'A broken unpolished bone fragment with three faint short isolated abrasion scratches, far apart at unrelated angles. The marks never touch, cross, join or form V shapes. They read as incidental wear, never glyphs or writing. No standardized counting scale, elaborate carvings, letters or decorative pictogram.',
 'A splinter of bone crudely rubbed toward an uneven point, with the broken end still rough. No needle eye, turned surface, engineered fitting, or elaborate decoration.',
 'A worn animal tooth fragment with a few irregular scratches and earth in its natural crevices. No polished pendant, metal fitting or sophisticated drilled decoration.',
 'A small lopsided pinch of sun-dried, UNFIRED clay retaining crude fingertip impressions. It is a shapeless or barely human-like experimental lump, never a finished ceramic figurine or vessel.',
@@ -34,9 +34,9 @@ def build():
         name=f"{c['VARIANTS'][v].capitalize()} {c['FORMS'][f]} · {c['TRACES'][t]}"
         prompt=f"Use case: historical-scene. Prehistoric exploration artifact {i:04d}: {name}.\n{GUIDE}\nSpecific subject: {SCENES[f]}\nMaterial: {c['MATERIALS'][f]}. Distinguishing physical variant: {c['VARIANTS'][v]}. Surface preservation: {c['TRACES'][t]}; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all."
         row={'catalogue_id':i,'artifact_origin':'prehistoric','name':name,'form':c['FORMS'][f],'material':c['MATERIALS'][f],'variant':c['VARIANTS'][v],'trace':c['TRACES'][t],'discovery_id':c['SUBJECTS'][f],'path':f'res://assets/ui/artifacts/prehistoric-v1/artifact-{i:04d}.png','prompt':prompt,'status':'pending'}
-        row.update({k:value for k,value in old.get(i,{}).items() if k in ['status','sha256','source','width','height','review','generation_prompt']});rows.append(row)
+        row.update({k:value for k,value in old.get(i,{}).items() if k in ['status','sha256','source','width','height','review','generation_prompt','revisions']});rows.append(row)
     data={'version':1,'expected_count':4096,'collection':'prehistoric-v1','generator':'built-in image_gen','style_references':[f'art_source/artifact-paper-references/style-{i}.png' for i in range(1,5)],'entries':rows}
-    bank.DEST.mkdir(parents=True,exist_ok=True);bank.MANIFEST.parent.mkdir(parents=True,exist_ok=True);bank.MANIFEST.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n');bank.MANIFEST.with_name('.gitignore').write_text('*.lock\n');bank.write_index(data)
+    bank.DEST.mkdir(parents=True,exist_ok=True);bank.MANIFEST.parent.mkdir(parents=True,exist_ok=True);bank.write_document(bank.MANIFEST,data);bank.MANIFEST.with_name('.gitignore').write_text('*.lock\nproduction-control.json\n');bank.write_index(data)
     print('Built 4096 prehistoric-only entries; civilization artwork is separate.')
 
 if __name__=='__main__':

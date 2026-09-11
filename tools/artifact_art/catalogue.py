@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build a resumable, one-image-per-artifact art catalogue. No image generation API."""
-import argparse, fcntl, hashlib, json, re, shutil, struct
+import argparse, fcntl, hashlib, json, os, re, shutil, struct
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 DEST=ROOT/'assets/ui/artifacts/early-civ-v1'
@@ -60,13 +60,18 @@ def build():
         row.update({k:v for k,v in prior.get(i,{}).items() if k in ['status','sha256','source','width','height','review','generation_prompt']})
         entries.append(row)
     manifest={'version':1,'expected_count':4096,'collection':'early-civ-v1','purpose':'Preserved civilization-made art, never prehistoric exploration finds.','generator':'built-in image_gen','style_references':[f'art_source/artifact-paper-references/style-{i}.png' for i in range(1,5)],'entries':entries}
-    DEST.mkdir(parents=True,exist_ok=True);MANIFEST.parent.mkdir(parents=True,exist_ok=True);MANIFEST.write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n')
+    DEST.mkdir(parents=True,exist_ok=True);MANIFEST.parent.mkdir(parents=True,exist_ok=True);write_document(MANIFEST,manifest)
     write_index(manifest)
     return manifest
 
+def write_document(path,data):
+    temporary=path.with_name(path.name+f'.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+    temporary.replace(path)
+
 def write_index(manifest):
     approved={str(e['catalogue_id']):{'path':e['path'],'sha256':e['sha256']} for e in manifest['entries'] if e['status']=='approved'}
-    INDEX.write_text(json.dumps({'version':1,'expected_count':4096,'approved':approved},indent=2)+'\n')
+    write_document(INDEX,{'version':1,'expected_count':4096,'approved':approved})
 
 def import_settings(path):
     resource='res://'+str(path.relative_to(ROOT))
@@ -93,7 +98,7 @@ def register(i,source,review=None):
     import_settings(dest)
     row.update(status='approved' if review else 'generated',sha256=digest,source=row.get('source',str(src)) if src==dest else str(src),width=width,height=height)
     if review:row['review']=review
-    MANIFEST.write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n')
+    write_document(MANIFEST,manifest)
     write_index(manifest)
     print(json.dumps({'id':i,'status':row['status'],'path':str(dest)}))
 
