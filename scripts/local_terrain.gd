@@ -1919,6 +1919,16 @@ void fragment() {
 	// procedural land beyond the playable geography. Legacy custom meshes lack UV fields.
 	if (UV.x>=0.999 && (abs(world_position.x)>fog_world_size.x*0.5 || abs(world_position.z)>fog_world_size.y*0.5)) { discard; }
 	if (streamed_cutout.w > 0.5 && abs(world_position.x-streamed_cutout.x)<streamed_cutout.z*0.5 && abs(world_position.z-streamed_cutout.y)<streamed_cutout.z*0.5) { discard; }
+	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
+	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
+	float discovered=max(texture(discovery_mask,fog_uv).r,current_visibility);
+	vec3 unknown_ground=vec3(0.006,0.012,0.014);
+	float reveal=smoothstep(0.06,0.62,discovered);
+	// Fully hidden ground needs only the existing unlit veil. Avoid all
+	// texture and procedural surface work until there is visible ground.
+	if (reveal<=0.0) {
+		ALBEDO=vec3(0.0); EMISSION=unknown_ground; ROUGHNESS=0.96;
+	} else {
 	vec2 surface_origin=floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 	float broad = organic_noise(world_position.xz * 0.052);
 	float regional = organic_noise(world_position.xz * 0.17 + vec2(17.0, -9.0));
@@ -2021,6 +2031,8 @@ void fragment() {
 	float dryland_mass = smoothstep(0.60,0.80,organic_noise(world_position.xz*0.022+vec2(61.0,-47.0))) * (1.0-forest_mask);
 	earth = mix(earth, vec3(0.34,0.37,0.205), open_meadow*0.30*climate_green);
 	earth = mix(earth, vec3(0.43,0.37,0.235), dryland_mass*0.26);
+	// These terms have exactly zero weight once their scale is unresolved.
+	if (close_detail>0.0) {
 	float dry_patch = smoothstep(0.63, 0.84, precise_surface_noise(surface_position,surface_origin,17,10,vec2(-31.0,22.0))) * close_detail;
 	float worn_patch = smoothstep(0.70, 0.91, precise_surface_noise(surface_position,surface_origin,75,10,vec2(8.0,-14.0))) * close_detail;
 	earth = mix(earth, vec3(0.36, 0.315, 0.21), dry_patch * 0.28);
@@ -2034,6 +2046,7 @@ void fragment() {
 	earth = mix(earth,vec3(0.39,0.335,0.225),close_soil_mass*0.43);
 	earth = mix(earth,vec3(0.19,0.285,0.145),close_lush_mass*0.27*climate_green);
 	earth = mix(earth,vec3(0.31,0.295,0.205),close_clearings*0.16);
+	}
 	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06;
 	earth *= modulation;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
@@ -2069,16 +2082,12 @@ void fragment() {
 	// relief map. Without this lift the settlement-scale ground fell nearly black.
 	earth *= mix(1.0, 1.32, close_detail);
 	earth = mix(earth, max(earth, vec3(0.105,0.112,0.072)), close_detail * 0.72);
-	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
-	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
-	float discovered=max(texture(discovery_mask,fog_uv).r,current_visibility);
-	vec3 unknown_ground=vec3(0.006,0.012,0.014);
-	float reveal=smoothstep(0.06,0.62,discovered);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
 	ALBEDO = earth*reveal;
 	EMISSION = unknown_ground*(1.0-reveal);
 	ROUGHNESS = 0.96;
+	}
 }
 """
 	shader.code=shader.code.replace("varying vec3 world_position;",LANDSCAPE_VISUALS.CUTTING_SHADER+"\nvarying vec3 world_position;")
