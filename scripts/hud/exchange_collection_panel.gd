@@ -1,4 +1,8 @@
 extends Control
+const A=preload("res://scripts/artifact_collection.gd")
+var pause=preload("res://scripts/hud/simulation_pause.gd").new()
+var page:=0
+var search:LineEdit
 const E=preload("res://scripts/society_exchange.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const V=preload("res://scripts/hud/city_report_visuals.gd")
@@ -19,7 +23,9 @@ static func open()->void:
 func label(parent:Node,text:String,size:int=14,color:Color=T.BODY)->Label:
 	var node:=T.make_label(text,size,color);node.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;node.size_flags_horizontal=SIZE_EXPAND_FILL;parent.add_child(node);return node
 func close()->void:get_parent().queue_free()
+func _exit_tree()->void:pause.release()
 func _ready()->void:
+	pause.acquire(get_tree().current_scene)
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	var dim:=ColorRect.new();dim.color=Color(.01,.02,.03,.72);dim.set_anchors_and_offsets_preset(PRESET_FULL_RECT);add_child(dim)
 	dim.gui_input.connect(func(event:InputEvent):
@@ -36,7 +42,11 @@ func _ready()->void:
 	var policies:=VBoxContainer.new();policies.add_theme_constant_override("separation",6);body.add_child(policies)
 	choice(policies,"New households",["balanced","welcome","consolidate"],["As capacity allows","Welcome faster","Consolidate at home"],String(E.data().migration_policy),func(value:String):E.policy(value,String(E.data().sharing_policy));refresh(true))
 	choice(policies,"Our knowledge",["open","selective","guarded"],["Share practices openly","Share culture & simple crafts","Keep our know-how private"],String(E.data().sharing_policy),func(value:String):E.policy(String(E.data().migration_policy),value);refresh(true))
-	filter=OptionButton.new();filter.add_item("All returned finds");filter.add_item("Objects & specimens");filter.add_item("Knowledge");filter.add_item("Culture");filter.item_selected.connect(func(_value:int):refresh(true));body.add_child(filter)
+	filter=OptionButton.new();filter.add_item("All returned finds");filter.add_item("Objects & specimens");filter.add_item("Knowledge");filter.add_item("Culture");filter.item_selected.connect(func(_value:int):page=0;refresh(true));body.add_child(filter)
+	search=LineEdit.new();search.placeholder_text="Search artifacts and origins";search.text_changed.connect(func(_text:String):page=0;refresh(true));body.add_child(search)
+	var pages:=HBoxContainer.new();body.add_child(pages)
+	for direction:int in [-1,1]:
+		var button:=Button.new();button.text="Previous" if direction<0 else "Next 40";button.pressed.connect(func():page=maxi(0,page+direction);refresh(true));pages.add_child(button)
 	cards=VBoxContainer.new();cards.size_flags_horizontal=SIZE_EXPAND_FILL;cards.add_theme_constant_override("separation",8);body.add_child(cards)
 	label(body,"Knowledge workers examine finds automatically using 15% of their existing effort. Understanding a practice still leaves its ordinary research, materials and adoption requirements.",12,T.MUTED)
 	resized.connect(layout);layout();refresh(true)
@@ -59,13 +69,21 @@ func refresh(force:bool)->void:
 	if not force and sig==signature:return
 	signature=sig
 	summary.text="%d finds · %d people settling in · room to invite %d" % [state.collections.size(),ceili(float(pressure.unsettled)),E.reception_capacity()]
+	var collection:=A.summary()
+	summary.text+="\n%d artifacts · %.1f prestige · science +%.1f%% · culture research +%.1f%%\nMuseum income last turn: %.2f" % [collection.count,collection.prestige,collection.science*100,collection.culture*100,E.data().get("museum_revenue",0)]
 	for child in cards.get_children():cards.remove_child(child);child.queue_free()
-	var values:Array=state.collections.values();values.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.returned_day)>int(b.returned_day))
+	var values:Array=state.collections.values();values.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.returned_day)>int(b.returned_day) if a.returned_day!=b.returned_day else String(a.id)<String(b.id))
 	var shown:=0
+	var matches:Array[Dictionary]=[]
 	for item:Dictionary in values:
 		if filter.selected==1 and item.kind not in ["artifact","specimen"]:continue
 		if filter.selected==2 and item.kind!="knowledge":continue
 		if filter.selected==3 and item.kind!="culture":continue
+		if not search.text.is_empty() and not (String(item.name)+" "+String(item.source_name)).to_lower().contains(search.text.to_lower()):continue
+		matches.append(item)
+	page=mini(page,maxi(0,(matches.size()-1)/40))
+	summary.text+=" · Page %d of %d" % [page+1,maxi(1,ceili(matches.size()/40.0))]
+	for item:Dictionary in matches.slice(page*40,(page+1)*40):
 		var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.TEAL if float(item.study)>=1 else T.BORDER,1,6,12));cards.add_child(card)
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 		var icon:=TextureRect.new();icon.texture=V.icon("population" if item.kind=="culture" else "production" if item.kind in ["artifact","specimen"] else "logistics");icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(36,36);row.add_child(icon)
@@ -91,7 +109,34 @@ func refresh(force:bool)->void:
 				if result.has("error"):summary.text=String(result.error)
 				else:summary.text="Research directed toward "+String(definition.name))
 			content.add_child(button)
+		if item.kind=="artifact":artifact_actions(content,item)
 		shown+=1
 		if shown>=40:break
 	if shown==0:label(cards,"Explorers bring back samples from ground they visit. Peaceful encounters can bring objects, accounts and cultural practices. Finds appear here only when their carriers return.",15,T.TEXT_SOFT)
 	if not state.history.is_empty():label(cards,String(state.history[0].text),12,T.TEXT_SOFT)
+
+func artifact_actions(content:Node,item:Dictionary)->void:
+	label(content,"%s · %.1f prestige · value %.2f · held %.1f years" % [A.TIERS[int(item.get("rarity",0))],A.prestige(item),A.price(item),float(item.get("held_days",0))/360],12,T.GOLD)
+	var display:=Button.new();display.text="Return to archive" if item.get("exhibited",false) else "Exhibit in museum";display.disabled=not A.museum_ready();display.tooltip_text="Requires public libraries and comparative chronicles. Studied exhibits attract paying visitors once currency is available.";display.pressed.connect(func():A.exhibit(String(item.id));refresh(true));content.add_child(display)
+	var recipient:=OptionButton.new();recipient.fit_to_longest_item=false;recipient.clip_text=true;recipient.add_item("Choose a contacted civilization");recipient.set_item_metadata(0,"");content.add_child(recipient)
+	for id:String in E.data().connections:
+		if E.owner_state(id)==null or id=="player":continue
+		recipient.add_item(E.owner_state(id).settlement_name);recipient.set_item_metadata(recipient.item_count-1,id)
+	var requested:=OptionButton.new();requested.fit_to_longest_item=false;requested.clip_text=true;requested.add_item("Choose an artifact to receive");requested.set_item_metadata(0,"");content.add_child(requested)
+	var requested_search:=LineEdit.new();requested_search.placeholder_text="Search their artifacts";content.add_child(requested_search)
+	var populate:=func(index:int):
+		requested.clear();requested.add_item("Choose an artifact to receive");requested.set_item_metadata(0,"")
+		var target:=E.owner_state(String(recipient.get_item_metadata(index)))
+		if target==null:return
+		for other:Dictionary in target.society_exchange.collections.values():
+			if other.kind!="artifact":continue
+			if not requested_search.text.is_empty() and not String(other.name).to_lower().contains(requested_search.text.to_lower()):continue
+			requested.add_item("%s (%.2f)" % [other.name,A.price(other)]);requested.set_item_metadata(requested.item_count-1,other.id)
+			if requested.item_count>=41:break
+	recipient.item_selected.connect(populate)
+	requested_search.text_changed.connect(func(_text:String):populate.call(recipient.selected))
+	for mode:String in ["gift","sell","trade"]:
+		var action:=Button.new();action.text=mode.capitalize();action.pressed.connect(func():
+			var result:=A.transfer(String(item.id),String(recipient.get_item_metadata(recipient.selected)),mode,String(requested.get_item_metadata(requested.selected)))
+			if result.has("error"):summary.text=String(result.error)
+			else:refresh(true));content.add_child(action)
