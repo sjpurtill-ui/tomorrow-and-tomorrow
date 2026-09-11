@@ -584,3 +584,12 @@ Twenty authored agronomy discoveries bring the live catalog to 361 / 5,000 and 1
 Validation: 57 cases pass with zero errors, failures, skips or orphans (8 agronomy, 10 food/water, 19 owned simulation, 11 atlas, 9 tree). Graph and production contracts are clean; all 361 identities are reachable under the ideal resource audit assumptions. Logs /tmp/tt-agronomy-*.log. Manifest: 20 verified images, 341 queued live subjects. No new save shape; existing discovery/adoption storage carries the new IDs. Native UI remains unverified.
 
 Scope: AgronomyKnowledge and tests, FoodSystem cultivation, DiscoverySystem, atlas details, catalog contracts, graph audit, art manifest and review documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 584e233. Shared integration conflicts include DiscoverySystem and FoodSystem. Canonical integration remains pending.
+
+
+## 47. Completed shared-foundation fifty-year diagnostic
+
+The run at simulation base 584e233 completed 18,250 days in 334.478 seconds, using 341 discoveries before the agronomy extension. Final population 336, Knowledge workers 12, learned discoveries 39 and four active inquiries. Cordage was learned on day 15,300 and Route Memory on day 16,261; these had been neglected in the previous century diagnostic. Stone Selection arrived on day 10,110 and Joinery on day 15,260. Stone stock finished at 10.57. Full evidence: pacing/fifty-year-shared-foundations.json; log /tmp/tt-foundations-fifty-year.log.
+
+Food reserves were 121.68 days, but actual intake was 0.969772 of demand (110.006 eaten / 113.435 demanded). Composite food security near 0.98 must not substitute for this intake metric. No hunger threshold was changed. The completed-building counter represents five founding projects, not total construction.
+
+This demonstrates shared foundations being learned in this scenario. The earlier supply-planner comparison used 333 discoveries, so the changed frontier prevents attributing all endpoint differences solely to the fallback. No foreign research, war, varied geography or millennial progression is tested. Current catalog remains 361 with twenty images. No simulation or save changes in this evidence commit. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base 8c56c76. Canonical integration remains outstanding.
