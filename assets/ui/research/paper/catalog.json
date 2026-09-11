@@ -2536,12 +2536,140 @@
       "id": "feedback_governors",
       "name": "Feedback Governors",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_streak_tests.png",
+      "description": "Powder rubbed onto a consistent pale surface reveals diagnostic colors that weathered outer faces can conceal.",
+      "domain": "ecology",
+      "id": "mineral_streak_tests",
+      "name": "Mineral Streak Tests",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_cleavage.png",
+      "description": "Repeated breaks distinguish flat cleavage planes from irregular and conchoidal fractures.",
+      "domain": "ecology",
+      "id": "mineral_cleavage",
+      "name": "Cleavage and Fracture Classification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/comparative_mineral_hardness.png",
+      "description": "A repeatable scratch sequence separates resistance to scratching from toughness under impact.",
+      "domain": "ecology",
+      "id": "comparative_mineral_hardness",
+      "name": "Comparative Mineral Hardness",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_specific_gravity.png",
+      "description": "Mass compared with displaced water distinguishes dense ore minerals from visually similar gangue.",
+      "domain": "ecology",
+      "id": "mineral_specific_gravity",
+      "name": "Mineral Specific Gravity",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relative_stratigraphy.png",
+      "description": "Superposition and interruptions in layered ground establish an order of deposition without needing absolute dates.",
+      "domain": "ecology",
+      "id": "relative_stratigraphy",
+      "name": "Relative Stratigraphy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lithologic_correlation.png",
+      "description": "Repeated rock assemblages allow separated exposures to be compared without assuming every similar-looking layer is identical.",
+      "domain": "ecology",
+      "id": "lithologic_correlation",
+      "name": "Lithologic Correlation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geologic_cross_sections.png",
+      "description": "Surface positions and layer inclinations can be reconciled in a vertical reconstruction of the ground.",
+      "domain": "ecology",
+      "id": "geologic_cross_sections",
+      "name": "Geologic Cross Sections",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/structural_geologic_mapping.png",
+      "description": "Faults, folds and joint orientations explain why mineralized and water-bearing zones depart from simple horizontal layers.",
+      "domain": "ecology",
+      "id": "structural_geologic_mapping",
+      "name": "Structural Geologic Mapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sediment_provenance.png",
+      "description": "Grain composition and transport patterns connect downstream sediment to possible upstream source rocks.",
+      "domain": "ecology",
+      "id": "sediment_provenance",
+      "name": "Sediment Provenance",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/systematic_channel_sampling.png",
+      "description": "Continuous measured cuts across an exposure reduce the bias of collecting only its richest-looking fragments.",
+      "domain": "ecology",
+      "id": "systematic_channel_sampling",
+      "name": "Systematic Channel Sampling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geochemical_baselines.png",
+      "description": "Local background variation must be understood before an unusual concentration can be treated as an exploration clue.",
+      "domain": "ecology",
+      "id": "geochemical_baselines",
+      "name": "Geochemical Baselines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geochemical_anomaly_mapping.png",
+      "description": "Spatially coherent chemical departures become follow-up targets after background variation and analytical uncertainty are considered.",
+      "domain": "ecology",
+      "id": "geochemical_anomaly_mapping",
+      "name": "Geochemical Anomaly Mapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grade_tonnage_models.png",
+      "description": "Likely grade and deposit size must be considered together rather than extrapolating a rich specimen into an entire orebody.",
+      "domain": "ecology",
+      "id": "grade_tonnage_models",
+      "name": "Grade–Tonnage Models",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spatial_variograms.png",
+      "description": "Pairs of spatially separated samples reveal how mineral measurements vary with distance and direction.",
+      "domain": "ecology",
+      "id": "spatial_variograms",
+      "name": "Spatial Variograms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/resource_kriging.png",
+      "description": "Spatial covariance allows estimates between samples to carry explicit weights and estimation uncertainty.",
+      "domain": "ecology",
+      "id": "resource_kriging",
+      "name": "Resource Kriging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/orebody_block_models.png",
+      "description": "A three-dimensional partition reconciles sampled grades with geologic boundaries and volumes without treating unsampled ground as known ore.",
+      "domain": "ecology",
+      "id": "orebody_block_models",
+      "name": "Orebody Block Models",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 317,
+  "live_count": 333,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 304,
+  "queued_count": 320,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

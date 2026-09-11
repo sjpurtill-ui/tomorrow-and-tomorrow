@@ -102,6 +102,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/mathematics_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/chemical_process_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/mechanics_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/geoscience_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -1011,6 +1012,14 @@ func _discovery_effect_summary(entry:Dictionary)->String:
 		var parts:Array[String]=[]
 		for unit:String in training:parts.append("%s %.0f%%" % [unit.replace("_"," "),float(training[unit])*100])
 		summary+="\nShorter new training orders at full adoption: "+", ".join(parts)+". Requires normal staff, personnel, equipment and provisions. Existing orders retain their schedule."
+	var prospecting:Dictionary=entry.get("prospecting_profile",{})
+	if not prospecting.is_empty():
+		var targets:Array[String]=[]
+		for deposit:Dictionary in WorldSimulation.resources.visible_deposits():
+			var resource:=String(deposit.resource)
+			if resource in prospecting.resources and resource not in targets:targets.append(resource)
+		var target_text:=", ".join(PackedStringArray(targets)) if not targets.is_empty() else "matching geological materials"
+		summary+="\nSurvey workers at full adoption: +%.0f%% identification effort and +%.0f%% extent-survey effort for %s. Strongest method per family; combined improvement capped at 75%%. No deposits, stocks or extraction access are granted." % [float(prospecting.recognition)*100,float(prospecting.survey)*100,target_text]
 	return summary if not summary.is_empty() else "Unlocks a prerequisite used by later practical methods."
 
 

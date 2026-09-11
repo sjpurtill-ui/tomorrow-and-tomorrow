@@ -48,10 +48,11 @@ func test_removing_all_new_mathematics_preserves_the_old_graphs_reachability()->
 			if entry.id in known or entry.id in excluded:continue
 			for route:Dictionary in P.routes_for(entry,known,{}):
 				if route.ready:known.append(entry.id);changed=true;break
-	# Later authored mechanics may explicitly depend on mathematics; the
+	# Later authored mechanics and geoscience may depend on mathematics; the
 	# empirical catalog that preceded it must still remain reachable.
 	var later:Array=[]
 	for entry:Dictionary in preload("res://scripts/mechanics_knowledge.gd").entries():later.append(entry.id)
+	for entry:Dictionary in preload("res://scripts/geoscience_knowledge.gd").entries():later.append(entry.id)
 	for entry:Dictionary in DiscoverySystem.technology_catalog:
 		if entry.id not in excluded and entry.id not in later:assert_bool(entry.id in known).override_failure_message(String(entry.id)).is_true()
 func test_route_augmentation_is_idempotent_and_preserves_original_requirements()->void:

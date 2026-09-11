@@ -23,7 +23,11 @@ func test_individual_capabilities_have_valid_downstream_uses()->void:
 func test_earlier_catalog_remains_reachable_without_mechanics_branch()->void:
 	var excluded:Array=[]
 	for entry:Dictionary in M.entries():excluded.append(entry.id)
-	assert_int(closure(excluded).size()).is_equal(DiscoverySystem.technology_catalog.size()-24)
+	var later:Array=[]
+	for entry:Dictionary in preload("res://scripts/geoscience_knowledge.gd").entries():later.append(entry.id)
+	var reachable:=closure(excluded)
+	for entry:Dictionary in DiscoverySystem.technology_catalog:
+		if entry.id not in excluded and entry.id not in later:assert_bool(entry.id in reachable).override_failure_message(String(entry.id)).is_true()
 func test_each_model_can_be_learned_before_its_target()->void:
 	for subject:String in M.MODELS:
 		var known:=closure([subject])

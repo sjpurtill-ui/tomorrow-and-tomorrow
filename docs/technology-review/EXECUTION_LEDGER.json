@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 317,
+    "live": 333,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -39,10 +39,11 @@
     "Returned, fully studied physical exploration specimens satisfy explicitly sample-based material identification gates, without local deposits or extraction access",
     "Pacing schema 4 supplies both synthetic water access and its ordinary hydrology occurrence; prior missing-water-research reports explicitly annotated",
     "Flint access receives an adopted Controlled Flaking processing contribution; normal labor and finite reserve extraction verified",
-    "Completed hydrology-corrected 18,250-day isolated AI diagnostic: 335 people, 34 discoveries, four inquiries; material/research bottlenecks recorded, not millennial acceptance"
+    "Completed hydrology-corrected 18,250-day isolated AI diagnostic: 335 people, 34 discoveries, four inquiries; material/research bottlenecks recorded, not millennial acceptance",
+    "Sixteen distinct field geology and prospecting methods improve adopted, staffed survey effort for relevant resources, with bounded family stacking and no reserve creation"
   ],
   "unfinished": [
-    "Remaining 4683 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4667 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Licensing and imported-service dependence; broader military and equipment reverse engineering; partnership automation and richer negotiated terms",
     "Civilian and future operating models beyond four primary-settlement plants; solar weather, storage and night-time balancing",
@@ -64,9 +65,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 317,
+    "live_subjects": 333,
     "verified_subject_images": 13,
-    "queued_live_images": 304,
+    "queued_live_images": 320,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

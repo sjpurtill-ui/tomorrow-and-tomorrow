@@ -42,6 +42,21 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 			if not Land.ARCHETYPES.has(unit):errors.append(id+": unsupported training role")
 			var value:Variant=training[unit]
 			if not (value is float or value is int) or not is_finite(float(value)) or float(value)<=0 or float(value)>.25:errors.append(id+": invalid training reduction")
+		var prospecting:Variant=entry.get("prospecting_profile",{})
+		if not prospecting is Dictionary:errors.append(id+": prospecting profile must be a dictionary");continue
+		if not prospecting.is_empty():
+			if prospecting.get("group","") not in preload("res://scripts/geoscience_knowledge.gd").GROUPS:errors.append(id+": unknown prospecting method family")
+			var resources:Variant=prospecting.get("resources",[])
+			if not resources is Array or resources.is_empty():errors.append(id+": prospecting needs resource targets")
+			else:
+				for resource:Variant in resources:
+					if not resource is String or not WorldSimulation.resources.catalog.has(resource):errors.append(id+": unknown prospecting resource")
+			var useful:=false
+			for phase:String in ["recognition","survey"]:
+				var value:Variant=prospecting.get(phase)
+				if not (value is float or value is int) or not is_finite(float(value)) or float(value)<0 or float(value)>.4:errors.append(id+": invalid prospecting improvement")
+				else:useful=useful or float(value)>0
+			if not useful:errors.append(id+": prospecting profile has no implemented improvement")
 		var children:Variant=entry.get("foundation_for",[])
 		if not children is Array:errors.append(id+": foundation targets must be an array");continue
 		for child:Variant in children:
@@ -59,5 +74,5 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 			if definition.is_empty() or definition.gate!=id:errors.append(id+": no implemented operating plant")
 		var doctrine:=String(entry.get("doctrine",""))
 		if not doctrine.is_empty() and (doctrine!=id or not preload("res://scripts/combined_arms_doctrine.gd").RULES.has(doctrine)):errors.append(id+": no implemented doctrine")
-		if doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty():errors.append(id+": no implemented consequence")
+		if doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
 	return errors
