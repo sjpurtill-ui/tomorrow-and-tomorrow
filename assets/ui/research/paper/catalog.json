@@ -3079,7 +3079,7 @@
       "domain": "production",
       "id": "foil_capacitors",
       "name": "Foil Capacitors",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/electromagnetic_relays.png",
@@ -3087,7 +3087,7 @@
       "domain": "production",
       "id": "electromagnetic_relays",
       "name": "Electromagnetic Relays",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/wound_transformers.png",
@@ -3095,7 +3095,7 @@
       "domain": "production",
       "id": "wound_transformers",
       "name": "Wound Transformers",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/silicon_rectifiers.png",
@@ -3141,9 +3141,9 @@
   "live_art_complete": false,
   "live_count": 392,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 363,
+  "queued_count": 360,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 29
+  "verified_count": 32
 }
