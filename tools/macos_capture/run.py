@@ -12,8 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(__file__).resolve().parent
 BUILD = ROOT / 'artifacts' / 'macos-background-capture'
 GODOT = Path('/Applications/Godot.app/Contents/MacOS/Godot')
-ALLOWED = {'canopy_transition_probe', 'seasonal_landscape_probe', 'terrain_lod_probe', 'ancient_scouting_probe'}
+ALLOWED = {'canopy_transition_probe', 'seasonal_landscape_probe', 'terrain_lod_probe', 'ancient_scouting_probe', 'woodland_scale_probe'}
 MARKERS = {'canopy_transition_probe': 'CANOPY_TRANSITION_CAPTURE PASS',
+           'woodland_scale_probe': 'WOODLAND_SCALE_CAPTURE PASS',
            'seasonal_landscape_probe': 'SEASONAL_LANDSCAPE_CAPTURE PASS',
            'terrain_lod_probe': 'TERRAIN_LOD_CAPTURE PASS',
            'ancient_scouting_probe': 'ANCIENT_SCOUTING_CAPTURE PASS'}

@@ -1969,9 +1969,15 @@ void fragment() {
 	vec3 forest_map = procedural_forest;
 	forest_map = mix(forest_map, local_forest_map, max(local_detail*0.76,regional_detail*0.34));
 	vec3 ground_close = mix(texture(ground_albedo, close_uv).rgb, texture(ground_albedo, close_uv_rotated).rgb, 0.32);
-	vec3 forest_close = mix(texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,4896,100,false,vec2(0.0))).rgb, texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,361216,10000,true,vec2(0.1216,-0.1728))).rgb, 0.28);
+	// The existing tile contains dozens of crowns across its width. A 500 m
+	// repeat puts them at roughly 10–20 m, visible from 10,000 ft. The former
+	// 20 m repeat shrank entire forests into grain while the 4 km layer looked
+	// like giant color clouds. Keep one crown scale as the camera approaches;
+	// mipmaps and the physical pixel footprint resolve it into distant cover.
+	vec3 forest_crowns = mix(texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,2,1,false,vec2(0.0))).rgb, texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,158,100,true,vec2(0.1216,-0.1728))).rgb, 0.14);
+	float crown_detail = 1.0-smoothstep(0.003,0.014,pixel_world);
 	vec3 ground_sample = mix(ground_map, ground_close, close_detail * 0.66);
-	vec3 forest_sample = mix(forest_map, forest_close, close_detail * 0.60);
+	vec3 forest_sample = mix(forest_map, forest_crowns, crown_detail * 0.90);
 	float ground_luma = dot(ground_sample, vec3(0.28, 0.57, 0.15));
 	float forest_luma = dot(forest_sample, vec3(0.28, 0.57, 0.15));
 	// Texture supplies light/dark detail; the surveyed biome supplies the hue.
@@ -1980,6 +1986,10 @@ void fragment() {
 	ground_surface = mix(vertex_tint * 0.70, ground_surface, 0.79);
 	vec3 forest_surface = mix(vec3(forest_luma), forest_sample, 0.76);
 	forest_surface = mix(vec3(0.058, 0.108, 0.069), forest_surface, 0.77);
+	// Preserve the light crown tops and shaded gaps that distinguish canopy
+	// from grass. The biome blend otherwise fills those gaps with flat green.
+	float crown_light = clamp(0.38+dot(forest_crowns,vec3(0.28,0.57,0.15))*38.0,0.45,2.0);
+	forest_surface *= mix(1.0,crown_light,crown_detail);
 	// Alpha carries woodland density from the same biome samples used by
 	// resource access and inspection. Green grass no longer implies forest.
 	float forest_mask=woodland_channel?clamp(COLOR.a,0.0,1.0):smoothstep(0.025,0.105,COLOR.g-max(COLOR.r,COLOR.b*0.82));
