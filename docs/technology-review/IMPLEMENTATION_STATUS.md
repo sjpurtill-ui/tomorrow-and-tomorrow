@@ -965,3 +965,9 @@ Base `acccfc6`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-imple
 Sequential same-seed 400-day reports match every recorded gameplay field. Early measured secondary consequence time fell from 549,768 to 502,423 microseconds (280 calls); total wall time 4.686 to 4.526 seconds. This is limited diagnostic evidence, not a broad scaling claim. Archive: [no-cooling-forecast-comparison.json](pacing/no-cooling-forecast-comparison.json). All 45 regression cases passed (14 operations, 12 city resources, 19 owned civilizations), zero errors/failures/skips/orphans and no script errors. `git diff --check` passed.
 
 No save fields changed. Shared conflict: FoodSystem. No canonical integration or player launch. Full scope remains unfinished at 414 authored technologies and 36 reviewed images; long-history pacing remains unverified.
+
+## 89. Fresh 250-year diagnostic with persistent evidence
+
+Run base `577f366` includes the no-cooling forecast change `f17c51b`, 414 authored discoveries, the current AI power planning and schema-9 secondary-city detail. The diagnostic's explicit maximum wall limit was raised from one to four hours; its default is unchanged. Earlier one-hour results did not reach 250 years. This does not accelerate or bypass simulation rules.
+
+A new isolated headless run was launched with target 91,250 days and 14,400-second wall cap, session **57160**. The handle was polled and remains live. Outputs are persistent worktree paths `artifacts/technology-pacing/catalog-414-250-profile.json` and `.log`. No matching older pacing process was running before launch. This is a running diagnostic, not a completed 250-year result or millennial acceptance. Keep polling this handle; do not restart merely because an observation times out. No canonical integration or player launch.
