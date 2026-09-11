@@ -231,7 +231,7 @@ func select(id:String,open_detail:bool=false)->void:
 		Art.label(detail_body,Art.status(item),13,Art.color(item.domain))
 		if item.exposed:
 			var definition:Dictionary=WorldSimulation.discovery.discovery_definition(String(item.id))
-			if not definition.get("preservation_profile",{}).is_empty() or not definition.get("training_profile",{}).is_empty() or not definition.get("prospecting_profile",{}).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),11,T.TEXT_SOFT,true)
+			if not definition.get("preservation_profile",{}).is_empty() or not definition.get("training_profile",{}).is_empty() or not definition.get("prospecting_profile",{}).is_empty() or not String(definition.get("medical_method","")).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),11,T.TEXT_SOFT,true)
 		var assignment:Dictionary=item.assignment
 		if not assignment.is_empty():
 			var leader:Dictionary=assignment.leader

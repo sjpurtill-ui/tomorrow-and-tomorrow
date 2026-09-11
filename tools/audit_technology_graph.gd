@@ -24,6 +24,7 @@ func run()->void:
 	for entry:Dictionary in load("res://scripts/resource_knowledge_catalog.gd").entries():
 		if entry.id in ["mine_airways","blast_furnace"]:errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate([entry],discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/geoscience_knowledge.gd").entries(),discovery.technology_catalog))
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/field_medicine.gd").entries(),discovery.technology_catalog))
 	var authored_routes:=0
 	for entry:Dictionary in discovery.technology_catalog:
 		authored_routes+=(entry.get("learning_routes",[]) as Array).size()

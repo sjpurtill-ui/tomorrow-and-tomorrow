@@ -9,6 +9,7 @@
 # grows out of — a viable transformation when its gates exist, never an
 # automatic replacement; older forms persist wherever they stay rational.
 const ARCHETYPES:Dictionary={
+	"medical_detachment": {"label": "Medical Detachment", "branch": "field_support", "lineage": "", "era": "organized casualty care", "gate": "litter_bearer_drill", "training_days": 35, "equipment": ["medical_kit"], "movement": "foot", "pace_km_day": 24, "purpose": "Provides staffed, equipped casualty recovery during supported preparation; contributes no offensive firepower.", "sustainment": "Requires issued care equipment and consumes local dressings and medicinal supplies when providing care.", "politics": "Care workers remain part of mobilized population, with the same losses and demobilization accounting."},
 	"levy": {
 		"label": "Levy",
 		"branch": "force_generation",
@@ -804,6 +805,7 @@ const ARCHETYPES:Dictionary={
 }
 
 const EQUIPMENT_GATES:Dictionary={
+	"medical_kit":"litter_bearer_drill",
 	"improvised": "",
 	"spear": "hafted_weapons",
 	"bow": "bow_craft",

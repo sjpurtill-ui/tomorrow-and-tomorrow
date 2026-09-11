@@ -1,5 +1,6 @@
 extends RefCounted
 const ITEMS:Dictionary={
+	"medical_kit":{"name": "Medical care equipment", "gate": "litter_bearer_drill", "materials": {"Timber": 1.0, "Fiber Plants": 2.0}, "days": 2.0, "crew": 1, "ammo": "", "ammo_per": 0, "attack": 0.0, "defense": 0.6, "armor": 0.0, "penetration": 0.0, "delivery": 1.0},
 	"axe": {
 		"name": "Axemen equipment",
 		"gate": "bronze_weaponry",

@@ -11,6 +11,7 @@ const BASE_CASUALTY_RATE := 0.055
 const MIN_EFFECTIVE_STRENGTH := 0.05
 
 const UNIT_TYPES := {
+	"medical_detachment":{"name":"Medical Detachment","attack":0.0,"defense":0.5,"organization":1.0},
 	"levy": {"name": "Levy", "attack": 0.65, "defense": 0.55, "organization": 0.65},
 	"line_infantry": {"name": "Line Infantry", "attack": 1.00, "defense": 1.00, "organization": 1.00},
 	"skirmisher": {"name": "Skirmisher", "attack": 0.85, "defense": 0.60, "organization": 0.85},
@@ -64,6 +65,7 @@ const UNIT_TYPES := {
 }
 
 const WEAPONS := {
+	"medical_kit":{"name":"Medical care equipment","attack":0.0,"defense":0.6,"armor":0.0,"penetration":0.0},
 	"improvised": {"name": "Improvised Arms", "attack": 0.65, "defense": 0.70, "armor": 0.00, "penetration": 0.10},
 	"spear": {"name": "Spears", "attack": 1.00, "defense": 1.18, "armor": 0.05, "penetration": 0.55},
 	"bow": {"name": "Bows", "attack": 1.18, "defense": 0.70, "armor": 0.00, "penetration": 0.35},
@@ -454,6 +456,7 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	var scattered_progress:=float(prepared.get("scattered_recovery_accumulator",0.0))+float(scattered_available)*(0.22+logistics*0.28)
 	var wounded_progress:=float(prepared.get("wounded_recovery_accumulator",0.0))+float(wounded_available)*(0.035+logistics*0.055)*recovery_multiplier
 	var scattered_return:=mini(scattered_available,maxi(0,floori(scattered_progress)))
+	wounded_progress+=clampf(float(context.get("medical_recovery",0)),0,float(wounded_available))
 	var wounded_return:=mini(wounded_available,maxi(0,floori(wounded_progress)))
 	prepared["scattered_recovery_accumulator"]=scattered_progress-float(scattered_return) if scattered_available>scattered_return else 0.0
 	prepared["wounded_recovery_accumulator"]=wounded_progress-float(wounded_return) if wounded_available>wounded_return else 0.0

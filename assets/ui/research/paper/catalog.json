@@ -2664,12 +2664,76 @@
       "id": "orebody_block_models",
       "name": "Orebody Block Models",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/litter_bearer_drill.png",
+      "description": "Carrying teams rehearse lifting and handing over injured people without abandoning the rest of the column.",
+      "domain": "security",
+      "id": "litter_bearer_drill",
+      "name": "Litter Bearer Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/casualty_collection_posts.png",
+      "description": "Marked collection points let bearers find waiting casualties instead of searching the whole camp repeatedly.",
+      "domain": "security",
+      "id": "casualty_collection_posts",
+      "name": "Casualty Collection Posts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/casualty_transfer_records.png",
+      "description": "A record accompanies each transfer so receiving carers know what happened and what care was already given.",
+      "domain": "security",
+      "id": "casualty_transfer_records",
+      "name": "Casualty Transfer Records",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/evacuation_relays.png",
+      "description": "Successive carrying teams exchange patients at agreed points rather than exhausting one team on the entire journey.",
+      "domain": "security",
+      "id": "evacuation_relays",
+      "name": "Casualty Evacuation Relays",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/field_aid_stations.png",
+      "description": "Organized sheltered care concentrates trained personnel and expendable supplies behind the fighting force.",
+      "domain": "security",
+      "id": "field_aid_stations",
+      "name": "Field Aid Stations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/triage_registers.png",
+      "description": "Staff compare urgency and available treatment capacity before deciding the next destination for each casualty.",
+      "domain": "security",
+      "id": "triage_registers",
+      "name": "Triage Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/medical_resupply_packing.png",
+      "description": "Standard care bundles make shortages visible before a receiving station exhausts its dressings and supplies.",
+      "domain": "security",
+      "id": "medical_resupply_packing",
+      "name": "Medical Resupply Packing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/convalescent_duty_reviews.png",
+      "description": "Recovery records distinguish people ready for duty from those who still need care or different work.",
+      "domain": "security",
+      "id": "convalescent_duty_reviews",
+      "name": "Convalescent Duty Reviews",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 333,
+  "live_count": 341,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 315,
+  "queued_count": 323,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
