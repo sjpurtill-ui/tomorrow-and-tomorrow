@@ -25,7 +25,7 @@ Live count remains 197: this checkpoint changes the underlying rules and acquisi
 ## Remaining approved work
 
 1. Author individual discovery contracts, prerequisites, operation requirements and grounded consequences for the full historical and future catalog. Preserve the approved 24-field and historical coverage targets.
-2. Implement paid/traded visiting scholars with actual travel, temporary staff commitments, teaching and return. Purchasing an existing report is not a visiting scholar or commissioned original research.
+2. Calibrate visiting scholar duration, teaching effectiveness and price across campaign eras; add negotiated terms and opponent invitation strategy. The second checkpoint implements the initial physical visit below.
 3. Extend partnerships, research licensing and imported-service dependencies, including interruption and domestic substitution.
 4. Implement broader military role families, equipment, doctrine, training, support and general-led behavior. The 96 reviewed roles are not yet a production roster.
 5. Add the required civilian and future operating models, then run full-campaign reachability, pacing, conservation, parity and performance checks.
@@ -59,3 +59,18 @@ Command for each suite, using its filename: `/Applications/Godot.app/Contents/Ma
 Graph audit: `/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/seanpurtill/Documents/Codex/tt-technology-implementation -s res://tools/audit_technology_graph.gd`. Result: 197 live discoveries, four explicit learning routes across the three revised subjects, all existing alternative routes included in causal validation, zero graph errors, 5,000 proposed target, complete_catalog=false.
 
 Shared integration files: `scripts/discovery_system.gd`, `scripts/civilization_system.gd`, `scripts/society_exchange.gd`, `scripts/knowledge_pathways.gd`, and the existing research interface files. No changes to terrain, project settings, civic labor ownership, military campaign control, top-level GameState or SaveSystem. No known conflicts against the unchanged base. Commit only the listed implementation, tests, audit and status record; generated UID files and captures are excluded. This checkpoint is ready for integrator review; remaining approved work above is unfinished.
+
+
+## Second checkpoint: visiting scholars
+
+Continues from `5b6908b227add8ad36c5734a141eb1dfff436c35` on the same isolated branch. READY for integrator review; not integrated or launched in the player build.
+
+Apprenticeship contracts or public schools enable invitations through the research inspector. The proposal carries a physical payment and prepays the visitor's travel and board. Quotes use known contact information without inspecting hidden supplier discoveries. At the actual encounter, an open-sharing supplier must know and have adopted the subject and retain at least one Knowledge worker after sending one specialist.
+
+The specialist travels with the returning envoys, teaches the selected investigation for 60 days, then travels home. One unit of effective Knowledge capacity is removed from the source throughout travel and teaching. The specialist remains in the source population; no new people or permanent researcher allocation are created. Available local Knowledge workers receive a 1.5 research multiplier during the delivered visit. This preserves prerequisites, local research work, and accumulated progress; it awards no instant discovery or permanent evidence. War suspends teaching, and the contractual return date still releases the source worker. Return travel is scheduled aggregate simulation, without a separate map figure or interception model.
+
+Payment settles through the ordinary embassy counterpart ledger. A refused visit returns payment and prepaid visitor rations once; envoy provisions remain spent. The inspector offers both studies and visitors once both capabilities exist. Registers are bounded to 32 active records per owner and expired records are pruned. Optional records serialize inside the existing society exchange authority; old saves without them remain valid. New executables are required to resume scholar records with their behavior.
+
+Verification: nine new scholar cases plus the previous 77 regression cases passed in separate headless processes, with zero errors, failures, skipped cases or orphan nodes. Tests cover arrival-gated teaching, subject specificity, departure/return boundaries, staffing and overbooking, real bilateral payment, refusal refunds, population conservation, serialized state and malformed metadata, war and host staff requirements, hidden supplier knowledge, and the panel's real invitation action. Logs: `/tmp/tt-scholar-<suite>.log`. Native visual inspection, full save-file loading, automatic opponent invitation strategy, whole-campaign balance, and map travel interception remain unverified or unimplemented.
+
+Additional shared integration hotspot: `scripts/game_state.gd`, limited to subtracting absent scholars from effective Knowledge capacity. Other changes: scholar contract helper and tests, existing embassy dispatch, purchase return/refund hooks, exchange validation/pruning, pathway multiplier and research inspector. Civic labor allocation remains under its existing authority. No terrain, project settings, military command or SaveSystem changes. The live discovery catalog is still 197; this checkpoint does not implement the 5,000-entry catalog, military expansion, or artwork.

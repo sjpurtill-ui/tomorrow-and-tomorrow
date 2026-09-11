@@ -20,6 +20,7 @@ static func number(value:Variant)->bool:return (value is int or value is float) 
 static func valid(value:Variant)->bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return false
+	if not preload("res://scripts/scholar_visits.gd").valid(value.get("scholar_visits",{})):return false
 	if not value.has_all(empty_state().keys()):return false
 	for key:String in ["collections","evidence","origins","connections","outbound"]:
 		if not value[key] is Dictionary or value[key].size()>COLLECTION_LIMIT:return false
@@ -72,6 +73,12 @@ static func valid_item(item:Variant)->bool:
 		if not number(item[field]) or item[field]<0:return false
 	return item.study<=1 and item.work>=1 and item.work<=100000 and item.position is Dictionary and number(item.position.get("x")) and number(item.position.get("z")) and text_list(item.signals,30)
 static func valid_mission(mission:Dictionary)->bool:
+	if (mission.has("research_mode") or mission.has("scholar_contract") or mission.has("scholar_provisions")) and not mission.has("research_subject"):return false
+	if mission.has("scholar_contract") and mission.get("research_mode","")!="scholar":return false
+	if mission.get("research_mode","purchase") not in ["purchase","scholar"]:return false
+	if mission.has("scholar_provisions") and (not number(mission.scholar_provisions) or mission.scholar_provisions<0):return false
+	if mission.has("scholar_contract"):
+		if not mission.scholar_contract is Dictionary or not preload("res://scripts/scholar_visits.gd").valid({mission.scholar_contract.get("id",""):mission.scholar_contract}):return false
 	if not mission.has("research_subject") and (mission.has("research_refused") or mission.has("research_refunded")):return false
 	if mission.has("research_subject"):
 		if not short_text(mission.research_subject) or String(mission.research_subject).is_empty():return false
@@ -412,6 +419,7 @@ static func advance(day:int)->void:
 	if day<=int(data().last_day):return
 	var elapsed:=mini(7,maxi(1,day-int(data().last_day))) if int(data().last_day)>=0 else 1
 	data().last_day=day
+	preload("res://scripts/scholar_visits.gd").advance(day)
 	for id:String in data().connections:
 		var view_id:="human" if id=="player" and WorldSimulation.actor_id!="player" else id
 		var index:int=WorldSimulation.world._civilization_index(view_id)

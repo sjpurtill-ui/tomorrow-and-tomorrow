@@ -39,6 +39,8 @@ static func key(source:String,subject:String)->String:
 static func negotiate(mission:Dictionary,source:String,source_name:String,position:Dictionary,day:int)->void:
 	if not mission.has("research_subject") or mission.has("research_refused"):return
 	if Exchange.owner_id(String(mission.get("civ_id","")))!=Exchange.owner_id(source) or day<int(mission.get("arrival_day",day+1)):return
+	if mission.get("research_mode","purchase")=="scholar":
+		preload("res://scripts/scholar_visits.gd").negotiate(mission,source,day);return
 	var subject:=String(mission.research_subject)
 	var provider:=Exchange.owner_state(source)
 	var accepted:=provider!=null and float(mission.get("gift_amount",0))>0
@@ -57,6 +59,8 @@ static func negotiate(mission:Dictionary,source:String,source_name:String,positi
 
 static func prepare_return(mission:Dictionary)->void:
 	if not mission.has("research_subject"):return
+	if mission.get("research_mode","purchase")=="scholar":
+		preload("res://scripts/scholar_visits.gd").deliver(mission);return
 	var report_key:=key(String(mission.civ_id),String(mission.research_subject))
 	var carried:=false
 	var incoming:=0
@@ -70,6 +74,7 @@ static func prepare_return(mission:Dictionary)->void:
 static func refund(mission:Dictionary)->void:
 	if not mission.has("research_subject") or not mission.get("research_refused",false) or mission.get("research_refunded",false):return
 	mission["research_refunded"]=true
+	WorldSimulation.food.receive_external_food(float(mission.get("scholar_provisions",0)))
 	var amount:=float(mission.get("gift_amount",0))
 	var resource:=String(mission.get("gift_resource",""))
 	if resource=="Food":WorldSimulation.food.receive_external_food(amount)

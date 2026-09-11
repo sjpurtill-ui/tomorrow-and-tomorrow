@@ -1362,6 +1362,7 @@ func effective_workers(role:String,include_military_construction:bool=false)->fl
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
 	if role=="Construction" and not include_military_construction and WorldSimulation.military.joint_operations!=null:capacity*=1.0-WorldSimulation.military.joint_operations.construction_share(resource_settlement_id)
+	if role=="Knowledge":capacity=maxf(0,capacity-preload("res://scripts/scholar_visits.gd").absent(self,int(elapsed_days)))
 	return capacity
 
 func receive_injured_veterans(count:int,severe:int)->void:

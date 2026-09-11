@@ -1427,12 +1427,16 @@ func diplomatic_mission_quote(civ_id:String,gift_resource:String="",purpose:Stri
 	return {"ok":true,"civ_id":civ_id,"civilization":String(civ.name),"gift":gift,"purpose":normalized_purpose,"purpose_label":String(DIPLOMATIC_PURPOSE_LABELS.get(normalized_purpose,"DIPLOMATIC MISSION")),"personnel":personnel,"provisions":provisions,"origin_position":{"x":player_world_origin.x,"z":player_world_origin.y},"target_position":target_position,"target_kind":target_kind,"distance_km":distance,"travel_days":travel_days,"total_days":total_days}
 
 
-func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goodwill",research_subject:String="")->Dictionary:
+func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goodwill",research_subject:String="",research_mode:String="purchase")->Dictionary:
 	if research_subject!="" and purpose!="goodwill":return {"error":"Research purchases need a peaceful research delegation."}
-	var quote:Dictionary=preload("res://scripts/research_purchase.gd").quote(civ_id,research_subject,gift_resource) if research_subject!="" else diplomatic_mission_quote(civ_id,gift_resource,purpose)
+	if research_mode not in ["purchase","scholar"]:return {"error":"Unknown research proposal."}
+	var quote:Dictionary=preload("res://scripts/scholar_visits.gd").quote(civ_id,research_subject,gift_resource) if research_subject!="" and research_mode=="scholar" else (preload("res://scripts/research_purchase.gd").quote(civ_id,research_subject,gift_resource) if research_subject!="" else diplomatic_mission_quote(civ_id,gift_resource,purpose))
 	if quote.has("error"): return quote
-	var provisions:=WorldSimulation.food.issue_for_obligation(float(quote.provisions),"diplomacy","Envoy provisions • %s" % String(quote.civilization),float(quote.total_days),int(quote.personnel))
-	if provisions+0.0001<float(quote.provisions): return {"error":"Food stores changed before the envoys could be provisioned."}
+	var requested_provisions:=float(quote.provisions)+float(quote.get("scholar_provisions",0))
+	var provisions:=WorldSimulation.food.issue_for_obligation(requested_provisions,"diplomacy","Envoy provisions • %s" % String(quote.civilization),float(quote.total_days),int(quote.personnel))
+	if provisions+0.0001<requested_provisions:
+		WorldSimulation.food.receive_external_food(provisions)
+		return {"error":"Food stores changed before the envoys could be provisioned."}
 	var gift:Dictionary=quote.gift
 	var amount:=float(gift.amount)
 	var delivered:=0.0
@@ -1449,7 +1453,10 @@ func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goo
 		return {"error":"The selected gift changed before the envoy could depart."}
 	var day:=int(WorldSimulation.state.elapsed_days)
 	diplomatic_mission={"civ_id":civ_id,"civilization":String(quote.civilization),"purpose":String(quote.purpose),"purpose_label":String(quote.purpose_label),"personnel":int(quote.personnel),"population_sources":{"support":int(quote.personnel)},"provisions":provisions,"gift_resource":String(gift.resource),"gift_amount":delivered,"origin_position":quote.origin_position,"target_position":quote.target_position,"target_kind":String(quote.target_kind),"depart_day":day,"arrival_day":day+int(quote.travel_days),"return_day":day+int(quote.total_days),"stage":"outbound","arrival_resolved":false,"distance_km":float(quote.distance_km)}
-	if research_subject!="":diplomatic_mission["research_subject"]=research_subject
+	if research_subject!="":
+		diplomatic_mission["research_subject"]=research_subject
+		diplomatic_mission["research_mode"]=research_mode
+		if research_mode=="scholar":diplomatic_mission["scholar_provisions"]=float(quote.scholar_provisions);diplomatic_mission.provisions-=float(quote.scholar_provisions)
 	diplomatic_mission["destination"]="Reported home of %s" % String(quote.civilization)
 	for known:Dictionary in city_intelligence.known_cities("player",civ_id):
 		if city_intelligence.vector(known.position).distance_to(city_intelligence.vector(quote.target_position))<1.0:

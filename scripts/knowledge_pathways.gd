@@ -84,7 +84,7 @@ static func ready(entry:Dictionary,day:int)->bool:
 static func multiplier(entry:Dictionary)->float:
 	var route:=chosen(entry,int(WorldSimulation.state.elapsed_days))
 	if route.is_empty():return 1.0
-	return float(route.progress_multiplier)*(1.0 if route.get("imported",false) else 1.0+minf(.4,float(route.support)*.15))
+	return preload("res://scripts/scholar_visits.gd").bonus(String(entry.id),int(WorldSimulation.state.elapsed_days))*float(route.progress_multiplier)*(1.0 if route.get("imported",false) else 1.0+minf(.4,float(route.support)*.15))
 
 static func missing(entry:Dictionary,day:int)->Array[String]:
 	if ready(entry,day):return []
