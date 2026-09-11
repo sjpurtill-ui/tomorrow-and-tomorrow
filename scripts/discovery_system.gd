@@ -97,6 +97,7 @@ func initialize() -> void:
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
 		catalog[i]=society_model.normalize_discovery(catalog[i])
+		catalog[i]=preload("res://scripts/technology_branch_rules.gd").apply(catalog[i])
 		var discovery:Dictionary=catalog[i]
 		catalog_by_id[String(discovery.get("id",""))]=discovery
 		if not bool(discovery.get("frontier",false)): technology_catalog.append(discovery)
@@ -850,7 +851,7 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 	var children:Dictionary={}
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)): continue
-		for requirement in entry.get("requires",[]):
+		for requirement in Pathways.definition_parents(entry):
 			if not children.has(String(requirement)): children[String(requirement)]=[]
 			(children[String(requirement)] as Array).append(String(entry.name))
 	for entry in technology_catalog:
@@ -858,12 +859,10 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		if dynamic_id!="" and String(entry.dynamic)!=dynamic_id: continue
 		var id:=String(entry.id)
 		var row:=entry.duplicate(true)
-		var missing:Array[String]=[]
+		var missing:Array[String]=Pathways.missing(entry,int(WorldSimulation.state.elapsed_days))
 		row["pathways"]=Pathways.routes(entry)
+		row["requires"]=entry.get("requires_all",entry.get("requires",[])).duplicate()
 		row["pathway_description"]=Pathways.describe(entry)
-		for requirement in entry.get("requires",[]):
-			if String(requirement) not in WorldSimulation.state.known_discoveries: missing.append(String(catalog_by_id.get(String(requirement),{}).get("name",requirement)))
-		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): missing.append("earliest day %d" % int(entry.day))
 		if not _resource_requirements_met(entry.get("resource_requirements",[])):
 			for requirement in entry.get("resource_requirements",[]): missing.append("%s: %s access" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized"))])
 		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
@@ -925,9 +924,9 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
 		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): continue
-		var viable:=true
-		for requirement in entry.get("requires",[]):
-			if String(requirement) not in known: viable=false; break
+		var viable:=false
+		for route:Dictionary in Pathways.routes_for(entry,known,{}):
+			if route.ready:viable=true;break
 		if not viable: continue
 		for requirement in entry.get("resource_requirements",[]):
 			if float(resources.get(String(requirement.get("resource","")),0.0))<0.16: viable=false; break
@@ -946,7 +945,7 @@ func technology_depth(id:String,visiting:Dictionary={})->int:
 	var path:=visiting.duplicate()
 	path[id]=true
 	var depth:=1
-	for parent in entry.get("requires",[]): depth=maxi(depth,1+technology_depth(String(parent),path))
+	for parent in Pathways.definition_parents(entry): depth=maxi(depth,1+technology_depth(String(parent),path))
 	entry["causal_depth"]=depth
 	return depth
 

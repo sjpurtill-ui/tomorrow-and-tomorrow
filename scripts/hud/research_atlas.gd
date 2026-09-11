@@ -243,7 +243,18 @@ func select(id:String,open_detail:bool=false)->void:
 		Art.label(detail_body,String(item.get("pathway_description","")),13,T.TEAL,true)
 		for route:Dictionary in item.get("pathways",[]):
 			Art.label(detail_body,("● " if bool(route.ready) else "○ ")+String(route.label),12,T.GREEN if bool(route.ready) else T.MUTED,true)
+			var requirements:Array[String]=[]
+			for req:String in route.get("requires_all",route.requires):requirements.append(_foundation_name(req))
+			for group:Array in route.get("requires_any",[]):
+				var choices:Array[String]=[]
+				for req:String in group:choices.append(_foundation_name(req))
+				requirements.append("("+" or ".join(choices)+")")
+			if not requirements.is_empty():Art.label(detail_body,"Requires "+" + ".join(requirements),11,T.TEXT_SOFT,true)
+			if float(route.get("progress_multiplier",1.0))!=1.0:Art.label(detail_body,"Research pace: %.2f× local baseline" % float(route.progress_multiplier),11,T.TEXT_SOFT,true)
 		Art.button(detail_body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
+		if item.exposed and not item.known and preload("res://scripts/research_purchase.gd").available():
+			var purchase:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
+			purchase.subject=String(item.id);detail_body.add_child(purchase)
 		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",10,T.MUTED)
@@ -269,3 +280,8 @@ func step(direction:int)->void:
 	for i in records.size():
 		if records[i].id==selected_id:index=i;break
 	select(String(records[posmod(index+direction,records.size())].id));plot.center_selected()
+
+func _foundation_name(id:String)->String:
+	for previous:Dictionary in all_records:
+		if previous.id==id and previous.exposed:return String(previous.name)
+	return "unexplored foundation"

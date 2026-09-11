@@ -37,7 +37,7 @@ static func valid(value:Variant)->bool:
 		if value.collections[key].discovery_id!=subject or value.collections[key].study!=1:return false
 	for origin:Variant in value.origins.values():
 		if not origin is Dictionary or not origin.has_all(["route","label","requires","collection_id","day"]):return false
-		if origin.route not in ["local","experimental","exchange","fieldwork"] or not short_text(origin.label) or not short_text(origin.collection_id) or not number(origin.day) or origin.day<0 or not text_list(origin.requires,20):return false
+		if not short_text(origin.route) or String(origin.route).is_empty() or not short_text(origin.label) or not short_text(origin.collection_id) or not number(origin.day) or origin.day<0 or not text_list(origin.requires,20):return false
 	for ties:Variant in value.connections.values():
 		if not ties is Dictionary or not ties.has_all(["last_visit","learned","shared","arrivals","departures","familiarity","respect","resentment"]):return false
 		if not text_list(ties.learned,COLLECTION_LIMIT) or not text_list(ties.shared,COLLECTION_LIMIT):return false
@@ -65,12 +65,18 @@ static func text_list(value:Variant,limit:int)->bool:
 static func valid_item(item:Variant)->bool:
 	if not item is Dictionary or not item.has_all(["id","kind","name","source_id","source_name","position","observed_day","returned_day","discovery_id","study","work","signals"]):return false
 	if item.kind not in ["artifact","knowledge","culture","specimen"]:return false
+	if item.has("research_purchase") and (not item.research_purchase is bool or item.kind!="knowledge"):return false
 	for field:String in ["id","name","source_id","source_name","discovery_id"]:
 		if not short_text(item[field]):return false
 	for field:String in ["observed_day","returned_day","study","work"]:
 		if not number(item[field]) or item[field]<0:return false
 	return item.study<=1 and item.work>=1 and item.work<=100000 and item.position is Dictionary and number(item.position.get("x")) and number(item.position.get("z")) and text_list(item.signals,30)
 static func valid_mission(mission:Dictionary)->bool:
+	if not mission.has("research_subject") and (mission.has("research_refused") or mission.has("research_refunded")):return false
+	if mission.has("research_subject"):
+		if not short_text(mission.research_subject) or String(mission.research_subject).is_empty():return false
+		for flag:String in ["research_refused","research_refunded"]:
+			if mission.has(flag) and not mission[flag] is bool:return false
 	var items:Variant=mission.get("carried_collections",[])
 	if not items is Array or items.size()>256:return false
 	for item:Variant in items:
@@ -268,6 +274,7 @@ static func envoy_arrived(system:Node,mission:Dictionary,day:int)->void:
 	mission["mission_id"]=-1-int(mission.get("depart_day",day))
 	mission["encountered_societies"]=[id]
 	encounter(mission,id,String(system.civilizations[index].name),location,day)
+	preload("res://scripts/research_purchase.gd").negotiate(mission,id,String(system.civilizations[index].name),location,day)
 
 static func recruitment_targets(system:Node)->Array[String]:
 	# Receiving households is a separate decision at the actual encounter.
@@ -359,7 +366,9 @@ static func returned(mission:Dictionary,day:int)->Array[Dictionary]:
 	var records:Array[Dictionary]=[]
 	if bool(mission.get("exchange_returned",false)):return records
 	mission["exchange_returned"]=true
+	preload("res://scripts/research_purchase.gd").refund(mission)
 	for item:Dictionary in mission.get("carried_collections",[]):
+		if item.get("research_purchase",false) and mission.get("research_refused",false):continue
 		if data().collections.has(String(item.id)) or data().collections.size()>=COLLECTION_LIMIT:continue
 		var saved:=item.duplicate(true);saved.returned_day=day
 		data().collections[String(item.id)]=saved
@@ -425,7 +434,8 @@ static func advance(day:int)->void:
 		var spent:=minf(study_work,(1-float(item.study))*float(item.work))
 		item.study=minf(1,float(item.study)+spent/float(item.work));study_work-=spent
 		if item.study>=1:
-			data().evidence[String(item.discovery_id)]=String(item.id)
+			var prior:Dictionary=data().collections.get(String(data().evidence.get(String(item.discovery_id),"")),{})
+			if not prior.get("research_purchase",false) or item.get("research_purchase",false):data().evidence[String(item.discovery_id)]=String(item.id)
 			var signals:Dictionary={}
 			for signal_name:String in item.signals:signals[signal_name]=.65
 			WorldSimulation.state.register_field_observations(signals,day+180)
