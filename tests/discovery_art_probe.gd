@@ -21,7 +21,7 @@ func run()->void:
 			var popup:=DiscoveryNotice.announce(host,hud,[{"id":id,"day":1129}]);await settle()
 			var inside:=Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(popup.next_button.get_global_rect())
 			if not inside:errors+=1
-			if id=="stone_sorting" and popup.hero.texture.resource_path!="res://assets/ui/research/stone-selection-v1.png":errors+=1
+			if id=="stone_sorting" and popup.hero.texture.resource_path!="res://assets/ui/research/paper/stone_sorting.png":errors+=1
 			if id=="clay_shaping" and popup.hero.get_node("FieldIllustrationCaption").size.x<90:errors+=1
 			if host.game_speed!=0:errors+=1
 			canvas.get_texture().get_image().save_png("res://artifacts/discovery-art/%s-%d.png" % [id,dimensions.x])

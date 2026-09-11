@@ -1,0 +1,2093 @@
+{
+  "full_overhaul_art_complete": false,
+  "items": [
+    {
+      "asset": "res://assets/ui/research/paper/seasonal_patterns.png",
+      "description": "Gatherers report that plants and animals return in recurring cycles.",
+      "domain": "ecology",
+      "id": "seasonal_patterns",
+      "name": "Seasonal Patterns",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_selection.png",
+      "description": "Some gathered seeds consistently produce stronger plants.",
+      "domain": "nutrition",
+      "id": "seed_selection",
+      "name": "Selective Planting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_drying.png",
+      "description": "Food left in dry moving air spoils more slowly.",
+      "domain": "nutrition",
+      "id": "food_drying",
+      "name": "Food Drying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/smoking.png",
+      "description": "Food kept above smoky fires changes texture and lasts longer.",
+      "domain": "nutrition",
+      "id": "smoking",
+      "name": "Smoke Preservation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cordage.png",
+      "description": "Twisted plant fibers hold much more weight than loose strands.",
+      "domain": "production",
+      "id": "cordage",
+      "name": "Twisted Cordage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/basketry.png",
+      "description": "Interlaced fibers form containers that remain light and strong.",
+      "domain": "production",
+      "id": "basketry",
+      "name": "Basketry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/charcoal.png",
+      "description": "Wood heated beneath restricted air leaves an unusually hot-burning residue.",
+      "domain": "production",
+      "id": "charcoal",
+      "name": "Charcoal Production",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_shaping.png",
+      "description": "Local wet earth can be shaped into containers before it dries.",
+      "domain": "production",
+      "id": "clay_shaping",
+      "name": "Clay Vessels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pit_firing.png",
+      "description": "Clay exposed to sustained heat becomes permanently hard.",
+      "domain": "production",
+      "id": "pit_firing",
+      "name": "Pit Firing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/joinery.png",
+      "description": "Carefully cut wooden members can lock together without cord.",
+      "domain": "infrastructure",
+      "id": "joinery",
+      "name": "Wood Joinery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drainage.png",
+      "description": "Shallow channels keep occupied ground drier after storms.",
+      "domain": "infrastructure",
+      "id": "drainage",
+      "name": "Ground Drainage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/well_siting.png",
+      "description": "Certain terrain features reliably indicate water beneath the ground.",
+      "domain": "infrastructure",
+      "id": "well_siting",
+      "name": "Well Siting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wound_cleaning.png",
+      "description": "Washed wounds become dangerous less often than untreated wounds.",
+      "domain": "health",
+      "id": "wound_cleaning",
+      "name": "Wound Cleaning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/herbal_classification.png",
+      "description": "Healers begin separating plants by repeatable effects rather than appearance.",
+      "domain": "health",
+      "id": "herbal_classification",
+      "name": "Medicinal Classification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clean_water.png",
+      "description": "Families using cleaner water suffer fewer stomach illnesses.",
+      "domain": "health",
+      "id": "clean_water",
+      "name": "Clean-Water Practice",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tallies.png",
+      "description": "Repeated marks can preserve quantities after memory becomes unreliable.",
+      "domain": "knowledge",
+      "id": "tallies",
+      "name": "Material Tallies",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/standard_measures.png",
+      "description": "Disputes fall when different workers use the same reference quantities.",
+      "domain": "knowledge",
+      "id": "standard_measures",
+      "name": "Shared Measures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/route_memory.png",
+      "description": "Travelers develop repeatable stories that preserve direction and distance.",
+      "domain": "knowledge",
+      "id": "route_memory",
+      "name": "Encoded Routes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/labor_rotations.png",
+      "description": "Regular rotations distribute exhausting work without abandoning essential tasks.",
+      "domain": "institutions",
+      "id": "labor_rotations",
+      "name": "Labor Rotations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/customary_law.png",
+      "description": "Repeated judgments are being remembered as rules that bind future decisions.",
+      "domain": "institutions",
+      "id": "customary_law",
+      "name": "Customary Law",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_stores.png",
+      "description": "Shared reserves can support projects no household could sustain alone.",
+      "domain": "institutions",
+      "id": "public_stores",
+      "name": "Public Stores",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/watch_rotation.png",
+      "description": "Scheduled sentries detect threats earlier and reduce exhaustion.",
+      "domain": "security",
+      "id": "watch_rotation",
+      "name": "Organized Watch",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/formation_drill.png",
+      "description": "Groups moving under repeated commands retain cohesion under pressure.",
+      "domain": "security",
+      "id": "formation_drill",
+      "name": "Formation Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/supply_groups.png",
+      "description": "Separating carriers from scouts allows groups to travel farther.",
+      "domain": "security",
+      "id": "supply_groups",
+      "name": "Organized Supply Parties",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/animal_taming.png",
+      "description": "Orphaned young of herd animals raised beside the settlement stay, breed, and follow.",
+      "domain": "ecology",
+      "id": "animal_taming",
+      "name": "Animal Taming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pack_animals.png",
+      "description": "Tamed beasts under saddle-frames carry loads no human team matches, day after day.",
+      "domain": "logistics",
+      "id": "pack_animals",
+      "name": "Pack Animal Husbandry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/domesticated_mounts.png",
+      "description": "Selected bloodlines accept riders. A mounted person moves like weather, not like walking.",
+      "domain": "logistics",
+      "id": "domesticated_mounts",
+      "name": "Domesticated Mounts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mounted_scouts.png",
+      "description": "Riders range in days across country that costs walkers weeks, and return fresh enough to tell it.",
+      "domain": "logistics",
+      "id": "mounted_scouts",
+      "name": "Mounted Scouting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hide_floats.png",
+      "description": "Inflated hides lashed into rafts carry people and bundles across still water.",
+      "domain": "logistics",
+      "id": "hide_floats",
+      "name": "Hide Floats",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/river_craft.png",
+      "description": "Framed hulls with paddles run the river both ways; the current becomes a road.",
+      "domain": "logistics",
+      "id": "river_craft",
+      "name": "River Craft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coastal_watercraft.png",
+      "description": "Sewn-plank hulls hold a heading along the coast and cross the mouths of bays.",
+      "domain": "logistics",
+      "id": "coastal_watercraft",
+      "name": "Coastal Watercraft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stone_sorting.png",
+      "description": "Workers learn which local stones hold an edge, split cleanly, or survive repeated blows.",
+      "domain": "production",
+      "id": "stone_sorting",
+      "name": "Stone Selection",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/controlled_flaking.png",
+      "description": "Repeated blows begin producing predictable cutting edges instead of accidental shards.",
+      "domain": "production",
+      "id": "controlled_flaking",
+      "name": "Controlled Flaking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hafted_tools.png",
+      "description": "Stone, wood, and binding are combined into tools that transfer force through a handle.",
+      "domain": "production",
+      "id": "hafted_tools",
+      "name": "Hafted Tools",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_grading.png",
+      "description": "Cutters distinguish woods by strength, flexibility, weight, and resistance to rot.",
+      "domain": "ecology",
+      "id": "timber_grading",
+      "name": "Timber Grading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_seasoning.png",
+      "description": "Wood stacked away from soil and rain becomes lighter, straighter, and more durable.",
+      "domain": "production",
+      "id": "timber_seasoning",
+      "name": "Timber Seasoning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/framed_construction.png",
+      "description": "Load-bearing frames separate a structure's strength from the material filling its walls.",
+      "domain": "infrastructure",
+      "id": "framed_construction",
+      "name": "Framed Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_grading.png",
+      "description": "Gatherers sort stems and bark by length, tensile strength, and behavior when wet.",
+      "domain": "ecology",
+      "id": "fiber_grading",
+      "name": "Fiber Grading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/woven_carriers.png",
+      "description": "Fitted baskets and slings let one carrier move more while keeping both hands free.",
+      "domain": "production",
+      "id": "woven_carriers",
+      "name": "Woven Carriers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rope_rigging.png",
+      "description": "Standard ropes, blocks, and lifting teams make heavy loads controllable.",
+      "domain": "infrastructure",
+      "id": "rope_rigging",
+      "name": "Rope Rigging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_testing.png",
+      "description": "Small samples reveal which clays crack, shrink, seal, or endure heat.",
+      "domain": "production",
+      "id": "clay_testing",
+      "name": "Clay Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_tempering.png",
+      "description": "Sand, crushed shell, and old pottery control cracking as vessels dry.",
+      "domain": "production",
+      "id": "clay_tempering",
+      "name": "Tempered Clay",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sealed_vessels.png",
+      "description": "Fitted lids and treated surfaces protect water, grain, oils, and medicines from damp and pests.",
+      "domain": "nutrition",
+      "id": "sealed_vessels",
+      "name": "Sealed Vessels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/kiln_control.png",
+      "description": "Enclosed firing chambers make heat repeatable enough to reproduce strong ceramics.",
+      "domain": "production",
+      "id": "kiln_control",
+      "name": "Controlled Kilns",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/quarry_reading.png",
+      "description": "Natural seams reveal where stone can be separated with less breakage and danger.",
+      "domain": "ecology",
+      "id": "quarry_reading",
+      "name": "Reading the Quarry Face",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wedges_and_levers.png",
+      "description": "Coordinated wedges and levers turn human effort into controlled movement of heavy stone.",
+      "domain": "infrastructure",
+      "id": "wedges_and_levers",
+      "name": "Wedges and Levers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lime_burning.png",
+      "description": "Burned limestone becomes a reactive powder that binds, coats, disinfects, and alters soil.",
+      "domain": "production",
+      "id": "lime_burning",
+      "name": "Lime Burning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lime_mortar.png",
+      "description": "Measured lime, sand, and water produce joints that harden into enduring masonry.",
+      "domain": "infrastructure",
+      "id": "lime_mortar",
+      "name": "Lime Mortar",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/salt_working.png",
+      "description": "Evaporation and scraping turn saline earth or water into a dependable preservative.",
+      "domain": "nutrition",
+      "id": "salt_working",
+      "name": "Salt Working",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/curing_regimens.png",
+      "description": "Measured salt, smoke, time, and airflow make preservation predictable across seasons.",
+      "domain": "nutrition",
+      "id": "curing_regimens",
+      "name": "Curing Regimens",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/peat_drying.png",
+      "description": "Cut peat stacked above wet ground becomes a compact, transportable fuel.",
+      "domain": "production",
+      "id": "peat_drying",
+      "name": "Peat Drying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ore_assaying.png",
+      "description": "Crushed samples, controlled heat, and recorded outcomes distinguish promising ore from colorful stone.",
+      "domain": "production",
+      "id": "ore_assaying",
+      "name": "Comparative Ore Assay",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/copper_smelting.png",
+      "description": "Hot charcoal and carefully selected ore yield beads of workable metal.",
+      "domain": "production",
+      "id": "copper_smelting",
+      "name": "Copper Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/copper_casting.png",
+      "description": "Prepared molds make metal forms repeatable, divisible, and repairable.",
+      "domain": "production",
+      "id": "copper_casting",
+      "name": "Reusable Casting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bronze_alloying.png",
+      "description": "Copper and tin in controlled proportions produce a harder, more reliable material.",
+      "domain": "production",
+      "id": "bronze_alloying",
+      "name": "Bronze Alloying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mine_shoring.png",
+      "description": "Regular supports and inspection practices let workings extend beyond self-supporting ground.",
+      "domain": "infrastructure",
+      "id": "mine_shoring",
+      "name": "Timbered Mine Shoring",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mine_drainage.png",
+      "description": "Sumps, channels, and lifting chains keep deeper workings usable.",
+      "domain": "infrastructure",
+      "id": "mine_drainage",
+      "name": "Mine Drainage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bitumen_sealing.png",
+      "description": "Heated bitumen seals roofs, containers, hulls, and vulnerable road surfaces.",
+      "domain": "infrastructure",
+      "id": "bitumen_sealing",
+      "name": "Bitumen Sealing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/iron_assaying.png",
+      "description": "Heated samples and slag behavior reveal iron-bearing rock that appearance alone concealed.",
+      "domain": "production",
+      "id": "iron_assaying",
+      "name": "Iron Ore Assay",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bloomery_smelting.png",
+      "description": "Forced air and charcoal reduce iron ore into a spongy bloom that can be consolidated by hammering.",
+      "domain": "production",
+      "id": "bloomery_smelting",
+      "name": "Bloomery Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/forge_welding.png",
+      "description": "Controlled heat and repeated working join iron pieces without melting them.",
+      "domain": "production",
+      "id": "forge_welding",
+      "name": "Forge Welding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hardened_edges.png",
+      "description": "Carbon, heat, and cooling are manipulated to keep cutting edges hard without making whole tools brittle.",
+      "domain": "production",
+      "id": "hardened_edges",
+      "name": "Hardened Iron Edges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coal_grading.png",
+      "description": "Different black seams are classified by smoke, heat, ash, and behavior under pressure.",
+      "domain": "ecology",
+      "id": "coal_grading",
+      "name": "Coal Grading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coke_firing.png",
+      "description": "Coal heated away from air produces a stronger, cleaner metallurgical fuel.",
+      "domain": "production",
+      "id": "coke_firing",
+      "name": "Coke Firing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/refractory_furnaces.png",
+      "description": "Heat-resistant linings allow furnaces to remain hotter and operate longer without collapsing.",
+      "domain": "production",
+      "id": "refractory_furnaces",
+      "name": "Refractory Furnaces",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/blast_furnace.png",
+      "description": "Continuous high-temperature reduction transforms the scale and organization of iron production.",
+      "domain": "production",
+      "id": "blast_furnace",
+      "name": "Continuous Blast Furnace",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sulfur_purification.png",
+      "description": "Controlled melting and condensation separate sulfur from mineral impurities.",
+      "domain": "production",
+      "id": "sulfur_purification",
+      "name": "Sulfur Purification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nitrate_cultivation.png",
+      "description": "Organic waste, drainage, and time are managed to cultivate nitrate-rich earth.",
+      "domain": "ecology",
+      "id": "nitrate_cultivation",
+      "name": "Nitrate Beds",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/black_powder.png",
+      "description": "Purified sulfur, charcoal, and nitrates are combined in repeatable proportions with violently expanding results.",
+      "domain": "security",
+      "id": "black_powder",
+      "name": "Composite Propellant",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/phosphate_dressing.png",
+      "description": "Ground phosphate is tested against exhausted soils and selected crops.",
+      "domain": "nutrition",
+      "id": "phosphate_dressing",
+      "name": "Phosphate Dressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/graphite_marking.png",
+      "description": "Prepared graphite leaves compact, erasable marks suited to inventories, diagrams, and calculation.",
+      "domain": "knowledge",
+      "id": "graphite_marking",
+      "name": "Graphite Marking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/graphite_crucibles.png",
+      "description": "Graphite-bearing crucibles endure heat and protect molten material from contamination.",
+      "domain": "production",
+      "id": "graphite_crucibles",
+      "name": "Graphite Crucibles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/material_accounting.png",
+      "description": "Stores are recorded by source, quality, loss, obligation, and intended use rather than as a single heap.",
+      "domain": "knowledge",
+      "id": "material_accounting",
+      "name": "Material Accounting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/workshop_standards.png",
+      "description": "Patterns, tolerances, and named grades let knowledge survive individual makers.",
+      "domain": "knowledge",
+      "id": "workshop_standards",
+      "name": "Workshop Standards",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crop_calendars.png",
+      "description": "Planting and harvest dates are preserved across households instead of remembered separately.",
+      "domain": "nutrition",
+      "id": "crop_calendars",
+      "name": "Crop Calendars",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/managed_fallow.png",
+      "description": "Leaving selected ground uncultivated restores yields more reliably than abandoning fields at random.",
+      "domain": "nutrition",
+      "id": "managed_fallow",
+      "name": "Managed Fallow",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_reserves.png",
+      "description": "The best seed is separated from ordinary food stores and protected through lean seasons.",
+      "domain": "nutrition",
+      "id": "seed_reserves",
+      "name": "Protected Seed Reserves",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/irrigation_schedules.png",
+      "description": "Households coordinate water turns so upstream use no longer destroys downstream crops.",
+      "domain": "nutrition",
+      "id": "irrigation_schedules",
+      "name": "Irrigation Schedules",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crop_rotation.png",
+      "description": "Different crops are sequenced to preserve soil and disrupt recurring pests.",
+      "domain": "nutrition",
+      "id": "crop_rotation",
+      "name": "Crop Rotation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grain_milling.png",
+      "description": "Rotary stones convert stored grain into digestible flour with less labor.",
+      "domain": "nutrition",
+      "id": "grain_milling",
+      "name": "Rotary Grain Milling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fermentation_control.png",
+      "description": "Temperature, vessels, and starter cultures are managed to reproduce fermentation.",
+      "domain": "nutrition",
+      "id": "fermentation_control",
+      "name": "Controlled Fermentation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/regional_granaries.png",
+      "description": "Surplus is distributed among measured, inspected stores rather than concentrated in one vulnerable reserve.",
+      "domain": "nutrition",
+      "id": "regional_granaries",
+      "name": "Regional Granaries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/soil_assays.png",
+      "description": "Soils are compared by drainage, texture, crop response, and amendments rather than color alone.",
+      "domain": "ecology",
+      "id": "soil_assays",
+      "name": "Comparative Soil Assays",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/intensive_gardens.png",
+      "description": "Highly tended plots near settlements produce diverse perishables for dense populations.",
+      "domain": "nutrition",
+      "id": "intensive_gardens",
+      "name": "Intensive Market Gardens",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/birth_attendants.png",
+      "description": "Birth attendants preserve positioning, cleanliness, warning signs, and methods of assisting difficult labor.",
+      "domain": "health",
+      "id": "birth_attendants",
+      "name": "Experienced Birth Attendants",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/latrine_siting.png",
+      "description": "Waste pits are placed according to slope, water flow, soil, and settlement use.",
+      "domain": "health",
+      "id": "latrine_siting",
+      "name": "Latrine Siting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/isolation_practice.png",
+      "description": "Repeated outbreaks reveal that separating the visibly ill can interrupt some chains of sickness.",
+      "domain": "health",
+      "id": "isolation_practice",
+      "name": "Isolation Practice",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/case_records.png",
+      "description": "Treatments and outcomes are recorded together, exposing remedies that fail as well as those that help.",
+      "domain": "health",
+      "id": "case_records",
+      "name": "Medical Case Records",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/trained_midwives.png",
+      "description": "Birth knowledge is taught deliberately and evaluated through recorded outcomes.",
+      "domain": "health",
+      "id": "trained_midwives",
+      "name": "Trained Midwives",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_baths.png",
+      "description": "Shared water and washing facilities separate drinking, cleaning, animals, and waste.",
+      "domain": "health",
+      "id": "public_baths",
+      "name": "Public Washing Facilities",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/surgical_anatomy.png",
+      "description": "Anatomical observations are compared across injuries and deaths, replacing many inherited assumptions.",
+      "domain": "health",
+      "id": "surgical_anatomy",
+      "name": "Surgical Anatomy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/civic_infirmaries.png",
+      "description": "Dedicated institutions concentrate carers, records, clean supplies, and difficult cases.",
+      "domain": "health",
+      "id": "civic_infirmaries",
+      "name": "Civic Infirmaries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/contagion_mapping.png",
+      "description": "Cases are mapped through households, water, work, and movement to distinguish environmental from contagious illness.",
+      "domain": "health",
+      "id": "contagion_mapping",
+      "name": "Contagion Mapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/preventive_inoculation.png",
+      "description": "Controlled exposure is organized to reduce the danger of later epidemics, despite immediate individual risk.",
+      "domain": "health",
+      "id": "preventive_inoculation",
+      "name": "Preventive Inoculation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pictographic_records.png",
+      "description": "Marks begin preserving categories, events, and obligations rather than quantities alone.",
+      "domain": "knowledge",
+      "id": "pictographic_records",
+      "name": "Pictographic Records",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/place_value.png",
+      "description": "Written position carries numerical meaning, making large calculations compact and checkable.",
+      "domain": "knowledge",
+      "id": "place_value",
+      "name": "Place-Value Calculation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/phonetic_notation.png",
+      "description": "Written signs represent speech sounds, allowing names and unfamiliar words to be preserved.",
+      "domain": "knowledge",
+      "id": "phonetic_notation",
+      "name": "Phonetic Notation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/formal_archives.png",
+      "description": "Records receive durable copies, custodians, dates, and known places of storage.",
+      "domain": "knowledge",
+      "id": "formal_archives",
+      "name": "Formal Archives",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geometric_survey.png",
+      "description": "Angles, baselines, and repeatable procedures turn land measurement into geometry.",
+      "domain": "knowledge",
+      "id": "geometric_survey",
+      "name": "Geometric Survey",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/regional_maps.png",
+      "description": "Routes, settlements, waters, elevations, and borders are reconciled onto shared surfaces.",
+      "domain": "knowledge",
+      "id": "regional_maps",
+      "name": "Regional Maps",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_schools.png",
+      "description": "Teaching is organized beyond households and occupations, widening access to preserved knowledge.",
+      "domain": "knowledge",
+      "id": "public_schools",
+      "name": "Public Instruction",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/paper_making.png",
+      "description": "Pulped fibers are formed into light sheets suitable for dense records and wide circulation.",
+      "domain": "knowledge",
+      "id": "paper_making",
+      "name": "Sheet Fiber Writing Material",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/printing_process.png",
+      "description": "Reusable forms reproduce texts and diagrams faster than individual copying.",
+      "domain": "knowledge",
+      "id": "printing_process",
+      "name": "Repeatable Printing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/experimental_controls.png",
+      "description": "Investigators deliberately vary one condition while holding others stable and preserve failed trials.",
+      "domain": "knowledge",
+      "id": "experimental_controls",
+      "name": "Experimental Controls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/statistical_inference.png",
+      "description": "Variation across many observations is measured rather than dismissed as noise.",
+      "domain": "knowledge",
+      "id": "statistical_inference",
+      "name": "Statistical Inference",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/household_councils.png",
+      "description": "Households send recognized speakers to settle shared work and recurring disputes.",
+      "domain": "institutions",
+      "id": "household_councils",
+      "name": "Household Councils",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/census_rolls.png",
+      "description": "Households, ages, dependents, occupations, and obligations are counted by name.",
+      "domain": "institutions",
+      "id": "census_rolls",
+      "name": "Household Census Rolls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_levies.png",
+      "description": "Public labor and material obligations become scheduled, recorded, and appealable.",
+      "domain": "institutions",
+      "id": "public_levies",
+      "name": "Scheduled Public Levies",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/specialized_courts.png",
+      "description": "Different disputes are heard through preserved procedures by people trained for the matter.",
+      "domain": "institutions",
+      "id": "specialized_courts",
+      "name": "Specialized Courts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/property_registers.png",
+      "description": "Claims to fields, water, workshops, and buildings are tied to maps and archived decisions.",
+      "domain": "institutions",
+      "id": "property_registers",
+      "name": "Property Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/craft_guilds.png",
+      "description": "Makers regulate apprenticeship, quality, mutual aid, and access to specialized work.",
+      "domain": "institutions",
+      "id": "craft_guilds",
+      "name": "Craft Guilds",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_credit.png",
+      "description": "Future tax and store revenues support present projects through recorded obligations.",
+      "domain": "institutions",
+      "id": "public_credit",
+      "name": "Public Credit",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/risk_pools.png",
+      "description": "Many households contribute to reserves that absorb rare fires, deaths, wrecks, and failed harvests.",
+      "domain": "institutions",
+      "id": "risk_pools",
+      "name": "Mutual Risk Pools",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/professional_service.png",
+      "description": "Offices preserve procedures and train successors independently of individual rulers.",
+      "domain": "institutions",
+      "id": "professional_service",
+      "name": "Professional Civil Service",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/graded_roads.png",
+      "description": "Road surfaces are crowned, drained, and repaired according to traffic and terrain.",
+      "domain": "infrastructure",
+      "id": "graded_roads",
+      "name": "Graded Roads",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_bridges.png",
+      "description": "Standard trusses carry roads across water and unstable ground.",
+      "domain": "infrastructure",
+      "id": "timber_bridges",
+      "name": "Timber Bridges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/canal_locks.png",
+      "description": "Gated chambers raise and lower vessels between controlled water levels.",
+      "domain": "infrastructure",
+      "id": "canal_locks",
+      "name": "Canal Locks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_mills.png",
+      "description": "Controlled water flow supplies continuous rotary power to milling and workshops.",
+      "domain": "infrastructure",
+      "id": "water_mills",
+      "name": "Water-Powered Mills",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/urban_street_plans.png",
+      "description": "Growth corridors, markets, drainage, firebreaks, and public ways are reserved before building closes them.",
+      "domain": "infrastructure",
+      "id": "urban_street_plans",
+      "name": "Urban Street Plans",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/covered_sewers.png",
+      "description": "Enclosed channels move waste away from dense settlement while inspection points permit maintenance.",
+      "domain": "infrastructure",
+      "id": "covered_sewers",
+      "name": "Covered Sewers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/precision_machinery.png",
+      "description": "Measured components, bearings, guides, and cutting tools reproduce controlled motion.",
+      "domain": "infrastructure",
+      "id": "precision_machinery",
+      "name": "Precision Machinery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hafted_weapons.png",
+      "description": "Tool hafting is adapted into balanced thrusting weapons whose bindings survive repeated impact.",
+      "domain": "security",
+      "id": "hafted_weapons",
+      "name": "Hafted Weapons",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bow_craft.png",
+      "description": "Bow woods, strings, draw lengths, and arrow shafts are matched deliberately for reliable military use.",
+      "domain": "security",
+      "id": "bow_craft",
+      "name": "War Bow Craft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shield_wall.png",
+      "description": "Overlapping shields and ranked spears turn individual fighters into a mutually supporting line.",
+      "domain": "security",
+      "id": "shield_wall",
+      "name": "Shield-Wall Discipline",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/field_fortifications.png",
+      "description": "Ditches, stakes, banks, and controlled approaches turn temporary camps into defensible ground.",
+      "domain": "security",
+      "id": "field_fortifications",
+      "name": "Field Fortifications",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fortified_stores.png",
+      "description": "Critical reserves are separated, guarded, fire-protected, and designed to resist seizure.",
+      "domain": "security",
+      "id": "fortified_stores",
+      "name": "Fortified Stores",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/siege_engineering.png",
+      "description": "Measured frames, counterweights, protective works, and supply schedules organize attacks on fortifications.",
+      "domain": "security",
+      "id": "siege_engineering",
+      "name": "Siege Engineering",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bronze_weaponry.png",
+      "description": "Standard molds, alloy proportions, edges, fittings, and shields make metal arms reproducible at military scale.",
+      "domain": "security",
+      "id": "bronze_weaponry",
+      "name": "Standardized Bronze Arms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/professional_corps.png",
+      "description": "A permanent body trains, records equipment, maintains readiness, and preserves doctrine.",
+      "domain": "security",
+      "id": "professional_corps",
+      "name": "Professional Military Corps",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/military_staffs.png",
+      "description": "Specialized officers reconcile intelligence, movement, stores, terrain, and timing before orders are issued.",
+      "domain": "security",
+      "id": "military_staffs",
+      "name": "Military Staff Planning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/battlefield_medicine.png",
+      "description": "Triage, evacuation, clean instruments, and organized convalescence reduce deaths after injury.",
+      "domain": "security",
+      "id": "battlefield_medicine",
+      "name": "Battlefield Medicine",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/powder_artillery.png",
+      "description": "Controlled powder charges propel standardized projectiles from reinforced barrels.",
+      "domain": "security",
+      "id": "powder_artillery",
+      "name": "Powder Artillery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/structural_steel.png",
+      "description": "Builders test and standardize structural steel frames before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "structural_steel",
+      "name": "Structural Steel Frames",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/reinforced_concrete.png",
+      "description": "Builders test and standardize reinforced concrete before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "reinforced_concrete",
+      "name": "Reinforced Concrete",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/safety_lifts.png",
+      "description": "Builders test and standardize safety lifts before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "safety_lifts",
+      "name": "Safety Lifts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/curtain_wall_systems.png",
+      "description": "Builders test and standardize glazed curtain walls before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "curtain_wall_systems",
+      "name": "Glazed Curtain Walls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pike_drill.png",
+      "description": "Develop and demonstrate pike formations through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "pike_drill",
+      "name": "Pike Formations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crossbow_mechanism.png",
+      "description": "Develop and demonstrate crossbow mechanisms through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "crossbow_mechanism",
+      "name": "Crossbow Mechanisms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/war_chariots.png",
+      "description": "Develop and demonstrate military chariots through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "war_chariots",
+      "name": "Military Chariots",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armored_riding.png",
+      "description": "Develop and demonstrate armored riding through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "armored_riding",
+      "name": "Armored Riding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/elephant_training.png",
+      "description": "Develop and demonstrate working elephant training through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "elephant_training",
+      "name": "Working Elephant Training",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/counterweight_engines.png",
+      "description": "Develop and demonstrate counterweight siege engines through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "counterweight_engines",
+      "name": "Counterweight Siege Engines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/matchlock_drill.png",
+      "description": "Develop and demonstrate matchlock arms and drill through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "matchlock_drill",
+      "name": "Matchlock Arms and Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mounted_firearms.png",
+      "description": "Develop and demonstrate mounted firearms through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "mounted_firearms",
+      "name": "Mounted Firearms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/galley_navigation.png",
+      "description": "Develop and demonstrate galley navigation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "galley_navigation",
+      "name": "Galley Navigation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_arsenals.png",
+      "description": "Develop and demonstrate naval arsenals through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_arsenals",
+      "name": "Naval Arsenals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ocean_sailing.png",
+      "description": "Develop and demonstrate ocean sailing through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "ocean_sailing",
+      "name": "Ocean Sailing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_gunnery.png",
+      "description": "Develop and demonstrate naval gunnery through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_gunnery",
+      "name": "Naval Gunnery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steam_propulsion.png",
+      "description": "Develop and demonstrate steam propulsion through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "steam_propulsion",
+      "name": "Steam Propulsion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armored_hulls.png",
+      "description": "Develop and demonstrate armored hulls through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "armored_hulls",
+      "name": "Armored Hulls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_torpedoes.png",
+      "description": "Develop and demonstrate naval torpedoes through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_torpedoes",
+      "name": "Naval Torpedoes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_fire_control.png",
+      "description": "Develop and demonstrate naval fire control through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_fire_control",
+      "name": "Naval Fire Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/submersible_hulls.png",
+      "description": "Develop and demonstrate submersible hulls through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "submersible_hulls",
+      "name": "Submersible Hulls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_logistics.png",
+      "description": "Develop and demonstrate fleet replenishment through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_logistics",
+      "name": "Fleet Replenishment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aerostat_observation.png",
+      "description": "Develop and demonstrate aerostat observation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "aerostat_observation",
+      "name": "Aerostat Observation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fuel_refining.png",
+      "description": "Develop and demonstrate liquid fuel refining through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "fuel_refining",
+      "name": "Liquid Fuel Refining",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/powered_flight.png",
+      "description": "Develop and demonstrate powered flight through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "powered_flight",
+      "name": "Powered Flight",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fighter_tactics.png",
+      "description": "Develop and demonstrate fighter tactics through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "fighter_tactics",
+      "name": "Fighter Tactics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aerial_bombardment.png",
+      "description": "Develop and demonstrate aerial bombardment through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "aerial_bombardment",
+      "name": "Aerial Bombardment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/advanced_airframes.png",
+      "description": "Develop and demonstrate advanced airframes through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "advanced_airframes",
+      "name": "Advanced Airframes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_aviation.png",
+      "description": "Develop and demonstrate naval aviation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_aviation",
+      "name": "Naval Aviation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/carrier_aviation.png",
+      "description": "Develop and demonstrate carrier aviation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "carrier_aviation",
+      "name": "Carrier Aviation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/airborne_operations.png",
+      "description": "Develop and demonstrate airborne operations through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "airborne_operations",
+      "name": "Airborne Operations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/amphibious_operations.png",
+      "description": "Develop and demonstrate amphibious operations through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "amphibious_operations",
+      "name": "Amphibious Operations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/jet_propulsion.png",
+      "description": "Develop and demonstrate jet propulsion through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "jet_propulsion",
+      "name": "Jet Propulsion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rotary_wing.png",
+      "description": "Develop and demonstrate rotary-wing flight through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "rotary_wing",
+      "name": "Rotary-Wing Flight",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/guided_weapons.png",
+      "description": "Develop and demonstrate guided weapons through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "guided_weapons",
+      "name": "Guided Weapons",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_missiles.png",
+      "description": "Develop and demonstrate naval missiles through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_missiles",
+      "name": "Naval Missiles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nuclear_propulsion.png",
+      "description": "Develop and demonstrate nuclear propulsion through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "nuclear_propulsion",
+      "name": "Nuclear Propulsion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/remote_aircraft.png",
+      "description": "Develop and demonstrate remote aircraft through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "remote_aircraft",
+      "name": "Remote Aircraft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rifled_barrels.png",
+      "description": "Reliable rifled barrels allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "rifled_barrels",
+      "name": "Rifled Barrels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/metallic_cartridges.png",
+      "description": "Reliable metallic cartridges allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "metallic_cartridges",
+      "name": "Metallic Cartridges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/automatic_actions.png",
+      "description": "Reliable automatic firearms allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "automatic_actions",
+      "name": "Automatic Firearms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/internal_combustion.png",
+      "description": "Reliable internal combustion engines allow standardized military equipment and specialist training.",
+      "domain": "production",
+      "id": "internal_combustion",
+      "name": "Internal Combustion Engines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armored_vehicles.png",
+      "description": "Reliable armored fighting vehicles allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "armored_vehicles",
+      "name": "Armored Fighting Vehicles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/indirect_fire.png",
+      "description": "Reliable indirect artillery fire allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "indirect_fire",
+      "name": "Indirect Artillery Fire",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armor_piercing_weapons.png",
+      "description": "Reliable armor-piercing weapons allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "armor_piercing_weapons",
+      "name": "Armor-Piercing Weapons",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/atomic_physics.png",
+      "description": "Spectra and charged-particle experiments support models of atomic structure.",
+      "domain": "knowledge",
+      "id": "atomic_physics",
+      "name": "Atomic Physics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/reactor_engineering.png",
+      "description": "Reaction control, cooling, containment and instrumentation are combined into a reactor design; operation still needs a constructed plant and fuel.",
+      "domain": "production",
+      "id": "reactor_engineering",
+      "name": "Controlled Nuclear Reactors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/festival_calendar.png",
+      "description": "Seasonal gatherings coordinate shared labor and bring scattered households together.",
+      "domain": "culture",
+      "id": "festival_calendar",
+      "name": "Festival Calendar",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/oral_epics.png",
+      "description": "Trained reciters preserve long accounts through rhythm, performance, and correction by listeners.",
+      "domain": "culture",
+      "id": "oral_epics",
+      "name": "Oral Epics",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_theatre.png",
+      "description": "Dedicated performance spaces bring stories, criticism, and public argument to larger audiences.",
+      "domain": "culture",
+      "id": "public_theatre",
+      "name": "Public Theatre",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/civic_games.png",
+      "description": "Agreed rules and measured contests create shared occasions across settlement rivalries.",
+      "domain": "culture",
+      "id": "civic_games",
+      "name": "Civic Games",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/comparative_chronicles.png",
+      "description": "Competing written accounts are checked against dates and records rather than repeating one official memory.",
+      "domain": "culture",
+      "id": "comparative_chronicles",
+      "name": "Comparative Chronicles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_libraries.png",
+      "description": "Catalogued shared collections let readers outside elite households compare and teach competing ideas.",
+      "domain": "culture",
+      "id": "public_libraries",
+      "name": "Public Libraries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crew_handoffs.png",
+      "description": "Checked tallies let the next crew continue unfinished work without duplicating the previous shift.",
+      "domain": "labor",
+      "id": "crew_handoffs",
+      "name": "Crew Handoffs",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/apprentice_contracts.png",
+      "description": "Agreed training duties and demonstrations of competence preserve skilled work across generations.",
+      "domain": "labor",
+      "id": "apprentice_contracts",
+      "name": "Apprentice Contracts",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/work_rest_limits.png",
+      "description": "Comparing fatigue and injury sets limits on continuous work, trading immediate hours for sustained output.",
+      "domain": "labor",
+      "id": "work_rest_limits",
+      "name": "Work and Rest Limits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/work_motion_studies.png",
+      "description": "Measured comparisons of tool placement and repeated movements reduce wasted effort at workshops.",
+      "domain": "labor",
+      "id": "work_motion_studies",
+      "name": "Work Motion Studies",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shared_childcare.png",
+      "description": "Households share supervised care so children remain attended while caregivers rotate necessary work.",
+      "domain": "demography",
+      "id": "shared_childcare",
+      "name": "Shared Childcare",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/maternal_recovery.png",
+      "description": "Food and relief from heavy work support recovery after birth rather than an immediate return to full workloads.",
+      "domain": "demography",
+      "id": "maternal_recovery",
+      "name": "Maternal Recovery Care",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/child_growth_records.png",
+      "description": "Repeated measurements reveal poor growth before severe illness and help direct scarce food and care.",
+      "domain": "demography",
+      "id": "child_growth_records",
+      "name": "Child Growth Records",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/household_space_planning.png",
+      "description": "Sleeping space, ventilation, and care areas are planned around household needs rather than floor area alone.",
+      "domain": "demography",
+      "id": "household_space_planning",
+      "name": "Household Space Planning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wayfinding_stars.png",
+      "description": "Recognized stars and seasonal sky changes help travelers keep direction when landmarks disappear.",
+      "domain": "logistics",
+      "id": "wayfinding_stars",
+      "name": "Celestial Wayfinding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/caravanserais.png",
+      "description": "Maintained stopping places offer shelter, protected stores, and rest along established overland trade routes.",
+      "domain": "logistics",
+      "id": "caravanserais",
+      "name": "Caravanserais",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/counterweight_cranes.png",
+      "description": "Counterweights and controlled lifting tackle let crews handle heavier loads at transfer points.",
+      "domain": "logistics",
+      "id": "counterweight_cranes",
+      "name": "Counterweight Cranes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cargo_seals.png",
+      "description": "Marked seals allow comparison of dispatched and received cargo to identify losses along a route.",
+      "domain": "logistics",
+      "id": "cargo_seals",
+      "name": "Cargo Seals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/root_cellars.png",
+      "description": "Below-ground stores buffer temperature swings while drainage keeps stored roots away from standing water.",
+      "domain": "nutrition",
+      "id": "root_cellars",
+      "name": "Root Cellars",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/raised_granaries.png",
+      "description": "Raised floors and separated supports keep grain away from damp ground and make animal access harder.",
+      "domain": "nutrition",
+      "id": "raised_granaries",
+      "name": "Raised Granaries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hermetic_grain_storage.png",
+      "description": "Dry grain is enclosed in carefully sealed containers instead of repeatedly exposing the whole reserve.",
+      "domain": "nutrition",
+      "id": "hermetic_grain_storage",
+      "name": "Hermetic Grain Storage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/brine_fermentation.png",
+      "description": "Repeated batches compare salt concentration, vessel care and keeping time for fermented vegetables.",
+      "domain": "nutrition",
+      "id": "brine_fermentation",
+      "name": "Brine Fermentation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vinegar_pickling.png",
+      "description": "Soured fermented liquids are reused in measured batches to keep plant foods longer.",
+      "domain": "nutrition",
+      "id": "vinegar_pickling",
+      "name": "Vinegar Pickling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stock_rotation.png",
+      "description": "Storekeepers mark incoming batches and issue older usable stock before new deliveries.",
+      "domain": "nutrition",
+      "id": "stock_rotation",
+      "name": "Dated Stock Rotation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/protected_wellheads.png",
+      "description": "Raised well rims, covers and drainage carry dirty surface water away from the opening.",
+      "domain": "health",
+      "id": "protected_wellheads",
+      "name": "Protected Wellheads",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rainwater_cisterns.png",
+      "description": "Catchment surfaces feed lined reserves that retain water between rainfalls.",
+      "domain": "infrastructure",
+      "id": "rainwater_cisterns",
+      "name": "Rainwater Cisterns",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_settling_basins.png",
+      "description": "Water rests in separate basins before the clearer upper portion is drawn off.",
+      "domain": "health",
+      "id": "water_settling_basins",
+      "name": "Water Settling Basins",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/slow_sand_filtration.png",
+      "description": "Operators compare water passed slowly through maintained sand beds and clean the beds without abandoning their working layer.",
+      "domain": "health",
+      "id": "slow_sand_filtration",
+      "name": "Slow Sand Filtration",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_service_inspections.png",
+      "description": "Regular checks connect damaged intakes, dirty containers and repair records with recurring water complaints.",
+      "domain": "health",
+      "id": "water_service_inspections",
+      "name": "Water Service Inspections",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/separate_clean_water_storage.png",
+      "description": "Dedicated covered vessels and separate dipping tools prevent cleaned water from being mixed with untreated supplies.",
+      "domain": "health",
+      "id": "separate_clean_water_storage",
+      "name": "Separate Clean-Water Storage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/skirmish_pair_drill.png",
+      "description": "Partners practice alternating observation and movement so a dispersed screen can remain mutually supporting.",
+      "domain": "security",
+      "id": "skirmish_pair_drill",
+      "name": "Skirmish Pair Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mounted_remount_school.png",
+      "description": "Experienced handlers teach riders to change mounts, check tack and manage a working remount string.",
+      "domain": "security",
+      "id": "mounted_remount_school",
+      "name": "Mounted Remount School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/siege_crew_rehearsals.png",
+      "description": "Crews rehearse assembly, safe loading and coordinated operation before transporting engines into a siege.",
+      "domain": "security",
+      "id": "siege_crew_rehearsals",
+      "name": "Siege Crew Rehearsals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mountain_field_school.png",
+      "description": "Instructors teach route selection, load distribution and group movement over steep broken ground.",
+      "domain": "security",
+      "id": "mountain_field_school",
+      "name": "Mountain Field School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/range_estimation_drill.png",
+      "description": "Measured ranges and repeated observation teach shooters to estimate distance and correct their aim.",
+      "domain": "security",
+      "id": "range_estimation_drill",
+      "name": "Range Estimation Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gun_detachment_school.png",
+      "description": "Gun detachments rehearse loading, laying and withdrawal with assigned duties and inspected equipment.",
+      "domain": "security",
+      "id": "gun_detachment_school",
+      "name": "Gun Detachment School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/engineer_demonstration_ranges.png",
+      "description": "Instructors use controlled obstacles and repeated demonstrations to teach field engineering procedures.",
+      "domain": "security",
+      "id": "engineer_demonstration_ranges",
+      "name": "Engineer Demonstration Ranges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanized_crew_school.png",
+      "description": "Drivers, mechanics and commanders train together on servicing routines and coordinated vehicle movement.",
+      "domain": "security",
+      "id": "mechanized_crew_school",
+      "name": "Mechanized Crew School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/glassmaking.png",
+      "description": "Silica mixtures are heated and cooled into reproducible glass for vessels and optical work.",
+      "domain": "production",
+      "id": "glassmaking",
+      "name": "Glassmaking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/optical_lenses.png",
+      "description": "Curved transparent surfaces are ground and compared for repeatable magnification and focus.",
+      "domain": "knowledge",
+      "id": "optical_lenses",
+      "name": "Optical Lenses",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/experimental_optics.png",
+      "description": "Controlled light paths distinguish reflection, refraction and interference effects.",
+      "domain": "knowledge",
+      "id": "experimental_optics",
+      "name": "Experimental Optics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vacuum_pumps.png",
+      "description": "Fitted pumps and seals remove air from experimental chambers.",
+      "domain": "knowledge",
+      "id": "vacuum_pumps",
+      "name": "Vacuum Pumps",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vacuum_experiments.png",
+      "description": "Pressure is varied systematically while other chamber conditions are recorded.",
+      "domain": "knowledge",
+      "id": "vacuum_experiments",
+      "name": "Vacuum Experiments",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/precision_thermometry.png",
+      "description": "Reproducible temperature scales let observers compare heating and cooling experiments.",
+      "domain": "knowledge",
+      "id": "precision_thermometry",
+      "name": "Precision Thermometry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/calorimetry.png",
+      "description": "Measured heat exchanges distinguish temperature from the quantity of energy transferred.",
+      "domain": "knowledge",
+      "id": "calorimetry",
+      "name": "Calorimetry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/heat_engine_cycles.png",
+      "description": "Comparisons of compression, heating and expansion relate fuel use to mechanical work.",
+      "domain": "knowledge",
+      "id": "heat_engine_cycles",
+      "name": "Heat Engine Cycles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pressure_vessels.png",
+      "description": "Joined vessels are tested against internal pressure before use in engines and experiments.",
+      "domain": "production",
+      "id": "pressure_vessels",
+      "name": "Pressure Vessels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/chemical_distillation.png",
+      "description": "Vapors are condensed separately from their heated mixtures to recover different fractions.",
+      "domain": "production",
+      "id": "chemical_distillation",
+      "name": "Chemical Distillation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fractional_distillation.png",
+      "description": "Repeated vapor-liquid contact separates mixtures by measured boiling behavior.",
+      "domain": "production",
+      "id": "fractional_distillation",
+      "name": "Fractional Distillation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrochemical_cells.png",
+      "description": "Paired materials and electrolytes produce repeatable electrical currents for experiments.",
+      "domain": "knowledge",
+      "id": "electrochemical_cells",
+      "name": "Electrochemical Cells",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrical_measurement.png",
+      "description": "Current, potential difference and resistance are compared using calibrated instruments.",
+      "domain": "knowledge",
+      "id": "electrical_measurement",
+      "name": "Electrical Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electromagnetic_induction.png",
+      "description": "Changing magnetic conditions produce measurable electrical currents in conducting circuits.",
+      "domain": "knowledge",
+      "id": "electromagnetic_induction",
+      "name": "Electromagnetic Induction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrical_generators.png",
+      "description": "Rotating magnetic machinery converts mechanical input into sustained electrical output.",
+      "domain": "production",
+      "id": "electrical_generators",
+      "name": "Electrical Generators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_motors.png",
+      "description": "Controlled current and magnetic forces produce repeatable rotary mechanical work.",
+      "domain": "production",
+      "id": "electric_motors",
+      "name": "Electric Motors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spectroscopy.png",
+      "description": "Separated light patterns are compared to distinguish emitting and absorbing materials.",
+      "domain": "knowledge",
+      "id": "spectroscopy",
+      "name": "Spectroscopy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electron_physics.png",
+      "description": "Experiments with discharge and charged particles establish reproducible electronic behavior.",
+      "domain": "knowledge",
+      "id": "electron_physics",
+      "name": "Electron Physics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/radiation_measurement.png",
+      "description": "Shielded detectors and counted events distinguish radiation exposure from instrumental background.",
+      "domain": "knowledge",
+      "id": "radiation_measurement",
+      "name": "Radiation Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nuclear_fission.png",
+      "description": "Measured nuclear fragmentation connects reaction products, released energy and neutron production.",
+      "domain": "knowledge",
+      "id": "nuclear_fission",
+      "name": "Nuclear Fission",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/neutron_moderation.png",
+      "description": "Materials are compared for how they slow and absorb neutrons in a controlled reaction system.",
+      "domain": "knowledge",
+      "id": "neutron_moderation",
+      "name": "Neutron Moderation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/structural_load_testing.png",
+      "description": "Repeatable loads reveal failure margins and fatigue in structural members.",
+      "domain": "knowledge",
+      "id": "structural_load_testing",
+      "name": "Structural Load Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aerodynamics.png",
+      "description": "Controlled flow measurements compare lift, drag and stability of candidate surfaces.",
+      "domain": "knowledge",
+      "id": "aerodynamics",
+      "name": "Aerodynamics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wind_tunnel_testing.png",
+      "description": "Powered test sections compare airframes under repeatable flow and measured loads.",
+      "domain": "knowledge",
+      "id": "wind_tunnel_testing",
+      "name": "Wind Tunnel Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_arc_furnaces.png",
+      "description": "An arc between carbon electrodes supplies controllable heat inside a refractory-lined steelmaking vessel.",
+      "domain": "production",
+      "id": "electric_arc_furnaces",
+      "name": "Electric Arc Furnaces",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanical_refrigeration.png",
+      "description": "Powered compression and expansion move heat from a storage enclosure into its surroundings.",
+      "domain": "infrastructure",
+      "id": "mechanical_refrigeration",
+      "name": "Mechanical Refrigeration",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steel_refining.png",
+      "description": "Controlled refining compares carbon content and the behavior of iron under working loads.",
+      "domain": "production",
+      "id": "steel_refining",
+      "name": "Steel Refining",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wire_drawing.png",
+      "description": "Successive dies reduce drawn metal to repeatable wire sections.",
+      "domain": "production",
+      "id": "wire_drawing",
+      "name": "Wire Drawing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cable_insulation.png",
+      "description": "Wrapped conductors and insulating compounds are tested against leakage and contact faults.",
+      "domain": "production",
+      "id": "cable_insulation",
+      "name": "Cable Insulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crystallography.png",
+      "description": "Repeated crystal faces and optical behavior suggest an ordered internal structure.",
+      "domain": "knowledge",
+      "id": "crystallography",
+      "name": "Crystallography",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/solid_state_physics.png",
+      "description": "Charge transport and thermal behavior are investigated in ordered solids rather than isolated atoms.",
+      "domain": "knowledge",
+      "id": "solid_state_physics",
+      "name": "Solid-State Physics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/band_theory.png",
+      "description": "Allowed and forbidden electronic energy ranges explain contrasting conducting behavior.",
+      "domain": "knowledge",
+      "id": "band_theory",
+      "name": "Electronic Band Theory",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/photoconductivity.png",
+      "description": "Illumination changes the measured conductivity of selected solids.",
+      "domain": "knowledge",
+      "id": "photoconductivity",
+      "name": "Photoconductivity",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/semiconductor_doping.png",
+      "description": "Controlled impurity additions alter charge-carrier populations in a semiconductor.",
+      "domain": "knowledge",
+      "id": "semiconductor_doping",
+      "name": "Semiconductor Doping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pn_junctions.png",
+      "description": "Joining differently doped regions establishes a built-in field and directional electrical behavior.",
+      "domain": "knowledge",
+      "id": "pn_junctions",
+      "name": "P–N Junctions",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/silicon_smelting.png",
+      "description": "Electrical furnace heat and carbon reduction produce a silicon feedstock from silica-bearing material.",
+      "domain": "production",
+      "id": "silicon_smelting",
+      "name": "Silicon Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/chlorosilane_purification.png",
+      "description": "A volatile chemical intermediate allows impurities to be separated before silicon is deposited again.",
+      "domain": "production",
+      "id": "chlorosilane_purification",
+      "name": "Chlorosilane Purification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/single_crystal_growth.png",
+      "description": "Controlled solidification extends a selected crystal orientation through a semiconductor boule.",
+      "domain": "production",
+      "id": "single_crystal_growth",
+      "name": "Single-Crystal Growth",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wafer_sawing.png",
+      "description": "Thin slices are cut from semiconductor boules, with abrasive loss and surface damage limiting usable output.",
+      "domain": "production",
+      "id": "wafer_sawing",
+      "name": "Semiconductor Wafer Sawing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/photovoltaic_conversion.png",
+      "description": "Illuminated material produces a measurable voltage and supplies current to an external load.",
+      "domain": "knowledge",
+      "id": "photovoltaic_conversion",
+      "name": "Photovoltaic Conversion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/solar_cell_fabrication.png",
+      "description": "Prepared wafer surfaces, junctions and metal contacts are combined into working photovoltaic cells.",
+      "domain": "production",
+      "id": "solar_cell_fabrication",
+      "name": "Solar Cell Fabrication",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/module_encapsulation.png",
+      "description": "Connected cells are enclosed behind protective glazing and mounted for outdoor electrical service.",
+      "domain": "production",
+      "id": "module_encapsulation",
+      "name": "Photovoltaic Module Encapsulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/photovoltaic_power.png",
+      "description": "Installed modules and wiring are commissioned as an operated source of electrical energy.",
+      "domain": "infrastructure",
+      "id": "photovoltaic_power",
+      "name": "Photovoltaic Power",
+      "status": "verified"
+    }
+  ],
+  "live_art_complete": false,
+  "live_count": 260,
+  "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
+  "queued_count": 253,
+  "schema": 1,
+  "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
+  "target_discoveries": 5000,
+  "verified_count": 7
+}

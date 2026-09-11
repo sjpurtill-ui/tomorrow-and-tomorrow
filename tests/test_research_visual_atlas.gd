@@ -100,5 +100,23 @@ func test_every_research_field_has_a_distinct_painted_asset()->void:
 func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
 	GameState.known_discoveries.append("stone_sorting")
 	var view:=fixture();view.set_view("known");view.select("stone_sorting")
-	assert_str(view.bindings.stone_sorting.painting.texture.resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
-	assert_str(view.detail_body.get_child(0).texture.resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+	assert_str(view.bindings.stone_sorting.painting.texture.resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
+	assert_str(view.detail_body.get_child(0).texture.resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
+
+func test_reviewed_paper_images_are_specific_and_preserve_the_full_square()->void:
+	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
+	for id:String in ["stone_sorting","apprentice_contracts","oral_epics","festival_calendar","wayfinding_stars","photovoltaic_power","public_schools"]:
+		var item:Dictionary={"id":id,"domain":"knowledge","exposed":true}
+		var picture:=Art.paint_discovery(parent,item,104)
+		assert_str(picture.texture.resource_path).is_equal("res://assets/ui/research/paper/"+id+".png")
+		assert_int(picture.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
+		assert_bool(picture.has_node("PaperMat")).is_true()
+		assert_bool(picture.has_node("FieldIllustrationCaption")).is_false()
+		item.exposed=false
+		assert_str(Art.subject_art_key(item)).is_empty()
+
+func test_missing_subject_art_retains_an_explicit_field_fallback()->void:
+	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
+	var picture:=Art.paint_discovery(parent,{"id":"single_crystal_growth","domain":"production","exposed":true},104)
+	assert_bool(picture.has_node("FieldIllustrationCaption")).is_true()
+	assert_str(picture.texture.resource_path).is_equal("res://assets/ui/research/production-v1.png")

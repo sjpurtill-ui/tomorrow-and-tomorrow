@@ -3,8 +3,10 @@ const T=preload("res://scripts/hud/hud_tokens.gd")
 const NAMES:={"demography":"People & homes","nutrition":"Food & farming","health":"Health & care","labor":"Work & tools","knowledge":"Learning & records","production":"Craft & industry","infrastructure":"Water & building","logistics":"Transport & supply","ecology":"Land & nature","institutions":"Government","security":"Defense","culture":"Culture & memory"}
 const COLORS:={"demography":Color("cf9c78"),"nutrition":Color("adbb77"),"health":Color("92c1ab"),"labor":Color("d5b57d"),"knowledge":Color("9db9d7"),"production":Color("d6a36d"),"infrastructure":Color("90bccc"),"logistics":Color("b7af83"),"ecology":Color("84b895"),"institutions":Color("baa2cd"),"security":Color("d28c7c"),"culture":Color("c29cb0")}
 # Explicit topic assignments; never infer a specific invention from its broad field.
-const DISCOVERY_ART:={"stone_sorting":"stone-selection-v1"}
+const DISCOVERY_ART:={"stone_sorting":"paper/stone_sorting", "apprentice_contracts":"paper/apprentice_contracts", "oral_epics":"paper/oral_epics", "festival_calendar":"paper/festival_calendar", "wayfinding_stars":"paper/wayfinding_stars", "photovoltaic_power":"paper/photovoltaic_power", "public_schools":"paper/public_schools"}
+const SUBJECT_CACHE_LIMIT:=24
 static var textures:Dictionary={}
+static var subject_order:Array[String]=[]
 static func art(domain:String)->Texture2D:
 	if not textures.has(domain):
 		var path:="res://assets/ui/research/%s-v1.png" % domain
@@ -17,10 +19,18 @@ static func for_discovery(item:Dictionary)->Texture2D:
 	var key:=subject_art_key(item)
 	if key=="":return art(String(item.get("domain",item.get("dynamic","knowledge"))))
 	if not textures.has(key):textures[key]=load("res://assets/ui/research/%s.png" % key)
+	subject_order.erase(key);subject_order.append(key)
+	while subject_order.size()>SUBJECT_CACHE_LIMIT:textures.erase(subject_order.pop_front())
 	return textures[key]
 static func paint_discovery(parent:Node,item:Dictionary,height:float=96)->TextureRect:
 	var image:=paint(parent,String(item.get("domain",item.get("dynamic","knowledge"))),height)
 	image.texture=for_discovery(item)
+	if subject_art_key(item).begins_with("paper/"):
+		# Preserve the empty paper and low subject instead of center-cropping.
+		image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		var mat:=ColorRect.new();mat.name="PaperMat";mat.color=Color("f1eee8")
+		mat.mouse_filter=Control.MOUSE_FILTER_IGNORE;mat.show_behind_parent=true
+		image.add_child(mat);mat.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if subject_art_key(item)=="":
 		var caption:=label(image,"FIELD ILLUSTRATION",10,T.INK)
 		caption.name="FieldIllustrationCaption";caption.position=Vector2(8,8)

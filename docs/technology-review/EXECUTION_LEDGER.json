@@ -22,7 +22,8 @@
     "commissioned primary-settlement power, cooling and workshop services",
     "Shared daily electrical budget for powered manufacturing; electric-arc steel alternative",
     "Bilateral joint investigations with two physical delegations, local contribution, and reciprocal validation",
-    "Fourteen semiconductor/photovoltaic discoveries, six linked manufactured intermediates, solar-first daily generation"
+    "Fourteen semiconductor/photovoltaic discoveries, six linked manufactured intermediates, solar-first daily generation",
+    "Seven reviewed paper-and-gouache subject images with full-square presentation and a live art queue"
   ],
   "unfinished": [
     "Remaining 4740 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
@@ -44,5 +45,13 @@
     "No player launches or stopping user sessions",
     "Keep checkpoints in this worktree; preserve generated untracked UID files",
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
-  ]
+  ],
+  "art": {
+    "live_subjects": 260,
+    "verified_subject_images": 7,
+    "queued_live_images": 253,
+    "target_subject_images": 5000,
+    "complete": false,
+    "manifest": "assets/ui/research/paper/catalog.json"
+  }
 }
