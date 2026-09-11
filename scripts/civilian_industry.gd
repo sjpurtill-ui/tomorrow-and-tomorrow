@@ -2,6 +2,16 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"relay_logic_modules":{"name": "Relay logic assemblies", "output": "Logic Modules", "gate": "relay_logic", "materials": {"Relays": 3.0, "Copper Wire": 0.5}, "days": 3.0, "tooling": {"Wrought Iron": 2.0, "Timber": 2.0}},
+	"diode_logic_modules":{"name": "Diode logic assemblies", "output": "Logic Modules", "gate": "diode_logic", "materials": {"Silicon Diodes": 3.0, "Resistors": 2.0, "Copper Wire": 0.3}, "days": 2.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"transistor_inverters":{"name": "Transistor inverter assemblies", "output": "Inverter Modules", "gate": "transistor_inverters", "materials": {"Transistors": 1.0, "Resistors": 2.0, "Copper Wire": 0.2}, "days": 2.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"bistable_modules":{"name": "Bistable storage assemblies", "output": "Bistable Modules", "gate": "bistable_multivibrators", "materials": {"Inverter Modules": 2.0, "Resistors": 2.0, "Copper Wire": 0.2}, "days": 2.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"binary_counter_modules":{"name": "Binary counter assemblies", "output": "Counter Modules", "gate": "binary_counters", "materials": {"Bistable Modules": 2.0, "Capacitors": 1.0, "Copper Wire": 0.5}, "days": 3.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"shift_register_modules":{"name": "Shift register assemblies", "output": "Register Modules", "gate": "shift_registers", "materials": {"Bistable Modules": 2.0, "Inverter Modules": 1.0, "Copper Wire": 0.5}, "days": 3.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"relay_adders":{"name": "Relay arithmetic assemblies", "output": "Adder Modules", "gate": "binary_adders", "materials": {"Logic Modules": 5.0, "Relays": 2.0, "Copper Wire": 1.0}, "days": 5.0, "tooling": {"Wrought Iron": 3.0, "Timber": 2.0}},
+	"semiconductor_adders":{"name": "Semiconductor arithmetic assemblies", "output": "Adder Modules", "gate": "binary_adders", "materials": {"Logic Modules": 3.0, "Inverter Modules": 1.0, "Copper Wire": 0.5}, "days": 3.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"sequence_controllers":{"name": "Hardwired sequence controllers", "output": "Sequence Controllers", "gate": "hardwired_sequence_control", "materials": {"Counter Modules": 1.0, "Register Modules": 1.0, "Adder Modules": 1.0, "Electronic Controllers": 1.0, "Insulated Cable": 1.0}, "days": 6.0, "tooling": {"Steel": 3.0, "Optical Lenses": 1.0}},
+
 	"carbon_resistors":{"name": "Carbon resistors", "output": "Resistors", "gate": "carbon_resistors", "materials": {"Graphite": 0.1, "Clay": 0.2, "Copper Wire": 0.1}, "days": 2.0, "tooling": {"Clay": 2.0, "Refined Copper": 1.0}},
 	"foil_capacitors":{"name": "Paper-dielectric foil capacitors", "output": "Capacitors", "gate": "foil_capacitors", "materials": {"Refined Copper": 0.2, "Paper": 0.2, "Bitumen": 0.05}, "days": 2.0, "tooling": {"Wrought Iron": 2.0, "Timber": 2.0}},
 	"electromagnetic_relays":{"name": "Electromagnetic relays", "output": "Relays", "gate": "electromagnetic_relays", "materials": {"Wrought Iron": 0.5, "Copper Wire": 0.3, "Insulated Cable": 0.1}, "days": 3.0, "tooling": {"Wrought Iron": 3.0, "Timber": 2.0}},

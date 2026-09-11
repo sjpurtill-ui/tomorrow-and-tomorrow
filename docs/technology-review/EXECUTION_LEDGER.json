@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 392,
+    "live": 400,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -54,13 +54,14 @@
     "Six glassworking discoveries and eight recipes connect physical vessels, tubes and laboratory apparatus to alternative brine and silicon production setups with actual inputs and power",
     "Nine electronic component discoveries and a paid controller supply chain feed a fifth commissioned installation: operator- and power-limited electronic machine-control workshops",
     "AI paper demand follows physical upstream inputs and pays to retool finished civilian lines within existing workshop capacity",
-    "Thirty-two reviewed subject images, including foil capacitors, electromagnetic relays and wound transformers"
+    "Thirty-two reviewed subject images, including foil capacitors, electromagnetic relays and wound transformers",
+    "Eight digital-logic discoveries and nine paid component recipes reconverge on a sixth commissioned hardwired sequencing workshop, with relay arithmetic independent of semiconductor manufacture"
   ],
   "unfinished": [
-    "Remaining 4608 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4600 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
-    "Civilian and future operating models beyond five primary-settlement plants; solar weather, storage and night-time balancing",
+    "Civilian and future operating models beyond six primary-settlement plants; solar weather, storage and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 88 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline"
@@ -79,9 +80,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 392,
+    "live_subjects": 400,
     "verified_subject_images": 32,
-    "queued_live_images": 360,
+    "queued_live_images": 368,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

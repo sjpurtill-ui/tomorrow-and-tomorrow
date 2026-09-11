@@ -3136,12 +3136,76 @@
       "id": "electronic_machine_control",
       "name": "Electronic Machine Control",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relay_logic.png",
+      "description": "Series and parallel switch contacts implement repeatable conditions using relay states.",
+      "domain": "production",
+      "id": "relay_logic",
+      "name": "Relay Logic",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/diode_logic.png",
+      "description": "Networks of one-way junctions combine input levels; restoring or inverting a signal requires an active stage.",
+      "domain": "production",
+      "id": "diode_logic",
+      "name": "Diode Logic",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/transistor_inverters.png",
+      "description": "A switching transistor makes a high input produce a low output and restores a usable output level.",
+      "domain": "production",
+      "id": "transistor_inverters",
+      "name": "Transistor Inverters",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bistable_multivibrators.png",
+      "description": "Cross-coupled active stages retain one of two stable states until a switching input changes it.",
+      "domain": "production",
+      "id": "bistable_multivibrators",
+      "name": "Bistable Multivibrators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/binary_counters.png",
+      "description": "Linked bistable stages accumulate input pulses as a binary count.",
+      "domain": "production",
+      "id": "binary_counters",
+      "name": "Binary Counters",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shift_registers.png",
+      "description": "Clocked storage stages transfer a sequence of states one position at a time.",
+      "domain": "production",
+      "id": "shift_registers",
+      "name": "Shift Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/binary_adders.png",
+      "description": "Logic combinations produce a sum and carry from binary inputs; linked stages propagate the carry.",
+      "domain": "production",
+      "id": "binary_adders",
+      "name": "Binary Adders",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hardwired_sequence_control.png",
+      "description": "Counters, stored states and fixed logic advance machinery through a wired sequence of operations in response to measured inputs.",
+      "domain": "production",
+      "id": "hardwired_sequence_control",
+      "name": "Hardwired Sequence Control",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 392,
+  "live_count": 400,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 360,
+  "queued_count": 368,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
