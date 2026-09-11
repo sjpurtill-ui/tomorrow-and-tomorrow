@@ -198,6 +198,9 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 		preload("res://scripts/civilization_resources.gd").initialize(Vector2(origin.x,origin.z))
 	var events: Array[Dictionary] = []
 	var method_factors:Dictionary=preload("res://scripts/geoscience_knowledge.gd").factors()
+	# Filled only if this city still has an eligible recognition/survey task.
+	# Family practice changes during the pass and remains evaluated per deposit.
+	var survey_inputs:Dictionary={}
 	for deposit in WorldSimulation.state.resource_deposits:
 		_ensure_deposit_fields(deposit)
 		var resource_name: String = deposit.resource
@@ -206,17 +209,17 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 		var definition: Dictionary = catalog[resource_name]
 		if deposit.stage == "unknown":
 			if not recognition_ready(resource_name):continue
-			var survey_effort := WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor() * float(method_factors.get(resource_name,{}).get("recognition",1.0))
-			var nature_focus := float(WorldSimulation.state.research_allocations.get("ecology", 0)) * 0.15
-			var material_focus := float(WorldSimulation.state.research_allocations.get("production", 0)) * 0.12
-			deposit.clues += definition.base * (0.5 + survey_effort + nature_focus + material_focus) * _family_literacy(resource_name) * rng.randf_range(0.5, 1.5)
+			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
+			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("recognition",1.0))
+			deposit.clues += definition.base * (0.5 + survey_effort + float(survey_inputs.nature) + float(survey_inputs.material)) * _family_literacy(resource_name) * rng.randf_range(0.5, 1.5)
 			if deposit.clues >= 1.0:
 				deposit.stage = "recognized"
 				_gain_practice(resource_name,"recognition",0.12)
 				events.append(_event("Resource Indicated", "Evidence suggests %s is present. Its extent and accessibility remain unknown." % resource_name, deposit.id))
 		elif deposit.stage == "recognized":
-			var survey_effort := WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor() * float(method_factors.get(resource_name,{}).get("survey",1.0))
-			deposit.survey += definition.base * 0.55 * survey_effort * (1.0+WorldSimulation.discovery.effect("survey_speed")) * _family_literacy(resource_name) * rng.randf_range(0.7,1.3)
+			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
+			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("survey",1.0))
+			deposit.survey += definition.base * 0.55 * survey_effort * float(survey_inputs.speed) * _family_literacy(resource_name) * rng.randf_range(0.7,1.3)
 			if deposit.survey >= 1.0:
 				deposit.stage = "surveyed"
 				_gain_practice(resource_name,"survey",0.18)
@@ -736,3 +739,8 @@ func _abundance_label(deposit: Dictionary) -> String:
 	if effective >= 2500: return "common"
 	if effective >= 900: return "limited"
 	return "traces"
+
+# These inputs are invariant only within one local-city resource pass. Do not
+# cache them across days, city scopes, allocation changes or policy changes.
+func _local_survey_inputs()->Dictionary:
+	return {"effort":WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor(),"nature":float(WorldSimulation.state.research_allocations.get("ecology",0))*.15,"material":float(WorldSimulation.state.research_allocations.get("production",0))*.12,"speed":1.0+WorldSimulation.discovery.effect("survey_speed")}

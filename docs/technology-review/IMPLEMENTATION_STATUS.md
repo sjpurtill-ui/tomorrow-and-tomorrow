@@ -784,3 +784,12 @@ Validation: matched 400-day profiling-on/off runs completed with identical initi
 The measured secondary-city interval was 22.845% of total stage time, city trade 1.547%, primary morphology 0.699%. The endpoint has a primary settlement of 81.03 people/19 plots and a secondary of 40.70 people/13 plots. Secondary work includes its own economic and demographic simulation, so the prior broad settlement share did not establish that primary morphology was expensive. The next investigation should target repeated work within secondary-city processing while preserving its independent stocks and population. Concurrent load and the short horizon limit absolute timing conclusions.
 
 Shared conflicts: CivilizationDay and pacing harness. No canonical integration, player launch or performance-improvement claim. Catalog remains 383. The existing handle 29066 continues on its earlier loaded build; do not restart it or treat these finer timings as part of that run.
+
+
+## 68. Reuse invariant local survey inputs
+
+Base `d34336c`. Resource recognition/survey passes now lazily calculate effective survey workforce, policy factor, research focus and survey-speed effect once per local-city pass. No cross-city/day cache. Family literacy stays per-deposit because practice can change while iterating. Random draws, stage order, recognition gates and extraction remain intact. See [LOCAL_SURVEY_COST.md](LOCAL_SURVEY_COST.md).
+
+Validation: completed 400-day candidate exactly matches recorded initial/final/annual snapshots, discoveries and bottlenecks from the committed pre-change baseline, including both settlements. Archive: `pacing/survey-pass-comparison.json`. All 52 relevant tests pass (9 resource recognition, 12 geoscience, 12 city resources, 19 owned simulation), zero errors/failures/skips/orphans.
+
+This removes repeated workforce/modifier evaluation from the deposit loop. An overall wall-time speedup is not proven under concurrent load, and the short comparison does not prove all-state or millennial equivalence. The active handle 29066 was polled and remains live on older code; it does not incorporate this change. No save/interface changes or canonical integration. Shared conflict: ResourceSystem. Catalog remains 383; goal remains active.
