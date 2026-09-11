@@ -1,0 +1,818 @@
+{
+  "annual_snapshots": [
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 0,
+      "day": 0,
+      "food_days": 30.0,
+      "food_security": 0.82,
+      "knowledge_workers": 4,
+      "known": 0,
+      "population": 120,
+      "settled": false,
+      "year": 0.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 0,
+      "day": 1,
+      "food_days": 31.5185644344519,
+      "food_security": 0.824757128260138,
+      "knowledge_workers": 4,
+      "known": 0,
+      "population": 120,
+      "settled": true,
+      "year": 0.00273972602739726
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 365,
+      "food_days": 60.2330606598253,
+      "food_security": 0.979999999586313,
+      "knowledge_workers": 3,
+      "known": 0,
+      "population": 120,
+      "settled": true,
+      "year": 1.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 730,
+      "food_days": 74.1590887113149,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 0,
+      "population": 122,
+      "settled": true,
+      "year": 2.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 1095,
+      "food_days": 65.3306521225904,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 0,
+      "population": 125,
+      "settled": true,
+      "year": 3.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 1460,
+      "food_days": 65.2199007328647,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 0,
+      "population": 127,
+      "settled": true,
+      "year": 4.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 1825,
+      "food_days": 62.4526589817179,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 1,
+      "population": 128,
+      "settled": true,
+      "year": 5.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 2190,
+      "food_days": 61.4704424490688,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 2,
+      "population": 130,
+      "settled": true,
+      "year": 6.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 2555,
+      "food_days": 61.9423379485666,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 2,
+      "population": 132,
+      "settled": true,
+      "year": 7.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 2920,
+      "food_days": 58.0976067906277,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 2,
+      "population": 135,
+      "settled": true,
+      "year": 8.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 3285,
+      "food_days": 60.2939647207082,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 3,
+      "population": 137,
+      "settled": true,
+      "year": 9.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 3650,
+      "food_days": 54.1174818927425,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 3,
+      "population": 139,
+      "settled": true,
+      "year": 10.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 4015,
+      "food_days": 56.0760772672304,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 3,
+      "population": 142,
+      "settled": true,
+      "year": 11.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 4380,
+      "food_days": 48.0824329317806,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 4,
+      "population": 144,
+      "settled": true,
+      "year": 12.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 4745,
+      "food_days": 51.7252129059061,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 4,
+      "population": 147,
+      "settled": true,
+      "year": 13.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 5110,
+      "food_days": 47.4480080016862,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 5,
+      "population": 149,
+      "settled": true,
+      "year": 14.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 5475,
+      "food_days": 51.3135500808967,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 6,
+      "population": 152,
+      "settled": true,
+      "year": 15.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 5840,
+      "food_days": 51.4457069111649,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 9,
+      "population": 155,
+      "settled": true,
+      "year": 16.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 6205,
+      "food_days": 56.3436831908561,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 10,
+      "population": 158,
+      "settled": true,
+      "year": 17.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 6570,
+      "food_days": 61.0690735052667,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 10,
+      "population": 160,
+      "settled": true,
+      "year": 18.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 6935,
+      "food_days": 64.9645888868018,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 11,
+      "population": 163,
+      "settled": true,
+      "year": 19.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 7300,
+      "food_days": 71.8848426421759,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 12,
+      "population": 165,
+      "settled": true,
+      "year": 20.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 7665,
+      "food_days": 69.2641442794511,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 12,
+      "population": 169,
+      "settled": true,
+      "year": 21.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 8030,
+      "food_days": 72.4678408132616,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 14,
+      "population": 171,
+      "settled": true,
+      "year": 22.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 8395,
+      "food_days": 66.9760824733918,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 16,
+      "population": 174,
+      "settled": true,
+      "year": 23.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 8760,
+      "food_days": 65.2099508406141,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 16,
+      "population": 176,
+      "settled": true,
+      "year": 24.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 9125,
+      "food_days": 66.9902713898519,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 16,
+      "population": 179,
+      "settled": true,
+      "year": 25.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 9490,
+      "food_days": 70.3233409983999,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 17,
+      "population": 182,
+      "settled": true,
+      "year": 26.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 9855,
+      "food_days": 79.2266767831907,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 18,
+      "population": 184,
+      "settled": true,
+      "year": 27.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 10220,
+      "food_days": 87.7433902328185,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 19,
+      "population": 186,
+      "settled": true,
+      "year": 28.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 10585,
+      "food_days": 87.5605500630149,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 20,
+      "population": 189,
+      "settled": true,
+      "year": 29.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 10950,
+      "food_days": 91.9561886438291,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 20,
+      "population": 193,
+      "settled": true,
+      "year": 30.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 11315,
+      "food_days": 95.9280779300243,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 21,
+      "population": 194,
+      "settled": true,
+      "year": 31.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 11680,
+      "food_days": 93.7288406339997,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 21,
+      "population": 197,
+      "settled": true,
+      "year": 32.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 2,
+      "day": 12045,
+      "food_days": 98.6563095287007,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 21,
+      "population": 200,
+      "settled": true,
+      "year": 33.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 12410,
+      "food_days": 99.1545907246633,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 22,
+      "population": 203,
+      "settled": true,
+      "year": 34.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 12775,
+      "food_days": 106.558402325349,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 23,
+      "population": 206,
+      "settled": true,
+      "year": 35.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 13140,
+      "food_days": 105.274961656494,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 23,
+      "population": 207,
+      "settled": true,
+      "year": 36.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 13505,
+      "food_days": 105.999716333396,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 24,
+      "population": 210,
+      "settled": true,
+      "year": 37.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 13870,
+      "food_days": 105.697458163937,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 24,
+      "population": 213,
+      "settled": true,
+      "year": 38.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 14235,
+      "food_days": 105.510867325421,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 24,
+      "population": 215,
+      "settled": true,
+      "year": 39.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 14600,
+      "food_days": 105.323199388398,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 24,
+      "population": 217,
+      "settled": true,
+      "year": 40.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 14965,
+      "food_days": 105.037308882344,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 25,
+      "population": 221,
+      "settled": true,
+      "year": 41.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 15330,
+      "food_days": 104.809456967576,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 26,
+      "population": 223,
+      "settled": true,
+      "year": 42.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 15695,
+      "food_days": 104.565044880101,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 26,
+      "population": 225,
+      "settled": true,
+      "year": 43.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 16060,
+      "food_days": 104.294862848105,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 26,
+      "population": 228,
+      "settled": true,
+      "year": 44.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 16425,
+      "food_days": 104.109034808548,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 26,
+      "population": 230,
+      "settled": true,
+      "year": 45.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 16790,
+      "food_days": 103.766774938392,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 27,
+      "population": 233,
+      "settled": true,
+      "year": 46.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 17155,
+      "food_days": 103.573912160798,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 27,
+      "population": 236,
+      "settled": true,
+      "year": 47.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 17520,
+      "food_days": 103.418895946697,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 28,
+      "population": 238,
+      "settled": true,
+      "year": 48.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 17885,
+      "food_days": 103.185463714155,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 28,
+      "population": 240,
+      "settled": true,
+      "year": 49.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 2,
+      "day": 18250,
+      "food_days": 103.120471930061,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 29,
+      "population": 241,
+      "settled": true,
+      "year": 50.0
+    }
+  ],
+  "days_per_second": 132.186031014827,
+  "discoveries": [
+    {
+      "day": 1732,
+      "id": "drainage",
+      "year": 4.74520547945205
+    },
+    {
+      "day": 2136,
+      "id": "watch_rotation",
+      "year": 5.85205479452055
+    },
+    {
+      "day": 3254,
+      "id": "labor_rotations",
+      "year": 8.91506849315068
+    },
+    {
+      "day": 4270,
+      "id": "shared_childcare",
+      "year": 11.6986301369863
+    },
+    {
+      "day": 4783,
+      "id": "route_memory",
+      "year": 13.1041095890411
+    },
+    {
+      "day": 5303,
+      "id": "household_councils",
+      "year": 14.5287671232877
+    },
+    {
+      "day": 5604,
+      "id": "formation_drill",
+      "year": 15.3534246575342
+    },
+    {
+      "day": 5620,
+      "id": "crew_handoffs",
+      "year": 15.3972602739726
+    },
+    {
+      "day": 5707,
+      "id": "food_drying",
+      "year": 15.6356164383562
+    },
+    {
+      "day": 5932,
+      "id": "oral_epics",
+      "year": 16.2520547945205
+    },
+    {
+      "day": 6758,
+      "id": "seasonal_patterns",
+      "year": 18.5150684931507
+    },
+    {
+      "day": 7244,
+      "id": "standard_measures",
+      "year": 19.8465753424658
+    },
+    {
+      "day": 7983,
+      "id": "festival_calendar",
+      "year": 21.8712328767123
+    },
+    {
+      "day": 8022,
+      "id": "wayfinding_stars",
+      "year": 21.9780821917808
+    },
+    {
+      "day": 8234,
+      "id": "tallies",
+      "year": 22.558904109589
+    },
+    {
+      "day": 8308,
+      "id": "customary_law",
+      "year": 22.7616438356164
+    },
+    {
+      "day": 9331,
+      "id": "civic_games",
+      "year": 25.5643835616438
+    },
+    {
+      "day": 9565,
+      "id": "smoking",
+      "year": 26.2054794520548
+    },
+    {
+      "day": 10094,
+      "id": "supply_groups",
+      "year": 27.6547945205479
+    },
+    {
+      "day": 10444,
+      "id": "public_stores",
+      "year": 28.613698630137
+    },
+    {
+      "day": 11273,
+      "id": "animal_taming",
+      "year": 30.8849315068493
+    },
+    {
+      "day": 12313,
+      "id": "stock_rotation",
+      "year": 33.7342465753425
+    },
+    {
+      "day": 12773,
+      "id": "pack_animals",
+      "year": 34.9945205479452
+    },
+    {
+      "day": 13201,
+      "id": "fractional_quantities",
+      "year": 36.1671232876712
+    },
+    {
+      "day": 14764,
+      "id": "domesticated_mounts",
+      "year": 40.4493150684931
+    },
+    {
+      "day": 15154,
+      "id": "material_accounting",
+      "year": 41.5178082191781
+    },
+    {
+      "day": 16758,
+      "id": "mounted_scouts",
+      "year": 45.9123287671233
+    },
+    {
+      "day": 17328,
+      "id": "elephant_training",
+      "year": 47.4739726027397
+    },
+    {
+      "day": 18067,
+      "id": "measured_kinematics",
+      "year": 49.4986301369863
+    }
+  ],
+  "final": {
+    "active_inquiries": 2,
+    "completed_buildings": 2,
+    "day": 18250,
+    "food_days": 103.120471930061,
+    "food_security": 0.979999999999999,
+    "knowledge_workers": 7,
+    "known": 29,
+    "population": 241,
+    "settled": true,
+    "year": 50.0
+  },
+  "full_campaign_verified": false,
+  "initial": {
+    "active_inquiries": 3,
+    "completed_buildings": 0,
+    "day": 0,
+    "food_days": 30.0,
+    "food_security": 0.82,
+    "knowledge_workers": 4,
+    "known": 0,
+    "population": 120,
+    "settled": false,
+    "year": 0.0
+  },
+  "limitations": [
+    "One isolated seat, not a full world or a player campaign",
+    "Synthetic local water and land authority; no rendered geography",
+    "No foreign acquisition, war or dependency-recovery scenario",
+    "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+    "Short or collapsed runs do not validate millennial pacing"
+  ],
+  "live_catalog": 316,
+  "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; no foreign exchange",
+  "schema": 1,
+  "seed": 91420,
+  "simulated_days": 18250,
+  "stop_reason": "target reached",
+  "target_days": 18250,
+  "target_reached": true,
+  "wall_seconds": 138.063,
+  "simulation_commit": "166a64c"
+}

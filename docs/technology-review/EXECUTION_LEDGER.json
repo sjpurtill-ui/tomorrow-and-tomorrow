@@ -23,7 +23,7 @@
     "Shared daily electrical budget for powered manufacturing; electric-arc steel alternative",
     "Bilateral joint investigations with two physical delegations, local contribution, and reciprocal validation",
     "Fourteen semiconductor/photovoltaic discoveries, six linked manufactured intermediates, solar-first daily generation",
-    "Eight reviewed paper-and-gouache subject images with full-square presentation and a live art queue",
+    "Ten reviewed paper-and-gouache subject images with full-square presentation and a live art queue",
     "Three formation-practiced combined-arms doctrines with actual troop support and counter-specific combat effects",
     "Twenty-six mathematical capabilities and optional model-assisted routes into fifteen practical investigations",
     "Calendar unlock gates removed from local and rival research; causal and material eligibility retained",
@@ -31,7 +31,8 @@
     "Destructive reverse engineering of owned civilian manufactured examples using local study work and weaker evidence",
     "Twenty-four mechanics capabilities and fourteen optional engineering routes preserving empirical alternatives",
     "Five manufactured mechanical components feed an alternative governed generator assembly using real stocks and shared workshops",
-    "Reproducible ordered-day pacing diagnostic and AI research allocation that avoids blocked fields without increasing its budget"
+    "Reproducible ordered-day pacing diagnostic and AI research allocation that avoids blocked fields without increasing its budget",
+    "Fifty-year isolated AI diagnostic: 29 discoveries, 241 people and two active investigations; not millennial acceptance"
   ],
   "unfinished": [
     "Remaining 4684 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
@@ -56,8 +57,8 @@
   ],
   "art": {
     "live_subjects": 316,
-    "verified_subject_images": 8,
-    "queued_live_images": 308,
+    "verified_subject_images": 10,
+    "queued_live_images": 306,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

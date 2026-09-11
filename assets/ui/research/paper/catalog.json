@@ -2359,7 +2359,7 @@
       "domain": "knowledge",
       "id": "compound_pulleys",
       "name": "Compound Pulleys",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/gear_ratios.png",
@@ -2367,7 +2367,7 @@
       "domain": "knowledge",
       "id": "gear_ratios",
       "name": "Gear Ratios",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/crank_linkages.png",
@@ -2533,9 +2533,9 @@
   "live_art_complete": false,
   "live_count": 316,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 308,
+  "queued_count": 306,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 8
+  "verified_count": 10
 }
