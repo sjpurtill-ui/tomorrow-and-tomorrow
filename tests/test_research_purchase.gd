@@ -160,3 +160,41 @@ func test_research_panel_dispatches_the_reviewed_offer_through_the_live_action()
 	assert_str(CivilizationSystem.diplomatic_mission.research_subject).is_equal("clay_shaping")
 	assert_str(CivilizationSystem.diplomatic_mission.gift_resource).is_equal("Stone")
 	assert_bool(panel.send.disabled).is_true()
+
+const Planner=preload("res://scripts/research_acquisition_planner.gd")
+func examined_report()->void:
+	E.data().collections["returned"]={"id":"returned","kind":"knowledge","source_id":"neighbor","discovery_id":"clay_shaping","study":1.0,"returned_day":100000,"work":90.0}
+func test_ai_requests_stronger_study_from_examined_evidence_without_supplier_omniscience()->void:
+	prepare();examined_report()
+	var expected:=Planner.recommendation()
+	assert_str(expected.subject).is_equal("clay_shaping")
+	assert_str(expected.resource).is_equal("Stone")
+	E.owner_state("neighbor").known_discoveries.clear()
+	assert_dict(Planner.recommendation()).is_equal(expected)
+	E.data().collections.returned.study=.5
+	assert_dict(Planner.recommendation()).is_empty()
+	E.data().collections.returned.study=1.0;E.data().collections.returned.returned_day=100001
+	assert_dict(Planner.recommendation()).is_empty()
+func test_ai_purchase_order_reserves_payment_and_does_not_unlock_discovery()->void:
+	prepare();examined_report()
+	var before:=float(GameState.resource_stockpiles.Stone)
+	assert_bool(preload("res://scripts/civilization_controller.gd").research_purchase_orders("player",{})).is_true()
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
+	assert_str(String(CivilizationSystem.diplomatic_mission.research_subject)).is_equal("clay_shaping")
+	assert_bool("clay_shaping" in GameState.known_discoveries).is_false()
+	assert_dict(Planner.recommendation()).is_empty()
+func test_ai_retains_scarce_materials_and_does_not_commission_during_emergencies()->void:
+	prepare();examined_report()
+	assert_dict(Planner.recommendation({"hungry":true})).is_empty()
+	assert_dict(Planner.recommendation({"at_war":true})).is_empty()
+	for resource:String in ["Timber","Fiber Plants","Clay","Stone"]:GameState.resource_stockpiles[resource]=100.0
+	assert_dict(Planner.recommendation()).is_empty()
+func test_ai_waits_after_previous_research_trip_and_ignores_already_strong_study()->void:
+	prepare();examined_report()
+	CivilizationSystem.diplomatic_history.append({"civ_id":"neighbor","research_subject":"clay_shaping","returned_day":99900})
+	assert_dict(Planner.recommendation()).is_empty()
+	GameState.elapsed_days=100266
+	assert_bool(Planner.recommendation().is_empty()).is_false()
+	E.data().collections["weaker"]=E.data().collections.returned.duplicate(true)
+	E.data().collections.returned.research_purchase=true
+	assert_dict(Planner.recommendation()).is_empty()

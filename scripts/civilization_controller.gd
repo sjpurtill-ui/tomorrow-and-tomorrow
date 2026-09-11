@@ -176,6 +176,10 @@ static func ensure_line(id:String,item:String,target:int)->void:
 			return
 	WorldSimulation.submit(id,{"kind":"production","item":item,"target":target})
 
+static func research_purchase_orders(id:String,plan:Dictionary)->bool:
+	var order:=preload("res://scripts/research_acquisition_planner.gd").recommendation(plan)
+	return not order.is_empty() and not WorldSimulation.submit(id,order).has("error")
+
 static func foreign_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
 	var world:=WorldSimulation.world
@@ -190,6 +194,7 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 	var scout_focus:="recruitment" if reception>=2 and float(plan.personality.empathy)>.65 else "exploration"
 	WorldSimulation.submit(id,{"kind":"scouting_policy","share":scout_share,"focus":scout_focus})
 	if not world.diplomatic_mission.is_empty():return
+	if research_purchase_orders(id,plan):return
 	var candidates:Array[Dictionary]=[]
 	var campaign_enemy:="";var campaign_urgency:=-INF
 	for civ:Dictionary in world.civilizations:
