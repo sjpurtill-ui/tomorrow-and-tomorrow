@@ -301,6 +301,8 @@ func _supply_blocks(army:Dictionary,capabilities:Dictionary)->Array:
 
 	]
 	var blocks:Array=[{"type":"tiles","heading":"SUPPLY","items":tiles}]
+	var medical:Dictionary=capabilities.get("medical_support",{})
+	if not medical.is_empty():blocks.append({"type":"text","heading":"HOME MEDICAL SUPPORT","text":preload("res://scripts/field_medicine.gd").describe(medical)})
 	var job_items:Array=[]
 	for job_variant in (army.get("equipment_queue",[]) as Array):
 		var job:Dictionary=job_variant

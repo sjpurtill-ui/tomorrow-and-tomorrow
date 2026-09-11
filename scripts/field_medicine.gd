@@ -26,13 +26,27 @@ static func capacity(force:Dictionary)->float:
 	for id:String in METHODS:
 		if id in WorldSimulation.state.known_discoveries:improvement+=float(METHODS[id].capacity)*WorldSimulation.discovery.adoption(id)
 	return staff*.5*(1+minf(1.5,improvement))
-static func provide(force:Dictionary,supply:float)->Dictionary:
+static func quote(force:Dictionary,supply:float)->Dictionary:
 	var wounded:=maxi(0,int(force.get("wounded_pool",0))-int(force.get("disabled_pool",0)))
-	var cases:=minf(float(wounded),capacity(force))*clampf(supply,0,1)
+	var care_capacity:=capacity(force)
+	var provisioned:=clampf(supply,0,1)
 	var stock:Dictionary=WorldSimulation.state.resource_stockpiles
-	cases=minf(cases,maxf(0,float(stock.get("Fiber Plants",0)))/.1)
-	cases=minf(cases,maxf(0,float(stock.get("Medicinal Plants",0)))/.05)
-	if cases<=0:return {"cases":0.0,"recovery":0.0,"inputs":{}}
-	var inputs:={"Fiber Plants":cases*.1,"Medicinal Plants":cases*.05}
-	for material:String in inputs:stock[material]=float(stock.get(material,0))-float(inputs[material])
-	return {"cases":cases,"recovery":cases*.08,"inputs":inputs}
+	var fiber:=maxf(0,float(stock.get("Fiber Plants",0)))/.1
+	var medicine:=maxf(0,float(stock.get("Medicinal Plants",0)))/.05
+	var cases:=minf(minf(float(wounded),care_capacity)*provisioned,minf(fiber,medicine))
+	var reason:="Care capacity is available"
+	if wounded<=0:reason="No recoverable wounded are waiting"
+	elif care_capacity<=0:reason="No trained, equipped medical detachment is available"
+	elif provisioned<=0:reason="The force has no supporting provisions"
+	elif fiber<=0:reason="No Fiber Plants are available for care supplies"
+	elif medicine<=0:reason="No Medicinal Plants are available for care supplies"
+	elif cases<minf(float(wounded),care_capacity)*provisioned:reason="Remaining care supplies limit service"
+	elif provisioned<1:reason="Partial provisions limit service"
+	return {"capacity":care_capacity,"recoverable_wounded":wounded,"cases":cases,"recovery":cases*.08,"reason":reason,"inputs":{"Fiber Plants":cases*.1,"Medicinal Plants":cases*.05} if cases>0 else {}}
+static func provide(force:Dictionary,supply:float)->Dictionary:
+	var result:=quote(force,supply)
+	for material:String in result.inputs:
+		WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0))-float(result.inputs[material])
+	return result
+static func describe(report:Dictionary)->String:
+	return "Equipped care capacity: %.1f patients. Recoverable wounded: %d. Current supplies support %.1f patients. %s. Care uses local supplies during recovery at home." % [float(report.get("capacity",0)),int(report.get("recoverable_wounded",0)),float(report.get("cases",0)),String(report.get("reason",""))]

@@ -88,3 +88,35 @@ func test_medical_formation_adds_no_offensive_combat_power()->void:
 	var profiles:=simulator.evaluate_force(a,enemy)
 	assert_float(simulator._cohort_power(profiles,1.0,1.0,.5)).is_equal(0.0)
 	assert_int(int(a.troops)).is_equal(10)
+func test_care_report_is_read_only_and_matches_actual_service()->void:
+	WorldSimulation.scoped("medic_ruler",func()->void:
+		WorldSimulation.state.resource_stockpiles={"Fiber Plants":.2,"Medicinal Plants":10.0}
+		var before:=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		var report:=M.quote(force(),1)
+		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(before)
+		assert_float(float(report.cases)).is_equal(2.0)
+		assert_str(String(report.reason)).is_equal("Remaining care supplies limit service")
+		assert_bool(M.describe(report).contains("at home")).is_true()
+		assert_dict(M.provide(force(),1)).is_equal(report)
+	)
+func test_capabilities_report_does_not_consume_care_materials()->void:
+	WorldSimulation.scoped("medic_ruler",func()->void:
+		WorldSimulation.state.resource_stockpiles={"Fiber Plants":10.0,"Medicinal Plants":10.0}
+		WorldSimulation.military.home_army=WorldSimulation.military.simulator.create_formation_force("Carers",force().formations)
+		WorldSimulation.military.home_army.wounded_pool=10
+		var before:=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		var report:Dictionary=WorldSimulation.military.military_capabilities().medical_support
+		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(before)
+		assert_float(float(report.cases)).is_greater(0.0)
+	)
+func test_supply_panel_includes_the_medical_capacity_report()->void:
+	var world:Node=auto_free(Node.new());var shell:Control=auto_free(Control.new())
+	var provider:=preload("res://scripts/hud/content/dock_content_military.gd").new(world,shell)
+	var report:={"capacity":5.0,"recoverable_wounded":12,"cases":2.0,"reason":"Remaining care supplies limit service"}
+	var found:=false
+	for block:Dictionary in provider._supply_blocks({}, {"medical_support":report}):
+		if String(block.get("heading",""))=="HOME MEDICAL SUPPORT":
+			found=true
+			assert_bool(String(block.text).contains("12")).is_true()
+			assert_bool(String(block.text).contains("Remaining care supplies")).is_true()
+	assert_bool(found).is_true()
