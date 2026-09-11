@@ -263,7 +263,7 @@
       "domain": "production",
       "id": "controlled_flaking",
       "name": "Controlled Flaking",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/hafted_tools.png",
@@ -2541,9 +2541,9 @@
   "live_art_complete": false,
   "live_count": 317,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 306,
+  "queued_count": 305,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 11
+  "verified_count": 12
 }
