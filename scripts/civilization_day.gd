@@ -53,9 +53,11 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
 		var local_context:=context(city.position)
 		WorldSimulation.settlements.process_city_resources(String(city.id),local_context,build)
+	stamp=record_timing(timings,"secondary_settlements",stamp)
 	WorldSimulation.settlements.process_city_trade()
+	stamp=record_timing(timings,"city_trade",stamp)
 	WorldSimulation.settlements.with_local_population(func()->void:WorldSimulation.settlements.process_month(daily_context))
-	stamp=record_timing(timings,"settlements",stamp)
+	stamp=record_timing(timings,"settlement_morphology",stamp)
 	var progression_events:=WorldSimulation.progression.process_day(day)
 	stamp=record_timing(timings,"progression",stamp)
 	if WorldSimulation.military.last_processed_day<day:

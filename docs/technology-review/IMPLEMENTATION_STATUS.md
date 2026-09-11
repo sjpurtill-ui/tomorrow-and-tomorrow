@@ -773,3 +773,14 @@ Base `26ed346`. Six authored methods and eight paid recipes distinguish core for
 Validation: all 61 relevant cases passed (4 glassworking, 12 civilian industry, 14 operations, 11 licenses, 11 reverse engineering, 9 technology tree), zero errors/failures/skips/orphans. Graph: 383 identities / 157 routes / no errors. Idealized resource audit reaches all 383. Art: 27 reviewed / 356 queued. No new save fields; older builds cannot operate new recipes. Shared conflicts: DiscoverySystem, CivilianIndustry, graph audit. Canonical integration and native player presentation remain unverified.
 
 Process 29066 remains live on its loaded 377-discovery build. Latest inspected interval was year 41: 256 people, 36 discoveries, 24 plots. Settlements accounted for 46% of that interval's measured stage time, consequences 13.1%, discovery 8.8%. These are partial diagnostic observations under concurrent load, not completed target evidence or an isolated performance benchmark. The glassworking changes are not loaded into that running process.
+
+
+## 67. Settlement timing attribution
+
+Base `2135d25`. Split the pacing settlement interval into secondary-city processing, city trade and primary morphology; schema 8 now reports sixteen groups. Snapshots count settlements; final diagnostics report each owned settlement's population, plot count, occupation and last resource day. No gameplay or save behavior changes.
+
+Validation: matched 400-day profiling-on/off runs completed with identical initial/final/annual snapshots, discovery events and bottlenecks. All sixteen groups have 400 samples; interval sums match cumulative calls and microseconds. Control timing collections are empty. Evidence: `pacing/secondary-settlement-stage-timing.json`.
+
+The measured secondary-city interval was 22.845% of total stage time, city trade 1.547%, primary morphology 0.699%. The endpoint has a primary settlement of 81.03 people/19 plots and a secondary of 40.70 people/13 plots. Secondary work includes its own economic and demographic simulation, so the prior broad settlement share did not establish that primary morphology was expensive. The next investigation should target repeated work within secondary-city processing while preserving its independent stocks and population. Concurrent load and the short horizon limit absolute timing conclusions.
+
+Shared conflicts: CivilizationDay and pacing harness. No canonical integration, player launch or performance-improvement claim. Catalog remains 383. The existing handle 29066 continues on its earlier loaded build; do not restart it or treat these finer timings as part of that run.
