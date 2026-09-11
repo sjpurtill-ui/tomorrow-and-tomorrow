@@ -604,3 +604,10 @@ Validation: 48 cases passed, zero errors, failures, skips or orphans: 11 reverse
 Save compatibility: existing collection shape and civilian IDs retained; military specimen IDs use an explicit military: namespace validated against subject. Older builds cannot validate these new examples. Equipment units remain the existing aggregate abstraction; component salvage, variable sample quality, procurement extensions, licensing and imported operating services remain unfinished. No battlefield command behavior changes.
 
 Scope: ResearchSpecimens, ReverseEngineering, SocietyExchange save validation, atlas action labels, tests and review documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 88f429d. Shared-file conflicts: SocietyExchange and research atlas. Canonical integration remains pending.
+
+
+## 49. Germination-trial illustration
+
+Added and visually inspected a square paper-and-gouache illustration of a farmer comparing three seed samples with differing emergence. Explicit discovery binding preserves the whole square. Import uses a 768-pixel limit and mipmaps; the prompt is recorded in assets/ui/research/paper/GERMINATION_TRIALS_PROMPT.md.
+
+Headless imports and eleven atlas tests pass, zero errors, failures, skips or orphans. Logs /tmp/tt-germination-*.log. Manifest now has 361 live discoveries, 21 verified subject images and 340 queued live subjects toward the unchanged 5,000 target. No gameplay or save change. Native presentation remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 9ed23b9; scope is the new asset/import/prompt, ResearchVisuals binding, manifest and review tracking. Canonical integration remains outstanding.

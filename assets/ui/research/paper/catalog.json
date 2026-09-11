@@ -2735,7 +2735,7 @@
       "domain": "nutrition",
       "id": "germination_trials",
       "name": "Germination Trials",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/seed_cleaning.png",
@@ -2893,9 +2893,9 @@
   "live_art_complete": false,
   "live_count": 361,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 341,
+  "queued_count": 340,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 20
+  "verified_count": 21
 }
