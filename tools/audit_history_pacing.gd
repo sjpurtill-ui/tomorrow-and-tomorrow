@@ -14,6 +14,22 @@ func _initialize()->void:call_deferred("run")
 func snapshot(day:int)->Dictionary:
 	var state:Node=simulation.state
 	return {"day":day,"year":float(day)/365.0,"population":state.population_total,"known":state.known_discoveries.size(),"knowledge_workers":state.population_allocations.get("Knowledge",0),"active_inquiries":state.active_investigations.size(),"food_security":state.food_security,"food_days":state.simulation_metrics.get("food_days",0),"settled":state.settlement_site_committed,"completed_buildings":state.settlement_completed.size(),"resource_deposits":state.resource_deposits.size(),"material_stocks":{"Timber":state.resource_stockpiles.get("Timber",0),"Stone":state.resource_stockpiles.get("Stone",0),"Clay":state.resource_stockpiles.get("Clay",0),"Fiber Plants":state.resource_stockpiles.get("Fiber Plants",0)}}
+func bottlenecks()->Dictionary:
+	var material_states:Dictionary={}
+	for deposit:Dictionary in simulation.state.resource_deposits:
+		var name:=String(deposit.resource)
+		if not material_states.has(name):material_states[name]=[]
+		material_states[name].append({"stage":deposit.stage,"access":deposit.get("access",0),"route":deposit.get("route",0),"survey":deposit.get("survey",0),"blockers":deposit.get("blockers",[])})
+	var questions:Array=[]
+	var pathways:Script=load("res://scripts/knowledge_pathways.gd")
+	for entry:Dictionary in simulation.discovery.technology_catalog:
+		if entry.id in simulation.state.known_discoveries:continue
+		if not pathways.ready(entry,int(simulation.state.elapsed_days)):continue
+		var missing_materials:Array=[]
+		for requirement:Dictionary in entry.get("resource_requirements",[]):
+			if not simulation.discovery._resource_requirements_met([requirement]):missing_materials.append(requirement)
+		questions.append({"id":entry.id,"domain":entry.dynamic,"missing_materials":missing_materials})
+	return {"causally_ready_questions":questions,"material_states":material_states,"allocations":simulation.state.population_allocations.duplicate(),"research_allocations":simulation.state.research_allocations.duplicate(),"known_ids":simulation.state.known_discoveries.duplicate()}
 func run()->void:
 	for argument:String in OS.get_cmdline_user_args():
 		if argument.begins_with("--days="):target_days=clampi(argument.trim_prefix("--days=").to_int(),1,3650000)
@@ -56,7 +72,8 @@ func run()->void:
 	var final:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return snapshot(day))
 	catalog_count=actor.systems.DiscoverySystem.technology_catalog.size()
 	var elapsed:=float(Time.get_ticks_msec()-start)/1000.0
-	var report:={"schema":2,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
+	var diagnostic:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return bottlenecks())
+	var report:={"schema":3,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
 	var file:=FileAccess.open(output_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write pacing diagnostic: "+output_path);quit(1);return
 	file.store_string(JSON.stringify(report,"  "));file.close()

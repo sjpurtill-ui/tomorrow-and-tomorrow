@@ -386,3 +386,6 @@ Save compatibility: no shape changes; existing surveyed occurrences can become a
 
 
 The combined resource/technology fixed-point audit (`tools/audit_resource_technology_dependencies.gd`) reaches all 317 discoveries and all 27 resource types in seven passes. It evaluates actual recognition rules, access blockers, AND/OR learning routes and discovery material-stage requirements. This is a structural upper bound: every material is assumed locally present, with sufficient observations, tools, workers, route work and processing practice; production time, access-score accumulation, adoption and geographic scarcity are not simulated. It cannot certify a playable progression or foreign-material recovery. Report: `/tmp/tt-resource-dependencies.log`.
+
+
+Pacing diagnostic schema 3 additionally records the final resource stages/access scores/blockers, actual labor and research allocations, known IDs and causally ready questions with unsatisfied material requirements. A one-day headless smoke run completed and its 51 occurrence records, known-count consistency and new diagnostic shape were checked. This adds observability without changing the daily simulation. Longer schema-2 reports retain their original scope.
