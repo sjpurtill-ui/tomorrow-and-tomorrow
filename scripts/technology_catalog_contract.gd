@@ -8,11 +8,13 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 	var errors:Array[String]=[]
 	var names:Dictionary={}
 	var ids:Dictionary={}
+	var by_id:Dictionary={}
 	for entry:Dictionary in catalog:
 		var name:=String(entry.get("name","")).strip_edges().to_lower()
 		names[name]=int(names.get(name,0))+1
 		var id:=String(entry.get("id",""))
 		ids[id]=int(ids.get(id,0))+1
+		by_id[id]=entry
 	for entry:Dictionary in additions:
 		var id:=String(entry.get("id",""))
 		if int(ids.get(id,0))!=1:errors.append(id+": production identity must occur exactly once")
@@ -40,5 +42,10 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 			if not Land.ARCHETYPES.has(unit):errors.append(id+": unsupported training role")
 			var value:Variant=training[unit]
 			if not (value is float or value is int) or not is_finite(float(value)) or float(value)<=0 or float(value)>.25:errors.append(id+": invalid training reduction")
-		if effects.is_empty() and profile.is_empty() and training.is_empty():errors.append(id+": no implemented consequence")
+		var children:Variant=entry.get("foundation_for",[])
+		if not children is Array:errors.append(id+": foundation targets must be an array");continue
+		for child:Variant in children:
+			if not child is String or not by_id.has(child):errors.append(id+": unknown foundation target");continue
+			if id not in preload("res://scripts/knowledge_pathways.gd").definition_parents(by_id[child]):errors.append(id+": foundation has no causal link to "+child)
+		if effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty():errors.append(id+": no implemented consequence")
 	return errors

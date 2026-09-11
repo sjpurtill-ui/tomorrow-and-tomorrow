@@ -95,6 +95,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
 	catalog.append_array(preload("res://scripts/food_water_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/military_education_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/civilian_science_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -310,7 +311,7 @@ func _refresh_active_investigations()->void:
 		var channel:=String(channel_variant)
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(id)
-		if discovery.is_empty() or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
+		if discovery.is_empty() or channel!=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))) or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
 			WorldSimulation.state.active_investigations.erase(channel)
 	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
 	# When a line completes or temporarily runs out of evidence, keep the same

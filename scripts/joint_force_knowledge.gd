@@ -1,4 +1,5 @@
 extends RefCounted
+## Stable military application IDs share civilian scientific foundations.
 static func entries()->Array:
 	return [
 		{
@@ -256,12 +257,12 @@ static func entries()->Array:
 		{
 			"id": "steam_propulsion",
 			"name": "Steam Propulsion",
-			"direction": "Warfare",
+			"direction": "Materials",
 			"day": 77000,
 			"chance": 0.001,
 			"requires": [
-				"precision_machinery",
-				"blast_furnace"
+				"heat_engine_cycles",
+				"precision_machinery"
 			],
 			"signals": [
 				"warfare",
@@ -403,11 +404,11 @@ static func entries()->Array:
 		{
 			"id": "fuel_refining",
 			"name": "Liquid Fuel Refining",
-			"direction": "Warfare",
+			"direction": "Materials",
 			"day": 84000,
 			"chance": 0.001,
 			"requires": [
-				"steam_propulsion",
+				"fractional_distillation",
 				"precision_machinery"
 			],
 			"signals": [
@@ -424,12 +425,12 @@ static func entries()->Array:
 		{
 			"id": "powered_flight",
 			"name": "Powered Flight",
-			"direction": "Warfare",
+			"direction": "Materials",
 			"day": 85000,
 			"chance": 0.001,
 			"requires": [
-				"fuel_refining",
-				"aerostat_observation",
+				"aerodynamics",
+				"structural_load_testing",
 				"internal_combustion"
 			],
 			"signals": [
@@ -488,12 +489,13 @@ static func entries()->Array:
 		{
 			"id": "advanced_airframes",
 			"name": "Advanced Airframes",
-			"direction": "Warfare",
+			"direction": "Materials",
 			"day": 88000,
 			"chance": 0.001,
 			"requires": [
-				"aerial_bombardment",
-				"fighter_tactics"
+				"powered_flight",
+				"wind_tunnel_testing",
+				"structural_load_testing"
 			],
 			"signals": [
 				"warfare",
@@ -593,12 +595,12 @@ static func entries()->Array:
 		{
 			"id": "jet_propulsion",
 			"name": "Jet Propulsion",
-			"direction": "Warfare",
+			"direction": "Materials",
 			"day": 93000,
 			"chance": 0.001,
 			"requires": [
 				"advanced_airframes",
-				"steam_propulsion"
+				"heat_engine_cycles"
 			],
 			"signals": [
 				"warfare",
@@ -777,11 +779,12 @@ static func entries()->Array:
 		{
 			"id": "internal_combustion",
 			"name": "Internal Combustion Engines",
-			"direction": "Warfare",
+			"direction": "Materials",
 			"day": 46000,
 			"chance": 0.001,
 			"requires": [
 				"fuel_refining",
+				"heat_engine_cycles",
 				"precision_machinery"
 			],
 			"signals": [
@@ -857,18 +860,18 @@ static func entries()->Array:
 		{
 			"id": "atomic_physics",
 			"name": "Atomic Physics",
-			"direction": "Warfare",
+			"direction": "Information",
 			"day": 90000,
 			"chance": 0.001,
 			"requires": [
-				"precision_machinery",
-				"naval_fire_control"
+				"spectroscopy",
+				"electron_physics"
 			],
 			"signals": [
 				"knowledge",
 				"information"
 			],
-			"observation": "Measurements reveal nuclear reactions and the energy bound in matter.",
+			"observation": "Spectra and charged-particle experiments support models of atomic structure.",
 			"effects": {
 				"task_coordination": 0.01
 			}
@@ -876,18 +879,20 @@ static func entries()->Array:
 		{
 			"id": "reactor_engineering",
 			"name": "Controlled Nuclear Reactors",
-			"direction": "Warfare",
+			"direction": "Materials",
 			"day": 95000,
 			"chance": 0.001,
 			"requires": [
-				"atomic_physics",
-				"steam_propulsion"
+				"nuclear_fission",
+				"neutron_moderation",
+				"pressure_vessels",
+				"electrical_generators"
 			],
 			"signals": [
 				"crafting",
 				"information"
 			],
-			"observation": "Controlled reactors turn nuclear heat into reliable power.",
+			"observation": "Reaction control, cooling, containment and instrumentation are combined into a reactor design; operation still needs a constructed plant and fuel.",
 			"effects": {
 				"task_coordination": 0.02
 			}

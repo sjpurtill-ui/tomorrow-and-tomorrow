@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the fourth checkpoint: **217 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the fifth checkpoint: **241 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -114,3 +114,12 @@ Verification: **111 tests passed** across 11 separately executed headless suites
 Compatibility: stable existing unit and discovery identities, no new save fields, no instant equipment or training upgrades. Old saves load new definitions through the existing discovery catalog. Existing training orders keep their saved schedules; newly scheduled orders can use adopted teaching. No guarantees for loading newly discovered IDs in an older executable.
 
 Shared integration files: `scripts/discovery_system.gd`, `scripts/military_unit_catalog.gd`, the research inspector, production validator and graph audit. New files: military education catalog and its test suite. The training-accounting test has the wording correction above. No MilitaryCampaign, combat simulator, GameState, SaveSystem, terrain or project settings edits. No known conflicts against the preceding branch checkpoint; cross-branch integration remains unverified. Whole-campaign pacing, the remaining 4,783 target discoveries, artwork and canonical integration are unfinished.
+
+
+## Fifth checkpoint: shared civilian science
+
+Continues from `0bee4c0`. Twenty-four individually named scientific/engineering foundations now connect optics, heat, electricity, instrumentation, chemistry and aerodynamics to existing practical capabilities. Each foundation has audited downstream consumers; these new theory nodes add no global production bonus or operating plant. Eight existing IDs were rewired and classified as civilian research: steam propulsion, fuel refining, internal combustion, powered flight, advanced airframes, atomic physics, reactor engineering and jet propulsion. Their existing aggregate effects and saved progress are retained. Atomic physics no longer requires naval fire control; advanced civilian airframes no longer require bombing or fighter tactics. The shared catalog has 241 live entries and zero graph/production-contract errors.
+
+Seven new tests verify all 24 contracts, actual downstream links, civilian reachability after removing every security-domain node, indispensable reactor foundations, stable IDs/progress, rejection of invented downstream uses and removal of stale research-channel assignments after reclassification. With seven relevant regression suites, 66 cases passed with no errors, failures, skips or orphans. Logs: `/tmp/tt-science-<suite>.log`; graph: `/tmp/tt-science-graph.log`. Reclassification now removes an old channel assignment before allocating the question in its new domain, preventing duplicate simultaneous work while retaining its progress.
+
+Changed shared files: DiscoverySystem, existing joint force knowledge definitions, production contract validator and graph audit. New civilian science definitions and tests. No new saved state, unit types, plant simulation, terrain, military command or project settings changes. Existing active questions may need their new civilian foundations before work resumes; previously earned knowledge is retained. Earliest dates are uncalibrated floors, not historical dates or full-campaign pacing evidence. This checkpoint is isolated, ready for integration review, and work continues toward the remaining scope.
