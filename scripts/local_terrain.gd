@@ -3130,11 +3130,10 @@ func _update_scale_lod() -> void:
 		_request_close_terrain_job(settler_marker.position)
 	if detail_terrain_patch:
 		detail_terrain_patch.visible = detail_visible
-	if detail_visible and settler_marker and not _camera_in_motion():
+	var foliage_fade:=_close_vegetation_lod_strength()
+	if foliage_fade>0.001 and settler_marker and not _camera_in_motion():
 		_rebuild_close_vegetation(GameState.settlement_founded_at if "Hearth Circle" in GameState.settlement_completed else settler_marker.position)
 	if close_vegetation_root:
-		var viewport_size:=get_viewport().get_visible_rect().size
-		var foliage_fade:=LandscapeCover.detail_strength(camera.size,viewport_size.x/maxf(1.0,viewport_size.y))
 		close_vegetation_root.visible=foliage_fade>0.001
 		if not is_equal_approx(foliage_fade,close_vegetation_fade):
 			close_vegetation_fade=foliage_fade
@@ -3554,11 +3553,16 @@ func _near_persistent_settlement_surface(local_point: Vector2) -> bool:
 				return true
 	return false
 
+func _close_vegetation_lod_strength()->float:
+	if camera==null:return 1.0
+	var viewport_size:=get_viewport().get_visible_rect().size
+	return LandscapeCover.detail_strength(camera.size,viewport_size.x/maxf(1.0,viewport_size.y))
+
 func _rebuild_close_vegetation(center: Vector3) -> void:
-	# Detailed plants are invisible above this distance. Do not regenerate them
-	# on monthly settlement updates while the player is looking at the region.
-	# The LOD transition checks again before showing close vegetation.
-	if camera!=null and camera.size>1.8:return
+	# Use the actual foliage handoff, including viewport shape, for both drawing
+	# and deferred construction. Hidden monthly updates must not rebuild plants.
+	# The LOD transition checks again before the layer becomes visible.
+	if _close_vegetation_lod_strength()<=0.001:return
 	if is_instance_valid(close_vegetation_root) and not close_vegetation_root.is_queued_for_deletion() and close_vegetation_revision == GameState.morphology_revision and close_vegetation_center==Vector2(center.x,center.z) and close_vegetation_seed==GameState.world_seed:
 		return
 	var surface_fields:Array=[]

@@ -59,9 +59,15 @@ func run()->void:
 		if label=="north_woodland":
 			# Explicit close diagnostic of existing rendered crown art, not a player view.
 			camera.projection=Camera3D.PROJECTION_ORTHOGONAL;camera.size=.30;camera.near=.01;camera.far=20
-			camera.position=Vector3(point.x,h+1,point.y);camera.basis=Basis(Vector3.RIGHT,Vector3(0,0,-1),Vector3.UP);terrain._update_scale_lod()
+			camera.position=Vector3(point.x,h+1,point.y);camera.basis=Basis(Vector3.RIGHT,Vector3(0,0,-1),Vector3.UP)
+			# The aerial views correctly defer this layer. Build it now so the
+			# crown diagnostic cannot silently pass with no crowns on screen.
+			terrain._rebuild_close_vegetation(Vector3(point.x,h,point.y));terrain._update_scale_lod()
+			var diagnostic_plants:=snapshot_plants(terrain)
+			check(not diagnostic_plants.is_empty(),"close seasonal diagnostic includes actual woodland plants")
 			for day:float in [91.25,273.75]:
 				GameState.elapsed_days=day;terrain._refresh_seasonal_visuals();await settle();canvas.get_texture().get_image().save_png(output+"crown-diagnostic-"+str(int(day))+".png")
+				check(diagnostic_plants==snapshot_plants(terrain),"close seasonal diagnostic retains plant identities at day "+str(day))
 			# Seasonal color cannot disclose vegetation/ground through fog.
 			var fog:=Image.create(2,2,false,Image.FORMAT_RGBA8);fog.fill(Color.BLACK)
 			for reference:WeakRef in terrain.woodland_visual_materials:
