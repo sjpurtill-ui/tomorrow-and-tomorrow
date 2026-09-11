@@ -12,6 +12,11 @@ static func recommendation()->Dictionary:
 	for item:Dictionary in E.data().collections.values():
 		if int(item.returned_day)>int(state.elapsed_days):continue
 		remaining+=maxf(0.0,1.0-float(item.study))*float(item.work)
+	var printed_target:=mini(10,ceili(remaining*S.PAPER_PER_WORK/(1.0+S.PRINTED_BONUS)))
+	remaining=maxf(0.0,remaining-maxf(0.0,float(state.resource_stockpiles.get("Printed Sheets",0.0)))*(1.0+S.PRINTED_BONUS)/S.PAPER_PER_WORK)
+	if remaining<=0.0:return {}
+	var printed:=supply("Printed Sheets",printed_target,{})
+	if not printed.is_empty():return printed
 	var target:=mini(10,ceili(remaining*S.PAPER_PER_WORK/(1.0+S.BONUS)))
 	if target<=0 or float(state.resource_stockpiles.get("Paper",0.0))>=target:return {}
 	return supply("Paper",target,{})

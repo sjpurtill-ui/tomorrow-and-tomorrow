@@ -3200,12 +3200,76 @@
       "id": "hardwired_sequence_control",
       "name": "Hardwired Sequence Control",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_oil_pressing.png",
+      "description": "Pressure separates oil from collected oil-bearing seeds; the resulting oil can serve as a printing-ink vehicle.",
+      "domain": "production",
+      "id": "seed_oil_pressing",
+      "name": "Seed Oil Pressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lampblack_capture.png",
+      "description": "Restricted combustion and cool collecting surfaces recover fine carbon soot for pigment.",
+      "domain": "production",
+      "id": "lampblack_capture",
+      "name": "Lampblack Capture",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/oil_based_printing_inks.png",
+      "description": "Fine carbon pigment is worked into a prepared drying-oil vehicle that transfers from a printing surface to paper.",
+      "domain": "production",
+      "id": "oil_based_printing_inks",
+      "name": "Oil-Based Printing Inks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relief_block_cutting.png",
+      "description": "Cutting away nonprinting areas leaves raised images and characters that can be inked repeatedly.",
+      "domain": "production",
+      "id": "relief_block_cutting",
+      "name": "Relief Block Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_movable_type.png",
+      "description": "Individually cut wooden characters can be aligned, locked into a form and rearranged for another text.",
+      "domain": "production",
+      "id": "wooden_movable_type",
+      "name": "Wooden Movable Type",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hand_relief_printing.png",
+      "description": "Hand pressure transfers an inked relief onto successive sheets without a powered press.",
+      "domain": "production",
+      "id": "hand_relief_printing",
+      "name": "Hand Relief Printing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/screw_press_printing.png",
+      "description": "A screw-driven platen applies controlled pressure across a prepared printing form.",
+      "domain": "production",
+      "id": "screw_press_printing",
+      "name": "Screw-Press Printing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cylinder_press_printing.png",
+      "description": "A turning pressure cylinder brings paper across an inked form in a controlled rolling impression.",
+      "domain": "production",
+      "id": "cylinder_press_printing",
+      "name": "Cylinder-Press Printing",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 400,
+  "live_count": 408,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 366,
+  "queued_count": 374,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

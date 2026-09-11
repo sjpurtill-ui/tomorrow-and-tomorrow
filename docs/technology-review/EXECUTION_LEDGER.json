@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 400,
+    "live": 408,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -57,10 +57,11 @@
     "Thirty-two reviewed subject images, including foil capacitors, electromagnetic relays and wound transformers",
     "Eight digital-logic discoveries and nine paid component recipes reconverge on a sixth commissioned hardwired sequencing workshop, with relay arithmetic independent of semiconductor manufacture",
     "AI rulers commission paid stronger studies from physically returned and examined evidence, with ordinary travel/payment/refusal and no hidden supplier-knowledge lookup",
-    "AI research acquisition requests paid 60-day scholar visits from examined leads before formal purchasing is available, reserving travel and board through the existing workforce-conserving contract"
+    "AI research acquisition requests paid 60-day scholar visits from examined leads before formal purchasing is available, reserving travel and board through the existing workforce-conserving contract",
+    "Eight printing-material/form/press discoveries and nine paid recipes produce Printed Sheets, a finite nonstacking alternative to Paper during collection examination; AI plans its supply chain"
   ],
   "unfinished": [
-    "Remaining 4600 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4592 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
     "Civilian and future operating models beyond six primary-settlement plants; solar weather, storage and night-time balancing",
@@ -82,9 +83,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 400,
+    "live_subjects": 408,
     "verified_subject_images": 34,
-    "queued_live_images": 366,
+    "queued_live_images": 374,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

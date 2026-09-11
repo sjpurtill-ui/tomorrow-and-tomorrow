@@ -2,6 +2,16 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"pressed_seed_oil":{"name": "Pressed drying seed oil", "output": "Drying Oil", "gate": "seed_oil_pressing", "materials": {"Fiber Plants": 2.0}, "days": 3.0, "tooling": {"Stone": 4.0, "Timber": 3.0, "Clay": 2.0}},
+	"captured_lampblack":{"name": "Collected lampblack", "output": "Lampblack", "gate": "lampblack_capture", "materials": {"Timber": 2.0}, "days": 3.0, "tooling": {"Clay": 3.0, "Stone": 2.0}},
+	"oil_printing_ink":{"name": "Carbon oil printing ink", "output": "Printing Ink", "gate": "oil_based_printing_inks", "materials": {"Drying Oil": 0.5, "Lampblack": 0.5, "Timber": 0.5}, "days": 2.0, "tooling": {"Stone": 2.0, "Clay": 2.0}},
+	"carved_printing_blocks":{"name": "Carved relief printing forms", "output": "Printing Forms", "gate": "relief_block_cutting", "materials": {"Timber": 2.0}, "days": 5.0, "tooling": {"Wrought Iron": 1.0, "Stone": 1.0}},
+	"wood_type_forms":{"name": "Composed wooden type forms", "output": "Printing Forms", "gate": "wooden_movable_type", "materials": {"Timber": 1.5}, "days": 6.0, "tooling": {"Wrought Iron": 1.0, "Stone": 2.0}},
+	"hand_printed_sheets":{"name": "Hand-impressed sheets", "output": "Printed Sheets", "gate": "hand_relief_printing", "materials": {"Paper": 1.0, "Printing Ink": 0.1}, "days": 3.0, "tooling": {"Printing Forms": 1.0, "Timber": 1.0}},
+	"screw_printed_sheets":{"name": "Screw-press sheets", "output": "Printed Sheets", "gate": "screw_press_printing", "materials": {"Paper": 1.0, "Printing Ink": 0.1}, "days": 1.5, "tooling": {"Printing Forms": 1.0, "Timber": 8.0, "Wrought Iron": 3.0}},
+	"cylinder_printed_sheets":{"name": "Hand-cranked cylinder sheets", "output": "Printed Sheets", "gate": "cylinder_press_printing", "materials": {"Paper": 1.0, "Printing Ink": 0.08}, "days": 1.0, "tooling": {"Printing Forms": 1.0, "Timber": 4.0, "Steel": 4.0, "Shaft Bearings": 2.0, "Gear Sets": 1.0}},
+	"motor_printed_sheets":{"name": "Motor-driven cylinder sheets", "output": "Printed Sheets", "gate": "cylinder_press_printing", "materials": {"Paper": 1.0, "Printing Ink": 0.08}, "days": 0.5, "power": 1.0, "daily_power": 1.0, "tooling": {"Printing Forms": 1.0, "Timber": 4.0, "Steel": 4.0, "Shaft Bearings": 2.0, "Gear Sets": 1.0, "Electric Motors": 1.0}},
+
 	"relay_logic_modules":{"name": "Relay logic assemblies", "output": "Logic Modules", "gate": "relay_logic", "materials": {"Relays": 3.0, "Copper Wire": 0.5}, "days": 3.0, "tooling": {"Wrought Iron": 2.0, "Timber": 2.0}},
 	"diode_logic_modules":{"name": "Diode logic assemblies", "output": "Logic Modules", "gate": "diode_logic", "materials": {"Silicon Diodes": 3.0, "Resistors": 2.0, "Copper Wire": 0.3}, "days": 2.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
 	"transistor_inverters":{"name": "Transistor inverter assemblies", "output": "Inverter Modules", "gate": "transistor_inverters", "materials": {"Transistors": 1.0, "Resistors": 2.0, "Copper Wire": 0.2}, "days": 2.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
