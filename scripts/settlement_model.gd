@@ -246,7 +246,7 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
 		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)
 		if daily_work.is_valid(): with_local_population(daily_work)
-		with_local_population(func()->void:process_month(context))
+		process_local_month(context)
 	)
 	WorldSimulation.state.settlement_network_revision+=1
 	record["last_resource_day"]=int(WorldSimulation.state.elapsed_days)
@@ -1247,6 +1247,16 @@ func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary
 		plot["frontage_route_id"]=route_id
 		connected_centers.append(plot_center)
 		route_id+=1
+
+func process_local_month(context:Dictionary={})->Array[Dictionary]:
+	# Keep registry refresh even when morphology is idle. Founding or summary
+	# repair still needs the real local population and follows the full path.
+	var state:=WorldSimulation.state
+	var month_day:=int(floor(state.elapsed_days/30.0))*30
+	if not state.settlement_plots.is_empty() and not state.settlement_morphology.is_empty() and month_day<=state.last_morphology_day:
+		_ensure_primary_settlement_record()
+		return []
+	return with_local_population(func()->Array[Dictionary]:return process_month(context))
 
 func process_month(context:Dictionary={})->Array[Dictionary]:
 	ensure_founded()
