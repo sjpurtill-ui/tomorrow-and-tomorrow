@@ -20,7 +20,7 @@ static func context(origin:Vector2,traveling:bool=false)->Dictionary:
 	result.merge(WorldSimulation.state.active_field_observation_signals(int(WorldSimulation.state.elapsed_days)))
 	return result
 
-static func advance(day:int,daily_context:Dictionary,construction:Callable=Callable(),timings:Dictionary={})->Dictionary:
+static func advance(day:int,daily_context:Dictionary,construction:Callable=Callable(),timings:Dictionary={},secondary_timings:Dictionary={})->Dictionary:
 	var stamp:=Time.get_ticks_usec() if not timings.is_empty() else 0
 	WorldSimulation.state.elapsed_days=day
 	WorldSimulation.state.convoy_traveling=bool(daily_context.get("traveling",false))
@@ -52,7 +52,7 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	for city in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
 		var local_context:=context(city.position)
-		WorldSimulation.settlements.process_city_resources(String(city.id),local_context,build)
+		WorldSimulation.settlements.process_city_resources(String(city.id),local_context,build,secondary_timings)
 	stamp=record_timing(timings,"secondary_settlements",stamp)
 	WorldSimulation.settlements.process_city_trade()
 	stamp=record_timing(timings,"city_trade",stamp)

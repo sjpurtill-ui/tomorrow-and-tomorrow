@@ -10,6 +10,8 @@ var seed_value:=91420
 var output_path:="/tmp/tt-history-pacing.json"
 var profile_enabled:=false
 var timings:Dictionary={}
+var secondary_timings:Dictionary={}
+var previous_secondary_timings:Dictionary={}
 var timing_intervals:Array=[]
 var previous_timings:Dictionary={}
 var previous_timing_day:=0
@@ -28,7 +30,13 @@ func timing_interval(day:int)->Dictionary:
 		if not timings[phase] is Dictionary:continue
 		var prior:Dictionary=previous_timings.get(phase,{"calls":0,"microseconds":0})
 		stages[phase]={"calls":int(timings[phase].calls)-int(prior.calls),"microseconds":int(timings[phase].microseconds)-int(prior.microseconds)}
-	var interval:={"from_day":previous_timing_day,"to_day":day,"wall_microseconds":now-previous_timing_usec,"stages":stages}
+	var secondary_stages:Dictionary={}
+	for phase:String in secondary_timings:
+		if not secondary_timings[phase] is Dictionary:continue
+		var prior:Dictionary=previous_secondary_timings.get(phase,{"calls":0,"microseconds":0})
+		secondary_stages[phase]={"calls":int(secondary_timings[phase].calls)-int(prior.calls),"microseconds":int(secondary_timings[phase].microseconds)-int(prior.microseconds)}
+	previous_secondary_timings=secondary_timings.duplicate(true)
+	var interval:={"secondary_stages":secondary_stages,"from_day":previous_timing_day,"to_day":day,"wall_microseconds":now-previous_timing_usec,"stages":stages}
 	timing_intervals.append(interval)
 	previous_timings=timings.duplicate(true);previous_timing_day=day;previous_timing_usec=now
 	return interval
@@ -56,7 +64,7 @@ func bottlenecks()->Dictionary:
 	return {"settlements":cities,"causally_ready_questions":questions,"material_states":material_states,"allocations":simulation.state.population_allocations.duplicate(),"research_allocations":simulation.state.research_allocations.duplicate(),"research_subcategory_allocations":simulation.state.research_subcategory_allocations.duplicate(true),"active_investigations":simulation.state.active_investigations.duplicate(),"controller_plan":controller.current_plan("pacing_reference"),"known_ids":simulation.state.known_discoveries.duplicate()}
 func run()->void:
 	for argument:String in OS.get_cmdline_user_args():
-		if argument=="--profile":profile_enabled=true;timings={"enabled":true}
+		if argument=="--profile":profile_enabled=true;timings={"enabled":true};secondary_timings={"enabled":true}
 		elif argument.begins_with("--days="):target_days=clampi(argument.trim_prefix("--days=").to_int(),1,3650000)
 		elif argument.begins_with("--wall-seconds="):wall_seconds=clampf(argument.trim_prefix("--wall-seconds=").to_float(),1,3600)
 		elif argument.begins_with("--seed="):seed_value=argument.trim_prefix("--seed=").to_int()
@@ -91,7 +99,7 @@ func run()->void:
 			if simulation.state.settlement_site_committed:origin=Vector2(simulation.state.settlement_founded_at.x,simulation.state.settlement_founded_at.z)
 			var context:Dictionary=daily.context(origin,simulation.state.convoy_traveling)
 			stamp=daily.record_timing(timings,"context",stamp)
-			var result:Dictionary=daily.advance(day,context,Callable(),timings)
+			var result:Dictionary=daily.advance(day,context,Callable(),timings,secondary_timings)
 			for event:Dictionary in result.discoveries:discoveries.append({"id":event.id,"day":day,"year":float(day)/365.0})
 			if day==1 or day%365==0:snapshots.append(snapshot(day))
 			return simulation.state.population_total<=1
@@ -107,7 +115,7 @@ func run()->void:
 	catalog_count=actor.systems.DiscoverySystem.technology_catalog.size()
 	var elapsed:=float(Time.get_ticks_msec()-start)/1000.0
 	var diagnostic:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return bottlenecks())
-	var report:={"schema":8,"timing_intervals":timing_intervals,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
+	var report:={"schema":9,"secondary_timings":secondary_timings,"timing_intervals":timing_intervals,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
 	var file:=FileAccess.open(output_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write pacing diagnostic: "+output_path);quit(1);return
 	file.store_string(JSON.stringify(report,"  "));file.close()
