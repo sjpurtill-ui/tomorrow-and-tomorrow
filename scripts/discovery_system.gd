@@ -773,7 +773,7 @@ func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	return {
 		"weight":weight,"total_weight":total_weight,"total_researchers":total_researchers,
 		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,
-		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier
+		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
 	}
 
 
