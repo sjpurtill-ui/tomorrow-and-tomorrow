@@ -58,7 +58,8 @@ static func routes_for(entry:Dictionary,known:Array,context:Dictionary,source:Di
 			imported["label"]=("Field experiments: " if source.kind=="specimen" else "Learned from ")+String(source.source_name)+" · "+String(foundation.label)
 			imported["collection_id"]=source.id
 			imported["imported"]=source.kind!="specimen"
-			imported["progress_multiplier"]*=(2.5 if source.get("research_purchase",false) else (1.6 if source.get("research_partnership",false) else 1.8)) if source.kind!="specimen" else 1.0
+			imported["progress_multiplier"]*=preload("res://scripts/society_exchange.gd").evidence_strength(source)
+			if source.get("reverse_engineered",false):imported["label"]="Workshop examination · "+String(foundation.label)
 			result.append(imported)
 	for route:Dictionary in result:
 		var assessment:=Requirements.evaluate(route,known)

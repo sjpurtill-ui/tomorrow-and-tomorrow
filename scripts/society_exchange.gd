@@ -66,6 +66,13 @@ static func text_list(value:Variant,limit:int)->bool:
 static func valid_item(item:Variant)->bool:
 	if not item is Dictionary or not item.has_all(["id","kind","name","source_id","source_name","position","observed_day","returned_day","discovery_id","study","work","signals"]):return false
 	if item.kind not in ["artifact","knowledge","culture","specimen"]:return false
+	if item.has("reverse_engineered"):
+		if not item.reverse_engineered is bool or item.kind!="artifact":return false
+		if item.reverse_engineered:
+			if item.get("work")!=180.0 or item.get("id")!="reverse:"+String(item.get("discovery_id","")):return false
+			var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(item.get("specimen_item","")))
+			if recipe.is_empty() or recipe.gate!=item.discovery_id:return false
+			if item.get("research_purchase",false) or item.get("research_partnership",false) or item.get("partnership_protocol",false):return false
 	if item.has("research_purchase") and (not item.research_purchase is bool or item.kind!="knowledge"):return false
 	for flag:String in ["partnership_protocol","research_partnership"]:
 		if item.has(flag) and (not item[flag] is bool or item.kind!="knowledge"):return false
@@ -467,6 +474,7 @@ static func advance(day:int)->void:
 			log_event("Examined %s. Its evidence now supports the related investigation." % String(item.name))
 
 static func evidence_strength(item:Dictionary)->float:
+	if item.get("reverse_engineered",false):return 1.35
 	if item.is_empty() or item.get("partnership_protocol",false):return 0.0
 	if item.get("research_purchase",false):return 2.5
 	if item.get("research_partnership",false):return 1.6

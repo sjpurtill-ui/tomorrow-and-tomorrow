@@ -266,6 +266,17 @@ func select(id:String,open_detail:bool=false)->void:
 			if not requirements.is_empty():Art.label(detail_body,"Requires "+" + ".join(requirements),11,T.TEXT_SOFT,true)
 			if float(route.get("progress_multiplier",1.0))!=1.0:Art.label(detail_body,"Research pace: %.2f× local baseline" % float(route.progress_multiplier),11,T.TEXT_SOFT,true)
 		Art.button(detail_body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
+		if item.exposed and not item.known and preload("res://scripts/reverse_engineering.gd").available():
+			for specimen:String in preload("res://scripts/reverse_engineering.gd").specimens(String(item.id)):
+				var subject:=String(item.id)
+				var terms:Dictionary=preload("res://scripts/reverse_engineering.gd").quote(subject,specimen)
+				var examine:=Button.new();examine.clip_text=true;examine.text="Consume 1 batch for study: "+String(preload("res://scripts/civilian_industry.gd").product(specimen).output)
+				examine.disabled=terms.has("error");examine.tooltip_text=String(terms.get("message",terms.get("error","")))
+				examine.pressed.connect(func()->void:
+					var result:Dictionary=preload("res://scripts/reverse_engineering.gd").begin(subject,specimen)
+					examine.tooltip_text=String(result.get("message",result.get("error","")));examine.disabled=true
+				)
+				detail_body.add_child(examine)
 		if item.exposed and (not item.known or preload("res://scripts/research_partnerships.gd").pending(String(item.id))) and (preload("res://scripts/research_purchase.gd").available() or preload("res://scripts/scholar_visits.gd").available()):
 			var purchase:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
 			purchase.subject=String(item.id);detail_body.add_child(purchase)

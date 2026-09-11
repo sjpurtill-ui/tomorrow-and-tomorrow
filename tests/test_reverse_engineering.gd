@@ -1,0 +1,67 @@
+extends GdUnitTestSuite
+const R=preload("res://scripts/reverse_engineering.gd")
+const E=preload("res://scripts/society_exchange.gd")
+const P=preload("res://scripts/knowledge_pathways.gd")
+func before_test()->void:
+	WorldSimulation.clear();GameState.reset_for_new_world(91417);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	GameState.elapsed_days=0;GameState.food_security=1;GameState.population_health=1
+	GameState.known_discoveries.assign(["apprentice_contracts","workshop_standards","kiln_control","salt_working"])
+	GameState.resource_stockpiles.Glass=2.0
+func after_test()->void:
+	GameState.elapsed_days=0;WorldSimulation.clear()
+	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
+func test_quote_is_read_only_and_begin_consumes_only_one_owned_example()->void:
+	assert_bool(R.quote("glassmaking","glass_batch").has("error")).is_false()
+	assert_float(float(GameState.resource_stockpiles.Glass)).is_equal(2.0)
+	assert_bool(R.begin("glassmaking","glass_batch").get("ok",false)).is_true()
+	assert_float(float(GameState.resource_stockpiles.Glass)).is_equal(1.0)
+	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
+	assert_float(float(GameState.resource_stockpiles.Glass)).is_equal(1.0)
+	assert_bool("glassmaking" in GameState.known_discoveries).is_false()
+	assert_dict(P.evidence("glassmaking")).is_empty()
+func test_missing_specimen_or_foundations_cannot_be_bypassed()->void:
+	GameState.resource_stockpiles.Glass=0.0
+	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
+	GameState.resource_stockpiles.Glass=2.0;GameState.known_discoveries.erase("kiln_control")
+	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
+	assert_float(float(GameState.resource_stockpiles.Glass)).is_equal(2.0)
+	assert_dict(E.data().collections).is_empty()
+func test_examination_needs_local_work_before_weaker_evidence_applies()->void:
+	R.begin("glassmaking","glass_batch")
+	GameState.population_allocations.Knowledge=0
+	E.advance(1);GameState.elapsed_days=1
+	assert_float(float(E.data().collections["reverse:glassmaking"].study)).is_equal(0.0)
+	GameState.population_allocations.Knowledge=20
+	for day in range(2,402):GameState.elapsed_days=day;E.advance(day)
+	assert_float(float(P.evidence("glassmaking").study)).is_equal(1.0)
+	assert_float(P.multiplier(DiscoverySystem.discovery_definition("glassmaking"))).is_equal(1.35)
+	assert_bool("glassmaking" in GameState.known_discoveries).is_false()
+func test_examined_specimen_cannot_replace_lost_local_foundations()->void:
+	R.begin("glassmaking","glass_batch")
+	var item:Dictionary=E.data().collections["reverse:glassmaking"]
+	GameState.known_discoveries.erase("kiln_control")
+	for route:Dictionary in P.routes_for(DiscoverySystem.discovery_definition("glassmaking"),GameState.known_discoveries,{},item):assert_bool(route.ready).is_false()
+func test_save_validation_accepts_progress_and_rejects_forged_contracts()->void:
+	R.begin("glassmaking","glass_batch")
+	var data:Dictionary=JSON.parse_string(JSON.stringify(E.data()))
+	assert_bool(E.valid(data)).is_true()
+	data.collections["reverse:glassmaking"].work=1.0
+	assert_bool(E.valid(data)).is_false()
+	data.collections["reverse:glassmaking"].work=180.0
+	data.collections["reverse:glassmaking"].specimen_item="electrical_generator"
+	assert_bool(E.valid(data)).is_false()
+func test_stronger_existing_evidence_prevents_wasting_a_specimen()->void:
+	R.begin("glassmaking","glass_batch")
+	var item:Dictionary=E.data().collections["reverse:glassmaking"].duplicate(true)
+	E.data().collections.clear();item.id="purchased";item.kind="knowledge";item.erase("reverse_engineered");item["research_purchase"]=true;item.study=1.0
+	E.data().collections[item.id]=item;E.data().evidence.glassmaking=item.id
+	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
+	assert_float(float(GameState.resource_stockpiles.Glass)).is_equal(1.0)
+
+func test_another_civilizations_specimen_does_not_supply_local_examination()->void:
+	WorldSimulation.create_actor("specimen_owner",981)
+	WorldSimulation.scoped("specimen_owner",func()->void:WorldSimulation.state.resource_stockpiles.Glass=10.0)
+	GameState.resource_stockpiles.Glass=0.0
+	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
+	assert_float(float(WorldSimulation.scoped("specimen_owner",func()->float:return WorldSimulation.state.resource_stockpiles.Glass))).is_equal(10.0)
