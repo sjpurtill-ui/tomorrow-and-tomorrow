@@ -24,7 +24,17 @@ static func review_due(id:String,day:int)->bool:
 static func research_orders(id:String,plan:Dictionary)->void:
 	var budget:=0
 	for value in WorldSimulation.state.research_allocations.values():budget+=int(value)
-	var weights:=STRATEGY.research_plan(plan.research_weights,budget)
+	var priorities:Dictionary=plan.research_weights.duplicate()
+	var viable:Dictionary={}
+	for entry:Dictionary in WorldSimulation.discovery.technology_catalog:
+		if WorldSimulation.discovery._discovery_is_eligible(entry,int(WorldSimulation.state.elapsed_days)):viable[String(entry.dynamic)]=true
+	# This ruler chooses its own emphasis through ordinary orders. Do not spend
+	# every point on blocked fields while their cross-field foundations await work.
+	# Player emphasis remains authoritative and is never changed by this controller.
+	if not viable.is_empty():
+		for domain:String in STRATEGY.DOMAINS:
+			if not viable.has(domain):priorities[domain]=0.0
+	var weights:=STRATEGY.research_plan(priorities,budget)
 	for domain:String in weights:
 		if int(WorldSimulation.state.research_allocations.get(domain,0))!=int(weights[domain]):
 			WorldSimulation.submit(id,{"kind":"research_emphasis","domain":domain,"weight":weights[domain],"reason":String(plan.goals[0].title)})
