@@ -66,3 +66,20 @@ func test_aquifer_lifting_uses_drainage_knowledge_but_still_needs_specialists()-
 	assert_array(ResourceSystem._access_blockers(water,ResourceSystem.catalog["Deep Aquifer"],{})).is_empty()
 	GameState.population_allocations.Knowledge=0
 	assert_array(ResourceSystem._access_blockers(water,ResourceSystem.catalog["Deep Aquifer"],{})).contains(["specialist knowledge is unavailable"])
+
+func test_flint_access_uses_adopted_flaking_and_actual_extraction_labor()->void:
+	var flint:=deposit("Flint");flint.stage="surveyed";flint.route=1.0
+	GameState.population_allocations.Extraction=8;GameState.population_allocations.Logistics=8
+	var context:={"tools":1.0,"origin":Vector3.ZERO,"settled":false}
+	assert_float(ResourceSystem._calculate_access(flint,ResourceSystem.catalog.Flint,context)).is_less(1.0)
+	GameState.known_discoveries.append("controlled_flaking");GameState.discovery_adoption.controlled_flaking=0.0
+	assert_float(ResourceSystem._calculate_access(flint,ResourceSystem.catalog.Flint,context)).is_less(1.0)
+	GameState.discovery_adoption.controlled_flaking=1.0
+	assert_float(ResourceSystem._calculate_access(flint,ResourceSystem.catalog.Flint,context)).is_greater_equal(1.0)
+	GameState.population_allocations.Extraction=0
+	assert_array(ResourceSystem._access_blockers(flint,ResourceSystem.catalog.Flint,context)).contains(["no extraction labor assigned"])
+	GameState.population_allocations.Extraction=8
+	ResourceSystem.process_day(context)
+	assert_str(String(flint.stage)).is_equal("developed")
+	assert_float(float(flint.lifetime_extracted)).is_greater(0.0)
+	assert_float(float(flint.remaining)).is_less(1000.0)

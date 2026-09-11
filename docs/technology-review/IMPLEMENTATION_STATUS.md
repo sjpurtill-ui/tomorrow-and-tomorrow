@@ -418,3 +418,10 @@ Schema-3 follow-up reached day 16,606 (45.50 years), with 285 people, ten Knowle
 The atlas now lists only unsatisfied material conditions and explicitly offers a returned, studied specimen when that investigation permits one. Nine existing technology-tree tests pass; no native UI interaction is claimed.
 
 Schema-4 one-year probe completed 365 days and verified 52 occurrences including one accessible Freshwater record. Population 121, five buildings, three inquiries, no completed discovery yet. Report: pacing/hydrology-enabled-reference.json. This confirms hydrology initialization, not longer progression.
+
+
+## 29. Flint access responds to learned processing
+
+The detailed resource probe exposed surveyed flint stuck below the access threshold with no listed blockers. Unlike the other minerals, Flint had no processing method contributing to its access score; a small number of surveyed occurrences could not accumulate enough survey practice to compensate. Controlled Flaking now supplies that processing contribution. Its investigation needs only recognized flint (or the explicitly permitted studied specimen), so extracting flint is not a prerequisite for learning how to work it. This adds no discovery identity or free material.
+
+All nine resource-recognition/access tests pass with no errors, failures, skips or orphans. The new regression verifies the score remains below threshold without adoption, crosses it with adopted flaking, still refuses access without extraction labor, and runs a normal resource day that extracts from the finite reserve and marks the occurrence developed. Existing recognition, coal ventilation and aquifer lifting cases remain green. Log: /tmp/tt-flint-access.log. No saved shape changes. Shared integration file: ResourceSystem; canonical integration remains pending.
