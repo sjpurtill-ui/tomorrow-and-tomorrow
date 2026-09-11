@@ -210,7 +210,10 @@ static func entries()->Array[Dictionary]:
 	      "rotational_dynamics",
 	      "water_mills"
 	    ],
-	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
+	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone. Enables the named physical workshop components; batch materials, setup tooling and finite workshop work are consumed to create them.",
+	    "production_items": [
+	      "gear_sets"
+	    ]
 	  },
 	  {
 	    "id": "crank_linkages",
@@ -238,7 +241,10 @@ static func entries()->Array[Dictionary]:
 	      "precision_machinery",
 	      "mine_drainage"
 	    ],
-	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
+	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone. Enables the named physical workshop components; batch materials, setup tooling and finite workshop work are consumed to create them.",
+	    "production_items": [
+	      "crank_assemblies"
+	    ]
 	  },
 	  {
 	    "id": "flywheel_smoothing",
@@ -264,7 +270,10 @@ static func entries()->Array[Dictionary]:
 	    "foundation_for": [
 	      "grain_milling"
 	    ],
-	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
+	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone. Enables the named physical workshop components; batch materials, setup tooling and finite workshop work are consumed to create them.",
+	    "production_items": [
+	      "flywheels"
+	    ]
 	  },
 	  {
 	    "id": "bearing_surfaces",
@@ -292,7 +301,10 @@ static func entries()->Array[Dictionary]:
 	      "grain_milling",
 	      "electric_motors"
 	    ],
-	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
+	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone. Enables the named physical workshop components; batch materials, setup tooling and finite workshop work are consumed to create them.",
+	    "production_items": [
+	      "shaft_bearings"
+	    ]
 	  },
 	  {
 	    "id": "friction_measurement",
@@ -754,9 +766,13 @@ static func entries()->Array[Dictionary]:
 	    "foundation_for": [
 	      "steam_propulsion"
 	    ],
-	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
+	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone. Enables the named physical workshop components; batch materials, setup tooling and finite workshop work are consumed to create them.",
+	    "production_items": [
+	      "mechanical_governors"
+	    ]
 	  }
 	]
+
 
 static func apply(entry:Dictionary)->Dictionary:
 	if not MODELS.has(String(entry.id)):return entry

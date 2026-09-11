@@ -2,6 +2,13 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"gear_sets":{"name": "Metal gear sets", "output": "Gear Sets", "gate": "gear_ratios", "materials": {"Steel": 2.0}, "days": 5.0, "tooling": {"Steel": 4.0, "Timber": 4.0}},
+	"shaft_bearings":{"name": "Shaft bearings", "output": "Shaft Bearings", "gate": "bearing_surfaces", "materials": {"Refined Copper": 1.0, "Steel": 0.5, "Graphite": 0.05}, "days": 4.0, "tooling": {"Steel": 3.0, "Timber": 2.0}},
+	"crank_assemblies":{"name": "Crank assemblies", "output": "Crank Assemblies", "gate": "crank_linkages", "materials": {"Steel": 2.0, "Shaft Bearings": 1.0}, "days": 4.0, "tooling": {"Steel": 4.0, "Timber": 3.0}},
+	"flywheels":{"name": "Balanced flywheels", "output": "Flywheels", "gate": "flywheel_smoothing", "materials": {"Wrought Iron": 3.0, "Steel": 0.5}, "days": 4.0, "tooling": {"Steel": 3.0, "Stone": 4.0}},
+	"mechanical_governors":{"name": "Mechanical governors", "output": "Mechanical Governors", "gate": "feedback_governors", "materials": {"Gear Sets": 1.0, "Shaft Bearings": 1.0, "Steel": 1.0}, "days": 5.0, "tooling": {"Steel": 4.0, "Optical Lenses": 1.0}},
+	"governed_generators":{"name": "Governed generator assemblies", "output": "Electrical Generators", "gate": "electrical_generators", "materials": {"Mechanical Governors": 1.0, "Crank Assemblies": 1.0, "Flywheels": 1.0, "Copper Wire": 5.0, "Insulated Cable": 2.0, "Steel": 2.0}, "days": 12.0, "tooling": {"Steel": 6.0, "Timber": 8.0}},
+
 	"purified_brine":{"name": "Purified brine", "output": "Purified Brine", "gate": "brine_purification", "materials": {"Salt": 1.0, "Freshwater": 3.0}, "days": 3.0, "tooling": {"Glass": 2.0, "Clay": 4.0}},
 	"chloralkali_batch":{"name": "Chlor-alkali batches", "output": "Chlorine", "co_products": {"Caustic Soda": 1.0, "Hydrogen": 1.0}, "gate": "chloralkali_cells", "materials": {"Purified Brine": 1.0, "Freshwater": 1.0, "Graphite": 0.02}, "days": 5.0, "power": 4.0, "daily_power": 2.0, "tooling": {"Pressure Vessels": 3.0, "Glass": 4.0, "Insulated Cable": 4.0}},
 	"hydrogen_chloride":{"name": "Hydrogen chloride", "output": "Hydrogen Chloride", "gate": "hydrogen_chloride_synthesis", "materials": {"Chlorine": 1.0, "Hydrogen": 1.0}, "days": 3.0, "tooling": {"Pressure Vessels": 2.0, "Glass": 3.0}},
