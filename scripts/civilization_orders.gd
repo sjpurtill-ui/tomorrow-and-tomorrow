@@ -49,6 +49,7 @@ static func execute(order:Dictionary)->Dictionary:
 		"train":return WorldSimulation.military.start_training(String(order.get("unit","")),String(order.get("weapon","")),int(order.get("count",0)))
 		"production_retool":return WorldSimulation.military.retool_production_line(int(order.get("job",-1)),String(order.get("item","")))
 		"production_target":return WorldSimulation.military.configure_production_line(int(order.get("job",-1)),int(order.get("target",0)),bool(order.get("paused",false)))
+		"plant_install":return preload("res://scripts/technology_operations.gd").install(String(order.get("plant","")),int(order.get("count",1)))
 		"production":return WorldSimulation.military.start_production_line(String(order.get("item","")),int(order.get("target",0)))
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))
