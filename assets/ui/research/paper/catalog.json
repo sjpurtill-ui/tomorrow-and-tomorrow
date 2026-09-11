@@ -2943,7 +2943,7 @@
       "domain": "production",
       "id": "spinning_wheels",
       "name": "Spinning Wheels",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/flyer_spinning.png",
@@ -2989,9 +2989,9 @@
   "live_art_complete": false,
   "live_count": 373,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 349,
+  "queued_count": 348,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 24
+  "verified_count": 25
 }

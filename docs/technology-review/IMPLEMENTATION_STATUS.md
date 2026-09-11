@@ -714,3 +714,12 @@ Base `4298b20`; implementation worktree only. The atlas now keeps foreign suppor
 Validation: 11 research-license tests and 11 research-visual-atlas tests passed, with zero errors, failures, skips or orphans. The new regression covers a license in its final 30 days, a known subject at 5% adoption, an enabled renewal proposal, hidden unexposed knowledge, and independence at 10%. The first fixture retained its manually completed diplomatic mission; clearing that completed fixture mission restored the ordinary available-envoy state. No production or payment rules changed.
 
 Save compatibility: no serialized changes. Integration conflicts: `scripts/hud/research_atlas.gd`, `scripts/hud/research_purchase_panel.gd`. Native player UI and canonical integration remain unverified. Catalog remains 373 authored technologies; this is a usability correction, not catalog expansion or completion of the overhaul.
+
+
+## 61. Spinning Wheels paper illustration
+
+Base `4743ba3`; generated through the built-in image tool using the established Apprentice Contracts style reference. Added `assets/ui/research/paper/spinning_wheels.png`, its recorded prompt and texture import, and its explicit discovery binding. The square scene depicts an artisan, hand-driven wheel and spindle in matte earth pigments on ivory paper; it is an illustrative scene, not a construction drawing. Import uses a 768-pixel limit and mipmaps; atlas presentation preserves the complete square.
+
+Validation: headless import exited successfully without script errors; all 11 research-visual-atlas cases passed with zero errors, failures, skips or orphans. Manifest confirms 373 live discoveries, 25 reviewed subject images and 348 queued live images. No save or gameplay state changes. Shared integration conflict: `scripts/hud/research_visuals.gd`. Native player presentation and canonical integration remain unverified.
+
+The existing 250-year-target pacing process was polled and remains live; its latest observed annual snapshot is year 141, population 4,365 and 125 discoveries. This is progress output, not completed 250-year or full-history acceptance, and the run predates recent textile and licensing changes.
