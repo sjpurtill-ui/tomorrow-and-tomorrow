@@ -3064,12 +3064,84 @@
       "id": "hydrogen_flame_glassworking",
       "name": "Hydrogen-Flame Glassworking",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/carbon_resistors.png",
+      "description": "A measured carbon path supplies repeatable electrical resistance between metal contacts.",
+      "domain": "production",
+      "id": "carbon_resistors",
+      "name": "Carbon Resistors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/foil_capacitors.png",
+      "description": "Conducting foils separated by an insulating paper layer store charge without a continuous conducting path.",
+      "domain": "production",
+      "id": "foil_capacitors",
+      "name": "Foil Capacitors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electromagnetic_relays.png",
+      "description": "A current-carrying coil moves an iron armature to switch a separate circuit.",
+      "domain": "production",
+      "id": "electromagnetic_relays",
+      "name": "Electromagnetic Relays",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wound_transformers.png",
+      "description": "Coupled windings transfer changing electrical excitation through a magnetic core at a winding-dependent voltage ratio.",
+      "domain": "production",
+      "id": "wound_transformers",
+      "name": "Wound Transformers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/silicon_rectifiers.png",
+      "description": "A manufactured silicon junction passes current much more readily in one direction than the other.",
+      "domain": "production",
+      "id": "silicon_rectifiers",
+      "name": "Silicon Rectifiers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bipolar_junction_transistors.png",
+      "description": "Two adjacent junctions let a small base signal control a larger collector current.",
+      "domain": "production",
+      "id": "bipolar_junction_transistors",
+      "name": "Bipolar Junction Transistors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/transistor_amplifiers.png",
+      "description": "A biased transistor circuit uses supplied power to amplify an input signal while passive components establish its operating range.",
+      "domain": "production",
+      "id": "transistor_amplifiers",
+      "name": "Transistor Amplifiers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/resistive_sensing.png",
+      "description": "A calibrated change in resistance becomes a measurable signal of a changing physical condition.",
+      "domain": "production",
+      "id": "resistive_sensing",
+      "name": "Resistive Sensing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electronic_machine_control.png",
+      "description": "A sensor, amplifier and switching stage compare machine behavior with a reference and adjust its actuation.",
+      "domain": "production",
+      "id": "electronic_machine_control",
+      "name": "Electronic Machine Control",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 383,
+  "live_count": 392,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 354,
+  "queued_count": 363,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

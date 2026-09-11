@@ -109,6 +109,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/textile_mechanization.gd").entries())
 	catalog.append_array(preload("res://scripts/paper_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/glassworking_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/electronic_components.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])

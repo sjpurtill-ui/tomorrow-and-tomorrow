@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 383,
+    "live": 392,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -51,13 +51,14 @@
     "Paid one-year civilian manufacturing licenses permit 65% throughput with real inputs and power, pause on expiry or supplier interruption, and yield to independent mastery without granting research",
     "Six textile-mechanization discoveries and seven physical hand/electric production alternatives retain ordinary tooling, work, input and energy costs",
     "Four paper-production discoveries and five physical recipes make consumable Paper available for bounded collection-study support while preserving study without paper",
-    "Six glassworking discoveries and eight recipes connect physical vessels, tubes and laboratory apparatus to alternative brine and silicon production setups with actual inputs and power"
+    "Six glassworking discoveries and eight recipes connect physical vessels, tubes and laboratory apparatus to alternative brine and silicon production setups with actual inputs and power",
+    "Nine electronic component discoveries and a paid controller supply chain feed a fifth commissioned installation: operator- and power-limited electronic machine-control workshops"
   ],
   "unfinished": [
-    "Remaining 4617 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4608 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
-    "Civilian and future operating models beyond four primary-settlement plants; solar weather, storage and night-time balancing",
+    "Civilian and future operating models beyond five primary-settlement plants; solar weather, storage and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 88 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline"
@@ -76,9 +77,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 383,
+    "live_subjects": 392,
     "verified_subject_images": 29,
-    "queued_live_images": 354,
+    "queued_live_images": 363,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"
