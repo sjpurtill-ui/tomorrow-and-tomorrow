@@ -2336,12 +2336,204 @@
       "id": "hydrogen_chloride_synthesis",
       "name": "Hydrogen Chloride Synthesis",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lever_moments.png",
+      "description": "Measured lever arms relate balancing loads to their distances from a fulcrum.",
+      "domain": "knowledge",
+      "id": "lever_moments",
+      "name": "Lever Moments",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/centers_of_mass.png",
+      "description": "Suspension and balance trials locate the effective point at which a body’s weight acts.",
+      "domain": "knowledge",
+      "id": "centers_of_mass",
+      "name": "Centers of Mass",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/compound_pulleys.png",
+      "description": "Multiple moving sheaves exchange a longer rope travel for a smaller lifting force.",
+      "domain": "knowledge",
+      "id": "compound_pulleys",
+      "name": "Compound Pulleys",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gear_ratios.png",
+      "description": "Counting meshing teeth predicts changes in rotational speed and torque.",
+      "domain": "knowledge",
+      "id": "gear_ratios",
+      "name": "Gear Ratios",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crank_linkages.png",
+      "description": "Pinned links convert continuous rotation into a controlled reciprocating stroke.",
+      "domain": "knowledge",
+      "id": "crank_linkages",
+      "name": "Crank Linkages",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flywheel_smoothing.png",
+      "description": "A weighted rotating wheel carries motion between intermittent driving strokes.",
+      "domain": "knowledge",
+      "id": "flywheel_smoothing",
+      "name": "Flywheel Smoothing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bearing_surfaces.png",
+      "description": "Replaceable fitted surfaces carry rotating shafts while controlling clearance and wear.",
+      "domain": "knowledge",
+      "id": "bearing_surfaces",
+      "name": "Bearing Surfaces",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/friction_measurement.png",
+      "description": "Repeated pull tests distinguish the forces needed to begin and sustain sliding.",
+      "domain": "knowledge",
+      "id": "friction_measurement",
+      "name": "Friction Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lubrication_regimes.png",
+      "description": "Load and speed trials distinguish boundary contact from motion supported by a lubricant film.",
+      "domain": "knowledge",
+      "id": "lubrication_regimes",
+      "name": "Lubrication Regimes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/displacement_buoyancy.png",
+      "description": "Comparing displaced water with carried weight explains when loaded bodies float.",
+      "domain": "knowledge",
+      "id": "displacement_buoyancy",
+      "name": "Displacement and Buoyancy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hydrostatic_pressure.png",
+      "description": "Water columns reveal that pressure increases with depth and acts on enclosing surfaces.",
+      "domain": "knowledge",
+      "id": "hydrostatic_pressure",
+      "name": "Hydrostatic Pressure",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flow_continuity.png",
+      "description": "Measured flows through changing sections balance incoming and outgoing fluid quantities.",
+      "domain": "knowledge",
+      "id": "flow_continuity",
+      "name": "Flow Continuity",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/viscous_resistance.png",
+      "description": "Controlled passages reveal how fluid viscosity and wall contact oppose motion.",
+      "domain": "knowledge",
+      "id": "viscous_resistance",
+      "name": "Viscous Resistance",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/elastic_deformation.png",
+      "description": "Repeated bending tests separate recoverable shape changes from permanent damage.",
+      "domain": "knowledge",
+      "id": "elastic_deformation",
+      "name": "Elastic Deformation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stress_strain_relations.png",
+      "description": "Loads compared with cross section and relative extension characterize material response.",
+      "domain": "knowledge",
+      "id": "stress_strain_relations",
+      "name": "Stress–Strain Relations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/column_buckling.png",
+      "description": "Slender loaded members fail by sideways instability before their material is crushed.",
+      "domain": "knowledge",
+      "id": "column_buckling",
+      "name": "Column Buckling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cyclic_fatigue.png",
+      "description": "Repeated loading reveals cracks and failure even below a single-load failure threshold.",
+      "domain": "knowledge",
+      "id": "cyclic_fatigue",
+      "name": "Cyclic Fatigue",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/measured_kinematics.png",
+      "description": "Repeated position and time measurements distinguish speed from acceleration.",
+      "domain": "knowledge",
+      "id": "measured_kinematics",
+      "name": "Measured Kinematics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/inertial_motion.png",
+      "description": "Low-resistance motion distinguishes persistence of motion from forces that change it.",
+      "domain": "knowledge",
+      "id": "inertial_motion",
+      "name": "Inertial Motion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/momentum_balance.png",
+      "description": "Collision and recoil measurements compare transferred motion across interacting bodies.",
+      "domain": "knowledge",
+      "id": "momentum_balance",
+      "name": "Momentum Balance",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanical_work_energy.png",
+      "description": "Force acting through distance relates lifting, motion and losses in machines.",
+      "domain": "knowledge",
+      "id": "mechanical_work_energy",
+      "name": "Mechanical Work and Energy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rotational_dynamics.png",
+      "description": "Torque and mass distribution explain changes in angular motion.",
+      "domain": "knowledge",
+      "id": "rotational_dynamics",
+      "name": "Rotational Dynamics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanical_oscillation.png",
+      "description": "Pendulums and spring-loaded bodies reveal repeatable periods and damping.",
+      "domain": "knowledge",
+      "id": "mechanical_oscillation",
+      "name": "Mechanical Oscillation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/feedback_governors.png",
+      "description": "A speed-sensitive linkage changes the drive input to resist unwanted speed changes.",
+      "domain": "knowledge",
+      "id": "feedback_governors",
+      "name": "Feedback Governors",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 292,
+  "live_count": 316,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 284,
+  "queued_count": 308,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

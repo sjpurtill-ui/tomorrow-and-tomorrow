@@ -48,7 +48,12 @@ func test_removing_all_new_mathematics_preserves_the_old_graphs_reachability()->
 			if entry.id in known or entry.id in excluded:continue
 			for route:Dictionary in P.routes_for(entry,known,{}):
 				if route.ready:known.append(entry.id);changed=true;break
-	assert_int(known.size()).is_equal(DiscoverySystem.technology_catalog.size()-excluded.size())
+	# Later authored mechanics may explicitly depend on mathematics; the
+	# empirical catalog that preceded it must still remain reachable.
+	var later:Array=[]
+	for entry:Dictionary in preload("res://scripts/mechanics_knowledge.gd").entries():later.append(entry.id)
+	for entry:Dictionary in DiscoverySystem.technology_catalog:
+		if entry.id not in excluded and entry.id not in later:assert_bool(entry.id in known).override_failure_message(String(entry.id)).is_true()
 func test_route_augmentation_is_idempotent_and_preserves_original_requirements()->void:
 	var base:={"id":"wind_tunnel_testing","requires":["physical_gate"],"requires_all":["common_gate"],"requires_any":[["route_a","route_b"]],"learning_routes":[{"id":"local","label":"Experiments","requires_all":["apparatus"],"requires_any":[["wood","metal"]]}]}
 	var once:=Mathematics.apply(base.duplicate(true))

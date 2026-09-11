@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the chemical-process checkpoint: **292 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the mechanics checkpoint: **316 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -292,3 +292,18 @@ Validation: **50 cases pass**: seven reverse-engineering, ten purchase, ten part
 Limitations: coverage is civilian manufactured outputs; military hardware and operational-service examples still need separate authored mappings and behavior. Upstream physical procurement, embodied tacit expertise, repairable versus destructive examination, waste, richer specialist staffing, pricing and full-history balance remain incomplete. UI compilation and existing atlas behavior are tested; native user interaction has not been visually verified.
 
 Handoff scope: new reverse-engineering module and tests, SocietyExchange artifact validation/evidence ranking, KnowledgePathways multiplier selection and the research inspector action. Save shapes remain compatible with optional fields; older binaries will not provide the new action. The canonical checkout remains untouched. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. The full overhaul and canonical integration remain outstanding.
+
+
+## 19. Mechanics across practical engineering
+
+Added 24 distinct mechanical capabilities: lever moments, centers of mass, compound pulleys, gear ratios, crank linkages, flywheel smoothing, bearing surfaces, friction measurement, lubrication regimes, displacement/buoyancy, hydrostatic pressure, flow continuity, viscous resistance, elastic deformation, stress–strain relations, column buckling, cyclic fatigue, measured kinematics, inertial motion, momentum balance, work/energy, rotational dynamics, mechanical oscillation and feedback governors. The catalog now contains **316 / 5,000 discoveries**.
+
+Fourteen practical subjects gain optional mechanical-method routes: cranes, water mills, grain mills, precision machinery, coastal craft, canal locks, mine drainage, aerodynamics, structural load tests, advanced airframes, steam propulsion, motors, wind tunnels and safety lifts. Relevant mechanical knowledge provides 1.15× research throughput while preserving previous empirical routes and all their physical foundations. When both existing mathematics and mechanics apply, the combined route gives 1.2×1.15 rather than repeatedly stacking overlays. The original woven-hull route and its supporting-observation threshold survive both the base and model-assisted versions.
+
+The branch distinguishes mechanisms rather than adding repeatable maturity labels. Each identity has a checked downstream causal use; each model's foundations can be learned without first knowing the subject it accelerates. All 292 earlier discoveries remain reachable with the mechanics branch removed. The mathematics regression now explicitly checks the pre-mechanics empirical catalog, since later formal mechanical concepts intentionally depend on mathematical ideas.
+
+Physical basis includes NASA's [conservation-of-mass explanation](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/conservation-of-mass/) and NIST's [cyclic-loading and damage-tolerance research](https://www.nist.gov/publications/damage-tolerant-design-additively-manufactured-metallic-components-subjected-cyclic). The exact research relationships and 15% benefit are game design choices, not historical or laboratory measurements. These ideas aid investigations; they do not automatically create machines or change operating output.
+
+Validation: **54 cases pass**: seven mechanics, eight mathematics, seven civilian science, twelve requirements, nine tree and eleven atlas cases. Zero errors, failures, skipped cases or orphans. Checks cover all model targets, prior-catalog reachability, non-circular model availability, physical prerequisites, idempotence, mathematical composition and woven-hull observation requirements. Graph audit: 316 identities, 105 explicit learning routes, no graph or authoring-contract errors. Logs: `/tmp/tt-mechanics-*.log`. Art queue: eight verified images and 308 pending live subjects.
+
+Save compatibility: unchanged stored shapes and stable existing identities. Newly possible model routes do not rewrite recorded origins or award previously unearned discoveries. Limitations: these mechanics currently affect investigation efficiency; explicit machine-component recipes, failure and maintenance models, and full-history pacing remain incomplete. No artificial calendar gates were added. Handoff scope: mechanics module and tests, mathematics regression, DiscoverySystem registration/overlay (shared hotspot), audit, art manifest and status records. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. The full overhaul and canonical integration remain unfinished.

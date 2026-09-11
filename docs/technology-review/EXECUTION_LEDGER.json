@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 292,
+    "live": 316,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -28,10 +28,11 @@
     "Twenty-six mathematical capabilities and optional model-assisted routes into fifteen practical investigations",
     "Calendar unlock gates removed from local and rival research; causal and material eligibility retained",
     "Three chemical process discoveries, coupled chlor-alkali co-products, and a reagent-fed silicon refining alternative",
-    "Destructive reverse engineering of owned civilian manufactured examples using local study work and weaker evidence"
+    "Destructive reverse engineering of owned civilian manufactured examples using local study work and weaker evidence",
+    "Twenty-four mechanics capabilities and fourteen optional engineering routes preserving empirical alternatives"
   ],
   "unfinished": [
-    "Remaining 4708 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4684 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Licensing and imported-service dependence; broader military and equipment reverse engineering; partnership automation and richer negotiated terms",
     "Civilian and future operating models beyond four primary-settlement plants; solar weather, storage and night-time balancing",
@@ -52,9 +53,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 292,
+    "live_subjects": 316,
     "verified_subject_images": 8,
-    "queued_live_images": 284,
+    "queued_live_images": 308,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

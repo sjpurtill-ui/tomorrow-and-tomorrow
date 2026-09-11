@@ -101,12 +101,14 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/combined_arms_doctrine.gd").entries())
 	catalog.append_array(preload("res://scripts/mathematics_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/chemical_process_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/mechanics_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
 		catalog[i]=society_model.normalize_discovery(catalog[i])
 		catalog[i]=preload("res://scripts/technology_branch_rules.gd").apply(catalog[i])
 		catalog[i]=preload("res://scripts/mathematics_knowledge.gd").apply(catalog[i])
+		catalog[i]=preload("res://scripts/mechanics_knowledge.gd").apply(catalog[i])
 		var discovery:Dictionary=catalog[i]
 		catalog_by_id[String(discovery.get("id",""))]=discovery
 		if not bool(discovery.get("frontier",false)): technology_catalog.append(discovery)
