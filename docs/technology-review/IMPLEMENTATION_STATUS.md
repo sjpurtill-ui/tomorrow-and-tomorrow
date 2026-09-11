@@ -611,3 +611,14 @@ Scope: ResearchSpecimens, ReverseEngineering, SocietyExchange save validation, a
 Added and visually inspected a square paper-and-gouache illustration of a farmer comparing three seed samples with differing emergence. Explicit discovery binding preserves the whole square. Import uses a 768-pixel limit and mipmaps; the prompt is recorded in assets/ui/research/paper/GERMINATION_TRIALS_PROMPT.md.
 
 Headless imports and eleven atlas tests pass, zero errors, failures, skips or orphans. Logs /tmp/tt-germination-*.log. Manifest now has 361 live discoveries, 21 verified subject images and 340 queued live subjects toward the unchanged 5,000 target. No gameplay or save change. Native presentation remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 9ed23b9; scope is the new asset/import/prompt, ResearchVisuals binding, manifest and review tracking. Canonical integration remains outstanding.
+
+
+## 50. Provision-delivery pacing diagnosis
+
+Pacing snapshots now include existing food-demand breakdown and military required/delivered rations and delivery ratio. A completed 365-day run at 909be10 (361 discoveries) has total demand 77.397844 and intake 76.094032. Its 1.303812-ration shortfall equals military required 3.36 minus delivered 2.056188 within floating-point tolerance. Stored reserves are 71.89 days. Report: pacing/provision-diagnostic.json; log /tmp/tt-provision-diagnostic.log. The process exited successfully without script errors. This identifies delivery, not shortage of stored food, as the cause of this endpoint's intake gap. It does not establish every later hunger flag's cause.
+
+CivilizationStrategy and LeaderPersonality currently classify hunger from reserve days or overall intake, then emphasize nutrition and health. Distinguishing delivery constraints from food-production constraints is the next strategy investigation; no behavior or threshold changed here. Snapshot schema 5 gains additive diagnostic fields; no game save change.
+
+A separate 250-year-target diagnostic is running with the pre-instrumentation harness and 361-discovery simulation at 909be10: session 66487, /tmp/tt-agronomy-250-year.log, planned output /tmp/tt-agronomy-250-year.json, 3,600-second wall cap. A target request is not completed evidence; poll the live process before reporting its status. No millennial or full-world acceptance is implied.
+
+Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 909be10. Scope: pacing harness and review evidence only. Catalog 361, images 21, canonical integration outstanding.
