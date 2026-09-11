@@ -329,6 +329,7 @@ func _refresh_active_investigations()->void:
 
 func _redistribute_stranded_attention(current_day:int)->void:
 	var stranded:Array[Dictionary]=[]
+	var stranded_domains:Dictionary={}
 	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
 		var dynamic_id:=String(dynamic_variant)
 		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_variant]
@@ -342,12 +343,16 @@ func _redistribute_stranded_attention(current_day:int)->void:
 			# ranking of every alternative in the same channel.
 			if String(WorldSimulation.state.active_investigations.get(channel,""))!="" or _channel_has_candidate(channel,current_day): continue
 			stranded.append({"dynamic":dynamic_id,"subcategory":subcategory,"count":allocation})
+			stranded_domains[dynamic_id]=true
 			subcategories[subcategory_variant]=0
 		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
 	if stranded.is_empty(): return
 	var live_channels:Array[Dictionary]=[]
 	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
 		var dynamic_id:=String(dynamic_variant)
+		# Observers can only move within their chosen domain. Ranking other
+		# domains cannot affect redistribution, even when they have live work.
+		if not stranded_domains.has(dynamic_id): continue
 		for subcategory_variant in (WorldSimulation.state.research_subcategory_allocations[dynamic_variant] as Dictionary):
 			var subcategory:=String(subcategory_variant)
 			var channel:=_channel_key(dynamic_id,subcategory)
