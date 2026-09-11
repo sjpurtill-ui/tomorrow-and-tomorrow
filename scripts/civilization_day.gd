@@ -29,6 +29,8 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 			if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
 			WorldSimulation.settlements.process_city_resources(String(city.id),context(city.position),func()->void:BUILD.process_day())
 		return {"discoveries":[],"resources":[],"events":[],"progression":[],"arrival":{}}
+	WorldSimulation.state.synchronize_population_allocations()
+	preload("res://scripts/technology_operations.gd").advance(day)
 	var discoveries:=WorldSimulation.discovery.process_day(daily_context)
 	var resource_events:=WorldSimulation.resources.process_day(daily_context)
 	WorldSimulation.state.synchronize_population_allocations()

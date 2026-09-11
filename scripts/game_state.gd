@@ -124,6 +124,7 @@ var society_subcategories:Dictionary={}
 ## it never grows with population.
 var societal_values:Dictionary=SOCIETAL_VALUES_MODEL.initial_state("",world_seed,"player")
 var combined_intelligence:=0.18
+var technology_operations:Dictionary=preload("res://scripts/technology_operations.gd").empty_state()
 var research_notification_mode:="milestones"
 var discovery_log: Array[Dictionary] = []
 var active_observations: Array[String] = []
@@ -445,6 +446,7 @@ func reset_for_new_world(new_seed:int)->void:
 	society_subcategories={}
 	societal_values=SOCIETAL_VALUES_MODEL.initial_state("",world_seed,"player")
 	combined_intelligence=0.18
+	technology_operations=preload("res://scripts/technology_operations.gd").empty_state()
 	research_notification_mode="milestones"
 	discovery_log=[]
 	active_observations=[]
@@ -1365,6 +1367,7 @@ func effective_workers(role:String,include_military_construction:bool=false)->fl
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
 	if role=="Construction" and not include_military_construction and WorldSimulation.military.joint_operations!=null:capacity*=1.0-WorldSimulation.military.joint_operations.construction_share(resource_settlement_id)
 	if role=="Knowledge":capacity=maxf(0,capacity-preload("res://scripts/scholar_visits.gd").absent(self,int(elapsed_days)))
+	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/technology_operations.gd").reserved_workers(self))
 	return capacity
 
 func receive_injured_veterans(count:int,severe:int)->void:

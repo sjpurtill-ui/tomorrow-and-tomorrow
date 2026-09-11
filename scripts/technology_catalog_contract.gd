@@ -52,5 +52,10 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		for item:Variant in products:
 			var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(item))
 			if recipe.is_empty() or recipe.gate!=id:errors.append(id+": no implemented recipe for production item")
-		if effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty():errors.append(id+": no implemented consequence")
+		var plants:Variant=entry.get("operating_plants",[])
+		if not plants is Array:errors.append(id+": operating plants must be an array");continue
+		for plant:Variant in plants:
+			var definition:Dictionary=preload("res://scripts/technology_operations.gd").PLANTS.get(plant,{})
+			if definition.is_empty() or definition.gate!=id:errors.append(id+": no implemented operating plant")
+		if effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty():errors.append(id+": no implemented consequence")
 	return errors

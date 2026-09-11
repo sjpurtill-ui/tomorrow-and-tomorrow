@@ -132,6 +132,9 @@ func refresh(refit:bool)->void:
 	var active:=0;var staffed:=0;var known:=0;var people:Dictionary={}
 	for item:Dictionary in all_records:
 		if item.known:known+=1
+		if item.known:
+			var operations:VBoxContainer=preload("res://scripts/hud/technology_operations_panel.gd").new()
+			operations.subject=String(item.id);detail_body.add_child(operations)
 		var assignment:Dictionary=item.assignment
 		if assignment.get("active",false):active+=1;staffed+=1 if Art.team(item)>0 else 0
 		var lead:=Art.lead(item)

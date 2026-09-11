@@ -1,0 +1,45 @@
+{
+  "goal_status": "active; do not treat checkpoints as completion",
+  "worktree": "/Users/seanpurtill/Documents/Codex/tt-technology-implementation",
+  "branch": "codex/technology-implementation",
+  "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
+  "catalog": {
+    "live": 245,
+    "target": 5000,
+    "review_candidates": 600,
+    "complete": false,
+    "generated_frontier_enabled": false
+  },
+  "implemented_foundations": [
+    "AND/OR causal routes",
+    "physical purchased studies",
+    "paid temporary scholar visits",
+    "food-category storage profiles",
+    "role-specific training education",
+    "civilian science without military prerequisites",
+    "saved notification preference and non-pausing digest",
+    "physical civilian intermediate production",
+    "commissioned primary-settlement power, cooling and workshop services"
+  ],
+  "unfinished": [
+    "Remaining 4755 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
+    "Research partnerships, licensing, reverse engineering and imported-service dependence",
+    "Civilian and future operating models beyond three primary-settlement plants",
+    "Broader military behaviors, countermeasures and general-led doctrine; current 87 total unit types are not the proposed 96-role inventory",
+    "All approved paper-and-gouache imagery, native presentation verification",
+    "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline"
+  ],
+  "next_work": [
+    "Expand civilian operating and manufacturing models using existing resource/labor authorities",
+    "Author modern and future discoveries with actual producers/consumers and reviewed reconvergent branches",
+    "Maintain explicit actual counts and tests; never inflate count with disabled generated combinations or cosmetic variants"
+  ],
+  "constraints": [
+    "Preserve canonical changes and existing stable IDs",
+    "No subagents without explicit delegation authorization",
+    "No player launches or stopping user sessions",
+    "Keep checkpoints in this worktree; preserve generated untracked UID files",
+    "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
+  ]
+}

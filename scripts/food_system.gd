@@ -6,6 +6,7 @@ var _forecast_climate_cache:Dictionary={}
 # displayed as roughly 2,400 kcal. Demand is calculated from numeric age,
 # labor, pregnancy, lactation, travel, military, and climate cohorts.
 
+const Operations=preload("res://scripts/technology_operations.gd")
 const KCAL_PER_RATION := 2400.0
 const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
 const FOOD_TYPES := ["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"]
@@ -332,9 +333,10 @@ func _spoil(traveling: bool) -> Dictionary:
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
 	if traveling: storage_multiplier*=1.28
+	var cooling:=Operations.refrigeration_multiplier(Operations.service("cold_storage") if not traveling else 0.0,WorldSimulation.state.food_stocks)
 	for food_type in FOOD_TYPES:
 		var amount:=float(WorldSimulation.state.food_stocks.get(food_type,0.0))
-		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)
+		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)*(cooling if food_type in ["Fresh plants","Fresh meat","Fish"] else 1.0)
 		WorldSimulation.state.food_stocks[food_type]=maxf(0.0,amount-loss)
 		result[food_type]=loss
 	return result
@@ -452,9 +454,10 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		var future_climate:=non_climate*maxf(0.0,-season_wave)*0.06
 		var future_required:=maxf(0.0,(non_climate+future_climate)*ration_factor-inaccessible_army_rations)
 		total_required+=future_required
+		var cooling:=Operations.refrigeration_multiplier(Operations.forecast_service("cold_storage",offset) if not traveling else 0.0,projected_stocks)
 		for food_type in FOOD_TYPES:
 			var amount:=float(projected_stocks.get(food_type,0.0))
-			var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*float(preservation[food_type])
+			var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*float(preservation[food_type])*(cooling if food_type in ["Fresh plants","Fresh meat","Fish"] else 1.0)
 			projected_stocks[food_type]=maxf(0.0,amount-loss)
 			total_spoiled+=loss
 		var eaten:=_consume_projection(projected_stocks,future_required)

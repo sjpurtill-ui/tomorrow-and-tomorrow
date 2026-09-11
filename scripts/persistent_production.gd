@@ -144,7 +144,8 @@ static func workforce() -> Dictionary:
 	# Mobile crafts are possible with carried tools; founded workplace damage
 	# reduces the real recorded productive fabric rather than a decorative score.
 	var facilities:=usable/weight if weight>0 else .5
-	return {"workers":workers,"health":health,"labor_efficiency":labor,"logistics":logistics,"workplace_condition":facilities,"condition_factor":health*labor*logistics*facilities}
+	var powered_factor:=1.0+minf(.5,preload("res://scripts/technology_operations.gd").service("mechanical_work")/maxf(1.0,workers))
+	return {"powered_factor":powered_factor,"workers":workers,"health":health,"labor_efficiency":labor,"logistics":logistics,"workplace_condition":facilities,"condition_factor":health*labor*logistics*facilities*powered_factor}
 
 static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
