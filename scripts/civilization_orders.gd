@@ -12,6 +12,7 @@ static func execute(order:Dictionary)->Dictionary:
 			if not WorldSimulation.state.research_subcategory_allocations.has(domain) or weight<0 or weight>12:return {"error":"Choose a research domain and emphasis from 0 to 12."}
 			WorldSimulation.discovery.set_domain_research_priority(domain,weight)
 			return {"ok":true}
+		"research_scholar":return preload("res://scripts/scholar_visits.gd").dispatch(String(order.get("source","")),String(order.get("subject","")),String(order.get("resource","")))
 		"research_purchase":return preload("res://scripts/research_purchase.gd").dispatch(String(order.get("source","")),String(order.get("subject","")),String(order.get("resource","")))
 		"research_target":
 			var entry:Dictionary=WorldSimulation.discovery.discovery_definition(String(order.get("id","")))

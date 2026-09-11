@@ -178,7 +178,7 @@ func test_ai_requests_stronger_study_from_examined_evidence_without_supplier_omn
 func test_ai_purchase_order_reserves_payment_and_does_not_unlock_discovery()->void:
 	prepare();examined_report()
 	var before:=float(GameState.resource_stockpiles.Stone)
-	assert_bool(preload("res://scripts/civilization_controller.gd").research_purchase_orders("player",{})).is_true()
+	assert_bool(preload("res://scripts/civilization_controller.gd").research_acquisition_orders("player",{})).is_true()
 	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
 	assert_str(String(CivilizationSystem.diplomatic_mission.research_subject)).is_equal("clay_shaping")
 	assert_bool("clay_shaping" in GameState.known_discoveries).is_false()
@@ -197,4 +197,28 @@ func test_ai_waits_after_previous_research_trip_and_ignores_already_strong_study
 	assert_bool(Planner.recommendation().is_empty()).is_false()
 	E.data().collections["weaker"]=E.data().collections.returned.duplicate(true)
 	E.data().collections.returned.research_purchase=true
+	assert_dict(Planner.recommendation()).is_empty()
+func test_ai_apprenticeship_uses_paid_scholar_before_formal_purchase()->void:
+	prepare();examined_report()
+	GameState.known_discoveries.assign(["apprentice_contracts"])
+	assert_bool(Purchase.available()).is_false()
+	var order:=Planner.recommendation()
+	assert_str(order.kind).is_equal("research_scholar")
+	var quote:=preload("res://scripts/scholar_visits.gd").quote(order.source,order.subject,order.resource)
+	var before:=float(GameState.resource_stockpiles.Stone)
+	var food_before:=FoodSystem.total_stored()
+	assert_bool(preload("res://scripts/civilization_controller.gd").research_acquisition_orders("player",{})).is_true()
+	assert_str(String(CivilizationSystem.diplomatic_mission.research_mode)).is_equal("scholar")
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal_approx(before-float(quote.gift.amount),.000001)
+	assert_float(FoodSystem.total_stored()).is_equal_approx(food_before-float(quote.provisions)-float(quote.scholar_provisions),.000001)
+	assert_bool("clay_shaping" in GameState.known_discoveries).is_false()
+func test_ai_scholar_requires_board_staff_and_an_unoccupied_visit_slot()->void:
+	prepare();examined_report();GameState.known_discoveries.assign(["apprentice_contracts"])
+	GameState.population_allocations.Knowledge=0
+	assert_dict(Planner.recommendation()).is_empty()
+	GameState.population_allocations.Knowledge=30
+	E.data().scholar_visits={"active":{"id":"active","source":"neighbor","host":"player","subject":"clay_shaping","depart_day":99990,"arrival_day":99995,"leave_day":100055,"home_day":100100,"delivered":true}}
+	assert_dict(Planner.recommendation()).is_empty()
+	E.data().scholar_visits={}
+	GameState.resource_stockpiles.Food=1.0;GameState.food_stocks={"Preserved food":1.0}
 	assert_dict(Planner.recommendation()).is_empty()
