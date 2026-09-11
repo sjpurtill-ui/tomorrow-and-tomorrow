@@ -1,8 +1,10 @@
 # Ancient scouting window
 
-Status: READY for sole-integrator review from base `ede2e04ea33fdb95e1e8c443dcd0d9b9c6a7121e`.
+Status: INTEGRATED. Source `31ba19db2a072b6e88d0db0cd1d00a56508298e0` was fast-forwarded by the sole integrator from canonical base `ede2e04ea33fdb95e1e8c443dcd0d9b9c6a7121e`. All 59 combined canonical cases pass (17.708 seconds); normal-entry boot and asset import are clean. Canonical logs are `artifacts/ancient-scouting/canonical-tests.log`, `canonical-import.log` and `canonical-boot.log`. Both owned test overrides are removed. Release target 2026.09.10.6 is packaged by the normal build-only launcher; no player/editor restart was performed.
 
-Worktree: `/Users/seanpurtill/Documents/Codex/tt-ancient-scouting-window`  
+The worker record follows.
+
+Worktree: `/Users/seanpurtill/Documents/Codex/tt-ancient-scouting-window`
 Branch: `codex/ancient-scouting-window`
 
 ## Player behavior
