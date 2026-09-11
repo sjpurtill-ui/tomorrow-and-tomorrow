@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 260,
+    "live": 263,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -23,10 +23,11 @@
     "Shared daily electrical budget for powered manufacturing; electric-arc steel alternative",
     "Bilateral joint investigations with two physical delegations, local contribution, and reciprocal validation",
     "Fourteen semiconductor/photovoltaic discoveries, six linked manufactured intermediates, solar-first daily generation",
-    "Seven reviewed paper-and-gouache subject images with full-square presentation and a live art queue"
+    "Seven reviewed paper-and-gouache subject images with full-square presentation and a live art queue",
+    "Three formation-practiced combined-arms doctrines with actual troop support and counter-specific combat effects"
   ],
   "unfinished": [
-    "Remaining 4740 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4737 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Licensing, reverse engineering and imported-service dependence; partnership automation and richer negotiated terms",
     "Civilian and future operating models beyond four primary-settlement plants; solar weather, storage and night-time balancing",
@@ -47,9 +48,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 260,
+    "live_subjects": 263,
     "verified_subject_images": 7,
-    "queued_live_images": 253,
+    "queued_live_images": 256,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

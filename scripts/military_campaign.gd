@@ -2572,6 +2572,7 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if not preload("res://scripts/combined_arms_doctrine.gd").valid_tree(payload):return {"error":"Invalid practiced military doctrine."}
 	var command_error:=String(command_hierarchy.validate(payload.get("command_hierarchy",{})))
 	if command_error!="":return {"error":command_error}
 	var strategy:Variant=payload.get("training_strategy",{})
@@ -3513,7 +3514,7 @@ func _process_military_day()->void:
 	home_army["delivery_load_capacity_today"]=daily_delivery_capacity
 	home_army["delivery_load_used_today"]=equipment_load_used+ammunition_load_used
 	var recovery_multiplier:=0.35+supply*0.55+_adoption("battlefield_medicine")*0.55
-	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier})
+	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier,"doctrine_levels":preload("res://scripts/combined_arms_doctrine.gd").levels(),"doctrine_supply":supply})
 	home_army=prepared.force
 	_rejoin_recovered_population("scattered_pool",int(prepared.scattered_returned))
 	_rejoin_recovered_population("wounded_pool",int(prepared.wounded_returned))

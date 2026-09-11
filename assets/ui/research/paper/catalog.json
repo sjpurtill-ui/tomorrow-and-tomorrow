@@ -2080,12 +2080,36 @@
       "id": "photovoltaic_power",
       "name": "Photovoltaic Power",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cavalry_infantry_liaison.png",
+      "description": "Foot and mounted troops rehearse mutual support so mounted attacks do not meet formed resistance alone.",
+      "domain": "security",
+      "id": "cavalry_infantry_liaison",
+      "name": "Cavalry–Infantry Liaison",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gun_line_security.png",
+      "description": "Infantry guards and gun crews rehearse protecting gun positions against troops closing on the batteries.",
+      "domain": "security",
+      "id": "gun_line_security",
+      "name": "Gun-Line Security",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/infantry_tank_cooperation.png",
+      "description": "Infantry and tank crews rehearse coordinated movement and protection against antitank positions.",
+      "domain": "security",
+      "id": "infantry_tank_cooperation",
+      "name": "Infantry–Tank Cooperation",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 260,
+  "live_count": 263,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 253,
+  "queued_count": 256,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

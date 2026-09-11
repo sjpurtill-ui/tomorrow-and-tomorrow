@@ -57,5 +57,7 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		for plant:Variant in plants:
 			var definition:Dictionary=preload("res://scripts/technology_operations.gd").PLANTS.get(plant,{})
 			if definition.is_empty() or definition.gate!=id:errors.append(id+": no implemented operating plant")
-		if effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty():errors.append(id+": no implemented consequence")
+		var doctrine:=String(entry.get("doctrine",""))
+		if not doctrine.is_empty() and (doctrine!=id or not preload("res://scripts/combined_arms_doctrine.gd").RULES.has(doctrine)):errors.append(id+": no implemented doctrine")
+		if doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty():errors.append(id+": no implemented consequence")
 	return errors

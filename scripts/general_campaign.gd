@@ -368,7 +368,7 @@ func _finish_step()->void:
 			var issued:=mini(need,int(WorldSimulation.military.military_inventory.get(weapon,0)))
 			formation.equipment=int(formation.get("equipment",0))+issued
 			WorldSimulation.military.military_inventory[weapon]=int(WorldSimulation.military.military_inventory.get(weapon,0))-issued
-		var prepared:Dictionary=WorldSimulation.military.simulator.advance_preparation_day(a,{"equipment_replacements":0,"manpower_replacements":0})
+		var prepared:Dictionary=WorldSimulation.military.simulator.advance_preparation_day(a,{"equipment_replacements":0,"manpower_replacements":0,"doctrine_levels":preload("res://scripts/combined_arms_doctrine.gd").levels(),"doctrine_supply":clampf(food_days(),0,1)})
 		WorldSimulation.military.field_armies[WorldSimulation.military._field_army_index(int(state.army_id))]=prepared.force
 		a=army()
 		if step.kind=="resupply":

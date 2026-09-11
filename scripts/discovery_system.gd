@@ -98,6 +98,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/civilian_science_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/civilian_industry.gd").entries())
 	catalog.append_array(preload("res://scripts/semiconductor_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/combined_arms_doctrine.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -989,6 +990,7 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
+	if not String(entry.get("doctrine","")).is_empty():return String(entry.get("production_contract",""))+" Requires rehearsal during supplied preparation; understanding alone does not improve the army."
 	var summary:=_effect_summary(entry.get("effects",{})) if not entry.get("effects",{}).is_empty() else ""
 	var profile:Dictionary=entry.get("preservation_profile",{})
 	if not profile.is_empty():
