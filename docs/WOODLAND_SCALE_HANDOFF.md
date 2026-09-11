@@ -7,7 +7,7 @@ Owner: sole integrator. Shared file: `scripts/local_terrain.gd` terrain shader o
 
 The user redirected this thread to landscape. The unfinished discovery-art branch is stopped and remains unintegrated; it is not part of this delivery.
 
-Status: READY for reviewed integration. No player/editor launched or stopped.
+Integrated source `0c33647568e8ba3a0868ca274460384d76618b40` by conflict-free fast-forward from the base above. All 41 canonical cases and the canonical ordinary import/normal-entry headless boot pass. Both owned overrides are removed before packaging release 2026.09.11.2. No player/editor launched or stopped.
 
 ## Visible change
 

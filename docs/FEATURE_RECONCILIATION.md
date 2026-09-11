@@ -1,3 +1,11 @@
+## September 11 — readable woodland at aerial distance
+
+INTEGRATED `0c33647568e8ba3a0868ca274460384d76618b40` by reviewed, conflict-free fast-forward from canonical Mac `2f695346b9c525a2c3b5bba1cbc9ad97fb24a210`. The forest crown layer now uses one physically consistent scale, with roughly 10–20 m crowns and retained crown-top/shadow contrast at the actual 10,000-foot view. Existing mipmaps and pixel-footprint filtering blend it into broad cover at distance. No new imagery, geometry, vegetation records, resource quantities, simulation rules or cache budgets are introduced.
+
+All **41 worktree and 41 canonical regression cases pass**, zero errors/failures/flaky cases/skips/orphans. Ordinary imports and normal-entry headless boots are clean. The guarded native material comparison passes on real temperate/tropical woodland and drylands, including all four distances, winter, harvested cover, coordinate reanchoring, paused stability and fog. Final dryland, fully harvested, hidden, regional and continental material comparisons are byte-identical to baseline. The complete land/water terrain LOD probe also passes coverage, progressive refinement, cancellation, fog and world-boundary checks; captures were inspected. See `WOODLAND_SCALE_HANDOFF.md` for evidence and limits.
+
+Normal standalone release target **2026.09.11.2** is packaged through the canonical build-only launcher after removing both owned test overrides. No player/editor was launched, stopped or restarted. The separate technology worktree process was left alone. This improves woodland readability; it does not finish landscape realism or fix mature-campaign FPS. Per the user's correction, this thread now focuses on landscape: the old discovery/portrait/window-art continuation is STOPPED and unintegrated.
+
 ## September 11 — mature-campaign daily research cost
 
 INTEGRATED `613eb98aaad3ad2daaa7fdf3539c06c19799f67b` by conflict-free fast-forward from canonical Mac `61da5e4310c4154fa7d80a915c69c2bf86602b66`. Daily research redistribution now ranks alternatives only in domains that have stranded researchers. Previously it ranked unrelated domains even though those researchers could never transfer there. No research scores, day/evidence gates, RNG, population dynamics or opponent turn frequency change.
