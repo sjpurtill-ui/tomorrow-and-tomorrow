@@ -222,3 +222,37 @@ func test_ai_scholar_requires_board_staff_and_an_unoccupied_visit_slot()->void:
 	E.data().scholar_visits={}
 	GameState.resource_stockpiles.Food=1.0;GameState.food_stocks={"Preserved food":1.0}
 	assert_dict(Planner.recommendation()).is_empty()
+
+func test_ai_late_scholar_can_teach_active_inquiry_during_long_examination_queue()->void:
+	prepare();examined_report()
+	GameState.active_investigations["test_channel"]="clay_shaping"
+	E.data().collections["backlog"]={"study":0.0,"work":10000.0,"returned_day":100000}
+	var order:=Planner.recommendation()
+	assert_str(order.kind).is_equal("research_scholar")
+	assert_bool(Purchase.available()).is_true()
+	# No supplier knowledge is consulted to predict whether the visit succeeds.
+	E.owner_state("neighbor").known_discoveries.clear()
+	assert_dict(Planner.recommendation()).is_equal(order)
+	E.data().collections.backlog.study=1.0
+	assert_str(Planner.recommendation().kind).is_equal("research_purchase")
+
+func test_ai_keeps_formal_study_when_teacher_has_no_active_audience_or_no_board()->void:
+	prepare();examined_report()
+	GameState.active_investigations.clear()
+	E.data().collections["backlog"]={"study":0.0,"work":10000.0,"returned_day":100000}
+	assert_str(Planner.recommendation().kind).is_equal("research_purchase")
+	GameState.active_investigations["test_channel"]="clay_shaping"
+	var quote:=Purchase.quote("neighbor","clay_shaping","Stone")
+	GameState.resource_stockpiles.Food=float(quote.provisions)+1.0
+	GameState.food_stocks={"Preserved food":float(quote.provisions)+1.0}
+	assert_str(Planner.recommendation().kind).is_equal("research_purchase")
+
+func test_ai_examination_estimate_clears_existing_work_during_travel()->void:
+	prepare();examined_report()
+	E.data().collections["backlog"]={"study":0.0,"work":1000.0,"returned_day":100000}
+	var no_trip:=Planner._study_delay(0)
+	var long_trip:=Planner._study_delay(10000)
+	assert_float(long_trip).is_less(no_trip)
+	assert_float(long_trip).is_greater(0.0)
+	E.data().collections.backlog.returned_day=100001
+	assert_float(Planner._study_delay(0)).is_equal_approx(long_trip,.000001)

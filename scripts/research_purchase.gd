@@ -4,6 +4,7 @@ extends RefCounted
 ## Knowledge workforce. This does not create a second research ledger.
 const Exchange=preload("res://scripts/society_exchange.gd")
 const Pathways=preload("res://scripts/knowledge_pathways.gd")
+const STUDY_WORK:=120.0
 
 static func available()->bool:
 	return "experimental_controls" in WorldSimulation.state.known_discoveries and "public_schools" in WorldSimulation.state.known_discoveries
@@ -61,7 +62,7 @@ static func negotiate(mission:Dictionary,source:String,source_name:String,positi
 	var entry:=WorldSimulation.discovery.discovery_definition(subject)
 	if entry.is_empty():mission.research_refused=true;mission.accepted=false;return
 	if not mission.has("carried_collections"):mission.carried_collections=[]
-	mission.carried_collections.append({"id":key(source,subject),"kind":"knowledge","name":"Purchased study: "+String(entry.name),"source_id":Exchange.owner_id(source),"source_name":source_name,"position":position.duplicate(),"observed_day":day,"returned_day":day,"discovery_id":subject,"study":0.0,"work":120.0,"signals":entry.get("signals",[]).duplicate(),"research_purchase":true,"acquisition":"Validated research purchased for %s %s" % [mission.get("gift_amount",0),mission.get("gift_resource","")]})
+	mission.carried_collections.append({"id":key(source,subject),"kind":"knowledge","name":"Purchased study: "+String(entry.name),"source_id":Exchange.owner_id(source),"source_name":source_name,"position":position.duplicate(),"observed_day":day,"returned_day":day,"discovery_id":subject,"study":0.0,"work":STUDY_WORK,"signals":entry.get("signals",[]).duplicate(),"research_purchase":true,"acquisition":"Validated research purchased for %s %s" % [mission.get("gift_amount",0),mission.get("gift_resource","")]})
 
 static func prepare_return(mission:Dictionary)->void:
 	if not mission.has("research_subject"):return
