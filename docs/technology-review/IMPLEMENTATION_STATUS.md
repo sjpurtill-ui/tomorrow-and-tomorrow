@@ -433,3 +433,10 @@ Added and visually inspected the new flaking illustration: an early toolmaker st
 
 
 The hydrology-corrected long probe reached 16,645 days (45.60 years), 298 people, ten Knowledge workers and 31 discoveries before the old 300-second diagnostic limit. The 52 occurrences include accessible Freshwater. The report is pacing/hydrology-long-reference.json, based on 6480ec2 and therefore preceding the flint-processing correction. It remains a capped run, not fifty-year acceptance. The diagnostic now permits an explicitly requested wall budget up to 3,600 seconds, so longer requested horizons need not repeatedly stop at the former five-minute cap; normal default duration is unchanged. This affects only the headless diagnostic.
+
+
+The six-case specimen suite additionally verifies that a studied imported sample supplies weaker material evidence than a worked local deposit, and retains the specimen route's 1.0 evidence strength rather than purchased or partnership bonuses. This preserves the requested disadvantage of relying on limited external examples. All six pass; log /tmp/tt-specimen-disadvantage.log.
+
+## 31. Well Siting subject art
+
+Added and visually inspected the Well Siting illustration: villagers compare damp soil from a shallow trial pit with nearby reeds and stream terrain. The scene uses the established low composition, warm ivory paper, matte ochre/olive gouache and simple figures; it contains no dowsing device, text or modern drilling machinery. The explicit research binding and 768-pixel mipmapped import pass all eleven atlas tests with no errors, failures, skips or orphans. Native presentation remains unverified. The manifest now contains 317 discoveries, thirteen verified images and 304 queued live subjects. Prompt: assets/ui/research/paper/WELL_SITING_PROMPT.md. No save or simulation changes.

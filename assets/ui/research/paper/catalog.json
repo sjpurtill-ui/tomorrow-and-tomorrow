@@ -95,7 +95,7 @@
       "domain": "infrastructure",
       "id": "well_siting",
       "name": "Well Siting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/wound_cleaning.png",
@@ -2541,9 +2541,9 @@
   "live_art_complete": false,
   "live_count": 317,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 305,
+  "queued_count": 304,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 12
+  "verified_count": 13
 }

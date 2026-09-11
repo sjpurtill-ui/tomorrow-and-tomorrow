@@ -23,7 +23,7 @@
     "Shared daily electrical budget for powered manufacturing; electric-arc steel alternative",
     "Bilateral joint investigations with two physical delegations, local contribution, and reciprocal validation",
     "Fourteen semiconductor/photovoltaic discoveries, six linked manufactured intermediates, solar-first daily generation",
-    "Twelve reviewed paper-and-gouache subject images with full-square presentation and a live art queue",
+    "Thirteen reviewed paper-and-gouache subject images with full-square presentation and a live art queue",
     "Three formation-practiced combined-arms doctrines with actual troop support and counter-specific combat effects",
     "Twenty-six mathematical capabilities and optional model-assisted routes into fifteen practical investigations",
     "Calendar unlock gates removed from local and rival research; causal and material eligibility retained",
@@ -64,8 +64,8 @@
   ],
   "art": {
     "live_subjects": 317,
-    "verified_subject_images": 12,
-    "queued_live_images": 305,
+    "verified_subject_images": 13,
+    "queued_live_images": 304,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

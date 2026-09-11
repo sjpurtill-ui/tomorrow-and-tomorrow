@@ -47,3 +47,13 @@ func test_sample_permission_survives_catalog_normalization_and_save_roundtrip()-
 		var restored:Dictionary=JSON.parse_string(JSON.stringify(GameState.society_exchange.collections))
 		GameState.society_exchange.collections=restored
 		assert_bool(DiscoverySystem._resource_requirements_met(DiscoverySystem.discovery_definition(subject).resource_requirements)).is_true()
+func test_returned_sample_is_weaker_material_evidence_than_local_worked_supply()->void:
+	sample("ore_assaying")
+	var requirements:Array=DiscoverySystem.discovery_definition("ore_assaying").resource_requirements
+	var imported:float=DiscoverySystem._resource_evidence(requirements)
+	var local:=ResourceSystem._deposit("Copper Ore",Vector3.ZERO,1.0,1000,0)
+	local.stage="developed";local.lifetime_extracted=200.0
+	GameState.resource_deposits.append(local)
+	assert_float(imported).is_greater(0.0)
+	assert_float(imported).is_less(DiscoverySystem._resource_evidence(requirements))
+	assert_float(E.evidence_strength(GameState.society_exchange.collections["ground:0:0:test"])).is_equal(1.0)
