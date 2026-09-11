@@ -47,5 +47,10 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		for child:Variant in children:
 			if not child is String or not by_id.has(child):errors.append(id+": unknown foundation target");continue
 			if id not in preload("res://scripts/knowledge_pathways.gd").definition_parents(by_id[child]):errors.append(id+": foundation has no causal link to "+child)
-		if effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty():errors.append(id+": no implemented consequence")
+		var products:Variant=entry.get("production_items",[])
+		if not products is Array:errors.append(id+": production items must be an array");continue
+		for item:Variant in products:
+			var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(item))
+			if recipe.is_empty() or recipe.gate!=id:errors.append(id+": no implemented recipe for production item")
+		if effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty():errors.append(id+": no implemented consequence")
 	return errors

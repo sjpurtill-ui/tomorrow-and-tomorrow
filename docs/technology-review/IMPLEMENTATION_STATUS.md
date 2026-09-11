@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the fifth checkpoint: **241 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the seventh checkpoint: **244 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -132,3 +132,14 @@ Routine discoveries now accumulate in a compact non-pausing digest that opens th
 32 headless cases pass: eight notification tests, eight existing popup tests, nine research interface tests and seven civilian science tests. New coverage includes pause ownership, mixed milestone/routine batches, quiet and all modes, duplicate/unknown events, 360×640 containment, invalid save preference rejection and reflected preference round-trip. Logs: `/tmp/tt-notifications-tests.log` and `/tmp/tt-notifications-<suite>.log`. No native visual capture or full save-file load was performed for this slice.
 
 Shared hotspots changed: GameState adds/reset-defaults one preference string; SaveSystem validates it; LocalTerrain changes only the daily announcement call; the research inspector adds the selector. New notification helper/test. Gameplay time and completed discoveries are not modified by routine digest delivery. Default popup behavior intentionally changes from every discovery to milestones, as approved for the large catalog. Broader milestone selection, per-field subscriptions, campaign pacing, catalog authoring, operating models, artwork and integration remain in progress.
+
+
+## Seventh checkpoint: manufactured civilian inputs
+
+Ten civilian products now use the existing finite workshop line system: glass, refined copper, wrought iron, steel, copper wire, insulated cable, optical lenses, pressure vessels, electrical generators and electric motors. Three production discoveries were added: Steel Refining, Wire Drawing and Cable Insulation. The live catalog is 244. Recipe batches consume real input stocks and workshop work; opening or retooling a civilian line also consumes tooling. Outputs enter the owning settlement resource ledger, not military inventory. A generator in stores is equipment, not an automatically operating power station.
+
+Lines share the existing bounded production allocation, capacity, workforce, workplace condition, pause/target controls and saved queue. UI wording now calls this allocation workshop lines. Products appear in existing supply/workshop selectors only after their own research. No second workforce or production clock was introduced. The new civilian saved-job type validates its recipe and work requirement against the authored definition, rejecting forged free inputs. Existing job types and quantities remain supported.
+
+58 cases passed: seven new civilian manufacturing cases and persistent production (19), all joint-force equipment catalogs (6), civilian science (7), technology tree (9), food/water (10). Tests cover setup and fractional batch conservation, target stop, blocked starts with no mutation, copper-to-wire manufacturing, one-line retooling, failed retool preservation, save recipe validation, retained output/no tooling refunds on closure and research-gated product visibility. Logs: `/tmp/tt-industry-tests.log` and `/tmp/tt-industry-<suite>.log`; graph: `/tmp/tt-industry-graph.log`. No errors, failures, skipped cases or orphan nodes.
+
+Integration hotspots: existing PersistentProduction adapter, MilitaryCampaign wording, military supply/workshop UI wording, DiscoverySystem, production contract validator and graph audit. New civilian industry recipe/catalog module and tests. Finished intermediates are reflected through the existing resource stock dictionary; no new top-level save field. Older executables do not understand new civilian line jobs. Quantities are game batches, not calibrated industrial units. Plant commissioning, operating services, expanded modern resource extraction and automatic civilian industrial planning are next; no claim of a complete economy or future-tech catalog.

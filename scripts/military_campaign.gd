@@ -563,7 +563,7 @@ func retool_production_line(job_id:int,item:String)->Dictionary:
 func set_production_labor_share(value:float)->Dictionary:
 	if not is_finite(value) or value<0 or value>1: return {"error":"Production share must be between 0 and 100%."}
 	production_labor_share=value
-	return {"ok":true,"message":"Military workshops receive up to %d%% of crafting labor; unused capacity remains civilian." % roundi(value*100)}
+	return {"ok":true,"message":"Workshop lines receive up to %d%% of crafting labor; unused capacity remains available for other civilian work." % roundi(value*100)}
 
 
 func production_line_capacity()->int:
@@ -573,7 +573,7 @@ func production_line_capacity()->int:
 func _production_line_gate()->Dictionary:
 	var capacity:=production_line_capacity()
 	if equipment_queue.size()>=capacity:
-		return {"error":"All %d military production lines are assigned. Complete or cancel a line, or develop broader production, logistics, institutions, and security capacity." % capacity,"capacity":capacity}
+		return {"error":"All %d workshop production lines are assigned. Complete or cancel a line, or develop broader production, logistics, institutions, and security capacity." % capacity,"capacity":capacity}
 	return {}
 
 
