@@ -3,6 +3,20 @@ extends Node
 var rng := RandomNumberGenerator.new()
 var initialized := false
 
+# Identification follows observations and existing methods, never campaign age.
+# These gates apply to unknown occurrences only; saved recognition is retained.
+const RECOGNITION_RULES={
+	"Deep Aquifer":{"requires_all":["well_siting"]},
+	"Refractory Clay":{"requires_all":["pit_firing"]},
+	"Phosphate Rock":{"requires_any":[["soil_assays","chemical_distillation"]]},
+	"Uranium Ore":{"requires_all":["ore_assaying"],"requires_any":[["chemical_distillation","radiation_measurement"]]},
+	"Nitrates":{"requires_all":["charcoal"],"requires_any":[["salt_working","chemical_distillation"]]},
+	"Graphite":{"requires_any":[["stone_sorting","tallies"]]}
+}
+func recognition_ready(resource_name:String)->bool:
+	if not catalog.has(resource_name):return false
+	return bool(preload("res://scripts/technology_requirements.gd").evaluate(RECOGNITION_RULES.get(resource_name,{}),WorldSimulation.state.known_discoveries).ready)
+
 const FOUNDING_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber Plants"]
 
 # Keep the simulation/save key stable while giving players a name that describes
@@ -21,7 +35,8 @@ func reset_for_new_world()->void:
 	initialized=false
 	rng=RandomNumberGenerator.new()
 
-# Internal-only knowledge about resources across the first two centuries.
+# Internal resource definitions. recognition_year is retained legacy metadata,
+# not a recognition, survey or extraction eligibility gate.
 # UI receives discovered deposits and present constraints, never this catalog.
 var catalog := {
 	"Timber":{"family":"Organic","renewable":true,"recognition_year":0,"access":["labor"],"processing":["cordage","joinery"],"signals":["survey","construction"],"base":0.030},
@@ -182,16 +197,14 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 		var origin:Vector3=context.get("origin",WorldSimulation.state.settlement_founded_at)
 		preload("res://scripts/civilization_resources.gd").initialize(Vector2(origin.x,origin.z))
 	var events: Array[Dictionary] = []
-	var year := int(WorldSimulation.state.elapsed_days / 365.0)
 	for deposit in WorldSimulation.state.resource_deposits:
 		_ensure_deposit_fields(deposit)
 		var resource_name: String = deposit.resource
 		if not catalog.has(resource_name):
 			continue
 		var definition: Dictionary = catalog[resource_name]
-		if year < definition.recognition_year:
-			continue
 		if deposit.stage == "unknown":
+			if not recognition_ready(resource_name):continue
 			var survey_effort := WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor()
 			var nature_focus := float(WorldSimulation.state.research_allocations.get("ecology", 0)) * 0.15
 			var material_focus := float(WorldSimulation.state.research_allocations.get("production", 0)) * 0.12
