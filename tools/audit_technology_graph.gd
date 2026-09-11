@@ -16,6 +16,7 @@ func run()->void:
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/military_education_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/civilian_science_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/civilian_industry.gd").entries(),discovery.technology_catalog))
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/semiconductor_knowledge.gd").entries(),discovery.technology_catalog))
 	var authored_routes:=0
 	for entry:Dictionary in discovery.technology_catalog:
 		authored_routes+=(entry.get("learning_routes",[]) as Array).size()

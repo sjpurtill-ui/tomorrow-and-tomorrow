@@ -3,6 +3,7 @@ extends RefCounted
 ## operators reserve capacity within Crafting rather than creating workers.
 const LIMIT:=1000
 const PLANTS={
+	"solar_array":{"name":"Photovoltaic array","gate":"photovoltaic_power","requires":["cable_insulation"],"cost":{"Photovoltaic Modules":1.0,"Insulated Cable":2.0,"Steel":1.0},"work":12.0,"workers":.2,"inputs":{},"power":0.0,"services":{"electricity":4.0}},
 	"steam_generator":{"name":"Steam-electric works","gate":"electrical_generators","requires":["steam_propulsion"],"cost":{"Electrical Generators":1.0,"Pressure Vessels":1.0,"Wrought Iron":5.0},"work":20.0,"workers":2.0,"inputs":{"Coal":.5,"Freshwater":1.0},"power":0.0,"services":{"electricity":10.0}},
 	"cold_store":{"name":"Electric cold store","gate":"mechanical_refrigeration","requires":["electric_motors"],"cost":{"Electric Motors":1.0,"Pressure Vessels":1.0,"Glass":1.0},"work":12.0,"workers":1.0,"inputs":{"Bitumen":.01},"power":3.0,"services":{"cold_storage":200.0}},
 	"powered_workshop":{"name":"Motor-driven workshop","gate":"electric_motors","requires":["electrical_generators"],"cost":{"Electric Motors":1.0,"Insulated Cable":2.0,"Wrought Iron":2.0},"work":10.0,"workers":1.0,"inputs":{},"power":2.0,"services":{"mechanical_work":3.0}}
@@ -80,7 +81,7 @@ static func advance(day:int)->void:
 		if record.is_empty() or not record.enabled or int(record.installed)<=0:continue
 		var spec:Dictionary=PLANTS[id]
 		var units:=minf(float(record.installed),available/float(spec.workers))*condition
-		if id=="steam_generator":units=minf(units,demand/float(spec.services.electricity))
+		if float(spec.services.get("electricity",0))>0:units=minf(units,maxf(0,demand-float(ledger.services.get("electricity",0)))/float(spec.services.electricity))
 		if float(spec.power)>0:units=minf(units,float(ledger.services.get("electricity",0))/float(spec.power))
 		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
 		if units<=0:continue
@@ -133,15 +134,15 @@ static func valid(value:Variant)->bool:
 	if not value.plants is Dictionary or value.plants.size()>PLANTS.size():return false
 	for field:String in ["last_day","workers"]:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
-	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>6000:return false
+	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>8000:return false
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
 			if field=="services" and key not in ["electricity","cold_storage","mechanical_work"]:return false
 			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":10000.0,"cold_storage":200000.0,"mechanical_work":3000.0}:
-		if float(value.services.get(name,0))>float({"electricity":10000.0,"cold_storage":200000.0,"mechanical_work":3000.0}[name])+.000001:return false
+	for name:String in {"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":3000.0}:
+		if float(value.services.get(name,0))>float({"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":3000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]

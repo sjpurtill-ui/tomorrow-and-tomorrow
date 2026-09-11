@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 246,
+    "live": 260,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -21,13 +21,14 @@
     "physical civilian intermediate production",
     "commissioned primary-settlement power, cooling and workshop services",
     "Shared daily electrical budget for powered manufacturing; electric-arc steel alternative",
-    "Bilateral joint investigations with two physical delegations, local contribution, and reciprocal validation"
+    "Bilateral joint investigations with two physical delegations, local contribution, and reciprocal validation",
+    "Fourteen semiconductor/photovoltaic discoveries, six linked manufactured intermediates, solar-first daily generation"
   ],
   "unfinished": [
-    "Remaining 4754 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4740 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Licensing, reverse engineering and imported-service dependence; partnership automation and richer negotiated terms",
-    "Civilian and future operating models beyond three primary-settlement plants",
+    "Civilian and future operating models beyond four primary-settlement plants; solar weather, storage and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 87 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline"
