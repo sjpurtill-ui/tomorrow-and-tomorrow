@@ -286,5 +286,7 @@
     "annual_snapshots": true,
     "discoveries": true
   },
-  "full_goal_complete": false
+  "full_goal_complete": false,
+  "diagnostic_defect": "Version 1 left WorldSimulation.enabled false and omitted surface catchments, skipping normal owned geology and surface-material initialization. Retained as historical observations only; not a representative resource-constrained pacing run.",
+  "superseded_by_harness_schema": 2
 }

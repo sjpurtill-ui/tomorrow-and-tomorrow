@@ -13,7 +13,7 @@ var discoveries:Array=[]
 func _initialize()->void:call_deferred("run")
 func snapshot(day:int)->Dictionary:
 	var state:Node=simulation.state
-	return {"day":day,"year":float(day)/365.0,"population":state.population_total,"known":state.known_discoveries.size(),"knowledge_workers":state.population_allocations.get("Knowledge",0),"active_inquiries":state.active_investigations.size(),"food_security":state.food_security,"food_days":state.simulation_metrics.get("food_days",0),"settled":state.settlement_site_committed,"completed_buildings":state.settlement_completed.size()}
+	return {"day":day,"year":float(day)/365.0,"population":state.population_total,"known":state.known_discoveries.size(),"knowledge_workers":state.population_allocations.get("Knowledge",0),"active_inquiries":state.active_investigations.size(),"food_security":state.food_security,"food_days":state.simulation_metrics.get("food_days",0),"settled":state.settlement_site_committed,"completed_buildings":state.settlement_completed.size(),"resource_deposits":state.resource_deposits.size(),"material_stocks":{"Timber":state.resource_stockpiles.get("Timber",0),"Stone":state.resource_stockpiles.get("Stone",0),"Clay":state.resource_stockpiles.get("Clay",0),"Fiber Plants":state.resource_stockpiles.get("Fiber Plants",0)}}
 func run()->void:
 	for argument:String in OS.get_cmdline_user_args():
 		if argument.begins_with("--days="):target_days=clampi(argument.trim_prefix("--days=").to_int(),1,3650000)
@@ -24,8 +24,14 @@ func run()->void:
 	simulation=root.get_node("WorldSimulation");simulation.clear()
 	daily=load("res://scripts/civilization_day.gd");controller=load("res://scripts/civilization_controller.gd")
 	var planet:Node=root.get_node("PlanetEnvironment")
-	simulation.context_provider=func(point:Vector2)->Dictionary:return {"environment_profile":planet.profile_at(point),"surface_water_distance_km":.1,"surface_water_recognized":true}
+	simulation.context_provider=func(point:Vector2)->Dictionary:
+		var profile:Dictionary=planet.profile_at(point)
+		var fields:Dictionary={}
+		for resource:String in ["Timber","Stone","Fiber Plants"]:
+			fields[resource]={"density":clampf(float(profile.get("resource_potentials",{}).get(resource,0)),0,1),"area_km2":9.0,"position":Vector3(point.x,0,point.y)}
+		return {"environment_profile":profile,"surface_water_distance_km":.1,"surface_water_recognized":true,"surface_material_catchments":fields,"woodland_catchment":fields.Timber}
 	var actor:Dictionary=simulation.create_actor("pacing_reference",seed_value,Vector2.ZERO)
+	simulation.enabled=true # Normal resource days initialize owned world geology.
 	actor.systems.CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return true
 	var start:=Time.get_ticks_msec()
 	var day:=0;var reason:="target reached";var catalog_count:=0
@@ -44,12 +50,13 @@ func run()->void:
 			if day==1 or day%365==0:snapshots.append(snapshot(day))
 			return simulation.state.population_total<=1
 		)
+		if day%365==0:print(JSON.stringify({"progress":day,"year":float(day)/365.0,"snapshot":snapshots.back()}))
 		if extinct:reason="population collapse";break
 		if day%30==0:await process_frame
 	var final:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return snapshot(day))
 	catalog_count=actor.systems.DiscoverySystem.technology_catalog.size()
 	var elapsed:=float(Time.get_ticks_msec()-start)/1000.0
-	var report:={"schema":1,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; no rendered geography","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
+	var report:={"schema":2,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
 	var file:=FileAccess.open(output_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write pacing diagnostic: "+output_path);quit(1);return
 	file.store_string(JSON.stringify(report,"  "));file.close()

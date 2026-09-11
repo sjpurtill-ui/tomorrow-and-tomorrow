@@ -814,5 +814,7 @@
   "target_days": 18250,
   "target_reached": true,
   "wall_seconds": 138.063,
-  "simulation_commit": "166a64c"
+  "simulation_commit": "166a64c",
+  "diagnostic_defect": "Version 1 left WorldSimulation.enabled false and omitted surface catchments, skipping normal owned geology and surface-material initialization. Retained as historical observations only; not a representative resource-constrained pacing run.",
+  "superseded_by_harness_schema": 2
 }
