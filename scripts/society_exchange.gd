@@ -116,23 +116,30 @@ static func pressure()->Dictionary:
 	var burden:=maxf(0,unsettled-admin*8)/population
 	return {"unsettled":unsettled,"unsettled_share":share,"administrative_load":burden*.25,"cohesion_cost":share*(.015+(1-housing)*.12+(1-food)*.15)+burden*.04,"health_cost":float(data().exposure)*(.02+(1-housing)*.08),"labor_cost":share*.08}
 
-static func reception_capacity()->int:
+static func reception_snapshot()->Dictionary:
 	var state:=WorldSimulation.state
-	if data().migration_policy=="consolidate" or not state.settlement_site_committed:return 0
 	var population:=maxf(1,state.population_exact)
 	var beds:=maxi(0,state.housing_capacity-ceili(population))
 	var water:=float(state.water_metrics.get("intake_ratio",1))
 	var food_days:=float(state.simulation_metrics.get("food_days",0))
-	if food_days<14 or water<.98:return 0
 	var administrative_room:=maxf(0,state.effective_workers("Administration")*12-float(pressure().unsettled))
-	var limit:=mini(beds,floori(administrative_room))
-	if data().migration_policy=="welcome":limit=mini(beds,floori(administrative_room*1.5))
-	# Inbound households have already been promised these places. They still
-	# belong to their source population until the actual return is settled.
+	if data().migration_policy=="welcome":administrative_room*=1.5
 	var inbound:=0
 	for mission:Dictionary in WorldSimulation.world.scout_missions:
 		if not bool(mission.get("migration_resolved",false)):inbound+=int(mission.get("migrant_reservation",{}).get("count",0))
-	return maxi(0,limit-inbound)
+	var room:=maxi(0,mini(beds,floori(administrative_room))-inbound)
+	var reasons:Array[String]=[]
+	if not state.settlement_site_committed:reasons.append("Found the settlement first.")
+	if data().migration_policy=="consolidate":reasons.append("Reception policy is Consolidate; invitations are paused.")
+	if beds-inbound<2:reasons.append("Housing: %d spare places after promised arrivals; at least 2 needed." % maxi(0,beds-inbound))
+	if food_days<14:reasons.append("Food: %.1f days stored; 14 days needed before inviting households." % food_days)
+	if water<.98:reasons.append("Water: %d%% of daily need supplied; 98%% needed." % roundi(water*100))
+	if administrative_room-inbound<2:reasons.append("Reception staff can support %d more people; at least 2 needed. Administration helps households settle." % maxi(0,floori(administrative_room)-inbound))
+	if not reasons.is_empty():room=0
+	return {"capacity":room,"reasons":reasons,"message":"Room to invite up to %d people. Households decide whether to join." % room if room>=2 else "\n".join(reasons)}
+
+static func reception_capacity()->int:
+	return int(reception_snapshot().capacity)
 
 static func attraction()->float:
 	var s:=WorldSimulation.state;var m:=s.simulation_metrics
@@ -174,7 +181,7 @@ static func sample_missions(system:Node,day:int)->void:
 				if String(actual.get("controller",id))!=id:continue
 			mission.encountered_societies.append(id)
 			encounter(mission,id,String(system.civilizations[index].name),site.position,day)
-		if mission.get("target_kind","")=="explore" and day%7==int(mission.get("mission_id",0))%7:sample_ground(system,mission,position,day)
+		if mission.get("target_kind","") in ["explore","recruit_people"] and day%7==int(mission.get("mission_id",0))%7:sample_ground(system,mission,position,day)
 
 static func encounter(mission:Dictionary,source:String,source_name:String,position:Dictionary,day:int)->void:
 	if not mission.has("carried_collections"):mission.carried_collections=[]
@@ -262,9 +269,10 @@ static func envoy_arrived(system:Node,mission:Dictionary,day:int)->void:
 	mission["encountered_societies"]=[id]
 	encounter(mission,id,String(system.civilizations[index].name),location,day)
 
-static func recruitment_target(system:Node)->String:
-	if reception_capacity()<2:return ""
-	var best:="";var score:=INF
+static func recruitment_targets(system:Node)->Array[String]:
+	# Receiving households is a separate decision at the actual encounter.
+	# Lack of spare homes must not prevent peaceful visits or cultural exchange.
+	var choices:Array[Dictionary]=[]
 	for city:Dictionary in system.city_intelligence.known_cities():
 		var id:=String(city.get("controller",""))
 		if id=="" or owner_id(id)==WorldSimulation.actor_id:continue
@@ -274,19 +282,24 @@ static func recruitment_target(system:Node)->String:
 		for mission:Dictionary in system.scout_missions:
 			if owner_id(String(mission.get("target_civ_id","")))==owner_id(id):reserved=true
 		if reserved:continue
-		# Recent unsuccessful visits lose priority; reported communities remain
-		# destinations, never coordinates drawn from private enemy state.
 		var age:=maxi(1,int(WorldSimulation.state.elapsed_days)-int(data().connections.get(id,{}).get("last_visit",-9999)))
 		var value:float=system.player_world_origin.distance_to(system.city_intelligence.vector(city.position))*(1+90.0/age)
-		if value<score:score=value;best="recruit:"+String(city.city_id)
-	return best
+		choices.append({"target":"recruit:"+String(city.city_id),"score":value})
+	choices.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return a.score<b.score if a.score!=b.score else a.target<b.target)
+	var result:Array[String]=[]
+	for choice:Dictionary in choices:result.append(choice.target)
+	return result
+
+static func recruitment_target(system:Node)->String:
+	var targets:=recruitment_targets(system)
+	return targets[0] if not targets.is_empty() else ""
 
 static func invite_households(mission:Dictionary,source:String,source_name:String,day:int)->void:
 	if mission.has("migrant_reservation"):return
 	if day<int(known_relation(source).get("recruitment_truce_until",0)):
 		mission["recruitment_reason"]="Our border understanding suspends invitations to each other’s households.";return
 	var room:=reception_capacity()
-	if room<2:mission["recruitment_reason"]="No spare reception capacity at home; no invitation was made.";return
+	if room<2:mission["recruitment_reason"]="No invitation: "+String(reception_snapshot().message);return
 	var recipient:=WorldSimulation.actor_id
 	var our_attraction:=attraction()
 	var familiarity:=float(connection(source).familiarity)

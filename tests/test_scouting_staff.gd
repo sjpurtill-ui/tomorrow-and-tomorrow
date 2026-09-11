@@ -129,3 +129,99 @@ func test_each_civilization_saves_its_own_policy_without_changing_the_player()->
 	assert_int(payload.scouting_staff.last_day).is_equal(99)
 	assert_float(float(CivilizationSystem.scouting_staff.data.share)).is_equal(0.0)
 	WorldSimulation.clear()
+
+func report_community(id:String,position:Vector2)->void:
+	system.initialize()
+	system.civilizations.append({"id":id,"name":id.capitalize(),"world_position":position,"strategic_regions":[],"player_relation":{"opinion":.3,"at_war":false,"contact_level":2}})
+	if not system.city_intelligence.records.has("player"):system.city_intelligence.records.player={}
+	system.city_intelligence.records.player[id+"_city"]={"city_id":id+"_city","name":id.capitalize()+" Town","civ_id":id,"controller":id,"position":{"x":position.x,"z":position.y},"observed_day":0,"reported_day":0,"source":"physical visit","reference":"test","fields":{}}
+
+func test_recruitment_departs_without_spare_beds_and_can_build_goodwill()->void:
+	GameState.housing_capacity=100;GameState.population_allocations.Administration=0
+	report_community("nearby",Vector2(30,0))
+	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	var party:Dictionary=system.scout_missions[0]
+	assert_str(party.target_kind).is_equal("recruit_people_visit")
+	assert_str(party.target_city_id).is_equal("nearby_city")
+	assert_int(system.scouting_staff.snapshot().reception.capacity).is_equal(0)
+	assert_str(system.scouting_staff.snapshot().reception.message).contains("Housing:")
+	var reports:Array[Dictionary]=[{"controller":"nearby","observed_day":10,"observation_days":4}]
+	assert_int(system.scouting_staff.returned_influence(party,reports,30).size()).is_equal(1)
+
+func test_recruitment_without_known_communities_searches_without_creating_people()->void:
+	system.initialize();system.city_intelligence.records.clear()
+	var population:=GameState.population_exact;var fog:Dictionary=system.fog_snapshot().duplicate(true)
+	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_str(system.scout_missions[0].target_kind).is_equal("recruit_people")
+	assert_str(system.scouting_staff.data.status).contains("find communities")
+	assert_float(GameState.population_exact).is_equal(population)
+	assert_dict(system.fog_snapshot()).is_equal(fog)
+	assert_bool(system._scout_route_is_land(system.scout_missions[0].route)).is_true()
+
+func test_staff_can_visit_a_known_community_beyond_ninety_days_reach()->void:
+	var distance:float=system.scout_one_way_range(90)*1.1
+	report_community("faraway",Vector2(distance,0))
+	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_str(system.scout_missions[0].target_city_id).is_equal("faraway_city")
+	assert_int(system.scout_missions[0].duration_days).is_greater(90)
+
+func test_unreachable_nearest_community_does_not_block_a_reachable_visit()->void:
+	report_community("island",Vector2(20,0));report_community("connected",Vector2(0,60))
+	system.set_scout_geography_authority(func(point:Vector2)->bool:return point.x<10)
+	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_str(system.scout_missions[0].target_city_id).is_equal("connected_city")
+
+func test_staff_fit_a_smaller_party_to_provisions_without_spending_home_reserve()->void:
+	var reserve:=GameState.population_exact*.9*7
+	GameState.resource_stockpiles.Food=reserve+34;GameState.food_stocks={"Preserved food":reserve+34}
+	system.scouting_staff.set_policy(.10,"exploration");system.scouting_staff.advance(0)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_int(system.scout_missions[0].personnel).is_equal(2)
+	assert_float(FoodSystem.total_stored()).is_greater_equal(reserve)
+
+func test_one_person_allocation_explains_minimum_party_and_food_wait_is_precise()->void:
+	system.scouting_staff.set_policy(.005,"recruitment");system.scouting_staff.advance(0)
+	assert_array(system.scout_missions).is_empty()
+	assert_str(system.scouting_staff.data.status).contains("at least 2")
+	GameState.resource_stockpiles.Food=GameState.population_exact*.9*7+20
+	GameState.food_stocks={"Preserved food":GameState.resource_stockpiles.Food}
+	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(1)
+	assert_array(system.scout_missions).is_empty()
+	assert_str(system.scouting_staff.data.status).contains("20 food available")
+	assert_str(system.scouting_staff.data.status).contains("needs 33")
+
+func test_exploration_can_cross_a_charted_neighborhood_to_a_more_distant_frontier()->void:
+	system.initialize()
+	# All routes possible under the old automatic 90-day budget are charted.
+	var near:float=system.scout_one_way_range(90)*.58+40
+	system._add_revealed_area(Vector2.ZERO,near,"previous expeditions")
+	GameState.resource_stockpiles.Food=100000;GameState.food_stocks={"Preserved food":100000.0}
+	system.scouting_staff.set_policy(.05,"exploration");system.scouting_staff.advance(0)
+	assert_int(system.scout_missions.size()).override_failure_message(str(system.scouting_staff.data)).is_equal(1)
+	var party:Dictionary=system.scout_missions[0]
+	var reached:=false
+	for point:Dictionary in party.route:
+		if Vector2(point.x,point.z).length()>near:reached=true
+	assert_bool(reached).is_true()
+
+func test_scouting_status_and_reception_shortages_fit_narrow_panel()->void:
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.scouting_staff.set_policy(.05,"recruitment")
+	GameState.housing_capacity=100;GameState.population_allocations.Administration=0
+	GameState.simulation_metrics.food_days=5;GameState.water_metrics={"intake_ratio":.5}
+	var panel_script=preload("res://scripts/hud/scouting_policy_panel.gd")
+	for shape:Vector2i in [Vector2i(960,720),Vector2i(340,640)]:
+		var viewport:=SubViewport.new();viewport.size=shape;add_child(viewport)
+		var layer:=CanvasLayer.new();viewport.add_child(layer)
+		var sheet=panel_script.new();layer.add_child(sheet)
+		await await_idle_frame();await await_idle_frame()
+		assert_bool(Rect2(Vector2.ZERO,shape).encloses(sheet.panel.get_global_rect())).is_true()
+		assert_str(sheet.reception.text).contains("INVITATIONS ON HOLD")
+		assert_str(sheet.reception.text).contains("Housing:")
+		assert_bool(sheet.reception.size.x<=sheet.panel.size.x).is_true()
+		assert_str(sheet.review.text).contains("next game day")
+		viewport.queue_free();await await_idle_frame()

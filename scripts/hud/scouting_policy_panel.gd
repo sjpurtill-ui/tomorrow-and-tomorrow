@@ -8,6 +8,8 @@ var allocation:Label
 var staffing:Label
 var status:Label
 var cost:Label
+var reception:Label
+var review:Label
 var parties:VBoxContainer
 var focus_buttons:Dictionary={}
 var presets:GridContainer
@@ -50,8 +52,9 @@ func _ready()->void:
 		var caption:="Exploration & discovery" if key=="exploration" else "Recruitment & influence"
 		var choice:=button(focuses,caption,func():CivilizationSystem.scouting_staff.set_policy(slider.value/100.0,key);refresh())
 		choice.icon=V.icon("logistics" if key=="exploration" else "population");choice.expand_icon=true;choice.add_theme_constant_override("icon_max_width",24);choice.alignment=HORIZONTAL_ALIGNMENT_LEFT;choice.toggle_mode=true;focus_buttons[key]=choice
-		choice.tooltip_text="Prioritize uncharted ground, resource surveys and field discoveries." if key=="exploration" else "Seek people, invite newcomers and build goodwill through physical visits."
-	status=label(body,"",13,T.TEAL);cost=label(body,"",12,T.TEXT_SOFT)
+		choice.tooltip_text="Prioritize uncharted ground, resource surveys and field discoveries." if key=="exploration" else "Visit known communities or seek first contact. Build goodwill and exchange knowledge; invite households when home has room."
+	status=label(body,"",13,T.TEAL);review=label(body,"",11,T.MUTED)
+	reception=label(body,"",12,T.GOLD);cost=label(body,"",12,T.TEXT_SOFT)
 	button(body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
 	label(body,"PARTIES IN THE FIELD",11,T.MUTED)
 	parties=VBoxContainer.new();parties.add_theme_constant_override("separation",6);body.add_child(parties)
@@ -71,6 +74,10 @@ func refresh()->void:
 	staffing.text="of the population\nUp to %d scouts · %d away" % [int(view.target),int(view.away)]
 	for key:String in focus_buttons:focus_buttons[key].set_pressed_no_signal(key==view.focus)
 	status.text=String(view.status)
+	review.text="Staff review in %d days" % int(view.review_in) if float(view.share)>0 and int(view.review_in)>0 else "Staff review on the next game day" if float(view.share)>0 else ""
+	reception.visible=view.focus=="recruitment"
+	if reception.visible:
+		reception.text=("INVITATIONS · "+String(view.reception.message)) if int(view.reception.capacity)>=2 else "INVITATIONS ON HOLD · Visits can still build goodwill\n"+String(view.reception.message)
 	cost.text="Food carried: %.1f per day across active parties. Staff keep seven days of civilian food at home." % float(view.daily_food)
 	var keys:Array=[int(GameState.elapsed_days)]
 	for mission:Dictionary in CivilizationSystem.scout_missions:keys.append([mission.get("mission_id",0),mission.get("personnel",0),mission.get("return_day",0),mission.get("route_status","")])
@@ -78,12 +85,12 @@ func refresh()->void:
 	if signature==rendered:return
 	rendered=signature
 	for child in parties.get_children():parties.remove_child(child);child.queue_free()
-	if CivilizationSystem.scout_missions.is_empty():label(parties,"No parties away. Your allocation sets the next departure.",13,T.TEXT_SOFT)
+	if CivilizationSystem.scout_missions.is_empty():label(parties,"No parties away. See the departure status above.",13,T.TEXT_SOFT)
 	for mission:Dictionary in CivilizationSystem.scout_missions:
 		var row:=HBoxContainer.new();parties.add_child(row)
 		var people:=label(row,"%d" % int(mission.personnel),23,T.INK);people.custom_minimum_size.x=40
 		var details:=VBoxContainer.new();details.size_flags_horizontal=SIZE_EXPAND_FILL;row.add_child(details)
-		label(details,"Recruitment & influence" if mission.get("target_kind","")=="recruit_people" else "City observation" if mission.get("target_kind","")=="observe_city" else "Exploration & discovery",13,T.BODY)
+		label(details,"Recruitment & influence" if mission.get("target_kind","") in ["recruit_people","recruit_people_visit"] else "City observation" if mission.get("target_kind","")=="observe_city" else "Exploration & discovery",13,T.BODY)
 		var remaining:=int(mission.return_day)-int(GameState.elapsed_days)
 		label(details,"Expected in %dd · %d food carried" % [remaining,roundi(float(mission.provisions))] if remaining>=0 else "%dd overdue · awaiting their report" % -remaining,11,T.MUTED)
 func _process(delta:float)->void:

@@ -287,3 +287,41 @@ func test_received_cooperation_does_not_resume_after_war_ends()->void:
 	CivilizationSystem.civilizations[0].player_relation.at_war=true;E.advance(1)
 	CivilizationSystem.civilizations[0].player_relation.at_war=false
 	assert_float(E.received_accord_bonus("knowledge")).is_equal(0.0)
+
+func test_reception_readiness_names_individual_shortages_and_reserved_places()->void:
+	GameState.housing_capacity=201;GameState.water_metrics.intake_ratio=.5
+	GameState.simulation_metrics.food_days=8;GameState.population_allocations.Administration=0
+	var readiness:=E.reception_snapshot()
+	assert_int(readiness.capacity).is_equal(0)
+	assert_str(readiness.message).contains("Housing: 1")
+	assert_str(readiness.message).contains("Food: 8.0")
+	assert_str(readiness.message).contains("Water: 50%")
+	assert_str(readiness.message).contains("Reception staff")
+	GameState.housing_capacity=205;GameState.water_metrics.intake_ratio=1
+	GameState.simulation_metrics.food_days=60;GameState.population_allocations.Administration=12
+	CivilizationSystem.scout_missions.append({"migrant_reservation":{"count":4}})
+	assert_int(E.reception_capacity()).is_equal(0)
+	CivilizationSystem.scout_missions.clear()
+	assert_int(E.reception_capacity()).is_equal(5)
+
+func test_dispatched_influence_party_physically_brings_knowledge_home_without_inviting_when_full()->void:
+	GameState.housing_capacity=190
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	civ.strategic_regions.append({"id":"neighbor_city","name":"Neighbor Town","role":"capital","map_x":.5,"map_y":.5,"position":Vector2(30,0),"controller":"neighbor"})
+	CivilizationSystem.city_intelligence.records.player={"neighbor_city":{"city_id":"neighbor_city","name":"Neighbor Town","civ_id":"neighbor","controller":"neighbor","position":{"x":30.0,"z":0.0},"observed_day":0,"reported_day":0,"source":"physical visit","reference":"test","fields":{}}}
+	CivilizationSystem.scouting_staff.set_policy(.05,"recruitment")
+	CivilizationSystem.scouting_staff.advance(0)
+	assert_int(CivilizationSystem.scout_missions.size()).is_equal(1)
+	var trip:Dictionary=CivilizationSystem.scout_missions[0]
+	assert_str(trip.target_kind).is_equal("recruit_people_visit")
+	assert_dict(E.data().collections).is_empty()
+	var end:=int(trip.actual_return_day)
+	for day in range(1,end):
+		GameState.elapsed_days=day;E.sample_missions(CivilizationSystem,day)
+	assert_bool("neighbor" in trip.encountered_societies).is_true()
+	assert_bool(trip.has("migrant_reservation")).is_false()
+	assert_str(trip.recruitment_reason).contains("Housing:")
+	assert_dict(E.data().collections).is_empty()
+	assert_int(E.returned(trip,end).size()).is_greater(0)
+	assert_int(E.arrive(trip,end)).is_equal(0)
+	assert_float(GameState.population_exact).is_equal(200.0)

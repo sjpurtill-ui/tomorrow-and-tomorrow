@@ -1165,8 +1165,8 @@ func scout_target_options()->Array[Dictionary]:
 		"id":"open_world","kind":"explore","civ_id":"","label":"OPEN EXPLORATION",
 		"description":"Chart an unexamined direction. Any encounters remain unknown until the party returns.","position":{}
 	},{
-		"id":"recruit_people","kind":"recruit_people","civ_id":"","label":"SEEK WILLING RECRUITS",
-		"description":"Search reachable country for wanderers or small bands who may freely choose to join. A return with recruits is never guaranteed.","position":{}
+		"id":"recruit_people","kind":"recruit_people","civ_id":"","label":"SEEK COMMUNITIES",
+		"description":"Find communities through physical travel and exchange knowledge. Invite existing households only when home can receive them; no newcomers are created.","position":{}
 	}]
 	for encounter_variant in contact_encounters_snapshot():
 		var encounter:Dictionary=encounter_variant
@@ -1247,9 +1247,9 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 			else:
 				# Roving parties search outward over connected ground. Do not run
 				# multiple expensive continent-scale A* searches for routine staffing.
-				var step:=clampf(walker.budget/20.0,4.0,24.0)
+				var step:=clampf(walker.budget/20.0,4.0,128.0)
 				route_plan=walker.search(step,96)
-				if not bool(route_plan.get("ok",false)):route_plan=walker.search(maxf(1.0,step*.25),96)
+				if not bool(route_plan.get("ok",false)):route_plan=walker.search(clampf(step*.25,1.0,6.0),96)
 				if open_scout_plan_cache.size()>32:open_scout_plan_cache.clear()
 				open_scout_plan_cache[key]=route_plan.duplicate(true)
 			if bool(route_plan.get("ok",false)):
@@ -1259,7 +1259,14 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 			else:route_plan["reason"]="No connected walking route found. Staff will review the departure later."
 		else:route_plan=_quoted_open_scout_route(one_way_range,quote_seed,ordered_heading)
 	elif not directional_search and target_position.has("x") and target_position.has("z"):
-		route_plan=_plan_scout_land_route(player_world_origin,Vector2(float(target_position.x),float(target_position.z)))
+		var destination:=Vector2(float(target_position.x),float(target_position.z))
+		var key:="visit:%s:%s:%s" % [player_world_origin,destination,_scout_water_crossing_allowance_km()]
+		if wandering and open_scout_plan_cache.has(key):route_plan=open_scout_plan_cache[key].duplicate(true)
+		else:
+			route_plan=_plan_scout_land_route(player_world_origin,destination)
+			if wandering:
+				if open_scout_plan_cache.size()>32:open_scout_plan_cache.clear()
+				open_scout_plan_cache[key]=route_plan.duplicate(true)
 	if directional_search and bool(route_plan.get("ok",false)):
 		var distance:=float(route_plan.get("distance_km",0))
 		for allowance:int in SCOUT_DURATIONS:
