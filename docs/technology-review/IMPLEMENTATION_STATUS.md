@@ -764,3 +764,12 @@ Validation: matched 400-day profiling-on/off runs completed with equal initial/f
 ### Current profiled long-run launch
 
 Launched against committed `49fe572`, catalog 377, seed 91420, target 91,250 days, wall cap 3,600 seconds, with `--profile`. Process handle 29066 was polled and confirmed live. Output paths: `/tmp/tt-current-250-profile.log` and final report `/tmp/tt-current-250-profile.json`. This is a new current-code diagnostic after the previous process terminated, not a restart of a live process. Its final outcome is pending; annual intervals are evidence of completed intervals only. Do not count this launch as 250-year acceptance. The older 361-discovery report remains archived separately.
+
+
+## 66. Glassworking and prepared chemical apparatus
+
+Base `26ed346`. Six authored methods and eight paid recipes distinguish core forming, free blowing, mold blowing, plunger pressing, tube drawing and hydrogen-flame apparatus work. Vessels support an alternative brine setup; laboratory apparatus supports an alternative silicon-refining setup. Both retain their chemical knowledge gates, inputs and any power costs. No free goods or research effects. Sources, numerical recipe table, physical limits and provenance abstraction are recorded in [GLASSWORKING_PRODUCTION.md](GLASSWORKING_PRODUCTION.md).
+
+Validation: all 61 relevant cases passed (4 glassworking, 12 civilian industry, 14 operations, 11 licenses, 11 reverse engineering, 9 technology tree), zero errors/failures/skips/orphans. Graph: 383 identities / 157 routes / no errors. Idealized resource audit reaches all 383. Art: 27 reviewed / 356 queued. No new save fields; older builds cannot operate new recipes. Shared conflicts: DiscoverySystem, CivilianIndustry, graph audit. Canonical integration and native player presentation remain unverified.
+
+Process 29066 remains live on its loaded 377-discovery build. Latest inspected interval was year 41: 256 people, 36 discoveries, 24 plots. Settlements accounted for 46% of that interval's measured stage time, consequences 13.1%, discovery 8.8%. These are partial diagnostic observations under concurrent load, not completed target evidence or an isolated performance benchmark. The glassworking changes are not loaded into that running process.

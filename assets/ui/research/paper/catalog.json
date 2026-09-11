@@ -3016,12 +3016,60 @@
       "id": "electric_pulp_beating",
       "name": "Electric Pulp Beating",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/core_formed_glass.png",
+      "description": "A removable core supports hot glass while a hollow vessel is built around it.",
+      "domain": "production",
+      "id": "core_formed_glass",
+      "name": "Core-Formed Glass",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/glass_blowing.png",
+      "description": "Air introduced through a metal blowpipe expands a hot gather into a hollow vessel.",
+      "domain": "production",
+      "id": "glass_blowing",
+      "name": "Glass Blowing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mold_blown_glass.png",
+      "description": "An inflated gather takes the repeatable shape of a surrounding mold.",
+      "domain": "production",
+      "id": "mold_blown_glass",
+      "name": "Mold-Blown Glass",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plunger_pressed_glass.png",
+      "description": "A metal plunger displaces hot glass against a mold to form the inside and outside of an open vessel.",
+      "domain": "production",
+      "id": "plunger_pressed_glass",
+      "name": "Plunger-Pressed Glass",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/glass_tube_drawing.png",
+      "description": "A hot hollow gather is drawn lengthwise while preserving a passage through the resulting tube.",
+      "domain": "production",
+      "id": "glass_tube_drawing",
+      "name": "Glass Tube Drawing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hydrogen_flame_glassworking.png",
+      "description": "A controlled hydrogen flame softens a small region of glass tubing for joining and shaping laboratory apparatus.",
+      "domain": "production",
+      "id": "hydrogen_flame_glassworking",
+      "name": "Hydrogen-Flame Glassworking",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 377,
+  "live_count": 383,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 350,
+  "queued_count": 356,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

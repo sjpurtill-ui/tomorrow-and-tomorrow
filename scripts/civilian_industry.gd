@@ -2,6 +2,15 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"core_glass_vessels":{"name": "Core-formed vessels", "output": "Glass Vessels", "gate": "core_formed_glass", "materials": {"Glass": 1.0, "Clay": 0.2, "Timber": 1.0}, "days": 4.0, "tooling": {"Clay": 4.0, "Stone": 4.0, "Timber": 2.0}},
+	"blown_glass_vessels":{"name": "Free-blown vessels", "output": "Glass Vessels", "gate": "glass_blowing", "materials": {"Glass": 0.8, "Timber": 1.0}, "days": 2.0, "tooling": {"Wrought Iron": 2.0, "Clay": 4.0, "Stone": 4.0}},
+	"mold_glass_vessels":{"name": "Mold-blown vessels", "output": "Glass Vessels", "gate": "mold_blown_glass", "materials": {"Glass": 0.8, "Timber": 1.0}, "days": 1.5, "tooling": {"Wrought Iron": 2.0, "Clay": 8.0, "Stone": 4.0}},
+	"pressed_glass_vessels":{"name": "Pressed open vessels", "output": "Glass Vessels", "gate": "plunger_pressed_glass", "materials": {"Glass": 1.0, "Timber": 1.0}, "days": 1.0, "tooling": {"Wrought Iron": 8.0, "Stone": 6.0}},
+	"drawn_glass_tubes":{"name": "Drawn glass tubes", "output": "Glass Tubes", "gate": "glass_tube_drawing", "materials": {"Glass": 1.0, "Timber": 1.0}, "days": 3.0, "tooling": {"Wrought Iron": 2.0, "Timber": 4.0, "Clay": 4.0}},
+	"hydrogen_worked_glassware":{"name": "Hydrogen-worked laboratory glassware", "output": "Laboratory Glassware", "gate": "hydrogen_flame_glassworking", "materials": {"Glass Tubes": 1.0, "Glass Vessels": 0.5, "Hydrogen": 0.2}, "days": 3.0, "tooling": {"Refined Copper": 2.0, "Clay": 3.0, "Pressure Vessels": 1.0}},
+	"vessel_purified_brine":{"name": "Brine in prepared glass vessels", "output": "Purified Brine", "gate": "brine_purification", "materials": {"Salt": 1.0, "Freshwater": 3.0}, "days": 2.5, "tooling": {"Glass Vessels": 2.0, "Clay": 2.0}},
+	"apparatus_refined_silicon":{"name": "Silicon refined with prepared apparatus", "output": "Purified Silicon", "gate": "chlorosilane_purification", "materials": {"Metallurgical Silicon": 1.0, "Hydrogen Chloride": 0.5, "Hydrogen": 0.25, "Freshwater": 1.0}, "days": 5.0, "power": 3.0, "daily_power": 1.5, "tooling": {"Laboratory Glassware": 3.0, "Pressure Vessels": 3.0, "Steel": 5.0}},
+
 	"beaten_pulp":{"name": "Hand-beaten fiber pulp", "output": "Paper Pulp", "gate": "fiber_pulp_beating", "materials": {"Prepared Fibers": 1.0, "Freshwater": 3.0}, "days": 4.0, "tooling": {"Timber": 3.0, "Stone": 3.0, "Clay": 2.0}},
 	"rag_pulp":{"name": "Plant-cloth pulp", "output": "Paper Pulp", "gate": "textile_rag_pulping", "materials": {"Woven Cloth": 0.5, "Freshwater": 4.0}, "days": 3.0, "tooling": {"Timber": 3.0, "Stone": 3.0, "Clay": 2.0}},
 	"handmade_paper":{"name": "Handmade paper", "output": "Paper", "gate": "paper_making", "materials": {"Paper Pulp": 1.0, "Freshwater": 1.0}, "days": 3.0, "tooling": {"Timber": 4.0, "Fiber Plants": 2.0}},
