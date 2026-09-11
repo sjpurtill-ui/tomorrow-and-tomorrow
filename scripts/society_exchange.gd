@@ -480,8 +480,8 @@ static func advance(day:int)->void:
 	for item:Dictionary in data().collections.values():
 		if study_work<=0:break
 		if float(item.study)>=1 or day<int(item.returned_day):continue
-		var spent:=minf(study_work,(1-float(item.study))*float(item.work))
-		item.study=minf(1,float(item.study)+spent/float(item.work));study_work-=spent
+		var supplies:=preload("res://scripts/paper_study.gd").use(study_work,(1-float(item.study))*float(item.work))
+		item.study=minf(1,float(item.study)+float(supplies.progress)/float(item.work));study_work-=float(supplies.work)
 		if item.study>=1:
 			if item.get("partnership_protocol",false):
 				log_event("Completed %s. Send a delegation to exchange findings with the partner." % String(item.name))

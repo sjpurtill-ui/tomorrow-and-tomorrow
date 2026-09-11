@@ -47,7 +47,7 @@ func _ready()->void:
 	page_label=label(navigation,"",12,T.TEXT_SOFT)
 	next_page=Button.new();next_page.text="Next";next_page.pressed.connect(func():page+=1;refresh(true));navigation.add_child(next_page)
 	cards=VBoxContainer.new();cards.size_flags_horizontal=SIZE_EXPAND_FILL;cards.add_theme_constant_override("separation",8);body.add_child(cards)
-	label(body,"Knowledge workers examine finds automatically using 15% of their existing effort. Understanding a practice still leaves its ordinary research, materials and adoption requirements.",12,T.MUTED)
+	label(body,"Knowledge workers examine finds automatically using 15% of their existing effort. Available Paper is consumed for up to 20% faster examination (0.01 batch per supported work). Study continues without it. Understanding a practice still leaves its ordinary research, materials and adoption requirements.",12,T.MUTED)
 	resized.connect(layout);layout();refresh(true)
 func choice(parent:Node,caption:String,ids:Array,titles:Array,current:String,action:Callable)->void:
 	var row:=VBoxContainer.new();parent.add_child(row);label(row,caption,13,T.BODY)

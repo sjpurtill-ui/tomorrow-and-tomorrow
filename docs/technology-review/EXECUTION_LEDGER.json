@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 373,
+    "live": 377,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -49,10 +49,11 @@
     "Research collection capacity expanded to 32,768 with bounded forty-card pagination; 5,001-record serialization validation passes without counting synthetic records as discoveries",
     "Six textile discoveries and seven paid workshop recipes connect plant fibers to yarn, loom weights, cloth and consumable medical dressings, preserving the raw-fiber care route",
     "Paid one-year civilian manufacturing licenses permit 65% throughput with real inputs and power, pause on expiry or supplier interruption, and yield to independent mastery without granting research",
-    "Six textile-mechanization discoveries and seven physical hand/electric production alternatives retain ordinary tooling, work, input and energy costs"
+    "Six textile-mechanization discoveries and seven physical hand/electric production alternatives retain ordinary tooling, work, input and energy costs",
+    "Four paper-production discoveries and five physical recipes make consumable Paper available for bounded collection-study support while preserving study without paper"
   ],
   "unfinished": [
-    "Remaining 4627 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4623 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
     "Civilian and future operating models beyond four primary-settlement plants; solar weather, storage and night-time balancing",
@@ -74,9 +75,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 373,
+    "live_subjects": 377,
     "verified_subject_images": 25,
-    "queued_live_images": 348,
+    "queued_live_images": 352,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

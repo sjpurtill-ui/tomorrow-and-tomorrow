@@ -2,6 +2,12 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"beaten_pulp":{"name": "Hand-beaten fiber pulp", "output": "Paper Pulp", "gate": "fiber_pulp_beating", "materials": {"Prepared Fibers": 1.0, "Freshwater": 3.0}, "days": 4.0, "tooling": {"Timber": 3.0, "Stone": 3.0, "Clay": 2.0}},
+	"rag_pulp":{"name": "Plant-cloth pulp", "output": "Paper Pulp", "gate": "textile_rag_pulping", "materials": {"Woven Cloth": 0.5, "Freshwater": 4.0}, "days": 3.0, "tooling": {"Timber": 3.0, "Stone": 3.0, "Clay": 2.0}},
+	"handmade_paper":{"name": "Handmade paper", "output": "Paper", "gate": "paper_making", "materials": {"Paper Pulp": 1.0, "Freshwater": 1.0}, "days": 3.0, "tooling": {"Timber": 4.0, "Fiber Plants": 2.0}},
+	"pressed_paper":{"name": "Pressed and dried paper", "output": "Paper", "gate": "paper_sheet_pressing", "materials": {"Paper Pulp": 1.0, "Freshwater": 1.0}, "days": 2.0, "tooling": {"Timber": 8.0, "Wrought Iron": 2.0}},
+	"electric_pulp":{"name": "Motor-beaten fiber pulp", "output": "Paper Pulp", "gate": "electric_pulp_beating", "materials": {"Prepared Fibers": 1.0, "Freshwater": 3.0}, "days": 1.0, "power": 2.0, "daily_power": 1.0, "tooling": {"Electric Motors": 1.0, "Shaft Bearings": 1.0, "Steel": 4.0}},
+
 	"wheel_spun_yarn":{"name": "Wheel-spun yarn", "output": "Spun Yarn", "gate": "spinning_wheels", "materials": {"Prepared Fibers": 1.0}, "days": 2.0, "tooling": {"Timber": 4.0, "Stone": 1.0, "Fiber Plants": 1.0}},
 	"flyer_spun_yarn":{"name": "Flyer-spun yarn", "output": "Spun Yarn", "gate": "flyer_spinning", "materials": {"Prepared Fibers": 1.0}, "days": 1.5, "tooling": {"Shaft Bearings": 1.0, "Timber": 4.0}},
 	"frame_spun_yarn":{"name": "Hand-frame spun yarn", "output": "Spun Yarn", "gate": "multi_spindle_spinning", "materials": {"Combed Fibers": 1.0}, "days": 1.0, "tooling": {"Timber": 8.0, "Wrought Iron": 2.0}},

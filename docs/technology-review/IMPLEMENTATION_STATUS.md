@@ -723,3 +723,12 @@ Base `4743ba3`; generated through the built-in image tool using the established 
 Validation: headless import exited successfully without script errors; all 11 research-visual-atlas cases passed with zero errors, failures, skips or orphans. Manifest confirms 373 live discoveries, 25 reviewed subject images and 348 queued live images. No save or gameplay state changes. Shared integration conflict: `scripts/hud/research_visuals.gd`. Native player presentation and canonical integration remain unverified.
 
 The existing 250-year-target pacing process was polled and remains live; its latest observed annual snapshot is year 141, population 4,365 and 125 discoveries. This is progress output, not completed 250-year or full-history acceptance, and the run predates recent textile and licensing changes.
+
+
+## 62. Physical paper supply for collection study
+
+Base `515f630`. Added four authored discoveries and five workshop recipes covering hand-beaten plant fibers, cloth pulping, hand sheets, pressed sheets and electric beating. Actual Paper stocks provide at most 20% additional collection-examination progress at 0.01 batch per supported work; ordinary study remains possible without paper. Consumption is capped by pending work and uses the existing Knowledge effort. No direct research unlock or evidence-strength bonus. See [PAPER_PRODUCTION.md](PAPER_PRODUCTION.md) for dependencies, quantities, sources and limits.
+
+Validation: 67 cases passed across paper (5), civilian industry (12), society exchange (28), licenses (11), and visual atlas (11), all with zero errors, failures, skips or orphans. Graph: 377 identities / 151 explicit routes / no errors. Idealized resource audit reaches all 377; campaign viability remains unproven. Manifest: 25 reviewed images and 352 queued live images.
+
+No new save fields; stock/job structures carry new goods and recipe IDs, which older builds cannot operate. Shared integration conflicts: DiscoverySystem, SocietyExchange, CivilianIndustry, collection panel, graph audit. No canonical integration or player launch. Outstanding 4,623 authored identities and the rest of the full overhaul remain active work.

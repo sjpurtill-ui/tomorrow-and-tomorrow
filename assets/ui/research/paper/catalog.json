@@ -2984,12 +2984,44 @@
       "id": "electric_power_looms",
       "name": "Electric Power Looms",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
+      "description": "Repeated wet beating separates and fibrillates prepared plant fibers so they bond into a sheet.",
+      "domain": "production",
+      "id": "fiber_pulp_beating",
+      "name": "Fiber Pulp Beating",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_rag_pulping.png",
+      "description": "Washed plant-fiber cloth is cut, soaked and beaten back into pulp rather than discarded.",
+      "domain": "production",
+      "id": "textile_rag_pulping",
+      "name": "Textile Rag Pulping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/paper_sheet_pressing.png",
+      "description": "A controlled press removes water from a stack of wet sheets before final drying, reducing workshop time.",
+      "domain": "production",
+      "id": "paper_sheet_pressing",
+      "name": "Paper Sheet Pressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_pulp_beating.png",
+      "description": "A motor drives repeated mechanical working of wet fibers while the operator regulates the consistency of the pulp.",
+      "domain": "production",
+      "id": "electric_pulp_beating",
+      "name": "Electric Pulp Beating",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 373,
+  "live_count": 377,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 348,
+  "queued_count": 352,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
