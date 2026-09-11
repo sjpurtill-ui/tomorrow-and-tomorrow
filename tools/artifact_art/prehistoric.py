@@ -30,6 +30,8 @@ def build():
     c={k:json.loads(re.search(r'const '+k+r' := (\[[^\n]+\])',source)[1]) for k in ['FORMS','VARIANTS','TRACES','MATERIALS','SUBJECTS']}
     prior=json.loads(bank.MANIFEST.read_text()) if bank.MANIFEST.exists() else {'entries':[]};old={e['catalogue_id']:e for e in prior['entries']};rows=[]
     for i in range(4096):
+        if old.get(i,{}).get('creative_direction'):
+            rows.append(old[i]);continue
         f=i%16;v=(i//16)%16;t=(i//256)%16
         name=f"{c['VARIANTS'][v].capitalize()} {c['FORMS'][f]} · {c['TRACES'][t]}"
         prompt=f"Use case: historical-scene. Prehistoric exploration artifact {i:04d}: {name}.\n{GUIDE}\nSpecific subject: {SCENES[f]}\nMaterial: {c['MATERIALS'][f]}. Distinguishing physical variant: {c['VARIANTS'][v]}. Surface preservation: {c['TRACES'][t]}; show this as natural weathering or residue, not sophisticated decoration. Preserve the recognizable crude object and prehistoric origin above all."

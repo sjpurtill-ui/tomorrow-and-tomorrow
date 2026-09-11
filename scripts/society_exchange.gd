@@ -83,6 +83,7 @@ static func valid_item(item:Variant)->bool:
 	for field:String in ["rarity","catalogue_id","held_days"]:
 		if item.has(field) and (not number(item[field]) or item[field]<0):return false
 	if item.get("rarity",0)>4 or item.get("catalogue_id",0)>4095:return false
+	if item.has("insight") and not short_text(item.insight,600):return false
 	if item.has("artifact_origin") and item.artifact_origin not in ["prehistoric","civilization"]:return false
 	if item.has("art_collection"):
 		if item.art_collection=="prehistoric-v1":

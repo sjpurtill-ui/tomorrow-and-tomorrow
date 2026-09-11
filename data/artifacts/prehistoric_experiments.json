@@ -1,0 +1,1232 @@
+{
+  "160": {
+    "name": "The shell that held a seam",
+    "form": "the shell that held a seam",
+    "material": "shell and plant fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 160,
+    "insight": "A hole turns a brittle shell into a fastening point. It invites experiments in joining flexible materials."
+  },
+  "161": {
+    "name": "Night in a hollow stone",
+    "form": "night in a hollow stone",
+    "material": "sandstone and animal fat",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 161,
+    "insight": "Fuel held beside a wick suggests a portable source of light."
+  },
+  "162": {
+    "name": "The reed that answered",
+    "form": "the reed that answered",
+    "material": "reed",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 162,
+    "insight": "Breath changes pitch inside a hollow tube; sound becomes something people can investigate."
+  },
+  "163": {
+    "name": "Memory tied in grass",
+    "form": "memory tied in grass",
+    "material": "grass fiber",
+    "discovery_id": "tallies",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 163,
+    "insight": "A knot can preserve a reminder beyond the moment it was made."
+  },
+  "164": {
+    "name": "A handle held by pitch",
+    "form": "a handle held by pitch",
+    "material": "flint, branch and resin",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 164,
+    "insight": "The useful object is a combination: cutting edge, grip and adhesive working together."
+  },
+  "165": {
+    "name": "The stone that carried warmth",
+    "form": "the stone that carried warmth",
+    "material": "stone and hide",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 165,
+    "insight": "A warmed mass releases heat gradually, suggesting that warmth can be moved and stored."
+  },
+  "166": {
+    "name": "Water in a folded skin",
+    "form": "water in a folded skin",
+    "material": "hide and thorn",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 166,
+    "insight": "A flexible surface can become a container when its edges are held together."
+  },
+  "167": {
+    "name": "The pebble that steadied a net",
+    "form": "the pebble that steadied a net",
+    "material": "stone and bast fiber",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 167,
+    "insight": "A small weight changes how a flexible mesh behaves in moving water."
+  },
+  "168": {
+    "name": "A bird from one thumb",
+    "form": "a bird from one thumb",
+    "material": "unfired clay",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 168,
+    "insight": "A few changes of shape can make an absent animal recognizable."
+  },
+  "169": {
+    "name": "Tracks remembered in red",
+    "form": "tracks remembered in red",
+    "material": "ochre and limestone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 169,
+    "insight": "The trace of an animal can stand for the animal itself, preserving an observation for others."
+  },
+  "170": {
+    "name": "The fork that turned a load",
+    "form": "the fork that turned a load",
+    "material": "forked branch",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 170,
+    "insight": "Changing the place where force is applied can make a heavy object easier to move."
+  },
+  "171": {
+    "name": "Three colors in a shell",
+    "form": "three colors in a shell",
+    "material": "shell and earth pigments",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 171,
+    "insight": "A natural hollow keeps different pigments close at hand without mixing them."
+  },
+  "172": {
+    "name": "The split bone and the sinew",
+    "form": "the split bone and the sinew",
+    "material": "bone and sinew",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 172,
+    "insight": "A split can grip a flexible strand and pull it through another material."
+  },
+  "173": {
+    "name": "A bark fold against rain",
+    "form": "a bark fold against rain",
+    "material": "bark and twig",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 173,
+    "insight": "Overlapping a water-shedding surface protects fragile material inside."
+  },
+  "174": {
+    "name": "The whistle in the joint",
+    "form": "the whistle in the joint",
+    "material": "animal bone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 174,
+    "insight": "A small air cavity offers a surprising way to make a loud signal."
+  },
+  "175": {
+    "name": "A child beside an adult",
+    "form": "a child beside an adult",
+    "material": "ochre and cave stone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 175,
+    "insight": "Marks can preserve presence and relationships long after their makers leave."
+  },
+  "176": {
+    "name": "The thorn that closed a tear",
+    "form": "the thorn that closed a tear",
+    "material": "thorn and hide",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 176,
+    "insight": "A temporary repair holds separated edges together, inviting better ways to mend."
+  },
+  "177": {
+    "name": "An ember under ash",
+    "form": "an ember under ash",
+    "material": "charcoal, ash and fungus",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 177,
+    "insight": "Insulating a small ember can preserve fire between hearths."
+  },
+  "178": {
+    "name": "A tooth made to swing",
+    "form": "a tooth made to swing",
+    "material": "tooth and fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 178,
+    "insight": "A natural narrowing becomes a secure attachment, making a found object wearable."
+  },
+  "179": {
+    "name": "The sand that took a shape",
+    "form": "the sand that took a shape",
+    "material": "dried clay and sand",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 179,
+    "insight": "Pressing a surface into a yielding material transfers its shape."
+  },
+  "180": {
+    "name": "The stone with two voices",
+    "form": "the stone with two voices",
+    "material": "thin slate",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 180,
+    "insight": "Pieces of the same material can sound different when struck."
+  },
+  "181": {
+    "name": "Seeds saved in a gourd",
+    "form": "seeds saved in a gourd",
+    "material": "wild gourd and seeds",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 181,
+    "insight": "A dry natural shell separates a small reserve from the surrounding ground."
+  },
+  "182": {
+    "name": "The wedge left in wood",
+    "form": "the wedge left in wood",
+    "material": "stone and branch",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 182,
+    "insight": "A widening shape can turn a crack into a useful split."
+  },
+  "183": {
+    "name": "A crescent remembered",
+    "form": "a crescent remembered",
+    "material": "charcoal and stone",
+    "discovery_id": "tallies",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 183,
+    "insight": "Repeated changes in the sky might be compared through marks kept on one surface."
+  },
+  "184": {
+    "name": "The feather that spread ochre",
+    "form": "the feather that spread ochre",
+    "material": "feather and pigment",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 184,
+    "insight": "A soft edge spreads material differently from a finger or a hard point."
+  },
+  "185": {
+    "name": "A sling of split bark",
+    "form": "a sling of split bark",
+    "material": "bark fiber and stone",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 185,
+    "insight": "A flexible extension changes the reach and motion of a hand-held weight."
+  },
+  "186": {
+    "name": "The hollow that kept droplets",
+    "form": "the hollow that kept droplets",
+    "material": "leaf and clay",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 186,
+    "insight": "A lining changes how a porous hollow holds liquid."
+  },
+  "187": {
+    "name": "Resin remembered a fingerprint",
+    "form": "resin remembered a fingerprint",
+    "material": "resin and wood",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 187,
+    "insight": "A soft material can take a mark and later harden around it."
+  },
+  "188": {
+    "name": "The scraper with a soft grip",
+    "form": "the scraper with a soft grip",
+    "material": "flint and hide",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 188,
+    "insight": "Protecting the hand allows a sharp edge to be used with greater control."
+  },
+  "189": {
+    "name": "A path made of contrasts",
+    "form": "a path made of contrasts",
+    "material": "pale and dark stones",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 189,
+    "insight": "Objects placed where they contrast with their surroundings can help someone find a way."
+  },
+  "190": {
+    "name": "The twisted root join",
+    "form": "the twisted root join",
+    "material": "root and wood",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 190,
+    "insight": "Wrapping a joint distributes strain and joins materials without shaping matching surfaces."
+  },
+  "191": {
+    "name": "An animal hiding in the rock",
+    "form": "an animal hiding in the rock",
+    "material": "ochre and limestone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 191,
+    "insight": "An existing shape can become part of an image, turning observation into representation."
+  },
+  "192": {
+    "name": "The branch that drilled by rolling",
+    "form": "the branch that drilled by rolling",
+    "material": "wood and stone",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 192,
+    "insight": "Rolling a point with grit wears a hollow without striking it."
+  },
+  "193": {
+    "name": "The reed that poured without spilling",
+    "form": "the reed that poured without spilling",
+    "material": "reed and gourd",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 193,
+    "insight": "A narrow passage can guide a liquid out of a larger hollow."
+  },
+  "194": {
+    "name": "The stone that smoothed a groove",
+    "form": "the stone that smoothed a groove",
+    "material": "sandstone and bone",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 194,
+    "insight": "A fixed abrasive channel guides repeated shaping."
+  },
+  "195": {
+    "name": "The bark that held a fold",
+    "form": "the bark that held a fold",
+    "material": "bark and root",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 195,
+    "insight": "A sheet can acquire useful depth through folding."
+  },
+  "196": {
+    "name": "The fork that lifted an ember",
+    "form": "the fork that lifted an ember",
+    "material": "wood and charcoal",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 196,
+    "insight": "A fork separates fingers from a dangerous contact surface."
+  },
+  "197": {
+    "name": "The shell that scraped a skin",
+    "form": "the shell that scraped a skin",
+    "material": "shell and hide",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 197,
+    "insight": "A curved natural edge can remove material while preserving what lies underneath."
+  },
+  "198": {
+    "name": "The antler that pressed an edge",
+    "form": "the antler that pressed an edge",
+    "material": "antler and flint",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 198,
+    "insight": "Concentrated pressure can refine an edge more gently than a blow."
+  },
+  "199": {
+    "name": "The moss that held water",
+    "form": "the moss that held water",
+    "material": "moss and bark",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 199,
+    "insight": "A porous bundle can temporarily hold and transfer liquid."
+  },
+  "200": {
+    "name": "The pebble that crushed a husk",
+    "form": "the pebble that crushed a husk",
+    "material": "stone and wild seeds",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 200,
+    "insight": "Breaking a protective shell exposes food inside."
+  },
+  "201": {
+    "name": "The root that bound a splint",
+    "form": "the root that bound a splint",
+    "material": "root and wood",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 201,
+    "insight": "A weak piece can be supported by parallel pieces tied around it."
+  },
+  "202": {
+    "name": "A scraper renewed by breaking",
+    "form": "a scraper renewed by breaking",
+    "material": "flint",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 202,
+    "insight": "Breaking a worn object can expose a new useful surface."
+  },
+  "203": {
+    "name": "The hide that caught fine dust",
+    "form": "the hide that caught fine dust",
+    "material": "hide and ochre",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 203,
+    "insight": "A flexible surface can catch and gather scattered fine material."
+  },
+  "204": {
+    "name": "The pebble inside a skin rattle",
+    "form": "the pebble inside a skin rattle",
+    "material": "hide and pebbles",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 204,
+    "insight": "An enclosed loose object turns shaking into a repeatable sound."
+  },
+  "205": {
+    "name": "The rib that spread a paste",
+    "form": "the rib that spread a paste",
+    "material": "bone and clay",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 205,
+    "insight": "A broad curved edge distributes a soft material over a surface."
+  },
+  "206": {
+    "name": "The hollow branch that carried tinder",
+    "form": "the hollow branch that carried tinder",
+    "material": "wood and dry grass",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 206,
+    "insight": "A natural tube protects fragile dry material during movement."
+  },
+  "207": {
+    "name": "A twig cross held by friction",
+    "form": "a twig cross held by friction",
+    "material": "twigs and root",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 207,
+    "insight": "A split and a binding can hold pieces at a useful angle."
+  },
+  "208": {
+    "name": "The shell that caught a flame",
+    "form": "the shell that caught a flame",
+    "material": "shell, fat and moss",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 208,
+    "insight": "A naturally formed container can support controlled burning."
+  },
+  "209": {
+    "name": "The pebble that marked a return",
+    "form": "the pebble that marked a return",
+    "material": "stone and ochre",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 209,
+    "insight": "A conspicuous change makes one object easier to recognize again."
+  },
+  "210": {
+    "name": "The bone that held a cord end",
+    "form": "the bone that held a cord end",
+    "material": "bone and fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 210,
+    "insight": "Turning a crosspiece behind an opening can stop a fastening from pulling through."
+  },
+  "211": {
+    "name": "The bent branch that stored a pull",
+    "form": "the bent branch that stored a pull",
+    "material": "wood and sinew",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 211,
+    "insight": "An elastic shape retains force and releases it when freed."
+  },
+  "212": {
+    "name": "The clay that remembered a leaf",
+    "form": "the clay that remembered a leaf",
+    "material": "unfired clay and leaf",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 212,
+    "insight": "A yielding surface preserves the structure of something pressed against it."
+  },
+  "213": {
+    "name": "The skin that softened a blow",
+    "form": "the skin that softened a blow",
+    "material": "hide and stone",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 213,
+    "insight": "A soft covering changes how a blow reaches a brittle surface."
+  },
+  "214": {
+    "name": "The grain held by a crack",
+    "form": "the grain held by a crack",
+    "material": "wood and seed",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 214,
+    "insight": "A narrow split can grip something too small or awkward for a bare hand."
+  },
+  "215": {
+    "name": "The stone that anchored a shelter edge",
+    "form": "the stone that anchored a shelter edge",
+    "material": "stone and hide",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 215,
+    "insight": "Gathering material around a weight provides an anchor without a drilled hole."
+  },
+  "216": {
+    "name": "The antler that loosened earth",
+    "form": "the antler that loosened earth",
+    "material": "antler and soil",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 216,
+    "insight": "A narrow strong point reaches into compact ground."
+  },
+  "217": {
+    "name": "The bark that shaded a wick",
+    "form": "the bark that shaded a wick",
+    "material": "bark and stone",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 217,
+    "insight": "A barrier changes the air reaching a small flame."
+  },
+  "218": {
+    "name": "The cord that gathered a mouth",
+    "form": "the cord that gathered a mouth",
+    "material": "fiber and hide",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 218,
+    "insight": "Pulling a loop gathers an open edge into a closure."
+  },
+  "219": {
+    "name": "A hollow tapped for an echo",
+    "form": "a hollow tapped for an echo",
+    "material": "wood and stone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 219,
+    "insight": "A cavity changes and carries the sound of a strike."
+  },
+  "220": {
+    "name": "The red hand dragged into motion",
+    "form": "the red hand dragged into motion",
+    "material": "ochre and stone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 220,
+    "insight": "A static mark can preserve the direction of a movement."
+  },
+  "221": {
+    "name": "The shell that separated fibers",
+    "form": "the shell that separated fibers",
+    "material": "shell and bast",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 221,
+    "insight": "Several natural edges can separate a tangled material into strands."
+  },
+  "222": {
+    "name": "The stone that bruised roots",
+    "form": "the stone that bruised roots",
+    "material": "stone and wild root",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 222,
+    "insight": "Repeated bruising changes the texture of a tough material."
+  },
+  "223": {
+    "name": "The twig that mixed two earths",
+    "form": "the twig that mixed two earths",
+    "material": "wood and pigment",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 223,
+    "insight": "Combining familiar substances creates a visibly different result."
+  },
+  "224": {
+    "name": "A knot caught behind a slit",
+    "form": "a knot caught behind a slit",
+    "material": "fiber and hide",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 224,
+    "insight": "A larger end can hold a smaller strand against an opening."
+  },
+  "225": {
+    "name": "The small stone under the large one",
+    "form": "the small stone under the large one",
+    "material": "stone",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 225,
+    "insight": "A support placed near a load changes how it can be lifted."
+  },
+  "226": {
+    "name": "The charcoal wrapped for a journey",
+    "form": "the charcoal wrapped for a journey",
+    "material": "charcoal and bark",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 226,
+    "insight": "A wrapper protects a fragile useful material while keeping it portable."
+  },
+  "227": {
+    "name": "The tooth that pierced a leaf",
+    "form": "the tooth that pierced a leaf",
+    "material": "tooth and leaf",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 227,
+    "insight": "A natural point can open a passage through a thin material."
+  },
+  "228": {
+    "name": "The skin pulled over a hollow",
+    "form": "the skin pulled over a hollow",
+    "material": "hide and wood",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 228,
+    "insight": "Tension across a hollow surface changes how it vibrates."
+  },
+  "229": {
+    "name": "The clay that stopped a leak",
+    "form": "the clay that stopped a leak",
+    "material": "clay and gourd",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 229,
+    "insight": "A yielding material can close a gap between rigid edges."
+  },
+  "230": {
+    "name": "The pebble that burnished hide",
+    "form": "the pebble that burnished hide",
+    "material": "stone and hide",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 230,
+    "insight": "Friction can change the feel and flexibility of a surface."
+  },
+  "231": {
+    "name": "The reed that carried a breath of pigment",
+    "form": "the reed that carried a breath of pigment",
+    "material": "reed and ochre",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 231,
+    "insight": "Air moving through a tube can carry fine particles."
+  },
+  "232": {
+    "name": "A feather held by a split",
+    "form": "a feather held by a split",
+    "material": "feather and twig",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 232,
+    "insight": "A flexible broad surface can be attached to a narrow support."
+  },
+  "233": {
+    "name": "The bark curl that scooped seeds",
+    "form": "the bark curl that scooped seeds",
+    "material": "bark and wild seeds",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 233,
+    "insight": "A curved surface gathers scattered small things into one place."
+  },
+  "234": {
+    "name": "The wet clay finger rest",
+    "form": "the wet clay finger rest",
+    "material": "clay and twig",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 234,
+    "insight": "A soft material can adapt a handle to the hand holding it."
+  },
+  "235": {
+    "name": "The cord with a sliding loop",
+    "form": "the cord with a sliding loop",
+    "material": "bast fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 235,
+    "insight": "A loop that changes size can grip objects of different thickness."
+  },
+  "236": {
+    "name": "The flat stone that cooled a paste",
+    "form": "the flat stone that cooled a paste",
+    "material": "stone and plant mash",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 236,
+    "insight": "Spreading material thin changes its contact with air and surrounding surfaces."
+  },
+  "237": {
+    "name": "The bough that dragged a bundle",
+    "form": "the bough that dragged a bundle",
+    "material": "branch and fiber",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 237,
+    "insight": "A shaped branch can carry a bundle while sliding over the ground."
+  },
+  "238": {
+    "name": "The tooth with a repaired root",
+    "form": "the tooth with a repaired root",
+    "material": "tooth, resin and fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 238,
+    "insight": "Joining broken parts can preserve an object that would otherwise be discarded."
+  },
+  "239": {
+    "name": "The stone that reflected a face poorly",
+    "form": "the stone that reflected a face poorly",
+    "material": "dark stone and water",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 239,
+    "insight": "A wet surface changes the way light returns to the observer."
+  },
+  "240": {
+    "name": "The cave wall tested with fingertips",
+    "form": "the cave wall tested with fingertips",
+    "material": "clay-coated stone",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 240,
+    "insight": "Repeated small trials reveal how a material responds to force."
+  },
+  "241": {
+    "name": "The seed pod used as a scoop",
+    "form": "the seed pod used as a scoop",
+    "material": "dry seed pod",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 241,
+    "insight": "A discarded natural shell can become a useful collecting surface."
+  },
+  "242": {
+    "name": "The root fiber twisted twice",
+    "form": "the root fiber twisted twice",
+    "material": "root fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 242,
+    "insight": "Combining strands changes how a flexible material holds together."
+  },
+  "243": {
+    "name": "The hand sized hammer grip",
+    "form": "the hand sized hammer grip",
+    "material": "stone and clay",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 243,
+    "insight": "Adding a shaped grip changes control without changing the striking material."
+  },
+  "244": {
+    "name": "The shell stack that clicked",
+    "form": "the shell stack that clicked",
+    "material": "shell and fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 244,
+    "insight": "Contact between suspended hard pieces makes a portable sound."
+  },
+  "245": {
+    "name": "The charred end that hardened",
+    "form": "the charred end that hardened",
+    "material": "wood and charcoal",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 245,
+    "insight": "Heat changes a material before it is completely consumed."
+  },
+  "246": {
+    "name": "The reed bundle that floated",
+    "form": "the reed bundle that floated",
+    "material": "reeds and root",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 246,
+    "insight": "Combining light hollow pieces changes how a load meets water."
+  },
+  "247": {
+    "name": "The stone ring without a hole",
+    "form": "the stone ring without a hole",
+    "material": "stone and fiber",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 247,
+    "insight": "An external channel can hold a fastening without penetrating the object."
+  },
+  "248": {
+    "name": "The fungus that took a spark",
+    "form": "the fungus that took a spark",
+    "material": "fungus and flint",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 248,
+    "insight": "The same heat affects loose porous material differently from solid rock."
+  },
+  "249": {
+    "name": "A shelter map made by touch",
+    "form": "a shelter map made by touch",
+    "material": "sand and pebbles",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 249,
+    "insight": "A small arrangement can help someone describe a larger place."
+  },
+  "250": {
+    "name": "The claw that teased a knot",
+    "form": "the claw that teased a knot",
+    "material": "claw and fiber",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 250,
+    "insight": "A curved point reaches under material that a straight point cannot easily lift."
+  },
+  "251": {
+    "name": "The shell that strained a mixture",
+    "form": "the shell that strained a mixture",
+    "material": "perforated shell and plant pulp",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 251,
+    "insight": "An opening passes liquid while holding back larger pieces."
+  },
+  "252": {
+    "name": "The clay plug with a pull tab",
+    "form": "the clay plug with a pull tab",
+    "material": "unfired clay and grass",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 252,
+    "insight": "A small projecting loop gives a way to remove a tightly fitted stopper."
+  },
+  "253": {
+    "name": "The stone flakes sorted by feel",
+    "form": "the stone flakes sorted by feel",
+    "material": "flint",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 253,
+    "insight": "Comparing edges makes selection purposeful instead of accidental."
+  },
+  "254": {
+    "name": "The stick that reached a crevice",
+    "form": "the stick that reached a crevice",
+    "material": "wood and resin",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 254,
+    "insight": "Adhesion extends reach into places a hand cannot enter."
+  },
+  "255": {
+    "name": "The leaf bundle bound to breathe",
+    "form": "the leaf bundle bound to breathe",
+    "material": "leaves and fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 255,
+    "insight": "A covering can shelter material while leaving gaps for air."
+  },
+  "256": {
+    "name": "The hollow used twice",
+    "form": "the hollow used twice",
+    "material": "stone, soot and ochre",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 256,
+    "insight": "A useful shape can serve a different purpose after its original use ends."
+  },
+  "257": {
+    "name": "The bark seam sealed with resin",
+    "form": "the bark seam sealed with resin",
+    "material": "bark and resin",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 257,
+    "insight": "Overlapping surfaces and filling their gap changes how they hold together."
+  },
+  "258": {
+    "name": "The rib used as a spring",
+    "form": "the rib used as a spring",
+    "material": "bone and fiber",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 258,
+    "insight": "A naturally curved flexible part can retain a small amount of force."
+  },
+  "259": {
+    "name": "The pebble line counted by moving",
+    "form": "the pebble line counted by moving",
+    "material": "pebbles and dirt",
+    "discovery_id": "tallies",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 259,
+    "insight": "Moving objects between groups preserves a count without written numerals."
+  },
+  "260": {
+    "name": "The rope worn smooth at a bend",
+    "form": "the rope worn smooth at a bend",
+    "material": "fiber and branch",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 260,
+    "insight": "A rounded contact changes how a pulling strand moves and wears."
+  },
+  "261": {
+    "name": "The nutshell that kept grease",
+    "form": "the nutshell that kept grease",
+    "material": "nutshell and fat",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 261,
+    "insight": "A tiny natural container makes a useful substance easier to carry and apply."
+  },
+  "262": {
+    "name": "The feather that showed a draft",
+    "form": "the feather that showed a draft",
+    "material": "feather and fiber",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 262,
+    "insight": "A light suspended object makes invisible air movement noticeable."
+  },
+  "263": {
+    "name": "The branch with a depth stain",
+    "form": "the branch with a depth stain",
+    "material": "wood and water stain",
+    "discovery_id": "tallies",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 263,
+    "insight": "A repeated boundary on an object can preserve a comparison of depth."
+  },
+  "264": {
+    "name": "The clay that held a charcoal point",
+    "form": "the clay that held a charcoal point",
+    "material": "clay and charcoal",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 264,
+    "insight": "A holder makes a fragile marking material easier to control."
+  },
+  "265": {
+    "name": "The thorn comb of a broken stem",
+    "form": "the thorn comb of a broken stem",
+    "material": "thorny stem and fur",
+    "discovery_id": "stone_sorting",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 265,
+    "insight": "Many projecting points can catch and separate fibers at once."
+  },
+  "266": {
+    "name": "The stone that shaded an ember",
+    "form": "the stone that shaded an ember",
+    "material": "stone and charcoal",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 266,
+    "insight": "A small cover changes exposure and helps keep a fragile process going."
+  },
+  "267": {
+    "name": "The hide strap widened at the shoulder",
+    "form": "the hide strap widened at the shoulder",
+    "material": "hide",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 267,
+    "insight": "Spreading contact over a wider area changes how a load is borne."
+  },
+  "268": {
+    "name": "A snapped point fitted backward",
+    "form": "a snapped point fitted backward",
+    "material": "flint and twig",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 268,
+    "insight": "Failure can reveal a different useful edge instead of ending an object's life."
+  },
+  "269": {
+    "name": "The clay ball that tested a fire",
+    "form": "the clay ball that tested a fire",
+    "material": "unfired clay and ash",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 269,
+    "insight": "Comparing exposed and unexposed pieces reveals a material change."
+  },
+  "270": {
+    "name": "The sound stone hung on a root",
+    "form": "the sound stone hung on a root",
+    "material": "stone and root",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 270,
+    "insight": "Freeing a surface from the ground changes its vibration."
+  },
+  "271": {
+    "name": "The bark tray with a raised corner",
+    "form": "the bark tray with a raised corner",
+    "material": "bark and twig",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 271,
+    "insight": "A slope can sort the movement of loose things without touching each one."
+  },
+  "272": {
+    "name": "The sharp edge guarded by a fold",
+    "form": "the sharp edge guarded by a fold",
+    "material": "flint and hide",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 272,
+    "insight": "A cover preserves an edge and separates it from other carried objects."
+  },
+  "273": {
+    "name": "The shell pressed into a grip",
+    "form": "the shell pressed into a grip",
+    "material": "shell and clay",
+    "discovery_id": "clay_shaping",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 273,
+    "insight": "Different materials can divide the jobs of holding and cutting."
+  },
+  "274": {
+    "name": "The twig gauge of an opening",
+    "form": "the twig gauge of an opening",
+    "material": "forked twig",
+    "discovery_id": "tallies",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 274,
+    "insight": "One object's span can preserve a comparison for use somewhere else."
+  },
+  "275": {
+    "name": "The soot print of a leaf",
+    "form": "the soot print of a leaf",
+    "material": "soot and stone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 275,
+    "insight": "Covering part of a surface makes an image by leaving material absent."
+  },
+  "276": {
+    "name": "The root basket before weaving",
+    "form": "the root basket before weaving",
+    "material": "roots",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 276,
+    "insight": "Crossing flexible supports begins to make a space that can hold something."
+  },
+  "277": {
+    "name": "The stone and the soft anvil",
+    "form": "the stone and the soft anvil",
+    "material": "stone and wood",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 277,
+    "insight": "The supporting surface changes how an impact affects the object above it."
+  },
+  "278": {
+    "name": "The knot with a quick release",
+    "form": "the knot with a quick release",
+    "material": "fiber and twig",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 278,
+    "insight": "A removable crosspiece makes a binding easier to undo."
+  },
+  "279": {
+    "name": "The charcoal smudge that matched a shadow",
+    "form": "the charcoal smudge that matched a shadow",
+    "material": "charcoal and stone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 279,
+    "insight": "A changing shadow can be compared with a mark that stays in place."
+  },
+  "280": {
+    "name": "The shell edge repaired with a chip",
+    "form": "the shell edge repaired with a chip",
+    "material": "shell, flint and resin",
+    "discovery_id": "controlled_flaking",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 280,
+    "insight": "A damaged object can acquire a new working surface from another material."
+  },
+  "281": {
+    "name": "The wood curl saved for a flame",
+    "form": "the wood curl saved for a flame",
+    "material": "wood and fiber",
+    "discovery_id": "charcoal",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 281,
+    "insight": "Thin exposed pieces catch heat differently from a solid branch."
+  },
+  "282": {
+    "name": "The ochre thumbprint on a shared tool",
+    "form": "the ochre thumbprint on a shared tool",
+    "material": "ochre and stone",
+    "discovery_id": "oral_epics",
+    "artifact_origin": "prehistoric",
+    "art_collection": "prehistoric-v1",
+    "catalogue_id": 282,
+    "insight": "A personal trace can connect a useful object with the people who handle it."
+  }
+}

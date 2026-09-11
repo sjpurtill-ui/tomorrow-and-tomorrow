@@ -95,6 +95,7 @@ func refresh(force:bool)->void:
 			var illustration:=TextureRect.new();illustration.texture=artwork;illustration.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;illustration.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;illustration.custom_minimum_size.y=240;illustration.size_flags_horizontal=SIZE_EXPAND_FILL;content.add_child(illustration)
 		label(content,"PREHISTORIC FIND" if item.get("artifact_origin","")=="prehistoric" else "CIVILIZATION-MADE" if item.get("artifact_origin","")=="civilization" else String(item.kind).to_upper(),10,T.GOLD);label(content,String(item.name),18,T.INK)
 		label(content,"%s · encountered day %d · home day %d" % [item.source_name,int(item.observed_day),int(item.returned_day)],12,T.TEXT_SOFT)
+		if not String(item.get("insight","")).is_empty():label(content,String(item.insight),13,T.BODY)
 		var bar:=ProgressBar.new();bar.show_percentage=false;bar.value=float(item.study)*100;bar.custom_minimum_size.y=6;content.add_child(bar)
 		var definition:=DiscoverySystem.discovery_definition(String(item.discovery_id))
 		var known:=String(item.discovery_id) in GameState.known_discoveries

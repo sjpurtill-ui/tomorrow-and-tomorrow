@@ -22,6 +22,7 @@ func test_approved_art_loads_and_pending_art_does_not_impersonate_another()->voi
 
 func test_illustrated_collection_stays_inside_small_and_large_viewports()->void:
 	var record:=Catalogue.find_at(777,Vector2(10,10),1);record.catalogue_id=0
+	record.insight="A rough hollow holds fuel beside a wick, suggesting a portable source of light that can be studied and improved."
 	E.data().collections[record.id]=record
 	for shape:Vector2i in [Vector2i(340,640),Vector2i(960,720)]:
 		var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=shape;add_child(viewport)
@@ -71,3 +72,24 @@ func test_all_exploration_variants_are_prehistoric_and_have_early_evidence()->vo
 		assert_str(definition.art_collection).is_equal("prehistoric-v1")
 		assert_bool(definition.discovery_id in ["stone_sorting","controlled_flaking","oral_epics","tallies","clay_shaping","charcoal"]).is_true()
 		assert_bool(not DiscoverySystem.discovery_definition(definition.discovery_id).is_empty()).is_true()
+
+func test_authored_experiments_preserve_specific_insights()->void:
+	const Ancient=preload("res://scripts/prehistoric_artifacts.gd")
+	var lamp:=Ancient.definition(161)
+	assert_str(lamp.name).is_equal("Night in a hollow stone")
+	assert_str(lamp.insight).contains("portable source of light")
+	lamp.name="changed local copy"
+	assert_str(Ancient.definition(161).name).is_equal("Night in a hollow stone")
+	assert_bool(Ancient.definition(159).has("insight")).is_false()
+
+func test_experiment_insight_survives_serialization_and_rejects_invalid_values()->void:
+	const Ancient=preload("res://scripts/prehistoric_artifacts.gd")
+	var record:=Catalogue.find_at(777,Vector2(10,10),1)
+	record.merge(Ancient.definition(161),true)
+	var restored:Dictionary=bytes_to_var(var_to_bytes(record))
+	assert_bool(E.valid_item(restored)).is_true()
+	assert_str(restored.insight).is_equal(record.insight)
+	restored.insight="x".repeat(601)
+	assert_bool(E.valid_item(restored)).is_false()
+	restored.insight={"unexpected":"object"}
+	assert_bool(E.valid_item(restored)).is_false()
