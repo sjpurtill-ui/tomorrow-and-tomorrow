@@ -1,0 +1,5435 @@
+{
+  "annual_snapshots": [
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 0,
+      "day": 0,
+      "food_consumption": 0,
+      "food_days": 30.0,
+      "food_eaten": 0,
+      "food_intake_ratio": 1,
+      "food_security": 0.82,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 10.0,
+        "Stone": 0.0,
+        "Timber": 12.0
+      },
+      "population": 120,
+      "resource_deposits": 0,
+      "settled": false,
+      "year": 0.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 0,
+      "day": 1,
+      "food_consumption": 114.2184,
+      "food_days": 31.5185644344519,
+      "food_eaten": 114.2184,
+      "food_intake_ratio": 1.0,
+      "food_security": 0.824757128260138,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 9.965,
+        "Stone": 0.0,
+        "Timber": 11.8767111111111
+      },
+      "population": 120,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 0.00273972602739726
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 365,
+      "food_consumption": 77.397843853428,
+      "food_days": 71.8901634154747,
+      "food_eaten": 76.0940319362508,
+      "food_intake_ratio": 0.98315441552033,
+      "food_security": 0.979999999586374,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 65.3064539717247,
+        "Stone": 47.400943998499,
+        "Timber": 63.4347368779254
+      },
+      "population": 121,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 1.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 730,
+      "food_consumption": 78.9679494841375,
+      "food_days": 85.0407827379245,
+      "food_eaten": 77.7014572270146,
+      "food_intake_ratio": 0.983961945759054,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 97.54440887995,
+        "Stone": 105.152696698338,
+        "Timber": 135.113526594827
+      },
+      "population": 124,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 2.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 1095,
+      "food_consumption": 79.6789069810873,
+      "food_days": 74.8627773758367,
+      "food_eaten": 78.4493492830688,
+      "food_intake_ratio": 0.984568592308748,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 112.264612924201,
+        "Stone": 152.408084297201,
+        "Timber": 185.277463057585
+      },
+      "population": 125,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 3.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 5,
+      "day": 1460,
+      "food_consumption": 81.4106695239103,
+      "food_days": 81.3083398394358,
+      "food_eaten": 80.2178458350067,
+      "food_intake_ratio": 0.98534806683351,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 2,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 120.560022884054,
+        "Stone": 123.383215622898,
+        "Timber": 221.178023403227
+      },
+      "population": 127,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 4.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 1825,
+      "food_consumption": 82.3710432919894,
+      "food_days": 80.71643425722,
+      "food_eaten": 80.3914341635736,
+      "food_intake_ratio": 0.975967171844619,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 2,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 123.031230912223,
+        "Stone": 104.753965152757,
+        "Timber": 243.616828738286
+      },
+      "population": 129,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 5.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 2190,
+      "food_consumption": 84.1972390963012,
+      "food_days": 78.9616399645989,
+      "food_eaten": 82.2165637597422,
+      "food_intake_ratio": 0.976475768590302,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 2,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 127.924124496792,
+        "Stone": 89.2449317831096,
+        "Timber": 262.787112149971
+      },
+      "population": 131,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 6.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 5,
+      "day": 2555,
+      "food_consumption": 85.1865086039092,
+      "food_days": 76.8785688217593,
+      "food_eaten": 83.20629783538,
+      "food_intake_ratio": 0.976754408638384,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 3,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 137.14439042499,
+        "Stone": 73.4695918208717,
+        "Timber": 283.08072300934
+      },
+      "population": 132,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 7.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 5,
+      "day": 2920,
+      "food_consumption": 87.1875996932318,
+      "food_days": 82.3836278700595,
+      "food_eaten": 85.2062045952274,
+      "food_intake_ratio": 0.977274347441884,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 5,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 116.152647018601,
+        "Stone": 78.0400427779274,
+        "Timber": 271.643252801181
+      },
+      "population": 135,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 8.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 5,
+      "day": 3285,
+      "food_consumption": 88.2731850013436,
+      "food_days": 85.0339066519498,
+      "food_eaten": 86.2909272668483,
+      "food_intake_ratio": 0.977544055598933,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 5,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 108.384369998082,
+        "Stone": 90.9769678596453,
+        "Timber": 257.348932511199
+      },
+      "population": 136,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 9.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 5,
+      "day": 3650,
+      "food_consumption": 89.5617913222351,
+      "food_days": 80.6761964103704,
+      "food_eaten": 87.578979817349,
+      "food_intake_ratio": 0.977860966427613,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 5,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 110.377080272695,
+        "Stone": 92.5341259482061,
+        "Timber": 256.365696512375
+      },
+      "population": 138,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 10.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 4015,
+      "food_consumption": 91.7264344901725,
+      "food_days": 85.7996998923144,
+      "food_eaten": 89.7514243008886,
+      "food_intake_ratio": 0.978468473125972,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 6,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 112.823061257031,
+        "Stone": 90.4082320132669,
+        "Timber": 259.505646486732
+      },
+      "population": 141,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 11.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 4380,
+      "food_consumption": 93.1622693929991,
+      "food_days": 127.835881943884,
+      "food_eaten": 91.1933624051296,
+      "food_intake_ratio": 0.978865832694953,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 6,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 115.835869003002,
+        "Stone": 86.3614739389927,
+        "Timber": 264.705840182021
+      },
+      "population": 144,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 12.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 4745,
+      "food_consumption": 94.6506717838114,
+      "food_days": 127.278946107005,
+      "food_eaten": 92.6884763557184,
+      "food_intake_ratio": 0.979269080809328,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 7,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 118.852976084088,
+        "Stone": 81.7615826478357,
+        "Timber": 270.750359791547
+      },
+      "population": 146,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 13.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 5110,
+      "food_consumption": 97.1225810621997,
+      "food_days": 126.429136596551,
+      "food_eaten": 95.161807451285,
+      "food_intake_ratio": 0.97981135190735,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 7,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 120.855121486679,
+        "Stone": 77.5392797019825,
+        "Timber": 276.11013838106
+      },
+      "population": 149,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 14.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 5475,
+      "food_consumption": 98.8466499071533,
+      "food_days": 125.814295810145,
+      "food_eaten": 96.8861180774543,
+      "food_intake_ratio": 0.980165925385022,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 4,
+      "known": 7,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 122.215477675226,
+        "Stone": 75.3420945467008,
+        "Timber": 279.202144586172
+      },
+      "population": 152,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 15.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 5840,
+      "food_consumption": 100.648583693127,
+      "food_days": 125.205576763788,
+      "food_eaten": 97.9198119819715,
+      "food_intake_ratio": 0.972888126081584,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 8,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 123.393961742996,
+        "Stone": 71.0381523792427,
+        "Timber": 284.76965439417
+      },
+      "population": 154,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 16.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 6205,
+      "food_consumption": 101.942916539193,
+      "food_days": 124.733834452317,
+      "food_eaten": 99.2110156191063,
+      "food_intake_ratio": 0.97320166017581,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 9,
+      "material_stocks": {
+        "Clay": 108.939429760772,
+        "Fiber Plants": 94.1649911888538,
+        "Stone": 80.0788488016859,
+        "Timber": 257.859364620386
+      },
+      "population": 156,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 17.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 6570,
+      "food_consumption": 103.902969923149,
+      "food_days": 124.116641513653,
+      "food_eaten": 101.167720523058,
+      "food_intake_ratio": 0.973674964227547,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 10,
+      "material_stocks": {
+        "Clay": 191.848507544552,
+        "Fiber Plants": 73.1600019706083,
+        "Stone": 111.080066518404,
+        "Timber": 218.325085627571
+      },
+      "population": 160,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 18.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 6935,
+      "food_consumption": 106.341603613007,
+      "food_days": 123.292046670425,
+      "food_eaten": 103.604686784807,
+      "food_intake_ratio": 0.974262972014605,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 11,
+      "material_stocks": {
+        "Clay": 194.44359802945,
+        "Fiber Plants": 68.8450512392036,
+        "Stone": 139.965220711626,
+        "Timber": 193.558527987374
+      },
+      "population": 164,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 19.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 7300,
+      "food_consumption": 108.560248772027,
+      "food_days": 122.584121089192,
+      "food_eaten": 105.83351507559,
+      "food_intake_ratio": 0.9748827611646,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 12,
+      "material_stocks": {
+        "Clay": 196.762827473625,
+        "Fiber Plants": 68.7067527576587,
+        "Stone": 153.063791111125,
+        "Timber": 179.142946443587
+      },
+      "population": 167,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 20.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 7665,
+      "food_consumption": 110.837491296182,
+      "food_days": 121.937959275535,
+      "food_eaten": 108.1088715747,
+      "food_intake_ratio": 0.975381798256418,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 12,
+      "material_stocks": {
+        "Clay": 197.730257022933,
+        "Fiber Plants": 69.654736018166,
+        "Stone": 159.676585952255,
+        "Timber": 171.170772800082
+      },
+      "population": 172,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 21.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 8030,
+      "food_consumption": 111.811216038091,
+      "food_days": 121.766675089686,
+      "food_eaten": 109.082876375164,
+      "food_intake_ratio": 0.975598694302742,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 12,
+      "material_stocks": {
+        "Clay": 198.290787986431,
+        "Fiber Plants": 70.9668752853291,
+        "Stone": 181.180595053164,
+        "Timber": 135.289990409347
+      },
+      "population": 173,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 22.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 8395,
+      "food_consumption": 114.404077302334,
+      "food_days": 120.985271014466,
+      "food_eaten": 111.672635169507,
+      "food_intake_ratio": 0.976124608517158,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 13,
+      "material_stocks": {
+        "Clay": 199.167690098355,
+        "Fiber Plants": 72.3003845962369,
+        "Stone": 207.931924313383,
+        "Timber": 103.568836843068
+      },
+      "population": 177,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 23.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 8760,
+      "food_consumption": 117.016338080035,
+      "food_days": 120.309425358295,
+      "food_eaten": 114.283743439434,
+      "food_intake_ratio": 0.976647751199217,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 5,
+      "known": 13,
+      "material_stocks": {
+        "Clay": 200.49899653428,
+        "Fiber Plants": 74.6110522322195,
+        "Stone": 231.464852797937,
+        "Timber": 82.991569518322
+      },
+      "population": 181,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 24.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 9125,
+      "food_consumption": 119.766194104021,
+      "food_days": 119.611681936048,
+      "food_eaten": 117.030412529131,
+      "food_intake_ratio": 0.977157313920207,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 14,
+      "material_stocks": {
+        "Clay": 206.331230827013,
+        "Fiber Plants": 139.342137845276,
+        "Stone": 227.376532589101,
+        "Timber": 92.2938842841783
+      },
+      "population": 185,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 25.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 9490,
+      "food_consumption": 122.596797906429,
+      "food_days": 118.954093386718,
+      "food_eaten": 119.858677357543,
+      "food_intake_ratio": 0.977665643836995,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 16,
+      "material_stocks": {
+        "Clay": 206.619266781296,
+        "Fiber Plants": 230.522648819897,
+        "Stone": 211.460591081044,
+        "Timber": 112.025034621241
+      },
+      "population": 190,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 26.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 9855,
+      "food_consumption": 124.997162934894,
+      "food_days": 118.343449172311,
+      "food_eaten": 122.268945427355,
+      "food_intake_ratio": 0.978173764560078,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 17,
+      "material_stocks": {
+        "Clay": 210.992992100336,
+        "Fiber Plants": 241.715672112152,
+        "Stone": 190.480125659035,
+        "Timber": 132.106184958303
+      },
+      "population": 194,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 27.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 10220,
+      "food_consumption": 127.997688223,
+      "food_days": 117.744239474798,
+      "food_eaten": 125.267731962523,
+      "food_intake_ratio": 0.978671831512134,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 19,
+      "material_stocks": {
+        "Clay": 216.180378709166,
+        "Fiber Plants": 242.454940959418,
+        "Stone": 174.970730360148,
+        "Timber": 151.08733529536
+      },
+      "population": 199,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 28.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 10585,
+      "food_consumption": 131.20916522445,
+      "food_days": 117.074450694562,
+      "food_eaten": 128.47595692588,
+      "food_intake_ratio": 0.979169074859256,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 20,
+      "material_stocks": {
+        "Clay": 217.708538744384,
+        "Fiber Plants": 243.734918613473,
+        "Stone": 162.692985500604,
+        "Timber": 170.711235632418
+      },
+      "population": 204,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 29.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 10950,
+      "food_consumption": 133.933892128471,
+      "food_days": 116.506140156368,
+      "food_eaten": 131.19735490757,
+      "food_intake_ratio": 0.979568000470889,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 20,
+      "material_stocks": {
+        "Clay": 212.503015358031,
+        "Fiber Plants": 244.316668979282,
+        "Stone": 146.937999243847,
+        "Timber": 190.792385969476
+      },
+      "population": 208,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 30.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 11315,
+      "food_consumption": 137.381668005652,
+      "food_days": 115.856251236471,
+      "food_eaten": 134.658203328271,
+      "food_intake_ratio": 0.980175923637288,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 6,
+      "known": 23,
+      "material_stocks": {
+        "Clay": 206.133495797758,
+        "Fiber Plants": 243.983400680133,
+        "Stone": 136.383461260148,
+        "Timber": 203.348713164175
+      },
+      "population": 213,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 31.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 11680,
+      "food_consumption": 102.144908699336,
+      "food_days": 124.848268425015,
+      "food_eaten": 99.4318210532436,
+      "food_intake_ratio": 0.973438836250969,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 23,
+      "material_stocks": {
+        "Clay": 200.456222899443,
+        "Fiber Plants": 239.27378080624,
+        "Stone": 130.919922132212,
+        "Timber": 208.129863501232
+      },
+      "population": 218,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 32.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 12045,
+      "food_consumption": 105.411506616203,
+      "food_days": 123.665854062618,
+      "food_eaten": 102.69526736831,
+      "food_intake_ratio": 0.97423204225908,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 24,
+      "material_stocks": {
+        "Clay": 200.52592640466,
+        "Fiber Plants": 239.391208319417,
+        "Stone": 114.592139848255,
+        "Timber": 228.21101383829
+      },
+      "population": 224,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 33.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 12410,
+      "food_consumption": 106.788213514636,
+      "food_days": 123.223725439902,
+      "food_eaten": 104.073730461243,
+      "food_intake_ratio": 0.97458068672512,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 25,
+      "material_stocks": {
+        "Clay": 200.55758928313,
+        "Fiber Plants": 239.434114618554,
+        "Stone": 98.1265862487022,
+        "Timber": 248.292164175348
+      },
+      "population": 227,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 34.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 12775,
+      "food_consumption": 108.701198163171,
+      "food_days": 122.647507327636,
+      "food_eaten": 105.993198486461,
+      "food_intake_ratio": 0.975087674078393,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 26,
+      "material_stocks": {
+        "Clay": 200.600396162738,
+        "Fiber Plants": 239.498745462977,
+        "Stone": 81.3283320370488,
+        "Timber": 269.073314512405
+      },
+      "population": 231,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 35.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 13140,
+      "food_consumption": 112.013676476946,
+      "food_days": 121.776750742525,
+      "food_eaten": 109.303498010702,
+      "food_intake_ratio": 0.975804932473561,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 7,
+      "known": 26,
+      "material_stocks": {
+        "Clay": 200.672136351237,
+        "Fiber Plants": 239.619673643066,
+        "Stone": 65.0397184679213,
+        "Timber": 289.154464849463
+      },
+      "population": 238,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 36.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 13505,
+      "food_consumption": 114.134688581129,
+      "food_days": 121.217213245595,
+      "food_eaten": 111.423717203355,
+      "food_intake_ratio": 0.9762476122599,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 8,
+      "known": 26,
+      "material_stocks": {
+        "Clay": 201.240763018259,
+        "Fiber Plants": 241.383674843076,
+        "Stone": 48.7864483301077,
+        "Timber": 309.23561518652
+      },
+      "population": 243,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 37.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 13870,
+      "food_consumption": 116.44079486535,
+      "food_days": 120.566709421059,
+      "food_eaten": 113.730265904604,
+      "food_intake_ratio": 0.976721827054852,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 8,
+      "known": 26,
+      "material_stocks": {
+        "Clay": 201.334209685206,
+        "Fiber Plants": 241.542905739433,
+        "Stone": 32.2237995884039,
+        "Timber": 330.016765523578
+      },
+      "population": 247,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 38.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 14235,
+      "food_consumption": 118.74362095925,
+      "food_days": 120.015405397931,
+      "food_eaten": 116.028547114355,
+      "food_intake_ratio": 0.977134991985579,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 8,
+      "known": 27,
+      "material_stocks": {
+        "Clay": 201.339281182187,
+        "Fiber Plants": 241.538515767665,
+        "Stone": 21.4816988069349,
+        "Timber": 340.50215960696
+      },
+      "population": 252,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 39.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 14600,
+      "food_consumption": 121.378475520467,
+      "food_days": 119.232045479541,
+      "food_eaten": 118.672764014986,
+      "food_intake_ratio": 0.977708473484448,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 8,
+      "known": 28,
+      "material_stocks": {
+        "Clay": 201.628889465263,
+        "Fiber Plants": 242.068042868034,
+        "Stone": 23.3370333488693,
+        "Timber": 338.179066197693
+      },
+      "population": 257,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 40.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 14965,
+      "food_consumption": 124.390347102075,
+      "food_days": 118.550380357234,
+      "food_eaten": 121.685903981434,
+      "food_intake_ratio": 0.978258416479682,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 9,
+      "known": 29,
+      "material_stocks": {
+        "Clay": 202.353882892209,
+        "Fiber Plants": 244.107891615608,
+        "Stone": 6.56734961344992,
+        "Timber": 358.960216534751
+      },
+      "population": 264,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 41.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 15330,
+      "food_consumption": 128.317927750453,
+      "food_days": 117.804984427985,
+      "food_eaten": 125.609686701275,
+      "food_intake_ratio": 0.978894289389987,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 9,
+      "known": 31,
+      "material_stocks": {
+        "Clay": 202.433474430625,
+        "Fiber Plants": 244.257923029849,
+        "Stone": 0.000262655321202331,
+        "Timber": 367.250188437842
+      },
+      "population": 272,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 42.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 15695,
+      "food_consumption": 131.738157406892,
+      "food_days": 117.007787444523,
+      "food_eaten": 129.035339693482,
+      "food_intake_ratio": 0.979483410375456,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 9,
+      "known": 31,
+      "material_stocks": {
+        "Clay": 201.650916003739,
+        "Fiber Plants": 242.789323095685,
+        "Stone": 12.1304669863368,
+        "Timber": 367.510588402556
+      },
+      "population": 278,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 43.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 16060,
+      "food_consumption": 134.73233972747,
+      "food_days": 116.385565110318,
+      "food_eaten": 132.038820012904,
+      "food_intake_ratio": 0.980008365326288,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 9,
+      "known": 31,
+      "material_stocks": {
+        "Clay": 201.669951218343,
+        "Fiber Plants": 242.67232763932,
+        "Stone": 12.2465865218171,
+        "Timber": 366.694517292747
+      },
+      "population": 284,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 44.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 16425,
+      "food_consumption": 98.9782732247305,
+      "food_days": 126.09446911309,
+      "food_eaten": 95.5332048777975,
+      "food_intake_ratio": 0.965193691153704,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 10,
+      "known": 33,
+      "material_stocks": {
+        "Clay": 199.873954971557,
+        "Fiber Plants": 238.030715598915,
+        "Stone": 8.8998069496562,
+        "Timber": 365.974986958188
+      },
+      "population": 292,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 45.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 16790,
+      "food_consumption": 101.414465437894,
+      "food_days": 124.992100373404,
+      "food_eaten": 97.9685627349123,
+      "food_intake_ratio": 0.96602158589406,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 10,
+      "known": 33,
+      "material_stocks": {
+        "Clay": 199.880869210424,
+        "Fiber Plants": 238.024763789427,
+        "Stone": 8.99783937663492,
+        "Timber": 366.011349853897
+      },
+      "population": 299,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 46.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 5,
+      "day": 17155,
+      "food_consumption": 104.041351968925,
+      "food_days": 124.315937776637,
+      "food_eaten": 100.590812883827,
+      "food_intake_ratio": 0.966834926499913,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 10,
+      "known": 34,
+      "material_stocks": {
+        "Clay": 199.991973122489,
+        "Fiber Plants": 238.21923673036,
+        "Stone": 9.68069587923323,
+        "Timber": 365.801197194297
+      },
+      "population": 306,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 47.0
+    },
+    {
+      "active_inquiries": 2,
+      "completed_buildings": 5,
+      "day": 17520,
+      "food_consumption": 106.515782530024,
+      "food_days": 123.452086658011,
+      "food_eaten": 103.073842053045,
+      "food_intake_ratio": 0.967686098761857,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 10,
+      "known": 34,
+      "material_stocks": {
+        "Clay": 200.097389361851,
+        "Fiber Plants": 238.3931201256,
+        "Stone": 10.2438930705379,
+        "Timber": 366.014211847906
+      },
+      "population": 313,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 48.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 17885,
+      "food_consumption": 109.091418659596,
+      "food_days": 122.616394531926,
+      "food_eaten": 105.652835953844,
+      "food_intake_ratio": 0.96847980576289,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 11,
+      "known": 35,
+      "material_stocks": {
+        "Clay": 200.120946036221,
+        "Fiber Plants": 238.420246570021,
+        "Stone": 10.425351726626,
+        "Timber": 366.013275716129
+      },
+      "population": 323,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 49.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 18250,
+      "food_consumption": 112.557537320783,
+      "food_days": 121.691705962269,
+      "food_eaten": 109.114965988576,
+      "food_intake_ratio": 0.969415008411239,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 12,
+      "known": 36,
+      "material_stocks": {
+        "Clay": 200.660468189344,
+        "Fiber Plants": 240.103000338199,
+        "Stone": 10.4807523088448,
+        "Timber": 365.655957981779
+      },
+      "population": 332,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 50.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 18615,
+      "food_consumption": 115.212748902586,
+      "food_days": 121.033802497711,
+      "food_eaten": 111.768955522336,
+      "food_intake_ratio": 0.97010926817516,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 12,
+      "known": 37,
+      "material_stocks": {
+        "Clay": 208.469007166328,
+        "Fiber Plants": 240.3249253367,
+        "Stone": 11.1716942801198,
+        "Timber": 366.220064263005
+      },
+      "population": 341,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 51.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 18980,
+      "food_consumption": 117.528649388903,
+      "food_days": 120.314178720777,
+      "food_eaten": 114.083149298472,
+      "food_intake_ratio": 0.970683742999294,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 12,
+      "known": 38,
+      "material_stocks": {
+        "Clay": 210.458072141508,
+        "Fiber Plants": 240.637746488997,
+        "Stone": 12.0979657714899,
+        "Timber": 366.393135753767
+      },
+      "population": 348,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 52.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 19345,
+      "food_consumption": 120.624851859259,
+      "food_days": 119.440697809388,
+      "food_eaten": 117.188329971681,
+      "food_intake_ratio": 0.971510664389557,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 12,
+      "known": 38,
+      "material_stocks": {
+        "Clay": 210.675516283011,
+        "Fiber Plants": 240.587396213733,
+        "Stone": 12.0480149298999,
+        "Timber": 366.512296936655
+      },
+      "population": 356,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 53.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 19710,
+      "food_consumption": 123.676003696968,
+      "food_days": 118.745571210478,
+      "food_eaten": 120.237322309038,
+      "food_intake_ratio": 0.972196050283484,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 13,
+      "known": 38,
+      "material_stocks": {
+        "Clay": 210.829495577058,
+        "Fiber Plants": 240.802876387653,
+        "Stone": 12.7009949117366,
+        "Timber": 366.842589931384
+      },
+      "population": 367,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 54.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 20075,
+      "food_consumption": 126.805201322684,
+      "food_days": 118.103020784551,
+      "food_eaten": 123.362794478396,
+      "food_intake_ratio": 0.972852794614254,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 13,
+      "known": 39,
+      "material_stocks": {
+        "Clay": 211.471546178576,
+        "Fiber Plants": 242.619235476911,
+        "Stone": 13.6887879013892,
+        "Timber": 367.144019772222
+      },
+      "population": 376,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 55.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 20440,
+      "food_consumption": 130.265905340195,
+      "food_days": 117.284634825946,
+      "food_eaten": 126.817386723859,
+      "food_intake_ratio": 0.973527082106937,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 13,
+      "known": 39,
+      "material_stocks": {
+        "Clay": 211.474480142568,
+        "Fiber Plants": 242.612757098913,
+        "Stone": 13.9284529736629,
+        "Timber": 367.37059137943
+      },
+      "population": 386,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 56.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 20805,
+      "food_consumption": 133.741237761195,
+      "food_days": 116.588031968773,
+      "food_eaten": 130.30350598532,
+      "food_intake_ratio": 0.974295648571657,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 14,
+      "known": 40,
+      "material_stocks": {
+        "Clay": 211.557427131334,
+        "Fiber Plants": 242.757350960521,
+        "Stone": 14.436091349278,
+        "Timber": 367.688200301386
+      },
+      "population": 397,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 57.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 21170,
+      "food_consumption": 136.936467038382,
+      "food_days": 116.033942363124,
+      "food_eaten": 133.501087057555,
+      "food_intake_ratio": 0.974912599579014,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 14,
+      "known": 41,
+      "material_stocks": {
+        "Clay": 211.93943567865,
+        "Fiber Plants": 243.543330010801,
+        "Stone": 15.7220390756202,
+        "Timber": 367.839390016077
+      },
+      "population": 407,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 58.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 21535,
+      "food_consumption": 140.724162850252,
+      "food_days": 115.343335137818,
+      "food_eaten": 137.291732992448,
+      "food_intake_ratio": 0.97560880954427,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 15,
+      "known": 42,
+      "material_stocks": {
+        "Clay": 214.865337690825,
+        "Fiber Plants": 252.202146235614,
+        "Stone": 15.9661980430145,
+        "Timber": 367.979546006898
+      },
+      "population": 418,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 59.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 21900,
+      "food_consumption": 144.123304202446,
+      "food_days": 114.678087144132,
+      "food_eaten": 140.727245529611,
+      "food_intake_ratio": 0.976436436205593,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 15,
+      "known": 43,
+      "material_stocks": {
+        "Clay": 215.007614748843,
+        "Fiber Plants": 268.944237075253,
+        "Stone": 16.5704073906561,
+        "Timber": 368.502418676869
+      },
+      "population": 427,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 60.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 22265,
+      "food_consumption": 147.507977989442,
+      "food_days": 114.121722459814,
+      "food_eaten": 144.123627566655,
+      "food_intake_ratio": 0.977056492340843,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 15,
+      "known": 44,
+      "material_stocks": {
+        "Clay": 215.066499396174,
+        "Fiber Plants": 276.322011602983,
+        "Stone": 16.9029720120346,
+        "Timber": 368.768036390989
+      },
+      "population": 436,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 61.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 22630,
+      "food_consumption": 151.21511520993,
+      "food_days": 113.624340911539,
+      "food_eaten": 147.830209995686,
+      "food_intake_ratio": 0.977615298513351,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 15,
+      "known": 45,
+      "material_stocks": {
+        "Clay": 215.123721821436,
+        "Fiber Plants": 277.363839465555,
+        "Stone": 17.205289099501,
+        "Timber": 369.059087079791
+      },
+      "population": 448,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 62.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 22995,
+      "food_consumption": 154.759667858796,
+      "food_days": 113.027449030195,
+      "food_eaten": 151.374633400263,
+      "food_intake_ratio": 0.978127153506032,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 16,
+      "known": 45,
+      "material_stocks": {
+        "Clay": 215.90463778279,
+        "Fiber Plants": 279.799438157675,
+        "Stone": 18.0500742969449,
+        "Timber": 368.735274136778
+      },
+      "population": 459,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 63.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 23360,
+      "food_consumption": 158.678849620256,
+      "food_days": 112.434889417289,
+      "food_eaten": 155.288429283913,
+      "food_intake_ratio": 0.978633445197917,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 15,
+      "known": 45,
+      "material_stocks": {
+        "Clay": 215.987177054384,
+        "Fiber Plants": 279.978348741836,
+        "Stone": 18.4737831433646,
+        "Timber": 369.618381310525
+      },
+      "population": 470,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 64.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 23725,
+      "food_consumption": 162.755255728466,
+      "food_days": 111.837842171185,
+      "food_eaten": 159.371625741993,
+      "food_intake_ratio": 0.979210318147155,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 16,
+      "known": 45,
+      "material_stocks": {
+        "Clay": 217.210571337424,
+        "Fiber Plants": 282.799494246924,
+        "Stone": 22.0519970699104,
+        "Timber": 369.240036923816
+      },
+      "population": 482,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 65.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 24090,
+      "food_consumption": 166.080838310928,
+      "food_days": 111.35547227872,
+      "food_eaten": 162.693007229143,
+      "food_intake_ratio": 0.979601312732767,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 16,
+      "known": 46,
+      "material_stocks": {
+        "Clay": 217.434126726601,
+        "Fiber Plants": 283.533794876205,
+        "Stone": 22.4645245969945,
+        "Timber": 369.894808424792
+      },
+      "population": 493,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 66.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 24455,
+      "food_consumption": 170.598011678397,
+      "food_days": 110.937540520387,
+      "food_eaten": 167.207517380469,
+      "food_intake_ratio": 0.980125827583974,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 17,
+      "known": 47,
+      "material_stocks": {
+        "Clay": 217.623828807156,
+        "Fiber Plants": 283.88679045126,
+        "Stone": 23.365699330394,
+        "Timber": 370.59846053066
+      },
+      "population": 505,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 67.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 24820,
+      "food_consumption": 175.050972816181,
+      "food_days": 110.390925291428,
+      "food_eaten": 170.929923174811,
+      "food_intake_ratio": 0.976458002060362,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 17,
+      "known": 48,
+      "material_stocks": {
+        "Clay": 218.146612744531,
+        "Fiber Plants": 285.728997777077,
+        "Stone": 22.995814679617,
+        "Timber": 370.91438349197
+      },
+      "population": 521,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 68.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 25185,
+      "food_consumption": 179.692231472549,
+      "food_days": 109.859370370356,
+      "food_eaten": 175.563589802754,
+      "food_intake_ratio": 0.977023816578145,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 17,
+      "known": 48,
+      "material_stocks": {
+        "Clay": 215.691158371702,
+        "Fiber Plants": 281.165909443994,
+        "Stone": 10.8014816214014,
+        "Timber": 371.169496343219
+      },
+      "population": 535,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 69.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 25550,
+      "food_consumption": 184.539242685209,
+      "food_days": 109.281978824526,
+      "food_eaten": 180.417722979801,
+      "food_intake_ratio": 0.977665890216974,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 18,
+      "known": 50,
+      "material_stocks": {
+        "Clay": 215.759397038742,
+        "Fiber Plants": 281.300991060563,
+        "Stone": 11.1805830849242,
+        "Timber": 371.688060819335
+      },
+      "population": 549,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 70.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 25915,
+      "food_consumption": 189.498438621147,
+      "food_days": 108.816598630999,
+      "food_eaten": 185.372564822721,
+      "food_intake_ratio": 0.97822739950552,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 19,
+      "known": 51,
+      "material_stocks": {
+        "Clay": 216.529525677773,
+        "Fiber Plants": 283.62010714935,
+        "Stone": 12.0001710074731,
+        "Timber": 372.090565439526
+      },
+      "population": 564,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 71.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 26280,
+      "food_consumption": 194.478784228635,
+      "food_days": 108.362109543904,
+      "food_eaten": 190.349871067824,
+      "food_intake_ratio": 0.978769338891195,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 19,
+      "known": 51,
+      "material_stocks": {
+        "Clay": 216.641683057427,
+        "Fiber Plants": 283.763218951084,
+        "Stone": 12.5168782649994,
+        "Timber": 371.829069022538
+      },
+      "population": 580,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 72.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 26645,
+      "food_consumption": 199.545079755895,
+      "food_days": 107.997218677407,
+      "food_eaten": 195.421015075782,
+      "food_intake_ratio": 0.979332666657786,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 20,
+      "known": 51,
+      "material_stocks": {
+        "Clay": 216.745807967842,
+        "Fiber Plants": 283.133934219633,
+        "Stone": 13.0682983858155,
+        "Timber": 371.000744528929
+      },
+      "population": 595,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 73.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 27010,
+      "food_consumption": 204.379514918262,
+      "food_days": 107.568770761211,
+      "food_eaten": 200.258413683785,
+      "food_intake_ratio": 0.979836035739075,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 20,
+      "known": 54,
+      "material_stocks": {
+        "Clay": 220.222938906483,
+        "Fiber Plants": 295.414620983188,
+        "Stone": 13.2904305705282,
+        "Timber": 373.293227883237
+      },
+      "population": 610,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 74.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 27375,
+      "food_consumption": 171.362329567653,
+      "food_days": 111.069933611811,
+      "food_eaten": 165.756037174645,
+      "food_intake_ratio": 0.967283985884455,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 21,
+      "known": 54,
+      "material_stocks": {
+        "Clay": 218.043806059987,
+        "Fiber Plants": 288.948824736581,
+        "Stone": 30.7974722981528,
+        "Timber": 333.914700954204
+      },
+      "population": 626,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 75.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 27740,
+      "food_consumption": 176.581782658312,
+      "food_days": 110.480182169227,
+      "food_eaten": 170.99152538041,
+      "food_intake_ratio": 0.968341823297144,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 21,
+      "known": 55,
+      "material_stocks": {
+        "Clay": 218.64060024504,
+        "Fiber Plants": 290.746719841281,
+        "Stone": 52.2491055382951,
+        "Timber": 311.022953043157
+      },
+      "population": 646,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 76.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 28105,
+      "food_consumption": 181.537465926513,
+      "food_days": 109.870793462755,
+      "food_eaten": 175.939071323955,
+      "food_intake_ratio": 0.969161216534639,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 22,
+      "known": 56,
+      "material_stocks": {
+        "Clay": 218.692440076345,
+        "Fiber Plants": 290.828104686741,
+        "Stone": 69.501140339737,
+        "Timber": 283.203915307449
+      },
+      "population": 665,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 77.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 28470,
+      "food_consumption": 186.750298705615,
+      "food_days": 109.246500545922,
+      "food_eaten": 181.161033231498,
+      "food_intake_ratio": 0.970070915479885,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 23,
+      "known": 56,
+      "material_stocks": {
+        "Clay": 218.752744981104,
+        "Fiber Plants": 290.928561453163,
+        "Stone": 76.8732034918694,
+        "Timber": 258.212167396538
+      },
+      "population": 686,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 78.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 28835,
+      "food_consumption": 191.674780778903,
+      "food_days": 108.792597815759,
+      "food_eaten": 186.064312114413,
+      "food_intake_ratio": 0.970729228739996,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 23,
+      "known": 57,
+      "material_stocks": {
+        "Clay": 218.986710547474,
+        "Fiber Plants": 291.367943384228,
+        "Stone": 98.2491393325791,
+        "Timber": 230.39312966083
+      },
+      "population": 704,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 79.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 29200,
+      "food_consumption": 196.083329251257,
+      "food_days": 108.489557141799,
+      "food_eaten": 190.481748796509,
+      "food_intake_ratio": 0.971432653269722,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 25,
+      "known": 58,
+      "material_stocks": {
+        "Clay": 219.621819541819,
+        "Fiber Plants": 293.350953283002,
+        "Stone": 109.780076990121,
+        "Timber": 207.501381749918
+      },
+      "population": 722,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 80.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 29565,
+      "food_consumption": 201.56066372639,
+      "food_days": 107.965645736528,
+      "food_eaten": 195.956241361888,
+      "food_intake_ratio": 0.972194860540304,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 25,
+      "known": 58,
+      "material_stocks": {
+        "Clay": 217.32754791362,
+        "Fiber Plants": 293.915243342146,
+        "Stone": 137.982182391527,
+        "Timber": 178.413266339426
+      },
+      "population": 744,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 81.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 29930,
+      "food_consumption": 207.19300896282,
+      "food_days": 107.493458631294,
+      "food_eaten": 201.592979476541,
+      "food_intake_ratio": 0.972971918722972,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 26,
+      "known": 60,
+      "material_stocks": {
+        "Clay": 217.32090976345,
+        "Fiber Plants": 295.110267183624,
+        "Stone": 158.787965474059,
+        "Timber": 154.690596103298
+      },
+      "population": 764,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 82.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 30295,
+      "food_consumption": 212.91261387997,
+      "food_days": 106.99378910903,
+      "food_eaten": 207.3058154619,
+      "food_intake_ratio": 0.973666198935349,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 27,
+      "known": 60,
+      "material_stocks": {
+        "Clay": 215.46490976345,
+        "Fiber Plants": 296.252109100333,
+        "Stone": 188.308404146102,
+        "Timber": 130.322848192387
+      },
+      "population": 785,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 83.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 30660,
+      "food_consumption": 219.194844257477,
+      "food_days": 106.574713850304,
+      "food_eaten": 213.608840667159,
+      "food_intake_ratio": 0.97451580757184,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 27,
+      "known": 60,
+      "material_stocks": {
+        "Clay": 210.60090976345,
+        "Fiber Plants": 295.485677969604,
+        "Stone": 203.815698351504,
+        "Timber": 97.9038104566831
+      },
+      "population": 809,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 84.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 31025,
+      "food_consumption": 224.617915700131,
+      "food_days": 106.207346347032,
+      "food_eaten": 219.026875387834,
+      "food_intake_ratio": 0.97510866266001,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 28,
+      "known": 61,
+      "material_stocks": {
+        "Clay": 208.74490976345,
+        "Fiber Plants": 298.176397452242,
+        "Stone": 247.881408829128,
+        "Timber": 74.3120625457766
+      },
+      "population": 832,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 85.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 31390,
+      "food_consumption": 231.548038863856,
+      "food_days": 105.73896092978,
+      "food_eaten": 225.947452919901,
+      "food_intake_ratio": 0.975812423325044,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 29,
+      "known": 62,
+      "material_stocks": {
+        "Clay": 204.21490976345,
+        "Fiber Plants": 299.185244086852,
+        "Stone": 270.429221310484,
+        "Timber": 46.9137248100715
+      },
+      "population": 859,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 86.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 31755,
+      "food_consumption": 238.031006453719,
+      "food_days": 105.248969900655,
+      "food_eaten": 232.443633490513,
+      "food_intake_ratio": 0.976526701094749,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 30,
+      "known": 63,
+      "material_stocks": {
+        "Clay": 200.50290976345,
+        "Fiber Plants": 301.165619207223,
+        "Stone": 280.435363499281,
+        "Timber": 38.6272313235641
+      },
+      "population": 883,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 87.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 32120,
+      "food_consumption": 244.612989704421,
+      "food_days": 104.893385009875,
+      "food_eaten": 239.032820201621,
+      "food_intake_ratio": 0.977187762965723,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 31,
+      "known": 65,
+      "material_stocks": {
+        "Clay": 191.49290976345,
+        "Fiber Plants": 301.799700951964,
+        "Stone": 276.427321452774,
+        "Timber": 40.0065495391231
+      },
+      "population": 909,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 88.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 32485,
+      "food_consumption": 251.036616807493,
+      "food_days": 104.486091359081,
+      "food_eaten": 245.448548451234,
+      "food_intake_ratio": 0.977740026824276,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 31,
+      "known": 65,
+      "material_stocks": {
+        "Clay": 187.01290976345,
+        "Fiber Plants": 304.433942655633,
+        "Stone": 270.68810162152,
+        "Timber": 40.4151643725422
+      },
+      "population": 934,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 89.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 32850,
+      "food_consumption": 257.82730805455,
+      "food_days": 104.150307405853,
+      "food_eaten": 252.252640325143,
+      "food_intake_ratio": 0.978378288275703,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 32,
+      "known": 67,
+      "material_stocks": {
+        "Clay": 182.14890976345,
+        "Fiber Plants": 304.57197801346,
+        "Stone": 280.55380450132,
+        "Timber": 38.4612722138134
+      },
+      "population": 960,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 90.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 33215,
+      "food_consumption": 266.181818797466,
+      "food_days": 103.731959840768,
+      "food_eaten": 260.627475458052,
+      "food_intake_ratio": 0.979133273021775,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 33,
+      "known": 67,
+      "material_stocks": {
+        "Clay": 175.04490976345,
+        "Fiber Plants": 306.958932746572,
+        "Stone": 279.886083720703,
+        "Timber": 43.8466696080067
+      },
+      "population": 989,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 91.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 33580,
+      "food_consumption": 273.885455375363,
+      "food_days": 103.296208631911,
+      "food_eaten": 268.328401759324,
+      "food_intake_ratio": 0.979710300393924,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 34,
+      "known": 68,
+      "material_stocks": {
+        "Clay": 175.04490976345,
+        "Fiber Plants": 306.923359544192,
+        "Stone": 283.879423863737,
+        "Timber": 43.2351159655424
+      },
+      "population": 1018,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 92.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 33945,
+      "food_consumption": 281.865530237143,
+      "food_days": 102.972708741486,
+      "food_eaten": 276.311912078119,
+      "food_intake_ratio": 0.980296923308247,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 35,
+      "known": 69,
+      "material_stocks": {
+        "Clay": 164.64490976345,
+        "Fiber Plants": 307.737082347897,
+        "Stone": 283.421282404179,
+        "Timber": 45.392945505126
+      },
+      "population": 1047,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 93.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 34310,
+      "food_consumption": 289.540103266569,
+      "food_days": 102.590135489239,
+      "food_eaten": 278.072380075006,
+      "food_intake_ratio": 0.96039331663495,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 36,
+      "known": 69,
+      "material_stocks": {
+        "Clay": 158.64490976345,
+        "Fiber Plants": 293.998513315099,
+        "Stone": 283.406108967328,
+        "Timber": 46.6196767344957
+      },
+      "population": 1078,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 94.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 34675,
+      "food_consumption": 297.78581530438,
+      "food_days": 102.266274389658,
+      "food_eaten": 286.302406208399,
+      "food_intake_ratio": 0.961437353608521,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 37,
+      "known": 69,
+      "material_stocks": {
+        "Clay": 154.20490976345,
+        "Fiber Plants": 309.248876687631,
+        "Stone": 286.162878723727,
+        "Timber": 45.6735550804271
+      },
+      "population": 1111,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 95.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 35040,
+      "food_consumption": 305.376504243705,
+      "food_days": 102.004019192674,
+      "food_eaten": 293.895638212265,
+      "food_intake_ratio": 0.962404226022974,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 38,
+      "known": 70,
+      "material_stocks": {
+        "Clay": 152.42490976345,
+        "Fiber Plants": 311.896129933948,
+        "Stone": 282.802172765742,
+        "Timber": 49.2015393819225
+      },
+      "population": 1141,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 96.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 35405,
+      "food_consumption": 314.045171306473,
+      "food_days": 101.58198606438,
+      "food_eaten": 302.557311375529,
+      "food_intake_ratio": 0.963419721172106,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 39,
+      "known": 71,
+      "material_stocks": {
+        "Clay": 152.42490976345,
+        "Fiber Plants": 312.662168475114,
+        "Stone": 273.349708498226,
+        "Timber": 52.1271879741465
+      },
+      "population": 1173,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 97.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 35770,
+      "food_consumption": 322.634153270558,
+      "food_days": 101.30947592067,
+      "food_eaten": 311.15063619967,
+      "food_intake_ratio": 0.964407001073882,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 41,
+      "known": 72,
+      "material_stocks": {
+        "Clay": 152.42490976345,
+        "Fiber Plants": 313.971460287707,
+        "Stone": 278.55961951227,
+        "Timber": 50.6113513863266
+      },
+      "population": 1207,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 98.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 36135,
+      "food_consumption": 331.818524938338,
+      "food_days": 101.045682167119,
+      "food_eaten": 320.338707060728,
+      "food_intake_ratio": 0.965403324363089,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 43,
+      "known": 72,
+      "material_stocks": {
+        "Clay": 152.42490976345,
+        "Fiber Plants": 314.528446588976,
+        "Stone": 278.588280526999,
+        "Timber": 53.5519374793935
+      },
+      "population": 1242,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 99.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 36500,
+      "food_consumption": 340.761266552047,
+      "food_days": 100.734177339948,
+      "food_eaten": 329.291643757284,
+      "food_intake_ratio": 0.966341178060472,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 44,
+      "known": 74,
+      "material_stocks": {
+        "Clay": 147.17690976345,
+        "Fiber Plants": 318.267997438571,
+        "Stone": 274.077770746306,
+        "Timber": 54.9253379717422
+      },
+      "population": 1280,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 100.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 36865,
+      "food_consumption": 351.012216481821,
+      "food_days": 100.414732532037,
+      "food_eaten": 339.543363199503,
+      "food_intake_ratio": 0.967326341523754,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 45,
+      "known": 74,
+      "material_stocks": {
+        "Clay": 126.10290976345,
+        "Fiber Plants": 327.148852921202,
+        "Stone": 285.06654020477,
+        "Timber": 54.7842146304613
+      },
+      "population": 1317,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 101.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 37230,
+      "food_consumption": 361.393704138102,
+      "food_days": 100.119118228849,
+      "food_eaten": 349.958597171879,
+      "food_intake_ratio": 0.968358311627218,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 46,
+      "known": 76,
+      "material_stocks": {
+        "Clay": 119.05290976345,
+        "Fiber Plants": 331.904598889138,
+        "Stone": 275.499792489666,
+        "Timber": 58.2899194253177
+      },
+      "population": 1357,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 102.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 37595,
+      "food_consumption": 371.01168347474,
+      "food_days": 99.8559780615045,
+      "food_eaten": 359.568236514975,
+      "food_intake_ratio": 0.969156100819818,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 48,
+      "known": 76,
+      "material_stocks": {
+        "Clay": 119.05290976345,
+        "Fiber Plants": 333.203516271887,
+        "Stone": 278.607004300246,
+        "Timber": 59.9846630893963
+      },
+      "population": 1395,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 103.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 37960,
+      "food_consumption": 381.238005310066,
+      "food_days": 99.6148114764404,
+      "food_eaten": 369.822314214009,
+      "food_intake_ratio": 0.970056261608093,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 49,
+      "known": 78,
+      "material_stocks": {
+        "Clay": 112.33290976345,
+        "Fiber Plants": 337.855326973403,
+        "Stone": 277.015299716014,
+        "Timber": 60.4065081411205
+      },
+      "population": 1436,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 104.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 38325,
+      "food_consumption": 391.757645181298,
+      "food_days": 99.3594088152933,
+      "food_eaten": 380.429455369808,
+      "food_intake_ratio": 0.971083679027508,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 51,
+      "known": 80,
+      "material_stocks": {
+        "Clay": 101.89523280689,
+        "Fiber Plants": 342.921028208142,
+        "Stone": 275.899621082014,
+        "Timber": 69.2101761434045
+      },
+      "population": 1477,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 105.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 38690,
+      "food_consumption": 403.033539481744,
+      "food_days": 99.0932926397091,
+      "food_eaten": 391.737154110286,
+      "food_intake_ratio": 0.971971599718515,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 52,
+      "known": 80,
+      "material_stocks": {
+        "Clay": 101.89523280689,
+        "Fiber Plants": 344.400739233225,
+        "Stone": 269.651271478085,
+        "Timber": 76.3420264804672
+      },
+      "population": 1522,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 106.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 39055,
+      "food_consumption": 413.789695375582,
+      "food_days": 98.8934022844964,
+      "food_eaten": 402.485821089506,
+      "food_intake_ratio": 0.972682078813452,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 54,
+      "known": 80,
+      "material_stocks": {
+        "Clay": 101.89523280689,
+        "Fiber Plants": 345.787476251942,
+        "Stone": 267.953257608552,
+        "Timber": 84.0424268175299
+      },
+      "population": 1564,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 107.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 39420,
+      "food_consumption": 426.356190338831,
+      "food_days": 98.6157817431796,
+      "food_eaten": 415.058331160948,
+      "food_intake_ratio": 0.973501360050843,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 56,
+      "known": 84,
+      "material_stocks": {
+        "Clay": 101.89523280689,
+        "Fiber Plants": 351.449557232915,
+        "Stone": 266.700335013679,
+        "Timber": 88.0192554979318
+      },
+      "population": 1613,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 108.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 39785,
+      "food_consumption": 438.900056455757,
+      "food_days": 98.4164089690136,
+      "food_eaten": 427.616428908953,
+      "food_intake_ratio": 0.974291123045364,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 57,
+      "known": 87,
+      "material_stocks": {
+        "Clay": 101.89523280689,
+        "Fiber Plants": 352.906504928597,
+        "Stone": 269.027796001304,
+        "Timber": 92.4118558349945
+      },
+      "population": 1661,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 109.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 40150,
+      "food_consumption": 451.491810198093,
+      "food_days": 98.1402690172062,
+      "food_eaten": 440.214934847786,
+      "food_intake_ratio": 0.975023078834234,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 59,
+      "known": 88,
+      "material_stocks": {
+        "Clay": 91.2981098151629,
+        "Fiber Plants": 356.304346048262,
+        "Stone": 253.714081970695,
+        "Timber": 99.4225061720573
+      },
+      "population": 1710,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 110.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 40515,
+      "food_consumption": 464.141492104637,
+      "food_days": 97.974102350635,
+      "food_eaten": 452.869618463051,
+      "food_intake_ratio": 0.975714574470654,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 61,
+      "known": 89,
+      "material_stocks": {
+        "Clay": 91.2981098151629,
+        "Fiber Plants": 360.584034760937,
+        "Stone": 219.931137565093,
+        "Timber": 112.92365650912
+      },
+      "population": 1761,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 111.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 40880,
+      "food_consumption": 477.759738303441,
+      "food_days": 97.7278571390994,
+      "food_eaten": 466.485509291542,
+      "food_intake_ratio": 0.976401885491787,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 63,
+      "known": 89,
+      "material_stocks": {
+        "Clay": 91.2981098151629,
+        "Fiber Plants": 364.689207704489,
+        "Stone": 206.056917854672,
+        "Timber": 118.990106846183
+      },
+      "population": 1815,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 112.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 41245,
+      "food_consumption": 491.862755594923,
+      "food_days": 97.5077865120261,
+      "food_eaten": 480.579977807244,
+      "food_intake_ratio": 0.97706112597602,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 64,
+      "known": 91,
+      "material_stocks": {
+        "Clay": 91.2981098151629,
+        "Fiber Plants": 368.897987852937,
+        "Stone": 202.471418632894,
+        "Timber": 127.001257183245
+      },
+      "population": 1868,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 113.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 41610,
+      "food_consumption": 506.448065322419,
+      "food_days": 97.3139240001263,
+      "food_eaten": 495.184145906803,
+      "food_intake_ratio": 0.977758984214017,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 66,
+      "known": 94,
+      "material_stocks": {
+        "Clay": 91.2981098151629,
+        "Fiber Plants": 370.608384798251,
+        "Stone": 205.123346292435,
+        "Timber": 136.206257520303
+      },
+      "population": 1926,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 114.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 41975,
+      "food_consumption": 521.774281927014,
+      "food_days": 97.1060644396818,
+      "food_eaten": 510.510790048303,
+      "food_intake_ratio": 0.978413094955328,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 68,
+      "known": 95,
+      "material_stocks": {
+        "Clay": 91.2981098151629,
+        "Fiber Plants": 376.462694568003,
+        "Stone": 87.0023218601008,
+        "Timber": 115.314042719001
+      },
+      "population": 1984,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 115.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 42340,
+      "food_consumption": 536.799113346146,
+      "food_days": 96.9179876313585,
+      "food_eaten": 525.527238877732,
+      "food_intake_ratio": 0.979001689480911,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 70,
+      "known": 95,
+      "material_stocks": {
+        "Clay": 88.1781098151629,
+        "Fiber Plants": 385.417449578155,
+        "Stone": 86.833935705498,
+        "Timber": 115.699472314825
+      },
+      "population": 2044,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 116.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 42705,
+      "food_consumption": 552.746928236794,
+      "food_days": 96.7282729342467,
+      "food_eaten": 541.477337566745,
+      "food_intake_ratio": 0.979611662961207,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 72,
+      "known": 98,
+      "material_stocks": {
+        "Clay": 84.0181098151629,
+        "Fiber Plants": 376.180581107213,
+        "Stone": 90.2187810263242,
+        "Timber": 128.883022651887
+      },
+      "population": 2106,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 117.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 43070,
+      "food_consumption": 569.125165609215,
+      "food_days": 96.5032638598267,
+      "food_eaten": 557.848307911508,
+      "food_intake_ratio": 0.980185628084753,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 74,
+      "known": 99,
+      "material_stocks": {
+        "Clay": 80.8981098151629,
+        "Fiber Plants": 379.153597279689,
+        "Stone": 91.6580024187704,
+        "Timber": 136.103772988946
+      },
+      "population": 2168,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 118.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 43435,
+      "food_consumption": 585.923682722653,
+      "food_days": 96.3219764835607,
+      "food_eaten": 568.210083745942,
+      "food_intake_ratio": 0.969768078166085,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 75,
+      "known": 99,
+      "material_stocks": {
+        "Clay": 76.7381098151628,
+        "Fiber Plants": 382.904017009005,
+        "Stone": 96.5819182228536,
+        "Timber": 135.770523326004
+      },
+      "population": 2235,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 119.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 43800,
+      "food_consumption": 602.493981810432,
+      "food_days": 96.1507534563956,
+      "food_eaten": 585.168309074136,
+      "food_intake_ratio": 0.97124340946239,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 78,
+      "known": 100,
+      "material_stocks": {
+        "Clay": 73.6181098151628,
+        "Fiber Plants": 386.312615242125,
+        "Stone": 97.0296978001486,
+        "Timber": 138.497713657983
+      },
+      "population": 2303,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 120.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 44165,
+      "food_consumption": 620.132516831998,
+      "food_days": 95.9686267523237,
+      "food_eaten": 602.803612950854,
+      "food_intake_ratio": 0.972056127664986,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 80,
+      "known": 101,
+      "material_stocks": {
+        "Clay": 71.5381098151628,
+        "Fiber Plants": 392.229089243676,
+        "Stone": 98.125922691853,
+        "Timber": 147.25516399504
+      },
+      "population": 2369,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 121.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 44530,
+      "food_consumption": 637.608339143086,
+      "food_days": 95.7998324847771,
+      "food_eaten": 620.297104222233,
+      "food_intake_ratio": 0.972849735710612,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 82,
+      "known": 104,
+      "material_stocks": {
+        "Clay": 71.5381098151628,
+        "Fiber Plants": 398.257549147549,
+        "Stone": 96.525922691853,
+        "Timber": 148.951214332098
+      },
+      "population": 2440,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 122.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 44895,
+      "food_consumption": 656.980271988947,
+      "food_days": 95.6355923597126,
+      "food_eaten": 639.659535753444,
+      "food_intake_ratio": 0.973635835086698,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 85,
+      "known": 104,
+      "material_stocks": {
+        "Clay": 71.5381098151628,
+        "Fiber Plants": 403.480709509052,
+        "Stone": 96.525922691853,
+        "Timber": 149.617264669156
+      },
+      "population": 2516,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 123.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 45260,
+      "food_consumption": 675.845311020994,
+      "food_days": 95.5034673447592,
+      "food_eaten": 658.548253337129,
+      "food_intake_ratio": 0.974406780069636,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 88,
+      "known": 107,
+      "material_stocks": {
+        "Clay": 71.5381098151628,
+        "Fiber Plants": 407.522760184179,
+        "Stone": 94.925922691853,
+        "Timber": 155.575765006213
+      },
+      "population": 2590,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 124.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 45625,
+      "food_consumption": 696.049592703631,
+      "food_days": 95.3387544356882,
+      "food_eaten": 678.762930629656,
+      "food_intake_ratio": 0.975164611465644,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 91,
+      "known": 107,
+      "material_stocks": {
+        "Clay": 71.5381098151628,
+        "Fiber Plants": 415.626444019254,
+        "Stone": 93.325922691853,
+        "Timber": 153.161365343271
+      },
+      "population": 2673,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 125.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 45990,
+      "food_consumption": 716.664102399899,
+      "food_days": 95.2058322001692,
+      "food_eaten": 699.412175282797,
+      "food_intake_ratio": 0.975927457424852,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 94,
+      "known": 109,
+      "material_stocks": {
+        "Clay": 70.4981098151628,
+        "Fiber Plants": 419.826762766,
+        "Stone": 93.325922691853,
+        "Timber": 159.659165680328
+      },
+      "population": 2753,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 126.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 46355,
+      "food_consumption": 737.070082817371,
+      "food_days": 95.1063425567782,
+      "food_eaten": 719.822434697292,
+      "food_intake_ratio": 0.976599717554467,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 98,
+      "known": 110,
+      "material_stocks": {
+        "Clay": 69.4581098151628,
+        "Fiber Plants": 426.580122768976,
+        "Stone": 91.725922691853,
+        "Timber": 160.430766017386
+      },
+      "population": 2840,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 127.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 46720,
+      "food_consumption": 759.129054250387,
+      "food_days": 94.9556883199892,
+      "food_eaten": 741.89298079861,
+      "food_intake_ratio": 0.977294936407358,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 100,
+      "known": 111,
+      "material_stocks": {
+        "Clay": 69.4581098151628,
+        "Fiber Plants": 431.476316396823,
+        "Stone": 90.125922691853,
+        "Timber": 157.548966354443
+      },
+      "population": 2926,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 128.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 47085,
+      "food_consumption": 781.9689330502,
+      "food_days": 94.8316758888533,
+      "food_eaten": 764.722716278149,
+      "food_intake_ratio": 0.977945138172204,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 103,
+      "known": 112,
+      "material_stocks": {
+        "Clay": 69.4581098151628,
+        "Fiber Plants": 436.892018228328,
+        "Stone": 90.125922691853,
+        "Timber": 170.310566691501
+      },
+      "population": 3015,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 129.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 47450,
+      "food_consumption": 806.741416243584,
+      "food_days": 94.6998829507214,
+      "food_eaten": 798.22955144145,
+      "food_intake_ratio": 0.989449079183554,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 106,
+      "known": 115,
+      "material_stocks": {
+        "Clay": 69.4581098151628,
+        "Fiber Plants": 442.995472752998,
+        "Stone": 88.525922691853,
+        "Timber": 130.053930533041
+      },
+      "population": 3114,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 130.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 47815,
+      "food_consumption": 832.430384359502,
+      "food_days": 94.578505094245,
+      "food_eaten": 825.021432951357,
+      "food_intake_ratio": 0.99109961439737,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 109,
+      "known": 115,
+      "material_stocks": {
+        "Clay": 63.5081098151628,
+        "Fiber Plants": 451.916667404628,
+        "Stone": 88.525922691853,
+        "Timber": 134.17650084027
+      },
+      "population": 3213,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 131.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 48180,
+      "food_consumption": 858.255122897593,
+      "food_days": 94.4359820752367,
+      "food_eaten": 851.033851474816,
+      "food_intake_ratio": 0.991586101579683,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 112,
+      "known": 116,
+      "material_stocks": {
+        "Clay": 59.9381098151628,
+        "Fiber Plants": 455.901984552162,
+        "Stone": 86.925922691853,
+        "Timber": 131.476899550639
+      },
+      "population": 3311,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 132.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 48545,
+      "food_consumption": 886.145544694832,
+      "food_days": 94.3171333991388,
+      "food_eaten": 878.969683650263,
+      "food_intake_ratio": 0.991902164280428,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 116,
+      "known": 118,
+      "material_stocks": {
+        "Clay": 55.1781098151628,
+        "Fiber Plants": 464.590907429648,
+        "Stone": 86.925922691853,
+        "Timber": 141.91287494752
+      },
+      "population": 3417,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 133.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 48910,
+      "food_consumption": 913.266940965494,
+      "food_days": 94.2155179746444,
+      "food_eaten": 905.304427841571,
+      "food_intake_ratio": 0.991281286153307,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 119,
+      "known": 118,
+      "material_stocks": {
+        "Clay": 52.7981098151628,
+        "Fiber Plants": 466.351038643013,
+        "Stone": 86.925922691853,
+        "Timber": 143.461636935791
+      },
+      "population": 3523,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 134.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 49275,
+      "food_consumption": 942.67078443612,
+      "food_days": 94.0944033464881,
+      "food_eaten": 928.520208619609,
+      "food_intake_ratio": 0.984988846530365,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 124,
+      "known": 121,
+      "material_stocks": {
+        "Clay": 49.2281098151628,
+        "Fiber Plants": 473.220027145199,
+        "Stone": 85.325922691853,
+        "Timber": 149.414537272848
+      },
+      "population": 3633,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 135.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 49640,
+      "food_consumption": 972.58245362278,
+      "food_days": 93.9594441181933,
+      "food_eaten": 955.646229491509,
+      "food_intake_ratio": 0.982586335926393,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 128,
+      "known": 123,
+      "material_stocks": {
+        "Clay": 45.6581098151628,
+        "Fiber Plants": 476.927358765688,
+        "Stone": 85.325922691853,
+        "Timber": 155.501133310378
+      },
+      "population": 3747,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 136.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 50005,
+      "food_consumption": 1002.54551826039,
+      "food_days": 93.8582442746243,
+      "food_eaten": 983.110083049735,
+      "food_intake_ratio": 0.980613912429254,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 132,
+      "known": 123,
+      "material_stocks": {
+        "Clay": 45.6581098151628,
+        "Fiber Plants": 482.167601532284,
+        "Stone": 85.325922691853,
+        "Timber": 161.620978583185
+      },
+      "population": 3862,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 137.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 50370,
+      "food_consumption": 1032.00592931406,
+      "food_days": 93.7587108174593,
+      "food_eaten": 1011.50690505951,
+      "food_intake_ratio": 0.98013671852818,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 136,
+      "known": 123,
+      "material_stocks": {
+        "Clay": 43.4281098151628,
+        "Fiber Plants": 482.331722372911,
+        "Stone": 85.325922691853,
+        "Timber": 160.794506165659
+      },
+      "population": 3983,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 138.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 50735,
+      "food_consumption": 1063.73978254129,
+      "food_days": 93.6558372275008,
+      "food_eaten": 1042.16797408548,
+      "food_intake_ratio": 0.979720784340436,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 140,
+      "known": 124,
+      "material_stocks": {
+        "Clay": 41.1981098151628,
+        "Fiber Plants": 487.541398138698,
+        "Stone": 83.725922691853,
+        "Timber": 166.512356502716
+      },
+      "population": 4107,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 139.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 51100,
+      "food_consumption": 1095.0660637187,
+      "food_days": 93.5502799939796,
+      "food_eaten": 1073.50070029488,
+      "food_intake_ratio": 0.980306792312982,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 145,
+      "known": 124,
+      "material_stocks": {
+        "Clay": 37.7781098151628,
+        "Fiber Plants": 493.147917945824,
+        "Stone": 83.725922691853,
+        "Timber": 176.527342104722
+      },
+      "population": 4233,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 140.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 51465,
+      "food_consumption": 1128.4701649357,
+      "food_days": 93.464294496742,
+      "food_eaten": 1106.12457810014,
+      "food_intake_ratio": 0.98019833618124,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 149,
+      "known": 125,
+      "material_stocks": {
+        "Clay": 37.7781098151628,
+        "Fiber Plants": 500.81099212934,
+        "Stone": 83.725922691853,
+        "Timber": 180.815309339603
+      },
+      "population": 4365,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 141.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 51830,
+      "food_consumption": 1162.59566615813,
+      "food_days": 93.3643636831031,
+      "food_eaten": 1139.48188317423,
+      "food_intake_ratio": 0.980118812019758,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 154,
+      "known": 128,
+      "material_stocks": {
+        "Clay": 34.5081098151628,
+        "Fiber Plants": 508.569907715901,
+        "Stone": 83.725922691853,
+        "Timber": 187.423729697878
+      },
+      "population": 4500,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 142.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 52195,
+      "food_consumption": 1197.27802957324,
+      "food_days": 93.2686297536177,
+      "food_eaten": 1173.19803923351,
+      "food_intake_ratio": 0.979887720525266,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 158,
+      "known": 130,
+      "material_stocks": {
+        "Clay": 32.2781098151628,
+        "Fiber Plants": 517.5358506666,
+        "Stone": 82.125922691853,
+        "Timber": 190.062743466847
+      },
+      "population": 4636,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 143.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 52560,
+      "food_consumption": 1233.37563488681,
+      "food_days": 93.1830435055426,
+      "food_eaten": 1208.97727183215,
+      "food_intake_ratio": 0.980218221955634,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 163,
+      "known": 131,
+      "material_stocks": {
+        "Clay": 29.7481098151628,
+        "Fiber Plants": 518.958505595325,
+        "Stone": 82.125922691853,
+        "Timber": 196.630063498685
+      },
+      "population": 4782,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 144.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 52925,
+      "food_consumption": 1270.91913471594,
+      "food_days": 93.0890571043904,
+      "food_eaten": 1245.59678638968,
+      "food_intake_ratio": 0.980075562925625,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 169,
+      "known": 132,
+      "material_stocks": {
+        "Clay": 79.4110970444792,
+        "Fiber Plants": 519.7122746831,
+        "Stone": 82.125922691853,
+        "Timber": 202.948649397555
+      },
+      "population": 4928,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 145.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 53290,
+      "food_consumption": 1309.32496554141,
+      "food_days": 93.006726499682,
+      "food_eaten": 1283.31079572226,
+      "food_intake_ratio": 0.980131617051698,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 174,
+      "known": 134,
+      "material_stocks": {
+        "Clay": 75.3910970444792,
+        "Fiber Plants": 520.920243800317,
+        "Stone": 1.11022302462516e-16,
+        "Timber": 69.8857396922384
+      },
+      "population": 5080,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 146.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 53655,
+      "food_consumption": 1348.82977040296,
+      "food_days": 92.9276368293103,
+      "food_eaten": 1321.77398490451,
+      "food_intake_ratio": 0.979941289781612,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 179,
+      "known": 135,
+      "material_stocks": {
+        "Clay": 68.6910970444791,
+        "Fiber Plants": 516.024302802824,
+        "Stone": 1.11022302462516e-16,
+        "Timber": 84.5854900293011
+      },
+      "population": 5238,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 147.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 54020,
+      "food_consumption": 1389.93038653137,
+      "food_days": 92.8643659851765,
+      "food_eaten": 1361.59434066147,
+      "food_intake_ratio": 0.9796133344918,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 184,
+      "known": 137,
+      "material_stocks": {
+        "Clay": 67.3510970444791,
+        "Fiber Plants": 516.155551530674,
+        "Stone": 0.0,
+        "Timber": 75.5324856098902
+      },
+      "population": 5401,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 148.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 54385,
+      "food_consumption": 1431.99376643443,
+      "food_days": 92.7949050761123,
+      "food_eaten": 1403.66870848002,
+      "food_intake_ratio": 0.980219845492109,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 190,
+      "known": 139,
+      "material_stocks": {
+        "Clay": 60.6510970444791,
+        "Fiber Plants": 516.319236071925,
+        "Stone": 0.0,
+        "Timber": 32.6037812034226
+      },
+      "population": 5569,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 149.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 54750,
+      "food_consumption": 1475.90986524009,
+      "food_days": 92.7250026290296,
+      "food_eaten": 1446.12313596997,
+      "food_intake_ratio": 0.979818056663459,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 196,
+      "known": 140,
+      "material_stocks": {
+        "Clay": 59.3110970444791,
+        "Fiber Plants": 517.448821696775,
+        "Stone": 13.3587134560258,
+        "Timber": 26.6682088578139
+      },
+      "population": 5745,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 150.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 55115,
+      "food_consumption": 1520.65592554178,
+      "food_days": 92.6654668471704,
+      "food_eaten": 1489.69816285971,
+      "food_intake_ratio": 0.979641836024779,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 202,
+      "known": 141,
+      "material_stocks": {
+        "Clay": 50.8070970444791,
+        "Fiber Plants": 509.163149371496,
+        "Stone": 32.1566954155441,
+        "Timber": 28.685476824605
+      },
+      "population": 5926,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 151.0
+    },
+    {
+      "active_inquiries": 4,
+      "completed_buildings": 5,
+      "day": 55480,
+      "food_consumption": 1566.692566799,
+      "food_days": 92.5924610972861,
+      "food_eaten": 1535.75213708123,
+      "food_intake_ratio": 0.980251116030382,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 208,
+      "known": 141,
+      "material_stocks": {
+        "Clay": 49.4670970444791,
+        "Fiber Plants": 510.649149800047,
+        "Stone": 32.3476213958716,
+        "Timber": 42.9827444931952
+      },
+      "population": 6111,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 152.0
+    },
+    {
+      "active_inquiries": 3,
+      "completed_buildings": 5,
+      "day": 55845,
+      "food_consumption": 1614.72007918625,
+      "food_days": 92.5228689102334,
+      "food_eaten": 1581.92139206966,
+      "food_intake_ratio": 0.979687694765572,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 215,
+      "known": 144,
+      "material_stocks": {
+        "Clay": 44.9270970444791,
+        "Fiber Plants": 511.217839986091,
+        "Stone": 16.5476213958717,
+        "Timber": 72.8678520103294
+      },
+      "population": 6302,
+      "resource_deposits": 52,
+      "settled": true,
+      "year": 153.0
+    }
+  ],
+  "bottlenecks": {
+    "active_investigations": {
+      "health::Water & sanitation": "slow_sand_filtration",
+      "knowledge::Observers": "regional_maps",
+      "nutrition::Land productivity": "sowing_depth_trials"
+    },
+    "allocations": {
+      "Administration": 182,
+      "Construction": 354,
+      "Crafting": 225,
+      "Defense": 129,
+      "Extraction": 354,
+      "Food": 1569,
+      "Knowledge": 216,
+      "Logistics": 305,
+      "Survey": 271
+    },
+    "causally_ready_questions": [
+      {
+        "domain": "production",
+        "eligible": true,
+        "id": "woven_carriers",
+        "missing_materials": [],
+        "progress": 0.69144582500176,
+        "score": 42.4491392962129,
+        "subcategory": "Material supply"
+      },
+      {
+        "domain": "production",
+        "eligible": false,
+        "id": "peat_drying",
+        "missing_materials": [
+          {
+            "minimum_stock": 0.0,
+            "resource": "Peat",
+            "stage": "recognized"
+          }
+        ],
+        "progress": 0,
+        "score": 81.7269494162713,
+        "subcategory": "Material supply"
+      },
+      {
+        "domain": "production",
+        "eligible": false,
+        "id": "bronze_alloying",
+        "missing_materials": [
+          {
+            "minimum_stock": 3.0,
+            "resource": "Tin Ore",
+            "stage": "accessible"
+          }
+        ],
+        "progress": 0,
+        "score": 164.025788205818,
+        "subcategory": "Material supply"
+      },
+      {
+        "domain": "production",
+        "eligible": true,
+        "id": "hardened_edges",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 197.280102072109,
+        "subcategory": "Tool quality"
+      },
+      {
+        "domain": "production",
+        "eligible": false,
+        "id": "coke_firing",
+        "missing_materials": [
+          {
+            "minimum_stock": 5.0,
+            "resource": "Coal",
+            "stage": "accessible"
+          }
+        ],
+        "progress": 0,
+        "score": 72.4624644996296,
+        "subcategory": "Material supply"
+      },
+      {
+        "domain": "ecology",
+        "eligible": false,
+        "id": "nitrate_cultivation",
+        "missing_materials": [
+          {
+            "minimum_stock": 0.0,
+            "resource": "Nitrates",
+            "stage": "recognized"
+          }
+        ],
+        "progress": 0,
+        "score": 107.058163374351,
+        "subcategory": "Land health"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "graphite_marking",
+        "missing_materials": [],
+        "progress": 0.87673392455718,
+        "score": 141.228175055343,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "nutrition",
+        "eligible": false,
+        "id": "crop_rotation",
+        "missing_materials": [
+          {
+            "resource": "Fertile Soil",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 73.0930821524898,
+        "subcategory": "Land productivity"
+      },
+      {
+        "domain": "health",
+        "eligible": false,
+        "id": "public_baths",
+        "missing_materials": [
+          {
+            "resource": "Freshwater",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 137.270437479243,
+        "subcategory": "Water & sanitation"
+      },
+      {
+        "domain": "health",
+        "eligible": false,
+        "id": "civic_infirmaries",
+        "missing_materials": [
+          {
+            "resource": "Medicinal Plants",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 59.3285536981202,
+        "subcategory": "General health"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "phonetic_notation",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 47.4193649245849,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "regional_maps",
+        "missing_materials": [],
+        "progress": 0.0609633979549253,
+        "score": 44.6186004214427,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "statistical_inference",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 93.2285779298296,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "infrastructure",
+        "eligible": false,
+        "id": "canal_locks",
+        "missing_materials": [
+          {
+            "resource": "Freshwater",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 142.85151740826,
+        "subcategory": "Housing"
+      },
+      {
+        "domain": "infrastructure",
+        "eligible": false,
+        "id": "water_mills",
+        "missing_materials": [
+          {
+            "resource": "Freshwater",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 76.8173363426697,
+        "subcategory": "Housing"
+      },
+      {
+        "domain": "security",
+        "eligible": true,
+        "id": "professional_corps",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 105.037616808515,
+        "subcategory": "Military readiness"
+      },
+      {
+        "domain": "security",
+        "eligible": true,
+        "id": "war_chariots",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 154.472930414778,
+        "subcategory": "Military readiness"
+      },
+      {
+        "domain": "security",
+        "eligible": true,
+        "id": "naval_arsenals",
+        "missing_materials": [],
+        "progress": 0.631853881296624,
+        "score": 94.7323534177536,
+        "subcategory": "Public safety"
+      },
+      {
+        "domain": "culture",
+        "eligible": true,
+        "id": "festival_calendar",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 46.5775943638778,
+        "subcategory": "Social cohesion"
+      },
+      {
+        "domain": "culture",
+        "eligible": true,
+        "id": "oral_epics",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 120.143807172775,
+        "subcategory": "Collective memory"
+      },
+      {
+        "domain": "culture",
+        "eligible": true,
+        "id": "civic_games",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 62.1653724658854,
+        "subcategory": "Shared legitimacy"
+      },
+      {
+        "domain": "labor",
+        "eligible": true,
+        "id": "crew_handoffs",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 56.1213897701016,
+        "subcategory": "Coordination"
+      },
+      {
+        "domain": "labor",
+        "eligible": true,
+        "id": "work_rest_limits",
+        "missing_materials": [],
+        "progress": 0.114620543109549,
+        "score": 58.9132326862812,
+        "subcategory": "Workload balance"
+      },
+      {
+        "domain": "labor",
+        "eligible": true,
+        "id": "work_motion_studies",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 47.0861199080403,
+        "subcategory": "Work efficiency"
+      },
+      {
+        "domain": "health",
+        "eligible": true,
+        "id": "slow_sand_filtration",
+        "missing_materials": [],
+        "progress": 0.145604535886827,
+        "score": 111.746395821643,
+        "subcategory": "Water & sanitation"
+      },
+      {
+        "domain": "security",
+        "eligible": true,
+        "id": "skirmish_pair_drill",
+        "missing_materials": [],
+        "progress": 0.380641412143747,
+        "score": 86.5591335581535,
+        "subcategory": "Public safety"
+      },
+      {
+        "domain": "security",
+        "eligible": true,
+        "id": "mounted_remount_school",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 91.4700302766556,
+        "subcategory": "Public safety"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "optical_lenses",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 90.5754741252413,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "precision_thermometry",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 120.330240947103,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "electrochemical_cells",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 114.821180325841,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "structural_load_testing",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 73.6901517928591,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "trigonometry",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 81.9145794929018,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "logarithms",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 57.1670439065447,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "differential_calculus",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 128.32371256957,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "integral_calculus",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 58.5732366860857,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "complex_numbers",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 132.830699902867,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "matrix_algebra",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 64.7823404491892,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "combinatorics",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 135.519918423986,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "dimensional_analysis",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 93.4130635083666,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "numerical_root_finding",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 65.5570816219797,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "lever_moments",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 79.0162355721941,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "gear_ratios",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 64.856003326272,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "bearing_surfaces",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 121.77414606223,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "friction_measurement",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 92.1920658172121,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "hydrostatic_pressure",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 84.8931939424028,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "elastic_deformation",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 75.8212716401568,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "measured_kinematics",
+        "missing_materials": [],
+        "progress": 0.00569069431993281,
+        "score": 136.28111789832,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "security",
+        "eligible": true,
+        "id": "field_aid_stations",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 93.2977641867393,
+        "subcategory": "Public safety"
+      },
+      {
+        "domain": "nutrition",
+        "eligible": true,
+        "id": "sowing_depth_trials",
+        "missing_materials": [],
+        "progress": 0.0997831502731175,
+        "score": 158.22294815648,
+        "subcategory": "Land productivity"
+      },
+      {
+        "domain": "nutrition",
+        "eligible": true,
+        "id": "controlled_pollination",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 121.346347471165,
+        "subcategory": "Daily supply"
+      }
+    ],
+    "controller_plan": {
+      "ambition": "sustenance",
+      "at_war": false,
+      "capacity_share": 0.810664078593254,
+      "deploy_share": 0.679773208498955,
+      "expansion_food": 48.9996595680714,
+      "goals": [
+        {
+          "accord": "exchange",
+          "id": "care",
+          "strategy": "sustenance",
+          "title": "Keep our people fed and healthy"
+        },
+        {
+          "accord": "routes",
+          "id": "growth",
+          "strategy": "growth",
+          "title": "Make room for the next generation"
+        },
+        {
+          "accord": "restraint",
+          "id": "security",
+          "strategy": "fortification",
+          "title": "Keep our homeland independent"
+        }
+      ],
+      "hungry": true,
+      "offensive": true,
+      "peace_food": 22.2371687293053,
+      "personality": {
+        "assertiveness": 0.686591804027557,
+        "discipline": 0.806791067123413,
+        "empathy": 0.429149121046066,
+        "openness": 0.466497719287872,
+        "risk_tolerance": 0.790626287460327
+      },
+      "recruit_share": 0.0982297798991203,
+      "research_weights": {
+        "culture": 0.644088560342789,
+        "demography": 1.33623420894146,
+        "ecology": 1.26639790385962,
+        "health": 3.09331929683685,
+        "infrastructure": 0.774414193630219,
+        "institutions": 0.724414193630219,
+        "knowledge": 0.709797263145447,
+        "labor": 0.684074640274048,
+        "logistics": 0.689226400852203,
+        "nutrition": 3.62030158638954,
+        "production": 0.839994621276855,
+        "security": 1.10266897678375
+      },
+      "scout_days": 30,
+      "scout_food": 28.2812113761902,
+      "settle_distance": 40.4625463485718,
+      "trade_opinion": 0.029823149740696,
+      "training": "suspended",
+      "war_food": 40.4686856269836,
+      "war_opinion": -0.515939979255199
+    },
+    "known_ids": [
+      "seasonal_patterns",
+      "watch_rotation",
+      "charcoal",
+      "food_drying",
+      "wound_cleaning",
+      "seed_selection",
+      "birth_attendants",
+      "drainage",
+      "clay_shaping",
+      "crop_calendars",
+      "herbal_classification",
+      "clean_water",
+      "latrine_siting",
+      "timber_grading",
+      "managed_fallow",
+      "fiber_grading",
+      "pit_firing",
+      "smoking",
+      "stone_sorting",
+      "animal_taming",
+      "field_fortifications",
+      "controlled_flaking",
+      "well_siting",
+      "labor_rotations",
+      "water_settling_basins",
+      "tallies",
+      "standard_measures",
+      "isolation_practice",
+      "irrigation_schedules",
+      "joinery",
+      "cordage",
+      "shared_childcare",
+      "route_memory",
+      "protected_wellheads",
+      "case_records",
+      "germination_trials",
+      "public_stores",
+      "hafted_tools",
+      "quarry_reading",
+      "row_spacing_trials",
+      "material_accounting",
+      "surgical_anatomy",
+      "basketry",
+      "raised_granaries",
+      "pictographic_records",
+      "trained_midwives",
+      "place_value",
+      "water_service_inspections",
+      "grain_milling",
+      "maternal_recovery",
+      "irrigation_loss_accounts",
+      "fractional_quantities",
+      "stock_rotation",
+      "mineral_cleavage",
+      "river_craft",
+      "seed_cleaning",
+      "relative_stratigraphy",
+      "seed_reserves",
+      "geometric_survey",
+      "root_cellars",
+      "comparative_mineral_hardness",
+      "mineral_streak_tests",
+      "bow_craft",
+      "symbolic_algebra",
+      "contour_cultivation",
+      "formation_drill",
+      "hafted_weapons",
+      "ratio_proportion",
+      "crop_residue_cover",
+      "straightedge_compass",
+      "crossbow_mechanism",
+      "mass_seed_selection",
+      "range_estimation_drill",
+      "customary_law",
+      "shield_wall",
+      "progeny_rows",
+      "wedges_and_levers",
+      "similar_triangles",
+      "graded_roads",
+      "household_councils",
+      "polynomial_equations",
+      "geologic_cross_sections",
+      "timber_seasoning",
+      "census_rolls",
+      "pike_drill",
+      "clay_testing",
+      "framed_construction",
+      "clay_tempering",
+      "sealed_vessels",
+      "kiln_control",
+      "salt_working",
+      "separate_clean_water_storage",
+      "regional_granaries",
+      "child_growth_records",
+      "ore_assaying",
+      "fermentation_control",
+      "household_space_planning",
+      "curing_regimens",
+      "brine_fermentation",
+      "glassmaking",
+      "vinegar_pickling",
+      "systematic_channel_sampling",
+      "hermetic_grain_storage",
+      "coal_grading",
+      "fortified_stores",
+      "coordinate_geometry",
+      "rainwater_cisterns",
+      "public_levies",
+      "bitumen_sealing",
+      "litter_bearer_drill",
+      "chemical_distillation",
+      "displacement_buoyancy",
+      "copper_smelting",
+      "supply_groups",
+      "coastal_watercraft",
+      "lime_burning",
+      "lime_mortar",
+      "copper_casting",
+      "cargo_seals",
+      "casualty_collection_posts",
+      "workshop_standards",
+      "brine_purification",
+      "hide_floats",
+      "mineral_specific_gravity",
+      "phosphate_dressing",
+      "iron_assaying",
+      "galley_navigation",
+      "sediment_provenance",
+      "pack_animals",
+      "bloomery_smelting",
+      "evacuation_relays",
+      "forge_welding",
+      "domesticated_mounts",
+      "casualty_transfer_records",
+      "wayfinding_stars",
+      "cavalry_infantry_liaison",
+      "sulfur_purification",
+      "mounted_scouts",
+      "wire_drawing",
+      "elephant_training",
+      "caravanserais",
+      "pressure_vessels",
+      "apprentice_contracts",
+      "experimental_controls"
+    ],
+    "material_states": {
+      "Bitumen": [
+        {
+          "access": 1.00413929421332,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00074683894874
+        }
+      ],
+      "Clay": [
+        {
+          "access": 1.00712568275467,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0039124793027
+        },
+        {
+          "access": 1.00712568275467,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00271504626273
+        },
+        {
+          "access": 1.00712568275467,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00285055596763
+        },
+        {
+          "access": 1.00712568275467,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00387128578231
+        }
+      ],
+      "Coal": [
+        {
+          "access": 1.1894,
+          "blockers": [
+            "safe underground ventilation is unknown"
+          ],
+          "route": 1.0,
+          "stage": "surveyed",
+          "survey": 1.00009582156324
+        },
+        {
+          "access": 1.1894,
+          "blockers": [
+            "safe underground ventilation is unknown"
+          ],
+          "route": 1.0,
+          "stage": "surveyed",
+          "survey": 1.00036843640873
+        }
+      ],
+      "Copper Ore": [
+        {
+          "access": 1.47587946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00091500307595
+        },
+        {
+          "access": 1.47587946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00038616661168
+        },
+        {
+          "access": 1.47587946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00041368715211
+        }
+      ],
+      "Deep Aquifer": [
+        {
+          "access": 1.1894,
+          "blockers": [
+            "deep lifting machinery is unavailable"
+          ],
+          "route": 1.0,
+          "stage": "surveyed",
+          "survey": 1.00031127871099
+        },
+        {
+          "access": 1.1894,
+          "blockers": [
+            "deep lifting machinery is unavailable"
+          ],
+          "route": 1.0,
+          "stage": "surveyed",
+          "survey": 1.00008983422785
+        }
+      ],
+      "Fertile Soil": [
+        {
+          "access": 1.02891959589237,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00649639276776
+        },
+        {
+          "access": 1.02891959589237,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00314323473482
+        },
+        {
+          "access": 1.02891959589237,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00640791923502
+        }
+      ],
+      "Fiber Plants": [
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "developed",
+          "survey": 0.0
+        }
+      ],
+      "Fine Sand": [
+        {
+          "access": 1.01967240288779,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00005078902441
+        },
+        {
+          "access": 1.01967240288779,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00024622000763
+        }
+      ],
+      "Flint": [
+        {
+          "access": 1.02664810427089,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00023768541589
+        },
+        {
+          "access": 1.02664810427089,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00024385770298
+        }
+      ],
+      "Freshwater": [
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "accessible",
+          "survey": 1.0
+        }
+      ],
+      "Game": [
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00375521794344
+        },
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00280078748388
+        },
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00263761187291
+        },
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00415862932539
+        }
+      ],
+      "Graphite": [
+        {
+          "access": 1.17060819624548,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0005060797217
+        },
+        {
+          "access": 1.17060819624548,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00045994059013
+        }
+      ],
+      "Iron Ore": [
+        {
+          "access": 1.49027946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00069935064806
+        },
+        {
+          "access": 1.49027946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00026065126575
+        },
+        {
+          "access": 1.49027946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00017690142002
+        },
+        {
+          "access": 1.49027946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00007519672587
+        },
+        {
+          "access": 1.49027946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00034652667689
+        }
+      ],
+      "Limestone": [
+        {
+          "access": 1.01967240288779,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0012085631027
+        },
+        {
+          "access": 1.01967240288779,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00069299487768
+        }
+      ],
+      "Medicinal Plants": [
+        {
+          "access": 1.02298021448773,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.0002781394243
+        },
+        {
+          "access": 1.02298021448773,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00045435171284
+        }
+      ],
+      "Phosphate Rock": [
+        {
+          "access": 1.10767608403247,
+          "blockers": [],
+          "route": 0.846507906352248,
+          "stage": "developed",
+          "survey": 1.00008905829197
+        }
+      ],
+      "Refractory Clay": [
+        {
+          "access": 1.19747946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00036038963795
+        },
+        {
+          "access": 1.19747946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00011001024773
+        },
+        {
+          "access": 1.19747946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00038427256355
+        },
+        {
+          "access": 1.19747946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00033486655227
+        },
+        {
+          "access": 1.19747946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00055881321247
+        },
+        {
+          "access": 1.19747946373962,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00037838345324
+        }
+      ],
+      "Salt": [
+        {
+          "access": 1.00005413323873,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00033126296206
+        },
+        {
+          "access": 1.00005413323873,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00250538498031
+        }
+      ],
+      "Stone": [
+        {
+          "access": 1.0073433698125,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00296038468424
+        },
+        {
+          "access": 1.0073433698125,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0057535277617
+        },
+        {
+          "access": 1.0073433698125,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00532503175548
+        },
+        {
+          "access": 1.0073433698125,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00412173541781
+        },
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "developed",
+          "survey": 0.0
+        }
+      ],
+      "Sulfur": [
+        {
+          "access": 1.16340819624548,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00002445384782
+        }
+      ],
+      "Timber": [
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "developed",
+          "survey": 0.0
+        }
+      ]
+    },
+    "research_allocations": {
+      "culture": 0,
+      "demography": 0,
+      "ecology": 0,
+      "health": 2,
+      "infrastructure": 0,
+      "institutions": 0,
+      "knowledge": 1,
+      "labor": 0,
+      "logistics": 0,
+      "nutrition": 1,
+      "production": 0,
+      "security": 0
+    },
+    "research_subcategory_allocations": {
+      "culture": {
+        "Collective memory": 0,
+        "Inquiry breadth": 0,
+        "Shared legitimacy": 0,
+        "Social cohesion": 0
+      },
+      "demography": {
+        "Child survival": 0,
+        "Fertility conditions": 0,
+        "Maternal safety": 0,
+        "Shelter capacity": 0
+      },
+      "ecology": {
+        "Land health": 0,
+        "Natural recovery": 0,
+        "Pollution control": 0,
+        "Resource sustainability": 0
+      },
+      "health": {
+        "Disease control": 0,
+        "General health": 0,
+        "Injury safety": 0,
+        "Water & sanitation": 2
+      },
+      "infrastructure": {
+        "Construction": 0,
+        "Housing": 0,
+        "Public works": 0,
+        "Resilience": 0
+      },
+      "institutions": {
+        "Administration": 0,
+        "Institutional flexibility": 0,
+        "Legitimacy": 0,
+        "State capacity": 0
+      },
+      "knowledge": {
+        "Communication": 0,
+        "Directed attention": 0,
+        "Observers": 1,
+        "Preserved knowledge": 0
+      },
+      "labor": {
+        "Able workforce": 0,
+        "Coordination": 0,
+        "Work efficiency": 0,
+        "Workload balance": 0
+      },
+      "logistics": {
+        "Carrying capacity": 0,
+        "Route quality": 0,
+        "Storage system": 0,
+        "Trade reach": 0
+      },
+      "nutrition": {
+        "Daily supply": 0,
+        "Diet quality": 0,
+        "Land productivity": 1,
+        "Stored reserve": 0
+      },
+      "production": {
+        "Craft capacity": 0,
+        "Material supply": 0,
+        "Standardization": 0,
+        "Tool quality": 0
+      },
+      "security": {
+        "Crisis resilience": 0,
+        "Military readiness": 0,
+        "Organized defense": 0,
+        "Public safety": 0
+      }
+    }
+  },
+  "days_per_second": 15.5355587356894,
+  "discoveries": [
+    {
+      "day": 1194,
+      "id": "seasonal_patterns",
+      "year": 3.27123287671233
+    },
+    {
+      "day": 1383,
+      "id": "watch_rotation",
+      "year": 3.78904109589041
+    },
+    {
+      "day": 2357,
+      "id": "charcoal",
+      "year": 6.45753424657534
+    },
+    {
+      "day": 2638,
+      "id": "food_drying",
+      "year": 7.22739726027397
+    },
+    {
+      "day": 2686,
+      "id": "wound_cleaning",
+      "year": 7.35890410958904
+    },
+    {
+      "day": 3910,
+      "id": "seed_selection",
+      "year": 10.7123287671233
+    },
+    {
+      "day": 4549,
+      "id": "birth_attendants",
+      "year": 12.4630136986301
+    },
+    {
+      "day": 5516,
+      "id": "drainage",
+      "year": 15.1123287671233
+    },
+    {
+      "day": 5903,
+      "id": "clay_shaping",
+      "year": 16.172602739726
+    },
+    {
+      "day": 6246,
+      "id": "crop_calendars",
+      "year": 17.1123287671233
+    },
+    {
+      "day": 6761,
+      "id": "herbal_classification",
+      "year": 18.5232876712329
+    },
+    {
+      "day": 7206,
+      "id": "clean_water",
+      "year": 19.7424657534247
+    },
+    {
+      "day": 8359,
+      "id": "latrine_siting",
+      "year": 22.9013698630137
+    },
+    {
+      "day": 8876,
+      "id": "timber_grading",
+      "year": 24.3178082191781
+    },
+    {
+      "day": 9371,
+      "id": "managed_fallow",
+      "year": 25.6739726027397
+    },
+    {
+      "day": 9414,
+      "id": "fiber_grading",
+      "year": 25.7917808219178
+    },
+    {
+      "day": 9594,
+      "id": "pit_firing",
+      "year": 26.2849315068493
+    },
+    {
+      "day": 9961,
+      "id": "smoking",
+      "year": 27.2904109589041
+    },
+    {
+      "day": 10110,
+      "id": "stone_sorting",
+      "year": 27.6986301369863
+    },
+    {
+      "day": 10348,
+      "id": "animal_taming",
+      "year": 28.3506849315068
+    },
+    {
+      "day": 11055,
+      "id": "field_fortifications",
+      "year": 30.2876712328767
+    },
+    {
+      "day": 11084,
+      "id": "controlled_flaking",
+      "year": 30.3671232876712
+    },
+    {
+      "day": 11252,
+      "id": "well_siting",
+      "year": 30.827397260274
+    },
+    {
+      "day": 11700,
+      "id": "labor_rotations",
+      "year": 32.0547945205479
+    },
+    {
+      "day": 12329,
+      "id": "water_settling_basins",
+      "year": 33.7780821917808
+    },
+    {
+      "day": 12524,
+      "id": "tallies",
+      "year": 34.3123287671233
+    },
+    {
+      "day": 14204,
+      "id": "standard_measures",
+      "year": 38.9150684931507
+    },
+    {
+      "day": 14246,
+      "id": "isolation_practice",
+      "year": 39.0301369863014
+    },
+    {
+      "day": 14735,
+      "id": "irrigation_schedules",
+      "year": 40.3698630136986
+    },
+    {
+      "day": 15264,
+      "id": "joinery",
+      "year": 41.8191780821918
+    },
+    {
+      "day": 15301,
+      "id": "cordage",
+      "year": 41.9205479452055
+    },
+    {
+      "day": 16095,
+      "id": "shared_childcare",
+      "year": 44.0958904109589
+    },
+    {
+      "day": 16261,
+      "id": "route_memory",
+      "year": 44.5506849315069
+    },
+    {
+      "day": 17008,
+      "id": "protected_wellheads",
+      "year": 46.5972602739726
+    },
+    {
+      "day": 17562,
+      "id": "case_records",
+      "year": 48.1150684931507
+    },
+    {
+      "day": 18061,
+      "id": "germination_trials",
+      "year": 49.4821917808219
+    },
+    {
+      "day": 18302,
+      "id": "public_stores",
+      "year": 50.1424657534247
+    },
+    {
+      "day": 18702,
+      "id": "hafted_tools",
+      "year": 51.2383561643836
+    },
+    {
+      "day": 19740,
+      "id": "quarry_reading",
+      "year": 54.0821917808219
+    },
+    {
+      "day": 20763,
+      "id": "row_spacing_trials",
+      "year": 56.8849315068493
+    },
+    {
+      "day": 21009,
+      "id": "material_accounting",
+      "year": 57.558904109589
+    },
+    {
+      "day": 21344,
+      "id": "surgical_anatomy",
+      "year": 58.4767123287671
+    },
+    {
+      "day": 21686,
+      "id": "basketry",
+      "year": 59.413698630137
+    },
+    {
+      "day": 21985,
+      "id": "raised_granaries",
+      "year": 60.2328767123288
+    },
+    {
+      "day": 22525,
+      "id": "pictographic_records",
+      "year": 61.7123287671233
+    },
+    {
+      "day": 23789,
+      "id": "trained_midwives",
+      "year": 65.1753424657534
+    },
+    {
+      "day": 24398,
+      "id": "place_value",
+      "year": 66.8438356164384
+    },
+    {
+      "day": 24794,
+      "id": "water_service_inspections",
+      "year": 67.9287671232877
+    },
+    {
+      "day": 25404,
+      "id": "grain_milling",
+      "year": 69.6
+    },
+    {
+      "day": 25504,
+      "id": "maternal_recovery",
+      "year": 69.8739726027397
+    },
+    {
+      "day": 25820,
+      "id": "irrigation_loss_accounts",
+      "year": 70.7397260273973
+    },
+    {
+      "day": 26665,
+      "id": "fractional_quantities",
+      "year": 73.0547945205479
+    },
+    {
+      "day": 26672,
+      "id": "stock_rotation",
+      "year": 73.0739726027397
+    },
+    {
+      "day": 26736,
+      "id": "mineral_cleavage",
+      "year": 73.2493150684931
+    },
+    {
+      "day": 27536,
+      "id": "river_craft",
+      "year": 75.441095890411
+    },
+    {
+      "day": 28099,
+      "id": "seed_cleaning",
+      "year": 76.9835616438356
+    },
+    {
+      "day": 28744,
+      "id": "relative_stratigraphy",
+      "year": 78.7506849315069
+    },
+    {
+      "day": 28985,
+      "id": "seed_reserves",
+      "year": 79.4109589041096
+    },
+    {
+      "day": 29834,
+      "id": "geometric_survey",
+      "year": 81.7369863013699
+    },
+    {
+      "day": 29913,
+      "id": "root_cellars",
+      "year": 81.9534246575342
+    },
+    {
+      "day": 30827,
+      "id": "comparative_mineral_hardness",
+      "year": 84.4575342465753
+    },
+    {
+      "day": 31026,
+      "id": "mineral_streak_tests",
+      "year": 85.0027397260274
+    },
+    {
+      "day": 31454,
+      "id": "bow_craft",
+      "year": 86.1753424657534
+    },
+    {
+      "day": 31777,
+      "id": "symbolic_algebra",
+      "year": 87.0602739726027
+    },
+    {
+      "day": 31994,
+      "id": "contour_cultivation",
+      "year": 87.654794520548
+    },
+    {
+      "day": 32509,
+      "id": "formation_drill",
+      "year": 89.0657534246575
+    },
+    {
+      "day": 32831,
+      "id": "hafted_weapons",
+      "year": 89.9479452054795
+    },
+    {
+      "day": 33332,
+      "id": "ratio_proportion",
+      "year": 91.3205479452055
+    },
+    {
+      "day": 33748,
+      "id": "crop_residue_cover",
+      "year": 92.4602739726027
+    },
+    {
+      "day": 34966,
+      "id": "straightedge_compass",
+      "year": 95.7972602739726
+    },
+    {
+      "day": 35110,
+      "id": "crossbow_mechanism",
+      "year": 96.1917808219178
+    },
+    {
+      "day": 35667,
+      "id": "mass_seed_selection",
+      "year": 97.7178082191781
+    },
+    {
+      "day": 36212,
+      "id": "range_estimation_drill",
+      "year": 99.2109589041096
+    },
+    {
+      "day": 36297,
+      "id": "customary_law",
+      "year": 99.4438356164383
+    },
+    {
+      "day": 36914,
+      "id": "shield_wall",
+      "year": 101.134246575342
+    },
+    {
+      "day": 37216,
+      "id": "progeny_rows",
+      "year": 101.961643835616
+    },
+    {
+      "day": 37645,
+      "id": "wedges_and_levers",
+      "year": 103.13698630137
+    },
+    {
+      "day": 37887,
+      "id": "similar_triangles",
+      "year": 103.8
+    },
+    {
+      "day": 38145,
+      "id": "graded_roads",
+      "year": 104.506849315068
+    },
+    {
+      "day": 38271,
+      "id": "household_councils",
+      "year": 104.852054794521
+    },
+    {
+      "day": 39270,
+      "id": "polynomial_equations",
+      "year": 107.58904109589
+    },
+    {
+      "day": 39277,
+      "id": "geologic_cross_sections",
+      "year": 107.608219178082
+    },
+    {
+      "day": 39318,
+      "id": "timber_seasoning",
+      "year": 107.720547945205
+    },
+    {
+      "day": 39392,
+      "id": "census_rolls",
+      "year": 107.923287671233
+    },
+    {
+      "day": 39468,
+      "id": "pike_drill",
+      "year": 108.131506849315
+    },
+    {
+      "day": 39574,
+      "id": "clay_testing",
+      "year": 108.421917808219
+    },
+    {
+      "day": 39762,
+      "id": "framed_construction",
+      "year": 108.93698630137
+    },
+    {
+      "day": 39957,
+      "id": "clay_tempering",
+      "year": 109.471232876712
+    },
+    {
+      "day": 40435,
+      "id": "sealed_vessels",
+      "year": 110.780821917808
+    },
+    {
+      "day": 40941,
+      "id": "kiln_control",
+      "year": 112.167123287671
+    },
+    {
+      "day": 40980,
+      "id": "salt_working",
+      "year": 112.27397260274
+    },
+    {
+      "day": 41261,
+      "id": "separate_clean_water_storage",
+      "year": 113.043835616438
+    },
+    {
+      "day": 41380,
+      "id": "regional_granaries",
+      "year": 113.369863013699
+    },
+    {
+      "day": 41451,
+      "id": "child_growth_records",
+      "year": 113.564383561644
+    },
+    {
+      "day": 41635,
+      "id": "ore_assaying",
+      "year": 114.068493150685
+    },
+    {
+      "day": 42414,
+      "id": "fermentation_control",
+      "year": 116.202739726027
+    },
+    {
+      "day": 42573,
+      "id": "household_space_planning",
+      "year": 116.638356164384
+    },
+    {
+      "day": 42589,
+      "id": "curing_regimens",
+      "year": 116.682191780822
+    },
+    {
+      "day": 43046,
+      "id": "brine_fermentation",
+      "year": 117.934246575342
+    },
+    {
+      "day": 43672,
+      "id": "glassmaking",
+      "year": 119.649315068493
+    },
+    {
+      "day": 43819,
+      "id": "vinegar_pickling",
+      "year": 120.052054794521
+    },
+    {
+      "day": 44295,
+      "id": "systematic_channel_sampling",
+      "year": 121.356164383562
+    },
+    {
+      "day": 44440,
+      "id": "hermetic_grain_storage",
+      "year": 121.753424657534
+    },
+    {
+      "day": 44520,
+      "id": "coal_grading",
+      "year": 121.972602739726
+    },
+    {
+      "day": 45064,
+      "id": "fortified_stores",
+      "year": 123.46301369863
+    },
+    {
+      "day": 45132,
+      "id": "coordinate_geometry",
+      "year": 123.649315068493
+    },
+    {
+      "day": 45134,
+      "id": "rainwater_cisterns",
+      "year": 123.654794520548
+    },
+    {
+      "day": 45656,
+      "id": "public_levies",
+      "year": 125.084931506849
+    },
+    {
+      "day": 45671,
+      "id": "bitumen_sealing",
+      "year": 125.12602739726
+    },
+    {
+      "day": 46218,
+      "id": "litter_bearer_drill",
+      "year": 126.624657534247
+    },
+    {
+      "day": 46706,
+      "id": "chemical_distillation",
+      "year": 127.961643835616
+    },
+    {
+      "day": 46734,
+      "id": "displacement_buoyancy",
+      "year": 128.038356164384
+    },
+    {
+      "day": 47159,
+      "id": "copper_smelting",
+      "year": 129.202739726027
+    },
+    {
+      "day": 47219,
+      "id": "supply_groups",
+      "year": 129.367123287671
+    },
+    {
+      "day": 47358,
+      "id": "coastal_watercraft",
+      "year": 129.747945205479
+    },
+    {
+      "day": 47981,
+      "id": "lime_burning",
+      "year": 131.454794520548
+    },
+    {
+      "day": 48336,
+      "id": "lime_mortar",
+      "year": 132.427397260274
+    },
+    {
+      "day": 48440,
+      "id": "copper_casting",
+      "year": 132.712328767123
+    },
+    {
+      "day": 48937,
+      "id": "cargo_seals",
+      "year": 134.07397260274
+    },
+    {
+      "day": 48975,
+      "id": "casualty_collection_posts",
+      "year": 134.178082191781
+    },
+    {
+      "day": 49208,
+      "id": "workshop_standards",
+      "year": 134.816438356164
+    },
+    {
+      "day": 49403,
+      "id": "brine_purification",
+      "year": 135.350684931507
+    },
+    {
+      "day": 49551,
+      "id": "hide_floats",
+      "year": 135.756164383562
+    },
+    {
+      "day": 50671,
+      "id": "mineral_specific_gravity",
+      "year": 138.824657534247
+    },
+    {
+      "day": 51346,
+      "id": "phosphate_dressing",
+      "year": 140.67397260274
+    },
+    {
+      "day": 51495,
+      "id": "iron_assaying",
+      "year": 141.082191780822
+    },
+    {
+      "day": 51622,
+      "id": "galley_navigation",
+      "year": 141.430136986301
+    },
+    {
+      "day": 51707,
+      "id": "sediment_provenance",
+      "year": 141.66301369863
+    },
+    {
+      "day": 52026,
+      "id": "pack_animals",
+      "year": 142.53698630137
+    },
+    {
+      "day": 52128,
+      "id": "bloomery_smelting",
+      "year": 142.816438356164
+    },
+    {
+      "day": 52353,
+      "id": "evacuation_relays",
+      "year": 143.432876712329
+    },
+    {
+      "day": 52901,
+      "id": "forge_welding",
+      "year": 144.934246575342
+    },
+    {
+      "day": 53050,
+      "id": "domesticated_mounts",
+      "year": 145.342465753425
+    },
+    {
+      "day": 53093,
+      "id": "casualty_transfer_records",
+      "year": 145.460273972603
+    },
+    {
+      "day": 53376,
+      "id": "wayfinding_stars",
+      "year": 146.235616438356
+    },
+    {
+      "day": 53683,
+      "id": "cavalry_infantry_liaison",
+      "year": 147.076712328767
+    },
+    {
+      "day": 53862,
+      "id": "sulfur_purification",
+      "year": 147.567123287671
+    },
+    {
+      "day": 54364,
+      "id": "mounted_scouts",
+      "year": 148.942465753425
+    },
+    {
+      "day": 54370,
+      "id": "wire_drawing",
+      "year": 148.958904109589
+    },
+    {
+      "day": 54737,
+      "id": "elephant_training",
+      "year": 149.964383561644
+    },
+    {
+      "day": 55071,
+      "id": "caravanserais",
+      "year": 150.879452054795
+    },
+    {
+      "day": 55539,
+      "id": "pressure_vessels",
+      "year": 152.161643835616
+    },
+    {
+      "day": 55738,
+      "id": "apprentice_contracts",
+      "year": 152.706849315068
+    },
+    {
+      "day": 55787,
+      "id": "experimental_controls",
+      "year": 152.841095890411
+    }
+  ],
+  "final": {
+    "active_inquiries": 3,
+    "completed_buildings": 5,
+    "day": 55930,
+    "food_consumption": 1625.37275049523,
+    "food_days": 92.5087015707064,
+    "food_eaten": 1592.56415069875,
+    "food_intake_ratio": 0.979814722631172,
+    "food_security": 0.979999999999999,
+    "knowledge_workers": 216,
+    "known": 144,
+    "material_stocks": {
+      "Clay": 44.9270970444791,
+      "Fiber Plants": 511.445815551071,
+      "Stone": 15.7476213958717,
+      "Timber": 71.6352979792344
+    },
+    "population": 6346,
+    "resource_deposits": 52,
+    "settled": true,
+    "year": 153.232876712329
+  },
+  "full_campaign_verified": false,
+  "initial": {
+    "active_inquiries": 3,
+    "completed_buildings": 0,
+    "day": 0,
+    "food_consumption": 0,
+    "food_days": 30.0,
+    "food_eaten": 0,
+    "food_intake_ratio": 1,
+    "food_security": 0.82,
+    "knowledge_workers": 4,
+    "known": 0,
+    "material_stocks": {
+      "Clay": 0.0,
+      "Fiber Plants": 10.0,
+      "Stone": 0.0,
+      "Timber": 12.0
+    },
+    "population": 120,
+    "resource_deposits": 0,
+    "settled": false,
+    "year": 0.0
+  },
+  "limitations": [
+    "One isolated seat, not a full world or a player campaign",
+    "Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling",
+    "No foreign acquisition, war or dependency-recovery scenario",
+    "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+    "Short or collapsed runs do not validate millennial pacing"
+  ],
+  "live_catalog": 361,
+  "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange",
+  "schema": 5,
+  "seed": 91420,
+  "simulated_days": 55930,
+  "stop_reason": "wall-time budget reached",
+  "target_days": 91250,
+  "target_reached": false,
+  "wall_seconds": 3600.128,
+  "implementation_base": "909be10",
+  "review_notes": [
+    "Process handle 66487 exited 0 after its wall-time budget; no live run remains on this handle.",
+    "Target was 250 years; achieved 153.232876712329 years. This is not a completed 250-year diagnostic.",
+    "Loaded catalog 361, before delivery-priority, textiles, manufacturing licenses, paper and stage-profiling changes.",
+    "The one-hour cap is elapsed wall time; concurrent validation and image work preclude an isolated performance benchmark.",
+    "The completed_buildings field counts five founding projects, not the complete settlement morphology.",
+    "No foreign acquisition, war, multiple seats or millennial campaign acceptance."
+  ]
+}

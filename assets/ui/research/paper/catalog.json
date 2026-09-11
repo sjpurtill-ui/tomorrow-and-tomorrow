@@ -823,7 +823,7 @@
       "domain": "knowledge",
       "id": "paper_making",
       "name": "Sheet Fiber Writing Material",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/printing_process.png",
@@ -2991,7 +2991,7 @@
       "domain": "production",
       "id": "fiber_pulp_beating",
       "name": "Fiber Pulp Beating",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/textile_rag_pulping.png",
@@ -3021,9 +3021,9 @@
   "live_art_complete": false,
   "live_count": 377,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 352,
+  "queued_count": 350,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 25
+  "verified_count": 27
 }
