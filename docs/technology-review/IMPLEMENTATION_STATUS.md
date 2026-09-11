@@ -633,3 +633,12 @@ When transport exclusion explains hunger and reserves suffice, the ruler's care 
 Validation: 30 cases pass, zero errors, failures, skips or orphans: 15 strategy (four new delivery/mixed/missing-metric/owned-controller cases), five shared-foundation, seven material-planner, three research-viability. Logs /tmp/tt-provision-strategy.log and /tmp/tt-provision-test*.log. The new cases cover continued training suspension, correct extra research domain, preserved low-reserve response, absence of resource mutation and actual owner-metric propagation. The existing research-budget tests still pass.
 
 No save shape changes. Scope: CivilizationController metric propagation, CivilizationStrategy priorities, LeaderPersonality shared classification/agenda, tests and review tracking. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 3d8404f. The running 250-year-target diagnostic remains at earlier 909be10 and cannot validate this change. Longer/varied behavioral pacing remains outstanding. Counts remain 361 discoveries / 21 images; canonical integration pending.
+
+
+## 52. Seed-cleaning illustration and strategy comparison in progress
+
+Added a visually reviewed Seed Cleaning illustration: a seated farmer sieves grain beside separated kernels and chaff. The square matte gouache image is bound explicitly, imported with a 768-pixel limit and mipmaps, and recorded in SEED_CLEANING_PROMPT.md. Headless import and all eleven atlas tests pass without errors, failures, skips or orphans. Logs /tmp/tt-seed-cleaning-*.log. Manifest: 361 live discoveries, 22 verified images, 339 queued live subjects toward the unchanged 5,000 goal.
+
+Started a separate 18,250-day comparison at simulation base c53e6bd, 361 discoveries, corrected delivery priorities, 1,200-second wall cap. Session 70191; log /tmp/tt-delivery-priorities-fifty-year.log; planned report /tmp/tt-delivery-priorities-fifty-year.json. This run and the 250-year-target baseline session 66487 remain incomplete at this checkpoint. Poll their handles; do not infer completion or restart from a temporary observation timeout. Neither establishes millennial/full-world acceptance.
+
+Scope: Seed Cleaning art/import/prompt, ResearchVisuals binding, manifest and tracking; no simulation/save change. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base c53e6bd. Native presentation unverified; canonical integration outstanding.
