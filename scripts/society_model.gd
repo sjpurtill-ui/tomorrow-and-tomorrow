@@ -244,7 +244,7 @@ func evaluate_capacities(_context:Dictionary)->Dictionary:
 		"ecology":clampf(ecology+effect("ecology_recovery")*0.20-effect("ecological_pressure")*0.18-effect("pollution")*0.12,0.01,1.0),
 		"institutions":clampf(institutional_support+effect("state_capacity")*0.22+effect("legitimacy")*0.12,0.02,1.0),
 		"security":clampf(security+effect("security_efficiency")*0.18+effect("warfare_readiness")*0.12,0.02,1.0),
-		"culture":clampf(cohesion*0.52+legitimacy*0.25+diversity*0.12+effect("cohesion")*0.11,0.02,1.0)
+		"culture":clampf(cohesion*0.52+legitimacy*0.25+diversity*0.12+effect("cohesion")*0.11+preload("res://scripts/artifact_collection.gd").bonus("culture")*.12,0.02,1.0)
 	}
 	# An office holder changes execution, judgment and coordination in the same
 	# canonical systems shown to the player. A merely impressive dossier can

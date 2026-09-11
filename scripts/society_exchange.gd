@@ -4,6 +4,7 @@ extends RefCounted
 const PERSONALITY=preload("res://scripts/leader_personality.gd")
 const COLLECTION_LIMIT:=32768 # Multiple acquisition records across the 5,000-discovery history.
 const CONTACT_LIMIT:=1024
+const Artifacts=preload("res://scripts/artifact_collection.gd")
 const CONTACT_RADIUS:=2.0
 const OBJECTS:={"clay_shaping":["Clay trial vessel","Clay"],"pit_firing":["Fired clay trial piece","Clay"],"cordage":["Braided cord sample","Fiber Plants"],"basketry":["Woven container sample","Fiber Plants"],"stone_sorting":["Selected cutting stone","Stone"],"joinery":["Fitted timber joint","Timber"],"tallies":["Marked counting stick","Timber"]}
 const CULTURE:=["oral_epics","festival_calendar","public_theatre","civic_games","comparative_chronicles","public_libraries","customary_law"]
@@ -27,6 +28,15 @@ static func valid(value:Variant)->bool:
 	if not preload("res://scripts/research_licenses.gd").valid(value.get("production_licenses",{})):return false
 	for key:String in ["collections","evidence","origins","connections","outbound"]:
 		if not value[key] is Dictionary or value[key].size()>(CONTACT_LIMIT if key in ["connections","outbound"] else COLLECTION_LIMIT):return false
+	if value.has("artifact_sites"):
+		if not value.artifact_sites is Dictionary or value.artifact_sites.size()>COLLECTION_LIMIT:return false
+		for site:Variant in value.artifact_sites:
+			if not short_text(site) or value.artifact_sites[site]!=true:return false
+	if value.has("artifact_bonuses"):
+		if not value.artifact_bonuses is Dictionary:return false
+		for amount:Variant in value.artifact_bonuses.values():
+			if not number(amount) or amount<0:return false
+	if value.has("museum_revenue") and (not number(value.museum_revenue) or value.museum_revenue<0):return false
 	if value.migration_policy not in ["balanced","welcome","consolidate"] or value.sharing_policy not in ["open","selective","guarded"]:return false
 	if not number(value.last_day) or not number(value.exposure) or value.exposure<0 or value.exposure>1:return false
 	if not value.integration is Array or value.integration.size()>128 or not value.history is Array or value.history.size()>64:return false
@@ -88,6 +98,11 @@ static func valid_item(item:Variant)->bool:
 		if not short_text(item[field]):return false
 	for field:String in ["observed_day","returned_day","study","work"]:
 		if not number(item[field]) or item[field]<0:return false
+	for field:String in ["rarity","catalogue_id","held_days"]:
+		if item.has(field) and (not number(item[field]) or item[field]<0):return false
+	if item.get("rarity",0)>4 or item.get("catalogue_id",0)>4095:return false
+	if item.has("gift_receipts") and not text_list(item.gift_receipts,64):return false
+	if item.has("exhibited") and not item.exhibited is bool:return false
 	return item.study<=1 and item.work>=1 and item.work<=100000 and item.position is Dictionary and number(item.position.get("x")) and number(item.position.get("z")) and text_list(item.signals,30)
 static func valid_mission(mission:Dictionary)->bool:
 	if not preload("res://scripts/communications_links.gd").valid_receipts(mission):return false
@@ -379,6 +394,12 @@ static func sample_ground(system:Node,mission:Dictionary,position:Vector2,day:in
 	if system._position_is_revealed(position):return
 	var ground:Dictionary=system.ground_survey_authority.call(position)
 	if ground.get("biome","")=="water":return
+	var artifact:=Artifacts.find_at(WorldSimulation.state.world_seed,position,day)
+	var seen:Dictionary=data().get("artifact_sites",{})
+	if not Artifacts.site_claimed(artifact.id) and seen.size()<COLLECTION_LIMIT:
+		seen[artifact.id]=true;data()["artifact_sites"]=seen
+		mission.carried_collections.append(artifact)
+		if mission.carried_collections.size()>=maxi(1,int(mission.personnel)/2):return
 	var potentials:Dictionary=ground.get("resource_potentials",{})
 	if potentials.is_empty():potentials=preload("res://scripts/civilization_day.gd").context(position).get("environment_profile",{}).get("resource_potentials",{})
 	var choices:={
@@ -464,6 +485,7 @@ static func advance(day:int)->void:
 	data().last_day=day
 	preload("res://scripts/sec_specialist_supply.gd").advance(day)
 	preload("res://scripts/scholar_visits.gd").advance(day)
+	Artifacts.advance(elapsed)
 	for id:String in data().connections:
 		var view_id:="human" if id=="player" and WorldSimulation.actor_id!="player" else id
 		var index:int=WorldSimulation.world._civilization_index(view_id)
