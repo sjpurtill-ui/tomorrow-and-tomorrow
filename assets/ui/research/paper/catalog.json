@@ -3023,7 +3023,7 @@
       "domain": "production",
       "id": "core_formed_glass",
       "name": "Core-Formed Glass",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/glass_blowing.png",
@@ -3031,7 +3031,7 @@
       "domain": "production",
       "id": "glass_blowing",
       "name": "Glass Blowing",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/mold_blown_glass.png",
@@ -3069,9 +3069,9 @@
   "live_art_complete": false,
   "live_count": 383,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 356,
+  "queued_count": 354,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 27
+  "verified_count": 29
 }

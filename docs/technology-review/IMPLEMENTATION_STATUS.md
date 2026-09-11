@@ -793,3 +793,12 @@ Base `d34336c`. Resource recognition/survey passes now lazily calculate effectiv
 Validation: completed 400-day candidate exactly matches recorded initial/final/annual snapshots, discoveries and bottlenecks from the committed pre-change baseline, including both settlements. Archive: `pacing/survey-pass-comparison.json`. All 52 relevant tests pass (9 resource recognition, 12 geoscience, 12 city resources, 19 owned simulation), zero errors/failures/skips/orphans.
 
 This removes repeated workforce/modifier evaluation from the deposit loop. An overall wall-time speedup is not proven under concurrent load, and the short comparison does not prove all-state or millennial equivalence. The active handle 29066 was polled and remains live on older code; it does not incorporate this change. No save/interface changes or canonical integration. Shared conflict: ResourceSystem. Catalog remains 383; goal remains active.
+
+
+## 69. Glass blowing and core-forming illustrations
+
+Base `cd78a6a`. Added two reviewed paper/gouache illustrations, explicit discovery bindings and full built-in-tool prompt records: `glass_blowing` and `core_formed_glass`. The core-forming output received a targeted edit removing an ambiguous dangling strand and bowl; the retained trail connects the tool to the supported core. Images depict distinct processes while preserving the established palette, texture and broad ivory space.
+
+Both textures imported with a 768-pixel limit and mipmaps. Import completed successfully; all 11 visual-atlas tests passed with zero errors, failures, skips or orphans. Manifest: 383 live discoveries, 29 reviewed subject images, 354 queued live images. No save/gameplay changes. Shared conflict: research_visuals.gd. Native player presentation and canonical integration remain unverified.
+
+The existing profiled long-run handle 29066 was polled and remains live. Latest observed annual output: year 94, population 962, 83 discoveries, 35 primary settlement plots and 146 primary plot-history records. This is a completed interval, not the target's terminal result; the process loaded the earlier 377-discovery build.
