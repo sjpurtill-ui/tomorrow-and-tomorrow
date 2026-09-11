@@ -2911,7 +2911,7 @@
       "domain": "production",
       "id": "drop_spindles",
       "name": "Drop Spindles",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/warp_weighted_looms.png",
@@ -2941,9 +2941,9 @@
   "live_art_complete": false,
   "live_count": 367,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 345,
+  "queued_count": 344,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 22
+  "verified_count": 23
 }

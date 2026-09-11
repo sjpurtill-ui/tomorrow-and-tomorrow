@@ -669,3 +669,10 @@ The 361-discovery simulation at c53e6bd completed 18,250 days in 365.991 seconds
 The revised run learned Route Memory, Basketry, Graded Roads, Public Stores, River Craft, Coastal Watercraft and Caravanserais by the endpoint. Its actual plan correctly describes delivery of available food and emphasizes logistics, with training suspended. However, intake remains 0.969247 versus old-priority 0.969415. Military ration delivery is 6.747616 of 10.08 required (0.669406 coverage). The priority response changes research breadth; it has not resolved inadequate ration delivery or proved better overall outcomes. Longer, varied and multi-civilization scenarios remain necessary.
 
 This evidence predates textiles, and neither result validates millennial pacing. Current totals remain 367 discoveries / 22 images. No simulation/save changes in this evidence record. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base ca39ca4. Canonical integration remains outstanding.
+
+
+## 56. Drop-spindle illustration
+
+Added a square paper-and-gouache image of a textile worker drafting fiber into a hanging spindle. A targeted edit placed the guiding hand on the single continuous thread and removed an unrelated dangling thread. The final image was visually inspected, explicitly bound to Drop Spindles and imported at a 768-pixel limit with mipmaps. Prompt and edit are recorded in DROP_SPINDLES_PROMPT.md.
+
+Headless imports and eleven atlas tests pass, zero errors, failures, skips or orphans; logs /tmp/tt-spindle-*.log. Manifest: 367 live discoveries, 23 verified images, 344 queued live subjects. No simulation or save change. Native rendering remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 6d58f23. Scope: image/import/prompt, ResearchVisuals binding, manifest and tracking. Canonical integration outstanding.

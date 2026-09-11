@@ -1,0 +1,9 @@
+# Drop Spindles
+
+Built-in image generation using apprentice_contracts.png as style reference. The final edited output was visually inspected for a coherent continuous thread, guiding hand and suspended spindle, with the approved matte gouache palette and ivory paper composition.
+
+Generate a square technology-tree illustration for Drop Spindles. Reference image is ONLY the style reference: matte gouache, dry brushed earthy pigment on fibrous warm ivory paper, flattened simplified figures, muted ochre, terracotta, olive and charcoal, large quiet negative space. A new scene: an early textile worker seated on a low stool in the lower right quarter, one hand raised at chest height gently drafting a pale bundle of prepared plant fibers, the other guiding a thin vertical thread. A wooden drop spindle with a small round clay whorl hangs clearly below the hands beside the worker's knee, suspended from the taut thread, above the ground. Small basket of pale fiber and two wound yarn skeins on the ground. Simple loose linen clothes, dark simplified face. Minimal low ochre ground marks only; top sixty percent empty warm ivory paper. Make spindle, whorl and thread mechanically coherent and easy to read. No spinning wheel, loom, machinery, extra limbs, text, labels, borders, watermark, photo detail or glossy effects. Match the reference's restrained historical illustration aesthetic but create a distinct new composition.
+
+Targeted edit:
+
+Edit only the thread and lower guiding hand. The person must handle ONE continuous thread running from the fiber bundle in the raised hand down to the hanging spindle. Move the lower guiding hand slightly left so its fingertips pinch that same vertical thread midway between the raised hand and spindle. Remove the unrelated second dangling thread near the lap. Keep the spindle, whorl, face, body, clothing, basket, yarn, landscape, exact square composition, textured ivory negative space and matte gouache style unchanged.
