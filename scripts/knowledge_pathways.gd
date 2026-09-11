@@ -69,11 +69,12 @@ static func routes_for(entry:Dictionary,known:Array,context:Dictionary,source:Di
 		if String(route.id).begins_with("experimental") and float(route.support)<.25:route.ready=false
 	return result
 
-static func chosen(entry:Dictionary,day:int=-1)->Dictionary:
+# The legacy day field is an authoring/order hint, never an eligibility gate.
+# Time is still required to do research; calendar age cannot replace foundations.
+static func chosen(entry:Dictionary,_day:int=-1)->Dictionary:
 	var result:Dictionary={};var best:=-1.0
 	for route:Dictionary in routes(entry):
 		if not bool(route.ready):continue
-		if day>=0 and day<int(entry.get("day",0)) and not bool(route.get("imported",false)):continue
 		var score:=float(route.support)+float(route.progress_multiplier)+(0.05 if route.id=="local" else .1)
 		if score>best:result=route;best=score
 	return result
@@ -97,7 +98,6 @@ static func missing(entry:Dictionary,day:int)->Array[String]:
 			var names:Array[String]=[]
 			for id:String in group:names.append(_name(id))
 			reasons.append("one of: "+" or ".join(names))
-		if day<int(entry.get("day",0)) and not route.get("imported",false):reasons.append("local inquiry not yet established; studied foreign practice can introduce it")
 		if reasons.is_empty():reasons.append("more supporting observations")
 		if not found or reasons.size()<best.size():best=reasons;found=true
 	return best

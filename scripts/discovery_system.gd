@@ -365,7 +365,7 @@ func _redistribute_stranded_attention(current_day:int)->void:
 			live_channels.append({"dynamic":dynamic_id,"subcategory":subcategory,"channel":channel,"candidate":candidate})
 	if live_channels.is_empty():
 		# A genuine evidence drought should not erase the player's broad emphasis.
-		# Leave the allocation waiting quietly; a later encounter/day gate will wake it.
+		# Leave the allocation waiting quietly; new evidence or foundations will wake it.
 		for entry in stranded:
 			var restored:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(entry.dynamic),{})
 			restored[String(entry.subcategory)]=int(restored.get(String(entry.subcategory),0))+int(entry.count)
@@ -931,7 +931,6 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 	var candidates:Array[Dictionary]=[]
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
-		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): continue
 		var viable:=false
 		for route:Dictionary in Pathways.routes_for(entry,known,{}):
 			if route.ready:viable=true;break

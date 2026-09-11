@@ -21,7 +21,7 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		if int(names.get(String(entry.get("name","")).strip_edges().to_lower(),0))!=1:errors.append(id+": duplicate or missing display identity")
 		for field:String in ["name","observation","production_contract"]:
 			if not entry.get(field) is String or String(entry[field]).strip_edges().is_empty():errors.append(id+": missing "+field)
-		if not entry.get("day") is int or int(entry.day)<0:errors.append(id+": invalid earliest day")
+		if not entry.get("day") is int or int(entry.day)<0:errors.append(id+": invalid legacy ordering day")
 		if not (entry.get("chance") is float or entry.get("chance") is int) or not is_finite(float(entry.chance)) or float(entry.chance)<=0 or float(entry.chance)>1:errors.append(id+": invalid discovery chance")
 		var effects:Variant=entry.get("effects",{})
 		if not effects is Dictionary:errors.append(id+": effects must be a dictionary");continue

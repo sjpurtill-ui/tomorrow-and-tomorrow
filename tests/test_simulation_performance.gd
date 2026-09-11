@@ -143,7 +143,7 @@ func test_society_presentation_cache_tracks_values_and_owns_its_results()->void:
 			assert_dict(model.identity_snapshot(state)).is_equal(normalized.identity)
 			state["lived"]={"centralization":float(i)/2.0,"hierarchy":.9}
 
-func test_candidate_existence_keeps_material_and_day_gates()->void:
+func test_candidate_existence_matches_foundation_and_material_eligibility()->void:
 	WorldSimulation.create_actor("candidate_check",789)
 	WorldSimulation.scoped("candidate_check",func()->void:
 		var research:=WorldSimulation.discovery

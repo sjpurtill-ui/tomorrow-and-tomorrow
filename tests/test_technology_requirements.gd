@@ -43,7 +43,7 @@ func test_import_can_support_the_alternative_and_never_skip_common_foundations()
 	assert_bool(imported_ready).is_true()
 	for route:Dictionary in P.routes_for(entry,["formal_archives"],{},item):assert_bool(route.ready).is_false()
 
-func test_imported_alternate_before_local_date_records_actual_route()->void:
+func test_imported_alternate_records_actual_route_without_calendar_gate()->void:
 	GameState.elapsed_days=1
 	GameState.known_discoveries.assign(["public_schools","formal_archives"])
 	var record:={"id":"neighbor:public_libraries","kind":"knowledge","name":"Copied library methods","source_id":"neighbor","source_name":"Neighbor","position":{"x":30.0,"z":0.0},"observed_day":0,"returned_day":1,"discovery_id":"public_libraries","study":1.0,"work":90.0,"signals":["research"]}
@@ -88,3 +88,35 @@ func test_legacy_opponent_candidates_use_the_same_alternative_foundations()->voi
 	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):
 		if entry.id=="public_libraries":found=true
 	assert_bool(found).is_true()
+
+func test_local_ready_foundations_do_not_wait_for_a_calendar_date()->void:
+	GameState.elapsed_days=1
+	GameState.known_discoveries.assign(["public_schools","formal_archives"])
+	var entry:=DiscoverySystem.discovery_definition("public_libraries")
+	assert_bool(int(entry.day)>1).is_true()
+	assert_bool(P.ready(entry,1)).is_true()
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,1)).is_true()
+	assert_array(P.missing(entry,1)).is_empty()
+	assert_str(String(P.chosen(entry,1).id)).is_equal("manuscript")
+	assert_bool("public_libraries" in GameState.known_discoveries).is_false()
+	GameState.known_discoveries.erase("formal_archives")
+	assert_bool(P.ready(entry,2000000)).is_false()
+
+func test_rivals_use_foundations_without_a_separate_date_gate()->void:
+	GameState.elapsed_days=1
+	var civ:={"discovery_profile":{"technologies":["public_schools","formal_archives"]},"environment_profile":{},"production":1.0,"logistics":1.0}
+	var candidates:Array[String]=[]
+	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):candidates.append(entry.id)
+	assert_bool("public_libraries" in candidates).is_true()
+	civ.discovery_profile.technologies.erase("formal_archives")
+	candidates.clear()
+	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):candidates.append(entry.id)
+	assert_bool("public_libraries" in candidates).is_false()
+
+func test_legacy_ordering_day_cannot_change_route_readiness_or_rate()->void:
+	GameState.known_discoveries.assign(["public_schools","formal_archives"])
+	var entry:=DiscoverySystem.discovery_definition("public_libraries").duplicate(true)
+	var baseline:=P.chosen(entry,1)
+	entry.day=2000000000
+	assert_dict(P.chosen(entry,1)).is_equal(baseline)
+	assert_array(P.missing(entry,1)).is_empty()
