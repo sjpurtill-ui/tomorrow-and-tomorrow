@@ -22,7 +22,7 @@ func run()->void:
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/chemical_process_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/mechanics_knowledge.gd").entries(),discovery.technology_catalog))
 	for entry:Dictionary in load("res://scripts/resource_knowledge_catalog.gd").entries():
-		if entry.id=="mine_airways":errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate([entry],discovery.technology_catalog))
+		if entry.id in ["mine_airways","blast_furnace"]:errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate([entry],discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/geoscience_knowledge.gd").entries(),discovery.technology_catalog))
 	var authored_routes:=0
 	for entry:Dictionary in discovery.technology_catalog:

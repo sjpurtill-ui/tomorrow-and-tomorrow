@@ -5,6 +5,60 @@ extends RefCounted
 # perform relevant work.  "effects" are small, composable causal modifiers used
 # by the resource, food, settlement, health, and state simulations.
 
+const EXPERIMENTAL_SUPPLIES={
+  "lime_burning": {
+    "Limestone": 5.0
+  },
+  "lime_mortar": {
+    "Limestone": 5.0,
+    "Fine Sand": 3.0
+  },
+  "copper_smelting": {
+    "Copper Ore": 5.0
+  },
+  "copper_casting": {
+    "Copper Ore": 5.0,
+    "Clay": 3.0
+  },
+  "bronze_alloying": {
+    "Copper Ore": 5.0,
+    "Tin Ore": 3.0
+  },
+  "bloomery_smelting": {
+    "Iron Ore": 5.0
+  },
+  "forge_welding": {
+    "Iron Ore": 5.0
+  },
+  "hardened_edges": {
+    "Iron Ore": 5.0
+  },
+  "coke_firing": {
+    "Coal": 5.0
+  },
+  "refractory_furnaces": {
+    "Refractory Clay": 5.0
+  },
+  "blast_furnace": {
+    "Iron Ore": 10.0,
+    "Coal": 10.0,
+    "Limestone": 5.0
+  },
+  "sulfur_purification": {
+    "Sulfur": 5.0
+  },
+  "phosphate_dressing": {
+    "Phosphate Rock": 5.0
+  },
+  "graphite_marking": {
+    "Graphite": 2.0
+  },
+  "graphite_crucibles": {
+    "Graphite": 5.0,
+    "Refractory Clay": 5.0
+  }
+}
+
 static func entries() -> Array[Dictionary]:
 	return [
 		_entry("stone_sorting","Stone Selection","Materials",20,0.010,[],[_r("Stone","recognized")],["stone","crafting"],"Workers learn which local stones hold an edge, split cleanly, or survive repeated blows.",{"survey_speed":0.03,"tool_quality":0.04}),
@@ -60,6 +114,14 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 	if id in ["stone_sorting","controlled_flaking","timber_grading","fiber_grading","clay_testing","salt_working","ore_assaying","iron_assaying","coal_grading"]:
 		for requirement:Dictionary in resource_requirements:
 			if requirement.stage in ["recognized","surveyed"]:requirement["sample_sufficient"]=true
+	var imported_basis:Dictionary=EXPERIMENTAL_SUPPLIES.get(id,{})
+	for requirement:Dictionary in resource_requirements:
+		if imported_basis.has(requirement.resource):requirement.minimum_stock=imported_basis[requirement.resource]
 	var result:={"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}
+	if id=="blast_furnace":
+		result.requires=["refractory_furnaces","rope_rigging"]
+		result["requires_all"]=result.requires.duplicate()
+		result["learning_routes"]=[{"id":"mine_supported","label":"Mine-supported furnace scale-up","requires_all":["mine_drainage"]},{"id":"metallurgical","label":"Scaling forced-air iron reduction","requires_all":["bloomery_smelting"]}]
+		result["production_contract"]="Preserves the mining-supported approach while allowing established forced-air iron reduction to support furnace scale-up. Refractory practice, lifting organization and actual iron, coal and limestone supplies remain necessary. Imported experimental stocks grant no discovery or operating furnace."
 	if id=="mine_airways":result["production_contract"]="Clears the coal ventilation access blocker after mine-airway knowledge is learned. Routes, construction staffing, logistics, access preparation and extraction labor remain required; no coal stock is granted. Adopted practice also contributes bounded mine safety."
 	return result

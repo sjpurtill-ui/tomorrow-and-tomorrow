@@ -277,7 +277,7 @@ func select(id:String,open_detail:bool=false)->void:
 					examine.tooltip_text=String(result.get("message",result.get("error","")));examine.disabled=true
 				)
 				detail_body.add_child(examine)
-		if item.exposed and (not item.known or preload("res://scripts/research_partnerships.gd").pending(String(item.id))) and (preload("res://scripts/research_purchase.gd").available() or preload("res://scripts/scholar_visits.gd").available()):
+		if item.exposed and (not item.known or preload("res://scripts/research_partnerships.gd").pending(String(item.id))) and (preload("res://scripts/research_purchase.gd").available() or preload("res://scripts/scholar_visits.gd").available() or preload("res://scripts/research_materials.gd").available(String(item.id))):
 			var purchase:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
 			purchase.subject=String(item.id);detail_body.add_child(purchase)
 		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)

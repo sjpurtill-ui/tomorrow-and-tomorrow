@@ -881,6 +881,7 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 			for requirement:Dictionary in entry.get("resource_requirements",[]):
 				if _resource_requirements_met([requirement]):continue
 				var alternative:=" or a returned, studied specimen" if bool(requirement.get("sample_sufficient",false)) and String(requirement.get("stage","recognized")) in ["recognized","surveyed"] else ""
+				if float(requirement.get("minimum_stock",0.0))>0:alternative+=" or %.1f in stores" % float(requirement.minimum_stock)
 				missing.append("%s: %s access%s" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized")),alternative])
 		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
 		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")

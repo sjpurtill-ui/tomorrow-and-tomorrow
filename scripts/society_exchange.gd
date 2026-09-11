@@ -89,7 +89,12 @@ static func valid_item(item:Variant)->bool:
 static func valid_mission(mission:Dictionary)->bool:
 	if (mission.has("research_mode") or mission.has("scholar_contract") or mission.has("scholar_provisions")) and not mission.has("research_subject"):return false
 	if mission.has("scholar_contract") and mission.get("research_mode","")!="scholar":return false
-	if mission.get("research_mode","purchase") not in ["purchase","scholar","partnership"]:return false
+	if mission.has("scholar_provisions") and mission.get("research_mode","")!="scholar":return false
+	if mission.get("research_mode","purchase") not in ["purchase","scholar","partnership","materials"]:return false
+	var materials:bool=mission.get("research_mode","")=="materials"
+	for field:String in ["materials_requested","material_cargo","materials_delivered"]:
+		if mission.has(field) and not materials:return false
+	if materials and not preload("res://scripts/research_materials.gd").valid(mission):return false
 	if mission.has("partnership_phase") and (mission.get("research_mode","")!="partnership" or mission.partnership_phase not in ["propose","exchange"]):return false
 	if mission.get("research_mode","")=="partnership" and (not mission.has("research_subject") or not mission.has("partnership_phase")):return false
 	if mission.has("scholar_provisions") and (not number(mission.scholar_provisions) or mission.scholar_provisions<0):return false
@@ -399,7 +404,9 @@ static func sample_ground(system:Node,mission:Dictionary,position:Vector2,day:in
 static func returned(mission:Dictionary,day:int)->Array[Dictionary]:
 	var records:Array[Dictionary]=[]
 	if bool(mission.get("exchange_returned",false)):return records
+	if mission.get("research_mode","")=="materials" and day<int(mission.get("return_day",day+1)):return records
 	mission["exchange_returned"]=true
+	if mission.get("research_mode","")=="materials":records.append_array(preload("res://scripts/research_materials.gd").deliver(mission,day))
 	preload("res://scripts/research_purchase.gd").refund(mission)
 	for item:Dictionary in mission.get("carried_collections",[]):
 		if (item.get("research_purchase",false) or item.get("partnership_protocol",false) or item.get("research_partnership",false)) and mission.get("research_refused",false):continue

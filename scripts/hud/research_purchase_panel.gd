@@ -1,6 +1,7 @@
 extends VBoxContainer
 const Purchase=preload("res://scripts/research_purchase.gd")
 const Partnerships=preload("res://scripts/research_partnerships.gd")
+const Materials=preload("res://scripts/research_materials.gd")
 const Scholars=preload("res://scripts/scholar_visits.gd")
 var modes:OptionButton
 var subject:=""
@@ -15,6 +16,7 @@ func _ready()->void:
 	if Purchase.available():modes.add_item("Purchase a validated study");modes.set_item_metadata(modes.item_count-1,"purchase")
 	if Scholars.available():modes.add_item("Invite a scholar for 60 days");modes.set_item_metadata(modes.item_count-1,"scholar")
 	if Partnerships.available():modes.add_item("Joint investigation and findings exchange");modes.set_item_metadata(modes.item_count-1,"partnership")
+	if Materials.available(subject):modes.add_item("Purchase experimental materials");modes.set_item_metadata(modes.item_count-1,"materials")
 	modes.item_selected.connect(func(_index:int)->void:refresh())
 	sources=OptionButton.new();sources.size_flags_horizontal=SIZE_EXPAND_FILL;sources.clip_text=true;add_child(sources)
 	for civ:Dictionary in WorldSimulation.world.civilizations:
@@ -41,6 +43,7 @@ func refresh()->void:
 
 func support()->Script:
 	match modes.get_selected_metadata():
+		"materials":return Materials
 		"scholar":return Scholars
 		"partnership":return Partnerships
 	return Purchase
