@@ -350,6 +350,17 @@ static func invite_households(mission:Dictionary,source:String,source_name:Strin
 	mission["migrant_reservation"]=result
 	mission["recruitment_reason"]="%d people accepted the invitation and are traveling with the party." % int(result.count)
 
+# These investigations can use a returned physical sample. This never claims
+# surveyed local reserves or supplies accessible/developed material gates.
+const SPECIMEN_RESOURCES={"clay_shaping":"Clay","stone_sorting":"Stone","fiber_grading":"Fiber Plants","timber_grading":"Timber","controlled_flaking":"Flint","salt_working":"Salt","herbal_classification":"Medicinal Plants","ore_assaying":"Copper Ore","iron_assaying":"Iron Ore","coal_grading":"Coal","soil_assays":"Fertile Soil"}
+static func studied_resource_sample(resource:String)->bool:
+	if resource.is_empty():return false
+	for item:Dictionary in data().collections.values():
+		if item.get("kind","")!="specimen" or float(item.get("study",0))<1.0:continue
+		if int(item.get("returned_day",0))>int(WorldSimulation.state.elapsed_days):continue
+		if SPECIMEN_RESOURCES.get(String(item.get("discovery_id","")),"")==resource:return true
+	return false
+
 static func sample_ground(system:Node,mission:Dictionary,position:Vector2,day:int)->void:
 	if not system.ground_survey_authority.is_valid() or mission.carried_collections.size()>=maxi(1,int(mission.personnel)/2):return
 	if system._position_is_revealed(position):return

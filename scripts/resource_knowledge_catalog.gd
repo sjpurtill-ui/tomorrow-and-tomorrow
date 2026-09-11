@@ -57,4 +57,7 @@ static func _r(resource_name: String, stage: String, minimum_stock := 0.0) -> Di
 	return {"resource":resource_name,"stage":stage,"minimum_stock":minimum_stock}
 
 static func _entry(id: String,name: String,direction: String,day: int,chance: float,requires: Array,resource_requirements: Array,signals: Array,observation: String,effects: Dictionary) -> Dictionary:
+	if id in ["stone_sorting","controlled_flaking","timber_grading","fiber_grading","clay_testing","salt_working","ore_assaying","iron_assaying","coal_grading"]:
+		for requirement:Dictionary in resource_requirements:
+			if requirement.stage in ["recognized","surveyed"]:requirement["sample_sufficient"]=true
 	return {"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}

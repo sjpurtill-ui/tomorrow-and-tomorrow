@@ -394,3 +394,17 @@ Pacing diagnostic schema 3 additionally records the final resource stages/access
 ## 26. Mine Airways subject art
 
 Added and visually inspected a square paper-and-gouache illustration: two miners observe a linen airflow indicator and adjust a timber partition outside an early mine. The low composition, warm ivory texture, olive/ochre earth and simplified figures follow the approved reference. It is explicitly bound to mine_airways and imported at a 768-pixel limit with mipmaps. Eleven atlas tests pass with no errors, failures, skips or orphans; headless import passes. Native player rendering remains unverified. The live manifest now has 317 subjects, eleven verified images and 306 queued images. Prompt and source asset are recorded in assets/ui/research/paper. No save behavior changes.
+
+
+## 27. Longer causal-resource pacing evidence
+
+The corrected resource-enabled scenario ran 14,426 days (39.52 years) before its 240-second wall limit, at 60.10 simulated days/second. It did not complete the requested fifty years. Population reached 247, with eight Knowledge workers, 26 discoveries, two active inquiries and five completed buildings. Stocks ended at approximately Timber 366.32, Fiber 272.80, Clay 209.75 and Stone zero; food reserves were 120.36 days. Clay Vessels appeared on day 12,649 (year 34.65), after which clay stocks grew. Stone exhaustion and the unchanged building count warrant further diagnosis. This is one isolated ruler under the explicitly synthetic geography assumptions, not whole-history acceptance.
+
+Machine-readable evidence: pacing/causal-resources-reference.json. Simulation base ce264d1; later changes during the run were separate harness/art changes. A follow-up using schema 3 includes material-stage and allocation diagnostics. Millennial pacing, geographic variety and foreign recovery remain unverified.
+
+
+## 28. Returned specimens support material identification
+
+Fixed a recovery gap: physically returned, fully studied exploration specimens previously supplied a research-route signal but could not satisfy the matching local-material gate. Explicit sample permissions now cover Clay Vessels, Stone Selection, Controlled Flaking, Fiber Grading, Timber Grading, Salt Working, Comparative Ore Assay, Iron Ore Assay and Coal Grading. Clay Testing can also use the studied clay specimen. The existing specimen collection/study flow supplies this evidence; no free knowledge, local deposits, stocks or extraction access are created. Requirements for accessible/developed materials cannot be bypassed even if a sample permission is present. Causal prerequisites remain mandatory. Quarry Reading and other location-dependent investigations retain their local requirements.
+
+Validation: 69 cases pass with zero errors, failures, skips or orphans: five new specimen cases, 26 society exchange, twelve technology requirements, nine tree, ten purchase and seven reverse engineering. Cases cover physical specimen kind, full study, return date, wrong material, missing foundations, extraction-stage rejection, explicit permission, normalized catalog gates and saved collection round-trip. Logs: /tmp/tt-specimen-*.log. No saved shape changes: legacy specimen identities map to their existing resource subjects. Aggregate economic import supply and industrial knowledge without local extraction remain unfinished. Catalog and art totals remain 317 and eleven. Shared integration scope includes DiscoverySystem, SocietyModel, SocietyExchange and the resource catalog; no canonical integration or player launch.

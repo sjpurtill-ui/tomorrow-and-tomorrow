@@ -679,6 +679,8 @@ func _resource_requirements_met(requirements: Array) -> bool:
 				break
 		if not found and float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>=minimum_stock and minimum_stock>0.0:
 			found=true
+		if not found and bool(requirement.get("sample_sufficient",false)) and needed_stage in ["recognized","surveyed"]:
+			found=preload("res://scripts/society_exchange.gd").studied_resource_sample(resource_name)
 		if not found:
 			return false
 	return true

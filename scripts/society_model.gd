@@ -22,7 +22,7 @@ const OFFICE_DYNAMICS:Dictionary={
 const RESOURCE_GATES:Dictionary={
 	"seed_selection":[{"resource":"Fertile Soil","stage":"recognized"}],
 	"cordage":[{"resource":"Fiber Plants","stage":"recognized"}],"basketry":[{"resource":"Fiber Plants","stage":"accessible"}],
-	"charcoal":[{"resource":"Timber","stage":"accessible"}],"clay_shaping":[{"resource":"Clay","stage":"recognized"}],
+	"charcoal":[{"resource":"Timber","stage":"accessible"}],"clay_shaping":[{"resource":"Clay","stage":"recognized","sample_sufficient":true}],
 	"pit_firing":[{"resource":"Clay","stage":"accessible"},{"resource":"Timber","stage":"accessible"}],
 	"joinery":[{"resource":"Timber","stage":"accessible"}],"well_siting":[{"resource":"Freshwater","stage":"recognized"}],
 	"wound_cleaning":[{"resource":"Freshwater","stage":"accessible"}],"clean_water":[{"resource":"Freshwater","stage":"accessible"}],
