@@ -35,7 +35,7 @@ static func valid(value:Variant)->bool:
 	for subject:Variant in value.evidence:
 		var key:Variant=value.evidence[subject]
 		if not subject is String or not key is String or not value.collections.has(key):return false
-		if value.collections[key].discovery_id!=subject or value.collections[key].study!=1:return false
+		if value.collections[key].discovery_id!=subject or value.collections[key].study!=1 or value.collections[key].get("partnership_protocol",false):return false
 	for origin:Variant in value.origins.values():
 		if not origin is Dictionary or not origin.has_all(["route","label","requires","collection_id","day"]):return false
 		if not short_text(origin.route) or String(origin.route).is_empty() or not short_text(origin.label) or not short_text(origin.collection_id) or not number(origin.day) or origin.day<0 or not text_list(origin.requires,20):return false
@@ -67,6 +67,13 @@ static func valid_item(item:Variant)->bool:
 	if not item is Dictionary or not item.has_all(["id","kind","name","source_id","source_name","position","observed_day","returned_day","discovery_id","study","work","signals"]):return false
 	if item.kind not in ["artifact","knowledge","culture","specimen"]:return false
 	if item.has("research_purchase") and (not item.research_purchase is bool or item.kind!="knowledge"):return false
+	for flag:String in ["partnership_protocol","research_partnership"]:
+		if item.has(flag) and (not item[flag] is bool or item.kind!="knowledge"):return false
+	if item.get("partnership_protocol",false) and item.get("research_partnership",false):return false
+	if item.get("partnership_protocol",false) or item.get("research_partnership",false):
+		var protocol:bool=item.get("partnership_protocol",false)
+		if item.get("work")!=(180.0 if protocol else 60.0) or item.get("research_purchase",false):return false
+		if item.get("id")!=("partnership_protocol:" if protocol else "partnership_result:")+String(item.get("source_id",""))+":"+String(item.get("discovery_id","")):return false
 	for field:String in ["id","name","source_id","source_name","discovery_id"]:
 		if not short_text(item[field]):return false
 	for field:String in ["observed_day","returned_day","study","work"]:
@@ -75,7 +82,9 @@ static func valid_item(item:Variant)->bool:
 static func valid_mission(mission:Dictionary)->bool:
 	if (mission.has("research_mode") or mission.has("scholar_contract") or mission.has("scholar_provisions")) and not mission.has("research_subject"):return false
 	if mission.has("scholar_contract") and mission.get("research_mode","")!="scholar":return false
-	if mission.get("research_mode","purchase") not in ["purchase","scholar"]:return false
+	if mission.get("research_mode","purchase") not in ["purchase","scholar","partnership"]:return false
+	if mission.has("partnership_phase") and (mission.get("research_mode","")!="partnership" or mission.partnership_phase not in ["propose","exchange"]):return false
+	if mission.get("research_mode","")=="partnership" and (not mission.has("research_subject") or not mission.has("partnership_phase")):return false
 	if mission.has("scholar_provisions") and (not number(mission.scholar_provisions) or mission.scholar_provisions<0):return false
 	if mission.has("scholar_contract"):
 		if not mission.scholar_contract is Dictionary or not preload("res://scripts/scholar_visits.gd").valid({mission.scholar_contract.get("id",""):mission.scholar_contract}):return false
@@ -375,7 +384,7 @@ static func returned(mission:Dictionary,day:int)->Array[Dictionary]:
 	mission["exchange_returned"]=true
 	preload("res://scripts/research_purchase.gd").refund(mission)
 	for item:Dictionary in mission.get("carried_collections",[]):
-		if item.get("research_purchase",false) and mission.get("research_refused",false):continue
+		if (item.get("research_purchase",false) or item.get("partnership_protocol",false) or item.get("research_partnership",false)) and mission.get("research_refused",false):continue
 		if data().collections.has(String(item.id)) or data().collections.size()>=COLLECTION_LIMIT:continue
 		var saved:=item.duplicate(true);saved.returned_day=day
 		data().collections[String(item.id)]=saved
@@ -438,12 +447,15 @@ static func advance(day:int)->void:
 	# Study competes within the existing Knowledge workforce, not a free team.
 	var study_work:=WorldSimulation.state.effective_workers("Knowledge")*.15*elapsed*food
 	for item:Dictionary in data().collections.values():
-		if float(item.study)>=1 or study_work<=0:continue
+		if float(item.study)>=1 or study_work<=0 or day<int(item.returned_day):continue
 		var spent:=minf(study_work,(1-float(item.study))*float(item.work))
 		item.study=minf(1,float(item.study)+spent/float(item.work));study_work-=spent
 		if item.study>=1:
+			if item.get("partnership_protocol",false):
+				log_event("Completed %s. Send a delegation to exchange findings with the partner." % String(item.name))
+				continue
 			var prior:Dictionary=data().collections.get(String(data().evidence.get(String(item.discovery_id),"")),{})
-			if not prior.get("research_purchase",false) or item.get("research_purchase",false):data().evidence[String(item.discovery_id)]=String(item.id)
+			if evidence_strength(item)>=evidence_strength(prior):data().evidence[String(item.discovery_id)]=String(item.id)
 			var signals:Dictionary={}
 			for signal_name:String in item.signals:signals[signal_name]=.65
 			WorldSimulation.state.register_field_observations(signals,day+180)
@@ -454,9 +466,15 @@ static func advance(day:int)->void:
 				ties.respect=minf(.3,float(ties.respect)+(.05 if item.kind=="culture" else .03))
 			log_event("Examined %s. Its evidence now supports the related investigation." % String(item.name))
 
+static func evidence_strength(item:Dictionary)->float:
+	if item.is_empty() or item.get("partnership_protocol",false):return 0.0
+	if item.get("research_purchase",false):return 2.5
+	if item.get("research_partnership",false):return 1.6
+	return 1.0 if item.get("kind","")=="specimen" else 1.8
+
 static func studying()->bool:
 	for item:Dictionary in data().collections.values():
-		if float(item.study)<1:return true
+		if float(item.study)<1 and int(item.returned_day)<=int(WorldSimulation.state.elapsed_days):return true
 	return false
 
 static func known_relation(id:String)->Dictionary:

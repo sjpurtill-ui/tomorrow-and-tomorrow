@@ -266,7 +266,7 @@ func select(id:String,open_detail:bool=false)->void:
 			if not requirements.is_empty():Art.label(detail_body,"Requires "+" + ".join(requirements),11,T.TEXT_SOFT,true)
 			if float(route.get("progress_multiplier",1.0))!=1.0:Art.label(detail_body,"Research pace: %.2f× local baseline" % float(route.progress_multiplier),11,T.TEXT_SOFT,true)
 		Art.button(detail_body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
-		if item.exposed and not item.known and (preload("res://scripts/research_purchase.gd").available() or preload("res://scripts/scholar_visits.gd").available()):
+		if item.exposed and (not item.known or preload("res://scripts/research_partnerships.gd").pending(String(item.id))) and (preload("res://scripts/research_purchase.gd").available() or preload("res://scripts/scholar_visits.gd").available()):
 			var purchase:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
 			purchase.subject=String(item.id);detail_body.add_child(purchase)
 		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)

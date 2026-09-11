@@ -1,5 +1,6 @@
 extends VBoxContainer
 const Purchase=preload("res://scripts/research_purchase.gd")
+const Partnerships=preload("res://scripts/research_partnerships.gd")
 const Scholars=preload("res://scripts/scholar_visits.gd")
 var modes:OptionButton
 var subject:=""
@@ -13,6 +14,7 @@ func _ready()->void:
 	modes=OptionButton.new();add_child(modes)
 	if Purchase.available():modes.add_item("Purchase a validated study");modes.set_item_metadata(modes.item_count-1,"purchase")
 	if Scholars.available():modes.add_item("Invite a scholar for 60 days");modes.set_item_metadata(modes.item_count-1,"scholar")
+	if Partnerships.available():modes.add_item("Joint investigation and findings exchange");modes.set_item_metadata(modes.item_count-1,"partnership")
 	modes.item_selected.connect(func(_index:int)->void:refresh())
 	sources=OptionButton.new();sources.size_flags_horizontal=SIZE_EXPAND_FILL;sources.clip_text=true;add_child(sources)
 	for civ:Dictionary in WorldSimulation.world.civilizations:
@@ -26,13 +28,19 @@ func _ready()->void:
 	sources.item_selected.connect(func(_index:int)->void:refresh())
 	resources.item_selected.connect(func(_index:int)->void:refresh())
 	send.pressed.connect(func()->void:
-		var result:=Scholars.dispatch(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected)) if modes.get_selected_metadata()=="scholar" else Purchase.dispatch(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected))
+		var result:Dictionary=support().dispatch(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected))
 		summary.text=String(result.get("message",result.get("error","The proposal could not depart.")))
 		send.disabled=result.get("ok",false))
 	refresh()
 
 func refresh()->void:
 	if sources.item_count==0 or modes.item_count==0:summary.text="A located foreign settlement and direct contact are needed.";send.disabled=true;return
-	var terms:=Scholars.quote(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected)) if modes.get_selected_metadata()=="scholar" else Purchase.quote(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected))
+	var terms:Dictionary=support().quote(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected))
 	summary.text=String(terms.get("message",terms.get("error","No proposal available.")))
 	send.disabled=terms.has("error")
+
+func support()->Script:
+	match modes.get_selected_metadata():
+		"scholar":return Scholars
+		"partnership":return Partnerships
+	return Purchase

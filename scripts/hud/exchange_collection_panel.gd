@@ -75,8 +75,10 @@ func refresh(force:bool)->void:
 		var bar:=ProgressBar.new();bar.show_percentage=false;bar.value=float(item.study)*100;bar.custom_minimum_size.y=6;content.add_child(bar)
 		var definition:=DiscoverySystem.discovery_definition(String(item.discovery_id))
 		var known:=String(item.discovery_id) in GameState.known_discoveries
-		label(content,"Recorded in our cultural and knowledge collection" if known else ("Evidence ready: "+String(definition.get("name","related investigation")) if float(item.study)>=1 else "Being examined · %d%%" % roundi(float(item.study)*100)),12,T.TEAL)
-		if float(item.study)>=1 and not known:
+		label(content,"Recorded in our cultural and knowledge collection" if known else (("Ready to exchange findings" if item.get("partnership_protocol",false) else "Evidence ready: "+String(definition.get("name","related investigation"))) if float(item.study)>=1 else "Being examined · %d%%" % roundi(float(item.study)*100)),12,T.TEAL)
+		if item.get("partnership_protocol",false) and float(item.study)>=1:
+			label(content,"Local investigation complete. Arrange a findings exchange through this discovery’s foreign research support.",12,T.GOLD)
+		if float(item.study)>=1 and not known and not item.get("partnership_protocol",false):
 			var button:=Button.new();button.text="Direct study: "+String(definition.get("name","investigation"));button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 			button.disabled=not DiscoverySystem._discovery_is_eligible(definition,int(GameState.elapsed_days)) if not definition.is_empty() else true
 			var needs:Array[String]=[]

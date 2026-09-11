@@ -1429,8 +1429,14 @@ func diplomatic_mission_quote(civ_id:String,gift_resource:String="",purpose:Stri
 
 func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goodwill",research_subject:String="",research_mode:String="purchase")->Dictionary:
 	if research_subject!="" and purpose!="goodwill":return {"error":"Research purchases need a peaceful research delegation."}
-	if research_mode not in ["purchase","scholar"]:return {"error":"Unknown research proposal."}
-	var quote:Dictionary=preload("res://scripts/scholar_visits.gd").quote(civ_id,research_subject,gift_resource) if research_subject!="" and research_mode=="scholar" else (preload("res://scripts/research_purchase.gd").quote(civ_id,research_subject,gift_resource) if research_subject!="" else diplomatic_mission_quote(civ_id,gift_resource,purpose))
+	if research_mode not in ["purchase","scholar","partnership"]:return {"error":"Unknown research proposal."}
+	var quote:Dictionary
+	if research_subject.is_empty():quote=diplomatic_mission_quote(civ_id,gift_resource,purpose)
+	else:
+		match research_mode:
+			"scholar":quote=preload("res://scripts/scholar_visits.gd").quote(civ_id,research_subject,gift_resource)
+			"partnership":quote=preload("res://scripts/research_partnerships.gd").quote(civ_id,research_subject,gift_resource)
+			_:quote=preload("res://scripts/research_purchase.gd").quote(civ_id,research_subject,gift_resource)
 	if quote.has("error"): return quote
 	var requested_provisions:=float(quote.provisions)+float(quote.get("scholar_provisions",0))
 	var provisions:=WorldSimulation.food.issue_for_obligation(requested_provisions,"diplomacy","Envoy provisions • %s" % String(quote.civilization),float(quote.total_days),int(quote.personnel))
@@ -1456,6 +1462,7 @@ func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goo
 	if research_subject!="":
 		diplomatic_mission["research_subject"]=research_subject
 		diplomatic_mission["research_mode"]=research_mode
+		if research_mode=="partnership":diplomatic_mission["partnership_phase"]=quote.partnership_phase
 		if research_mode=="scholar":diplomatic_mission["scholar_provisions"]=float(quote.scholar_provisions);diplomatic_mission.provisions-=float(quote.scholar_provisions)
 	diplomatic_mission["destination"]="Reported home of %s" % String(quote.civilization)
 	for known:Dictionary in city_intelligence.known_cities("player",civ_id):

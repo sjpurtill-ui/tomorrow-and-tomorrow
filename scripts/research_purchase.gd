@@ -41,6 +41,8 @@ static func negotiate(mission:Dictionary,source:String,source_name:String,positi
 	if Exchange.owner_id(String(mission.get("civ_id","")))!=Exchange.owner_id(source) or day<int(mission.get("arrival_day",day+1)):return
 	if mission.get("research_mode","purchase")=="scholar":
 		preload("res://scripts/scholar_visits.gd").negotiate(mission,source,day);return
+	if mission.get("research_mode","purchase")=="partnership":
+		preload("res://scripts/research_partnerships.gd").negotiate(mission,source,source_name,position,day);return
 	var subject:=String(mission.research_subject)
 	var provider:=Exchange.owner_state(source)
 	var accepted:=provider!=null and float(mission.get("gift_amount",0))>0
@@ -61,6 +63,8 @@ static func prepare_return(mission:Dictionary)->void:
 	if not mission.has("research_subject"):return
 	if mission.get("research_mode","purchase")=="scholar":
 		preload("res://scripts/scholar_visits.gd").deliver(mission);return
+	if mission.get("research_mode","purchase")=="partnership":
+		preload("res://scripts/research_partnerships.gd").prepare_return(mission);return
 	var report_key:=key(String(mission.civ_id),String(mission.research_subject))
 	var carried:=false
 	var incoming:=0
