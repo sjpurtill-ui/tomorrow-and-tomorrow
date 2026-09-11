@@ -72,9 +72,20 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		for plant:Variant in plants:
 			var definition:Dictionary=preload("res://scripts/technology_operations.gd").PLANTS.get(plant,{})
 			if definition.is_empty() or definition.gate!=id:errors.append(id+": no implemented operating plant")
+		var agronomy:Variant=entry.get("agronomy_profile",{})
+		if not agronomy is Dictionary:errors.append(id+": agronomy profile must be a dictionary");continue
+		if not agronomy.is_empty():
+			if agronomy.get("group","") not in preload("res://scripts/agronomy_knowledge.gd").GROUPS:errors.append(id+": unknown agronomy family")
+			if not agronomy.get("rank") is int or int(agronomy.get("rank",0))<1:errors.append(id+": invalid agronomy rank")
+			var useful:=false
+			for field:String in ["yield_gain","soil_protection","weather_buffer","labor_cost","land_cost"]:
+				var value:Variant=agronomy.get(field)
+				if not (value is float or value is int) or not is_finite(float(value)) or float(value)<0 or float(value)>.4:errors.append(id+": invalid agronomy coefficient")
+				elif field in ["yield_gain","soil_protection","weather_buffer"]:useful=useful or float(value)>0
+			if not useful:errors.append(id+": agronomy needs an operating benefit")
 		var medical:=String(entry.get("medical_method",""))
 		if not medical.is_empty() and (medical!=id or not preload("res://scripts/field_medicine.gd").METHODS.has(medical)):errors.append(id+": no implemented medical method")
 		var doctrine:=String(entry.get("doctrine",""))
 		if not doctrine.is_empty() and (doctrine!=id or not preload("res://scripts/combined_arms_doctrine.gd").RULES.has(doctrine)):errors.append(id+": no implemented doctrine")
-		if medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
+		if agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
 	return errors

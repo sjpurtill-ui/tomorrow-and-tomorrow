@@ -268,7 +268,8 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var fishing_access:=maxf(float(access.freshwater),float(coastal.marine_opportunity)*0.90)
 	result["Fish"]=workers*fishing_weight*5.00*BASE_SUBSISTENCE_YIELD_CALIBRATION*fish_season*efficiency*float(WorldSimulation.state.food_source_health.get("Fishing",0.9))*(0.76+fishing_access*0.34)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))*_food_type_weather_multiplier("Fish",weather_factor)
 	if cultivation_weight>0.0 and not traveling:
-		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*_food_type_weather_multiplier("Dry staples",weather_factor)
+		var agronomy:Dictionary=preload("res://scripts/agronomy_knowledge.gd").factors(traveling)
+		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*float(agronomy["yield"])*preload("res://scripts/agronomy_knowledge.gd").weather_factor(_food_type_weather_multiplier("Dry staples",weather_factor),agronomy)
 	result["Dry staples"]+=occupation_transfer
 	return result
 
@@ -393,7 +394,7 @@ func _update_source_health(harvest: Dictionary,workers: float,traveling: bool) -
 		var current:=float(WorldSimulation.state.food_source_health.get(source,0.9))
 		var used:=float(harvest.get(mapping[source],0.0))>0.01
 		var damage:=maxf(0.0,pressure-0.42)*0.0018*(1.0+WorldSimulation.discovery.effect("ecological_pressure")) if used else 0.0
-		if source=="Cultivation" and used: damage=maxf(0.0,pressure-0.55)*0.0011
+		if source=="Cultivation" and used: damage=maxf(0.0,pressure-0.55)*0.0011*float(preload("res://scripts/agronomy_knowledge.gd").factors(traveling).soil_damage)
 		WorldSimulation.state.food_source_health[source]=clampf(current+recovery-damage,0.12,1.0)
 
 func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array[Dictionary]:

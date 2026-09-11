@@ -104,6 +104,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/mechanics_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/geoscience_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/field_medicine.gd").entries())
+	catalog.append_array(preload("res://scripts/agronomy_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -1002,6 +1003,9 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
+	if not entry.get("agronomy_profile",{}).is_empty():
+		var p:Dictionary=entry.agronomy_profile
+		return "At full adoption: cultivation performance +%.1f%%, labor cost %.1f%%, harvest-area cost %.1f%%, soil-wear reduction %.1f%% and adverse-weather loss reduction %.1f%%. Applies to staffed, settled cultivation; strongest adopted practice per family." % [float(p.yield_gain)*100,float(p.labor_cost)*100,float(p.land_cost)*100,float(p.soil_protection)*100,float(p.weather_buffer)*100]
 	var medical:=String(entry.get("medical_method",""))
 	if not medical.is_empty():return String(entry.get("production_contract",""))+" Care consumes Fiber Plants and Medicinal Plants during supported recovery at home."
 	if not String(entry.get("doctrine","")).is_empty():return String(entry.get("production_contract",""))+" Requires rehearsal during supplied preparation; understanding alone does not improve the army."

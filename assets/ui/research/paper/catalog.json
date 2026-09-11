@@ -2728,12 +2728,172 @@
       "id": "convalescent_duty_reviews",
       "name": "Convalescent Duty Reviews",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/germination_trials.png",
+      "description": "Counted seed samples are sprouted before sowing so poor establishment can be distinguished from later crop losses.",
+      "domain": "nutrition",
+      "id": "germination_trials",
+      "name": "Germination Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_cleaning.png",
+      "description": "Screens and hand sorting separate useful seed from chaff, stones and visibly damaged material.",
+      "domain": "nutrition",
+      "id": "seed_cleaning",
+      "name": "Seed Cleaning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sowing_depth_trials.png",
+      "description": "Comparable seed is planted at measured depths to find which placements emerge reliably in the local soil.",
+      "domain": "nutrition",
+      "id": "sowing_depth_trials",
+      "name": "Sowing Depth Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/row_spacing_trials.png",
+      "description": "Parallel planted strips compare crowding, access and harvest without confusing spacing with seed quality.",
+      "domain": "nutrition",
+      "id": "row_spacing_trials",
+      "name": "Row Spacing Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seedbed_firming.png",
+      "description": "Farmers compare seed contact and emergence after carefully pressing rather than merely loosening a seedbed.",
+      "domain": "nutrition",
+      "id": "seedbed_firming",
+      "name": "Seedbed Firming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mass_seed_selection.png",
+      "description": "Seed from many desirable plants is pooled across harvests while retaining enough plants to avoid a narrow accidental lineage.",
+      "domain": "nutrition",
+      "id": "mass_seed_selection",
+      "name": "Mass Seed Selection",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/progeny_rows.png",
+      "description": "Offspring of selected plants are kept in identifiable rows so inherited performance can be compared.",
+      "domain": "nutrition",
+      "id": "progeny_rows",
+      "name": "Progeny Rows",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/controlled_pollination.png",
+      "description": "Selected parents are crossed deliberately and their offspring kept separate from uncontrolled seed mixtures.",
+      "domain": "nutrition",
+      "id": "controlled_pollination",
+      "name": "Controlled Pollination",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/field_variety_trials.png",
+      "description": "Candidate varieties are compared in repeated field plots rather than judged from a single exceptional plant.",
+      "domain": "nutrition",
+      "id": "field_variety_trials",
+      "name": "Field Variety Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/regional_seed_trials.png",
+      "description": "The same seed is compared across growing districts so local adaptation is not mistaken for universal superiority.",
+      "domain": "nutrition",
+      "id": "regional_seed_trials",
+      "name": "Regional Seed Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crop_residue_cover.png",
+      "description": "Harvest residue is retained over soil instead of leaving the surface entirely exposed between crops.",
+      "domain": "nutrition",
+      "id": "crop_residue_cover",
+      "name": "Crop Residue Cover",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/green_manure_crops.png",
+      "description": "A deliberately grown crop is returned to the soil rather than harvested for food, exchanging immediate output for land condition.",
+      "domain": "nutrition",
+      "id": "green_manure_crops",
+      "name": "Green Manure Crops",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cover_crop_mixtures.png",
+      "description": "Different cover plants are combined and observed for complementary rooting and seasonal soil protection.",
+      "domain": "nutrition",
+      "id": "cover_crop_mixtures",
+      "name": "Cover Crop Mixtures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/contour_cultivation.png",
+      "description": "Cultivation follows measured contours so disturbed soil and runoff are less directly connected down a slope.",
+      "domain": "nutrition",
+      "id": "contour_cultivation",
+      "name": "Contour Cultivation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/strip_cropping.png",
+      "description": "Alternating crop strips interrupt long exposed slopes while requiring more careful work around field boundaries.",
+      "domain": "nutrition",
+      "id": "strip_cropping",
+      "name": "Strip Cropping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/reduced_tillage.png",
+      "description": "Repeated observations distinguish necessary seedbed work from disruptive passes that leave soil structure poorer.",
+      "domain": "nutrition",
+      "id": "reduced_tillage",
+      "name": "Reduced Tillage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/soil_infiltration_trials.png",
+      "description": "Measured additions of water reveal differences in infiltration and surface sealing that visual soil descriptions miss.",
+      "domain": "nutrition",
+      "id": "soil_infiltration_trials",
+      "name": "Soil Infiltration Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mulch_water_management.png",
+      "description": "Cover depth and placement are compared against water retention and emergence instead of applying the same mulch everywhere.",
+      "domain": "nutrition",
+      "id": "mulch_water_management",
+      "name": "Mulch Water Management",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/irrigation_loss_accounts.png",
+      "description": "Water delivered and crop response are compared along a distribution route to identify where irrigation effort is being lost.",
+      "domain": "nutrition",
+      "id": "irrigation_loss_accounts",
+      "name": "Irrigation Loss Accounts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/soil_moisture_scheduling.png",
+      "description": "Observed soil moisture and crop response guide watering intervals rather than applying identical turns regardless of conditions.",
+      "domain": "nutrition",
+      "id": "soil_moisture_scheduling",
+      "name": "Soil Moisture Scheduling",
+      "status": "queued"
     }
   ],
   "live_art_complete": false,
-  "live_count": 341,
+  "live_count": 361,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 321,
+  "queued_count": 341,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

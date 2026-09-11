@@ -575,3 +575,12 @@ Validation: 26 cases pass, zero errors, failures, skips or orphans: five new fou
 The pacing snapshot now records actual food intake, food eaten and food demand. A completed one-year baseline before this rule found intake 0.983154 while composite food security was approximately 0.98. That distinction prevents treating the composite score as proof of a hunger-threshold bug. No hunger rule changed. Report: pacing/intake-reference.json, base db2bb76; log /tmp/tt-intake-reference.log. It does not explain the earlier century-end hunger flag.
 
 No new save shape or technology identity. Scope: ResearchFoundations and tests, CivilizationController fallback, pacing metrics/evidence and this handoff. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base db2bb76. Current totals remain 341 discoveries and twenty images. Canonical integration remains outstanding.
+
+
+## 46. Cultivation methods with operating costs
+
+Twenty authored agronomy discoveries bring the live catalog to 361 / 5,000 and 135 explicit learning routes. Adopted establishment, breeding, cover, tillage and water practices alter staffed settled cultivation, soil wear and adverse-weather losses. Labor and harvest-area costs reduce output; strongest adopted practice per family and explicit caps prevent unbounded stacking. See AGRONOMY_METHODS.md for identities, sources and limits. These are aggregate cultivation effects, not implemented genetics, individual fields or irrigation infrastructure.
+
+Validation: 57 cases pass with zero errors, failures, skips or orphans (8 agronomy, 10 food/water, 19 owned simulation, 11 atlas, 9 tree). Graph and production contracts are clean; all 361 identities are reachable under the ideal resource audit assumptions. Logs /tmp/tt-agronomy-*.log. Manifest: 20 verified images, 341 queued live subjects. No new save shape; existing discovery/adoption storage carries the new IDs. Native UI remains unverified.
+
+Scope: AgronomyKnowledge and tests, FoodSystem cultivation, DiscoverySystem, atlas details, catalog contracts, graph audit, art manifest and review documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 584e233. Shared integration conflicts include DiscoverySystem and FoodSystem. Canonical integration remains pending.

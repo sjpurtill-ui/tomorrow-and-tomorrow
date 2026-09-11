@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 341,
+    "live": 361,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -42,7 +42,8 @@
     "Completed hydrology-corrected 18,250-day isolated AI diagnostic: 335 people, 34 discoveries, four inquiries; material/research bottlenecks recorded, not millennial acceptance",
     "Sixteen distinct field geology and prospecting methods improve adopted, staffed survey effort for relevant resources, with bounded family stacking and no reserve creation",
     "Paid experimental-material consignments for fifteen investigations use real supplier stocks, existing envoys and once-only payment/delivery; a metallurgical furnace route preserves the mining alternative",
-    "Eight field-medicine discoveries, Medical Detachment role, paid care equipment and supply-limited supported recovery"
+    "Eight field-medicine discoveries, Medical Detachment role, paid care equipment and supply-limited supported recovery",
+    "Twenty agronomy discoveries with staffed cultivation, family-bounded effects, soil protection and labor/land tradeoffs"
   ],
   "unfinished": [
     "Remaining 4667 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
@@ -67,9 +68,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 341,
+    "live_subjects": 361,
     "verified_subject_images": 20,
-    "queued_live_images": 321,
+    "queued_live_images": 341,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"
