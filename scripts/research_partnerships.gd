@@ -58,6 +58,7 @@ static func negotiate(mission:Dictionary,peer:String,name:String,position:Dictio
 	mission.carried_collections.append(item(peer,name,subject,position,day,phase=="exchange"))
 static func prepare_return(mission:Dictionary)->void:
 	var expected:=key(String(mission.civ_id),String(mission.research_subject),mission.get("partnership_phase","")=="exchange")
+	if preload("res://scripts/communications_links.gd").delivered(mission,expected):return
 	var found:=false;var incoming:=0
 	for report:Dictionary in mission.get("carried_collections",[]):
 		if report.id==expected:found=true

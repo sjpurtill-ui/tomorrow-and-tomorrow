@@ -4,6 +4,7 @@ extends RefCounted
 const LIMIT:=1000
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"research_radio_station":{"name": "Research radio station", "gate": "radio_telegraphy", "requires": ["agreed_signal_codes"], "cost": {"Radio Telegraph Sets": 1, "Timber": 2}, "work": 14.0, "workers": 1.0, "inputs": {"Paper": 0.05}, "power": 2.0, "services": {"radio_records": 1.0}},
 	"optical_signal_bench":{"name": "Optical signaling bench", "gate": "optical_telegraphy", "requires": ["experimental_controls"], "cost": {"Optical Telegraph Sets": 1, "Timber": 2}, "work": 10.0, "workers": 0.5, "inputs": {"Paper": 0.02}, "power": 0.0, "services": {"signal_analysis": 1.0}},
 	"electrical_signal_bench":{"name": "Electrical communications bench", "gate": "electrical_telegraphy", "requires": ["electrical_measurement", "telephone_circuits"], "cost": {"Electrical Telegraph Sets": 1, "Telephone Sets": 1, "Timber": 2}, "work": 14.0, "workers": 1.0, "inputs": {"Paper": 0.02}, "power": 1.0, "services": {"signal_analysis": 3.0}},
 	"radio_signal_bench":{"name": "Radio communications bench", "gate": "superheterodyne_reception", "requires": ["amplitude_modulation", "frequency_modulation", "radio_telegraphy"], "cost": {"Superheterodyne Receivers": 1, "AM Exciters": 1, "FM Signal Sets": 1, "Radio Telegraph Sets": 1}, "work": 18.0, "workers": 1.0, "inputs": {"Paper": 0.02}, "power": 3.0, "services": {"signal_analysis": 5.0}},
@@ -192,15 +193,15 @@ static func valid(value:Variant)->bool:
 	if not value.plants is Dictionary or value.plants.size()>PLANTS.size():return false
 	for field:String in ["last_day","workers"]:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
-	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>24000:return false
+	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>PLANTS.size()*2.0*LIMIT:return false
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
-			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation","food_preservation","signal_analysis"]:return false
+			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation","food_preservation","signal_analysis","radio_records"]:return false
 			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0}:
-		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"radio_records":1000.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"radio_records":1000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]

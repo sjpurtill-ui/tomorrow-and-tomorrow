@@ -1271,7 +1271,10 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "radio_telegraphy"
     ],
-    "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    "production_contract": "Produces paid radio equipment. Paired commissioned research radio stations consume operators, paper and electricity to transmit negotiated research records up to 120 map kilometers; evidence still requires local study. Physical travelers and cargo retain their journeys.",
+    "operating_plants": [
+      "research_radio_station"
+    ]
   },
   {
     "id": "amplitude_modulation",
