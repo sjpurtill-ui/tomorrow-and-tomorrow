@@ -1,0 +1,699 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_identities": 0,
+  "mapped_candidates": 75,
+  "partial_candidates": 0,
+  "mappings": [
+    {
+      "review_id": "D12-01",
+      "candidate_name": "Material tallies",
+      "mapped_ids": [
+        "tallies"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-02",
+      "candidate_name": "Shared measures",
+      "mapped_ids": [
+        "standard_measures"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-03",
+      "candidate_name": "Geometric comparison",
+      "mapped_ids": [
+        "straightedge_compass",
+        "similar_triangles"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-04",
+      "candidate_name": "Seasonal reckoning",
+      "mapped_ids": [
+        "seasonal_patterns",
+        "crop_calendars"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-05",
+      "candidate_name": "Fractional quantities",
+      "mapped_ids": [
+        "fractional_quantities"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-06",
+      "candidate_name": "Place value calculation",
+      "mapped_ids": [
+        "place_value"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-07",
+      "candidate_name": "Algebraic methods",
+      "mapped_ids": [
+        "symbolic_algebra"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-08",
+      "candidate_name": "Trigonometric methods",
+      "mapped_ids": [
+        "trigonometry"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-09",
+      "candidate_name": "Geometric surveying",
+      "mapped_ids": [
+        "geometric_survey"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-10",
+      "candidate_name": "Mechanical timekeeping",
+      "mapped_ids": [
+        "mechanical_escapement_clocks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-11",
+      "candidate_name": "Differential calculus",
+      "mapped_ids": [
+        "differential_calculus"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-12",
+      "candidate_name": "Probability theory",
+      "mapped_ids": [
+        "probability_theory"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-13",
+      "candidate_name": "Statistical inference",
+      "mapped_ids": [
+        "statistical_inference"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-14",
+      "candidate_name": "Precision dimensional standards",
+      "mapped_ids": [
+        "dimensional_metrology"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-15",
+      "candidate_name": "Thermodynamic measurement",
+      "mapped_ids": [
+        "precision_thermometry",
+        "calorimetry"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-16",
+      "candidate_name": "Information theory",
+      "mapped_ids": [
+        "information_entropy_models",
+        "channel_capacity_analysis"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-17",
+      "candidate_name": "Control theory",
+      "mapped_ids": [
+        "optimal_control_theory",
+        "feedback_stability_analysis"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-18",
+      "candidate_name": "Atomic timekeeping",
+      "mapped_ids": [
+        "atomic_timekeeping"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-19",
+      "candidate_name": "Numerical simulation",
+      "mapped_ids": [
+        "numerical_simulation_software"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-20",
+      "candidate_name": "Uncertainty quantification",
+      "mapped_ids": [
+        "uncertainty_propagation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-21",
+      "candidate_name": "Quantum limited sensing",
+      "mapped_ids": [
+        "quantum_limited_sensing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-22",
+      "candidate_name": "Distributed precision timing",
+      "mapped_ids": [
+        "distributed_precision_timing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-23",
+      "candidate_name": "Automated formal proof",
+      "mapped_ids": [
+        "automated_theorem_proving",
+        "proof_certificate_checking"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-24",
+      "candidate_name": "Multiscale predictive modeling",
+      "mapped_ids": [
+        "multiscale_model_coupling"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D12-25",
+      "candidate_name": "Extreme environment metrology",
+      "mapped_ids": [
+        "extreme_environment_metrology"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-01",
+      "candidate_name": "Oral epics",
+      "mapped_ids": [
+        "oral_epics"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-02",
+      "candidate_name": "Pictographic records",
+      "mapped_ids": [
+        "pictographic_records"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-03",
+      "candidate_name": "Clay record tablets",
+      "mapped_ids": [
+        "clay_record_tablets"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-04",
+      "candidate_name": "Knotted record systems",
+      "mapped_ids": [
+        "knotted_record_systems"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-05",
+      "candidate_name": "Messenger routes",
+      "mapped_ids": [
+        "route_memory",
+        "postal_relay_services"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-06",
+      "candidate_name": "Phonetic notation",
+      "mapped_ids": [
+        "phonetic_notation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-07",
+      "candidate_name": "Fiber writing sheets",
+      "mapped_ids": [
+        "paper_making"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-08",
+      "candidate_name": "Woodblock printing",
+      "mapped_ids": [
+        "relief_block_cutting",
+        "hand_relief_printing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-09",
+      "candidate_name": "Movable type composition",
+      "mapped_ids": [
+        "movable_type_composition"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-10",
+      "candidate_name": "Public postal relays",
+      "mapped_ids": [
+        "postal_relay_services"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-11",
+      "candidate_name": "Optical telegraphy",
+      "mapped_ids": [
+        "optical_telegraphy"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-12",
+      "candidate_name": "Electrical telegraphy",
+      "mapped_ids": [
+        "electrical_telegraphy"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-13",
+      "candidate_name": "Telephone networks",
+      "mapped_ids": [
+        "telephone_exchange_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-14",
+      "candidate_name": "Radio transmission",
+      "mapped_ids": [
+        "radio_telegraphy",
+        "radio_broadcast_transmission"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-15",
+      "candidate_name": "Mass newspaper production",
+      "mapped_ids": [
+        "periodical_news_production"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-16",
+      "candidate_name": "Optical fiber links",
+      "mapped_ids": [
+        "optical_fiber_communication"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-17",
+      "candidate_name": "Packet switched networks",
+      "mapped_ids": [
+        "packet_switching"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-18",
+      "candidate_name": "Satellite communications",
+      "mapped_ids": [
+        "satellite_communication_links"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-19",
+      "candidate_name": "Error correcting transmission",
+      "mapped_ids": [
+        "error_correcting_code_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-20",
+      "candidate_name": "Secure digital messaging",
+      "mapped_ids": [
+        "secure_digital_messaging"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-21",
+      "candidate_name": "Delay tolerant interplanetary networks",
+      "mapped_ids": [
+        "delay_tolerant_space_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-22",
+      "candidate_name": "Deep space optical links",
+      "mapped_ids": [
+        "interplanetary_optical_links"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-23",
+      "candidate_name": "Archival media longevity",
+      "mapped_ids": [
+        "archival_media_lifetime_testing",
+        "format_migration_services",
+        "archival_replication_planning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Testing and continuing preservation services are represented; no eternally durable storage medium is claimed."
+    },
+    {
+      "review_id": "D13-24",
+      "candidate_name": "Authenticated synthetic media",
+      "mapped_ids": [
+        "synthetic_media_provenance"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D13-25",
+      "candidate_name": "Resilient decentralized communications",
+      "mapped_ids": [
+        "resilient_decentralized_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-01",
+      "candidate_name": "Rhythmic performance",
+      "mapped_ids": [
+        "rhythmic_ensemble_practice"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-02",
+      "candidate_name": "Pigment image making",
+      "mapped_ids": [
+        "pigment_image_composition"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-03",
+      "candidate_name": "Ritual gathering practice",
+      "mapped_ids": [
+        "ritual_gathering_organization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-04",
+      "candidate_name": "Kinship memory",
+      "mapped_ids": [
+        "oral_epics",
+        "genealogical_cross_checking"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-05",
+      "candidate_name": "Festival calendars",
+      "mapped_ids": [
+        "festival_calendar"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-06",
+      "candidate_name": "Public theatre",
+      "mapped_ids": [
+        "public_theatre"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-07",
+      "candidate_name": "Civic games",
+      "mapped_ids": [
+        "civic_games"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-08",
+      "candidate_name": "Comparative chronicles",
+      "mapped_ids": [
+        "comparative_chronicles"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-09",
+      "candidate_name": "Musical notation",
+      "mapped_ids": [
+        "musical_notation_systems"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-10",
+      "candidate_name": "Monument conservation",
+      "mapped_ids": [
+        "monument_conservation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-11",
+      "candidate_name": "Public libraries",
+      "mapped_ids": [
+        "public_libraries"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-12",
+      "candidate_name": "Museum curation",
+      "mapped_ids": [
+        "museum_collection_curation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-13",
+      "candidate_name": "Photographic documentation",
+      "mapped_ids": [
+        "photographic_image_capture",
+        "photographic_reproduction"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-14",
+      "candidate_name": "Recorded sound",
+      "mapped_ids": [
+        "mechanical_sound_recording",
+        "magnetic_audio_recording"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-15",
+      "candidate_name": "Mass public exhibition",
+      "mapped_ids": [
+        "public_exhibition_curation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-16",
+      "candidate_name": "Broadcast production",
+      "mapped_ids": [
+        "broadcast_program_production"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-17",
+      "candidate_name": "Film editing",
+      "mapped_ids": [
+        "film_editing_practice"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-18",
+      "candidate_name": "Digital cultural archives",
+      "mapped_ids": [
+        "cultural_archive_digitization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-19",
+      "candidate_name": "Interactive media design",
+      "mapped_ids": [
+        "interactive_media_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-20",
+      "candidate_name": "Community heritage stewardship",
+      "mapped_ids": [
+        "community_heritage_stewardship"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-21",
+      "candidate_name": "Immersive cultural environments",
+      "mapped_ids": [
+        "immersive_cultural_environments"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-22",
+      "candidate_name": "Durable language preservation",
+      "mapped_ids": [
+        "language_documentation_corpora",
+        "language_revitalization_teaching",
+        "long_term_media_stewardship"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "References document and transmit language; they do not guarantee living-language survival without actual speakers and sustained use."
+    },
+    {
+      "review_id": "D19-23",
+      "candidate_name": "Collective memory authentication",
+      "mapped_ids": [
+        "collective_memory_authentication"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Authentication concerns record provenance and alteration, not proof of one universally true historical account."
+    },
+    {
+      "review_id": "D19-24",
+      "candidate_name": "Participatory virtual performance",
+      "mapped_ids": [
+        "participatory_virtual_performance"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    },
+    {
+      "review_id": "D19-25",
+      "candidate_name": "Interplanetary cultural exchange",
+      "mapped_ids": [
+        "interplanetary_cultural_exchange"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+    }
+  ]
+}
