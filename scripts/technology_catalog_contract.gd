@@ -83,6 +83,8 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 				if not (value is float or value is int) or not is_finite(float(value)) or float(value)<0 or float(value)>.4:errors.append(id+": invalid agronomy coefficient")
 				elif field in ["yield_gain","soil_protection","weather_buffer"]:useful=useful or float(value)>0
 			if not useful:errors.append(id+": agronomy needs an operating benefit")
+		var grain:=String(entry.get("grain_method",""))
+		if not grain.is_empty() and (grain!=id or not preload("res://scripts/grain_processing.gd").METHODS.has(grain)):errors.append(id+": no implemented grain method")
 		var meal:=String(entry.get("meal_preparation",""))
 		if not meal.is_empty() and (meal!=id or not preload("res://scripts/food_preparation.gd").METHODS.has(meal)):errors.append(id+": no implemented meal preparation")
 		var nutrients:=bool(entry.get("nutrient_application",false))
@@ -93,5 +95,5 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		if not medical.is_empty() and (medical!=id or not preload("res://scripts/field_medicine.gd").METHODS.has(medical)):errors.append(id+": no implemented medical method")
 		var doctrine:=String(entry.get("doctrine",""))
 		if not doctrine.is_empty() and (doctrine!=id or not preload("res://scripts/combined_arms_doctrine.gd").RULES.has(doctrine)):errors.append(id+": no implemented doctrine")
-		if meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
+		if grain.is_empty() and meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
 	return errors

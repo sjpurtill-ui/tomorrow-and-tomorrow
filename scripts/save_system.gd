@@ -187,6 +187,8 @@ static func _apply_reflected(target:Object,state:Dictionary,skip:Array=[])->void
 func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	var nutrition:=preload("res://scripts/crop_nutrition.gd")
 	var state:Dictionary=payload.get("reflected_GameState",{})
+	var grain=preload("res://scripts/grain_processing.gd")
+	if not grain.valid(state.get("grain_processing",grain.empty_state())) or not grain.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid grain processing records."}
 	if not nutrition.valid(state.get("cultivation_nutrients",nutrition.empty_state())) or not nutrition.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid cultivation nutrient reserves."}
 	if not preload("res://scripts/technology_operations.gd").valid(payload.get("reflected_GameState",{}).get("technology_operations",preload("res://scripts/technology_operations.gd").empty_state())):return {"error":"Invalid technology installation records."}
 	if payload.get("reflected_GameState",{}).get("research_notification_mode","milestones") not in ["milestones","all","quiet"]:return {"error":"Invalid research notification preference."}

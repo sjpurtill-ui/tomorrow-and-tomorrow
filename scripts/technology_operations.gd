@@ -81,7 +81,7 @@ static func advance(day:int)->void:
 	var available:float=state.effective_workers("Crafting")
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1.0)
 	if condition<=0 or available<=0:return
-	var workshop_demand:=workshop_power_demand()
+	var workshop_demand:float=workshop_power_demand()+float(load("res://scripts/grain_processing.gd").power_demand())
 	var demand:=workshop_demand
 	for id:String in PLANTS:
 		var record:Dictionary=ledger.plants.get(id,{})

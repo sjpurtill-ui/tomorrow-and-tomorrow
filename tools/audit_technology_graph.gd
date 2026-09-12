@@ -13,6 +13,7 @@ func run()->void:
 	for entry:Dictionary in discovery.technology_catalog:graph.append(pathways.graph_entry(entry))
 	var errors:Array=requirements.validate(graph)
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/food_preparation.gd").entries(),discovery.technology_catalog))
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/grain_processing.gd").entries(),discovery.technology_catalog))
 	for entry:Dictionary in discovery.technology_catalog:
 		var channels:Dictionary=preload("res://scripts/discovery_frontier_catalog.gd").SUBCATEGORIES
 		if not channels.has(entry.dynamic) or String(entry.subcategory) not in channels.get(entry.dynamic,[]):errors.append(String(entry.id)+": unsupported research channel")

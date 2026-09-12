@@ -375,6 +375,8 @@ func validate_payload(payload:Dictionary)->String:
 				var saved_type:=typeof(actor.state[name][field]);var expected_type:=int(property_types[field])
 				if expected_type!=TYPE_NIL and saved_type!=expected_type and not (saved_type in [TYPE_INT,TYPE_FLOAT] and expected_type in [TYPE_INT,TYPE_FLOAT]):return "Invalid civilization field type: "+field
 		var nutrition:=preload("res://scripts/crop_nutrition.gd")
+		var grain=preload("res://scripts/grain_processing.gd")
+		if not grain.valid(actor.state.GameState.get("grain_processing",grain.empty_state())) or not grain.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization grain processing records."
 		if not nutrition.valid(actor.state.GameState.get("cultivation_nutrients",nutrition.empty_state())) or not nutrition.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization cultivation nutrient reserves."
 		if not preload("res://scripts/technology_operations.gd").valid(actor.state.GameState.get("technology_operations",preload("res://scripts/technology_operations.gd").empty_state())):return "Invalid civilization technology installations."
 		if not preload("res://scripts/society_exchange.gd").valid(actor.state.GameState.get("society_exchange",preload("res://scripts/society_exchange.gd").empty_state())):return "Invalid civilization exchange records."

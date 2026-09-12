@@ -98,6 +98,15 @@ func _food_blocks(metrics:Dictionary)->Array:
 		var inputs:Array[String]=[]
 		for resource:String in preparation.get("inputs",{}):inputs.append("%.2f %s" % [float(preparation.inputs[resource]),resource])
 		blocks.append({"type":"rows","heading":"MEAL PREPARATION","items":[{"name":String(DiscoverySystem.discovery_definition(String(preparation.method)).get("name","Prepared meals")),"sub":", ".join(inputs),"value":"%.1f rations" % float(preparation.rations),"tip":"Uses %.2f Logistics worker-days, shared with preservation. These rations are part of food eaten today." % float(preparation.get("workers_reserved",0.0))}]})
+	var grain:Dictionary=metrics.get("grain_processing",{})
+	var grain_items:Array=[]
+	for kind:String in metrics.get("grain_stocks",{}):
+		var stored:=float(metrics.grain_stocks[kind])
+		if stored>0.001:grain_items.append({"name":kind.capitalize(),"value":"%.1f rations" % stored,"sub":"Included in available food"})
+	if not grain_items.is_empty() or float(metrics.get("grain_in_process",0))>0:
+		grain_items.append({"name":"Germinating","value":"%.1f rations" % float(metrics.get("grain_in_process",0)),"sub":"Unavailable until handling is complete"})
+		grain_items.append({"name":"Processing loss today","value":"%.2f rations" % float(grain.get("loss",0)),"sub":"%.2f handler-days · %.2f electricity" % [float(grain.get("workers",0)),float(grain.get("electricity",0))]})
+		blocks.append({"type":"rows","heading":"GRAIN PROCESSING","items":grain_items})
 	var preservation_inputs:Dictionary=metrics.get("food_preservation_inputs",{})
 	if not preservation_inputs.is_empty():
 		blocks.append({"type":"rows","heading":"SMOKING FUEL","items":[{"name":"Timber used today","value":"%.2f" % float(preservation_inputs.get("Timber",0.0)),"sub":"Preserving meat and fish · shared processing staff"}]})
