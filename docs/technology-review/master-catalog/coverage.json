@@ -1,19 +1,19 @@
 {
   "verified_baseline_discoveries": 556,
   "pending_communications": 48,
-  "new_authored_drafts": 2329,
-  "distinct_accounted_identities": 2933,
-  "remaining_identities_to_author": 2067,
+  "new_authored_drafts": 2389,
+  "distinct_accounted_identities": 2993,
+  "remaining_identities_to_author": 2007,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
   "review_candidates_not_added_to_count": 600,
   "atlas_coverage": {
     "candidate_count": 600,
-    "mapped_candidate_count": 425,
-    "fully_mapped_subject_count": 420,
-    "partial_candidate_count": 5,
-    "unmapped_candidate_count": 175,
+    "mapped_candidate_count": 450,
+    "fully_mapped_subject_count": 442,
+    "partial_candidate_count": 8,
+    "unmapped_candidate_count": 150,
     "partial_subjects": [
       {
         "review_id": "D02-08",
@@ -44,6 +44,24 @@
         "candidate_name": "Rapid pathogen platform response",
         "source": "atlas-reconciliation-medicine-interventions.json",
         "note": "Product development and delivery are present; rapid platform adaptation, requalification and scaled response integration are not yet authored as a complete mechanism chain."
+      },
+      {
+        "review_id": "D21-20",
+        "candidate_name": "Cryptographic hardware",
+        "source": "atlas-reconciliation-electronic-control.json",
+        "note": "Cryptographic methods and verified boot exist, but dedicated key-protection hardware, side-channel qualification and accelerator integration are not yet authored as a complete physical chain."
+      },
+      {
+        "review_id": "D21-21",
+        "candidate_name": "Fault tolerant quantum computing",
+        "source": "atlas-reconciliation-electronic-control.json",
+        "note": "Qubit control and error correction are present; a complete fault-tolerant system needs logical-operation scheduling, physical resource closure and validated fault assumptions beyond these foundations."
+      },
+      {
+        "review_id": "D21-25",
+        "candidate_name": "Energy proportional computing",
+        "source": "atlas-reconciliation-electronic-control.json",
+        "note": "Power budgeting is present; workload-dependent voltage, frequency, clock gating and sleep-state integration remain incomplete."
       }
     ],
     "unmapped_candidate_ids": [
@@ -196,37 +214,12 @@
       "D20-22",
       "D20-23",
       "D20-24",
-      "D20-25",
-      "D21-01",
-      "D21-02",
-      "D21-03",
-      "D21-04",
-      "D21-05",
-      "D21-06",
-      "D21-07",
-      "D21-08",
-      "D21-09",
-      "D21-10",
-      "D21-11",
-      "D21-12",
-      "D21-13",
-      "D21-14",
-      "D21-15",
-      "D21-16",
-      "D21-17",
-      "D21-18",
-      "D21-19",
-      "D21-20",
-      "D21-21",
-      "D21-22",
-      "D21-23",
-      "D21-24",
-      "D21-25"
+      "D20-25"
     ],
     "adds_discovery_identities": 0,
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
-  "branch_alternatives": 422,
+  "branch_alternatives": 436,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 118,
@@ -249,7 +242,7 @@
     "D18": 92,
     "D19": 95,
     "D20": 113,
-    "D21": 120,
+    "D21": 180,
     "D22": 60,
     "D23": 117,
     "D24": 56
@@ -461,9 +454,9 @@
       "target": 300,
       "implemented_baseline": 34,
       "pending_communications": 14,
-      "authored_drafts": 120,
-      "accounted": 168,
-      "remaining_to_target": 132
+      "authored_drafts": 180,
+      "accounted": 228,
+      "remaining_to_target": 72
     },
     {
       "id": "D22",

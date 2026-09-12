@@ -21,9 +21,9 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The master expansion contains **2,329 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **2,933 distinct IDs; 2,067 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **2,389 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **2,993 distinct IDs; 2,007 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
-Four hundred and twenty-two explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
+Four hundred and thirty-six explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
 [Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 604 baseline/pending identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. Historical-horizon allocation remains outstanding.
 
@@ -70,7 +70,9 @@ Review sections:
 
 - [Culture and Learning Depth Review](Culture%20and%20Learning%20Depth%20Review.md): 69 further proposals after four overlap exclusions (36 culture, 32 learning, one shared bellows mechanism), eighteen new alternative groups, two early-music branch repairs and 25 new learning atlas mappings. D19 accounts for 104/180 and D18 for 101/160 identities.
 
-Current atlas reconciliation: 425 candidates mapped, including five partial subjects. The remaining 175 candidates are unmapped. Earlier section summaries retain their publication counts.
+- [Electronic Control and Computation Depth Review](Electronic%20Control%20and%20Computation%20Depth%20Review.md): 60 further proposals after two overlap exclusions and two early-computation additions, fourteen alternative groups and 25 atlas mappings. Three new atlas scopes remain partial. D21 accounts for 228/300 identities.
+
+Current atlas reconciliation: 450 candidates mapped, including eight partial subjects. The remaining 150 candidates are unmapped. Earlier section summaries retain their publication counts.
 
 JSON records preserve the proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts. Run `tools/technology-review/check_master_catalog.py` for the inexpensive authoring check; it does not run the game or certify behavior.
 
