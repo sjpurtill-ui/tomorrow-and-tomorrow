@@ -1,6 +1,8 @@
 extends RefCounted
 ## Structural fabrication closure. Raw resources are assumed obtainable;
 ## knowledge, quantities, elapsed work and geographic access are not simulated.
+static func numeric(value:Variant,positive:bool=false)->bool:
+	return (value is int or value is float) and is_finite(float(value)) and (float(value)>0 if positive else float(value)>=0)
 static func missing(costs:Dictionary,available:Dictionary)->Array[String]:
 	var result:Array[String]=[]
 	for item:String in costs:
@@ -16,22 +18,29 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 		var recipe:Dictionary=products[id]
 		if String(recipe.gate) not in discovery_ids:errors.append(id+": unknown discovery "+String(recipe.gate))
 		if String(recipe.output).strip_edges().is_empty():errors.append(id+": missing manufactured output")
-		if not is_finite(float(recipe.days)) or float(recipe.days)<=0:errors.append(id+": invalid manufacturing work")
-		if not is_finite(float(recipe.get("power",0))) or float(recipe.get("power",0))<0:errors.append(id+": invalid electricity requirement")
+		if not numeric(recipe.get("days"),true):errors.append(id+": invalid manufacturing work")
+		if not numeric(recipe.get("power",0)):errors.append(id+": invalid electricity requirement")
 		for field:String in ["materials","tooling","co_products"]:
 			for item:String in recipe.get(field,{}):
 				var quantity:Variant=recipe[field][item]
-				if not (quantity is int or quantity is float) or not is_finite(float(quantity)) or float(quantity)<=0:errors.append(id+": invalid "+field+" quantity for "+item)
+				if not numeric(quantity,true):errors.append(id+": invalid "+field+" quantity for "+item)
 				if field!="co_products" and not sources.has(item):errors.append(id+": no source for "+item+" ("+field+")")
 	for id:String in plants:
 		var plant:Dictionary=plants[id]
+		if not numeric(plant.get("power",0)):errors.append(id+": invalid operating electricity requirement")
+		for service:String in plant.get("services",{}):
+			if not numeric(plant.services[service],true):errors.append(id+": invalid service quantity for "+service)
 		for gate:String in [plant.gate]+plant.get("requires",[]):
 			if gate not in discovery_ids:errors.append(id+": unknown discovery "+gate)
 		for field:String in ["cost","inputs"]:
 			for item:String in plant.get(field,{}):
 				var quantity:Variant=plant[field][item]
-				if not (quantity is int or quantity is float) or not is_finite(float(quantity)) or float(quantity)<=0:errors.append(id+": invalid "+field+" quantity for "+item)
+				if not numeric(quantity,true):errors.append(id+": invalid "+field+" quantity for "+item)
 				if not sources.has(item):errors.append(id+": no source for "+item+" ("+field+")")
+	# Do not execute closure on invalid quantities or unknown gates. Counts of
+	# zero here mean unverified, not proof that every dependency is blocked.
+	if not errors.is_empty():
+		return {"errors":errors,"blocked_products":{},"blocked_plants":{},"reachable_products":0,"product_count":products.size(),"reachable_plants":0,"plant_count":plants.size(),"rounds":0,"closure_performed":false,"structural_only":true,"campaign_verified":false}
 	var made:Dictionary={};var installed:Dictionary={};var services:Dictionary={}
 	var changed:=true;var rounds:=0
 	while changed:
@@ -58,4 +67,4 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 		blocked[id]={"materials":missing(recipe.materials,available),"tooling":missing(recipe.get("tooling",{}),available),"electricity":float(recipe.get("power",0))<=0 or services.has("electricity")}
 	for id:String in plants:
 		if not installed.has(id):blocked_plants[id]={"cost":missing(plants[id].cost,available),"inputs":missing(plants[id].inputs,available),"electricity":float(plants[id].power)<=0 or services.has("electricity")}
-	return {"errors":errors,"blocked_products":blocked,"blocked_plants":blocked_plants,"reachable_products":made.size(),"product_count":products.size(),"reachable_plants":installed.size(),"plant_count":plants.size(),"rounds":rounds,"structural_only":true,"campaign_verified":false}
+	return {"errors":errors,"blocked_products":blocked,"blocked_plants":blocked_plants,"reachable_products":made.size(),"product_count":products.size(),"reachable_plants":installed.size(),"plant_count":plants.size(),"rounds":rounds,"closure_performed":true,"structural_only":true,"campaign_verified":false}

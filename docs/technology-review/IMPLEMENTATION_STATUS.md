@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 108: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 109: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1194,3 +1194,14 @@ A new individually generated illustration depicts botanical specimen preparation
 No gameplay or save change. Task-owned files: subject PNG/import metadata and prompt; shared files: research artwork bindings, prompt index, manifest and this record. Native player presentation remains unverified. Full-history implementation remains active and incomplete. The ongoing historical diagnostic session 57160 was re-polled live at the start; its 250-year target completion is not claimed.
 
 Verification: both headless imports exited cleanly; all eleven atlas cases pass with zero errors/failures/skips/orphans, including all 43 explicit subject bindings. The updated manifest reports 453 live discoveries, 43 verified images and 410 queued live images; the 5,000-image objective remains incomplete.
+
+
+## Checkpoint 109: reject invalid production data before reachability claims
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `2b650b5`. No canonical integration or player launch.
+
+The production dependency audit now rejects malformed numeric values before traversing recipes or installations. Unknown discovery gates and other validation errors also prevent traversal. Reports explicitly distinguish an unperformed closure from a completed reachability calculation, avoiding false success counts on invalid input. See [Production dependencies](PRODUCTION_DEPENDENCIES.md). No gameplay, save or catalog/art count change. Task-owned audit helper, tests and review documentation only; no shared integration hotspots.
+
+The active diagnostic session 57160 was confirmed live; latest inspected snapshot year 190, population 16,704, 211 known discoveries and 17 settlements. Its loaded 414-discovery build is older than this worktree. No terminal report exists yet and the 250-year target remains pending. Full-history completion remains unproven and incomplete.
+
+Verification: nine focused cases pass with zero errors/failures/skips/orphans. The first run exposed an outdated assertion expecting traversal after an unknown source error; it was updated to assert the new explicit unperformed state and the suite rerun. The combined live graph audit completes cleanly: 453 identities, 227 routes, 130 reachable civilian recipes and eleven reachable installation types in six production rounds, with `closure_performed: true`. This remains structural evidence under ideal resource/knowledge assumptions, not campaign pacing proof.

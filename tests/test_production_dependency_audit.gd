@@ -7,7 +7,7 @@ func generator(cost:Dictionary)->Dictionary:
 func test_missing_stock_names_are_reported_instead_of_assumed()->void:
 	var result:=Audit.audit({"lens":recipe("Lens",{"Imaginary Copper":1.0})},{},["Copper Ore"],["method"])
 	assert_array(result.errors).contains(["lens: no source for Imaginary Copper (materials)"])
-	assert_bool(result.blocked_products.has("lens")).is_true()
+	assert_bool(result.closure_performed).is_false()
 func test_self_tooling_cycle_requires_a_separate_bootstrap_recipe()->void:
 	var products:={"precision":recipe("Tool",{"Ore":1.0},{"Tool":1.0})}
 	assert_bool(Audit.audit(products,{},["Ore"],["method"]).blocked_products.has("precision")).is_true()
@@ -48,3 +48,19 @@ func test_invalid_quantities_work_and_power_are_rejected()->void:
 	assert_array(Audit.audit({"invalid":invalid},{},["Ore"],["method"]).errors).is_not_empty()
 	var plant:=generator({"Ore":-1.0})
 	assert_array(Audit.audit({}, {"invalid":plant},["Ore"],["method"]).errors).is_not_empty()
+
+func test_malformed_numeric_values_never_run_dependency_closure()->void:
+	for value:Variant in ["many",true,null,[],{}]:
+		for field:String in ["days","power"]:
+			var invalid:=recipe("Output",{"Ore":1.0});invalid[field]=value
+			var result:=Audit.audit({"invalid":invalid},{},["Ore"],["method"])
+			assert_array(result.errors).is_not_empty();assert_bool(result.closure_performed).is_false()
+			assert_int(int(result.reachable_products)).is_equal(0)
+		var invalid:=recipe("Output",{"Ore":value})
+		assert_bool(Audit.audit({"invalid":invalid},{},["Ore"],["method"]).closure_performed).is_false()
+		var plant:=generator({"Ore":1.0});plant.services.electricity=value
+		assert_bool(Audit.audit({}, {"invalid":plant},["Ore"],["method"]).closure_performed).is_false()
+func test_unknown_gate_cannot_be_reported_as_reachable_production()->void:
+	var result:=Audit.audit({"unknown":recipe("Output",{"Ore":1.0})},{},["Ore"],[])
+	assert_array(result.errors).is_not_empty();assert_bool(result.closure_performed).is_false()
+	assert_int(int(result.rounds)).is_equal(0)
