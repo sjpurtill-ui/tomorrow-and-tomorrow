@@ -1,0 +1,747 @@
+[
+  {
+    "id": "surface_illumination_horizon_mapping",
+    "name": "Surface Illumination Horizon Mapping",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "foundations": "orbital_dynamics, geometric_survey",
+    "mechanism": "Combine local terrain horizons with changing solar geometry.",
+    "operating_requirement": "Mapped terrain, referenced observations and finite computation.",
+    "consequence": "Predicts usable sunlight windows for particular sites; distant ridges and seasonal geometry can invalidate apparent continuous supply.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_illumination_horizon_mapping",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Combine local terrain horizons with changing solar geometry.",
+      "operating_requirements": "Mapped terrain, referenced observations and finite computation.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "shadowed_surface_route_planning",
+    "name": "Shadowed Surface Route Planning",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "surface_illumination_horizon_mapping",
+      "planetary_rover_mobility"
+    ],
+    "requires_any": [],
+    "foundations": "surface_illumination_horizon_mapping, planetary_rover_mobility",
+    "mechanism": "Plan traverses against route-specific darkness, slope, thermal exposure and return reserves.",
+    "operating_requirement": "Surveyed corridors, vehicle energy state, temperature limits and a reachable recovery point.",
+    "consequence": "Opens bounded access to shadowed deposits; poor reserves force a shorter sortie instead of a guaranteed resource haul.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "shadowed_surface_route_planning",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Plan traverses against route-specific darkness, slope, thermal exposure and return reserves.",
+      "operating_requirements": "Surveyed corridors, vehicle energy state, temperature limits and a reachable recovery point.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "surface_survival_heat_budgeting",
+    "name": "Surface Survival Heat Budgeting",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_thermal_balance",
+      "surface_illumination_horizon_mapping"
+    ],
+    "requires_any": [
+      [
+        "space_power_eclipse_reserves",
+        "fission_electric_space_power"
+      ]
+    ],
+    "foundations": "spacecraft_thermal_balance, surface_illumination_horizon_mapping",
+    "mechanism": "Allocate limited stored or continuously supplied energy to keep dormant surface equipment within survival limits.",
+    "operating_requirement": "Actual insulation, heaters, energy supply, thermal observations and an explicit dark interval.",
+    "consequence": "Trades production against survival duration; loss of reserve can damage equipment even while settlement stock remains elsewhere.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_survival_heat_budgeting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Allocate limited stored or continuously supplied energy to keep dormant surface equipment within survival limits.",
+      "operating_requirements": "Actual insulation, heaters, energy supply, thermal observations and an explicit dark interval.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "surface_cold_start_recommissioning",
+    "name": "Surface Cold-Start Recommissioning",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "surface_survival_heat_budgeting"
+    ],
+    "requires_any": [],
+    "foundations": "surface_survival_heat_budgeting",
+    "mechanism": "Restore dormant equipment through monitored warming, diagnostics and staged load application.",
+    "operating_requirement": "Surviving hardware, startup energy, diagnostic access and replacement parts for failed components.",
+    "consequence": "Restores verified capacity gradually after darkness; a successful survival cycle does not instantly yield full plant output.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_cold_start_recommissioning",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Restore dormant equipment through monitored warming, diagnostics and staged load application.",
+      "operating_requirements": "Surviving hardware, startup energy, diagnostic access and replacement parts for failed components.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "surface_power_cable_deployment",
+    "name": "Surface Power Cable Deployment",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "planetary_surface_power"
+    ],
+    "requires_any": [
+      [
+        "remote_manipulation",
+        "robotic_field_repair"
+      ]
+    ],
+    "foundations": "planetary_surface_power",
+    "mechanism": "Lay and connect physical power cables across qualified surface routes.",
+    "operating_requirement": "Delivered cable, deployment hardware, surveyed route, connection labor and electrical tests.",
+    "consequence": "Connects distant loads within cable capacity and losses; cuts and failed connectors interrupt the affected branch rather than all sites gaining global power.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_power_cable_deployment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Lay and connect physical power cables across qualified surface routes.",
+      "operating_requirements": "Delivered cable, deployment hardware, surveyed route, connection labor and electrical tests.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "vacuum_dust_connector_servicing",
+    "name": "Vacuum Dust Connector Servicing",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_seal_design",
+      "habitat_dust_exclusion"
+    ],
+    "requires_any": [],
+    "foundations": "mechanical_seal_design, habitat_dust_exclusion",
+    "mechanism": "Clean, inspect and mate exposed connectors while controlling abrasive contamination and seal damage.",
+    "operating_requirement": "Compatible tools, consumables, spare seals, access and leak or electrical verification for the specific interface.",
+    "consequence": "Returns a qualified connector to service; worn interfaces consume spares and can remain unusable after cleaning.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vacuum_dust_connector_servicing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Clean, inspect and mate exposed connectors while controlling abrasive contamination and seal damage.",
+      "operating_requirements": "Compatible tools, consumables, spare seals, access and leak or electrical verification for the specific interface.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "regolith_tool_wear_management",
+    "name": "Regolith Tool Wear Management",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_excavation",
+      "comparative_mineral_hardness"
+    ],
+    "requires_any": [],
+    "foundations": "regolith_excavation, comparative_mineral_hardness",
+    "mechanism": "Track abrasive wear of contact tools against excavated material and remaining useful geometry.",
+    "operating_requirement": "Tool inspections, usage records, replacement edges and maintenance access.",
+    "consequence": "Schedules replacement before loss of cutting performance; local mining creates a continuing imported-or-manufactured tool demand.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regolith_tool_wear_management",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Track abrasive wear of contact tools against excavated material and remaining useful geometry.",
+      "operating_requirements": "Tool inspections, usage records, replacement edges and maintenance access.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "low_gravity_excavation_reaction_control",
+    "name": "Low-Gravity Excavation Reaction Control",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_excavation",
+      "robotic_contact_force_control"
+    ],
+    "requires_any": [],
+    "foundations": "regolith_excavation, robotic_contact_force_control",
+    "mechanism": "Balance excavation forces against limited vehicle traction and anchoring.",
+    "operating_requirement": "Qualified digging mechanism, reaction sensing, terrain assessment and finite drive power.",
+    "consequence": "Raises achievable excavation throughput for supported ground; excessive force causes slip or immobilization instead of free Earthlike digging.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "low_gravity_excavation_reaction_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Balance excavation forces against limited vehicle traction and anchoring.",
+      "operating_requirements": "Qualified digging mechanism, reaction sensing, terrain assessment and finite drive power.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "regolith_feedstock_classification",
+    "name": "Regolith Feedstock Classification",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_excavation",
+      "standard_measures"
+    ],
+    "requires_any": [
+      [
+        "gravity_mineral_concentration",
+        "magnetic_mineral_separation",
+        "flour_sifting"
+      ]
+    ],
+    "foundations": "regolith_excavation, standard_measures",
+    "mechanism": "Separate and record excavated feed fractions suited to a declared downstream process.",
+    "operating_requirement": "Actual feed, qualified low-gravity separation equipment, sample checks and reject storage.",
+    "consequence": "Diverts unsuitable fractions before reactor or construction work; classification redistributes feed and cannot create its missing constituents.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice. Empirical screening is an alternative to mineral separation; food screening only supplies the separation principle, while local-gravity equipment and feed qualification remain required.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regolith_feedstock_classification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate and record excavated feed fractions suited to a declared downstream process.",
+      "operating_requirements": "Actual feed, qualified low-gravity separation equipment, sample checks and reject storage.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "regolith_volatile_capture",
+    "name": "Regolith Volatile Capture",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_volatile_assays",
+      "vacuum_pumps"
+    ],
+    "requires_any": [
+      [
+        "regolith_excavation",
+        "shadowed_surface_route_planning"
+      ]
+    ],
+    "foundations": "regolith_volatile_assays, vacuum_pumps",
+    "mechanism": "Release and retain volatile material from an assayed feed or reachable deposit.",
+    "operating_requirement": "Thermal extraction equipment, collection surfaces, containment, energy and a demonstrably volatile-bearing source.",
+    "consequence": "Produces a measured contaminated condensate inventory with extraction losses; a survey indication alone supplies nothing.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regolith_volatile_capture",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Release and retain volatile material from an assayed feed or reachable deposit.",
+      "operating_requirements": "Thermal extraction equipment, collection surfaces, containment, energy and a demonstrably volatile-bearing source.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "regolith_condensate_purification",
+    "name": "Regolith Condensate Purification",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_volatile_capture",
+      "thermal_desalination"
+    ],
+    "requires_any": [],
+    "foundations": "regolith_volatile_capture, thermal_desalination",
+    "mechanism": "Separate a captured volatile mixture to meet the requirements of its intended downstream user.",
+    "operating_requirement": "Collected condensate, compatible separators, contaminant measurements, energy and reject containment.",
+    "consequence": "Makes an accepted water fraction available for further processing; unqualified fractions cannot directly become drinking water or electrolyzer feed.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regolith_condensate_purification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate a captured volatile mixture to meet the requirements of its intended downstream user.",
+      "operating_requirements": "Collected condensate, compatible separators, contaminant measurements, energy and reject containment.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "regolith_sintered_pavers",
+    "name": "Regolith Sintered Pavers",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_feedstock_classification",
+      "ceramic_sintering_kinetics"
+    ],
+    "requires_any": [],
+    "foundations": "regolith_feedstock_classification, ceramic_sintering_kinetics",
+    "mechanism": "Consolidate selected regolith into inspected paving units through a qualified thermal process.",
+    "operating_requirement": "Prepared feed, tooling, heat supply, handling equipment and destructive sample tests.",
+    "consequence": "Supplies finite paving units from local material while paying energy and reject costs; manufactured units alone do not certify a launch pad.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regolith_sintered_pavers",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Consolidate selected regolith into inspected paving units through a qualified thermal process.",
+      "operating_requirements": "Prepared feed, tooling, heat supply, handling equipment and destructive sample tests.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "vacuum_construction_joint_qualification",
+    "name": "Vacuum Construction Joint Qualification",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "habitat_modular_construction",
+      "spacecraft_structural_testing"
+    ],
+    "requires_any": [
+      [
+        "mechanical_seal_design",
+        "welding_metallurgy"
+      ]
+    ],
+    "foundations": "habitat_modular_construction, spacecraft_structural_testing",
+    "mechanism": "Demonstrate a chosen assembled joint under relevant vacuum, thermal cycling and load conditions.",
+    "operating_requirement": "Representative joints, test facilities, actual joining tools and inspection records.",
+    "consequence": "Permits a specified interface for supported loads; tested mechanical or welded options retain separate equipment and repair dependencies.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vacuum_construction_joint_qualification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate a chosen assembled joint under relevant vacuum, thermal cycling and load conditions.",
+      "operating_requirements": "Representative joints, test facilities, actual joining tools and inspection records.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "surface_cargo_offloading",
+    "name": "Surface Cargo Offloading",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "remote_manipulation",
+      "planetary_rover_mobility"
+    ],
+    "requires_any": [],
+    "foundations": "remote_manipulation, planetary_rover_mobility",
+    "mechanism": "Move delivered cargo between a lander and surface carriers within stability and reach limits.",
+    "operating_requirement": "Rated handling equipment, reachable landing site, compatible cargo attachments and vehicle reserve.",
+    "consequence": "Turns landed cargo into locally reachable stock through finite handling work; items too heavy or inaccessible remain at the lander.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_cargo_offloading",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Move delivered cargo between a lander and surface carriers within stability and reach limits.",
+      "operating_requirements": "Rated handling equipment, reachable landing site, compatible cargo attachments and vehicle reserve.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "regolith_shield_placement",
+    "name": "Regolith Shield Placement",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_excavation",
+      "space_radiation_shielding",
+      "habitat_modular_construction"
+    ],
+    "requires_any": [],
+    "foundations": "regolith_excavation, space_radiation_shielding, habitat_modular_construction",
+    "mechanism": "Place measured local overburden around structures whose load and access limits have been evaluated.",
+    "operating_requirement": "Movable regolith, excavation work, verified structure, retained access paths and exposure assessment.",
+    "consequence": "Changes protection only for the treated occupied volume; excess load or blocked access can disable the structure.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regolith_shield_placement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Place measured local overburden around structures whose load and access limits have been evaluated.",
+      "operating_requirements": "Movable regolith, excavation work, verified structure, retained access paths and exposure assessment.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "surface_spares_cannibalization",
+    "name": "Surface Spares Cannibalization",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "robotic_field_repair",
+      "industrial_material_traceability"
+    ],
+    "requires_any": [],
+    "foundations": "robotic_field_repair, industrial_material_traceability",
+    "mechanism": "Recover and qualify compatible working modules from disabled surface assets.",
+    "operating_requirement": "Reachable donor hardware, diagnostic tools, maintenance labor and a compatible recipient.",
+    "consequence": "Returns one asset to service at the expense of donor capability; no duplicated component inventory or automatic equivalence between models.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_spares_cannibalization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Recover and qualify compatible working modules from disabled surface assets.",
+      "operating_requirements": "Reachable donor hardware, diagnostic tools, maintenance labor and a compatible recipient.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "surface_process_heat_cascading",
+    "name": "Surface Process Heat Cascading",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_heat_exchangers",
+      "planetary_surface_power"
+    ],
+    "requires_any": [],
+    "foundations": "industrial_heat_exchangers, planetary_surface_power",
+    "mechanism": "Match recoverable process heat to nearby loads with compatible temperature and operating schedules.",
+    "operating_requirement": "Connected thermal paths, measured source duty, sink demand and maintenance capacity.",
+    "consequence": "Reduces a specified secondary heat demand while the source runs; source shutdown removes the recovered supply and forces reserves or load reduction.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_process_heat_cascading",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Match recoverable process heat to nearby loads with compatible temperature and operating schedules.",
+      "operating_requirements": "Connected thermal paths, measured source duty, sink demand and maintenance capacity.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  },
+  {
+    "id": "surface_dust_witness_monitoring",
+    "name": "Surface Dust Witness Monitoring",
+    "field": "D23",
+    "status": "authored_draft",
+    "requires_all": [
+      "habitat_dust_exclusion",
+      "remote_sensing_calibration"
+    ],
+    "requires_any": [],
+    "foundations": "habitat_dust_exclusion, remote_sensing_calibration",
+    "mechanism": "Use referenced witness surfaces to compare dust deposition with exposed equipment performance.",
+    "operating_requirement": "Installed witness targets, repeat observations, environmental context and cleaning access.",
+    "consequence": "Triggers evidence-based inspection or cleaning of affected equipment; a clean witness does not certify hidden seals or every nearby surface.",
+    "branching_note": "Every requires_all parent and one member of each requires_any group is mandatory. Geography, available feed and tested equipment constrain operation separately. No calendar or civilization identity unlocks this practice.",
+    "recovery": "Pay for delayed specialist evidence or contracted service, contribute to partnership trials, or analyze delivered hardware. Local environmental qualification remains necessary; outside instruction cannot conjure surface capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_dust_witness_monitoring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use referenced witness surfaces to compare dust deposition with exposed equipment performance.",
+      "operating_requirements": "Installed witness targets, repeat observations, environmental context and cleaning access.",
+      "outside_costs": [
+        "reachable capable source",
+        "payment or reciprocal experimental contribution",
+        "communication or physical delivery delay",
+        "local qualification time and consumables",
+        "ongoing energy, maintenance and spares"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Physical specialist travel requires compatible transport and life support; remote supervision is limited by communication delay and local crew skill.",
+        "partnership": "Contribute real trials, instrument time or materials; shared results remain conditional on the tested environment.",
+        "purchased_research": "Commission a bounded capability question with paid evidence delivery and uncertain outcome; repeat necessary local acceptance work.",
+        "licensed_or_imported_service": "Buy delivered equipment or finite provider operations; continued service depends on reachable logistics and provider capacity.",
+        "reverse_engineering": "Inspect delivered hardware with finite analysis and trial expense; do not infer hidden material history or environmental qualification from appearance."
+      }
+    },
+    "scope_boundary": "A distinct proposed surface operation, not an assertion that this technology is currently deployed or that its full economic feasibility has been demonstrated. Existing broad space, power and habitat discoveries retain their identities.",
+    "implementation_status": "Design only. Physical site inventories, equipment duty, failure state, acquisition costs, rival decisions and full-history progression remain to be implemented."
+  }
+]

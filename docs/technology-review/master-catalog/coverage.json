@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 614,
   "pending_communications": 0,
-  "new_authored_drafts": 2424,
-  "distinct_accounted_identities": 3038,
-  "remaining_identities_to_author": 1962,
+  "new_authored_drafts": 2442,
+  "distinct_accounted_identities": 3056,
+  "remaining_identities_to_author": 1944,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -189,7 +189,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 942,
+    "assigned_identities": 960,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2346,16 +2346,16 @@
         "id": "H06",
         "name": "Advanced planetary and human futures",
         "target": 1300,
-        "assigned": 21,
-        "target_slots_not_yet_assigned": 1279,
+        "assigned": 39,
+        "target_slots_not_yet_assigned": 1261,
         "implemented_baseline": 0,
         "pending_communications": 0,
-        "authored_drafts": 21
+        "authored_drafts": 39
       }
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 462,
+  "branch_alternatives": 467,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 108,
@@ -2380,7 +2380,7 @@
     "D20": 113,
     "D21": 180,
     "D22": 60,
-    "D23": 117,
+    "D23": 135,
     "D24": 56
   },
   "field_coverage": [
@@ -2610,9 +2610,9 @@
       "target": 180,
       "implemented_baseline": 0,
       "pending_communications": 0,
-      "authored_drafts": 117,
-      "accounted": 117,
-      "remaining_to_target": 63
+      "authored_drafts": 135,
+      "accounted": 135,
+      "remaining_to_target": 45
     },
     {
       "id": "D24",
