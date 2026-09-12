@@ -89,7 +89,7 @@
   ],
   "unfinished": [
     "Remaining 4444 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
-    "Full 2500–3000-year natural pacing and performance evidence; no arbitrary era locks",
+    "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
     "Civilian and future operating models beyond twelve primary-settlement plants; solar weather, battery wear and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 89 total unit types are not the proposed 96-role inventory",
@@ -99,8 +99,8 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Continue full master authoring before fine-grained production or artwork. Current 1381 drafts provide initial coverage in 23 fields; future humanity remains for initial coverage. Then expand every field toward 5000 distinct identities with explicit mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts.",
-    "Continue semantic and atlas reconciliation. Nine fields have 225 candidate mappings and four earlier subjects remain partial; mappings add zero discoveries. Reconcile the remaining 375 candidates without counting names wholesale. Preserve the removed well-curb and historical-interpretation duplicates as exclusions.",
+    "Expand the full master beyond initial coverage in all 24 fields: 1437 drafts, 2041 accounted identities, 2959 still to author. First allocate the 556 baseline and 48 pending identities to fields and historical horizons so expansion follows real gaps rather than draft-only quotas. Preserve distinct mechanisms and the substantial future across fields.",
+    "Continue semantic and atlas reconciliation: 250 candidate mappings, four earlier partial subjects and 350 unmapped candidates. Mappings add zero discoveries. Preserve all documented duplicate exclusions; complete historical-horizon allocation and substantive review.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
@@ -125,11 +125,11 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 1381,
-    "distinct_ids_accounted": 1985,
-    "remaining_to_author": 3015,
+    "authored_drafts": 1437,
+    "distinct_ids_accounted": 2041,
+    "remaining_to_author": 2959,
     "complete": false,
-    "atlas_candidates_mapped": 225,
+    "atlas_candidates_mapped": 250,
     "atlas_partial_mappings": 4
   }
 }
