@@ -94,6 +94,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/joint_force_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
 	catalog.append_array(preload("res://scripts/food_water_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/food_preparation.gd").entries())
 	catalog.append_array(preload("res://scripts/military_education_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/civilian_science_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/civilian_industry.gd").entries())
@@ -869,7 +870,7 @@ func _classify_discovery(source:Dictionary)->Dictionary:
 		if not discovery.has("social_consequence"): discovery["social_consequence"]=String(DiscoveryFrontierCatalog.SOCIAL_RESULTS.get(String(discovery.dynamic),"Collective expectations change as the practice spreads"))
 		return discovery
 	var old_direction:=String(discovery.get("direction","Information"))
-	var dynamic_id:String={"Sustenance":"nutrition","Materials":"production","Infrastructure":"infrastructure","Health":"health","Nature":"ecology","Information":"knowledge","Society":"institutions","Warfare":"security"}.get(old_direction,old_direction.to_lower())
+	var dynamic_id:String={"Sustenance":"nutrition","Movement":"logistics","Materials":"production","Infrastructure":"infrastructure","Health":"health","Nature":"ecology","Information":"knowledge","Society":"institutions","Warfare":"security"}.get(old_direction,old_direction.to_lower())
 	var text:=(String(discovery.get("name",""))+" "+String(discovery.get("observation",""))).to_lower()
 	var subcategory:=String((DiscoveryFrontierCatalog.SUBCATEGORIES.get(dynamic_id,["Directed attention"]) as Array)[0])
 	var keyword_map:Dictionary={
@@ -1039,6 +1040,9 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
+	if String(entry.get("id",""))=="smoking":return "Adopted smoking converts meat and fish to preserved rations at 82% yield using shared Logistics/Crafting capacity and 0.04 Timber per input ration. Fuel shortages limit output; unavailable during travel."
+	if String(entry.get("id",""))=="food_drying":return "Adopted air drying converts fresh plants to dry staples at 88% yield using shared Logistics/Crafting capacity, without fuel. Unavailable during travel."
+	if not String(entry.get("meal_preparation","")).is_empty():return String(entry.production_contract)
 	if not entry.get("agronomy_profile",{}).is_empty():
 		var p:Dictionary=entry.agronomy_profile
 		return "At full adoption: cultivation performance +%.1f%%, labor cost %.1f%%, harvest-area cost %.1f%%, soil-wear reduction %.1f%% and adverse-weather loss reduction %.1f%%. Applies to staffed, settled cultivation; strongest adopted practice per family." % [float(p.yield_gain)*100,float(p.labor_cost)*100,float(p.land_cost)*100,float(p.soil_protection)*100,float(p.weather_buffer)*100]

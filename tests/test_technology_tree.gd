@@ -14,6 +14,7 @@ func test_playable_tree_is_finite_unique_and_has_every_domain()->void:
 		assert_bool(ids.has(String(entry.id))).is_false()
 		ids[String(entry.id)]=true
 		domains[String(entry.dynamic)]=true
+		assert_bool(preload("res://scripts/discovery_frontier_catalog.gd").SUBCATEGORIES.has(String(entry.dynamic))).is_true()
 		assert_bool(bool(entry.get("frontier",false))).is_false()
 		for parent in entry.get("requires",[]): assert_bool(DiscoverySystem.catalog_by_id.has(String(parent))).is_true()
 		assert_int(DiscoverySystem.technology_depth(String(entry.id))).is_less(30)

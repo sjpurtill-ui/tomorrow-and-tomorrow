@@ -10,8 +10,13 @@ func run()->void:
 	var requirements:Script=load("res://scripts/technology_requirements.gd")
 	discovery.initialize()
 	var graph:Array=[]
+	# Meal processing is audited against the same live identity and operating contract.
 	for entry:Dictionary in discovery.technology_catalog:graph.append(pathways.graph_entry(entry))
 	var errors:Array=requirements.validate(graph)
+	for entry:Dictionary in discovery.technology_catalog:
+		var channels:Dictionary=preload("res://scripts/discovery_frontier_catalog.gd").SUBCATEGORIES
+		if not channels.has(entry.dynamic) or String(entry.subcategory) not in channels.get(entry.dynamic,[]):errors.append(String(entry.id)+": unsupported research channel")
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/food_preparation.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/food_water_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/military_education_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/civilian_science_knowledge.gd").entries(),discovery.technology_catalog))
