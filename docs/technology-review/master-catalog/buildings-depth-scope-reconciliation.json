@@ -1,0 +1,34 @@
+{
+  "status": "scope_reconciliation_for_review",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "building_condition_surveys",
+      "existing_id": "building_retrofit_assessment",
+      "reason": "Application of an existing inspection, recovery or disassembly method, not a distinct discovery."
+    },
+    {
+      "excluded_id": "reversible_building_connections",
+      "existing_id": "material_disassembly_design",
+      "reason": "Application of an existing inspection, recovery or disassembly method, not a distinct discovery."
+    },
+    {
+      "excluded_id": "robotic_building_inspection",
+      "existing_id": "robotic_field_repair",
+      "reason": "Application of an existing inspection, recovery or disassembly method, not a distinct discovery."
+    }
+  ],
+  "mappings": [
+    {
+      "existing_id": "masonry_bridge_arches",
+      "scope": "Integration of an arch into a bridge with waterway, traffic and support conditions; voussoir assembly is the shared masonry construction mechanism.",
+      "shared_mechanism": "voussoir_arch_assembly"
+    },
+    {
+      "existing_id": "vaulted_masonry_roofs",
+      "scope": "Roof geometry and structural integration; masonry unit assembly and temporary support are shared mechanisms, not separate arch inventions per application.",
+      "shared_mechanism": "voussoir_arch_assembly"
+    }
+  ],
+  "integration_requirement": "Authored parent lists now connect bridge arches and vaulted roofs to shared voussoir assembly. Vaults no longer require bridge construction first. Runtime integration remains pending; alternative corbelled construction retains its separate identity."
+}

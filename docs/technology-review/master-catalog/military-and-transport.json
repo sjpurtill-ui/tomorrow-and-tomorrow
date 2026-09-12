@@ -2305,13 +2305,13 @@
     "field": "D09",
     "id": "masonry_bridge_arches",
     "name": "Masonry Bridge Arches",
-    "foundations": "lime_mortar,geometric_survey,structural_load_testing",
+    "foundations": "voussoir_arch_assembly,geometric_survey,structural_load_testing",
     "mechanism": "Carry bridge loads through a compressed masonry arch into supporting foundations",
     "operating_requirement": "Suitable masonry, centering, sound abutments and inspection",
     "consequence": "Span selected crossings while foundation movement or overload can cause failure",
     "status": "authored_draft",
     "requires_all": [
-      "lime_mortar",
+      "voussoir_arch_assembly",
       "geometric_survey",
       "structural_load_testing"
     ],
@@ -2327,7 +2327,8 @@
       "grants_instant_mastery": false,
       "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
     },
-    "recovery": "For Masonry Bridge Arches: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
+    "recovery": "For Masonry Bridge Arches: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+    "branching_note": "Shared arch assembly supplies the masonry mechanism; bridge knowledge adds crossing, foundation and traffic conditions."
   },
   {
     "field": "D09",

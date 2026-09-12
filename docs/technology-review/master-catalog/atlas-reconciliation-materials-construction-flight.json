@@ -2,7 +2,7 @@
   "status": "editorial_reconciliation",
   "adds_discovery_identities": 0,
   "mapped_candidates": 75,
-  "partial_candidates": 3,
+  "partial_candidates": 2,
   "mappings": [
     {
       "review_id": "D04-01",
@@ -296,10 +296,13 @@
       "candidate_name": "Load bearing arches",
       "mapped_ids": [
         "masonry_bridge_arches",
-        "vaulted_masonry_roofs"
+        "vaulted_masonry_roofs",
+        "voussoir_arch_assembly",
+        "masonry_arch_centering",
+        "masonry_thrust_assessment"
       ],
-      "scope_status": "partial",
-      "note": "Bridge-arch and vault applications are represented. Reconcile the shared arch mechanism and free-standing building applications before claiming full coverage; do not add synonyms automatically."
+      "scope_status": "subject_mapped",
+      "note": "Shared assembly, temporary support and thrust assessment now have authored identities. Bridge and vaulted-roof parent lists use shared assembly directly; vaults no longer require bridges. This is authored graph reconciliation, not implementation."
     },
     {
       "review_id": "D08-07",

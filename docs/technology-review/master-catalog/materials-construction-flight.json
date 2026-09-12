@@ -2346,13 +2346,13 @@
     "field": "D08",
     "id": "vaulted_masonry_roofs",
     "name": "Vaulted Masonry Roofs",
-    "foundations": "masonry_bridge_arches,masonry_buttressing",
+    "foundations": "voussoir_arch_assembly,masonry_buttressing",
     "mechanism": "Extend compressed masonry forms across enclosed spaces with supported thrust paths",
     "operating_requirement": "Qualified masonry, temporary support, foundations and skilled erection",
     "consequence": "Cover durable interior spaces with substantial weight and support demands",
     "status": "authored_draft",
     "requires_all": [
-      "masonry_bridge_arches",
+      "voussoir_arch_assembly",
       "masonry_buttressing"
     ],
     "requires_any": [],
@@ -2372,7 +2372,8 @@
       ],
       "grants_instant_mastery": false,
       "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
-    }
+    },
+    "branching_note": "A masonry roof can develop from shared arch assembly without first constructing a bridge; qualified support and thrust requirements remain."
   },
   {
     "field": "D08",
