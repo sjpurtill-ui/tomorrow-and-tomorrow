@@ -55,7 +55,7 @@
       "domain": "production",
       "id": "charcoal",
       "name": "Charcoal Production",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/clay_shaping.png",
@@ -519,7 +519,7 @@
       "domain": "production",
       "id": "coke_firing",
       "name": "Coke Firing",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/refractory_furnaces.png",
@@ -3757,9 +3757,9 @@
   "live_art_complete": false,
   "live_count": 469,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 423,
+  "queued_count": 421,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 46
+  "verified_count": 48
 }

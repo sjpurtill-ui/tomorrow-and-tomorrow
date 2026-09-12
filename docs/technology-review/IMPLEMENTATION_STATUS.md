@@ -1323,3 +1323,18 @@ Verification: 53 cases pass with zero errors/failures/skips/orphans: charcoal su
 Counts: 469 discoveries, 148 civilian recipes, 11 plant types, 89 military roles and 46 reviewed images. 4,531 identities remain against the 5,000 discovery target; 423 live images are queued and 4,954 total images remain. Full overhaul incomplete. Historical session 57160 was revalidated live at the start; its older code does not inherit these changes and no terminal result is claimed.
 
 Task-owned knowledge, tests and documentation. Shared civilian recipes, resource/finery definitions, graph audit, art manifest and status; discovery_system.gd hotspot includes the catalog append, charcoal contract and alternative-stock checks/disclosure. No save fields changed. Existing known discoveries remain valid; no stock grants. Research materials remain an evidence basis rather than consumed experimental batches. Fuel quality, emissions, byproducts, sustained furnace operation and campaign economic balance remain unimplemented or unverified.
+
+
+## Checkpoint 120: charcoal and coke production artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `527cd48`. No canonical integration or player launch.
+
+Generated two subject-specific illustrations through the built-in image tool using apprentice_contracts.png as the inspected style reference. Charcoal Production shows a covered mound and separate cooled fuel collection; Coke Firing shows closed/open brick ovens, a rake and coal cart. Both were visually reviewed for subject and the approved matte paper-and-gouache aesthetic, then copied unchanged into the project and bound to their existing technology identities. Coke porosity is exaggerated for illustration; neither image is an operating diagram. Exact prompts and source paths are recorded in assets/ui/research/paper/CHARCOAL_PROMPT.md and COKE_FIRING_PROMPT.md.
+
+Original PNGs are 1254 square. Runtime imports use size limit 768 and mipmaps, preserving the existing full-frame presentation and bounded cache. Source/workspace byte equality verified: charcoal SHA256 a3dbf605f08b14c760c8481a3c10d6b70c067771f9ffac20a3dd05990bcad7ea; coke SHA256 8082943a2e29f770716a4eb85f42e6e23142cd457562aee56b38189e198ce3e0. All owned headless import processes exited successfully. No native player presentation is claimed.
+
+Manifest: 469 discoveries, 48 reviewed images, 421 queued live images. Full target still lacks 4,531 authored identities and 4,952 images. Recipe, plant and role counts unchanged at 148, 11 and 89. Full overhaul incomplete. Historical session 57160 was revalidated live at the start; latest inspected snapshot year 227, population 53,197, 264 known discoveries and 17 settlements. It retains its older code and has not produced a terminal target-completion report.
+
+Task-owned images, import metadata and prompt records. Shared research visual bindings, prompt index, art manifest and status. No simulation or save fields changed.
+
+Verification: all 11 research-visual atlas cases pass with zero errors/failures/skips/orphans, including all bound textures, square runtime limits, mipmaps, full-frame presentation, cache bounds and hidden-information behavior. Manifest export reports 48 verified bindings with no missing assets. These headless checks do not establish native player visual acceptance.

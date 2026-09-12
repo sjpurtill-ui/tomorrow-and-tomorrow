@@ -57,3 +57,6 @@ Built-in image generation, using the approved apprentice image as a style refere
 - [Refractory ceramics](REFRACTORY_CERAMICS_PROMPTS.md) — ceramic crucibles and refractory brick firing; built-in generation.
 
 - [Diode Control Stores](DIODE_CONTROL_STORES_PROMPT.md) — discrete diode-grid assembly, built-in generation.
+
+- [Charcoal Production](CHARCOAL_PROMPT.md) — covered mound and cooled fuel collection.
+- [Coke Firing](COKE_FIRING_PROMPT.md) — brick ovens and coke handling.
