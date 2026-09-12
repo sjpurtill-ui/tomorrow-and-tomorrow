@@ -1,0 +1,2405 @@
+[
+  {
+    "field": "D15",
+    "id": "organ_function_comparison",
+    "name": "Organ Function Comparison",
+    "foundations": "comparative_anatomy",
+    "mechanism": "Relate observed organ activity to whole-organism functions through controlled comparisons",
+    "operating_requirement": "Suitable observations, qualified research models and recorded evidence",
+    "consequence": "Distinguish structural resemblance from demonstrated function",
+    "status": "authored_draft",
+    "requires_all": [
+      "comparative_anatomy"
+    ],
+    "requires_any": [
+      [
+        "experimental_controls",
+        "clinical_observation_rounds"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "organ_function_comparison",
+      "local_demonstration": "Relate observed organ activity to whole-organism functions through controlled comparisons",
+      "operating_requirements": "Suitable observations, qualified research models and recorded evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Qualified repeated physiological observations can precede formal laboratory controls; causal certainty remains limited by evidence."
+  },
+  {
+    "field": "D15",
+    "id": "circulatory_flow_models",
+    "name": "Circulatory Flow Models",
+    "foundations": "comparative_anatomy",
+    "mechanism": "Relate observed cardiac action and vessel flow to a closed circulation model",
+    "operating_requirement": "Appropriate observations, qualified investigators and consistent records",
+    "consequence": "Support physiological interpretation without granting a cardiac treatment",
+    "status": "authored_draft",
+    "requires_all": [
+      "comparative_anatomy"
+    ],
+    "requires_any": [
+      [
+        "clinical_pulse_assessment",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "circulatory_flow_models",
+      "local_demonstration": "Relate observed cardiac action and vessel flow to a closed circulation model",
+      "operating_requirements": "Appropriate observations, qualified investigators and consistent records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Circulation can be investigated through different observed flow and cardiac evidence; a dedicated pulse-assessment practice is not the only route."
+  },
+  {
+    "field": "D15",
+    "id": "respiratory_gas_exchange_models",
+    "name": "Respiratory Gas Exchange Models",
+    "foundations": "gas_composition_analysis",
+    "mechanism": "Relate measured organism gas exchange to transport across respiratory surfaces",
+    "operating_requirement": "Qualified gas measurements, suitable models and controlled conditions",
+    "consequence": "Explain bounded respiratory behavior while measurement scale matters",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis"
+    ],
+    "requires_any": [
+      [
+        "cellular_respiration_models",
+        "organ_function_comparison"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "respiratory_gas_exchange_models",
+      "local_demonstration": "Relate measured organism gas exchange to transport across respiratory surfaces",
+      "operating_requirements": "Qualified gas measurements, suitable models and controlled conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Organ-level gas exchange can be studied before a complete cellular energy model."
+  },
+  {
+    "field": "D15",
+    "id": "renal_filtration_models",
+    "name": "Renal Filtration Models",
+    "foundations": "organ_function_comparison",
+    "mechanism": "Relate renal filtering and selective handling to fluid and solute balance",
+    "operating_requirement": "Appropriate physiological evidence and qualified analysis",
+    "consequence": "Support renal reasoning without providing replacement therapy",
+    "status": "authored_draft",
+    "requires_all": [
+      "organ_function_comparison"
+    ],
+    "requires_any": [
+      [
+        "flow_continuity",
+        "clinical_chemistry"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "renal_filtration_models",
+      "local_demonstration": "Relate renal filtering and selective handling to fluid and solute balance",
+      "operating_requirements": "Appropriate physiological evidence and qualified analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Qualified fluid and solute evidence can support renal models through different measurement traditions."
+  },
+  {
+    "field": "D15",
+    "id": "endocrine_feedback_models",
+    "name": "Endocrine Feedback Models",
+    "foundations": "organ_function_comparison",
+    "mechanism": "Model hormone-mediated coordination and feedback among biological processes",
+    "operating_requirement": "Appropriate biochemical evidence, qualified comparisons and analytical staff",
+    "consequence": "Explain selected regulation without treating a hormone measurement as a complete diagnosis",
+    "status": "authored_draft",
+    "requires_all": [
+      "organ_function_comparison"
+    ],
+    "requires_any": [
+      [
+        "metabolic_pathway_analysis",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "endocrine_feedback_models",
+      "local_demonstration": "Model hormone-mediated coordination and feedback among biological processes",
+      "operating_requirements": "Appropriate biochemical evidence, qualified comparisons and analytical staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Controlled physiological comparisons can precede detailed biochemical pathway maps."
+  },
+  {
+    "field": "D15",
+    "id": "neural_impulse_observation",
+    "name": "Neural Impulse Observation",
+    "foundations": "electrical_measurement",
+    "mechanism": "Measure and compare electrical signaling in qualified nervous-tissue observations",
+    "operating_requirement": "Suitable instruments, reviewed research models and trained investigators",
+    "consequence": "Support evidence of neural signaling while recording does not decode all thought",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [
+      [
+        "tissue_histology",
+        "comparative_anatomy"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "neural_impulse_observation",
+      "local_demonstration": "Measure and compare electrical signaling in qualified nervous-tissue observations",
+      "operating_requirements": "Suitable instruments, reviewed research models and trained investigators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Measured nervous-tissue electrical behavior can precede advanced tissue histology."
+  },
+  {
+    "field": "D15",
+    "id": "synaptic_transmission_models",
+    "name": "Synaptic Transmission Models",
+    "foundations": "neural_impulse_observation",
+    "mechanism": "Relate communication between nerve cells to converging electrical and molecular evidence",
+    "operating_requirement": "Qualified observations, analytical methods and research staff",
+    "consequence": "Explain specified signaling processes without implying complete behavioral prediction",
+    "status": "authored_draft",
+    "requires_all": [
+      "neural_impulse_observation"
+    ],
+    "requires_any": [
+      [
+        "enzyme_catalysis",
+        "gene_expression_measurement",
+        "tissue_histology"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "synaptic_transmission_models",
+      "local_demonstration": "Relate communication between nerve cells to converging electrical and molecular evidence",
+      "operating_requirements": "Qualified observations, analytical methods and research staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Different converging evidence supports signaling hypotheses; one enzyme-analysis lineage is not universally required."
+  },
+  {
+    "field": "D15",
+    "id": "muscle_contraction_models",
+    "name": "Muscle Contraction Models",
+    "foundations": "tissue_histology,mechanical_work_energy",
+    "mechanism": "Relate muscle force and shortening to evaluated cellular and molecular processes",
+    "operating_requirement": "Suitable measurement, qualified research models and recorded comparisons",
+    "consequence": "Support mechanical and physiological understanding without automatically increasing strength",
+    "status": "authored_draft",
+    "requires_all": [
+      "tissue_histology",
+      "mechanical_work_energy"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "muscle_contraction_models",
+      "local_demonstration": "Relate muscle force and shortening to evaluated cellular and molecular processes",
+      "operating_requirements": "Suitable measurement, qualified research models and recorded comparisons",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "homeostatic_control_models",
+    "name": "Homeostatic Control Models",
+    "foundations": "endocrine_feedback_models",
+    "mechanism": "Describe maintained biological conditions as interacting regulated processes",
+    "operating_requirement": "Repeated physiological measurements and qualified model comparison",
+    "consequence": "Distinguish regulated variation from a fixed ideal value",
+    "status": "authored_draft",
+    "requires_all": [
+      "endocrine_feedback_models"
+    ],
+    "requires_any": [
+      [
+        "feedback_governors",
+        "differential_equations"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "homeostatic_control_models",
+      "local_demonstration": "Describe maintained biological conditions as interacting regulated processes",
+      "operating_requirements": "Repeated physiological measurements and qualified model comparison",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Formal dynamic models or control analogies can aid interpretation; the organism does not require a mechanical governor."
+  },
+  {
+    "field": "D15",
+    "id": "circadian_rhythm_measurement",
+    "name": "Circadian Rhythm Measurement",
+    "foundations": "seasonal_patterns,experimental_controls",
+    "mechanism": "Measure recurring biological timing and its relation to environmental cues",
+    "operating_requirement": "Repeated observations, suitable timekeeping and controlled evidence",
+    "consequence": "Characterize rhythms without assuming every organism shares one schedule",
+    "status": "authored_draft",
+    "requires_all": [
+      "seasonal_patterns",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "circadian_rhythm_measurement",
+      "local_demonstration": "Measure recurring biological timing and its relation to environmental cues",
+      "operating_requirements": "Repeated observations, suitable timekeeping and controlled evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "plant_transpiration_measurement",
+    "name": "Plant Transpiration Measurement",
+    "foundations": "experimental_controls",
+    "mechanism": "Measure water loss through plants in relation to environmental and physiological conditions",
+    "operating_requirement": "Suitable plants, qualified water-loss measurements with adequate references and controlled observations",
+    "consequence": "Inform crop-water models without assuming all water loss causes equal growth",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_controls"
+    ],
+    "requires_any": [
+      [
+        "photosynthetic_process_analysis",
+        "crop_calendars"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plant_transpiration_measurement",
+      "local_demonstration": "Measure water loss through plants in relation to environmental and physiological conditions",
+      "operating_requirements": "Suitable plants, qualified water-loss measurements with adequate references and controlled observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Repeated plant-water observations can precede a complete photosynthesis model; actual qualified measurement remains necessary."
+  },
+  {
+    "field": "D15",
+    "id": "plant_water_potential_models",
+    "name": "Plant Water Potential Models",
+    "foundations": "plant_transpiration_measurement,hydrostatic_pressure",
+    "mechanism": "Relate plant water movement to evaluated gradients and tissue properties",
+    "operating_requirement": "Appropriate measurement methods, specimens and analysis",
+    "consequence": "Explain water stress and transport within model limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "plant_transpiration_measurement",
+      "hydrostatic_pressure"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plant_water_potential_models",
+      "local_demonstration": "Relate plant water movement to evaluated gradients and tissue properties",
+      "operating_requirements": "Appropriate measurement methods, specimens and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "plant_nutrient_transport",
+    "name": "Plant Nutrient Transport",
+    "foundations": "nutrient_response_trials",
+    "mechanism": "Trace uptake and distribution of selected nutrients within suitable plants",
+    "operating_requirement": "Characterized inputs, qualified measurements and controlled plant trials",
+    "consequence": "Support nutrient-use reasoning without creating nutrients",
+    "status": "authored_draft",
+    "requires_all": [
+      "nutrient_response_trials"
+    ],
+    "requires_any": [
+      [
+        "metabolic_pathway_analysis",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plant_nutrient_transport",
+      "local_demonstration": "Trace uptake and distribution of selected nutrients within suitable plants",
+      "operating_requirements": "Characterized inputs, qualified measurements and controlled plant trials",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Observed uptake and distribution may precede complete metabolic pathways."
+  },
+  {
+    "field": "D15",
+    "id": "plant_hormone_response_trials",
+    "name": "Plant Hormone Response Trials",
+    "foundations": "developmental_stage_series,experimental_controls",
+    "mechanism": "Compare growth responses associated with specified endogenous signaling processes",
+    "operating_requirement": "Suitable plants, controlled observations and qualified analytical evidence",
+    "consequence": "Distinguish signaling effects from general growth conditions",
+    "status": "authored_draft",
+    "requires_all": [
+      "developmental_stage_series",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plant_hormone_response_trials",
+      "local_demonstration": "Compare growth responses associated with specified endogenous signaling processes",
+      "operating_requirements": "Suitable plants, controlled observations and qualified analytical evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "seed_embryo_development",
+    "name": "Seed Embryo Development",
+    "foundations": "developmental_stage_series,seed_dormancy_trials",
+    "mechanism": "Observe seed formation and embryo development across defined stages",
+    "operating_requirement": "Suitable specimens, observation tools and recorded comparisons",
+    "consequence": "Support propagation research without ensuring every seed germinates",
+    "status": "authored_draft",
+    "requires_all": [
+      "developmental_stage_series",
+      "seed_dormancy_trials"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "seed_embryo_development",
+      "local_demonstration": "Observe seed formation and embryo development across defined stages",
+      "operating_requirements": "Suitable specimens, observation tools and recorded comparisons",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "plant_pathology_diagnosis",
+    "name": "Plant Pathology Diagnosis",
+    "foundations": "biological_classification",
+    "mechanism": "Distinguish plausible causes of plant damage using qualified organism and environmental evidence",
+    "operating_requirement": "Appropriate samples, trained investigators and suitable tests",
+    "consequence": "Guide bounded plant-health interpretation without assuming every symptom is infectious",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_classification"
+    ],
+    "requires_any": [
+      [
+        "germ_theory",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plant_pathology_diagnosis",
+      "local_demonstration": "Distinguish plausible causes of plant damage using qualified organism and environmental evidence",
+      "operating_requirements": "Appropriate samples, trained investigators and suitable tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Controlled environmental and organism evidence can distinguish noninfectious causes before a complete germ theory; pathogen claims require their own evidence."
+  },
+  {
+    "field": "D15",
+    "id": "plant_resistance_trait_trials",
+    "name": "Plant Resistance Trait Trials",
+    "foundations": "heredity_experiments,plant_pathology_diagnosis",
+    "mechanism": "Evaluate inherited plant responses to a defined naturally occurring stress under reviewed trials",
+    "operating_requirement": "Suitable plant lines, qualified contained observations and repeated evidence",
+    "consequence": "Identify context-specific resistance without promising universal immunity",
+    "status": "authored_draft",
+    "requires_all": [
+      "heredity_experiments",
+      "plant_pathology_diagnosis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plant_resistance_trait_trials",
+      "local_demonstration": "Evaluate inherited plant responses to a defined naturally occurring stress under reviewed trials",
+      "operating_requirements": "Suitable plant lines, qualified contained observations and repeated evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "symbiotic_nitrogen_fixation_models",
+    "name": "Symbiotic Nitrogen Fixation Models",
+    "foundations": "plant_nutrient_transport",
+    "mechanism": "Relate specific plant-microbe associations to measured nitrogen inputs and exchange",
+    "operating_requirement": "Qualified natural-system observations, analytical methods and plant material",
+    "consequence": "Explain a bounded biological nutrient source without making all crops self-fertilizing",
+    "status": "authored_draft",
+    "requires_all": [
+      "plant_nutrient_transport"
+    ],
+    "requires_any": [
+      [
+        "microbial_community_analysis",
+        "microbial_observation"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "symbiotic_nitrogen_fixation_models",
+      "local_demonstration": "Relate specific plant-microbe associations to measured nitrogen inputs and exchange",
+      "operating_requirements": "Qualified natural-system observations, analytical methods and plant material",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Relevant natural associations can be studied before modern community profiling; measured nitrogen exchange is still required."
+  },
+  {
+    "field": "D15",
+    "id": "mycorrhizal_exchange_measurement",
+    "name": "Mycorrhizal Exchange Measurement",
+    "foundations": "plant_nutrient_transport,microbial_observation",
+    "mechanism": "Measure resource exchange in defined plant-fungal associations",
+    "operating_requirement": "Suitable identified organisms, controlled observations and qualified tracing",
+    "consequence": "Support ecological and crop interpretation while benefit depends on conditions",
+    "status": "authored_draft",
+    "requires_all": [
+      "plant_nutrient_transport",
+      "microbial_observation"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mycorrhizal_exchange_measurement",
+      "local_demonstration": "Measure resource exchange in defined plant-fungal associations",
+      "operating_requirements": "Suitable identified organisms, controlled observations and qualified tracing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "plant_stomatal_response",
+    "name": "Plant Stomatal Response",
+    "foundations": "plant_transpiration_measurement,microscopic_cell_observation",
+    "mechanism": "Relate observed pore behavior to environmental cues and gas-water exchange",
+    "operating_requirement": "Qualified microscopy, suitable plants and controlled conditions",
+    "consequence": "Explain a specific transport-control mechanism without a general yield bonus",
+    "status": "authored_draft",
+    "requires_all": [
+      "plant_transpiration_measurement",
+      "microscopic_cell_observation"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plant_stomatal_response",
+      "local_demonstration": "Relate observed pore behavior to environmental cues and gas-water exchange",
+      "operating_requirements": "Qualified microscopy, suitable plants and controlled conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "meiotic_recombination_models",
+    "name": "Meiotic Recombination Models",
+    "foundations": "chromosome_behavior,genetic_linkage_mapping",
+    "mechanism": "Relate chromosome exchange and segregation to observed inheritance combinations",
+    "operating_requirement": "Qualified cytological and inheritance evidence",
+    "consequence": "Explain variation patterns without controlling every offspring outcome",
+    "status": "authored_draft",
+    "requires_all": [
+      "chromosome_behavior",
+      "genetic_linkage_mapping"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "meiotic_recombination_models",
+      "local_demonstration": "Relate chromosome exchange and segregation to observed inheritance combinations",
+      "operating_requirements": "Qualified cytological and inheritance evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "sex_linked_inheritance_models",
+    "name": "Sex Linked Inheritance Models",
+    "foundations": "chromosomal_inheritance,heredity_experiments",
+    "mechanism": "Relate specified trait transmission to sex-chromosome inheritance in the studied organism",
+    "operating_requirement": "Reliable pedigree evidence and qualified chromosome observations",
+    "consequence": "Interpret bounded inheritance patterns without applying one species model universally",
+    "status": "authored_draft",
+    "requires_all": [
+      "chromosomal_inheritance",
+      "heredity_experiments"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sex_linked_inheritance_models",
+      "local_demonstration": "Relate specified trait transmission to sex-chromosome inheritance in the studied organism",
+      "operating_requirements": "Reliable pedigree evidence and qualified chromosome observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "cytoplasmic_inheritance_models",
+    "name": "Cytoplasmic Inheritance Models",
+    "foundations": "heredity_experiments,microscopic_cell_observation",
+    "mechanism": "Explain selected inheritance patterns through transmitted cellular components beyond nuclear chromosomes",
+    "operating_requirement": "Appropriate cross-generation observations and cellular evidence",
+    "consequence": "Distinguish organelle-related transmission from ordinary nuclear models",
+    "status": "authored_draft",
+    "requires_all": [
+      "heredity_experiments",
+      "microscopic_cell_observation"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cytoplasmic_inheritance_models",
+      "local_demonstration": "Explain selected inheritance patterns through transmitted cellular components beyond nuclear chromosomes",
+      "operating_requirements": "Appropriate cross-generation observations and cellular evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "quantitative_trait_variance",
+    "name": "Quantitative Trait Variance",
+    "foundations": "population_genetics,statistical_inference",
+    "mechanism": "Partition observed trait variation under an explicit inheritance and environment model",
+    "operating_requirement": "Representative phenotype and relationship data with qualified analysis",
+    "consequence": "Estimate conditional contributions without equating heritability with immutability",
+    "status": "authored_draft",
+    "requires_all": [
+      "population_genetics",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "quantitative_trait_variance",
+      "local_demonstration": "Partition observed trait variation under an explicit inheritance and environment model",
+      "operating_requirements": "Representative phenotype and relationship data with qualified analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "population_structure_correction",
+    "name": "Population Structure Correction",
+    "foundations": "population_genetics,statistical_sampling",
+    "mechanism": "Account for relatedness and sampling structure in comparisons of inherited variation",
+    "operating_requirement": "Representative data, suitable models and independent evaluation",
+    "consequence": "Reduce specified confounding without guaranteeing causal inference",
+    "status": "authored_draft",
+    "requires_all": [
+      "population_genetics",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "population_structure_correction",
+      "local_demonstration": "Account for relatedness and sampling structure in comparisons of inherited variation",
+      "operating_requirements": "Representative data, suitable models and independent evaluation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "genome_wide_association_analysis",
+    "name": "Genome Wide Association Analysis",
+    "foundations": "genomic_variant_analysis,population_structure_correction",
+    "mechanism": "Compare many measured variants with a defined phenotype under controlled statistical testing",
+    "operating_requirement": "Suitable cohort data, consent where relevant, computation and validation",
+    "consequence": "Identify supported associations without declaring every linked marker causal",
+    "status": "authored_draft",
+    "requires_all": [
+      "genomic_variant_analysis",
+      "population_structure_correction"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "genome_wide_association_analysis",
+      "local_demonstration": "Compare many measured variants with a defined phenotype under controlled statistical testing",
+      "operating_requirements": "Suitable cohort data, consent where relevant, computation and validation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "causal_variant_evidence_review",
+    "name": "Causal Variant Evidence Review",
+    "foundations": "genome_wide_association_analysis,gene_expression_measurement",
+    "mechanism": "Combine independent evidence to assess whether a candidate variant contributes to a specified effect",
+    "operating_requirement": "Qualified observational and functional evidence with accountable review",
+    "consequence": "Narrow causal hypotheses while retaining unresolved mechanisms",
+    "status": "authored_draft",
+    "requires_all": [
+      "genome_wide_association_analysis",
+      "gene_expression_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "causal_variant_evidence_review",
+      "local_demonstration": "Combine independent evidence to assess whether a candidate variant contributes to a specified effect",
+      "operating_requirements": "Qualified observational and functional evidence with accountable review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "phylogenetic_relationship_inference",
+    "name": "Phylogenetic Relationship Inference",
+    "foundations": "biological_classification",
+    "mechanism": "Infer evolutionary relationships from declared character or sequence evidence and models",
+    "operating_requirement": "Representative identified samples, suitable computation and uncertainty assessment",
+    "consequence": "Compare supported ancestry hypotheses without equating similarity with certainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_classification"
+    ],
+    "requires_any": [
+      [
+        "sequence_alignment",
+        "comparative_anatomy"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "phylogenetic_relationship_inference",
+      "local_demonstration": "Infer evolutionary relationships from declared character or sequence evidence and models",
+      "operating_requirements": "Representative identified samples, suitable computation and uncertainty assessment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Morphological characters can support ancestry hypotheses before sequence-reading technology; uncertainty and homoplasy remain."
+  },
+  {
+    "field": "D15",
+    "id": "molecular_clock_calibration",
+    "name": "Molecular Clock Calibration",
+    "foundations": "phylogenetic_relationship_inference,sequence_alignment",
+    "mechanism": "Relate molecular change to time using explicit calibration evidence and model assumptions",
+    "operating_requirement": "Suitable sequence evidence, independent time constraints and analysis",
+    "consequence": "Estimate lineage timing with interval uncertainty rather than exact universal rates",
+    "status": "authored_draft",
+    "requires_all": [
+      "phylogenetic_relationship_inference",
+      "sequence_alignment"
+    ],
+    "requires_any": [
+      [
+        "radiometric_geochronology",
+        "heredity_experiments"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "molecular_clock_calibration",
+      "local_demonstration": "Relate molecular change to time using explicit calibration evidence and model assumptions",
+      "operating_requirements": "Suitable sequence evidence, independent time constraints and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Calibration may use independently dated deep-time evidence or directly observed lineage intervals; the applicable time scale and uncertainty remain distinct."
+  },
+  {
+    "field": "D15",
+    "id": "comparative_genome_synteny",
+    "name": "Comparative Genome Synteny",
+    "foundations": "genome_assembly,sequence_alignment",
+    "mechanism": "Compare conserved order and rearrangement of genomic regions among qualified assemblies",
+    "operating_requirement": "Compatible annotated assemblies and suitable analysis",
+    "consequence": "Support evolutionary interpretation while assembly artifacts remain possible",
+    "status": "authored_draft",
+    "requires_all": [
+      "genome_assembly",
+      "sequence_alignment"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "comparative_genome_synteny",
+      "local_demonstration": "Compare conserved order and rearrangement of genomic regions among qualified assemblies",
+      "operating_requirements": "Compatible annotated assemblies and suitable analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "chromatin_organization_models",
+    "name": "Chromatin Organization Models",
+    "foundations": "chromosome_behavior",
+    "mechanism": "Relate DNA-protein organization to observed accessibility and cellular state",
+    "operating_requirement": "Qualified structural and molecular evidence with trained interpretation",
+    "consequence": "Explain selected genome packaging behavior without changing the DNA sequence by definition",
+    "status": "authored_draft",
+    "requires_all": [
+      "chromosome_behavior"
+    ],
+    "requires_any": [
+      [
+        "protein_structure_analysis",
+        "biological_staining"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "chromatin_organization_models",
+      "local_demonstration": "Relate DNA-protein organization to observed accessibility and cellular state",
+      "operating_requirements": "Qualified structural and molecular evidence with trained interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Qualified cytological evidence can precede detailed molecular structural analysis."
+  },
+  {
+    "field": "D15",
+    "id": "epigenetic_state_measurement",
+    "name": "Epigenetic State Measurement",
+    "foundations": "chromatin_organization_models,gene_expression_measurement",
+    "mechanism": "Measure specified DNA-associated or chromatin marks and compare their relation to expression",
+    "operating_requirement": "Qualified assays, representative biological material and analytical controls",
+    "consequence": "Characterize states without assuming every mark is causal or inherited across generations",
+    "status": "authored_draft",
+    "requires_all": [
+      "chromatin_organization_models",
+      "gene_expression_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "epigenetic_state_measurement",
+      "local_demonstration": "Measure specified DNA-associated or chromatin marks and compare their relation to expression",
+      "operating_requirements": "Qualified assays, representative biological material and analytical controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "transcription_regulation_models",
+    "name": "Transcription Regulation Models",
+    "foundations": "genetic_code_analysis,gene_expression_measurement",
+    "mechanism": "Relate production of RNA to evaluated regulatory interactions and conditions",
+    "operating_requirement": "Suitable molecular evidence, controlled comparisons and research staff",
+    "consequence": "Explain selected expression changes rather than infer protein output directly from DNA alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "genetic_code_analysis",
+      "gene_expression_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "transcription_regulation_models",
+      "local_demonstration": "Relate production of RNA to evaluated regulatory interactions and conditions",
+      "operating_requirements": "Suitable molecular evidence, controlled comparisons and research staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "rna_processing_models",
+    "name": "Rna Processing Models",
+    "foundations": "transcription_regulation_models,nucleic_acid_characterization",
+    "mechanism": "Relate precursor RNA to observed processed products under defined cellular conditions",
+    "operating_requirement": "Qualified RNA measurements and comparative evidence",
+    "consequence": "Explain alternative processing without treating every transcript as the same product",
+    "status": "authored_draft",
+    "requires_all": [
+      "transcription_regulation_models",
+      "nucleic_acid_characterization"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rna_processing_models",
+      "local_demonstration": "Relate precursor RNA to observed processed products under defined cellular conditions",
+      "operating_requirements": "Qualified RNA measurements and comparative evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "translation_control_models",
+    "name": "Translation Control Models",
+    "foundations": "genetic_code_analysis",
+    "mechanism": "Relate protein synthesis rates to evaluated translation machinery and regulation",
+    "operating_requirement": "Suitable molecular measurements and qualified models",
+    "consequence": "Distinguish protein-production control from transcript abundance",
+    "status": "authored_draft",
+    "requires_all": [
+      "genetic_code_analysis"
+    ],
+    "requires_any": [
+      [
+        "protein_separation",
+        "gene_expression_measurement"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "translation_control_models",
+      "local_demonstration": "Relate protein synthesis rates to evaluated translation machinery and regulation",
+      "operating_requirements": "Suitable molecular measurements and qualified models",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Different suitable molecular measurements may support translation models; actual protein-production evidence remains required."
+  },
+  {
+    "field": "D15",
+    "id": "protein_turnover_measurement",
+    "name": "Protein Turnover Measurement",
+    "foundations": "protein_separation,metabolic_pathway_analysis",
+    "mechanism": "Measure synthesis and removal of selected proteins over defined observation intervals",
+    "operating_requirement": "Qualified time-series measurements and controlled evidence",
+    "consequence": "Estimate dynamic protein abundance without treating it as static expression",
+    "status": "authored_draft",
+    "requires_all": [
+      "protein_separation",
+      "metabolic_pathway_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "protein_turnover_measurement",
+      "local_demonstration": "Measure synthesis and removal of selected proteins over defined observation intervals",
+      "operating_requirements": "Qualified time-series measurements and controlled evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "membrane_transport_models",
+    "name": "Membrane Transport Models",
+    "foundations": "cell_theory,electrochemical_cells",
+    "mechanism": "Relate selective membrane movement to gradients and qualified transport mechanisms",
+    "operating_requirement": "Suitable cellular evidence, measurement and analysis",
+    "consequence": "Explain bounded material exchange rather than assume cells freely admit every solute",
+    "status": "authored_draft",
+    "requires_all": [
+      "cell_theory",
+      "electrochemical_cells"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "membrane_transport_models",
+      "local_demonstration": "Relate selective membrane movement to gradients and qualified transport mechanisms",
+      "operating_requirements": "Suitable cellular evidence, measurement and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "ion_channel_recording",
+    "name": "Ion Channel Recording",
+    "foundations": "membrane_transport_models,electrical_measurement",
+    "mechanism": "Measure qualified electrical events associated with membrane conductance",
+    "operating_requirement": "Suitable recording equipment, reviewed research material and trained investigators",
+    "consequence": "Support specific transport models without directly proving organism-level treatment",
+    "status": "authored_draft",
+    "requires_all": [
+      "membrane_transport_models",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ion_channel_recording",
+      "local_demonstration": "Measure qualified electrical events associated with membrane conductance",
+      "operating_requirements": "Suitable recording equipment, reviewed research material and trained investigators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "cell_adhesion_models",
+    "name": "Cell Adhesion Models",
+    "foundations": "tissue_histology",
+    "mechanism": "Relate cellular attachment and tissue organization to evaluated molecular interactions",
+    "operating_requirement": "Qualified observations, appropriate specimens and analysis",
+    "consequence": "Explain selected tissue behavior without automatically engineering a functional organ",
+    "status": "authored_draft",
+    "requires_all": [
+      "tissue_histology"
+    ],
+    "requires_any": [
+      [
+        "protein_structure_analysis",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cell_adhesion_models",
+      "local_demonstration": "Relate cellular attachment and tissue organization to evaluated molecular interactions",
+      "operating_requirements": "Qualified observations, appropriate specimens and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Controlled cell-attachment evidence can precede a full molecular structure model."
+  },
+  {
+    "field": "D15",
+    "id": "programmed_cell_death_models",
+    "name": "Programmed Cell Death Models",
+    "foundations": "cell_division_observation",
+    "mechanism": "Distinguish regulated cellular death processes through converging evidence",
+    "operating_requirement": "Qualified observations and controlled biological comparisons",
+    "consequence": "Support developmental and disease reasoning without a guaranteed intervention",
+    "status": "authored_draft",
+    "requires_all": [
+      "cell_division_observation"
+    ],
+    "requires_any": [
+      [
+        "gene_expression_measurement",
+        "developmental_stage_series"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "programmed_cell_death_models",
+      "local_demonstration": "Distinguish regulated cellular death processes through converging evidence",
+      "operating_requirements": "Qualified observations and controlled biological comparisons",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Developmental evidence can identify regulated cell loss before expression profiling; mere cell damage is not proof of programmed death."
+  },
+  {
+    "field": "D15",
+    "id": "biological_fluorescence_imaging",
+    "name": "Biological Fluorescence Imaging",
+    "foundations": "biological_staining,experimental_optics",
+    "mechanism": "Use qualified emitted-light contrast to locate selected biological features",
+    "operating_requirement": "Appropriate optics, characterized labels, specimens and interpretation",
+    "consequence": "Observe specified features with photobleaching and labeling limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_staining",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biological_fluorescence_imaging",
+      "local_demonstration": "Use qualified emitted-light contrast to locate selected biological features",
+      "operating_requirements": "Appropriate optics, characterized labels, specimens and interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "confocal_biological_imaging",
+    "name": "Confocal Biological Imaging",
+    "foundations": "biological_fluorescence_imaging,laser_light_generation",
+    "mechanism": "Reject selected out-of-focus signal to reconstruct qualified optical sections",
+    "operating_requirement": "Compatible microscope, controlled scanning, samples and analysis",
+    "consequence": "Improve supported spatial discrimination while depth and light exposure constrain observations",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_fluorescence_imaging",
+      "laser_light_generation"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "confocal_biological_imaging",
+      "local_demonstration": "Reject selected out-of-focus signal to reconstruct qualified optical sections",
+      "operating_requirements": "Compatible microscope, controlled scanning, samples and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "live_cell_time_lapse",
+    "name": "Live Cell Time Lapse",
+    "foundations": "cell_culture_methods,microscopic_cell_observation",
+    "mechanism": "Record qualified living-cell changes over time while monitoring observation effects",
+    "operating_requirement": "Suitable culture support, stable imaging and tracked conditions",
+    "consequence": "Reveal dynamics that fixed snapshots miss without assuming imaging is harmless",
+    "status": "authored_draft",
+    "requires_all": [
+      "cell_culture_methods",
+      "microscopic_cell_observation"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "live_cell_time_lapse",
+      "local_demonstration": "Record qualified living-cell changes over time while monitoring observation effects",
+      "operating_requirements": "Suitable culture support, stable imaging and tracked conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "biological_electron_microscopy",
+    "name": "Biological Electron Microscopy",
+    "foundations": "electron_physics,vacuum_pumps",
+    "mechanism": "Use qualified electron imaging to examine prepared biological structure",
+    "operating_requirement": "Appropriate instrument, prepared specimens, utilities and trained interpretation",
+    "consequence": "Resolve selected structure while preparation artifacts and sampling remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "electron_physics",
+      "vacuum_pumps"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biological_electron_microscopy",
+      "local_demonstration": "Use qualified electron imaging to examine prepared biological structure",
+      "operating_requirements": "Appropriate instrument, prepared specimens, utilities and trained interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "cryogenic_molecular_imaging",
+    "name": "Cryogenic Molecular Imaging",
+    "foundations": "biological_electron_microscopy,protein_structure_analysis",
+    "mechanism": "Reconstruct qualified molecular structure from cryogenically preserved specimens and measured images",
+    "operating_requirement": "Suitable instrument, cryogenic preparation, computation and expert review",
+    "consequence": "Infer selected structures with uncertainty rather than directly photograph every atom",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_electron_microscopy",
+      "protein_structure_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryogenic_molecular_imaging",
+      "local_demonstration": "Reconstruct qualified molecular structure from cryogenically preserved specimens and measured images",
+      "operating_requirements": "Suitable instrument, cryogenic preparation, computation and expert review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "flow_cytometric_measurement",
+    "name": "Flow Cytometric Measurement",
+    "foundations": "biological_fluorescence_imaging,flow_continuity",
+    "mechanism": "Measure qualified optical properties of individual suspended cells in a controlled stream",
+    "operating_requirement": "Appropriate instrument, prepared samples and calibrated analysis",
+    "consequence": "Compare cell populations while gating and sample handling affect results",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_fluorescence_imaging",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "flow_cytometric_measurement",
+      "local_demonstration": "Measure qualified optical properties of individual suspended cells in a controlled stream",
+      "operating_requirements": "Appropriate instrument, prepared samples and calibrated analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "biological_electrophoretic_separation",
+    "name": "Biological Electrophoretic Separation",
+    "foundations": "protein_separation,electrical_measurement",
+    "mechanism": "Separate qualified biological molecules by evaluated migration in an electrical field",
+    "operating_requirement": "Suitable apparatus, media, power and analytical controls",
+    "consequence": "Resolve specified molecular fractions without identifying them from position alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "protein_separation",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biological_electrophoretic_separation",
+      "local_demonstration": "Separate qualified biological molecules by evaluated migration in an electrical field",
+      "operating_requirements": "Suitable apparatus, media, power and analytical controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "biological_chromatographic_separation",
+    "name": "Biological Chromatographic Separation",
+    "foundations": "protein_separation",
+    "mechanism": "Separate selected biological molecules through differing interactions with qualified stationary and mobile phases",
+    "operating_requirement": "Compatible media, equipment, samples and analytical staff",
+    "consequence": "Recover or compare defined fractions with yield and purity tradeoffs",
+    "status": "authored_draft",
+    "requires_all": [
+      "protein_separation"
+    ],
+    "requires_any": [
+      [
+        "chemical_distillation",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biological_chromatographic_separation",
+      "local_demonstration": "Separate selected biological molecules through differing interactions with qualified stationary and mobile phases",
+      "operating_requirements": "Compatible media, equipment, samples and analytical staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Qualified phase-interaction separation can be established empirically; distillation is not universal."
+  },
+  {
+    "field": "D15",
+    "id": "biological_mass_spectrometry",
+    "name": "Biological Mass Spectrometry",
+    "foundations": "spectroscopy,electron_physics",
+    "mechanism": "Infer molecular mass-related information from qualified ion measurements of biological samples",
+    "operating_requirement": "Suitable instrument, preparation, reference evidence and expert analysis",
+    "consequence": "Characterize selected molecules with detection and interpretation limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "spectroscopy",
+      "electron_physics"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biological_mass_spectrometry",
+      "local_demonstration": "Infer molecular mass-related information from qualified ion measurements of biological samples",
+      "operating_requirements": "Suitable instrument, preparation, reference evidence and expert analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "metabolomic_profile_analysis",
+    "name": "Metabolomic Profile Analysis",
+    "foundations": "biological_mass_spectrometry,metabolic_pathway_analysis",
+    "mechanism": "Compare measured small-molecule profiles under controlled sampling and analytical conditions",
+    "operating_requirement": "Representative specimens, qualified measurement and computation",
+    "consequence": "Reveal supported metabolic differences without treating every association as mechanism",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_mass_spectrometry",
+      "metabolic_pathway_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metabolomic_profile_analysis",
+      "local_demonstration": "Compare measured small-molecule profiles under controlled sampling and analytical conditions",
+      "operating_requirements": "Representative specimens, qualified measurement and computation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "stable_isotope_biological_tracing",
+    "name": "Stable Isotope Biological Tracing",
+    "foundations": "metabolic_pathway_analysis,spectroscopy",
+    "mechanism": "Follow a qualified stable-isotope label to infer selected material transformations",
+    "operating_requirement": "Suitable benign labeled material, analytical equipment and reviewed observations",
+    "consequence": "Trace specific pathways while label dilution and model assumptions limit inference",
+    "status": "authored_draft",
+    "requires_all": [
+      "metabolic_pathway_analysis",
+      "spectroscopy"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "stable_isotope_biological_tracing",
+      "local_demonstration": "Follow a qualified stable-isotope label to infer selected material transformations",
+      "operating_requirements": "Suitable benign labeled material, analytical equipment and reviewed observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "nucleic_acid_amplification_measurement",
+    "name": "Nucleic Acid Amplification Measurement",
+    "foundations": "dna_replication_models,nucleic_acid_characterization",
+    "mechanism": "Use qualified amplification to detect or compare a defined nucleic-acid target",
+    "operating_requirement": "Appropriate analytical reagents, instruments, controls and trained laboratory staff",
+    "consequence": "Improve bounded target detection while contamination and interpretation limits remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "dna_replication_models",
+      "nucleic_acid_characterization"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nucleic_acid_amplification_measurement",
+      "local_demonstration": "Use qualified amplification to detect or compare a defined nucleic-acid target",
+      "operating_requirements": "Appropriate analytical reagents, instruments, controls and trained laboratory staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "rna_sequence_quantification",
+    "name": "Rna Sequence Quantification",
+    "foundations": "dna_sequence_reading,rna_processing_models",
+    "mechanism": "Estimate RNA representation from a qualified sequencing and sampling workflow",
+    "operating_requirement": "Suitable samples, analytical instruments, computation and controls",
+    "consequence": "Compare expression evidence while sampling and processing bias remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "dna_sequence_reading",
+      "rna_processing_models"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rna_sequence_quantification",
+      "local_demonstration": "Estimate RNA representation from a qualified sequencing and sampling workflow",
+      "operating_requirements": "Suitable samples, analytical instruments, computation and controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "environmental_dna_surveys",
+    "name": "Environmental Dna Surveys",
+    "foundations": "nucleic_acid_amplification_measurement,ecological_detection_models",
+    "mechanism": "Infer supported organism presence from qualified environmental genetic evidence",
+    "operating_requirement": "Representative samples, controls, analytical capacity and reference data",
+    "consequence": "Extend biodiversity observation without equating DNA detection with a living local population",
+    "status": "authored_draft",
+    "requires_all": [
+      "nucleic_acid_amplification_measurement",
+      "ecological_detection_models"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "environmental_dna_surveys",
+      "local_demonstration": "Infer supported organism presence from qualified environmental genetic evidence",
+      "operating_requirements": "Representative samples, controls, analytical capacity and reference data",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "multiomic_evidence_integration",
+    "name": "Multiomic Evidence Integration",
+    "foundations": "metabolomic_profile_analysis,rna_sequence_quantification",
+    "mechanism": "Compare different molecular measurement layers while retaining their distinct errors and scales",
+    "operating_requirement": "Matched qualified data, computation and independent interpretation",
+    "consequence": "Support converging hypotheses without assuming more data ensures causality",
+    "status": "authored_draft",
+    "requires_all": [
+      "metabolomic_profile_analysis",
+      "rna_sequence_quantification"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "multiomic_evidence_integration",
+      "local_demonstration": "Compare different molecular measurement layers while retaining their distinct errors and scales",
+      "operating_requirements": "Matched qualified data, computation and independent interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "lineage_resolved_cell_models",
+    "name": "Lineage Resolved Cell Models",
+    "foundations": "single_cell_analysis,developmental_stage_series",
+    "mechanism": "Infer or track qualified relationships among observed cell states over time",
+    "operating_requirement": "Appropriate observations, identifiers where suitable and uncertainty-aware analysis",
+    "consequence": "Study cell development without treating computational trajectories as proven ancestry",
+    "status": "authored_draft",
+    "requires_all": [
+      "single_cell_analysis",
+      "developmental_stage_series"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lineage_resolved_cell_models",
+      "local_demonstration": "Infer or track qualified relationships among observed cell states over time",
+      "operating_requirements": "Appropriate observations, identifiers where suitable and uncertainty-aware analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "organ_on_chip_models",
+    "name": "Organ On Chip Models",
+    "foundations": "cell_culture_methods,microfluidic_channel_design",
+    "mechanism": "Maintain selected tissue functions in a qualified small-scale flow device for bounded experiments",
+    "operating_requirement": "Suitable cells, device, media, pumps and characterization",
+    "consequence": "Model specific responses without replacing a whole organism or proving clinical efficacy",
+    "status": "authored_draft",
+    "requires_all": [
+      "cell_culture_methods",
+      "microfluidic_channel_design"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "organ_on_chip_models",
+      "local_demonstration": "Maintain selected tissue functions in a qualified small-scale flow device for bounded experiments",
+      "operating_requirements": "Suitable cells, device, media, pumps and characterization",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D15",
+    "id": "tissue_perfusion_models",
+    "name": "Tissue Perfusion Models",
+    "foundations": "tissue_scaffold_engineering,flow_continuity",
+    "mechanism": "Relate delivered fluid transport to evaluated exchange needs in a tissue model",
+    "operating_requirement": "Qualified constructs, flow equipment, measurements and analysis",
+    "consequence": "Bound tissue-support conditions without creating a functional transplant",
+    "status": "authored_draft",
+    "requires_all": [
+      "tissue_scaffold_engineering",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tissue_perfusion_models",
+      "local_demonstration": "Relate delivered fluid transport to evaluated exchange needs in a tissue model",
+      "operating_requirements": "Qualified constructs, flow equipment, measurements and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
+  },
+  {
+    "field": "D06",
+    "id": "microfluidic_channel_design",
+    "name": "Microfluidic Channel Design",
+    "foundations": "flow_continuity",
+    "mechanism": "Qualify small-channel geometry and interfaces against measured fluid transport and surface effects",
+    "operating_requirement": "Suitable fabricated channels, compatible fluids, connection equipment and qualified measurements",
+    "consequence": "Support bounded small-volume handling with pressure, wetting and contamination constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "flow_continuity"
+    ],
+    "requires_any": [
+      [
+        "glass_tube_drawing",
+        "photolithographic_patterning"
+      ]
+    ],
+    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "microfluidic_channel_design",
+      "local_demonstration": "Qualify small-channel geometry and interfaces against measured fluid transport and surface effects",
+      "operating_requirements": "Suitable fabricated channels, compatible fluids, connection equipment and qualified measurements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real specimen or information delivery",
+        "finite local replication and interpretation",
+        "continuing instruments, specimens, utilities and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+      }
+    },
+    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+    "branching_note": "Qualified small channels may follow glass capillary or patterned fabrication routes; a semiconductor factory is not universal."
+  }
+]
