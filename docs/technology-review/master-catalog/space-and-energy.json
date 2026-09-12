@@ -452,17 +452,33 @@
     "field": "D05",
     "id": "district_heating_loops",
     "name": "District Heating Loops",
-    "foundations": "pressure_pipe_jointing,thermal_storage_tanks",
+    "foundations": "pressure_pipe_jointing",
     "mechanism": "Circulate heat through a shared supply-and-return pipe system",
-    "operating_requirement": "Insulated pipes, pumps and connected buildings",
-    "consequence": "Deliver heat with distance and pumping losses",
+    "operating_requirement": "An actual qualified heat supply, insulated pipes, pumps or suitable circulation, connected loads and maintained access",
+    "consequence": "Deliver shared heat with finite source capacity, distance losses, pumping demand and outage exposure",
     "status": "authored_draft",
     "requires_all": [
-      "pressure_pipe_jointing",
-      "thermal_storage_tanks"
+      "pressure_pipe_jointing"
     ],
     "requires_any": [],
-    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+    "recovery": "For District Heating Loops: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+    "branching_note": "Heat storage is optional. Imported heat or an available compatible local source can supply a network without domestic mastery of every generation method.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "district_heating_loops",
+      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for District-Heat Distribution",
+      "local_demonstration": "Circulate heat through a shared supply-and-return pipe system",
+      "operating_requirements": "An actual qualified heat supply, insulated pipes, pumps or suitable circulation, connected loads and maintained access",
+      "outside_costs": [
+        "competent source availability",
+        "negotiated payment or reciprocal work",
+        "actual travel or evidence delivery",
+        "local adaptation and qualification",
+        "finite teacher and learner capacity"
+      ],
+      "grants_instant_mastery": false,
+      "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+    }
   },
   {
     "field": "D05",

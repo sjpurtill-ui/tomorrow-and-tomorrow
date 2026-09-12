@@ -208,3 +208,5 @@ Payment and clearing entries distinguish liquidity, settlement obligations and f
 Shared equipment, repositories, training and research infrastructure are distinct capacities in UNESCO’s [Recommendation on Open Science](https://www.unesco.org/en/legal-affairs/recommendation-open-science). This supports separating publication from the practical ability to reproduce and operate a method.
 
 These overview sources do not validate every historical prerequisite. Individual historical review, semantic duplicate reconciliation, broader empirical alternatives, explicit recovery routes and implemented operating effects remain outstanding.
+
+Current civic/economic and translation prerequisite corrections are documented in [Civic, Economic and Learning Horizon and Branch Review](Civic%20Economic%20and%20Learning%20Horizon%20Review.md). Its before/after table supersedes affected cells in this publication checkpoint; current JSON/TSV definitions are authoritative.

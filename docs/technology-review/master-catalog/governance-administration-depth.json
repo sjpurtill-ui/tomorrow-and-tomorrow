@@ -1465,36 +1465,28 @@
     "field": "D16",
     "id": "public_service_case_routing",
     "name": "Public Service Case Routing",
-    "foundations": "administrative_service_standards,jurisdiction_boundaries",
+    "foundations": "jurisdiction_boundaries",
     "mechanism": "Route a request to the office actually responsible and preserve unresolved obligations",
     "operating_requirement": "Current responsibility map, staff and functioning handoff channels",
     "consequence": "Reduce lost requests while real workload and capacity still cause delays",
     "status": "authored_draft",
     "requires_all": [
-      "administrative_service_standards",
       "jurisdiction_boundaries"
     ],
     "requires_any": [],
-    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
     "recovery_contract": {
       "status": "design_proposal",
       "destination": "public_service_case_routing",
-      "local_demonstration": "Route a request to the office actually responsible and preserve unresolved obligations",
+      "local_demonstration": "a request transferred between responsible offices without losing unresolved duties",
       "operating_requirements": "Current responsibility map, staff and functioning handoff channels",
       "grants_instant_mastery": false,
-      "outside_costs": [
-        "available competent source",
-        "payment or reciprocal contribution",
-        "real travel or record delivery",
-        "finite local adaptation and practiced administration",
-        "continuing staff, public resources and enforceable adopted terms"
-      ],
       "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
-        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
-        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
-        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
-        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete a request transferred between responsible offices without losing unresolved duties.",
+        "partnership": "Contribute staff, evidence or supplies to a request transferred between responsible offices without losing unresolved duties; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing a request transferred between responsible offices without losing unresolved duties; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for a request transferred between responsible offices without losing unresolved duties; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to a request transferred between responsible offices without losing unresolved duties; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
       }
     },
     "adoption_contract": {
@@ -1503,7 +1495,8 @@
       "required_for_all_civilizations": false,
       "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
       "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
-    }
+    },
+    "branching_note": "Requests can be routed to the responsible office before measurable administrative service standards are adopted."
   },
   {
     "field": "D16",
@@ -1597,36 +1590,28 @@
     "field": "D16",
     "id": "language_access_administration",
     "name": "Language Access Administration",
-    "foundations": "cultural_translation_practice,administrative_service_standards",
+    "foundations": "cultural_translation_practice",
     "mechanism": "Provide qualified language access for public interactions and consequential records",
     "operating_requirement": "Competent interpreters or translators, appropriate materials and staff time",
     "consequence": "Make services more accessible while translation quality and capacity remain limits",
     "status": "authored_draft",
     "requires_all": [
-      "cultural_translation_practice",
-      "administrative_service_standards"
+      "cultural_translation_practice"
     ],
     "requires_any": [],
-    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
     "recovery_contract": {
       "status": "design_proposal",
       "destination": "language_access_administration",
-      "local_demonstration": "Provide qualified language access for public interactions and consequential records",
+      "local_demonstration": "an interpreted public interaction checked by competent speakers and subject practitioners",
       "operating_requirements": "Competent interpreters or translators, appropriate materials and staff time",
       "grants_instant_mastery": false,
-      "outside_costs": [
-        "available competent source",
-        "payment or reciprocal contribution",
-        "real travel or record delivery",
-        "finite local adaptation and practiced administration",
-        "continuing staff, public resources and enforceable adopted terms"
-      ],
       "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
-        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
-        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
-        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
-        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete an interpreted public interaction checked by competent speakers and subject practitioners.",
+        "partnership": "Contribute staff, evidence or supplies to an interpreted public interaction checked by competent speakers and subject practitioners; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing an interpreted public interaction checked by competent speakers and subject practitioners; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for an interpreted public interaction checked by competent speakers and subject practitioners; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to an interpreted public interaction checked by competent speakers and subject practitioners; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
       }
     },
     "adoption_contract": {
@@ -1635,7 +1620,8 @@
       "required_for_all_civilizations": false,
       "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
       "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
-    }
+    },
+    "branching_note": "Qualified interpretation for public dealings does not require an adopted modern service-standard program."
   },
   {
     "field": "D16",

@@ -207,3 +207,5 @@ Soil disturbance, ground cover and crop diversity interact rather than granting 
 Aquaponics joins aquatic production and soilless crops through managed water and nutrient flows, with water-quality and system-design requirements described in FAO’s [aquaponic food production reference](https://www.fao.org/family-farming/detail/en/c/1743023/). Proposed closed-habitat entries extend these dependencies as game-design questions; self-sufficiency is not assumed.
 
 Historical prerequisites, regional alternatives, biological feasibility, numeric balances, explicit disadvantaged recovery routes and actual operating implementation remain pending. Unique IDs and reachable edges establish neither scientific validation nor completion.
+
+Current prerequisite corrections are documented in [Food, Water and Ecology Horizon and Branch Review](Food%20Water%20and%20Ecology%20Horizon%20Review.md); its before/after table supersedes affected prerequisite cells in this publication checkpoint. Current JSON/TSV definitions are authoritative.

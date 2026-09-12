@@ -409,10 +409,10 @@
       "review_id": "D08-18",
       "candidate_name": "District heating",
       "mapped_ids": [
-        "district_heat_distribution"
+        "district_heating_loops"
       ],
       "scope_status": "subject_mapped",
-      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review. District-Heat Distribution was reconciled to the shared energy-field District Heating Loops identity; this does not add a discovery."
     },
     {
       "review_id": "D08-19",

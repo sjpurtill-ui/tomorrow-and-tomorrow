@@ -1,6 +1,7 @@
 """Check draft identities and AND/OR reachability; never certify gameplay."""
 from collections import Counter
 import json
+import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -110,10 +111,72 @@ def field_coverage(baseline, pending, drafts, allocation):
     return result
 
 
+def scope_digest(row):
+    """Invalidate editorial assignments when the authored capability changes."""
+    scope = {key: row.get(key) for key in
+             ("id", "name", "mechanism", "operating_requirement", "consequence")}
+    return hashlib.sha256(json.dumps(scope, sort_keys=True).encode()).hexdigest()
+
+
+def horizon_coverage(records, allocation):
+    """Editorial horizon accounting, never historical or gameplay certification."""
+    expected = {row["id"]: row for row in records}
+    if len(expected) != len(records):
+        raise ValueError("Duplicate horizon source identity")
+    if allocation.get("is_unlock_gate") is not False:
+        raise ValueError("Historical horizons must not be unlock gates")
+    horizons = allocation["horizons"]
+    targets = {h["id"]: h["target"] for h in horizons}
+    if (len(horizons) != 6 or set(targets) != {f"H{i:02d}" for i in range(1, 7)}
+            or any(type(t) is not int or t <= 0 for t in targets.values())
+            or sum(targets.values()) != 5000):
+        raise ValueError("Horizon targets must be six positive integer allocations totaling 5000")
+    mapped = {}
+    for row in allocation["mappings"]:
+        ident = row["id"]
+        if ident in mapped:
+            raise ValueError(f"Duplicate horizon mapping: {ident}")
+        if ident not in expected:
+            raise ValueError(f"Unknown horizon identity: {ident}")
+        original = expected[ident]
+        for key in ("name", "source_file", "source_status", "scope_digest"):
+            if row.get(key) != original[key]:
+                raise ValueError(f"Stale horizon {key}: {ident}")
+        if row.get("horizon") not in targets:
+            raise ValueError(f"Unknown horizon: {ident}")
+        if row.get("classification_status") != "editorial_review":
+            raise ValueError(f"Unsupported horizon review status: {ident}")
+        if not isinstance(row.get("rationale"), str) or not row["rationale"].strip():
+            raise ValueError(f"Missing horizon rationale: {ident}")
+        mapped[ident] = row
+    counts = Counter(row["horizon"] for row in mapped.values())
+    statuses = Counter((row["horizon"], row["source_status"]) for row in mapped.values())
+    unassigned = sorted(set(expected) - set(mapped))
+    return {
+        "assigned_identities": len(mapped),
+        "unassigned_identities": len(unassigned),
+        "unassigned_ids": unassigned,
+        "allocation_complete": not unassigned,
+        "is_unlock_gate": False,
+        "horizons": [{**h, "assigned": counts[h["id"]],
+                      "target_slots_not_yet_assigned": h["target"] - counts[h["id"]],
+                      "implemented_baseline": statuses[h["id"], "implemented_baseline"],
+                      "pending_communications": statuses[h["id"], "pending_communications"],
+                      "authored_drafts": statuses[h["id"], "authored_draft"]}
+                     for h in horizons],
+        "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified.",
+    }
+
+
 def main():
     baseline = read("implemented-baseline.json")["items"]
     pending = read("communications-pending.json")["entries"]
     drafts = []
+    horizon_sources = []
+    for filename, status, items in (("implemented-baseline.json", "implemented_baseline", baseline),
+                                    ("communications-pending.json", "pending_communications", pending)):
+        horizon_sources.extend({**row, "source_file": filename, "source_status": status,
+                                "scope_digest": scope_digest(row)} for row in items)
     for path in sorted(CATALOG.glob("*.json")):
         value = json.loads(path.read_text())
         if isinstance(value, list):
@@ -121,6 +184,8 @@ def main():
                 if row.get("status") != "authored_draft":
                     raise ValueError(f"Unrecognized draft status in {path}: {row.get('id')}")
             drafts.extend(value)
+            horizon_sources.extend({**row, "source_file": path.name, "source_status": "authored_draft",
+                                    "scope_digest": scope_digest(row)} for row in value)
     records = baseline + pending + drafts
     ids = Counter(row["id"] for row in records)
     names = Counter("".join(c.lower() for c in row["name"] if c.isalnum()) for row in records)
@@ -154,6 +219,7 @@ def main():
          for path in sorted(CATALOG.glob("atlas-reconciliation-*.json"))],
         ids,
     )
+    horizons = horizon_coverage(horizon_sources, read("historical-horizon-allocation.json"))
     reached = {row["id"] for row in baseline + pending}
     remaining = drafts.copy()
     rounds = 0
@@ -178,6 +244,7 @@ def main():
         "draft_unreachable_nodes": [],
         "review_candidates_not_added_to_count": atlas["candidate_count"],
         "atlas_coverage": atlas,
+        "historical_horizon_coverage": horizons,
         "branch_alternatives": sum(len(row["requires_any"]) for row in drafts),
         "draft_reachability_rounds": rounds,
         "draft_fields": dict(sorted(Counter(row["field"] for row in drafts).items())),

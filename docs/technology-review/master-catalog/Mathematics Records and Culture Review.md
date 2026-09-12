@@ -341,3 +341,5 @@ This delivery is HELD as gameplay: none of these 179 additions is integrated int
 No game regression or long simulation was run for this document-only change. Save behavior is unchanged. Owned files are this review, matching JSON/TSV, atlas reconciliation, master README, coverage and execution ledger. Existing unfinished communications code remains separate. No shared runtime files were edited, no canonical merge performed, and no player or editor session launched or stopped.
 
 Continue with machinery, fibers, earth systems and substantial human futures to complete initial coverage across all 24 fields, then expand and reconcile the full authored catalog. Initial field coverage does not complete a field or justify mechanically empty additions to reach 5,000.
+
+Current civic/economic and translation prerequisite corrections are documented in [Civic, Economic and Learning Horizon and Branch Review](Civic%20Economic%20and%20Learning%20Horizon%20Review.md). Its before/after table supersedes affected cells in this publication checkpoint; current JSON/TSV definitions are authoritative.

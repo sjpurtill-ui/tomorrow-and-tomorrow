@@ -1890,7 +1890,7 @@
     },
     {
       "id": "pn_junctions",
-      "name": "P\u2013N Junctions",
+      "name": "P–N Junctions",
       "source_status": "implemented_baseline",
       "source_domain": "knowledge",
       "field": "D21"
@@ -1953,28 +1953,28 @@
     },
     {
       "id": "skirmisher_infantry_screens",
-      "name": "Skirmisher\u2013Infantry Screens",
+      "name": "Skirmisher–Infantry Screens",
       "source_status": "implemented_baseline",
       "source_domain": "security",
       "field": "D20"
     },
     {
       "id": "engineer_infantry_security",
-      "name": "Engineer\u2013Infantry Security",
+      "name": "Engineer–Infantry Security",
       "source_status": "implemented_baseline",
       "source_domain": "security",
       "field": "D20"
     },
     {
       "id": "infantry_antitank_coordination",
-      "name": "Infantry\u2013Antitank Coordination",
+      "name": "Infantry–Antitank Coordination",
       "source_status": "implemented_baseline",
       "source_domain": "security",
       "field": "D20"
     },
     {
       "id": "cavalry_infantry_liaison",
-      "name": "Cavalry\u2013Infantry Liaison",
+      "name": "Cavalry–Infantry Liaison",
       "source_status": "implemented_baseline",
       "source_domain": "security",
       "field": "D20"
@@ -1988,7 +1988,7 @@
     },
     {
       "id": "infantry_tank_cooperation",
-      "name": "Infantry\u2013Tank Cooperation",
+      "name": "Infantry–Tank Cooperation",
       "source_status": "implemented_baseline",
       "source_domain": "security",
       "field": "D20"
@@ -2296,7 +2296,7 @@
     },
     {
       "id": "stress_strain_relations",
-      "name": "Stress\u2013Strain Relations",
+      "name": "Stress–Strain Relations",
       "source_status": "implemented_baseline",
       "source_domain": "knowledge",
       "field": "D12"
@@ -2450,7 +2450,7 @@
     },
     {
       "id": "grade_tonnage_models",
-      "name": "Grade\u2013Tonnage Models",
+      "name": "Grade–Tonnage Models",
       "source_status": "implemented_baseline",
       "source_domain": "ecology",
       "field": "D22"
@@ -4019,338 +4019,408 @@
     {
       "id": "agreed_signal_codes",
       "name": "Agreed Signal Codes",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "relay_observation_posts",
       "name": "Relay Observation Posts",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "timed_signal_sequences",
       "name": "Timed Signal Sequences",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "shutter_signal_frames",
       "name": "Shutter Signal Frames",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "optical_telegraphy",
       "name": "Optical Telegraphy",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "telegraph_keys",
       "name": "Telegraph Keys",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "electromagnet_sounders",
       "name": "Electromagnet Sounders",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "line_insulators",
       "name": "Line Insulators",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "telegraph_return_circuits",
       "name": "Telegraph Return Circuits",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "electrical_telegraphy",
       "name": "Electrical Telegraphy",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "polarized_telegraph_relays",
       "name": "Polarized Telegraph Relays",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "duplex_telegraphy",
       "name": "Duplex Telegraphy",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "punched_message_tape",
       "name": "Punched Message Tape",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "teleprinter_mechanisms",
       "name": "Teleprinter Mechanisms",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "automatic_telegraphy",
       "name": "Automatic Telegraphy",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "acoustic_diaphragms",
       "name": "Acoustic Diaphragms",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "carbon_microphones",
       "name": "Carbon Microphones",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "electromagnetic_earpieces",
       "name": "Electromagnetic Earpieces",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "telephone_circuits",
       "name": "Telephone Circuits",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "manual_switchboards",
       "name": "Manual Switchboards",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "balanced_conductor_pairs",
       "name": "Balanced Conductor Pairs",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "inductive_line_loading",
       "name": "Inductive Line Loading",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "telephone_repeaters",
       "name": "Telephone Repeaters",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "electromagnetic_wave_theory",
       "name": "Electromagnetic Wave Theory",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "resonant_tuned_circuits",
       "name": "Resonant Tuned Circuits",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "variable_air_capacitors",
       "name": "Variable Air Capacitors",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "aerial_matching",
       "name": "Aerial Matching",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "crystal_radio_detection",
       "name": "Crystal Radio Detection",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "tuned_radio_reception",
       "name": "Tuned Radio Reception",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "thermionic_emission",
       "name": "Thermionic Emission",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "vacuum_diodes",
       "name": "Vacuum Diodes",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "triode_valves",
       "name": "Triode Valves",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "feedback_radio_oscillators",
       "name": "Feedback Radio Oscillators",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "frequency_stabilization",
       "name": "Frequency Stabilization",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "radio_telegraphy",
       "name": "Radio Telegraphy",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "amplitude_modulation",
       "name": "Amplitude Modulation",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "frequency_modulation",
       "name": "Frequency Modulation",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "frequency_conversion",
       "name": "Frequency Conversion",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D21"
     },
     {
       "id": "superheterodyne_reception",
       "name": "Superheterodyne Reception",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "signal_sampling",
       "name": "Signal Sampling",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "pulse_code_modulation",
       "name": "Pulse-Code Modulation",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "message_framing",
       "name": "Message Framing",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "error_detection_codes",
       "name": "Error-Detection Codes",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "automatic_repeat_request",
       "name": "Automatic Repeat Request",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "data_modems",
       "name": "Data Modems",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "packet_switching",
       "name": "Packet Switching",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "packet_routers",
       "name": "Packet Routers",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
     },
     {
       "id": "store_forward_archives",
       "name": "Store-and-Forward Archives",
-      "source_status": "pending_communications",
+      "source_status": "implemented_baseline",
       "source_domain": "communications",
       "field": "D13"
+    },
+    {
+      "id": "hearth_roasting_control",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Hearth Roasting Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "earth_oven_cooking",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Earth Oven Cooking",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_steaming_vessels",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food Steaming Vessels",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "threshing_frames",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Threshing Frames",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "winnowing_practice",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Winnowing Practice",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "grain_moisture_testing",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Grain-Moisture Testing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "forced_air_grain_drying",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Forced-Air Grain Drying",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "roller_grain_milling",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Roller Grain Milling",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "flour_sifting",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Flour Sifting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "grain_malting",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Grain Malting",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
