@@ -71,7 +71,8 @@
     "Reviewed paper-and-gouache subject art for Nutrient Response Trials and Catalytic Ammonia Synthesis; atlas verification now checks every explicit binding rather than an older fixed subset",
     "AI can acquire complementary fertilizer manufacturing methods through separate paid license trips from examined prospects; local nutrient needs are shared with production planning, and reduced-throughput manufacture feeds actual crops without discovery grants",
     "Seven electrical-storage discoveries and manufactured components; two commissioned finite-energy bank types with real charging, losses, discharge, operators and conservative forecasts",
-    "AI buys or manufactures bounded battery reserves behind surplus generation and checks real stored energy for first powered production; no free charge or permanent generation credit"
+    "AI buys or manufactures bounded battery reserves behind surplus generation and checks real stored energy for first powered production; no free charge or permanent generation credit",
+    "Battery Bank Wiring has individually generated and visually inspected paper-and-gouache art; 39 explicit subject images total"
   ],
   "unfinished": [
     "Remaining 4559 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
@@ -99,8 +100,8 @@
   ],
   "art": {
     "live_subjects": 441,
-    "verified_subject_images": 38,
-    "queued_live_images": 403,
+    "verified_subject_images": 39,
+    "queued_live_images": 402,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

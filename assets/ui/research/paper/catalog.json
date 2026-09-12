@@ -3031,7 +3031,7 @@
       "domain": "production",
       "id": "battery_bank_wiring",
       "name": "Battery Bank Wiring",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/charge_regulation.png",
@@ -3533,9 +3533,9 @@
   "live_art_complete": false,
   "live_count": 441,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 403,
+  "queued_count": 402,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 38
+  "verified_count": 39
 }

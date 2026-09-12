@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 97: **441 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 98: **441 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1069,3 +1069,12 @@ The power planner can buy or manufacture a limited battery reserve after commiss
 Verification: 35 cases, zero errors/failures/skips/orphans: power planning 12 (four new), civilian production planning 8 and civilization strategy 15. The controller test purchases, commissions, charges and then supplies a workshop after fuel is removed. Other tests cover finite stored-energy quotes, no quote mutations, empty/disabled/unstaffed banks, no surplus/demand/fuel, missing-bank manufacture and regulation adoption. Monthly strategic scheduling remains unchanged; tests exercise the sequence on shorter intervals.
 
 No new save fields, discoveries, roles or images: 441 discoveries, 89 military roles, nine installation types and 38 reviewed images. Shared file is the existing power investment planner; its tests and review records accompany the change. No player launch or merge. Limits include fuel replenishment, weather, battery lifetime valuation, one-slot workshop sequencing, consumer-plant investment and full-history pacing. Diagnostic session 57160 was confirmed live again; its target is not claimed complete.
+
+
+## Checkpoint 98: Battery Bank Wiring artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `c5054f9`. Built-in image generation used the approved apprentice image as style reference. The selected square illustration shows two workshop technicians, six accumulator jars and a small instrument, with matte muted gouache, fibrous ivory paper and broad upper negative space. It is illustrative, not a wiring schematic.
+
+Copied unchanged to `assets/ui/research/paper/battery_bank_wiring.png`, with source hash verified and exact prompt/provenance in `BATTERY_BANK_WIRING_PROMPT.md`. Explicit discovery binding, 768-pixel runtime texture limit and mipmaps. Both headless imports exited without errors. All 11 atlas cases pass with zero errors/failures/skips/orphans, covering every one of the 39 explicit images and square presentation/cache limits. Native player presentation remains unverified.
+
+Totals remain 441 discoveries, 89 roles and nine installation types; artwork is now 39 reviewed, 402 queued live images. No save change. Shared files: research visual bindings, art manifest and prompt index, implementation records. New image, import metadata and prompt record are task-owned. No canonical merge, player launch or completion claim. Diagnostic session 57160 was confirmed live; target completion remains pending.

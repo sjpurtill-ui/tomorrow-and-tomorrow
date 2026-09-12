@@ -45,3 +45,5 @@ Built-in image generation, using the approved apprentice image as a style refere
 
 - Nutrient Response Trials: [prompt record](NUTRIENT_RESPONSE_TRIALS_PROMPT.md).
 - Catalytic Ammonia Synthesis: [prompt record](CATALYTIC_AMMONIA_SYNTHESIS_PROMPT.md).
+
+- Battery Bank Wiring: [prompt record](BATTERY_BANK_WIRING_PROMPT.md), built-in generation using the approved apprentice style reference.
