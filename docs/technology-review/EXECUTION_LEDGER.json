@@ -99,10 +99,10 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Continue historical-horizon review of 2702 unassigned existing identities, then author genuine coverage gaps. Current total remains 3031 accounted IDs, 1969 unauthored. The 21 advanced/future assignments in 329 reviewed entries are a partial count, not the whole tree future total. Preserve causal learning without era gates.",
+    "Continue 2387 unassigned existing horizon entries and semantic/causal review, then author genuine gaps. Current distinct total3030, unauthored1970. Twenty repaired prerequisite targets pass structural alternate-route probe; full physical bootstrapping remains unverified.",
     "Continue semantic and atlas reconciliation using checker-derived coverage: 475 candidates mapped, eight partial subjects retained in coverage.json, and 125 unmapped. Mappings add zero discoveries and do not establish operating implementation.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
-    "Observe designated integrator food delivery when it reports readiness or integration. Verify canonical commit and exact included systems before changing any player-build or implemented-baseline claim. Keep source runtime/communications untouched during the bounded integration window.",
+    "Coordinate substantive 556-baseline integration with designated task. Bounded canonical release is200 discoveries; never conflate it with source556 baseline or master3030 identities. Preserve running player and canonical food prerequisites/report behavior.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
   ],
   "constraints": [
@@ -125,9 +125,9 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 2427,
-    "distinct_ids_accounted": 3031,
-    "remaining_to_author": 1969,
+    "authored_drafts": 2426,
+    "distinct_ids_accounted": 3030,
+    "remaining_to_author": 1970,
     "complete": false,
     "atlas_candidates_mapped": 475,
     "atlas_partial_mappings": 8,
@@ -135,15 +135,15 @@
     "historical_horizon_allocation_complete": false,
     "atlas_coverage_source": "master-catalog/coverage.json: atlas_coverage",
     "atlas_fully_mapped_subjects": 467,
-    "historical_horizon_assigned": 329,
-    "historical_horizon_unassigned": 2702,
+    "historical_horizon_assigned": 643,
+    "historical_horizon_unassigned": 2387,
     "historical_horizon_coverage_source": "master-catalog/coverage.json: historical_horizon_coverage"
   },
   "parallel_implementation": {
     "task_id": "01a0978a-39f5-7620-a77f-5918ccb1d8ba",
     "originating_task_id": "01a09789-3d3c-71d1-b389-794d955f2135",
     "scope": "Early food cooking and physically constrained preservation; design documents read-only.",
-    "status": "Coordinator assigned task as canonical integrator for bounded food delivery; minimal integration review in progress, not yet verified integrated.",
+    "status": "Bounded food release integrated. User reauthorized substantive 556 baseline review; same integrator owns new canonical window.",
     "reported_graph_count": 559,
     "counting_note": "559 is a verified worker graph checkpoint, not this worktree baseline or canonical player count. Three IDs already exist among authored drafts, so they add zero to total identities.",
     "ready_commit": "c247e8d",
@@ -151,7 +151,22 @@
     "handoff": "/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow/docs/TECH_FOOD_PROCESSING_HANDOFF.md",
     "follow_on_scope": "Grain work paused until bounded food integration resolves.",
     "integrator_task_id": "01a0978a-39f5-7620-a77f-5918ccb1d8ba",
-    "integration_scope": "Minimal cooking/preservation and required AND/OR evaluator/UI from canonical 2041666; broader inherited 556 baseline excluded for separate review.",
-    "coordination_window": "Source task freezes all runtime and canonical tracked files; continues design metadata/reviews only in separate worktree."
+    "integration_scope": "Review substantive committed baseline 18b0cb7/82b574e against canonical food release; preserve source communications exclusion and running player until controlled release handling.",
+    "coordination_window": "Source remains design-only; canonical/runtime ownership reserved for designated integrator."
+  },
+  "canonical_food_delivery": {
+    "status": "integrated_and_packaged_verified",
+    "live_discoveries": 200,
+    "integration_commit": "860cdb6964ac622c2f258f64d03b9f607be81c6b",
+    "package_source": "d388ea0631865a060dbf7cd7c0118a595591df32",
+    "release": "2026.09.12.1",
+    "overlapping_master_ids": [
+      "hearth_roasting_control",
+      "earth_oven_cooking",
+      "food_steaming_vessels"
+    ],
+    "adds_master_identities": 0,
+    "evidence": "Inspected canonical commits, integration handoff, canonical 200-node audit, build.ok exact hash and PID22048 command at this checkpoint.",
+    "broader_556_baseline_included": false
   }
 }

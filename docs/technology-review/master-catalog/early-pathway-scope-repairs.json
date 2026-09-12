@@ -1,0 +1,375 @@
+{
+  "status": "authored_graph_review",
+  "adds_discovery_ids": 0,
+  "changes": [
+    {
+      "id": "long_baseline_probe_fault_recovery",
+      "source_file": "future-humanity.json",
+      "before_all": [
+        "interstellar_probe_navigation",
+        "fault_tolerant_computing"
+      ],
+      "before_any": [],
+      "after_all": [
+        "fault_tolerant_computing"
+      ],
+      "after_any": [
+        [
+          "interstellar_probe_navigation",
+          "launch_vehicle_guidance"
+        ]
+      ],
+      "reason": "Modern onboard guidance/control provides a probe fault-recovery route without first developing interstellar navigation."
+    },
+    {
+      "id": "honey_extraction_separation",
+      "source_file": "food-agriculture-depth.json",
+      "before_all": [
+        "movable_comb_frames"
+      ],
+      "before_any": [
+        [
+          "food_batch_traceability",
+          "sealed_vessels"
+        ]
+      ],
+      "after_all": [
+        "managed_bee_hives",
+        "sealed_vessels"
+      ],
+      "after_any": [],
+      "reason": "Honey can be separated from harvested fixed comb; removable frames improve hive handling but are not a prerequisite for extraction."
+    },
+    {
+      "id": "animal_feed_storage_hygiene",
+      "source_file": "food-agriculture-depth.json",
+      "before_all": [
+        "livestock_feed_rations"
+      ],
+      "before_any": [
+        [
+          "food_process_hazard_analysis",
+          "raised_granaries"
+        ]
+      ],
+      "after_all": [
+        "animal_taming"
+      ],
+      "after_any": [
+        [
+          "food_process_hazard_analysis",
+          "raised_granaries"
+        ]
+      ],
+      "reason": "Keeping feed stores clean and protected can follow practical granary handling before quantified feed-ration design."
+    },
+    {
+      "id": "livestock_heat_stress_management",
+      "source_file": "food-agriculture-depth.json",
+      "before_all": [
+        "livestock_body_condition_scoring"
+      ],
+      "before_any": [
+        [
+          "temperature_station_networks",
+          "seasonal_patterns"
+        ]
+      ],
+      "after_all": [
+        "animal_taming"
+      ],
+      "after_any": [
+        [
+          "temperature_station_networks",
+          "seasonal_patterns"
+        ]
+      ],
+      "reason": "Observed heat and animal behavior can guide shade and water provision without a formal body-condition scoring system."
+    },
+    {
+      "id": "food_acidity_measurement",
+      "source_file": "food-agriculture-depth.json",
+      "before_all": [
+        "food_process_hazard_analysis",
+        "electrochemical_cells"
+      ],
+      "before_any": [],
+      "after_all": [
+        "standard_measures",
+        "electrochemical_cells"
+      ],
+      "after_any": [],
+      "reason": "This retained route uses calibrated electrochemical measurement; prior food hazard-analysis organization is unnecessary. A chemical-titration alternative still requires its own authored measurement foundation."
+    },
+    {
+      "id": "water_intake_screening",
+      "source_file": "water-ecology-depth.json",
+      "before_all": [
+        "raw_water_quality_sampling"
+      ],
+      "before_any": [],
+      "after_all": [],
+      "after_any": [
+        [
+          "basketry",
+          "joinery"
+        ]
+      ],
+      "reason": "Woven or fitted slatted screens can exclude visible debris before formal water-quality sampling; this does not establish potable quality."
+    },
+    {
+      "id": "deadwood_habitat_retention",
+      "source_file": "water-ecology-depth.json",
+      "before_all": [
+        "forest_inventory_plots"
+      ],
+      "before_any": [],
+      "after_all": [
+        "habitat_observation_records"
+      ],
+      "after_any": [
+        [
+          "forest_inventory_plots",
+          "community_resource_monitoring"
+        ]
+      ],
+      "reason": "Repeated local observations can support retention before formal forest plot measurement."
+    },
+    {
+      "id": "herbivory_exclosure_trials",
+      "source_file": "water-ecology-depth.json",
+      "before_all": [
+        "vegetation_quadrats",
+        "experimental_controls"
+      ],
+      "before_any": [],
+      "after_all": [
+        "experimental_controls"
+      ],
+      "after_any": [
+        [
+          "vegetation_quadrats",
+          "habitat_observation_records"
+        ]
+      ],
+      "reason": "Repeated observed comparisons inside and outside browsing barriers need not await formal vegetation quadrats."
+    },
+    {
+      "id": "stock_watering_points",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "well_siting",
+        "livestock_feed_rations"
+      ],
+      "before_any": [],
+      "after_all": [
+        "animal_taming"
+      ],
+      "after_any": [
+        [
+          "well_siting",
+          "spring_capture_structures"
+        ]
+      ],
+      "reason": "Accessible water points can be established for managed animals without first designing measured nutritional rations."
+    },
+    {
+      "id": "thermal_desalination",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "chemical_distillation",
+        "steam_condensers"
+      ],
+      "before_any": [],
+      "after_all": [
+        "chemical_distillation"
+      ],
+      "after_any": [],
+      "reason": "Simple evaporative separation and condensation do not require an industrial steam-engine condenser."
+    },
+    {
+      "id": "rainwater_first_flush_diversion",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "rainwater_cisterns",
+        "raw_water_quality_sampling"
+      ],
+      "before_any": [],
+      "after_all": [
+        "rainwater_cisterns"
+      ],
+      "after_any": [],
+      "reason": "Separating visibly dirty initial runoff can precede analytical water-quality sampling; collection is not proof of microbiological safety."
+    },
+    {
+      "id": "fecal_sludge_collection",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "decentralized_sanitation_services"
+      ],
+      "before_any": [
+        [
+          "sewage_lift_stations",
+          "pressure_vessels"
+        ]
+      ],
+      "after_all": [
+        "latrine_siting"
+      ],
+      "after_any": [
+        [
+          "sealed_vessels",
+          "pressure_vessels"
+        ]
+      ],
+      "reason": "Contained manual collection and transport can precede pump stations or a modern decentralized service organization; actual containment, labor and disposal capacity remain necessary."
+    },
+    {
+      "id": "selective_tree_harvesting",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "forest_inventory_plots",
+        "hafted_tools"
+      ],
+      "before_any": [],
+      "after_all": [
+        "hafted_tools"
+      ],
+      "after_any": [
+        [
+          "forest_inventory_plots",
+          "habitat_observation_records"
+        ]
+      ],
+      "reason": "Selection from repeated local tree observations is an alternative to formal inventory plots."
+    },
+    {
+      "id": "pollard_fodder_management",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "coppice_woodland_management",
+        "livestock_feed_rations"
+      ],
+      "before_any": [],
+      "after_all": [
+        "coppice_woodland_management",
+        "animal_taming"
+      ],
+      "after_any": [],
+      "reason": "Producing and using regrowing tree fodder does not require formal livestock ration accounting."
+    },
+    {
+      "id": "woodland_harvest_rotations",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "forest_growth_yield_models",
+        "coppice_woodland_management"
+      ],
+      "before_any": [],
+      "after_all": [
+        "coppice_woodland_management"
+      ],
+      "after_any": [
+        [
+          "forest_growth_yield_models",
+          "seasonal_patterns"
+        ]
+      ],
+      "reason": "Observed regrowth intervals support empirical rotation before quantified growth/yield models."
+    },
+    {
+      "id": "landscape_firebreaks",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "fuel_load_surveys",
+        "drainage"
+      ],
+      "before_any": [],
+      "after_all": [],
+      "after_any": [
+        [
+          "fuel_load_surveys",
+          "habitat_observation_records"
+        ]
+      ],
+      "reason": "Observed vegetation/fuel discontinuities support practical firebreak placement before formal fuel surveys; drainage works are not universally necessary."
+    },
+    {
+      "id": "gully_erosion_control",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "sediment_budget_accounts",
+        "contour_cultivation"
+      ],
+      "before_any": [],
+      "after_all": [
+        "contour_cultivation"
+      ],
+      "after_any": [
+        [
+          "sediment_budget_accounts",
+          "watershed_boundary_surveys"
+        ]
+      ],
+      "reason": "Observed catchment flow paths can guide erosion control before full sediment accounting."
+    },
+    {
+      "id": "crop_pest_exclusion",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "integrated_pest_monitoring",
+        "woven_carriers"
+      ],
+      "before_any": [],
+      "after_all": [
+        "woven_carriers"
+      ],
+      "after_any": [
+        [
+          "integrated_pest_monitoring",
+          "habitat_observation_records"
+        ]
+      ],
+      "reason": "Observed crop damage and animal entry can motivate physical barriers before an integrated pest-monitoring program."
+    },
+    {
+      "id": "community_resource_monitoring",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "common_land_boundaries",
+        "ecological_transects"
+      ],
+      "before_any": [],
+      "after_all": [
+        "common_land_boundaries"
+      ],
+      "after_any": [
+        [
+          "ecological_transects",
+          "habitat_observation_records"
+        ]
+      ],
+      "reason": "Agreed repeatable local observations need not await formal line-transect sampling."
+    },
+    {
+      "id": "long_duration_ecological_stewardship",
+      "source_file": "food-water-ecology.json",
+      "before_all": [
+        "adaptive_land_management",
+        "long_horizon_public_trusts"
+      ],
+      "before_any": [],
+      "after_all": [
+        "community_resource_monitoring"
+      ],
+      "after_any": [
+        [
+          "adaptive_land_management",
+          "distributed_skill_custodianship"
+        ]
+      ],
+      "reason": "Institutional continuity and practiced succession can sustain obligations before modern adaptive-management methodology; neither route automatically enacts land policy."
+    }
+  ],
+  "limitations": "Causal design repairs only; physical bootstrapping, runtime changes and chronological completeness remain unverified."
+}

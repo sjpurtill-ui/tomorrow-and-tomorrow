@@ -712,33 +712,71 @@
     "field": "D01",
     "id": "rotational_grazing_plans",
     "name": "Rotational Grazing Plans",
-    "foundations": "managed_fallow,selective_herd_breeding",
-    "mechanism": "Move livestock among grazing areas according to measured forage recovery",
-    "operating_requirement": "Fencing or herders, water points and adequate land",
-    "consequence": "Manage grazing pressure without assuming rotation alone increases carrying capacity",
+    "foundations": "animal_taming",
+    "mechanism": "Move managed livestock among accessible grazing areas using observed forage recovery and explicit rest criteria",
+    "operating_requirement": "Actual herds, accessible pasture, fencing or herders, usable water points and repeated regrowth observations",
+    "consequence": "Change grazing timing and distribution without automatically raising carrying capacity or granting access to land",
     "status": "authored_draft",
     "requires_all": [
-      "managed_fallow",
-      "selective_herd_breeding"
+      "animal_taming"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "managed_fallow",
+        "rangeland_residual_forage_management"
+      ]
+    ],
+    "recovery": "Obtain paid specialist instruction, partner evidence, commissioned analysis, a qualified external service or interpretable delivered records or material. Pay actual access, transport and local validation; outside knowledge does not create water, treatment capacity, habitat or healthy organisms.",
+    "branching_note": "Rested-ground practice or measured residual-forage management provides an alternative route to spatial rotation. Selective breeding is not a necessary foundation.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rotational_grazing_plans",
+      "local_demonstration": "Move managed livestock among accessible grazing areas using observed forage recovery and explicit rest criteria",
+      "operating_requirements": "Actual herds, accessible pasture, fencing or herders, usable water points and repeated regrowth observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "real sample transport or information delivery",
+        "finite local trials and interpretation",
+        "continuing labor, equipment, material and site access"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff repeat the relevant site assessment, model or qualified operation.",
+        "partnership": "Contribute actual observations, samples, staff, equipment time or funds; shared evidence still needs local interpretation and compatible site conditions.",
+        "purchased_research": "Commission a defined water or ecological question from a capable source; pay for evidence and local evaluation without a guaranteed favorable or transferable result.",
+        "licensed_or_imported_service": "Pay for a real bounded treatment, measurement or field service within the provider's reachable capacity; continuing supply and maintenance remain dependencies.",
+        "reverse_engineering": "Examine delivered hardware, authorized samples or interpretable records with finite local analysis; observed outcomes alone do not reveal all causal or operating conditions."
+      }
+    },
+    "scope_boundary": "A proposed physical or analytical capability. Actual site conditions, finite resources and measured performance determine outcomes. Discovery does not enact land-use restrictions, grant access rights, replace civic labor authority or guarantee safe water or ecosystem recovery.",
+    "outcome_contract": {
+      "guarantees_restoration": false,
+      "guarantees_transfer_to_new_site": false,
+      "requires_observed_response": true
+    },
+    "implementation_status": "Authored proposal; coupled water and habitat state, operating installations, finite interventions, acquisition penalties, AI choices and campaign outcomes remain pending."
   },
   {
     "field": "D01",
     "id": "stock_watering_points",
     "name": "Stock Watering Points",
-    "foundations": "well_siting,livestock_feed_rations",
+    "foundations": "animal_taming",
     "mechanism": "Provide accessible water suited to herd demand",
     "operating_requirement": "Water supply, troughs and maintenance",
     "consequence": "Support herd distribution while concentrating local trampling and waste",
     "status": "authored_draft",
     "requires_all": [
-      "well_siting",
-      "livestock_feed_rations"
+      "animal_taming"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "well_siting",
+        "spring_capture_structures"
+      ]
+    ],
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Accessible water points can be established for managed animals without first designing measured nutritional rations."
   },
   {
     "field": "D01",
@@ -1490,17 +1528,17 @@
     "field": "D02",
     "id": "thermal_desalination",
     "name": "Thermal Desalination",
-    "foundations": "chemical_distillation,steam_condensers",
+    "foundations": "chemical_distillation",
     "mechanism": "Evaporate and condense water while separating most dissolved salts",
     "operating_requirement": "Heat, condensers, corrosion control and brine disposal",
     "consequence": "Produce water at substantial heat and equipment cost",
     "status": "authored_draft",
     "requires_all": [
-      "chemical_distillation",
-      "steam_condensers"
+      "chemical_distillation"
     ],
     "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Simple evaporative separation and condensation do not require an industrial steam-engine condenser."
   },
   {
     "field": "D02",
@@ -1542,17 +1580,17 @@
     "field": "D02",
     "id": "rainwater_first_flush_diversion",
     "name": "Rainwater First-Flush Diversion",
-    "foundations": "rainwater_cisterns,raw_water_quality_sampling",
+    "foundations": "rainwater_cisterns",
     "mechanism": "Separate an initial runoff fraction carrying accumulated roof or catchment material",
     "operating_requirement": "Diverters, maintained surfaces and storage",
     "consequence": "Reduce some incoming contaminants without making collected water automatically potable",
     "status": "authored_draft",
     "requires_all": [
-      "rainwater_cisterns",
-      "raw_water_quality_sampling"
+      "rainwater_cisterns"
     ],
     "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Separating visibly dirty initial runoff can precede analytical water-quality sampling; collection is not proof of microbiological safety."
   },
   {
     "field": "D02",
@@ -1799,21 +1837,22 @@
     "field": "D02",
     "id": "fecal_sludge_collection",
     "name": "Fecal-Sludge Collection",
-    "foundations": "decentralized_sanitation_services",
+    "foundations": "latrine_siting",
     "mechanism": "Remove contained waste and transport it to a managed treatment location",
     "operating_requirement": "Suitable equipment, workers and receiving capacity",
     "consequence": "Prevent containment from becoming indefinite unserviced accumulation",
     "status": "authored_draft",
     "requires_all": [
-      "decentralized_sanitation_services"
+      "latrine_siting"
     ],
     "requires_any": [
       [
-        "sewage_lift_stations",
+        "sealed_vessels",
         "pressure_vessels"
       ]
     ],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Contained manual collection and transport can precede pump stations or a modern decentralized service organization; actual containment, labor and disposal capacity remain necessary."
   },
   {
     "field": "D02",
@@ -2097,17 +2136,22 @@
     "field": "D03",
     "id": "selective_tree_harvesting",
     "name": "Selective Tree Harvesting",
-    "foundations": "forest_inventory_plots,hafted_tools",
+    "foundations": "hafted_tools",
     "mechanism": "Remove specified trees while retaining chosen stand structure",
     "operating_requirement": "Marked trees, skilled crews and access planning",
     "consequence": "Obtain timber with impacts dependent on intensity and implementation",
     "status": "authored_draft",
     "requires_all": [
-      "forest_inventory_plots",
       "hafted_tools"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "forest_inventory_plots",
+        "habitat_observation_records"
+      ]
+    ],
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Selection from repeated local tree observations is an alternative to formal inventory plots."
   },
   {
     "field": "D03",
@@ -2129,17 +2173,18 @@
     "field": "D03",
     "id": "pollard_fodder_management",
     "name": "Pollard Fodder Management",
-    "foundations": "coppice_woodland_management,livestock_feed_rations",
+    "foundations": "coppice_woodland_management,animal_taming",
     "mechanism": "Cut suitable trees above browsing height to obtain regrowing foliage and branches",
     "operating_requirement": "Skilled cutting, appropriate species and recovery intervals",
     "consequence": "Supply fodder or small wood while retaining a living trunk",
     "status": "authored_draft",
     "requires_all": [
       "coppice_woodland_management",
-      "livestock_feed_rations"
+      "animal_taming"
     ],
     "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Producing and using regrowing tree fodder does not require formal livestock ration accounting."
   },
   {
     "field": "D03",
@@ -2217,17 +2262,22 @@
     "field": "D03",
     "id": "woodland_harvest_rotations",
     "name": "Woodland Harvest Rotations",
-    "foundations": "forest_growth_yield_models,coppice_woodland_management",
+    "foundations": "coppice_woodland_management",
     "mechanism": "Schedule harvest areas to retain planned recovery periods",
     "operating_requirement": "Land records, enforcement and credible growth estimates",
     "consequence": "Avoid treating a harvested area as immediately replenished",
     "status": "authored_draft",
     "requires_all": [
-      "forest_growth_yield_models",
       "coppice_woodland_management"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "forest_growth_yield_models",
+        "seasonal_patterns"
+      ]
+    ],
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Observed regrowth intervals support empirical rotation before quantified growth/yield models."
   },
   {
     "field": "D03",
@@ -2265,17 +2315,20 @@
     "field": "D03",
     "id": "landscape_firebreaks",
     "name": "Landscape Firebreaks",
-    "foundations": "fuel_load_surveys,drainage",
+    "foundations": "",
     "mechanism": "Maintain discontinuities in fuels where they can aid fire control",
     "operating_requirement": "Suitable placement, clearing labor and continuing maintenance",
     "consequence": "Reduce some spread opportunities without stopping every fire",
     "status": "authored_draft",
-    "requires_all": [
-      "fuel_load_surveys",
-      "drainage"
+    "requires_all": [],
+    "requires_any": [
+      [
+        "fuel_load_surveys",
+        "habitat_observation_records"
+      ]
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Observed vegetation/fuel discontinuities support practical firebreak placement before formal fuel surveys; drainage works are not universally necessary."
   },
   {
     "field": "D03",
@@ -2425,17 +2478,22 @@
     "field": "D03",
     "id": "gully_erosion_control",
     "name": "Gully-Erosion Control",
-    "foundations": "sediment_budget_accounts,contour_cultivation",
+    "foundations": "contour_cultivation",
     "mechanism": "Reduce concentrated runoff energy and stabilize active erosion channels",
     "operating_requirement": "Catchment treatment, suitable structures and upkeep",
     "consequence": "Limit gully expansion within design and flow constraints",
     "status": "authored_draft",
     "requires_all": [
-      "sediment_budget_accounts",
       "contour_cultivation"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "sediment_budget_accounts",
+        "watershed_boundary_surveys"
+      ]
+    ],
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Observed catchment flow paths can guide erosion control before full sediment accounting."
   },
   {
     "field": "D03",
@@ -2605,17 +2663,22 @@
     "field": "D03",
     "id": "crop_pest_exclusion",
     "name": "Crop-Pest Exclusion",
-    "foundations": "integrated_pest_monitoring,woven_carriers",
+    "foundations": "woven_carriers",
     "mechanism": "Separate vulnerable crops from selected pests using physical barriers",
     "operating_requirement": "Suitable mesh or structures and access management",
     "consequence": "Reduce entry while changing ventilation, pollination and labor demands",
     "status": "authored_draft",
     "requires_all": [
-      "integrated_pest_monitoring",
       "woven_carriers"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "integrated_pest_monitoring",
+        "habitat_observation_records"
+      ]
+    ],
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Observed crop damage and animal entry can motivate physical barriers before an integrated pest-monitoring program."
   },
   {
     "field": "D03",
@@ -2701,17 +2764,22 @@
     "field": "D03",
     "id": "community_resource_monitoring",
     "name": "Community Resource Monitoring",
-    "foundations": "common_land_boundaries,ecological_transects",
+    "foundations": "common_land_boundaries",
     "mechanism": "Train and support local users to record agreed resource conditions",
     "operating_requirement": "Shared methods, equipment and credible reporting",
     "consequence": "Broaden observations while requiring trust and quality control",
     "status": "authored_draft",
     "requires_all": [
-      "common_land_boundaries",
-      "ecological_transects"
+      "common_land_boundaries"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "ecological_transects",
+        "habitat_observation_records"
+      ]
+    ],
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Agreed repeatable local observations need not await formal line-transect sampling."
   },
   {
     "field": "D03",
@@ -2916,16 +2984,21 @@
     "field": "D03",
     "id": "long_duration_ecological_stewardship",
     "name": "Long-Duration Ecological Stewardship",
-    "foundations": "adaptive_land_management,long_horizon_public_trusts",
+    "foundations": "community_resource_monitoring",
     "mechanism": "Maintain responsibility, observations and resources for ecological work across generations",
     "operating_requirement": "Durable institutions, funding and transferable local knowledge",
     "consequence": "Sustain stewardship without assuming future staff or resources are guaranteed",
     "status": "authored_draft",
     "requires_all": [
-      "adaptive_land_management",
-      "long_horizon_public_trusts"
+      "community_resource_monitoring"
     ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
+    "requires_any": [
+      [
+        "adaptive_land_management",
+        "distributed_skill_custodianship"
+      ]
+    ],
+    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+    "branching_note": "Institutional continuity and practiced succession can sustain obligations before modern adaptive-management methodology; neither route automatically enacts land policy."
   }
 ]

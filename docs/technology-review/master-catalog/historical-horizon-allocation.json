@@ -3324,6 +3324,3146 @@
       "classification_status": "editorial_review",
       "rationale": "The frontier operating scope processes characterized asteroid material into collected output while controlling reaction motion and escaped material; sample acquisition alone is insufficient.",
       "scope_digest": "b77c913d3fded254d3e6fffdd7ed5b30994bbe11c0d1afbdc37219a4b7b5fe8f"
+    },
+    {
+      "id": "root_crop_propagation",
+      "name": "Root-Crop Propagation",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "4c8772b46d1dee5a21ca500dc623048bdec202b2dbc34af53fd57e2271edf1dc"
+    },
+    {
+      "id": "stem_cutting_propagation",
+      "name": "Stem-Cutting Propagation",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "1c52094eb69ce7a4dffffba539aeb1a83e4c406c489684658eed958470f9c5d8"
+    },
+    {
+      "id": "fruit_tree_grafting",
+      "name": "Fruit-Tree Grafting",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "fb0ab775264783b518164568f333d337329aae16319c410ff5df9e197aae5359"
+    },
+    {
+      "id": "orchard_pruning",
+      "name": "Orchard Pruning",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "e7ec76369a233271c19d9f48b4ad859d1f7dd5515ce1d23b70e3801216978101"
+    },
+    {
+      "id": "orchard_pollination_planning",
+      "name": "Orchard Pollination Planning",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "982dbd3a504f53e45b0e4d969f372b592729281797006f08974b924a58021523"
+    },
+    {
+      "id": "vegetative_stock_sanitation",
+      "name": "Vegetative-Stock Sanitation",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "bed642d7c4b3a9bdaa668503f3ef5e88340d2bf2dc60ea282eafa558f6ffe6e5"
+    },
+    {
+      "id": "seed_dormancy_trials",
+      "name": "Seed-Dormancy Trials",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "463c36d5b23be4c72bccd4410c88922de0be9264566ed091d709ee51556f1a3f"
+    },
+    {
+      "id": "vernalization_trials",
+      "name": "Vernalization Trials",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "35b5e87a8da82f2f27a7ca39417011655508452186fa3c7592d99ab2b21b5436"
+    },
+    {
+      "id": "photoperiod_crop_trials",
+      "name": "Photoperiod Crop Trials",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f1c979b2516fbc5f38acb0aecd159d069ec72831c14d6507048ef9d813321762"
+    },
+    {
+      "id": "hybrid_seed_production",
+      "name": "Hybrid Seed Production",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "4cc862858e5a1d06d0b0b3f37b693a93f24bcfa282b705094111b307e993469c"
+    },
+    {
+      "id": "seed_lot_identity",
+      "name": "Seed-Lot Identity",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Keeping seed identity/provenance is an early storage/distribution practice; modern genetic verification is not intrinsic to this identity.",
+      "scope_digest": "ddcc2033e2c679993dd415bd3a27f0a8321e97865e4df84edc7e9b0c74df8ccc"
+    },
+    {
+      "id": "seed_banks",
+      "name": "Seed Banks",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope combines diverse maintained accessions and repeated viability testing as organized conservation, rather than ordinary household seed saving.",
+      "scope_digest": "bf9eb30820ed5ddc6230eb5329de6b036c372b2a643ee349c572c7f981c1bfb7"
+    },
+    {
+      "id": "raised_bed_cultivation",
+      "name": "Raised-Bed Cultivation",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "ea1cbf0abb90986e34fb737a8ec4c13aa8196a1b4407ec30dfc4c4aa87d65d92"
+    },
+    {
+      "id": "terrace_cultivation",
+      "name": "Terrace Cultivation",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "57d818564ea1ad8dd3588de8ad1ccb9ef361df2aeacdb29f83c746cd4489af83"
+    },
+    {
+      "id": "flood_recession_farming",
+      "name": "Flood-Recession Farming",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "4d26735d7843a28b80938d599e161c4a6286da9f4a89b8e51b88ff0d4da56c74"
+    },
+    {
+      "id": "relay_cropping",
+      "name": "Relay Cropping",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "7630deb1ef826d04f22ebfe78ea46d2268c1580438878b87184de201fbef5b56"
+    },
+    {
+      "id": "mixed_species_cropping",
+      "name": "Mixed-Species Cropping",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "f6eff4109c16ed5e46968532116374ddb3419d266fc1acd7340a576937dad13c"
+    },
+    {
+      "id": "draft_ploughing",
+      "name": "Draft Ploughing",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "dbca7918534f25e4d3b98d0eeb51485ef3375206311628dabdcd3530accbc0e6"
+    },
+    {
+      "id": "mouldboard_ploughs",
+      "name": "Mouldboard Ploughs",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "a5e8302783627a03e6fd8702b7d7e7db18c33ad279a44e39a74b46e05d86140f"
+    },
+    {
+      "id": "field_harrowing",
+      "name": "Field Harrowing",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "c985fa7e55193ca8cc036e5b3ef6be35e3d118787284fabed5fda5d40701da0d"
+    },
+    {
+      "id": "mechanical_seed_drills",
+      "name": "Mechanical Seed Drills",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "abd0fd162c60f068b04abf4d41126276864eedbb444d409a85bf59b265368a7e"
+    },
+    {
+      "id": "threshing_frames",
+      "name": "Threshing Frames",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "b5b5fbc70bfb6fffd5a26576350d1d7adea00aa47f31680f7741f9147d7ecdff"
+    },
+    {
+      "id": "winnowing_practice",
+      "name": "Winnowing Practice",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "0dc49bb57581f17bc83d490a51f690d8bf792cad038c9bae49fb19fadb9a37b6"
+    },
+    {
+      "id": "mechanical_reapers",
+      "name": "Mechanical Reapers",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "cda5a223fa8d1aeb5bee3abc62af8566ee02756cbdde912ce915d6ec82a18297"
+    },
+    {
+      "id": "combine_harvesters",
+      "name": "Combine Harvesters",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "15fd1b6272f53aa31a750a06ed2e083ec1e224557dfc51db710768495cdb39f3"
+    },
+    {
+      "id": "grain_moisture_testing",
+      "name": "Grain-Moisture Testing",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "bc54ea2366a458398474427ff67bea1268182917f6827cca2233d34dfb18e9b6"
+    },
+    {
+      "id": "forced_air_grain_drying",
+      "name": "Forced-Air Grain Drying",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "e0f7a904929f167732ba89cd3e18d147acb4e9d0bd40924ec86aad3a7a9ef99d"
+    },
+    {
+      "id": "roller_grain_milling",
+      "name": "Roller Grain Milling",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "48553eb87251b4257798d3c651189eadff8c4f020fabe69aac929aecb4ec8eb4"
+    },
+    {
+      "id": "flour_sifting",
+      "name": "Flour Sifting",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "f6c1433703a5b594f70bbdd6b6e9ce3e19b39d9e87a1a4bb4377b10b81b9bf0b"
+    },
+    {
+      "id": "grain_malting",
+      "name": "Grain Malting",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "eb9b608131c3a30e0d89e789a90764e4ef9a43e7e7be1b7fb401dccf6f7c1169"
+    },
+    {
+      "id": "dough_leavening",
+      "name": "Dough Leavening",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "d47f68611d52404c62c168388a883a5c9c92867791025e5482d68e7a3b6343bf"
+    },
+    {
+      "id": "controlled_baking",
+      "name": "Controlled Baking",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "93a9942c92a9f3792485deba10f024edd4acad4e601cbd3978e9b2619520f9ab"
+    },
+    {
+      "id": "edible_oil_clarification",
+      "name": "Edible-Oil Clarification",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "4068918e57e6ebd0de327b5674c4b1d8c151706c33d92cc0670477e448985252"
+    },
+    {
+      "id": "oil_rancidity_management",
+      "name": "Oil Rancidity Management",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "e1e72403c1f72df358f079a5add795ebc07bab84a2189ecb0ceaf77455e4c0b1"
+    },
+    {
+      "id": "food_freezing",
+      "name": "Food Freezing",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This node explicitly requires mechanical refrigeration and continuous energy; natural-ice handling is the separate earlier ice_chilling_foods route.",
+      "scope_digest": "1b1718f6445f2f7041d2da1b21c59498c8db1a66d8f80e045e794c88eb28e845"
+    },
+    {
+      "id": "freeze_drying",
+      "name": "Freeze Drying",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7aa1dc703d09a598f9cbc7fae78cd70936947ff19d08ff875b7eaa69174d4129"
+    },
+    {
+      "id": "controlled_atmosphere_food_storage",
+      "name": "Controlled-Atmosphere Food Storage",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "4e6abefa0b5e74515cd4c53b8a465aa8da2497a196e3061dd05674347206261f"
+    },
+    {
+      "id": "food_batch_traceability",
+      "name": "Food-Batch Traceability",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned modern for linked food-production batches and destinations in the authored process scope; ordinary earlier lot identity remains a separate foundation.",
+      "scope_digest": "d5082366e7c5d47a149905a8d74a3a090d20476cff8d7ac65ab43358d2dbe7eb"
+    },
+    {
+      "id": "food_process_hazard_analysis",
+      "name": "Food-Process Hazard Analysis",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "3290b141b58d8a80e3f34d11e4d066008e8023bd50d54c5a47f2f00791ddfcf9"
+    },
+    {
+      "id": "selective_herd_breeding",
+      "name": "Selective Herd Breeding",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "a481de8b0b4a4f2c2b1b40061b2ab60f396db1b86d066b7229dc9c9120ea2faf"
+    },
+    {
+      "id": "livestock_feed_rations",
+      "name": "Livestock Feed Rations",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "a788700456b307eff75acf4688ff8af67c5cc3f6566342b46ff0c1f17157cac1"
+    },
+    {
+      "id": "haymaking",
+      "name": "Haymaking",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "7f0364825acb3c8763c600bed678e3cb401589db060efe0aca8e45ec40358a11"
+    },
+    {
+      "id": "forage_silage",
+      "name": "Forage Silage",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "262a4555dbf02083e1d865b88741869dc6cb8adfd21cc8e934df0686c62c24d6"
+    },
+    {
+      "id": "rotational_grazing_plans",
+      "name": "Rotational Grazing Plans",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Spatial pasture rotation is an earlier managed-herd practice. Selective breeding is no longer a gate; fallow/rest knowledge and observed residual-forage management are alternatives. The later duplicate identity has been removed.",
+      "scope_digest": "c3f4ee8ea9d85121afb351303d60184ca57d5d676e0b0b1fab60ce0f17193b6e"
+    },
+    {
+      "id": "stock_watering_points",
+      "name": "Stock Watering Points",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "000dd843161e5a34e4b56216fc6fd91bdedb3cfea08fd157301b033cfaf41525"
+    },
+    {
+      "id": "clean_milk_handling",
+      "name": "Clean Milk Handling",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "f34a00ca405f39ceeb7a4a340972d8ca0ebf80c7b052ffc6de05492f4eb75805"
+    },
+    {
+      "id": "cheese_curd_processing",
+      "name": "Cheese Curd Processing",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "add2fbf9a28fa65f084ec2c612b956bcca9b27e23356a87a5e67d8e0797c7717"
+    },
+    {
+      "id": "butter_churning",
+      "name": "Butter Churning",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "b469cf3d9ac4a03cf1f782e946af2d8e9772bc3f863d20b203945eefa973ccb3"
+    },
+    {
+      "id": "poultry_brooding",
+      "name": "Poultry Brooding",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "fba9c3fb4b5ccb32ea30984a674fe7ba0723c6e0cc6e1c59e3ee84b7ad76ec43"
+    },
+    {
+      "id": "pond_aquaculture",
+      "name": "Pond Aquaculture",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "f4c886095e72d7db2bf6d30e4e45324ed33106ee17e18631f4d227079f172400"
+    },
+    {
+      "id": "fish_hatchery_practice",
+      "name": "Fish Hatchery Practice",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "f443b10a179b04cb2f359de0dc0f7ab3197bc27623d327334e3d698f215306c4"
+    },
+    {
+      "id": "recirculating_aquaculture",
+      "name": "Recirculating Aquaculture",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "825a45908e353964e01baf72f38bf67ed65b51db5f2f3ae7ecb0394bc70e5c20"
+    },
+    {
+      "id": "integrated_aquaponics",
+      "name": "Integrated Aquaponics",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "5855d669f4a2eadcfaa8182d29586b93b86f5f40f3a1fe567f80f6df04f53180"
+    },
+    {
+      "id": "greenhouse_climate_control",
+      "name": "Greenhouse Climate Control",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "ac9b4988131f6187d948ce6f80aa14d0c070606571bfb5a98a7e1076c0a2265b"
+    },
+    {
+      "id": "soilless_nutrient_culture",
+      "name": "Soilless Nutrient Culture",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f0dbd574552136fcc980e0d85919cec0aef6a1317b50c8685ace247a54500ee5"
+    },
+    {
+      "id": "crop_light_schedules",
+      "name": "Crop Light Schedules",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "4ad3db69e2c735731aa5a70d98f64629fd01fc0d7e3ff7ff65fc45148d84cd9e"
+    },
+    {
+      "id": "closed_crop_water_loops",
+      "name": "Closed Crop-Water Loops",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "456f88b171f7d6881420189746801d3b6b7cb7eb3b68cf0fdcf3d79278f53bef"
+    },
+    {
+      "id": "multilayer_indoor_cultivation",
+      "name": "Multilayer Indoor Cultivation",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "011611546c95bda0e2220857ebed0c126657694788dc059a1002f9b59da846d3"
+    },
+    {
+      "id": "crop_robotic_handling",
+      "name": "Crop Robotic Handling",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "05d5c0c4328efb3377ae054d002987d49b555f94f23e5208ead4c38bb503a696"
+    },
+    {
+      "id": "habitat_food_balance",
+      "name": "Habitat Food Balance",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Measured dietary/material planning is modern systems practice. This identity does not promise indefinite closed food production or a novel future metabolism.",
+      "scope_digest": "abca9b5bb2117a4d2f8b140c861be32bf5cc9b95e4ea755e043b84952adffcb6"
+    },
+    {
+      "id": "watershed_boundary_surveys",
+      "name": "Watershed Boundary Surveys",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "d80b0141fedd4fb1604dd1641c219cdd1608077728d797867b7fb74d35fa4e35"
+    },
+    {
+      "id": "spring_capture_structures",
+      "name": "Spring Capture Structures",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "e899122a2b47c79a0294601d0e0e4d5cf91a8a75519e32052ab06095f0804604"
+    },
+    {
+      "id": "well_lining",
+      "name": "Well Lining",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "d40a28812986d0fa40d5decbbee4f5036b11564665d91e6092eda6361c58577f"
+    },
+    {
+      "id": "bucket_windlasses",
+      "name": "Bucket Windlasses",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "e4a21135316bbab4d0b5b9aa28f23a5ec0bae83f18a80fa1ea30b667b9a3d568"
+    },
+    {
+      "id": "counterweighted_water_lifts",
+      "name": "Counterweighted Water Lifts",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "bce1d3f435ff93fbf02dd27f061ee50df6b84ed96663ae2caaf1f0cb3a18a91f"
+    },
+    {
+      "id": "chain_of_pots_water_lifts",
+      "name": "Chain-of-Pots Water Lifts",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "d9c000f4daec46b1d7d262a7a4de18904d855d9cb43c98ffb55c896ed7f4c42d"
+    },
+    {
+      "id": "archimedean_water_screws",
+      "name": "Water-Lifting Screws",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "386629799bd3d6cc49d3717617eed115f15005711c83946bbadb8a3e7fbe5d63"
+    },
+    {
+      "id": "gravity_aqueducts",
+      "name": "Gravity Aqueducts",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "a50d4e90223b03f17dfe93460aa94e22c5d4dd7aeb331bec349aa09afa9da183"
+    },
+    {
+      "id": "siphon_crossings",
+      "name": "Siphon Crossings",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "12bc49f0a93ebcae4061d88af8954179dd3faae677afcc57e25cec32f3f14c04"
+    },
+    {
+      "id": "qanat_gallery_construction",
+      "name": "Qanat Gallery Construction",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "5a83a2f79dbe946610473be2d86b883a38e4c4fad8976aa1c903678fea0486d7"
+    },
+    {
+      "id": "distribution_reservoirs",
+      "name": "Distribution Reservoirs",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "332f5e3052e65486a26f4ef34790b7c704640ebd88a62e51638375791c1854bc"
+    },
+    {
+      "id": "water_pressure_zones",
+      "name": "Water Pressure Zones",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "f9ec06b78c59c5289c50c10a3d3e78db59f2dd38daee1d22d9b22a49b9ba9100"
+    },
+    {
+      "id": "water_main_isolation",
+      "name": "Water-Main Isolation",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "6342af39a2584b631151b4da1b7d5691849b8a2a31c1a8d785be7570641b4ed7"
+    },
+    {
+      "id": "water_leak_balances",
+      "name": "Water-Leak Balances",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "b34d8ec7788cd77a0a64cef720a5657721b8cc4ab7ba54f96de3af829dbeeca9"
+    },
+    {
+      "id": "acoustic_leak_detection",
+      "name": "Acoustic Leak Detection",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "40c561ffdae5af58002c62c084e0940d14b41852623d3bc3013b15e98e7519ea"
+    },
+    {
+      "id": "water_meter_calibration",
+      "name": "Water-Meter Calibration",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "2587691bbd70152bdf1dd12ea132272c6e456b90fbfb0bccc5351ea4191cb14d"
+    },
+    {
+      "id": "backflow_prevention",
+      "name": "Backflow Prevention",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "64185cb2e64549c53899b18830f79a46321692af3aa393ba91d0f564acc3a47e"
+    },
+    {
+      "id": "cross_connection_inspection",
+      "name": "Cross-Connection Inspection",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "4b21c0abaeaf2b3764fa7281bc943aaa8466f819db886bed8df50c183510838d"
+    },
+    {
+      "id": "water_source_protection_zones",
+      "name": "Water-Source Protection Zones",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "3d18e45159f9d60e673c41b5510dd76189818868ab5aae366c7afd59bb2afbf2"
+    },
+    {
+      "id": "raw_water_quality_sampling",
+      "name": "Raw-Water Quality Sampling",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "23c29cbb803e0433b3e75f86767d02486bda40ec450ee571a98b9bc86eef5b75"
+    },
+    {
+      "id": "water_turbidity_measurement",
+      "name": "Water-Turbidity Measurement",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "8e704287735bb9d50725866765285570d0ae94eb275cd49cc871f3ff05b22b9a"
+    },
+    {
+      "id": "coagulation_flocculation",
+      "name": "Coagulation and Flocculation",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "5305ac87a1815ec207da7254d7670c31d9a7271346f99143639f813860ad975f"
+    },
+    {
+      "id": "rapid_granular_filtration",
+      "name": "Rapid Granular Filtration",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "ac78c9eddb37002acc82e64e033bf0feb0d71e9567bd49f957701a99c77a05ad"
+    },
+    {
+      "id": "filter_backwashing",
+      "name": "Filter Backwashing",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "b325f1e2ba586a207a14015b4b14f528b958bc4263eff27a519569132baec8e5"
+    },
+    {
+      "id": "water_disinfection_control",
+      "name": "Water Disinfection Control",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "513b6fd252dc5c1f2cd84831c21738bd0a8f0f346da9f63b09fc16eca3469dfc"
+    },
+    {
+      "id": "chlorinated_water_treatment",
+      "name": "Chlorinated Water Treatment",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "8251f904f11f69bf5bdf8ca850b3b7e8add7c35dea1d63b4755146673763a52f"
+    },
+    {
+      "id": "ultraviolet_water_treatment",
+      "name": "Ultraviolet Water Treatment",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "700252262d6ad175f04401cd52dfb2a29f5016edc23ba3181d455a6cac0f1bbc"
+    },
+    {
+      "id": "ozone_water_treatment",
+      "name": "Ozone Water Treatment",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "9956c399ab38c0bf44e48b1b6ee6b92bc586c1fc92fbbebefcb06b2a6a57f240"
+    },
+    {
+      "id": "membrane_microfiltration",
+      "name": "Membrane Microfiltration",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d2b1cb04504c0bb40a0760da8834d24abfdd5d809bfc92180fbdcf1b5265340b"
+    },
+    {
+      "id": "water_ultrafiltration",
+      "name": "Water Ultrafiltration",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f9c728e8e75f120da229e73cf362490dcbec299865b9906f3ce72866158b326b"
+    },
+    {
+      "id": "reverse_osmosis_desalination",
+      "name": "Reverse-Osmosis Desalination",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7a1cdb40970ddbf206123ef898d72e961ee4fc1b43930399178bf77262b6f8e5"
+    },
+    {
+      "id": "thermal_desalination",
+      "name": "Thermal Desalination",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "5b5a7805b70d718f1dead422a2343f5df7d6903c1f6fa1063ff49dea3906302b"
+    },
+    {
+      "id": "desalination_energy_recovery",
+      "name": "Desalination Energy Recovery",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "bae7f76afca4ae04e65be28478d2c24e2901b050803a29f2e897103dfc023045"
+    },
+    {
+      "id": "brine_discharge_management",
+      "name": "Brine Discharge Management",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "767b83bfa36af1dbccbfc02adae659f916e0fd7daad462360cde1e71439dd1a1"
+    },
+    {
+      "id": "rainwater_first_flush_diversion",
+      "name": "Rainwater First-Flush Diversion",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "e20c49db287a6308fc015a4a1a9b478886f1dbe4b208e53ec704edc4b1cd91b9"
+    },
+    {
+      "id": "stormwater_detention",
+      "name": "Stormwater Detention",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "e2ae6e0f083628adcbb8ad20fa8831cf772f34de63720be36d43dd4ae114d232"
+    },
+    {
+      "id": "infiltration_basins",
+      "name": "Infiltration Basins",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "892941a7b443273319bbff37227dd39473e07ca7dc1bb01f916b349d933ff755"
+    },
+    {
+      "id": "managed_aquifer_recharge",
+      "name": "Managed Aquifer Recharge",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "80aaa86bce738f7d4736d7aacadffd2c460525c5df027848f4e79266771d350f"
+    },
+    {
+      "id": "drought_supply_planning",
+      "name": "Drought Supply Planning",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "efdf3af1f29a31a425d704d63e7bfef254421c2a0e671204ce3fe27cf69abcbc"
+    },
+    {
+      "id": "separate_storm_sewers",
+      "name": "Separate Storm Sewers",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "cfacc1881cdda297e9d2006b62e2632fbf76f97937f29d7401eaa8efa2c4f574"
+    },
+    {
+      "id": "sewage_lift_stations",
+      "name": "Sewage Lift Stations",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "86c14e148f996748eff0bf009b1ffbda2de44b344d688c5e06e9ef59699346ba"
+    },
+    {
+      "id": "wastewater_screening",
+      "name": "Wastewater Screening",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "e49614ddddd5ddeab2b12f221bb445a50a19cb5bbcc308d643bc6c7eb6c19969"
+    },
+    {
+      "id": "primary_wastewater_settling",
+      "name": "Primary Wastewater Settling",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "0ab4241c551dc5f7f61adb532f371024caae7690ebc28443c403962de9f39648"
+    },
+    {
+      "id": "biological_wastewater_filters",
+      "name": "Biological Wastewater Filters",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "aca6612c7d2bd45854644c91b842cdc0159f6fd97a838dba921e74696581c3a2"
+    },
+    {
+      "id": "activated_sludge_treatment",
+      "name": "Activated-Sludge Treatment",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "c35e9c017ec6629007bfefe91595f69825ea8ae753ba4a42b8a1cb72c2bca92b"
+    },
+    {
+      "id": "wastewater_nutrient_removal",
+      "name": "Wastewater Nutrient Removal",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "115352c13a1409335d48e6224956a33600d150b79321b0c1ae23a8e4b9c08de7"
+    },
+    {
+      "id": "sludge_digesters",
+      "name": "Sludge Digesters",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "d497db3239997654b9a340e4e8a5beaa9ec43c8db52a3f9c24bdd430295c12d1"
+    },
+    {
+      "id": "biosolids_quality_control",
+      "name": "Biosolids Quality Control",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "ca6b05d89072aeee73f8eedaa7fe1f3b7208114ede88e5dfcb71e0a55203e55b"
+    },
+    {
+      "id": "constructed_treatment_wetlands",
+      "name": "Constructed Treatment Wetlands",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "c4fb111530cab82f6681b6db73271280ab5c371cb5e01e833bc7cf610da3a42f"
+    },
+    {
+      "id": "decentralized_sanitation_services",
+      "name": "Decentralized Sanitation Services",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "bb4e5c773ad7e41a6bc02b3f11395d73d7951c3597c76af0eefa5c52dccea86a"
+    },
+    {
+      "id": "fecal_sludge_collection",
+      "name": "Fecal-Sludge Collection",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "f54c7432e7737ae28cc74463ecf63af5b8e8ff0128b364aaded2d4005b44cab6"
+    },
+    {
+      "id": "greywater_reuse",
+      "name": "Greywater Reuse",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "fa2abf17ab0ff8cd4f03aa52e4689e9d21d90761a66ce12be19ed13cca3f0744"
+    },
+    {
+      "id": "potable_reuse_barriers",
+      "name": "Potable-Reuse Barriers",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "879f3a2e0d4b0e160f6ddc17136161c8c9cd7135c4743495a3bbbda67385d1ae"
+    },
+    {
+      "id": "water_treatment_fail_safe_diversion",
+      "name": "Water-Treatment Fail-Safe Diversion",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "234418a4997b428f99e0427851f717211127b5ceeaf08cfac9fe21e3526a120d"
+    },
+    {
+      "id": "water_network_telemetry",
+      "name": "Water-Network Telemetry",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f158a4f26c9497452a9b5f32eccb8c18a1a4c660b0965af067dc5c7a74e96091"
+    },
+    {
+      "id": "water_demand_forecasts",
+      "name": "Water-Demand Forecasts",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "eb8f8ad37b93853d3422693bf09f9c017c44cb19f953d0eba10841e402d5446b"
+    },
+    {
+      "id": "water_energy_joint_dispatch",
+      "name": "Water-Energy Joint Dispatch",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "22e8cb860835804df3750d0706aa5d0c2b20afe927902125284d033b3b16e56b"
+    },
+    {
+      "id": "habitat_water_quality_barriers",
+      "name": "Habitat Water-Quality Barriers",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Verified recycled-water barriers are modern life-support engineering. Their use in a later settlement does not automatically satisfy advanced/future coverage.",
+      "scope_digest": "ea2c2963612554630eff0aa2e5b49ebbe3d8c429835ebb4ca468750d632c6d32"
+    },
+    {
+      "id": "water_service_recovery_drills",
+      "name": "Water-Service Recovery Drills",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "e8362f413097500862921ab2de072ed99d6418ff95ae9d15c77a4a28d4051432"
+    },
+    {
+      "id": "habitat_observation_records",
+      "name": "Habitat Observation Records",
+      "horizon": "H01",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "6f930821b80ab64b0fd698aba333bb61d13abbec019aa886e02bfca3cc6d781e"
+    },
+    {
+      "id": "ecological_transects",
+      "name": "Ecological Transects",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "703b1c570a4876d972a5d802dbd505505950a59115d207527d067d4f96ad094d"
+    },
+    {
+      "id": "vegetation_quadrats",
+      "name": "Vegetation Quadrats",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "b19419c818b7e1673ba00f007b3d6f432292aecfa79a13997f34b80c64deffb1"
+    },
+    {
+      "id": "wildlife_track_surveys",
+      "name": "Wildlife Track Surveys",
+      "horizon": "H01",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "c3364e672bd3e517f452d000baac46d2b5085d46a441b9e79981ac51ef8cc601"
+    },
+    {
+      "id": "seasonal_wildlife_calendars",
+      "name": "Seasonal Wildlife Calendars",
+      "horizon": "H01",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "48d3760f5b44d78b0c90625efd5781df9f0257ef674ddb7b647cffa9c64cb18d"
+    },
+    {
+      "id": "population_mark_recapture",
+      "name": "Population Mark-Recapture",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "b7857c550c09ee323d733d6f4789b758262f4a48fc1af15e3c236be615aaada6"
+    },
+    {
+      "id": "ecological_detection_models",
+      "name": "Ecological Detection Models",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "394285262f92375bfb71e819b1863b91d67baa63ae1f5443bee460fcca7a4b40"
+    },
+    {
+      "id": "forest_inventory_plots",
+      "name": "Forest Inventory Plots",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "8d03c0a195611e3b265994b6b9b668d4fd2a7e2003b28e819d3b63b6c4d6816a"
+    },
+    {
+      "id": "forest_growth_yield_models",
+      "name": "Forest Growth-and-Yield Models",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "64802ed971480f3cab3d42dff421b8dda39607896944a5af52ecd55ded6a0eea"
+    },
+    {
+      "id": "selective_tree_harvesting",
+      "name": "Selective Tree Harvesting",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "d862c71832e5bc2f2945c3818e148c5927c430be010979ddf0b325e649eb1b94"
+    },
+    {
+      "id": "coppice_woodland_management",
+      "name": "Coppice Woodland Management",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "bf41cbe97670adb712aee29ed434b682c8db9907115fcc97ab3db0cb5e55dc80"
+    },
+    {
+      "id": "pollard_fodder_management",
+      "name": "Pollard Fodder Management",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "88a0f5c6d18ad2b52739a26c061d3f1f86221742975afc4ca701b786e8c81149"
+    },
+    {
+      "id": "forest_seed_source_matching",
+      "name": "Forest Seed-Source Matching",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "3aa4dec9e6c59dc5f92fe5247d50e82fdd4ff82d5dbf9b38535472fd3b9ba148"
+    },
+    {
+      "id": "forest_nursery_practice",
+      "name": "Forest Nursery Practice",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "85ec312af3512e2f69815b945b00ef7a721b43b7493fea7708c0d411034fbd21"
+    },
+    {
+      "id": "reforestation_site_preparation",
+      "name": "Reforestation Site Preparation",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "3ca69d285e9bb8f69f1a5bf1fa83999593e356de9eba15b0f5661b9740c9f05f"
+    },
+    {
+      "id": "assisted_natural_regeneration",
+      "name": "Assisted Natural Regeneration",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "b24981ef91a37ac26c7bc8f3074a44fc33316a8bc12e2128ac41ece353015a40"
+    },
+    {
+      "id": "woodland_harvest_rotations",
+      "name": "Woodland Harvest Rotations",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "c4199b5f4afd52942017e36d292574d990ca718b7938cb5f681149934b434cef"
+    },
+    {
+      "id": "forest_access_impact_planning",
+      "name": "Forest Access-Impact Planning",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "9c7d8701aff3c68c514a78beeafc4bdfccc708322f944099ce12faa3fa72f078"
+    },
+    {
+      "id": "fuel_load_surveys",
+      "name": "Fuel-Load Surveys",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "4446fa4b67da0d4a01f51a1acc0fc0633865a393031390da83410e5d47da9be0"
+    },
+    {
+      "id": "landscape_firebreaks",
+      "name": "Landscape Firebreaks",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "4a8599af17664bb8446555d705d1c66e21d756160af5b1f344cbebe47af79c02"
+    },
+    {
+      "id": "prescribed_fire_planning",
+      "name": "Prescribed-Fire Planning",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "67243aaa17c913760eb2bdb51d1ec03637dcc82c447a73659c7ea4230ac07d4c"
+    },
+    {
+      "id": "post_fire_watershed_stabilization",
+      "name": "Post-Fire Watershed Stabilization",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "8c8fb57770ab610a11108b644f659e901012874ca0d171adb087d668c8e8e509"
+    },
+    {
+      "id": "riparian_buffer_management",
+      "name": "Riparian Buffer Management",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "f6c72a50009980fbbc381b1ac908eba3dea60f1c49a862da32836c1c9b7f4daf"
+    },
+    {
+      "id": "stream_bank_bioengineering",
+      "name": "Stream-Bank Bioengineering",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "7c21f5458ccb74fb33309f9a32ec76bc5b51b8376b1c1a4407312b5e96824c39"
+    },
+    {
+      "id": "wetland_hydrology_restoration",
+      "name": "Wetland Hydrology Restoration",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "1c00e595cd5a792c9c2d5578780d521db844e625395781a0b97126796c39bee9"
+    },
+    {
+      "id": "floodplain_reconnection",
+      "name": "Floodplain Reconnection",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "b01f23808d154a57c7932ee20ea83a434d76562962e23662457241e383ba38d6"
+    },
+    {
+      "id": "fish_passage_design",
+      "name": "Fish Passage Design",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "54034e569cc917a1ccc13498d84ae1ee20f7f54e22c4e5f55a08dab552769bf0"
+    },
+    {
+      "id": "stream_environmental_flows",
+      "name": "Stream Environmental Flows",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "99ec278f700228e630e88352a7ff1eb73369069c1619f80222a7994b4fb121bd"
+    },
+    {
+      "id": "sediment_budget_accounts",
+      "name": "Sediment Budget Accounts",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "af639e6bc140d38bab6a20f42fc81f9f60b467d6c5be64008efa4783be7cc290"
+    },
+    {
+      "id": "gully_erosion_control",
+      "name": "Gully-Erosion Control",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "ec2f8660d1a698ab5d5ee27cd8f599802701adb29f39c1660fa756921aeaeea7"
+    },
+    {
+      "id": "wind_erosion_shelterbelts",
+      "name": "Wind-Erosion Shelterbelts",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "8195d26f2710736bab971be660d7ce2c730083b286472c967f2a486945612b02"
+    },
+    {
+      "id": "saline_soil_reclamation",
+      "name": "Saline-Soil Reclamation",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "2de36981f8c83bb997d070d428a36d4a9d87e642d34b8b55645985551d87e5a0"
+    },
+    {
+      "id": "soil_organic_matter_accounts",
+      "name": "Soil Organic-Matter Accounts",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "fda0e6e8cdd720c05c792b78c3eec40b735fcf5fd382cb49eabdabc9e534be5d"
+    },
+    {
+      "id": "soil_compaction_diagnosis",
+      "name": "Soil-Compaction Diagnosis",
+      "horizon": "H04",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "28aa303eb9d6ae31fabfa405e5edf50153bff5973d4ac7e4e2a24c99eb7ae4cf"
+    },
+    {
+      "id": "controlled_traffic_farming",
+      "name": "Controlled-Traffic Farming",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "4793e83284a3b01ce21f18a8922f82b27dfd81d3f219fa9ffacd00d8d8c1ba6e"
+    },
+    {
+      "id": "agroforestry_design",
+      "name": "Agroforestry Design",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "84d2b8d41278f4270b9375f1b54da04d8663422a16b71f7ec2ce70bbc4182384"
+    },
+    {
+      "id": "pollinator_habitat_networks",
+      "name": "Pollinator Habitat Networks",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "29a2ea2b0ca530b2676f2795cef7a8e0f98ffd6e488b6b2af000538835d8c327"
+    },
+    {
+      "id": "integrated_pest_monitoring",
+      "name": "Integrated Pest Monitoring",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "db3a0de00c1b357782276eea8b475edf1cf7ae2193393dcfc674ecb4472f23de"
+    },
+    {
+      "id": "pest_action_thresholds",
+      "name": "Pest Action Thresholds",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "33afe524497510aadede840527da1c94f96b723e27d57e421d4037262bc718d6"
+    },
+    {
+      "id": "biological_pest_control",
+      "name": "Biological Pest Control",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned modern for the authored species-specific evidence, containment and monitoring program. Earlier empirical uses of natural enemies are not claimed to require all this infrastructure.",
+      "scope_digest": "8b5734cee91dcc109f277e32b6167fc7fdf1be8e257c737bce15af5db4f24f2b"
+    },
+    {
+      "id": "crop_pest_exclusion",
+      "name": "Crop-Pest Exclusion",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "3e321dff67508e50b99059eb5d8eede77642bf8da16123f488dd225e5f3e444a"
+    },
+    {
+      "id": "invasive_species_screening",
+      "name": "Invasive-Species Screening",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "122fa78f2913edbc22eb0db08abc8eafce5606bb323db59868406611a1ea0376"
+    },
+    {
+      "id": "invasive_species_early_detection",
+      "name": "Invasive-Species Early Detection",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "27f669289ea678a069499abcd1484ffdcc3f5487aa2511c72fb069e40e3e3843"
+    },
+    {
+      "id": "invasive_species_response_plans",
+      "name": "Invasive-Species Response Plans",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "dc057d463002ba3f25a654b4967a9af1d4b1a79094c346e23d9028f301eef651"
+    },
+    {
+      "id": "habitat_corridor_planning",
+      "name": "Habitat Corridor Planning",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7e8bbc00705b035031744ef73981c1a58f38347231114d6d5c1bd599d765e437"
+    },
+    {
+      "id": "protected_area_zoning",
+      "name": "Protected-Area Zoning",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "a009a66c6eb1af4a2ecb9739560b887e706883b86f7bb1f900614a84bcdd9c5f"
+    },
+    {
+      "id": "community_resource_monitoring",
+      "name": "Community Resource Monitoring",
+      "horizon": "H02",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Local users can record resource conditions through agreed repeatable observations before electronic sensors or formal statistical ecology.",
+      "scope_digest": "d73740fb028b82e0cf7bd8637d0aa96883a28a5768582ee4cdee394ae379f0ca"
+    },
+    {
+      "id": "biodiversity_reference_sites",
+      "name": "Biodiversity Reference Sites",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "95eb48a8fbcf52a333ca4542f083507417f6c9ea0ed9531a265602bc18c5a5d5"
+    },
+    {
+      "id": "ecological_restoration_targets",
+      "name": "Ecological Restoration Targets",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "1fd391faeef3c44a24fcc502ff8c41475de3b92a0f8bc60925da008fc8061a64"
+    },
+    {
+      "id": "adaptive_land_management",
+      "name": "Adaptive Land Management",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "021d24806093154c4f2d1ce71706dd5156fad85bad829ddd6fc650d6578e6e91"
+    },
+    {
+      "id": "landscape_remote_sensing",
+      "name": "Landscape Remote Sensing",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "c2fdc780fce4e790b7e063e575d63398b89a2a413159fdd0314eebdac01b0a19"
+    },
+    {
+      "id": "ecological_change_detection",
+      "name": "Ecological Change Detection",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "70b7ea2384e57ef38d4c6f4cee34bb85168646388018e5c65f4da3e45b4a159c"
+    },
+    {
+      "id": "forest_carbon_measurement",
+      "name": "Forest Carbon Measurement",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "a104227600593d33ec3f57eb076107cd51866d440a900b8a993de90403e964e9"
+    },
+    {
+      "id": "conservation_genetic_sampling",
+      "name": "Conservation Genetic Sampling",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "025bc482d898d0e38a621240429d0ce83c4d2d847ac4a0cd51483adc4a595a10"
+    },
+    {
+      "id": "assisted_species_movement_review",
+      "name": "Assisted Species-Movement Review",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7c880bb1e18032054a8970f89df3bb6173842dadd0bf4c330b048c5fdc244f54"
+    },
+    {
+      "id": "urban_heat_ecology",
+      "name": "Urban Heat Ecology",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "b8a8df4a65cae1d26347c22679c2528f743e86732e87f0ea63769d43890e9996"
+    },
+    {
+      "id": "green_infrastructure_networks",
+      "name": "Green-Infrastructure Networks",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "11b8b04ce40846ab93a8d110a7eaea93649a59bd839bd28c804ec3de1d4f7db5"
+    },
+    {
+      "id": "closed_ecosystem_experiments",
+      "name": "Closed-Ecosystem Experiments",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Bounded experiments with measured cycling are modern ecology. The experiment may expose failure; research completion does not grant indefinite closure.",
+      "scope_digest": "4e702104aa283f069d5a59cb48c2d24ec7055ea41e3a72272a7ce2aafd3aebe8"
+    },
+    {
+      "id": "artificial_habitat_ecology",
+      "name": "Artificial-Habitat Ecology",
+      "horizon": "H05",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Designing and testing managed ecological communities is modern research; the authored scope does not establish a permanently self-sustaining extraterrestrial biosphere.",
+      "scope_digest": "83954a87b24f896c6d0567a85e49604164f83d334b79b84a05235c8541d5f0ad"
+    },
+    {
+      "id": "long_duration_ecological_stewardship",
+      "name": "Long-Duration Ecological Stewardship",
+      "horizon": "H03",
+      "source_file": "food-water-ecology.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Maintaining ecological obligations and observations over generations is possible through earlier institutions; long duration does not alone imply futuristic science.",
+      "scope_digest": "6228a5cf956f36d2f67219d5ee7e51b7e8591fffb89239915a15e39c09e8c122"
+    },
+    {
+      "id": "edible_resource_recognition",
+      "name": "Edible Resource Recognition",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "436bc4b43a8c9ec283fb1d67f3ba43edd66db759a86614c7d4951599729c1e43"
+    },
+    {
+      "id": "wild_food_harvest_rotation",
+      "name": "Wild Food Harvest Rotation",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "7f41a8bf9a65c380be13fcd3035406196fe51dd80107c572a7d51ac4004afb57"
+    },
+    {
+      "id": "digging_stick_harvesting",
+      "name": "Digging Stick Harvesting",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "793f00e19ddce08f8118441d116259958557769360470f7e9c2105670d71188e"
+    },
+    {
+      "id": "food_pounding_mortars",
+      "name": "Food Pounding Mortars",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "98736c1730097817ec634f5ae18d2d7595ac529db48881ba43b1418efd6af7c9"
+    },
+    {
+      "id": "hearth_roasting_control",
+      "name": "Hearth Roasting Control",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "1a95c23dad42b1adde8f7567a220a9ed58740f1a3ec042acee276be39fe1937e"
+    },
+    {
+      "id": "earth_oven_cooking",
+      "name": "Earth Oven Cooking",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "0131d981d47ad911d1cabe550da973c3329314b697b886d9c7c12ef62c56c5b3"
+    },
+    {
+      "id": "food_steaming_vessels",
+      "name": "Food Steaming Vessels",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The source permits basketry as an alternative to clay vessels. Steam-assisted cooking is not assigned an industrial boiler prerequisite.",
+      "scope_digest": "e78e7a6b7f1ba8fd9987f9a76c5c74e1e0b0ae8a1fba7e9bf9362108273abda1"
+    },
+    {
+      "id": "cereal_dehulling",
+      "name": "Cereal Dehulling",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "b7d69644951edc756ffce7936216c0d8f7bce01d7b6dad9e0bf7fd87446c2e5b"
+    },
+    {
+      "id": "starch_washing_separation",
+      "name": "Starch Washing Separation",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "2607ed62ee7e23513ab29646242fa114d0336b78975de9f9c287d946423e2699"
+    },
+    {
+      "id": "alkaline_grain_processing",
+      "name": "Alkaline Grain Processing",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "1343bc5a5775e5cabca4ba56afa759c1c2e767bfd62122ef9c369e5d63166765"
+    },
+    {
+      "id": "hand_dough_forming",
+      "name": "Hand Dough Forming",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "8669967453932d6c9f8387c771d1db0e44182e4b4934f925a4aafb93b54a0edd"
+    },
+    {
+      "id": "managed_bee_hives",
+      "name": "Managed Bee Hives",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "1812cd89625f23b7a5df9d97ebd4c99c85d25e3ad63bd1a13df86624480024ef"
+    },
+    {
+      "id": "movable_comb_frames",
+      "name": "Movable Comb Frames",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "a6aadf9621dac1172c79d2ee67d38ae84a74c6b22a8fb8c53340874ee7757ccf"
+    },
+    {
+      "id": "bee_colony_health_observation",
+      "name": "Bee Colony Health Observation",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "4db12192bfd0747dd71c896d0505104dd0b95e3166027f687fc31af03276d5f4"
+    },
+    {
+      "id": "managed_pollination_contracts",
+      "name": "Managed Pollination Contracts",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "47705135492abb71a39a960b1eeaaf2d98f875e31e2dde81686bf5fbee8900a6"
+    },
+    {
+      "id": "honey_extraction_separation",
+      "name": "Honey Extraction Separation",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "6105295540a99a5c49917a5a723034ad304dc5b82cb5e2c063484a38b698f38d"
+    },
+    {
+      "id": "fish_net_mesh_design",
+      "name": "Fish Net Mesh Design",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "14a2be3238ed3db0db6dd2ef2a3b51b2403076935d665480bc661aedd2d848f9"
+    },
+    {
+      "id": "fish_trap_flow_siting",
+      "name": "Fish Trap Flow Siting",
+      "horizon": "H01",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
+      "scope_digest": "7e9d98f771362ee1d6589c4e33b1aeffabf91ccb9236f23d3ef10b457e9af9c0"
+    },
+    {
+      "id": "shellfish_harvest_area_assessment",
+      "name": "Shellfish Harvest Area Assessment",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "61f2b9c33edf79e2ee0303115a0ea5fbe11e20ef79e9a3e873cbdb13bf6351e2"
+    },
+    {
+      "id": "ice_chilling_foods",
+      "name": "Ice Chilling Foods",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The source includes natural or manufactured ice. Controlled chilled handling therefore need not wait for mechanical refrigeration, although ice supply remains finite.",
+      "scope_digest": "6879f10799a3c7314c21d099a116458577e59cae5126e4e0ff55ff5d25841706"
+    },
+    {
+      "id": "shellfish_aquaculture_substrates",
+      "name": "Shellfish Aquaculture Substrates",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "190e7e7f9d9861944370549c98e12856377553a1b35a0b06596e84a31ca1f3d6"
+    },
+    {
+      "id": "seaweed_farm_cultivation",
+      "name": "Seaweed Farm Cultivation",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "5a64a1068879457d93ffef0ba86fd7297d0e7d449e46c1bc16cb482d155971bb"
+    },
+    {
+      "id": "fish_stock_catch_assessment",
+      "name": "Fish Stock Catch Assessment",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "1e4d65d4bc6751821f9b33a09dd2eb253ba557638ed52c3ac7ddb2bef2a67c58"
+    },
+    {
+      "id": "animal_handling_enclosures",
+      "name": "Animal Handling Enclosures",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "becbaa34e7c897b63062b1623a255b72a24cd15238942ec60ba6b8377d30de6d"
+    },
+    {
+      "id": "livestock_body_condition_scoring",
+      "name": "Livestock Body Condition Scoring",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "3c7c460776365507dd752297308c093858e3f967ea29365367bcaa92fdc4897c"
+    },
+    {
+      "id": "livestock_birth_support",
+      "name": "Livestock Birth Support",
+      "horizon": "H02",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "cd2d6d13c772dc5d63823538cf3da09d2b1f64c84f3159a92a27936f12f5d941"
+    },
+    {
+      "id": "veterinary_case_records",
+      "name": "Veterinary Case Records",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "5430a56a6f388e02fd0da4fe77d4757744615d68535b0b86da9d07a98fdb8620"
+    },
+    {
+      "id": "herd_quarantine_practice",
+      "name": "Herd Quarantine Practice",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "09c1a480f4179ceb20aacb9febd2ba91b2401c9a9fa515283d489201f9f45d11"
+    },
+    {
+      "id": "livestock_parasite_monitoring",
+      "name": "Livestock Parasite Monitoring",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f70660493bcca1085802fc4c59be72a7fddead3367de2d85e782c13c10bc50f3"
+    },
+    {
+      "id": "animal_feed_storage_hygiene",
+      "name": "Animal Feed Storage Hygiene",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "83e5073e5b4a733e51e87b006e3117c94d4ee152dd7201870826787bd22dc98e"
+    },
+    {
+      "id": "feed_digestibility_trials",
+      "name": "Feed Digestibility Trials",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "54f85bfd5a9b7160a2c6032c6b85b2dcab81ced811628f4871453af8135386cf"
+    },
+    {
+      "id": "pasture_forage_budgeting",
+      "name": "Pasture Forage Budgeting",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "f73354dd8d4c097a11823caa51bcd323e5b0da70a0ffea6cda641429f233ce24"
+    },
+    {
+      "id": "livestock_heat_stress_management",
+      "name": "Livestock Heat Stress Management",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "51374f898f12fe587ce25ec41ac67fcf7714a77d22e3a296e6dc76fe3d87896c"
+    },
+    {
+      "id": "milking_machine_qualification",
+      "name": "Milking Machine Qualification",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "326281624e82159df373d1b057e938d767018450abc9ac729b48bbab0fe71a60"
+    },
+    {
+      "id": "milk_pasteurization_control",
+      "name": "Milk Pasteurization Control",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "2d28d4adc2e7fd51a7f36f73dce6325f74604336faa4349cf9438774d3324323"
+    },
+    {
+      "id": "milk_homogenization",
+      "name": "Milk Homogenization",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "9d1cbff2f7980903ae1c2380510a5bf231f04b46b8304e7976d53ddcdd996058"
+    },
+    {
+      "id": "fermentation_starter_cultures",
+      "name": "Fermentation Starter Cultures",
+      "horizon": "H03",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The source allows empirical controlled culture practice before microbial isolation theory. Maintaining a working starter is distinct from engineered precision fermentation.",
+      "scope_digest": "1c26c00a1cab61669b08970a1cbdc6345df4d2d19f6450a1c0cb3b1dc5f0c021"
+    },
+    {
+      "id": "food_water_activity_measurement",
+      "name": "Food Water Activity Measurement",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "b59a72476cbd085dcda184c9d34a173362e7ca6f1fcb27947e91e319ecc4efe6"
+    },
+    {
+      "id": "food_acidity_measurement",
+      "name": "Food Acidity Measurement",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "757e1a2f5d7e883b09e9fd3a2371161ed0d0251fcb2b5881658de1271ff9ace2"
+    },
+    {
+      "id": "food_freeze_concentration",
+      "name": "Food Freeze Concentration",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "048c0190d2489739550c42a317cb09579b90ddbba86062f815f9df682330512c"
+    },
+    {
+      "id": "vacuum_food_evaporation",
+      "name": "Vacuum Food Evaporation",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "d4834a51c6086b5da1862f1d0859641d7409b32c7c13a8e5a80f80911b7df6fd"
+    },
+    {
+      "id": "spray_food_drying",
+      "name": "Spray Food Drying",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "f9d13ba6b1582181656be5419686b7cf458d90833ff4a610144c4ff134e145b5"
+    },
+    {
+      "id": "food_extrusion_cooking",
+      "name": "Food Extrusion Cooking",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "9d315e77b26b1fd9b0f0b8554e48a9e4a721b814be9f2db9b8be21bc530717f1"
+    },
+    {
+      "id": "food_emulsion_stabilization",
+      "name": "Food Emulsion Stabilization",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "ecd19deda42a71cd01898e0a0b722c30944f3dfbb8b1e65c1fe5bd40051c058e"
+    },
+    {
+      "id": "food_package_barrier_testing",
+      "name": "Food Package Barrier Testing",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "28edd12970971ed69851cd4d0e9fc13305d8705e28d5684b2661ee8e99db1913"
+    },
+    {
+      "id": "aseptic_food_filling",
+      "name": "Aseptic Food Filling",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f80c6d32e61773f3d4f42da995ce7ba4ee57c8b6071a4aa689dbd4e77fe0a3f6"
+    },
+    {
+      "id": "food_package_leak_detection",
+      "name": "Food Package Leak Detection",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "cd7f0452fde3acbca95b91e268b5bbc6a0f929bda80fe0cba73aa402ab83736b"
+    },
+    {
+      "id": "fresh_produce_ripening_control",
+      "name": "Fresh Produce Ripening Control",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d3e823b75217d46eeb1b76c1b34ba4460b6934f48c2c9dc95a0336c930f23a94"
+    },
+    {
+      "id": "food_allergen_segregation",
+      "name": "Food Allergen Segregation",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "edd40e0ce5c112e9a0a3e6da7607a9a3a7c3c3f88b2e393d6592d704f9de892e"
+    },
+    {
+      "id": "food_contaminant_sampling_plans",
+      "name": "Food Contaminant Sampling Plans",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "098043aef8d232d70d2a9cdc34d3624dfc2f144a560ec4af1c0b116cf06a172a"
+    },
+    {
+      "id": "food_recall_traceback",
+      "name": "Food Recall Traceback",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "af72cb70a4e12e5626e35d8593e77adc26d16137855745c0146c0b16f42c7e00"
+    },
+    {
+      "id": "postharvest_loss_measurement",
+      "name": "Postharvest Loss Measurement",
+      "horizon": "H04",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "0804792c319fdd2750c60cf56d112dff7a060363938c8485a8161c0da83c8726"
+    },
+    {
+      "id": "crop_yield_mapping",
+      "name": "Crop Yield Mapping",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "99e42ec6299edf254758e0d74018e7a8f427ee0116dc5f06ec33c3d154038da5"
+    },
+    {
+      "id": "variable_rate_crop_inputs",
+      "name": "Variable Rate Crop Inputs",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "17e93d8a7de364a442c73a21d937ef8e8ca6533ccb1f21f9b37a7252d6c335df"
+    },
+    {
+      "id": "microbial_food_protein_qualification",
+      "name": "Microbial Food Protein Qualification",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Modern biomass food qualification is assigned by its measured ingredient/process scope, not by possible future production scale.",
+      "scope_digest": "ed4a705b2269b2b3d91b78965bcd6275ef9db3ded557b6fff58d75755f676b52"
+    },
+    {
+      "id": "precision_fermented_food_ingredients",
+      "name": "Precision Fermented Food Ingredients",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The scope is modern characterized ingredient production and qualification. A larger future factory is not an additional invention under this identity.",
+      "scope_digest": "2480f75be9375bd5227b880017d45aeb54d58a2632b6b54097b9301cce791d43"
+    },
+    {
+      "id": "cultured_food_cell_expansion",
+      "name": "Cultured Food Cell Expansion",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Modern food-cell culture and qualification are distinct from a promise of future population-scale affordable production.",
+      "scope_digest": "e76e5ad04a5a460d06c7c46cd3e9341dc45c1be71798563874a536d59b4d96d8"
+    },
+    {
+      "id": "cultured_food_structure_formation",
+      "name": "Cultured Food Structure Formation",
+      "horizon": "H05",
+      "source_file": "food-agriculture-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope is evaluated food-compatible cell/scaffold structure, not a demonstrated unlimited or fully mature future food system.",
+      "scope_digest": "399ee7a004e480a72e600482b0b84cacbc7f2efeba6fdfd6878141e3877893e4"
+    },
+    {
+      "id": "river_diversion_weirs",
+      "name": "River Diversion Weirs",
+      "horizon": "H02",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "bfebbb496053c3c88baeed5287e64de4d959b296982a476a92b88f597c09a70d"
+    },
+    {
+      "id": "water_intake_screening",
+      "name": "Water Intake Screening",
+      "horizon": "H02",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "52f85d2bd577ee5cb67e683e8f47fcab253d43ef8f17fbde43ca52c5a610760d"
+    },
+    {
+      "id": "sediment_scour_outlets",
+      "name": "Sediment Scour Outlets",
+      "horizon": "H03",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "cab05e9e32b122d1258914ed62bcad67b48d5547d076402ef1fddf0085f3e726"
+    },
+    {
+      "id": "earthen_flood_embankments",
+      "name": "Earthen Flood Embankments",
+      "horizon": "H02",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "46f09bee58484e53fac204347e9d83f5ad84f23399bb05604422982776483574"
+    },
+    {
+      "id": "puddled_clay_water_linings",
+      "name": "Puddled-Clay Water Linings",
+      "horizon": "H02",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism belongs to settled food, animal, water or resource-handling craft and can be learned empirically without modern analytical infrastructure.",
+      "scope_digest": "305e7cc20575283095bb7c5f3c76683e1daac2a9906f64a8e2018b282c02cfd3"
+    },
+    {
+      "id": "subsurface_field_drainage",
+      "name": "Subsurface Field Drainage",
+      "horizon": "H03",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "739167f896c85e2f6d61e0c0f04d4fbf880494faf49930a7ed3931aec02fb0aa"
+    },
+    {
+      "id": "flood_spillway_design",
+      "name": "Flood Spillway Design",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "93dc63915a21324c95dc7147cd6e0db5f0b91db0f8bfc6f926fd8d6c4e29c8ca"
+    },
+    {
+      "id": "hydraulic_jump_dissipation",
+      "name": "Hydraulic Jump Dissipation",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "e5b279c0c6a40bd9d8cf0beb6e655e75ea6e80f7101883da4ed1ca3006ac64d7"
+    },
+    {
+      "id": "water_hammer_models",
+      "name": "Water Hammer Models",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "45cc4d3895175ae7284561f27dac082edc1f03a3ba8fe5c00af7c47d2dcdf87b"
+    },
+    {
+      "id": "pressure_reducing_water_valves",
+      "name": "Pressure-Reducing Water Valves",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "642c60f5abf711b9b7784034d3b5cb75225c1b8aba25939012025a9b7fb76d68"
+    },
+    {
+      "id": "pipeline_air_management",
+      "name": "Pipeline Air Management",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "e12f00ac5336728e97f2f986d3d91fa2c8da14340bab624f1c5c65768f105a6f"
+    },
+    {
+      "id": "hydraulic_ram_pumps",
+      "name": "Hydraulic Ram Pumps",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "f12153214d8373f3e3d7c1de0b7544f02cdeb5253431f4255e67d14236fd0f21"
+    },
+    {
+      "id": "bank_filtration_intakes",
+      "name": "Bank-Filtration Intakes",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "e1390da0c53ef0fc35e1107885f9069a5d7595909989c7f0d94bfebd83c54bcd"
+    },
+    {
+      "id": "saltwater_intrusion_models",
+      "name": "Saltwater Intrusion Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d66d2a67c8f5863750c149126c0fc7f204f97f4a4673d435ab3780ae45fe9816"
+    },
+    {
+      "id": "aquifer_compaction_models",
+      "name": "Aquifer Compaction Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d00031d4d36bcc97bddf05c15f7724af85de4b322af104ccf326ab62855d0e4e"
+    },
+    {
+      "id": "groundwater_capture_zone_models",
+      "name": "Groundwater Capture-Zone Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "81587d2eb000dbc42dee5216deb299764178257b48560d8c9450b31e7d319cd5"
+    },
+    {
+      "id": "catchment_water_balance",
+      "name": "Catchment Water Balance",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "85eefbdea46947dd707ad558d09e7e31dd6304ff1d38bfdd43f4e51f731956e8"
+    },
+    {
+      "id": "granular_carbon_adsorption",
+      "name": "Granular Carbon Adsorption",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified porous-carbon treatment is assigned to industrial water processing; the adsorption mechanism is distinct from simple screening or settling.",
+      "scope_digest": "49c22eed569e0182ec4dd682372487d489272744de00a148306b669cc0ce433b"
+    },
+    {
+      "id": "water_ion_exchange",
+      "name": "Water Ion Exchange",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d34c0d40c056b08a085caa7d57d4f288787c67a384f453e82aef8dd5964ee384"
+    },
+    {
+      "id": "electrodialytic_water_separation",
+      "name": "Electrodialytic Water Separation",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7b43b842709b23c754134c862569b9ccb5f3c489f158e0a71bd122c5c3d91c8a"
+    },
+    {
+      "id": "water_nanofiltration",
+      "name": "Water Nanofiltration",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "246e386fecf7f94b2638bdb33d82ef5c239ad740d2f989b216bc38952bc5242c"
+    },
+    {
+      "id": "dissolved_air_flotation",
+      "name": "Dissolved-Air Flotation",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "c4d8e315ef07ffa2359b83e5c026274f525653980992d0fb52a4d4dbc80f0041"
+    },
+    {
+      "id": "water_aeration_contactors",
+      "name": "Water Aeration Contactors",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "9178c8580819e4eb9b6b20de29567a1fc7da3413da7f69ecd5e6b50f37492858"
+    },
+    {
+      "id": "precipitative_water_softening",
+      "name": "Precipitative Water Softening",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "35e3fb8bf67435687420788c68d7c6974f7395791b78b4132cec8011154f35fc"
+    },
+    {
+      "id": "water_distribution_corrosion_control",
+      "name": "Water Distribution Corrosion Control",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "5693550410a67e28bbd630eff12872875c55630af41f99e823090d586336f5fa"
+    },
+    {
+      "id": "disinfection_byproduct_assessment",
+      "name": "Disinfection Byproduct Assessment",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "ba5fd16128c71234a83ba3665d97ba444836e50048d018144c09443c9e3acb73"
+    },
+    {
+      "id": "filter_ripening_control",
+      "name": "Filter Ripening Control",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "0d4424b5bfe55fce69f647c809f4882d9b1422262583c9c9057ebd51fe9cd369"
+    },
+    {
+      "id": "membrane_integrity_testing",
+      "name": "Membrane Integrity Testing",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "8d2c1360ebed8ae27ea2d84d7f726dd3291a64e4e98d950bb07915214e959552"
+    },
+    {
+      "id": "membrane_fouling_control",
+      "name": "Membrane Fouling Control",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "b3a4e0e96b711066c5731941cf6073ab8bc5410eb97f8f935c11539d17c476f8"
+    },
+    {
+      "id": "sewer_gas_ventilation",
+      "name": "Sewer Gas Ventilation",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "dee772a42c6678b3bc59416bdfa6ba88a5e908656a45644a4ff212bd09ddadf3"
+    },
+    {
+      "id": "anaerobic_baffled_reactors",
+      "name": "Anaerobic Baffled Reactors",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d4e8d78984cd0eec8ef68f1f59680a31a2c27a1a07fd064b136b6795b60a0a93"
+    },
+    {
+      "id": "sequencing_batch_wastewater_treatment",
+      "name": "Sequencing-Batch Wastewater Treatment",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "dabd78006bef550562ef1d194172b91ebc86f612f3799ca5aec955a9ff0fee0b"
+    },
+    {
+      "id": "membrane_bioreactor_treatment",
+      "name": "Membrane Bioreactor Treatment",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "9943138b5fd162fd6ecf156031d190ca46733533252e3f5f727f5b131aeed897"
+    },
+    {
+      "id": "anammox_wastewater_treatment",
+      "name": "Anammox Wastewater Treatment",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "c6e2cbc8e476854463be294bf3611aaccae51f454e4176f32253c1812e5d19b9"
+    },
+    {
+      "id": "struvite_nutrient_recovery",
+      "name": "Struvite Nutrient Recovery",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "a8e12b2f0b95b6171af28c69c033d165e961121afb9989d7d706f7729d2e9690"
+    },
+    {
+      "id": "sludge_mechanical_dewatering",
+      "name": "Sludge Mechanical Dewatering",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "a49a0643af60a431903a51fa653b13c207857cb1d1c91033c3a30158542df0de"
+    },
+    {
+      "id": "sludge_drying_beds",
+      "name": "Sludge Drying Beds",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "29938864b83941fa8c003c4e8605de80213e746c2099f1b7d91830b6056bacb9"
+    },
+    {
+      "id": "wastewater_residence_tracing",
+      "name": "Wastewater Residence Tracing",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7bb3e150f3a2b1319207c2ebbddcaeb1735ffd7c64042293c93160e00e6eaf0f"
+    },
+    {
+      "id": "sewer_overflow_storage_control",
+      "name": "Sewer Overflow Storage Control",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "450778f5a8c03471f2e438fbb86355affa05a93b378152871953c74fd0a8f7c4"
+    },
+    {
+      "id": "water_quality_surrogate_validation",
+      "name": "Water-Quality Surrogate Validation",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "978d0e508136951840b82bc306915a29bf099ea7f8fd2162d7c1cc6028eff27c"
+    },
+    {
+      "id": "species_interaction_networks",
+      "name": "Species Interaction Networks",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d32952261d6ef70502dcf1b799638264f74e5201bb6368312544cb6f142d8ffd"
+    },
+    {
+      "id": "population_resource_limit_models",
+      "name": "Population Resource-Limit Models",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "01e3ee0ace61f4f3ce35d52eaaff53f572f6202a0527bf9c989b416a14a1b6fc"
+    },
+    {
+      "id": "metapopulation_connectivity_models",
+      "name": "Metapopulation Connectivity Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f1f1720362902abfd530d37ad15a926db76c9cbfb0c81d882a32a6799f9dc9e0"
+    },
+    {
+      "id": "disturbance_regime_models",
+      "name": "Disturbance Regime Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "2a6765fef740ebd929f60b7ee2f23ce95d5315ebc4834b8ed09b14e992eb1fd9"
+    },
+    {
+      "id": "ecological_succession_models",
+      "name": "Ecological Succession Models",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "b214a939358045f81b3e5fbb53804ea2429aac14ea5d89f3d42fe047b4e11308"
+    },
+    {
+      "id": "functional_trait_analysis",
+      "name": "Functional Trait Analysis",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "d9cb1e40abcc3567dc62c54bbb6a1291905f68f2ccbcac48ab32cd500d69da8f"
+    },
+    {
+      "id": "food_web_energy_accounts",
+      "name": "Food-Web Energy Accounts",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "218295636986e6d439f32004a2b157d334af626f46fb7ea5bfc92142157f7ef9"
+    },
+    {
+      "id": "ecological_toxicity_bioassays",
+      "name": "Ecological Toxicity Bioassays",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "bc4bb78a301e84bb184019bdd953e949439819ac3589549151999d26b4238182"
+    },
+    {
+      "id": "biomagnification_models",
+      "name": "Biomagnification Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7862ce078992b0870c84120cb31f80a92359b24cd4f79092e58e367ad412bef5"
+    },
+    {
+      "id": "eutrophication_load_models",
+      "name": "Eutrophication Load Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "23a8969e294e34cc6196d598fdd35c15a3f8f7ccbafb445c84783c65515c1496"
+    },
+    {
+      "id": "lake_stratification_models",
+      "name": "Lake Stratification Models",
+      "horizon": "H04",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified machinery, process control or measured biological/physical method fits industrial production and systematic observation, without requiring a distinct frontier operating system.",
+      "scope_digest": "1044a170fa00d7c598a644d3948214cb7fe713d8ff8b449dc3cd6c7e7f78d647"
+    },
+    {
+      "id": "hypoxia_forecast_models",
+      "name": "Hypoxia Forecast Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "87e0ad448c2b38181c535781f95015751d7cf6a2682efd1da47797d8bebd5b18"
+    },
+    {
+      "id": "legacy_nutrient_release_models",
+      "name": "Legacy Nutrient Release Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "2ec745b9764a47ee63273b7316c71340f418fbe366a44b638f4b4911f289d1b9"
+    },
+    {
+      "id": "phenological_mismatch_analysis",
+      "name": "Phenological Mismatch Analysis",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "6eb64c607dabdfa6c50e7219d5f53b93906757a1f7f29bd9fc574200164096a9"
+    },
+    {
+      "id": "migratory_connectivity_tracking",
+      "name": "Migratory Connectivity Tracking",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "dc022f766c28f12d57b58c8d0c061800e3adcbfd49a72e7cbcfa64a80f2236e0"
+    },
+    {
+      "id": "deadwood_habitat_retention",
+      "name": "Deadwood Habitat Retention",
+      "horizon": "H03",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "ad773e08c19de3282f0b55fedf57b2f41f52a3fbabd8af43c5cfc881a4eb2d2e"
+    },
+    {
+      "id": "herbivory_exclosure_trials",
+      "name": "Herbivory Exclosure Trials",
+      "horizon": "H03",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "A repeated comparison with and without browsing access can be conducted with ordinary barriers and observation before modern ecological instrumentation.",
+      "scope_digest": "6ff7aea268e2071c4e0e205b9c756f097dd3fa327acae2103ab6fbcd6fb3ba3f"
+    },
+    {
+      "id": "wildlife_crossing_structures",
+      "name": "Wildlife Crossing Structures",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "51dee885d48f74e749f6f1becf0ef448cca4c9432cbbe07a6f827efb6ce7c1c4"
+    },
+    {
+      "id": "rangeland_residual_forage_management",
+      "name": "Rangeland Residual-Forage Management",
+      "horizon": "H03",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses organized craft, cultivation, measured resource practice or coordinated water works within preindustrial learned traditions.",
+      "scope_digest": "6be1a3e4274eb7b6a251804c7876e9e3047c680677d08c59e6f3237576f177cb"
+    },
+    {
+      "id": "wildlife_disease_contact_models",
+      "name": "Wildlife Disease Contact Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "7c853f177e5200bb9be7fd3f9f328cd9f7313be38ae641368a3a1d3c162ccd18"
+    },
+    {
+      "id": "seagrass_establishment_methods",
+      "name": "Seagrass Establishment Methods",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "31dd27225aa6c100f6255c0eae3a217fc19375e3d75e4396be1d3be9eb127f01"
+    },
+    {
+      "id": "kelp_grazing_balance_management",
+      "name": "Kelp Grazing-Balance Management",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "613f67bc782df961dc987f38ebaa7114d58c08d0a4b78070f62415a419d9f27d"
+    },
+    {
+      "id": "coral_recruitment_support",
+      "name": "Coral Recruitment Support",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "048953a6b4c675247d886a2175f98d4ef2ec734e13fa32d05418e08f17d8c698"
+    },
+    {
+      "id": "living_shoreline_integration",
+      "name": "Living Shoreline Integration",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "dcdea8d8eb9877754bf5c83bf306039712ecae26d4a3d4680c9c173950ba367e"
+    },
+    {
+      "id": "seed_bank_viability_assessment",
+      "name": "Seed-Bank Viability Assessment",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This examines naturally retained soil/sediment propagules, not the curated seed-accession bank. The two mechanisms remain distinct.",
+      "scope_digest": "89ff130999c6e5a5c999882b3e7b6bfd65b3515194a71fd5cf0b98f8f36c6b8c"
+    },
+    {
+      "id": "ecological_before_after_controls",
+      "name": "Ecological Before-After Controls",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "53dad312267fdea854793e2bc594e9b3d95dfe92b3e4731b04011a2b2d3f0d4d"
+    },
+    {
+      "id": "ecological_occupancy_dynamics",
+      "name": "Ecological Occupancy Dynamics",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "98bb804f4202ffb72f5fd4dd8cc0eb036b717c1e1fb0ca4b99595ad214cf4eab"
+    },
+    {
+      "id": "species_distribution_ensembles",
+      "name": "Species Distribution Ensembles",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "bb1427f53092f351b7fd0fecd38ddfe5f382f33a7f8743216be0ec435840538d"
+    },
+    {
+      "id": "extinction_debt_models",
+      "name": "Extinction Debt Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "c3bf85ab86ac31250be4c096da26f01a10146cc927986cb41e1f44fbfe27ceb8"
+    },
+    {
+      "id": "restoration_sequence_dependency",
+      "name": "Restoration Sequence Dependency",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "567ac2d09626fb61c4d01226b5acfda7b80e29154664b703d11af3a3fe685f00"
+    },
+    {
+      "id": "ecosystem_early_warning_models",
+      "name": "Ecosystem Early-Warning Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "c12569d336afcb4513c97d9b4d32af71c348f6173b83869358ffa67f682526f2"
+    },
+    {
+      "id": "bioacoustic_species_monitoring",
+      "name": "Bioacoustic Species Monitoring",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "b6a767bc08c288bd064325b53611c361e41ff3acfa8181191e7d9036c5f2dff1"
+    },
+    {
+      "id": "restoration_genetic_diversity_design",
+      "name": "Restoration Genetic Diversity Design",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "75432ea3278168723ac7b402c9b527a73c81ada303ced31d303c869dfaff506d"
+    },
+    {
+      "id": "assisted_gene_flow_review",
+      "name": "Assisted Gene-Flow Review",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "5e176b03142a68995c8c9fa38ef4f67f370579135cdbaa2a07e6bb0d3ffc1165"
+    },
+    {
+      "id": "microbial_community_restoration_trials",
+      "name": "Microbial Community Restoration Trials",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "f50c0e6717083f6e19616cb24dca419efbd1e08369a1cec8d3ae19a486a8839b"
+    },
+    {
+      "id": "landscape_refugia_planning",
+      "name": "Landscape Refugia Planning",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "83ff3898acb5eaf50758a351a8e86bf056b511c33931219718bc601b43af3601"
+    },
+    {
+      "id": "seed_dispersal_models",
+      "name": "Seed Dispersal Models",
+      "horizon": "H05",
+      "source_file": "water-ecology-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
+      "scope_digest": "bedc28c19407e4934e8e913c9d45ea4fa510b06fcc6ab29f8c085881a80f049e"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

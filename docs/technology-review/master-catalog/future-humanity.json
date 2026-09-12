@@ -3477,16 +3477,20 @@
     "field": "D24",
     "id": "long_baseline_probe_fault_recovery",
     "name": "Long Baseline Probe Fault Recovery",
-    "foundations": "interstellar_probe_navigation,fault_tolerant_computing",
+    "foundations": "fault_tolerant_computing",
     "mechanism": "Restore bounded probe functions after faults without timely ground intervention",
     "operating_requirement": "Redundant qualified hardware, finite energy, validated recovery software and retained diagnostics",
     "consequence": "Extend useful unattended investigation within tested fault coverage",
     "status": "authored_draft",
     "requires_all": [
-      "interstellar_probe_navigation",
       "fault_tolerant_computing"
     ],
-    "requires_any": [],
+    "requires_any": [
+      [
+        "interstellar_probe_navigation",
+        "launch_vehicle_guidance"
+      ]
+    ],
     "confidence_class": "plausible_extrapolation",
     "uncertainty_limit": "Unmodeled failures and component lifetime limit mission survival",
     "recovery": "For Long Baseline Probe Fault Recovery, obtain a competent partner or paid specialist with actual evidence, transmit records or travel, and reproduce the relevant demonstration locally. Research purchases shorten only supported inquiry; imported services retain supplier dependence. Missing operating capacity and unresolved scientific evidence remain requirements.",
@@ -3545,7 +3549,8 @@
       "negative_result_retained": true,
       "deployment_requires": "Qualified operating evidence for the advertised conditions; research completion alone does not grant installation, population growth, clinical benefit or supplies.",
       "era_gate": false
-    }
+    },
+    "branching_note": "Modern onboard guidance/control provides a probe fault-recovery route without first developing interstellar navigation."
   },
   {
     "field": "D24",
