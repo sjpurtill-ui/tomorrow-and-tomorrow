@@ -99,8 +99,8 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Expand the full master beyond 2749 accounted identities: 2251 remain to author. Largest gaps include medicine 147, electronics 132, records/communications 126, energy 123 and governance 120. Water now accounts for 115/180 and ecology for 105/180. Continue distinct mechanisms and disadvantaged recovery design; complete explicit historical-horizon allocation without era gates.",
-    "Continue semantic and atlas reconciliation: 375 candidates mapped, including four partial scopes (ceramic pipe manufacture, autonomous water-network control, autonomous habitat monitoring, regional ecological recovery coupling); 225 candidates remain unmapped. Reusable launch/stage mappings remain resolved as design coverage. Mappings add zero discoveries.",
+    "Expand the full master beyond 2805 accounted identities: 2195 remain to author. Largest gaps include electronics 132, records/communications 126, energy 123, governance 120, food 119 and materials 114. Medicine now accounts for 189/280. Continue distinct mechanisms and disadvantaged recovery design; complete explicit historical-horizon allocation without era gates.",
+    "Continue semantic and atlas reconciliation: 400 candidates mapped, including five partial scopes (ceramic pipe manufacture, autonomous water-network control, autonomous habitat monitoring, regional ecological recovery coupling, rapid pathogen-platform response); 200 candidates remain unmapped. Mappings add zero discoveries and do not establish operating implementation.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
@@ -125,12 +125,12 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 2145,
-    "distinct_ids_accounted": 2749,
-    "remaining_to_author": 2251,
+    "authored_drafts": 2201,
+    "distinct_ids_accounted": 2805,
+    "remaining_to_author": 2195,
     "complete": false,
-    "atlas_candidates_mapped": 375,
-    "atlas_partial_mappings": 4,
+    "atlas_candidates_mapped": 400,
+    "atlas_partial_mappings": 5,
     "baseline_field_allocation": "master-catalog/baseline-field-allocation.json",
     "historical_horizon_allocation_complete": false
   }

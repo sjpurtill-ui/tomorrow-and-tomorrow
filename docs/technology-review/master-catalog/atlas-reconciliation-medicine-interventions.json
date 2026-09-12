@@ -1,0 +1,236 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "review_id": "D14-01",
+      "candidate_name": "Wound cleaning",
+      "mapped_ids": [
+        "wound_cleaning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-02",
+      "candidate_name": "Medicinal plant comparison",
+      "mapped_ids": [
+        "herbal_classification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-03",
+      "candidate_name": "Birth attendance",
+      "mapped_ids": [
+        "birth_attendants"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-04",
+      "candidate_name": "Fracture splinting",
+      "mapped_ids": [
+        "fracture_immobilization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-05",
+      "candidate_name": "Maternal recovery care",
+      "mapped_ids": [
+        "maternal_recovery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-06",
+      "candidate_name": "Clinical case records",
+      "mapped_ids": [
+        "case_records",
+        "clinical_observation_rounds"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-07",
+      "candidate_name": "Isolation practice",
+      "mapped_ids": [
+        "isolation_practice"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-08",
+      "candidate_name": "Surgical anatomy",
+      "mapped_ids": [
+        "surgical_anatomy"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-09",
+      "candidate_name": "Trained midwifery",
+      "mapped_ids": [
+        "trained_midwives"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-10",
+      "candidate_name": "Community infirmaries",
+      "mapped_ids": [
+        "civic_infirmaries"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-11",
+      "candidate_name": "Anesthesia",
+      "mapped_ids": [
+        "clinical_anesthesia"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-12",
+      "candidate_name": "Antiseptic surgery",
+      "mapped_ids": [
+        "antiseptic_surgery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-13",
+      "candidate_name": "Germ theory",
+      "mapped_ids": [
+        "germ_theory"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-14",
+      "candidate_name": "Immunization programs",
+      "mapped_ids": [
+        "immunization_service_delivery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-15",
+      "candidate_name": "Public health surveillance",
+      "mapped_ids": [
+        "public_health_surveillance"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-16",
+      "candidate_name": "Antibiotic production",
+      "mapped_ids": [
+        "antibiotic_manufacturing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-17",
+      "candidate_name": "Diagnostic imaging",
+      "mapped_ids": [
+        "radiographic_imaging",
+        "ultrasound_imaging",
+        "computed_tomography",
+        "magnetic_resonance_imaging"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-18",
+      "candidate_name": "Blood transfusion services",
+      "mapped_ids": [
+        "blood_transfusion_services"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-19",
+      "candidate_name": "Organ transplantation",
+      "mapped_ids": [
+        "organ_transplant_services"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-20",
+      "candidate_name": "Emergency care systems",
+      "mapped_ids": [
+        "emergency_care_systems"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-21",
+      "candidate_name": "Personalized cell therapy",
+      "mapped_ids": [
+        "personalized_cell_therapy"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-22",
+      "candidate_name": "Targeted drug delivery",
+      "mapped_ids": [
+        "targeted_drug_delivery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-23",
+      "candidate_name": "Regenerative tissue treatment",
+      "mapped_ids": [
+        "regenerative_tissue_treatment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    },
+    {
+      "review_id": "D14-24",
+      "candidate_name": "Rapid pathogen platform response",
+      "mapped_ids": [
+        "vaccine_product_development",
+        "immunization_service_delivery"
+      ],
+      "scope_status": "partial",
+      "note": "Product development and delivery are present; rapid platform adaptation, requalification and scaled response integration are not yet authored as a complete mechanism chain."
+    },
+    {
+      "review_id": "D14-25",
+      "candidate_name": "Long term implant integration",
+      "mapped_ids": [
+        "long_term_implant_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. The candidate label adds no discovery identity and does not certify clinical implementation."
+    }
+  ]
+}
