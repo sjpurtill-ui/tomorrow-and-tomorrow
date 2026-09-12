@@ -43,6 +43,7 @@ static func execute(order:Dictionary)->Dictionary:
 		"scout":return WorldSimulation.world.dispatch_scouts(int(order.get("days",30)),String(order.get("target","open_world")),String(order.get("heading","")))
 		"diplomacy":return WorldSimulation.world.dispatch_diplomat(String(order.get("target","")),"",String(order.get("action","goodwill")))
 		"training_policy":return WorldSimulation.military.training_staff.set_policy(String(order.get("service","army")),String(order.get("policy","regular")))
+		"army_reinforce_home":return preload("res://scripts/home_army_reinforcement.gd").transfer(WorldSimulation.military,int(order.get("army",0)),String(order.get("unit","")),int(order.get("count",0)))
 		"deploy":return WorldSimulation.military.create_field_army(int(order.get("count",0)),String(order.get("name","")))
 		"area":return WorldSimulation.military.command_hierarchy.create_region(String(order.get("service","army")),order.get("vertices",[]),String(order.get("name","")))
 		"objective":return WorldSimulation.military.command_hierarchy.assign(String(order.get("command","army")),[],order.get("region",{}),String(order.get("mission","defend")),String(order.get("target","")),String(order.get("vision","")))

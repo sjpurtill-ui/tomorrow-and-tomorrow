@@ -741,13 +741,14 @@ func _detach_field_army_formations(army_id:int,requested:int)->Array[Dictionary]
 	return detached
 
 
-func _detach_occupation_formations(requested:int)->Array[Dictionary]:
+func _detach_occupation_formations(requested:int,unit_filter:String="")->Array[Dictionary]:
 	var detached:Array[Dictionary]=[]
 	var remaining:=maxi(0,requested)
 	var formations:Array=home_army.get("formations",[])
 	for index in range(formations.size()-1,-1,-1):
 		if remaining<=0: break
 		var formation:Dictionary=formations[index]
+		if not unit_filter.is_empty() and String(formation.get("unit",""))!=unit_filter:continue
 		var original_count:=maxi(0,int(formation.get("count",0)))
 		if original_count<=0: continue
 		var take:=mini(remaining,original_count)

@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 116: **466 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 117: **466 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1286,3 +1286,14 @@ The land controller can now choose a bounded supporting contingent for an adopte
 Task-owned helper, focused tests and documentation. Shared existing controller, doctrine ratio constant and review record; no integration hotspots or save fields changed. Prior saves remain compatible. Catalog counts remain 466 discoveries, 89 roles and 46 reviewed images. Full-history completion remains unproven and incomplete. Historical diagnostic session 57160 was confirmed live at the start; it retains its older controller code and no target completion is claimed.
 
 Verification: 42 cases pass with zero errors/failures/skips/orphans: supporting-arm recruitment 4, doctrine 13, civilization strategy 15 and military training accounting 10. The new controller test queues 30 skirmishers for 60 spearmen, leaves the other 70 recruits unassigned, preserves total mobilized population and inventory, and suppresses a duplicate support order once trainees are committed. Further checks cover existing/pending support, recruit caps, knowledge/adoption, supply, training policy and unrelated or absent target forces. These do not establish full-campaign composition quality or remote reinforcement delivery.
+
+
+## Checkpoint 117: physical home reinforcement for combined-arms armies
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `8d364f2`. No canonical integration or player launch.
+
+Trained home supporting troops can now join a field army stationed at home through an ordinary validated order. The monthly controller requests a bounded doctrinal shortfall. The existing proportional detachment path now accepts an optional unit filter, preserving its default behavior. Personnel, issued equipment and ammunition move together; commander, location, army identity, casualty pools and formation doctrine remain accounted for. No remote teleportation, provisions, recruits or battlefield orders are generated. See [Home army reinforcement](HOME_ARMY_REINFORCEMENT.md).
+
+Task-owned helper, focused tests and documentation. Shared controller and ordinary order adapter; military_campaign.gd is an integration hotspot with only the optional detachment filter added. No save fields added and old records remain compatible. Existing occupation/army detachment callers retain the empty-filter default. Counts remain 466 discoveries, 89 roles and 46 reviewed images. Full-history completion remains unverified and incomplete. The historical diagnostic session 57160 was confirmed live at the start and retains its older loaded code; no target-completion claim.
+
+Verification: 114 cases pass with zero errors/failures/skips/orphans: home reinforcement 6, support recruitment 4, doctrine 13, civilization strategy 15, command hierarchy 61, occupation governance 5 and city force capacity 10. New checks cover the real order and monthly-controller paths, partial support transfer with personnel/equipment/ammunition conservation, unchanged commanders/casualty pools, unique destination IDs, movement/transport/battle rejection, invalid counts, actual post-attachment doctrine benefit and owned-save round trip. The first save assertion exposed a fixture-created home force missing the normal zero exercise-bonus field; the fixture was normalized and rerun cleanly. No player campaign or remote convoy behavior is claimed.

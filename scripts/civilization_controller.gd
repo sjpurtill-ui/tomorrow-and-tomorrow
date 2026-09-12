@@ -150,6 +150,8 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	land_training_orders(id,chosen,weapon,target,plan)
 	if campaign.field_armies.is_empty() and int(campaign.home_army.get("troops",0))>=4:
 		WorldSimulation.submit(id,{"kind":"deploy","count":maxi(4,roundi(float(campaign.home_army.troops)*float(plan.deploy_share)))})
+	var reinforcement:=preload("res://scripts/home_army_reinforcement.gd").recommendation(campaign)
+	if not reinforcement.is_empty():WorldSimulation.submit(id,reinforcement)
 	campaign.command_hierarchy.sync()
 	if campaign.command_hierarchy.data.zones.is_empty() and not campaign.field_armies.is_empty():
 		var zone:=WorldSimulation.submit(id,{"kind":"area","service":"army","name":"Home defense","vertices":campaign.command_hierarchy.R.rectangle(WorldSimulation.world.player_world_origin,8.0)})
