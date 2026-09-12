@@ -452,23 +452,26 @@ func active_investigation_records_shallow()->Array[Dictionary]:
 		if not discovery.is_empty(): records.append(discovery)
 	return records
 
-func _discovery_is_eligible(discovery:Dictionary,current_day:int)->bool:
+func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=null)->bool:
+	if known==null:known=WorldSimulation.state.known_discoveries
 	var id:=String(discovery.get("id",""))
-	if id in WorldSimulation.state.known_discoveries or not _path_is_viable(discovery):return false
-	return Pathways.ready(discovery,current_day) and _resource_requirements_met(discovery.get("resource_requirements",[]))
+	if id in known or not _path_is_viable(discovery):return false
+	return Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 func _channel_has_candidate(channel:String,current_day:int)->bool:
+	var known:=Pathways.Requirements.index_known(WorldSimulation.state.known_discoveries)
 	for discovery:Dictionary in (catalog_by_channel.get(channel,[]) as Array):
-		if _discovery_is_eligible(discovery,current_day):return true
+		if _discovery_is_eligible(discovery,current_day,known):return true
 	return false
 
 
 func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
+	var known:=Pathways.Requirements.index_known(WorldSimulation.state.known_discoveries)
 	var best:Dictionary={}
 	var best_score:=-INF
 	for discovery_variant in (catalog_by_channel.get(channel,[]) as Array):
 		var discovery:Dictionary=discovery_variant
-		if not _discovery_is_eligible(discovery,current_day): continue
+		if not _discovery_is_eligible(discovery,current_day,known): continue
 		var score:=_candidate_score(discovery)
 		if String(WorldSimulation.state.research_targets.get(channel,""))==String(discovery.id): score+=100000.0
 		if score>best_score:
@@ -902,6 +905,7 @@ func _classify_discovery(source:Dictionary)->Dictionary:
 func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 	initialize()
 	var rows:Array[Dictionary]=[]
+	var known_index:=Pathways.Requirements.index_known(WorldSimulation.state.known_discoveries)
 	var children:Dictionary={}
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)): continue
@@ -913,10 +917,10 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		if dynamic_id!="" and String(entry.dynamic)!=dynamic_id: continue
 		var id:=String(entry.id)
 		var row:=entry.duplicate(true)
-		var missing:Array[String]=Pathways.missing(entry,int(WorldSimulation.state.elapsed_days))
-		row["pathways"]=Pathways.routes(entry)
+		var missing:Array[String]=Pathways.missing(entry,int(WorldSimulation.state.elapsed_days),known_index)
+		row["pathways"]=Pathways.routes(entry,known_index)
 		row["requires"]=entry.get("requires_all",entry.get("requires",[])).duplicate()
-		row["pathway_description"]=Pathways.describe(entry)
+		row["pathway_description"]=Pathways.describe(entry,known_index)
 		if not _resource_requirements_met(entry.get("resource_requirements",[])):
 			for requirement:Dictionary in entry.get("resource_requirements",[]):
 				if _resource_requirements_met([requirement]):continue
@@ -924,9 +928,9 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 				if float(requirement.get("minimum_stock",0.0))>0:alternative+=" or %.1f in stores" % float(requirement.minimum_stock)
 				for resource:String in requirement.get("alternative_stocks",{}):alternative+=" or %.1f %s in stores" % [float(requirement.alternative_stocks[resource]),resource]
 				missing.append("%s: %s access%s" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized")),alternative])
-		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
+		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days),known_index) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
 		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")
-		var known:=id in WorldSimulation.state.known_discoveries
+		var known:=known_index.has(id)
 		row["ready"]=not known and missing.is_empty()
 		row["missing"]=missing
 		row["leads_to"]=children.get(id,[])

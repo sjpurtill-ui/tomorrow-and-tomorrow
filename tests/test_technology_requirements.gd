@@ -120,3 +120,59 @@ func test_legacy_ordering_day_cannot_change_route_readiness_or_rate()->void:
 	entry.day=2000000000
 	assert_dict(P.chosen(entry,1)).is_equal(baseline)
 	assert_array(P.missing(entry,1)).is_empty()
+
+func test_indexed_routes_match_arrays_and_do_not_retain_old_knowledge()->void:
+	var entry:=DiscoverySystem.discovery_definition("public_libraries")
+	var known:Array=["formal_archives","public_schools"]
+	assert_array(P.routes_for(entry,R.index_known(known),{})).is_equal(P.routes_for(entry,known,{}))
+	GameState.known_discoveries.assign(known)
+	var channel:=DiscoverySystem._channel_key(String(entry.dynamic),String(entry.subcategory))
+	var original:Array=DiscoverySystem.catalog_by_channel[channel]
+	DiscoverySystem.catalog_by_channel[channel]=[entry]
+	assert_bool(DiscoverySystem._channel_has_candidate(channel,1)).is_true()
+	assert_str(DiscoverySystem._best_candidate_for_channel(channel,1).id).is_equal("public_libraries")
+	GameState.known_discoveries.erase("public_schools")
+	assert_bool(DiscoverySystem._channel_has_candidate(channel,1)).is_false()
+	assert_dict(DiscoverySystem._best_candidate_for_channel(channel,1)).is_empty()
+	GameState.known_discoveries.append("public_schools")
+	GameState.known_discoveries.append("public_libraries")
+	assert_bool(DiscoverySystem._channel_has_candidate(channel,1)).is_false()
+	DiscoverySystem.catalog_by_channel[channel]=original
+
+func test_large_reverse_graph_preserves_and_or_and_route_foundations()->void:
+	var graph:Array=[{"id":"root"}]
+	for i in range(1,5000):
+		var previous:="root" if i==1 else "node%d"%(i-1)
+		graph.append({"id":"node%d"%i,"requires_all":["root"],"learning_routes":[
+			{"id":"cycle","requires":["node4999"]},
+			{"id":"causal","requires_any":[[previous,"node4999"]]}]})
+	graph.reverse()
+	assert_array(R.validate(graph)).is_empty()
+	graph.back().requires=["node4999"]
+	assert_int(R.validate(graph).size()).is_equal(5000)
+
+func test_dependency_queue_matches_fixed_point_on_mixed_graphs()->void:
+	var rng:=RandomNumberGenerator.new();rng.seed=41237
+	for trial in 20:
+		var graph:Array=[]
+		for i in 40:
+			var entry:Dictionary={"id":"n%d"%i}
+			if i>2:
+				entry.requires_all=["n%d"%rng.randi_range(0,39)]
+				entry.learning_routes=[{"id":"a","requires_any":[["n%d"%rng.randi_range(0,39),"n%d"%rng.randi_range(0,39)]]},{"id":"b","requires":["n%d"%rng.randi_range(0,39)]}]
+			graph.append(entry)
+		if trial%2==0:graph.reverse()
+		var reachable:Array=[]
+		var changed:=true
+		while changed:
+			changed=false
+			for entry:Dictionary in graph:
+				if entry.id in reachable or not R.evaluate(entry,reachable).ready:continue
+				var possible:bool=entry.get("learning_routes",[]).is_empty()
+				for route:Dictionary in entry.get("learning_routes",[]):
+					if R.evaluate(route,reachable).ready:possible=true
+				if possible:reachable.append(entry.id);changed=true
+		var expected:Array[String]=[]
+		for entry:Dictionary in graph:
+			if entry.id not in reachable:expected.append(String(entry.id)+": no reachable causal route (cycle or missing foundation)")
+		assert_array(R.validate(graph)).is_equal(expected)

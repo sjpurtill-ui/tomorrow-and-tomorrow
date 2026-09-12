@@ -27,10 +27,10 @@ static func evidence(id:String)->Dictionary:
 	var key:=String(book().get("evidence",{}).get(id,""))
 	return book().collections.get(key,{})
 
-static func routes(entry:Dictionary)->Array[Dictionary]:
-	return routes_for(entry,WorldSimulation.state.known_discoveries,WorldSimulation.discovery.latest_context,evidence(String(entry.id)))
+static func routes(entry:Dictionary,known:Variant=null)->Array[Dictionary]:
+	return routes_for(entry,WorldSimulation.state.known_discoveries if known==null else known,WorldSimulation.discovery.latest_context,evidence(String(entry.id)))
 
-static func routes_for(entry:Dictionary,known:Array,context:Dictionary,source:Dictionary={})->Array[Dictionary]:
+static func routes_for(entry:Dictionary,known:Variant,context:Dictionary,source:Dictionary={})->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	var common:Dictionary={"requires_all":entry.get("requires_all",[]),"requires_any":entry.get("requires_any",[])}
 	var definitions:Array=entry.get("learning_routes",[]).duplicate(true)
@@ -72,27 +72,27 @@ static func routes_for(entry:Dictionary,known:Array,context:Dictionary,source:Di
 
 # The legacy day field is an authoring/order hint, never an eligibility gate.
 # Time is still required to do research; calendar age cannot replace foundations.
-static func chosen(entry:Dictionary,_day:int=-1)->Dictionary:
+static func chosen(entry:Dictionary,_day:int=-1,known:Variant=null)->Dictionary:
 	var result:Dictionary={};var best:=-1.0
-	for route:Dictionary in routes(entry):
+	for route:Dictionary in routes(entry,known):
 		if not bool(route.ready):continue
 		var score:=float(route.support)+float(route.progress_multiplier)+(0.05 if route.id=="local" else .1)
 		if score>best:result=route;best=score
 	return result
 
-static func ready(entry:Dictionary,day:int)->bool:
-	return not chosen(entry,day).is_empty()
+static func ready(entry:Dictionary,day:int,known:Variant=null)->bool:
+	return not chosen(entry,day,known).is_empty()
 
 static func multiplier(entry:Dictionary)->float:
 	var route:=chosen(entry,int(WorldSimulation.state.elapsed_days))
 	if route.is_empty():return 1.0
 	return preload("res://scripts/scholar_visits.gd").bonus(String(entry.id),int(WorldSimulation.state.elapsed_days))*float(route.progress_multiplier)*(1.0 if route.get("imported",false) else 1.0+minf(.4,float(route.support)*.15))
 
-static func missing(entry:Dictionary,day:int)->Array[String]:
-	if ready(entry,day):return []
+static func missing(entry:Dictionary,day:int,known:Variant=null)->Array[String]:
+	if ready(entry,day,known):return []
 	var best:Array[String]=[]
 	var found:=false
-	for route:Dictionary in routes(entry):
+	for route:Dictionary in routes(entry,known):
 		var reasons:Array[String]=[]
 		for id:String in route.missing_all:reasons.append(_name(id))
 		for group:Array in route.missing_any:
@@ -126,10 +126,10 @@ static func remember(entry:Dictionary,day:int)->void:
 				break
 	book().origins[String(entry.id)]={"route":route.id,"label":route.label,"requires":foundations,"collection_id":route.get("collection_id",""),"day":day}
 
-static func describe(entry:Dictionary)->String:
+static func describe(entry:Dictionary,known:Variant=null)->String:
 	var origin:Dictionary=book().origins.get(String(entry.id),{})
 	if not origin.is_empty():return "Developed through %s · day %d" % [String(origin.label).to_lower(),int(origin.day)]
-	var route:=chosen(entry)
+	var route:=chosen(entry,-1,known)
 	return "Current approach: "+String(route.label) if not route.is_empty() else "Several approaches may lead here; foundations or evidence are still missing."
 
 static func graph_entry(entry:Dictionary)->Dictionary:
