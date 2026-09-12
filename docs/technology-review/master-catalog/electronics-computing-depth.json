@@ -1,0 +1,2353 @@
+[
+  {
+    "field": "D21",
+    "id": "semiconductor_cleanroom_control",
+    "name": "Semiconductor Cleanroom Control",
+    "foundations": "experimental_controls",
+    "mechanism": "Control measured particulate and chemical contamination around qualified semiconductor processes",
+    "operating_requirement": "Filtered process environment, suitable water and gases, trained staff and monitoring",
+    "consequence": "Reduce contamination-related yield losses at continuing utility and maintenance cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_controls"
+    ],
+    "requires_any": [
+      [
+        "photolithographic_patterning",
+        "thin_film_deposition"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "semiconductor_cleanroom_control",
+      "local_demonstration": "Control measured particulate and chemical contamination around qualified semiconductor processes",
+      "operating_requirements": "Filtered process environment, suitable water and gases, trained staff and monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Process contamination can be investigated before integrated-circuit production; working clean utilities and filters remain physical requirements."
+  },
+  {
+    "field": "D21",
+    "id": "semiconductor_thermal_diffusion",
+    "name": "Semiconductor Thermal Diffusion",
+    "foundations": "semiconductor_doping,precision_thermometry",
+    "mechanism": "Control dopant redistribution through a qualified thermal process and measured profiles",
+    "operating_requirement": "Suitable wafers, characterized dopant sources, thermal equipment and process metrology",
+    "consequence": "Form specified doped regions with finite process tolerances",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_doping",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "semiconductor_thermal_diffusion",
+      "local_demonstration": "Control dopant redistribution through a qualified thermal process and measured profiles",
+      "operating_requirements": "Suitable wafers, characterized dopant sources, thermal equipment and process metrology",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "ion_implantation_control",
+    "name": "Ion Implantation Control",
+    "foundations": "semiconductor_doping,electron_physics",
+    "mechanism": "Introduce selected ions into a substrate under controlled beam and dose conditions",
+    "operating_requirement": "Qualified implantation equipment, source materials, vacuum, power and profile measurement",
+    "consequence": "Produce controlled dopant distributions with damage and uniformity limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_doping",
+      "electron_physics"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ion_implantation_control",
+      "local_demonstration": "Introduce selected ions into a substrate under controlled beam and dose conditions",
+      "operating_requirements": "Qualified implantation equipment, source materials, vacuum, power and profile measurement",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "implant_damage_annealing",
+    "name": "Implant Damage Annealing",
+    "foundations": "ion_implantation_control,semiconductor_thermal_diffusion",
+    "mechanism": "Recover selected implantation damage and activate dopants through evaluated thermal treatment",
+    "operating_requirement": "Qualified thermal system, process windows and electrical or structural measurements",
+    "consequence": "Improve specified device properties without erasing diffusion and stress constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "ion_implantation_control",
+      "semiconductor_thermal_diffusion"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "implant_damage_annealing",
+      "local_demonstration": "Recover selected implantation damage and activate dopants through evaluated thermal treatment",
+      "operating_requirements": "Qualified thermal system, process windows and electrical or structural measurements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "selective_wet_etching",
+    "name": "Selective Wet Etching",
+    "foundations": "photolithographic_patterning,experimental_controls",
+    "mechanism": "Remove selected exposed material using qualified chemical selectivity and endpoint evidence",
+    "operating_requirement": "Compatible process chemistry, masking, handling systems and effluent treatment",
+    "consequence": "Transfer selected structures while undercut and material compatibility limit geometry",
+    "status": "authored_draft",
+    "requires_all": [
+      "photolithographic_patterning",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "selective_wet_etching",
+      "local_demonstration": "Remove selected exposed material using qualified chemical selectivity and endpoint evidence",
+      "operating_requirements": "Compatible process chemistry, masking, handling systems and effluent treatment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Measured chemical selectivity does not universally require distillation; suitable qualified reagents and handling remain necessary."
+  },
+  {
+    "field": "D21",
+    "id": "plasma_pattern_etching",
+    "name": "Plasma Pattern Etching",
+    "foundations": "photolithographic_patterning,plasma_physics",
+    "mechanism": "Control plasma-assisted material removal to produce evaluated patterned geometry",
+    "operating_requirement": "Qualified plasma tool, process gases, vacuum, power and inspection",
+    "consequence": "Support selected anisotropic features with finite damage and selectivity limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "photolithographic_patterning",
+      "plasma_physics"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plasma_pattern_etching",
+      "local_demonstration": "Control plasma-assisted material removal to produce evaluated patterned geometry",
+      "operating_requirements": "Qualified plasma tool, process gases, vacuum, power and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "chemical_mechanical_planarization",
+    "name": "Chemical Mechanical Planarization",
+    "foundations": "thin_film_deposition,dimensional_metrology",
+    "mechanism": "Combine controlled surface chemistry and polishing to reduce measured topography",
+    "operating_requirement": "Qualified slurries, pads, equipment, cleaning and surface metrology",
+    "consequence": "Prepare sufficiently level surfaces for later fabrication while consuming materials",
+    "status": "authored_draft",
+    "requires_all": [
+      "thin_film_deposition",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "chemical_mechanical_planarization",
+      "local_demonstration": "Combine controlled surface chemistry and polishing to reduce measured topography",
+      "operating_requirements": "Qualified slurries, pads, equipment, cleaning and surface metrology",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "wafer_alignment_metrology",
+    "name": "Wafer Alignment Metrology",
+    "foundations": "photolithographic_patterning",
+    "mechanism": "Measure positional correspondence between patterned layers against alignment references",
+    "operating_requirement": "Calibrated optics, reference marks and qualified positioning",
+    "consequence": "Bound overlay errors rather than assuming successive layers coincide",
+    "status": "authored_draft",
+    "requires_all": [
+      "photolithographic_patterning"
+    ],
+    "requires_any": [
+      [
+        "optical_interferometry",
+        "dimensional_metrology"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wafer_alignment_metrology",
+      "local_demonstration": "Measure positional correspondence between patterned layers against alignment references",
+      "operating_requirements": "Calibrated optics, reference marks and qualified positioning",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Evaluated optical or dimensional reference techniques can support alignment without one mandatory interferometer architecture."
+  },
+  {
+    "field": "D21",
+    "id": "wafer_electrical_probing",
+    "name": "Wafer Electrical Probing",
+    "foundations": "integrated_circuit_fabrication,electrical_measurement",
+    "mechanism": "Measure selected device behavior before separating wafer dies",
+    "operating_requirement": "Qualified probe interfaces, test equipment, power and reference criteria",
+    "consequence": "Identify usable dies and process faults without guaranteeing packaged reliability",
+    "status": "authored_draft",
+    "requires_all": [
+      "integrated_circuit_fabrication",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wafer_electrical_probing",
+      "local_demonstration": "Measure selected device behavior before separating wafer dies",
+      "operating_requirements": "Qualified probe interfaces, test equipment, power and reference criteria",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "die_separation_control",
+    "name": "Die Separation Control",
+    "foundations": "wafer_electrical_probing,dimensional_metrology",
+    "mechanism": "Separate processed dies while limiting edge damage and contamination",
+    "operating_requirement": "Qualified separation tools, handling, cleaning and inspection",
+    "consequence": "Recover finite usable dies from a wafer with measured losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "wafer_electrical_probing",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "die_separation_control",
+      "local_demonstration": "Separate processed dies while limiting edge damage and contamination",
+      "operating_requirements": "Qualified separation tools, handling, cleaning and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "wire_bond_interconnection",
+    "name": "Wire Bond Interconnection",
+    "foundations": "semiconductor_package_engineering,wire_drawing",
+    "mechanism": "Form qualified fine-wire electrical connections between die and package contacts",
+    "operating_requirement": "Suitable wire, bond equipment, clean interfaces and pull or electrical checks",
+    "consequence": "Connect compatible dies within current, geometry and reliability limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_package_engineering",
+      "wire_drawing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wire_bond_interconnection",
+      "local_demonstration": "Form qualified fine-wire electrical connections between die and package contacts",
+      "operating_requirements": "Suitable wire, bond equipment, clean interfaces and pull or electrical checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "flip_chip_interconnection",
+    "name": "Flip Chip Interconnection",
+    "foundations": "semiconductor_package_engineering,wafer_alignment_metrology",
+    "mechanism": "Join aligned die contacts directly to a compatible carrier through qualified interconnects",
+    "operating_requirement": "Matched surfaces, bonding materials, positioning and inspection",
+    "consequence": "Support dense short package connections with thermal and fatigue constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_package_engineering",
+      "wafer_alignment_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "flip_chip_interconnection",
+      "local_demonstration": "Join aligned die contacts directly to a compatible carrier through qualified interconnects",
+      "operating_requirements": "Matched surfaces, bonding materials, positioning and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "through_silicon_interconnects",
+    "name": "Through Silicon Interconnects",
+    "foundations": "plasma_pattern_etching,thin_film_deposition",
+    "mechanism": "Form insulated conductive paths through a semiconductor substrate",
+    "operating_requirement": "Qualified deep-feature processes, insulation, fill materials and defect inspection",
+    "consequence": "Support selected vertical connections with electrical and mechanical limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "plasma_pattern_etching",
+      "thin_film_deposition"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "through_silicon_interconnects",
+      "local_demonstration": "Form insulated conductive paths through a semiconductor substrate",
+      "operating_requirements": "Qualified deep-feature processes, insulation, fill materials and defect inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "wafer_bonding_integration",
+    "name": "Wafer Bonding Integration",
+    "foundations": "wafer_alignment_metrology,chemical_mechanical_planarization",
+    "mechanism": "Join prepared wafer surfaces under qualified interface and alignment conditions",
+    "operating_requirement": "Clean planar surfaces, controlled bonding and interface inspection",
+    "consequence": "Integrate compatible structures while bond defects constrain yield",
+    "status": "authored_draft",
+    "requires_all": [
+      "wafer_alignment_metrology",
+      "chemical_mechanical_planarization"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wafer_bonding_integration",
+      "local_demonstration": "Join prepared wafer surfaces under qualified interface and alignment conditions",
+      "operating_requirements": "Clean planar surfaces, controlled bonding and interface inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "chiplet_interface_design",
+    "name": "Chiplet Interface Design",
+    "foundations": "semiconductor_package_engineering,communication_protocol_negotiation",
+    "mechanism": "Specify interoperable electrical, timing and transaction behavior among packaged compute dies",
+    "operating_requirement": "Compatible dies, substrate, qualification evidence and maintained interface specifications",
+    "consequence": "Compose selected functions without assuming any chip can connect to any other",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_package_engineering",
+      "communication_protocol_negotiation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "chiplet_interface_design",
+      "local_demonstration": "Specify interoperable electrical, timing and transaction behavior among packaged compute dies",
+      "operating_requirements": "Compatible dies, substrate, qualification evidence and maintained interface specifications",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "three_dimensional_die_stacking",
+    "name": "Three Dimensional Die Stacking",
+    "foundations": "through_silicon_interconnects,wafer_bonding_integration",
+    "mechanism": "Integrate vertically connected active dies with evaluated thermal and test access",
+    "operating_requirement": "Known-good dies, bonding equipment, power delivery and heat removal",
+    "consequence": "Increase selected integration density while heat and compounded yield remain costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "through_silicon_interconnects",
+      "wafer_bonding_integration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "three_dimensional_die_stacking",
+      "local_demonstration": "Integrate vertically connected active dies with evaluated thermal and test access",
+      "operating_requirements": "Known-good dies, bonding equipment, power delivery and heat removal",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "package_thermal_path_design",
+    "name": "Package Thermal Path Design",
+    "foundations": "semiconductor_package_engineering,calorimetry",
+    "mechanism": "Design and measure heat flow from active devices through package interfaces",
+    "operating_requirement": "Qualified interface materials, mechanical assembly and thermal testing",
+    "consequence": "Keep operating components within evaluated temperature envelopes",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_package_engineering",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "package_thermal_path_design",
+      "local_demonstration": "Design and measure heat flow from active devices through package interfaces",
+      "operating_requirements": "Qualified interface materials, mechanical assembly and thermal testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "semiconductor_reliability_stress_tests",
+    "name": "Semiconductor Reliability Stress Tests",
+    "foundations": "wafer_electrical_probing,statistical_inference",
+    "mechanism": "Relate selected accelerated stress observations to bounded device-failure models",
+    "operating_requirement": "Characterized samples, controlled stress equipment and failure analysis",
+    "consequence": "Estimate reliability limits without equating short tests with unlimited lifetime",
+    "status": "authored_draft",
+    "requires_all": [
+      "wafer_electrical_probing",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "semiconductor_reliability_stress_tests",
+      "local_demonstration": "Relate selected accelerated stress observations to bounded device-failure models",
+      "operating_requirements": "Characterized samples, controlled stress equipment and failure analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "electronic_static_discharge_control",
+    "name": "Electronic Static Discharge Control",
+    "foundations": "electrical_measurement,semiconductor_package_engineering",
+    "mechanism": "Limit uncontrolled charge transfer during qualified component handling",
+    "operating_requirement": "Grounded handling systems, suitable packaging, monitoring and trained workers",
+    "consequence": "Reduce handling damage without making devices immune to every surge",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "semiconductor_package_engineering"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electronic_static_discharge_control",
+      "local_demonstration": "Limit uncontrolled charge transfer during qualified component handling",
+      "operating_requirements": "Grounded handling systems, suitable packaging, monitoring and trained workers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "boundary_scan_testing",
+    "name": "Boundary Scan Testing",
+    "foundations": "integrated_circuit_fabrication,shift_registers",
+    "mechanism": "Use accessible test chains to inspect selected board interconnections and device states",
+    "operating_requirement": "Compatible test logic, documented access, equipment and test vectors",
+    "consequence": "Find supported assembly faults where physical probing is impractical",
+    "status": "authored_draft",
+    "requires_all": [
+      "integrated_circuit_fabrication",
+      "shift_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "boundary_scan_testing",
+      "local_demonstration": "Use accessible test chains to inspect selected board interconnections and device states",
+      "operating_requirements": "Compatible test logic, documented access, equipment and test vectors",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "pipeline_instruction_execution",
+    "name": "Pipeline Instruction Execution",
+    "foundations": "microprocessor_architecture",
+    "mechanism": "Overlap defined instruction-processing stages while managing hazards",
+    "operating_requirement": "Implemented processor, clocking, control circuitry and verified instruction behavior",
+    "consequence": "Improve selected throughput while hazards and stalls consume cycles",
+    "status": "authored_draft",
+    "requires_all": [
+      "microprocessor_architecture"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pipeline_instruction_execution",
+      "local_demonstration": "Overlap defined instruction-processing stages while managing hazards",
+      "operating_requirements": "Implemented processor, clocking, control circuitry and verified instruction behavior",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "branch_prediction_models",
+    "name": "Branch Prediction Models",
+    "foundations": "pipeline_instruction_execution",
+    "mechanism": "Predict likely instruction-control paths from retained execution evidence",
+    "operating_requirement": "Predictor state, processor control and measured workloads",
+    "consequence": "Reduce some control stalls while mispredictions incur real wasted work",
+    "status": "authored_draft",
+    "requires_all": [
+      "pipeline_instruction_execution"
+    ],
+    "requires_any": [
+      [
+        "statistical_learning",
+        "finite_state_models"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "branch_prediction_models",
+      "local_demonstration": "Predict likely instruction-control paths from retained execution evidence",
+      "operating_requirements": "Predictor state, processor control and measured workloads",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Simple retained-state predictors need not descend from trained statistical models; prediction quality and penalties remain measured."
+  },
+  {
+    "field": "D21",
+    "id": "out_of_order_execution",
+    "name": "Out Of Order Execution",
+    "foundations": "pipeline_instruction_execution",
+    "mechanism": "Schedule ready operations while preserving architecturally required effects",
+    "operating_requirement": "Dependency tracking, reorder resources and verified exception handling",
+    "consequence": "Exploit selected execution parallelism at area, power and validation cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "pipeline_instruction_execution"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "out_of_order_execution",
+      "local_demonstration": "Schedule ready operations while preserving architecturally required effects",
+      "operating_requirements": "Dependency tracking, reorder resources and verified exception handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Dependency tracking and architecturally correct completion are required; protected address spaces are not a universal prerequisite for scheduling ready operations."
+  },
+  {
+    "field": "D21",
+    "id": "vector_instruction_execution",
+    "name": "Vector Instruction Execution",
+    "foundations": "microprocessor_architecture,matrix_algebra",
+    "mechanism": "Apply a defined operation across multiple data elements with explicit lane behavior",
+    "operating_requirement": "Compatible execution lanes, memory bandwidth and suitable compiled programs",
+    "consequence": "Accelerate suitable data-parallel work rather than arbitrary programs",
+    "status": "authored_draft",
+    "requires_all": [
+      "microprocessor_architecture",
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vector_instruction_execution",
+      "local_demonstration": "Apply a defined operation across multiple data elements with explicit lane behavior",
+      "operating_requirements": "Compatible execution lanes, memory bandwidth and suitable compiled programs",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "cache_coherence_protocols",
+    "name": "Cache Coherence Protocols",
+    "foundations": "cache_hierarchy_design,parallel_processor_architecture",
+    "mechanism": "Maintain specified shared-memory visibility among cached processor copies",
+    "operating_requirement": "Compatible interconnects, protocol state and verified ordering rules",
+    "consequence": "Support shared parallel programs with coherence traffic and contention costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "cache_hierarchy_design",
+      "parallel_processor_architecture"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cache_coherence_protocols",
+      "local_demonstration": "Maintain specified shared-memory visibility among cached processor copies",
+      "operating_requirements": "Compatible interconnects, protocol state and verified ordering rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "hardware_interrupt_handling",
+    "name": "Hardware Interrupt Handling",
+    "foundations": "microprocessor_architecture,finite_state_models",
+    "mechanism": "Transfer execution to defined event handlers while preserving required machine state",
+    "operating_requirement": "Compatible control hardware, handler software and bounded event sources",
+    "consequence": "Respond to peripheral events without continuous polling of every device",
+    "status": "authored_draft",
+    "requires_all": [
+      "microprocessor_architecture",
+      "finite_state_models"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hardware_interrupt_handling",
+      "local_demonstration": "Transfer execution to defined event handlers while preserving required machine state",
+      "operating_requirements": "Compatible control hardware, handler software and bounded event sources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "direct_memory_transfer",
+    "name": "Direct Memory Transfer",
+    "foundations": "hardware_interrupt_handling,memory_protection",
+    "mechanism": "Move bounded data between devices and memory through controlled transfer engines",
+    "operating_requirement": "Compatible bus hardware, address controls and driver coordination",
+    "consequence": "Reduce processor copying work while consuming memory and interconnect bandwidth",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardware_interrupt_handling",
+      "memory_protection"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "direct_memory_transfer",
+      "local_demonstration": "Move bounded data between devices and memory through controlled transfer engines",
+      "operating_requirements": "Compatible bus hardware, address controls and driver coordination",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "programmable_logic_arrays",
+    "name": "Programmable Logic Arrays",
+    "foundations": "pn_junctions",
+    "mechanism": "Configure a qualified array of logic and routing resources to implement specified circuits",
+    "operating_requirement": "Programmable device, configuration tools, power and verified design",
+    "consequence": "Reconfigure selected hardware functions within finite device capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "pn_junctions"
+    ],
+    "requires_any": [
+      [
+        "transistor_inverters",
+        "diode_logic"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "programmable_logic_arrays",
+      "local_demonstration": "Configure a qualified array of logic and routing resources to implement specified circuits",
+      "operating_requirements": "Programmable device, configuration tools, power and verified design",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Qualified programmed connections may use different logic families; a rewritable semiconductor memory array is not mandatory."
+  },
+  {
+    "field": "D21",
+    "id": "electronic_design_synthesis",
+    "name": "Electronic Design Synthesis",
+    "foundations": "programmable_logic_arrays,algorithmic_procedures",
+    "mechanism": "Translate a circuit description into a constrained implementation and assess equivalence",
+    "operating_requirement": "Design tools, target library, computation and engineering review",
+    "consequence": "Reduce some circuit-development work without eliminating physical qualification",
+    "status": "authored_draft",
+    "requires_all": [
+      "programmable_logic_arrays",
+      "algorithmic_procedures"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electronic_design_synthesis",
+      "local_demonstration": "Translate a circuit description into a constrained implementation and assess equivalence",
+      "operating_requirements": "Design tools, target library, computation and engineering review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "hardware_timing_closure",
+    "name": "Hardware Timing Closure",
+    "foundations": "electrical_measurement",
+    "mechanism": "Check and revise implemented signal paths against specified timing constraints",
+    "operating_requirement": "Characterized device and interconnect models, analysis tools and measured validation",
+    "consequence": "Establish bounded timing margins rather than relying on logical correctness alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [
+      [
+        "electronic_design_synthesis",
+        "printed_circuit_interconnects"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hardware_timing_closure",
+      "local_demonstration": "Check and revise implemented signal paths against specified timing constraints",
+      "operating_requirements": "Characterized device and interconnect models, analysis tools and measured validation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Timing can be analyzed and measured for manually designed circuits before automated synthesis; bounded physical path data remain necessary."
+  },
+  {
+    "field": "D21",
+    "id": "operating_system_device_drivers",
+    "name": "Operating System Device Drivers",
+    "foundations": "hardware_interrupt_handling,structured_programming",
+    "mechanism": "Mediate specified device operations through controlled software interfaces",
+    "operating_requirement": "Documented hardware, driver code, compatible operating system and test access",
+    "consequence": "Allow applications to use actual peripherals under access and failure rules",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardware_interrupt_handling",
+      "structured_programming"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "operating_system_device_drivers",
+      "local_demonstration": "Mediate specified device operations through controlled software interfaces",
+      "operating_requirements": "Documented hardware, driver code, compatible operating system and test access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "virtual_machine_monitors",
+    "name": "Virtual Machine Monitors",
+    "foundations": "virtualized_computing",
+    "mechanism": "Control guest execution and privileged resource access over shared physical hardware",
+    "operating_requirement": "Compatible processor support or software translation, monitor code and verification",
+    "consequence": "Host isolated guests while sharing finite compute and memory",
+    "status": "authored_draft",
+    "requires_all": [
+      "virtualized_computing"
+    ],
+    "requires_any": [
+      [
+        "memory_protection",
+        "compiler_construction"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "virtual_machine_monitors",
+      "local_demonstration": "Control guest execution and privileged resource access over shared physical hardware",
+      "operating_requirements": "Compatible processor support or software translation, monitor code and verification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Software translation can implement controlled guest execution where direct hardware virtualization is unavailable; measured overhead and enforcement remain."
+  },
+  {
+    "field": "D21",
+    "id": "checkpoint_restart_computation",
+    "name": "Checkpoint Restart Computation",
+    "foundations": "file_system_organization,process_scheduling",
+    "mechanism": "Persist sufficient job state to resume after a supported interruption",
+    "operating_requirement": "Durable storage, consistent checkpoint logic and spare execution capacity",
+    "consequence": "Recover completed work within checkpoint scope while paying storage and pause overhead",
+    "status": "authored_draft",
+    "requires_all": [
+      "file_system_organization",
+      "process_scheduling"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "checkpoint_restart_computation",
+      "local_demonstration": "Persist sufficient job state to resume after a supported interruption",
+      "operating_requirements": "Durable storage, consistent checkpoint logic and spare execution capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "write_ahead_recovery_logs",
+    "name": "Write Ahead Recovery Logs",
+    "foundations": "transactional_databases,file_system_organization",
+    "mechanism": "Record intended persistent changes before applying recoverable data updates",
+    "operating_requirement": "Ordered durable writes, log storage and tested recovery code",
+    "consequence": "Restore defined transaction consistency after supported failures",
+    "status": "authored_draft",
+    "requires_all": [
+      "transactional_databases",
+      "file_system_organization"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "write_ahead_recovery_logs",
+      "local_demonstration": "Record intended persistent changes before applying recoverable data updates",
+      "operating_requirements": "Ordered durable writes, log storage and tested recovery code",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "multiversion_concurrency_control",
+    "name": "Multiversion Concurrency Control",
+    "foundations": "transactional_databases,process_scheduling",
+    "mechanism": "Retain record versions so compatible transactions can observe defined snapshots",
+    "operating_requirement": "Version storage, visibility rules and reclamation work",
+    "consequence": "Permit selected concurrent reads and writes with storage and conflict costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "transactional_databases",
+      "process_scheduling"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "multiversion_concurrency_control",
+      "local_demonstration": "Retain record versions so compatible transactions can observe defined snapshots",
+      "operating_requirements": "Version storage, visibility rules and reclamation work",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "query_cost_optimization",
+    "name": "Query Cost Optimization",
+    "foundations": "relational_query_models,database_indexing",
+    "mechanism": "Compare alternative execution plans using measured data and resource estimates",
+    "operating_requirement": "Statistics, optimizer computation and available access paths",
+    "consequence": "Reduce some query work while stale estimates can select poor plans",
+    "status": "authored_draft",
+    "requires_all": [
+      "relational_query_models",
+      "database_indexing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "query_cost_optimization",
+      "local_demonstration": "Compare alternative execution plans using measured data and resource estimates",
+      "operating_requirements": "Statistics, optimizer computation and available access paths",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "distributed_job_partitioning",
+    "name": "Distributed Job Partitioning",
+    "foundations": "parallel_processor_architecture,algorithm_complexity_analysis",
+    "mechanism": "Divide a computation into communicating tasks under measured dependency and data constraints",
+    "operating_requirement": "Available workers, actual network service and coordination software",
+    "consequence": "Use several machines when coordination costs do not dominate",
+    "status": "authored_draft",
+    "requires_all": [
+      "parallel_processor_architecture",
+      "algorithm_complexity_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "distributed_job_partitioning",
+      "local_demonstration": "Divide a computation into communicating tasks under measured dependency and data constraints",
+      "operating_requirements": "Available workers, actual network service and coordination software",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "replicated_service_failover",
+    "name": "Replicated Service Failover",
+    "foundations": "distributed_storage_replication,fault_tolerant_computing",
+    "mechanism": "Transfer service responsibility to a qualified replica while controlling conflicting ownership",
+    "operating_requirement": "Independent reachable replicas, state replication and tested takeover rules",
+    "consequence": "Restore supported services with finite interruption and consistency limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "distributed_storage_replication",
+      "fault_tolerant_computing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "replicated_service_failover",
+      "local_demonstration": "Transfer service responsibility to a qualified replica while controlling conflicting ownership",
+      "operating_requirements": "Independent reachable replicas, state replication and tested takeover rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "content_integrity_hashing",
+    "name": "Content Integrity Hashing",
+    "foundations": "algorithmic_procedures,cryptographic_protocol_design",
+    "mechanism": "Compute a specified content digest with declared collision and adversary assumptions",
+    "operating_requirement": "Qualified implementation, finite compute and reference checks",
+    "consequence": "Compare content integrity without proving authorship or truth",
+    "status": "authored_draft",
+    "requires_all": [
+      "algorithmic_procedures",
+      "cryptographic_protocol_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "content_integrity_hashing",
+      "local_demonstration": "Compute a specified content digest with declared collision and adversary assumptions",
+      "operating_requirements": "Qualified implementation, finite compute and reference checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "credential_revocation_distribution",
+    "name": "Credential Revocation Distribution",
+    "foundations": "cryptographic_identity_management",
+    "mechanism": "Distribute and evaluate current invalidation of previously issued credentials",
+    "operating_requirement": "Reachable update sources, freshness rules and maintained trust anchors",
+    "consequence": "Limit continued use of invalid credentials while offline clients retain uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryptographic_identity_management"
+    ],
+    "requires_any": [
+      [
+        "network_time_services",
+        "postal_delivery_receipts"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "credential_revocation_distribution",
+      "local_demonstration": "Distribute and evaluate current invalidation of previously issued credentials",
+      "operating_requirements": "Reachable update sources, freshness rules and maintained trust anchors",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Authenticated delivered revocation records can precede online time services; delayed/offline recipients must retain explicit freshness uncertainty."
+  },
+  {
+    "field": "D21",
+    "id": "least_privilege_capability_systems",
+    "name": "Least Privilege Capability Systems",
+    "foundations": "memory_protection",
+    "mechanism": "Represent and delegate narrowly scoped authority through controlled capabilities",
+    "operating_requirement": "Compatible enforcement, accountable grants and revocation mechanisms",
+    "consequence": "Restrict authorized actions without assuming credentials imply unlimited permission",
+    "status": "authored_draft",
+    "requires_all": [
+      "memory_protection"
+    ],
+    "requires_any": [
+      [
+        "cryptographic_identity_management",
+        "static_type_systems"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "least_privilege_capability_systems",
+      "local_demonstration": "Represent and delegate narrowly scoped authority through controlled capabilities",
+      "operating_requirements": "Compatible enforcement, accountable grants and revocation mechanisms",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Local unforgeable references can enforce capabilities without a public credential infrastructure; distributed delegation needs its own qualified authentication."
+  },
+  {
+    "field": "D21",
+    "id": "verified_boot_chains",
+    "name": "Verified Boot Chains",
+    "foundations": "secure_software_update,content_integrity_hashing",
+    "mechanism": "Check successive executable stages against an established trust policy before use",
+    "operating_requirement": "Protected trust anchors, compatible hardware and recovery provisions",
+    "consequence": "Detect specified unauthorized startup changes while trust-root compromise remains relevant",
+    "status": "authored_draft",
+    "requires_all": [
+      "secure_software_update",
+      "content_integrity_hashing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "verified_boot_chains",
+      "local_demonstration": "Check successive executable stages against an established trust policy before use",
+      "operating_requirements": "Protected trust anchors, compatible hardware and recovery provisions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "reproducible_software_builds",
+    "name": "Reproducible Software Builds",
+    "foundations": "compiler_construction",
+    "mechanism": "Recreate specified binary outputs from controlled source and build inputs",
+    "operating_requirement": "Recorded toolchain, deterministic process and independent compute",
+    "consequence": "Compare distributed software with declared build inputs without proving source safety",
+    "status": "authored_draft",
+    "requires_all": [
+      "compiler_construction"
+    ],
+    "requires_any": [
+      [
+        "version_control_systems",
+        "formal_archives"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reproducible_software_builds",
+      "local_demonstration": "Recreate specified binary outputs from controlled source and build inputs",
+      "operating_requirements": "Recorded toolchain, deterministic process and independent compute",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Recorded source and toolchain inputs can be retained in controlled archives before a dedicated version-control system."
+  },
+  {
+    "field": "D21",
+    "id": "software_dependency_provenance",
+    "name": "Software Dependency Provenance",
+    "foundations": "version_control_systems,machine_readable_record_schemas",
+    "mechanism": "Track source, version and composition of incorporated software components",
+    "operating_requirement": "Maintained manifests, identifiable artifacts and accountable review",
+    "consequence": "Locate affected dependencies when defects or trust changes are discovered",
+    "status": "authored_draft",
+    "requires_all": [
+      "version_control_systems",
+      "machine_readable_record_schemas"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "software_dependency_provenance",
+      "local_demonstration": "Track source, version and composition of incorporated software components",
+      "operating_requirements": "Maintained manifests, identifiable artifacts and accountable review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "service_resource_quotas",
+    "name": "Service Resource Quotas",
+    "foundations": "resource_metered_compute_services,process_scheduling",
+    "mechanism": "Enforce declared per-consumer resource limits and allocation priorities",
+    "operating_requirement": "Measured compute/storage use, enforcement software and service operators",
+    "consequence": "Prevent one admitted workload from consuming all shared capacity by policy accident",
+    "status": "authored_draft",
+    "requires_all": [
+      "resource_metered_compute_services",
+      "process_scheduling"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "service_resource_quotas",
+      "local_demonstration": "Enforce declared per-consumer resource limits and allocation priorities",
+      "operating_requirements": "Measured compute/storage use, enforcement software and service operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "compute_power_budgeting",
+    "name": "Compute Power Budgeting",
+    "foundations": "resource_metered_compute_services,electrical_measurement",
+    "mechanism": "Schedule workloads against measured electrical capacity and performance-energy profiles",
+    "operating_requirement": "Working power meters, controllable workloads and dispatch coordination",
+    "consequence": "Trade turnaround time against finite supplied electrical power",
+    "status": "authored_draft",
+    "requires_all": [
+      "resource_metered_compute_services",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "compute_power_budgeting",
+      "local_demonstration": "Schedule workloads against measured electrical capacity and performance-energy profiles",
+      "operating_requirements": "Working power meters, controllable workloads and dispatch coordination",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "server_airflow_management",
+    "name": "Server Airflow Management",
+    "foundations": "package_thermal_path_design",
+    "mechanism": "Separate and route cooling air according to measured server heat loads and pressure paths",
+    "operating_requirement": "Fans, contained air paths, sensors, power and maintenance",
+    "consequence": "Remove supported heat loads without treating room volume as cooling capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "package_thermal_path_design"
+    ],
+    "requires_any": [
+      [
+        "mechanical_building_ventilation",
+        "flow_continuity"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "server_airflow_management",
+      "local_demonstration": "Separate and route cooling air according to measured server heat loads and pressure paths",
+      "operating_requirements": "Fans, contained air paths, sensors, power and maintenance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Building air-handling practice or measured fluid-flow analysis supports server cooling; qualified fans, paths and heat rejection remain required."
+  },
+  {
+    "field": "D21",
+    "id": "liquid_cooled_compute_racks",
+    "name": "Liquid Cooled Compute Racks",
+    "foundations": "package_thermal_path_design",
+    "mechanism": "Move server heat through qualified liquid interfaces and heat-exchange loops",
+    "operating_requirement": "Compatible cold plates, pumps, coolant, leak monitoring and heat rejection",
+    "consequence": "Support evaluated rack heat loads with pumping and cooling overhead",
+    "status": "authored_draft",
+    "requires_all": [
+      "package_thermal_path_design"
+    ],
+    "requires_any": [
+      [
+        "heat_pump_cycles",
+        "geothermal_heat_exchange",
+        "steam_condensers"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "liquid_cooled_compute_racks",
+      "local_demonstration": "Move server heat through qualified liquid interfaces and heat-exchange loops",
+      "operating_requirements": "Compatible cold plates, pumps, coolant, leak monitoring and heat rejection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Liquid heat rejection can use multiple exchanger and cooling traditions; a heat pump is not universally required."
+  },
+  {
+    "field": "D21",
+    "id": "compute_water_energy_accounting",
+    "name": "Compute Water Energy Accounting",
+    "foundations": "compute_power_budgeting,water_meter_calibration",
+    "mechanism": "Measure direct water and electrical demands against delivered computing service",
+    "operating_requirement": "Metered facility boundaries, workload records and maintained instruments",
+    "consequence": "Expose local resource tradeoffs rather than claiming efficient chips make a resource-free service",
+    "status": "authored_draft",
+    "requires_all": [
+      "compute_power_budgeting",
+      "water_meter_calibration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "compute_water_energy_accounting",
+      "local_demonstration": "Measure direct water and electrical demands against delivered computing service",
+      "operating_requirements": "Metered facility boundaries, workload records and maintained instruments",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "accelerator_workload_mapping",
+    "name": "Accelerator Workload Mapping",
+    "foundations": "compiler_construction",
+    "mechanism": "Map eligible operations and data movement onto specialized execution resources",
+    "operating_requirement": "Compatible accelerator, software support, memory and actual workload",
+    "consequence": "Accelerate suitable tasks while transfer and idle costs remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "compiler_construction"
+    ],
+    "requires_any": [
+      [
+        "vector_instruction_execution",
+        "programmable_logic_arrays"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "accelerator_workload_mapping",
+      "local_demonstration": "Map eligible operations and data movement onto specialized execution resources",
+      "operating_requirements": "Compatible accelerator, software support, memory and actual workload",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "A suitable accelerator can be a vector processor or a qualified reconfigurable implementation; neither promises arbitrary-workload speedup."
+  },
+  {
+    "field": "D21",
+    "id": "training_data_lineage",
+    "name": "Training Data Lineage",
+    "foundations": "data_provenance_tracking,machine_readable_record_schemas",
+    "mechanism": "Track origin, transformations and allowed use of data entering a learning process",
+    "operating_requirement": "Maintained records, accessible source evidence and responsible data stewardship",
+    "consequence": "Enable review and correction of training inputs without asserting source truth",
+    "status": "authored_draft",
+    "requires_all": [
+      "data_provenance_tracking",
+      "machine_readable_record_schemas"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "training_data_lineage",
+      "local_demonstration": "Track origin, transformations and allowed use of data entering a learning process",
+      "operating_requirements": "Maintained records, accessible source evidence and responsible data stewardship",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "held_out_model_evaluation",
+    "name": "Held Out Model Evaluation",
+    "foundations": "statistical_learning,statistical_sampling",
+    "mechanism": "Estimate task performance on appropriately separated data with leakage checks",
+    "operating_requirement": "Representative evaluation data, defined metrics and independent analysis",
+    "consequence": "Expose generalization limits rather than rewarding training-set fit",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_learning",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "held_out_model_evaluation",
+      "local_demonstration": "Estimate task performance on appropriately separated data with leakage checks",
+      "operating_requirements": "Representative evaluation data, defined metrics and independent analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "model_uncertainty_calibration",
+    "name": "Model Uncertainty Calibration",
+    "foundations": "held_out_model_evaluation,probability_theory",
+    "mechanism": "Compare predictive confidence with observed outcomes under evaluated conditions",
+    "operating_requirement": "Applicable observations, calibration methods and continuing review",
+    "consequence": "Make reported uncertainty more informative within its evidence domain",
+    "status": "authored_draft",
+    "requires_all": [
+      "held_out_model_evaluation",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "model_uncertainty_calibration",
+      "local_demonstration": "Compare predictive confidence with observed outcomes under evaluated conditions",
+      "operating_requirements": "Applicable observations, calibration methods and continuing review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "model_compression_qualification",
+    "name": "Model Compression Qualification",
+    "foundations": "neural_network_models,held_out_model_evaluation",
+    "mechanism": "Reduce model representation or computation while measuring retained task performance",
+    "operating_requirement": "Source model, compression tools, finite compute and representative tests",
+    "consequence": "Trade memory and speed against measured loss rather than promise free efficiency",
+    "status": "authored_draft",
+    "requires_all": [
+      "neural_network_models",
+      "held_out_model_evaluation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "model_compression_qualification",
+      "local_demonstration": "Reduce model representation or computation while measuring retained task performance",
+      "operating_requirements": "Source model, compression tools, finite compute and representative tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "federated_model_training",
+    "name": "Federated Model Training",
+    "foundations": "statistical_learning",
+    "mechanism": "Coordinate model updates across separate data holders under explicit disclosure assumptions",
+    "operating_requirement": "Willing participants, local compute, actual communication and reviewed aggregation",
+    "consequence": "Train selected models without assuming raw data centralization or automatic privacy",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_learning"
+    ],
+    "requires_any": [
+      [
+        "privacy_preserving_computation",
+        "cryptographic_protocol_design"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "federated_model_training",
+      "local_demonstration": "Coordinate model updates across separate data holders under explicit disclosure assumptions",
+      "operating_requirements": "Willing participants, local compute, actual communication and reviewed aggregation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Federated coordination does not inherently guarantee privacy; the selected communication and aggregation method defines actual disclosure limits."
+  },
+  {
+    "field": "D21",
+    "id": "machine_action_runtime_monitors",
+    "name": "Machine Action Runtime Monitors",
+    "foundations": "real_time_computing,software_verification",
+    "mechanism": "Check specified operating constraints during machine execution and trigger bounded fallback",
+    "operating_requirement": "Independent-enough observations, enforceable intervention and maintained monitor logic",
+    "consequence": "Stop or constrain detected violations within monitored scope",
+    "status": "authored_draft",
+    "requires_all": [
+      "real_time_computing",
+      "software_verification"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "machine_action_runtime_monitors",
+      "local_demonstration": "Check specified operating constraints during machine execution and trigger bounded fallback",
+      "operating_requirements": "Independent-enough observations, enforceable intervention and maintained monitor logic",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "robotic_contact_force_control",
+    "name": "Robotic Contact Force Control",
+    "foundations": "robotic_sensor_fusion",
+    "mechanism": "Regulate measured interaction forces during qualified machine contact tasks",
+    "operating_requirement": "Force-capable sensors, compliant or controlled actuators, power and task qualification",
+    "consequence": "Perform selected contact work within force, bandwidth and environment limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "robotic_sensor_fusion"
+    ],
+    "requires_any": [
+      [
+        "feedback_governors",
+        "real_time_computing"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "robotic_contact_force_control",
+      "local_demonstration": "Regulate measured interaction forces during qualified machine contact tasks",
+      "operating_requirements": "Force-capable sensors, compliant or controlled actuators, power and task qualification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending.",
+    "branching_note": "Qualified mechanical or electronic control can regulate measured contact; digital control is not the only conceptual route."
+  },
+  {
+    "field": "D21",
+    "id": "robotic_self_localization_maps",
+    "name": "Robotic Self Localization Maps",
+    "foundations": "robotic_sensor_fusion,geometric_survey",
+    "mechanism": "Estimate machine pose and environmental landmarks from uncertain observations",
+    "operating_requirement": "Suitable sensors, computation and observable reference features",
+    "consequence": "Navigate within estimated confidence while ambiguity can stop progress",
+    "status": "authored_draft",
+    "requires_all": [
+      "robotic_sensor_fusion",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "robotic_self_localization_maps",
+      "local_demonstration": "Estimate machine pose and environmental landmarks from uncertain observations",
+      "operating_requirements": "Suitable sensors, computation and observable reference features",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "robotic_tool_change_qualification",
+    "name": "Robotic Tool Change Qualification",
+    "foundations": "robotic_workcell_integration,precision_robot_calibration",
+    "mechanism": "Verify mounted-tool identity, geometry and service connections before executing a task",
+    "operating_requirement": "Compatible couplers, calibrated tools, inspection and maintained control records",
+    "consequence": "Reuse a machine across qualified tasks without assuming every tool is interchangeable",
+    "status": "authored_draft",
+    "requires_all": [
+      "robotic_workcell_integration",
+      "precision_robot_calibration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "robotic_tool_change_qualification",
+      "local_demonstration": "Verify mounted-tool identity, geometry and service connections before executing a task",
+      "operating_requirements": "Compatible couplers, calibrated tools, inspection and maintained control records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "quantum_device_noise_characterization",
+    "name": "Quantum Device Noise Characterization",
+    "foundations": "controlled_qubit_operations,statistical_inference",
+    "mechanism": "Estimate specified operation and measurement errors under characterized test conditions",
+    "operating_requirement": "Working quantum device, calibrated control, repeated measurements and analysis",
+    "consequence": "Bound noise evidence for later error management without claiming useful computation from qubit count",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_qubit_operations",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal research, purchased design evidence or a qualified external service. Pay delivery and access costs, reproduce the mechanism locally and retain actual equipment, utilities and staff requirements. Imported chips and rented computation do not grant fabrication knowledge.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "quantum_device_noise_characterization",
+      "local_demonstration": "Estimate specified operation and measurement errors under characterized test conditions",
+      "operating_requirements": "Working quantum device, calibrated control, repeated measurements and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual information or equipment delivery",
+        "local adaptation and qualification work",
+        "continuing utilities, staff and supplier dependence"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; reproduce the specified mechanism on locally available equipment.",
+        "partnership": "Contribute staff, materials or usable evidence; wait for actual communication and shared facility access before local qualification.",
+        "purchased_research": "Pay for a defined study or design with evidence of its limits; delivered documents accelerate supported inquiry but do not install production capacity.",
+        "licensed_or_imported_service": "Pay for qualified chips, equipment or bounded compute service; continuing supply, access, maintenance and throughput limits persist without local mastery.",
+        "reverse_engineering": "Obtain a real specimen or inspectable program, spend analysis work and reproduce relevant behavior; opaque service access alone does not reveal fabrication or training methods."
+      }
+    },
+    "implementation_status": "Authored design only; material recipes, installed equipment, finite service throughput, source choice and AI operation remain pending."
+  }
+]
