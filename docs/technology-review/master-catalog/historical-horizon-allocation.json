@@ -9354,6 +9354,186 @@
       "classification_status": "editorial_review",
       "rationale": "Comparative trials of allocation rules are modern research. Experimental results do not force a population to adopt a rule.",
       "scope_digest": "9fe386e129ad3e8be96de54ad70a856b3dbd10a5a4da459f02a0c49cbc897aaf"
+    },
+    {
+      "id": "surface_illumination_horizon_mapping",
+      "name": "Surface Illumination Horizon Mapping",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "0bac2c8852298a8f3d7165435fd47b14995f6b3d802d707e06fb459b06503a60"
+    },
+    {
+      "id": "shadowed_surface_route_planning",
+      "name": "Shadowed Surface Route Planning",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "ec60e2f363a49db08293ace49d542bbf74e7eeeeffca88cb21a7a474674cad1e"
+    },
+    {
+      "id": "surface_survival_heat_budgeting",
+      "name": "Surface Survival Heat Budgeting",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "86ea106eb4bab98b358918342d87eed117319e957ed0759a30d4b54e6f532a06"
+    },
+    {
+      "id": "surface_cold_start_recommissioning",
+      "name": "Surface Cold-Start Recommissioning",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "16c7756df4a3413eceb735b4136c9aa878be14785c4d86ddca4fdbd8a80a756c"
+    },
+    {
+      "id": "surface_power_cable_deployment",
+      "name": "Surface Power Cable Deployment",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "4089b0aa9a53f0ba25c3649a10417df1fe2476648052743211d4bdb161bdbf2a"
+    },
+    {
+      "id": "vacuum_dust_connector_servicing",
+      "name": "Vacuum Dust Connector Servicing",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "270f7e110ed9d1d6344cd367c7c1f0d379d2e570bc7d6256bd0e1759d1834228"
+    },
+    {
+      "id": "regolith_tool_wear_management",
+      "name": "Regolith Tool Wear Management",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "88402c070b34c5551a670aad5e6d66d7deaf1e7e1ea05e398aac6e2e17d19ca5"
+    },
+    {
+      "id": "low_gravity_excavation_reaction_control",
+      "name": "Low-Gravity Excavation Reaction Control",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "9f5f7b40391d6882e1e2f5f7aff6690d6265ee386368f4c01b3128c2b381d1c2"
+    },
+    {
+      "id": "regolith_feedstock_classification",
+      "name": "Regolith Feedstock Classification",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "bb824fe78b5b493763c184a55fa3e913a471b333ba066fa521813352e6e6c2ef"
+    },
+    {
+      "id": "regolith_volatile_capture",
+      "name": "Regolith Volatile Capture",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "599f4bc2cdab837194f85049b3c98e3a19878815cee862caf04b74090380bd76"
+    },
+    {
+      "id": "regolith_condensate_purification",
+      "name": "Regolith Condensate Purification",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "ba928c2bc888360fb8e0b7707fc7fc3c380c4c78616287aaa30ba02b6c213923"
+    },
+    {
+      "id": "regolith_sintered_pavers",
+      "name": "Regolith Sintered Pavers",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "dd3b664c1b3082e0fc10c1b1dddf1adcc0618b05f424c0f579b0adbdbcc130f4"
+    },
+    {
+      "id": "vacuum_construction_joint_qualification",
+      "name": "Vacuum Construction Joint Qualification",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "b68b6123d0d41482fae29727286fc83c8b472d382194f79b3dd0fceda458da39"
+    },
+    {
+      "id": "surface_cargo_offloading",
+      "name": "Surface Cargo Offloading",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "f7486bb71bc7860fd40c9792493d1172e7411101f93d6c8d3d882155a67a813f"
+    },
+    {
+      "id": "regolith_shield_placement",
+      "name": "Regolith Shield Placement",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "c8bc06f3303d5d332b09e59596e02e065a88d66bf9eaf14e9e752df8233476f5"
+    },
+    {
+      "id": "surface_spares_cannibalization",
+      "name": "Surface Spares Cannibalization",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "5993836eb7643ed079097ba75c566509742d1304ab18c95a99058be51e0a50e4"
+    },
+    {
+      "id": "surface_process_heat_cascading",
+      "name": "Surface Process Heat Cascading",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "99c4066c12cac36562da28f8572600ef301efa49090d76e960c0b0b805615604"
+    },
+    {
+      "id": "surface_dust_witness_monitoring",
+      "name": "Surface Dust Witness Monitoring",
+      "horizon": "H06",
+      "source_file": "frontier-surface-industry.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
+      "scope_digest": "022aa41496a60f943a738b654df6fb68a2ff6cd0e18f66ab681c9e03d432397d"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
