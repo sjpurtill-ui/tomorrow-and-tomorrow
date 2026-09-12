@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 110: **459 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 111: **459 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1216,3 +1216,14 @@ Six individually authored discoveries and six physical recipes connect clay levi
 Verification: 33 cases pass with zero errors/failures/skips/orphans: refractory branch 3, civilian industry 12, technology tree 9 and production dependency audit 9. New tests manufacture the complete chain, check pot and brick consumption, validate individual contracts and demonstrate the original glass method under pot shortage. Common graph audit reports 459 discoveries, 233 routes and no errors; all 136 civilian recipes and eleven installation types are structurally reachable. Resource/research audit reaches all 459 under its explicit ideal-geography assumptions. These do not prove finite campaign pacing or globally optimal balance.
 
 Task-owned files: refractory discovery module, focused tests and branch documentation. Shared files: civilian product catalog, discovery_system.gd (one module registration; integration hotspot), art queue and this record. No save fields added; old records remain compatible, new IDs require this revision. Government continues to own assigned labor. Totals: 459 authored discoveries, 43 reviewed images, 416 live images queued, 89 military roles and eleven plant types. Full-history scope remains incomplete, including 4,541 further authored identities. The loaded 414-discovery historical diagnostic was confirmed live at the start; no target-completion claim.
+
+
+## Checkpoint 111: refractory ceramics illustrations
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `2226a24`. No canonical integration or player launch.
+
+Ceramic Crucibles and Refractory Brick Firing receive individually generated subject illustrations in the approved paper-and-gouache aesthetic. The first shows forming thick-walled refractory vessels; the second shows loading spaced bricks into an unlit kiln. Both were visually inspected, copied unchanged with matching hashes and explicitly bound to their own discoveries. Exact prompts and source provenance are in `assets/ui/research/paper/REFRACTORY_CERAMICS_PROMPTS.md`.
+
+No gameplay, save or discovery additions. Task-owned files: two subject PNGs/import metadata and prompt record. Shared files: research artwork bindings, prompt index, art manifest and this record. Native player presentation remains unverified. The active historical diagnostic session 57160 was confirmed live at the start; no target completion is claimed. Full-history work remains active and incomplete.
+
+Verification: both headless import passes exited cleanly. All eleven atlas cases pass with zero errors/failures/skips/orphans, covering all 45 explicit subject bindings, texture-size/mipmap requirements and cache limits. Manifest: 459 discoveries, 45 verified illustrations and 414 queued live illustrations. No full-history art-completion claim.

@@ -3167,7 +3167,7 @@
       "domain": "production",
       "id": "refractory_brick_firing",
       "name": "Refractory Brick Firing",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/ceramic_crucibles.png",
@@ -3175,7 +3175,7 @@
       "domain": "production",
       "id": "ceramic_crucibles",
       "name": "Ceramic Crucibles",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/crucible_glass_melting.png",
@@ -3677,9 +3677,9 @@
   "live_art_complete": false,
   "live_count": 459,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 416,
+  "queued_count": 414,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 43
+  "verified_count": 45
 }

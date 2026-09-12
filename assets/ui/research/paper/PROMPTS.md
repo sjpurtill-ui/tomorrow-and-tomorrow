@@ -53,3 +53,5 @@ Built-in image generation, using the approved apprentice image as a style refere
 - Compound Microscopy: [exact prompt and provenance](COMPOUND_MICROSCOPY_PROMPT.md), built-in generation with the approved apprentice style reference.
 
 - [Specimen Slide Mounting](SPECIMEN_SLIDE_MOUNTING_PROMPT.md) — botanical slide preparation, built-in generation.
+
+- [Refractory ceramics](REFRACTORY_CERAMICS_PROMPTS.md) — ceramic crucibles and refractory brick firing; built-in generation.
