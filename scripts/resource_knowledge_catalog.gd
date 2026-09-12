@@ -122,10 +122,16 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 		result.effects={}
 		result["production_items"]=["ground_phosphate_fertilizer"]
 		result["production_contract"]="Enables physical ground phosphate dressing. Field uptake requires nutrient response trials and complementary nitrogen inputs; the deposit itself supplies no manufactured fertilizer."
+	if id=="coke_firing":
+		result.effects={}
+		result["production_items"]=["metallurgical_coke"]
+		result["production_contract"]="Converts actual coal into coke through finite workshop labor and paid kiln tooling. Coke is a stock consumed by ironmaking, not a global fuel or metal bonus."
 	if id=="blast_furnace":
+		result.effects={}
+		result["production_items"]=["blast_pig_iron"]
 		result.requires=["refractory_furnaces","rope_rigging"]
 		result["requires_all"]=result.requires.duplicate()
 		result["learning_routes"]=[{"id":"mine_supported","label":"Mine-supported furnace scale-up","requires_all":["mine_drainage"]},{"id":"metallurgical","label":"Scaling forced-air iron reduction","requires_all":["bloomery_smelting"]}]
-		result["production_contract"]="Preserves the mining-supported approach while allowing established forced-air iron reduction to support furnace scale-up. Refractory practice, lifting organization and actual iron, coal and limestone supplies remain necessary. Imported experimental stocks grant no discovery or operating furnace."
+		result["production_contract"]="Preserves the mining-supported approach while allowing established forced-air iron reduction to support furnace scale-up. Refractory practice, lifting organization and actual iron, coal and limestone supplies remain necessary. Imported experimental stocks grant no discovery or operating furnace. Finite workshop batches consume coke, ore and flux after brick and iron tooling is paid, producing pig iron that still needs refining."
 	if id=="mine_airways":result["production_contract"]="Clears the coal ventilation access blocker after mine-airway knowledge is learned. Routes, construction staffing, logistics, access preparation and extraction labor remain required; no coal stock is granted. Adopted practice also contributes bounded mine safety."
 	return result

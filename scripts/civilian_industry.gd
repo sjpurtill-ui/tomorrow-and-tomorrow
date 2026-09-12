@@ -2,6 +2,10 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"metallurgical_coke":{"name": "Metallurgical coke", "output": "Coke", "gate": "coke_firing", "materials": {"Coal": 2.0}, "days": 3.0, "tooling": {"Stone": 8.0, "Clay": 6.0}},
+	"blast_pig_iron":{"name": "Coke-smelted pig iron", "output": "Pig Iron", "gate": "blast_furnace", "materials": {"Iron Ore": 3.0, "Coke": 1.0, "Limestone": 0.3}, "days": 2.0, "tooling": {"Refractory Bricks": 12.0, "Wrought Iron": 4.0, "Timber": 4.0}},
+	"finery_iron":{"name": "Fined wrought iron", "output": "Wrought Iron", "gate": "finery_forges", "materials": {"Pig Iron": 1.2, "Timber": 2.0}, "days": 2.0, "tooling": {"Stone": 8.0, "Clay": 6.0, "Wrought Iron": 2.0}},
+
 	"diode_control_store":{"name": "Diode Control Stores", "output": "Control Stores", "gate": "diode_control_stores", "materials": {"Silicon Diodes": 6.0, "Memory Decoders": 1.0, "Copper Wire": 0.5}, "days": 4.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
 	"microsequencer":{"name": "Microinstruction Sequencing", "output": "Microsequencers", "gate": "microinstruction_sequencing", "materials": {"Program Counters": 1.0, "Branch Units": 1.0, "Register Modules": 1.0}, "days": 4.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
 	"arithmetic_logic_unit":{"name": "Arithmetic-Logic Units", "output": "Arithmetic-Logic Units", "gate": "arithmetic_logic_units", "materials": {"Adder Modules": 1.0, "Logic Modules": 2.0, "Inverter Modules": 1.0, "Register Banks": 1.0}, "days": 4.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},

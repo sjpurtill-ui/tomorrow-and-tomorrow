@@ -3210,6 +3210,14 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/finery_forges.png",
+      "description": "Oxidizing and hammering pig iron removes excess carbon and consolidates workable wrought iron.",
+      "domain": "production",
+      "id": "finery_forges",
+      "name": "Finery Forges",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3731,9 +3739,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 466,
+  "live_count": 467,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 420,
+  "queued_count": 421,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
