@@ -26,7 +26,7 @@ func test_stale_service_ledger_does_not_claim_current_operating_capability()->vo
 	WorldSimulation.scoped("evidence",func()->void:
 		WorldSimulation.state.elapsed_days=10
 		Ops.data().last_day=9;Ops.data().services.electricity=2.0
-		Ops.data().plants.solar_array={"installed":1,"building":2,"work":0.0,"enabled":true,"running":1.0}
+		Ops.data().plants.solar_array={"installed":1,"building":2,"work":0.0,"enabled":true,"running_units":1.0}
 		var result:=Evidence.capture(true)
 		assert_bool(result.operations_ledger_current).is_false();assert_dict(result.remaining_daily_services).is_empty()
 		assert_int(int(result.installed_units)).is_equal(1);assert_int(int(result.units_under_construction)).is_equal(2)
@@ -35,4 +35,17 @@ func test_stale_service_ledger_does_not_claim_current_operating_capability()->vo
 		assert_float(float(result.remaining_daily_services.electricity)).is_equal(2.0)
 		assert_float(float(result.plants[0].running)).is_equal(1.0)
 		assert_bool(Evidence.capture().has("recipes")).is_false()
+	)
+
+func test_food_and_delivery_guards_are_reported_from_current_metrics()->void:
+	WorldSimulation.scoped("evidence",func()->void:
+		var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+		metrics.merge({"food_days":120,"food_intake_ratio":.94,"food_consumption":100.0,"army_provisions_required":10.0,"army_provision_delivery_ratio":.4},true)
+		var result:=Evidence.capture()
+		assert_bool(result.delivery_shortage).is_true()
+		assert_bool(result.food_shortage).is_false()
+		assert_bool(result.production_food_blocked).is_false()
+		metrics.food_intake_ratio=.8;result=Evidence.capture()
+		assert_bool(result.food_shortage).is_true()
+		assert_bool(result.production_food_blocked).is_true()
 	)

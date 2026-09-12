@@ -25,12 +25,16 @@ static func capture(detailed:bool=false)->Dictionary:
 	for id:String in Ops.data().plants:
 		var record:Dictionary=Ops.data().plants[id]
 		installed+=int(record.installed);building+=int(record.building)
-		plants.append({"id":id,"installed":record.installed,"building":record.building,"enabled":record.enabled,"running":record.get("running",0) if current else 0,"stored_energy":record.get("stored_energy",0)})
+		plants.append({"id":id,"installed":record.installed,"building":record.building,"enabled":record.enabled,"running":record.get("running_units",0) if current else 0,"stored_energy":record.get("stored_energy",0)})
 	var services:Dictionary={}
 	for service:String in Ops.data().services:
 		var available:=Ops.service(service)
 		if available>0:services[service]=available
 	var result:={"available_civilian_recipes":methods.size(),"civilian_lines":lines.size(),"manufactured_stock_kinds":stocks.size(),"installed_units":installed,"units_under_construction":building,"remaining_daily_services":services,"operations_ledger_current":current}
+	var food:=preload("res://scripts/leader_personality.gd").food_constraints(state.simulation_metrics)
+	result["food_shortage"]=food.food_shortage
+	result["delivery_shortage"]=food.delivery_shortage
+	result["production_food_blocked"]=preload("res://scripts/civilization_controller.gd").production_food_blocked(food)
 	if detailed:
 		result["recipes"]=methods;result["lines"]=lines;result["plants"]=plants;result["manufactured_stocks"]=stocks
 		result["limits"]="Stocks may be acquired rather than produced. Completed counts cover retained current lines only. Reported line state is not guaranteed throughput. New-line blockers exclude electricity dispatch and line-slot capacity. Remaining daily services exclude work already consumed."

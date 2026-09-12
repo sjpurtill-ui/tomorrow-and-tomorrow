@@ -4,6 +4,8 @@ The user approved the design on September 10, 2026. The target remains 5,000 dis
 
 Current branch state after the machine-tool batch: **532 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
+Delivery-recovery correction: production now distinguishes actual food scarcity from a transport-only ration shortfall, allowing paid carts and peacetime civilian goods to address the latter while training remains suspended. See `DELIVERY_PRODUCTION_RECOVERY.md`; 21 focused recovery, strategy and diagnostic cases pass. The live catalog-476 run's year-191 absence of industry prompted this inspection, but the running process does not load this fix and full-campaign recovery is not yet proven.
+
 Latest behavior addition: civilian machine-workshop investment now follows funded production demand, paid equipment, power and operator capacity. See `AI_MACHINE_WORKSHOP_INVESTMENT.md`. Six new investment cases and twelve existing power-investment cases pass. Counts remain 532 discoveries and 78 reviewed images; 4,468 discovery identities and 4,922 illustrations remain against the full target. This is worktree implementation, not canonical integration or full-history pacing acceptance.
 
 ## First checkpoint: routes and purchased studies

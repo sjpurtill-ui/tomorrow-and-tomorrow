@@ -1,0 +1,13 @@
+# Production during food-delivery shortfalls
+
+The year-191 catalog-476 diagnostic reported 225 known discoveries and 54 available civilian recipes, but no civilian production lines or installed plants. The process was confirmed live; it has not completed its 250-year target. The selected observation is preserved in `pacing/catalog-476-year191-production.json`.
+
+Inspection found a causal mismatch: the strategy already distinguished insufficient food from available food excluded by troop delivery capacity. It prioritized logistics for the latter, but the controller still stopped civilian and cart-production orders for every hunger condition. That prevented it from building the carts intended to address this shortage.
+
+Production now uses the existing `food_shortage` classification, falling back conservatively to `hungry` for older or minimal plans. Paid cart production can continue during a delivery-only shortfall, including wartime logistics. Civilian production can continue during a delivery-only shortfall outside war. Real food shortages still block both paths. Hunger still suspends training and prevents expansion and peacetime recruitment growth; general-led battlefield authority is unchanged.
+
+Three focused recovery cases pass: actual cart orders consume two assembly kits, produce two carts and improve staffed delivery capacity while training remains suspended; paper production supports returned research despite delivery-only hunger; real and unclassified food shortages retain the guard. Fifteen existing strategy cases and three production-evidence cases also pass. All 21 cases report zero errors, failures, skips or orphans. No broad gameplay sweep was repeated.
+
+Future pacing reports use schema 11 and record food shortage, delivery shortage and the production food guard directly. Detailed plant reporting now reads the real `running_units` field rather than an unused `running` field. Existing schema-10 results remain historical evidence. The ongoing process retains its loaded old controller; it has not acquired this fix. These focused results do not establish that this was the only industrial blocker or demonstrate full-history industrial emergence.
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`, preceding commit `66298fd`. Shared integration file: `scripts/civilization_controller.gd`. Other changes are diagnostic reporting, focused tests and this evidence. No save format, discovery count or illustration change; no canonical integration or player launch. Remaining full target: 4,468 discovery identities, 4,922 illustrations, full-history pacing and integration acceptance.

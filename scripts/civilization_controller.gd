@@ -99,8 +99,14 @@ static func choose_orders(id:String)->void:
 		if value>best_value:best={"kind":"settle","destination":point};best_value=value
 	if not best.is_empty():WorldSimulation.submit(id,best)
 
+## Transport exclusion is hunger, but does not mean home stores cannot feed
+## craftspeople. Keep making the carts and goods needed to recover delivery.
+## Legacy/minimal plans without this distinction retain the conservative guard.
+static func production_food_blocked(plan:Dictionary)->bool:
+	return bool(plan.get("food_shortage",plan.get("hungry",false)))
+
 static func civilian_orders(id:String,plan:Dictionary)->void:
-	if bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)):return
+	if production_food_blocked(plan) or bool(plan.get("at_war",false)):return
 	var recommendation:=preload("res://scripts/power_investment_planner.gd").recommendation()
 	if recommendation.is_empty():recommendation=preload("res://scripts/scientific_instrument_planner.gd").recommendation()
 	if recommendation.is_empty():recommendation=preload("res://scripts/canning_investment_planner.gd").recommendation()
@@ -137,7 +143,7 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 static func military_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
 	var campaign:=WorldSimulation.military
-	if not bool(plan.get("hungry",false)):
+	if not production_food_blocked(plan):
 		production_order(id,preload("res://scripts/cart_supply_planner.gd").recommendation())
 	var policy:=String(plan.training)
 	for service in ["army","navy","air"]:WorldSimulation.submit(id,{"kind":"training_policy","service":service,"policy":policy})
