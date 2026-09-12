@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 556,
   "pending_communications": 48,
-  "new_authored_drafts": 2425,
-  "distinct_accounted_identities": 3029,
-  "remaining_identities_to_author": 1971,
+  "new_authored_drafts": 2424,
+  "distinct_accounted_identities": 3028,
+  "remaining_identities_to_author": 1972,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -196,7 +196,7 @@
   },
   "historical_horizon_coverage": {
     "assigned_identities": 932,
-    "unassigned_identities": 2097,
+    "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
       "absolute_position_encoders",
@@ -737,7 +737,6 @@
       "distributed_manufacturing_verification",
       "distributed_precision_timing",
       "distributed_storage_replication",
-      "district_heat_distribution",
       "diving_support_services",
       "dna_replication_models",
       "dna_sequence_reading",
@@ -2372,7 +2371,7 @@
     "D05": 156,
     "D06": 62,
     "D07": 60,
-    "D08": 117,
+    "D08": 116,
     "D09": 60,
     "D10": 61,
     "D11": 60,
@@ -2467,9 +2466,9 @@
       "target": 220,
       "implemented_baseline": 13,
       "pending_communications": 0,
-      "authored_drafts": 117,
-      "accounted": 130,
-      "remaining_to_target": 90
+      "authored_drafts": 116,
+      "accounted": 129,
+      "remaining_to_target": 91
     },
     {
       "id": "D09",

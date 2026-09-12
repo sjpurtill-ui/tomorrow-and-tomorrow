@@ -21,7 +21,7 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The master expansion contains **2,425 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **3,029 distinct IDs; 1,971 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **2,424 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **3,028 distinct IDs; 1,972 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
 459 explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
@@ -95,3 +95,5 @@ Validation: `python3 tools/technology-review/test_atlas_coverage.py` passes seve
 [Civic, economic and learning horizon/branch review](Civic%20Economic%20and%20Learning%20Horizon%20Review.md) classifies another 289 identities, merges one mediation duplicate and repairs 13 direct or indirect gates. Twelve repaired methods receive explicit local demonstration and five-route recovery contracts.
 
 Canonical integration checkpoint: the reviewed source baseline plus three cooking methods is merged at `a578cd4` with 559 live discoveries, 240 civilian recipes and 12 facility types. Final canonical verification and release 2026.09.12.2 packaging remain pending at this checkpoint; the already-running 200-node executable is not changed by a source merge. Uncommitted communications and subsequent master drafts are excluded. The execution ledger tracks final delivery evidence separately.
+
+[Building heat scope review](Building%20Heat%20Scope%20Review.md) merges a duplicate shared-heat network identity. User direction now prioritizes completing and integrating working runtime batches toward all5,000; remaining design/horizon review continues as needed alongside implementation, rather than blocking it.

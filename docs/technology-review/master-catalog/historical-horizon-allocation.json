@@ -1252,8 +1252,8 @@
       "source_file": "space-and-energy.json",
       "source_status": "authored_draft",
       "classification_status": "editorial_review",
-      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
-      "scope_digest": "2723db5d9bdb15a973fd31a90393a411cdadfafb58ce14781a29d0b1d444d2cb"
+      "rationale": "Shared heat piping remains industrial infrastructure. Source supply is an operating requirement; storage and domestic generation mastery are not compulsory prerequisites.",
+      "scope_digest": "0da8d6d95433c9bf4c68821709b38c3805e667c6dfc89f0514f256fa3b56309d"
     },
     {
       "id": "heat_pump_cycles",
