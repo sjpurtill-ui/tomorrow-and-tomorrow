@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 105: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 106: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1161,3 +1161,14 @@ The common technology graph audit now includes civilian manufacturing and instal
 Verification: seven audit cases pass with zero errors/failures/skips/orphans. They cover nonexistent stocks, self-tooling cycles and alternatives, electricity circularity, dependent by-products, empty storage, invalid numeric requirements and all live recipes/installations. Both standalone and combined audits complete without script errors: 130 civilian recipes and eleven plant types reachable; 453 discovery identities, 227 explicit routes, no graph errors. An initial standalone script loaded an autoload-dependent plant script too early; runtime loading after autoload initialization corrected that harness issue before evidence was accepted.
 
 No gameplay, save, catalog count or artwork changes. Files are task-owned audit helper/entry point/tests/documentation plus the existing graph audit and review records. This does not prove finite production or full-history pacing: raw resources and methods are assumed available, and military recipes outside the civilian product catalog are excluded. Coupled research/material/energy and full-campaign evidence remain explicit unfinished work. The active long diagnostic was re-polled live at the start; its target completion is not claimed.
+
+
+## Checkpoint 106: Compound Microscopy illustration
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `ad3de8d`. No canonical integration or player launch.
+
+Compound Microscopy now has an individually generated and visually inspected subject illustration in the approved matte-gouache/fibrous-ivory aesthetic. An investigator uses a modest microscope while an assistant prepares a slide; the optical tube, stage and daylight mirror are readable. Built-in generation used the approved apprentice image as style reference only. The selected output was copied unchanged to `assets/ui/research/paper/compound_microscopy.png`; source hash matched. Exact prompt and provenance are recorded in `COMPOUND_MICROSCOPY_PROMPT.md` and linked from the prompt index.
+
+Both headless import passes exited without errors. The texture uses the shared 768-pixel runtime limit and mipmaps. All 11 atlas cases pass with zero errors/failures/skips/orphans, covering all 42 explicit image bindings and square/cache constraints. Native player presentation remains unverified. No gameplay or save change.
+
+Totals: 453 discoveries, 89 military roles, eleven installation types; 42 reviewed images and 411 queued live images. Shared files are visual bindings, art manifest, prompt index and review records; image/import metadata/prompt record are task-owned. Full-history work remains active. Diagnostic session 57160 was confirmed live at the start; latest inspected snapshot is year 184, population 13,848, 203 known discoveries and 17 settlements on the loaded 414-discovery revision. Its 250-year target remains pending.

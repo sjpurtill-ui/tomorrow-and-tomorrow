@@ -49,3 +49,5 @@ Built-in image generation, using the approved apprentice image as a style refere
 - Battery Bank Wiring: [prompt record](BATTERY_BANK_WIRING_PROMPT.md), built-in generation using the approved apprentice style reference.
 
 - Cylinder Boring and Pneumatic Pressing: [exact prompts and provenance](PNEUMATIC_ENGINEERING_PROMPTS.md), built-in generation with the approved apprentice style reference.
+
+- Compound Microscopy: [exact prompt and provenance](COMPOUND_MICROSCOPY_PROMPT.md), built-in generation with the approved apprentice style reference.

@@ -3135,7 +3135,7 @@
       "domain": "knowledge",
       "id": "compound_microscopy",
       "name": "Compound Microscopy",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
@@ -3629,9 +3629,9 @@
   "live_art_complete": false,
   "live_count": 453,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 412,
+  "queued_count": 411,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 41
+  "verified_count": 42
 }

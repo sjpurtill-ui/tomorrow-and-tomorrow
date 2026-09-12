@@ -79,7 +79,8 @@
     "Cylinder Boring and Pneumatic Pressing receive reviewed paper-and-gouache subject art; 41 explicit subject images total",
     "Paid operating-input licenses use examined foreign leads and shared stock needs; compressor-license envoy journey feeds a real press at reduced manufacturing throughput without local discovery",
     "Six optical instrument-making discoveries and manufactured components; a staffed slide-consuming microscopy bench provides finite help to returned physical specimen examination",
-    "Common graph audit now checks all civilian recipe/installation material, tooling, coproduct and electricity bootstrap paths; 130 recipes and eleven installation types structurally reachable, with seven targeted audit tests"
+    "Common graph audit now checks all civilian recipe/installation material, tooling, coproduct and electricity bootstrap paths; 130 recipes and eleven installation types structurally reachable, with seven targeted audit tests",
+    "Compound Microscopy receives reviewed paper-and-gouache subject art, bringing explicit reviewed images to 42"
   ],
   "unfinished": [
     "Remaining 4547 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
@@ -108,8 +109,8 @@
   ],
   "art": {
     "live_subjects": 453,
-    "verified_subject_images": 41,
-    "queued_live_images": 412,
+    "verified_subject_images": 42,
+    "queued_live_images": 411,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"
