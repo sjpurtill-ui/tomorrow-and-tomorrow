@@ -1,0 +1,61 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "monetary_fineness_verification",
+      "retained_id": "ore_assaying",
+      "reason": "Monetary fineness is a use of calibrated compositional assay, not a new measurement mechanism. Payment inspection can consume this evidence."
+    },
+    {
+      "excluded_proposal": "capacity_reservation_options",
+      "retained_id": "contingent_supply_contracts",
+      "reason": "Paid conditional capacity reservation is covered by contingent supply, with optional exercise represented by the separately authored option contract."
+    },
+    {
+      "excluded_proposal": "service_performance_escrow",
+      "retained_id": "settlement_dispute_escrow",
+      "reason": "Measured service acceptance specializes the existing conditional escrow release mechanism; measurement capability remains a real operating requirement."
+    },
+    {
+      "excluded_proposal": "research_portfolio_option_review",
+      "retained_id": "long_horizon_project_optioning",
+      "reason": "Evidence-dependent continuation, redirection or stopping of research belongs to existing reversible project optioning, not an additional research-prefixed discovery."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "technology_use_licenses",
+        "know_how_transfer_packages",
+        "research_result_reproduction_acceptance"
+      ],
+      "distinction": "Permission to use, transmission of practical method and demonstrated reproducibility are separate mechanisms; none automatically grants the others."
+    },
+    {
+      "ids": [
+        "commodity_money_conventions",
+        "unit_of_account_conventions"
+      ],
+      "distinction": "Accepted payment material differs from a valuation unit; debts can be denominated in a unit without being discharged in that material."
+    },
+    {
+      "ids": [
+        "ascending_bid_auctions",
+        "sealed_bid_auctions",
+        "reverse_procurement_auctions",
+        "double_auction_matching",
+        "package_bid_allocation"
+      ],
+      "distinction": "These change information revelation, buyer/seller roles or the allocation problem; none is presented as universally optimal."
+    },
+    {
+      "ids": [
+        "insurance_risk_pooling",
+        "marine_cargo_insurance",
+        "insurance_claim_adjustment"
+      ],
+      "distinction": "General finite pooling, shipping-specific insured exposure and evidence-based claim adjustment are distinct. Earlier specialized marine coverage need not wait for later general formalization."
+    }
+  ]
+}

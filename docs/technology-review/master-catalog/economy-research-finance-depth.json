@@ -1,0 +1,2505 @@
+[
+  {
+    "field": "D17",
+    "id": "commodity_money_conventions",
+    "name": "Commodity Money Conventions",
+    "foundations": "",
+    "mechanism": "Recognize a transferable commodity as a generally accepted intermediate means of exchange",
+    "operating_requirement": "Actual accepted goods, divisible quantities and willing trading partners",
+    "consequence": "Reduce double-coincidence constraints while retaining storage loss and refusal risk",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "barter_equivalence_tables",
+        "reciprocal_gift_accounts"
+      ]
+    ],
+    "branching_note": "Acceptance can grow through exchange equivalences or reciprocal obligations; formal monetary institutions are not required.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "commodity_money_conventions",
+      "local_demonstration": "Recognize a transferable commodity as a generally accepted intermediate means of exchange",
+      "operating_requirements": "Actual accepted goods, divisible quantities and willing trading partners",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "unit_of_account_conventions",
+    "name": "Unit of Account Conventions",
+    "foundations": "",
+    "mechanism": "Express unlike obligations in one agreed valuation unit without requiring payment in that material",
+    "operating_requirement": "Shared valuation convention and interpretable obligation records",
+    "consequence": "Compare debts while keeping account units distinct from deliverable payment",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "barter_equivalence_tables",
+        "debt_maturity_records"
+      ]
+    ],
+    "branching_note": "A shared valuation unit can emerge from trading or debt reckoning; coined money is not mandatory.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "unit_of_account_conventions",
+      "local_demonstration": "Express unlike obligations in one agreed valuation unit without requiring payment in that material",
+      "operating_requirements": "Shared valuation convention and interpretable obligation records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "monetary_piece_stamping",
+    "name": "Monetary Piece Stamping",
+    "foundations": "merchant_weight_verification",
+    "mechanism": "Mark standardized metal pieces with an issuer claim of denomination and quality",
+    "operating_requirement": "Metal stock, blanks, dies, striking labor and trusted issuer",
+    "consequence": "Reduce repeated weighing for accepted pieces; stamping cannot guarantee purity or acceptance",
+    "status": "authored_draft",
+    "requires_all": [
+      "merchant_weight_verification"
+    ],
+    "requires_any": [
+      [
+        "metal_annealing_control",
+        "metal_casting_feed_design"
+      ]
+    ],
+    "branching_note": "Suitable struck or cast blanks can support a marked monetary piece; metal supply and mint quality remain physical requirements.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "monetary_piece_stamping",
+      "local_demonstration": "Mark standardized metal pieces with an issuer claim of denomination and quality",
+      "operating_requirements": "Metal stock, blanks, dies, striking labor and trusted issuer",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare. Piece marking differs from composition assay; material quality inspection uses existing ore_assaying where suitable and does not add another assay identity.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "redeemable_payment_notes",
+    "name": "Redeemable Payment Notes",
+    "foundations": "debt_maturity_records,unit_of_account_conventions",
+    "mechanism": "Issue transferable payment promises with stated redemption obligations",
+    "operating_requirement": "Identifiable issuer, authentic notes, actual redemption assets and enforceable terms",
+    "consequence": "Transfer issuer credit while exposing holders to redemption delays and default",
+    "status": "authored_draft",
+    "requires_all": [
+      "debt_maturity_records",
+      "unit_of_account_conventions"
+    ],
+    "requires_any": [
+      [
+        "pictographic_records",
+        "knotted_record_systems"
+      ]
+    ],
+    "branching_note": "Transferable redemption claims may use authenticated written or encoded tokens; industrial printing is not mandatory.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "redeemable_payment_notes",
+      "local_demonstration": "Issue transferable payment promises with stated redemption obligations",
+      "operating_requirements": "Identifiable issuer, authentic notes, actual redemption assets and enforceable terms",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "payment_token_authentication",
+    "name": "Payment Token Authentication",
+    "foundations": "",
+    "mechanism": "Use repeatable identifying features and comparison checks to distinguish authorized tokens",
+    "operating_requirement": "Controlled issuance tools, reference pieces and trained inspection",
+    "consequence": "Reduce undetected imitation at a continuing inspection cost",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "monetary_piece_stamping",
+        "redeemable_payment_notes"
+      ]
+    ],
+    "branching_note": "Authentication can develop for marked metal or documentary payment claims; the chosen security feature must match the medium.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "payment_token_authentication",
+      "local_demonstration": "Use repeatable identifying features and comparison checks to distinguish authorized tokens",
+      "operating_requirements": "Controlled issuance tools, reference pieces and trained inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "price_observation_registers",
+    "name": "Price Observation Registers",
+    "foundations": "market_gathering_schedules,unit_of_account_conventions",
+    "mechanism": "Record comparable transactions with quantities, quality, place and observation time",
+    "operating_requirement": "Observed trades, record keepers and shared quantity definitions",
+    "consequence": "Reveal local price variation without granting unseen market information",
+    "status": "authored_draft",
+    "requires_all": [
+      "market_gathering_schedules",
+      "unit_of_account_conventions"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "price_observation_registers",
+      "local_demonstration": "Record comparable transactions with quantities, quality, place and observation time",
+      "operating_requirements": "Observed trades, record keepers and shared quantity definitions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "commodity_price_indices",
+    "name": "Commodity Price Indices",
+    "foundations": "price_observation_registers",
+    "mechanism": "Combine comparable price observations using a stated basket and weights",
+    "operating_requirement": "Repeated observations, basket definitions and revision records",
+    "consequence": "Track basket price changes while exposing substitution and coverage limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "price_observation_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "commodity_price_indices",
+      "local_demonstration": "Combine comparable price observations using a stated basket and weights",
+      "operating_requirements": "Repeated observations, basket definitions and revision records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "currency_conversion_quotations",
+    "name": "Currency Conversion Quotations",
+    "foundations": "unit_of_account_conventions,price_observation_registers",
+    "mechanism": "State exchange ratios between accepted payment units with explicit fees and validity",
+    "operating_requirement": "Willing counterparties, actual balances and current observed quotations",
+    "consequence": "Support conversion without assuming infinite liquidity or fixed rates",
+    "status": "authored_draft",
+    "requires_all": [
+      "unit_of_account_conventions",
+      "price_observation_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "currency_conversion_quotations",
+      "local_demonstration": "State exchange ratios between accepted payment units with explicit fees and validity",
+      "operating_requirements": "Willing counterparties, actual balances and current observed quotations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "purchasing_power_comparison",
+    "name": "Purchasing Power Comparison",
+    "foundations": "commodity_price_indices,currency_conversion_quotations",
+    "mechanism": "Compare the cost of matched baskets across monetary areas",
+    "operating_requirement": "Comparable goods, local prices and quality adjustments",
+    "consequence": "Separate nominal conversion from differences in attainable goods",
+    "status": "authored_draft",
+    "requires_all": [
+      "commodity_price_indices",
+      "currency_conversion_quotations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "purchasing_power_comparison",
+      "local_demonstration": "Compare the cost of matched baskets across monetary areas",
+      "operating_requirements": "Comparable goods, local prices and quality adjustments",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "ascending_bid_auctions",
+    "name": "Ascending Bid Auctions",
+    "foundations": "market_gathering_schedules",
+    "mechanism": "Allocate a specified lot through successively higher public bids under a stopping rule",
+    "operating_requirement": "Real lot, eligible bidders, credible bids and settlement procedure",
+    "consequence": "Discover a transaction price with delay and collusion risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "market_gathering_schedules"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ascending_bid_auctions",
+      "local_demonstration": "Allocate a specified lot through successively higher public bids under a stopping rule",
+      "operating_requirements": "Real lot, eligible bidders, credible bids and settlement procedure",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "sealed_bid_auctions",
+    "name": "Sealed Bid Auctions",
+    "foundations": "witnessed_obligations",
+    "mechanism": "Collect confidential offers before a fixed close and apply a declared ranking and payment rule",
+    "operating_requirement": "Secure offer custody, comparable lot terms and qualified bidders",
+    "consequence": "Trade public price discovery for a bounded submission period",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations"
+    ],
+    "requires_any": [
+      [
+        "pictographic_records",
+        "knotted_record_systems"
+      ]
+    ],
+    "branching_note": "Offers can be privately encoded before advanced writing or electronic systems; trustworthy secrecy and a closing rule remain necessary.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sealed_bid_auctions",
+      "local_demonstration": "Collect confidential offers before a fixed close and apply a declared ranking and payment rule",
+      "operating_requirements": "Secure offer custody, comparable lot terms and qualified bidders",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "reverse_procurement_auctions",
+    "name": "Reverse Procurement Auctions",
+    "foundations": "commodity_quality_grading",
+    "mechanism": "Compare competing supplier offers against one specified deliverable and acceptance rule",
+    "operating_requirement": "Qualified suppliers, genuine demand and deliverable quality tests",
+    "consequence": "Reduce purchasing cost only when actual capable suppliers compete",
+    "status": "authored_draft",
+    "requires_all": [
+      "commodity_quality_grading"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reverse_procurement_auctions",
+      "local_demonstration": "Compare competing supplier offers against one specified deliverable and acceptance rule",
+      "operating_requirements": "Qualified suppliers, genuine demand and deliverable quality tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "double_auction_matching",
+    "name": "Double Auction Matching",
+    "foundations": "price_observation_registers",
+    "mechanism": "Match buyer bids and seller offers under declared priority rules",
+    "operating_requirement": "Actual orders, available goods or balances and settlement capacity",
+    "consequence": "Coordinate repeated trades while retaining unmatched orders and market-power effects",
+    "status": "authored_draft",
+    "requires_all": [
+      "price_observation_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "double_auction_matching",
+      "local_demonstration": "Match buyer bids and seller offers under declared priority rules",
+      "operating_requirements": "Actual orders, available goods or balances and settlement capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "package_bid_allocation",
+    "name": "Package Bid Allocation",
+    "foundations": "sealed_bid_auctions,constrained_optimization",
+    "mechanism": "Select mutually compatible package offers when complementary lots cannot be valued independently",
+    "operating_requirement": "Explicit bundle bids, capacity limits and auditable allocation computation",
+    "consequence": "Reduce exposure from winning an unusable subset without promising truthful bidding",
+    "status": "authored_draft",
+    "requires_all": [
+      "sealed_bid_auctions",
+      "constrained_optimization"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "package_bid_allocation",
+      "local_demonstration": "Select mutually compatible package offers when complementary lots cannot be valued independently",
+      "operating_requirements": "Explicit bundle bids, capacity limits and auditable allocation computation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "commodity_forward_delivery",
+    "name": "Commodity Forward Delivery",
+    "foundations": "witnessed_obligations,commodity_quality_grading",
+    "mechanism": "Agree quantity, grade, delivery location, date and price before physical delivery",
+    "operating_requirement": "Credible counterparties and actual future production or sourcing capacity",
+    "consequence": "Share price uncertainty while retaining harvest, transport and default risk",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations",
+      "commodity_quality_grading"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "commodity_forward_delivery",
+      "local_demonstration": "Agree quantity, grade, delivery location, date and price before physical delivery",
+      "operating_requirements": "Credible counterparties and actual future production or sourcing capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "exchange_contract_standardization",
+    "name": "Exchange Contract Standardization",
+    "foundations": "commodity_forward_delivery",
+    "mechanism": "Standardize contract sizes, grades, delivery windows and transferable positions",
+    "operating_requirement": "Accepted specifications, position records and delivery governance",
+    "consequence": "Make comparable forward positions transferable without manufacturing the underlying goods",
+    "status": "authored_draft",
+    "requires_all": [
+      "commodity_forward_delivery"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "exchange_contract_standardization",
+      "local_demonstration": "Standardize contract sizes, grades, delivery windows and transferable positions",
+      "operating_requirements": "Accepted specifications, position records and delivery governance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "variation_margin_settlement",
+    "name": "Variation Margin Settlement",
+    "foundations": "exchange_contract_standardization,price_observation_registers",
+    "mechanism": "Transfer collateral as marked contract exposure changes",
+    "operating_requirement": "Observed settlement prices, real collateral and enforceable position limits",
+    "consequence": "Limit accumulating unsecured exposure while creating liquidity calls",
+    "status": "authored_draft",
+    "requires_all": [
+      "exchange_contract_standardization",
+      "price_observation_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "variation_margin_settlement",
+      "local_demonstration": "Transfer collateral as marked contract exposure changes",
+      "operating_requirements": "Observed settlement prices, real collateral and enforceable position limits",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "option_exercise_contracts",
+    "name": "Option Exercise Contracts",
+    "foundations": "commodity_forward_delivery",
+    "mechanism": "Trade a bounded right to transact under specified conditions without the holder's exercise obligation",
+    "operating_requirement": "Premium payment, defined exercise terms and a capable obligated counterparty",
+    "consequence": "Separate optional access from mandatory delivery with finite counterparty exposure",
+    "status": "authored_draft",
+    "requires_all": [
+      "commodity_forward_delivery"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "option_exercise_contracts",
+      "local_demonstration": "Trade a bounded right to transact under specified conditions without the holder's exercise obligation",
+      "operating_requirements": "Premium payment, defined exercise terms and a capable obligated counterparty",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "market_liquidity_measurement",
+    "name": "Market Liquidity Measurement",
+    "foundations": "double_auction_matching",
+    "mechanism": "Measure spread, available depth and execution slippage across observed order sizes",
+    "operating_requirement": "Time-stamped orders and actual completed or attempted trades",
+    "consequence": "Distinguish a quoted price from the cost of executing a large order",
+    "status": "authored_draft",
+    "requires_all": [
+      "double_auction_matching"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "market_liquidity_measurement",
+      "local_demonstration": "Measure spread, available depth and execution slippage across observed order sizes",
+      "operating_requirements": "Time-stamped orders and actual completed or attempted trades",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "loan_deposit_creation_accounts",
+    "name": "Loan and Deposit Creation Accounts",
+    "foundations": "bank_deposit_accounts,double_entry_bookkeeping",
+    "mechanism": "Record a bank loan asset and corresponding deposit liability at origination and track repayment",
+    "operating_requirement": "Authorized lending institution, credit assessment, capital and settlement liquidity",
+    "consequence": "Model credit-created deposits as liabilities rather than newly created physical wealth",
+    "status": "authored_draft",
+    "requires_all": [
+      "bank_deposit_accounts",
+      "double_entry_bookkeeping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "loan_deposit_creation_accounts",
+      "local_demonstration": "Record a bank loan asset and corresponding deposit liability at origination and track repayment",
+      "operating_requirements": "Authorized lending institution, credit assessment, capital and settlement liquidity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "credit_underwriting",
+    "name": "Credit Underwriting",
+    "foundations": "debt_maturity_records",
+    "mechanism": "Assess promised repayment against observed income, obligations and downside cases",
+    "operating_requirement": "Accessible borrower evidence, review labor and explicit uncertainty",
+    "consequence": "Price or refuse credit without treating collateral or reputation as certain repayment",
+    "status": "authored_draft",
+    "requires_all": [
+      "debt_maturity_records"
+    ],
+    "requires_any": [
+      [
+        "reciprocal_gift_accounts",
+        "cash_flow_statements"
+      ]
+    ],
+    "branching_note": "Qualified community repayment evidence can precede corporate accounting; limited evidence produces wider uncertainty, not free certainty.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "credit_underwriting",
+      "local_demonstration": "Assess promised repayment against observed income, obligations and downside cases",
+      "operating_requirements": "Accessible borrower evidence, review labor and explicit uncertainty",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "amortization_schedules",
+    "name": "Amortization Schedules",
+    "foundations": "interest_accrual_accounts",
+    "mechanism": "Separate each scheduled payment into accrued interest and principal reduction",
+    "operating_requirement": "Agreed rate and timing conventions, records and actual payments",
+    "consequence": "Expose remaining debt and payment timing instead of counting every payment as principal",
+    "status": "authored_draft",
+    "requires_all": [
+      "interest_accrual_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "amortization_schedules",
+      "local_demonstration": "Separate each scheduled payment into accrued interest and principal reduction",
+      "operating_requirements": "Agreed rate and timing conventions, records and actual payments",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "receivables_factoring",
+    "name": "Receivables Factoring",
+    "foundations": "invoice_verification",
+    "mechanism": "Transfer verified receivable claims for discounted immediate payment with stated recourse",
+    "operating_requirement": "Authentic invoices, buyer funds and debtor collection access",
+    "consequence": "Release working cash while preserving fraud, nonpayment and fee exposure",
+    "status": "authored_draft",
+    "requires_all": [
+      "invoice_verification"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "receivables_factoring",
+      "local_demonstration": "Transfer verified receivable claims for discounted immediate payment with stated recourse",
+      "operating_requirements": "Authentic invoices, buyer funds and debtor collection access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "asset_leasing_accounts",
+    "name": "Asset Leasing Accounts",
+    "foundations": "debt_maturity_records",
+    "mechanism": "Separate paid temporary use of an asset from ownership and specify maintenance and return duties",
+    "operating_requirement": "Actual serviceable asset, lessor capacity and enforceable use terms",
+    "consequence": "Access equipment without outright purchase while retaining rent and repossession dependence",
+    "status": "authored_draft",
+    "requires_all": [
+      "debt_maturity_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "asset_leasing_accounts",
+      "local_demonstration": "Separate paid temporary use of an asset from ownership and specify maintenance and return duties",
+      "operating_requirements": "Actual serviceable asset, lessor capacity and enforceable use terms",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "insolvency_claim_resolution",
+    "name": "Insolvency Claim Resolution",
+    "foundations": "collateral_registration",
+    "mechanism": "Rank and reconcile competing claims against insufficient assets through a disclosed process",
+    "operating_requirement": "Verified claims, actual realizable assets and recognized adjudication",
+    "consequence": "Distribute losses rather than erase liabilities or replenish missing resources",
+    "status": "authored_draft",
+    "requires_all": [
+      "collateral_registration"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "insolvency_claim_resolution",
+      "local_demonstration": "Rank and reconcile competing claims against insufficient assets through a disclosed process",
+      "operating_requirements": "Verified claims, actual realizable assets and recognized adjudication",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "insurance_risk_pooling",
+    "name": "Insurance Risk Pooling",
+    "foundations": "",
+    "mechanism": "Collect contributions against specified shared losses and pay from a finite pool",
+    "operating_requirement": "Defined covered events, pooled reserves and trustworthy claims handling",
+    "consequence": "Share individual shocks while exposing correlated losses and reserve exhaustion",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "reciprocal_gift_accounts",
+        "partnership_capital_accounts"
+      ]
+    ],
+    "branching_note": "Customary mutual contributions or formal capital pools can share specified losses; actuarial theory is an improvement, not a first-use gate.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "insurance_risk_pooling",
+      "local_demonstration": "Collect contributions against specified shared losses and pay from a finite pool",
+      "operating_requirements": "Defined covered events, pooled reserves and trustworthy claims handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "insurance_claim_adjustment",
+    "name": "Insurance Claim Adjustment",
+    "foundations": "insurance_risk_pooling",
+    "mechanism": "Compare reported loss with coverage, evidence and recoverable value",
+    "operating_requirement": "Accessible loss evidence, adjusters and actual available reserves",
+    "consequence": "Pay qualified claims while preserving investigation cost and disagreement",
+    "status": "authored_draft",
+    "requires_all": [
+      "insurance_risk_pooling"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "insurance_claim_adjustment",
+      "local_demonstration": "Compare reported loss with coverage, evidence and recoverable value",
+      "operating_requirements": "Accessible loss evidence, adjusters and actual available reserves",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "pension_contribution_accounts",
+    "name": "Pension Contribution Accounts",
+    "foundations": "debt_maturity_records",
+    "mechanism": "Track contributions and promised later benefits separately from the pool's actual assets",
+    "operating_requirement": "Participant records, funding rules and finite invested or current contribution resources",
+    "consequence": "Expose retirement obligations and funding gaps without guaranteed future purchasing power",
+    "status": "authored_draft",
+    "requires_all": [
+      "debt_maturity_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pension_contribution_accounts",
+      "local_demonstration": "Track contributions and promised later benefits separately from the pool's actual assets",
+      "operating_requirements": "Participant records, funding rules and finite invested or current contribution resources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "correlated_loss_stress_models",
+    "name": "Correlated Loss Stress Models",
+    "foundations": "actuarial_loss_tables,probability_theory",
+    "mechanism": "Evaluate reserve sufficiency when multiple losses share common causes",
+    "operating_requirement": "Joint exposure data, stated scenarios and model review",
+    "consequence": "Reveal concentration missed by independent-loss assumptions without predicting every crisis",
+    "status": "authored_draft",
+    "requires_all": [
+      "actuarial_loss_tables",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "correlated_loss_stress_models",
+      "local_demonstration": "Evaluate reserve sufficiency when multiple losses share common causes",
+      "operating_requirements": "Joint exposure data, stated scenarios and model review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "wage_time_accounts",
+    "name": "Wage and Time Accounts",
+    "foundations": "witnessed_obligations",
+    "mechanism": "Link agreed compensation to recorded time and approved work periods",
+    "operating_requirement": "Actual workers, supervisors, payment stock and interpretable time records",
+    "consequence": "Make earned compensation auditable without creating labor or forcing employment",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations"
+    ],
+    "requires_any": [
+      [
+        "labor_rotations",
+        "price_observation_registers"
+      ]
+    ],
+    "branching_note": "Recorded service periods or agreed market compensation support work accounts; payment can be in kind and does not require banks.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wage_time_accounts",
+      "local_demonstration": "Link agreed compensation to recorded time and approved work periods",
+      "operating_requirements": "Actual workers, supervisors, payment stock and interpretable time records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "piecework_compensation",
+    "name": "Piecework Compensation",
+    "foundations": "witnessed_obligations",
+    "mechanism": "Pay for accepted output units with stated rejection and rework rules",
+    "operating_requirement": "Measurable output, quality inspection, willing workers and payment resources",
+    "consequence": "Change work incentives while exposing quality shortcuts and uneven earnings",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations"
+    ],
+    "requires_any": [
+      [
+        "commodity_quality_grading",
+        "journeyman_skill_trials"
+      ]
+    ],
+    "branching_note": "Accepted countable work can be judged by graded goods or demonstrated craft standards; quality must remain verifiable.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "piecework_compensation",
+      "local_demonstration": "Pay for accepted output units with stated rejection and rework rules",
+      "operating_requirements": "Measurable output, quality inspection, willing workers and payment resources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "collective_bargaining_procedures",
+    "name": "Collective Bargaining Procedures",
+    "foundations": "witnessed_obligations",
+    "mechanism": "Authorize representatives to negotiate shared working terms and ratify agreements",
+    "operating_requirement": "Represented workers, counterparties and a recognized negotiation process",
+    "consequence": "Support joint bargaining without automatic agreement or a universal productivity bonus",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "collective_bargaining_procedures",
+      "local_demonstration": "Authorize representatives to negotiate shared working terms and ratify agreements",
+      "operating_requirements": "Represented workers, counterparties and a recognized negotiation process",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "employment_dispute_mediation",
+    "name": "Employment Dispute Mediation",
+    "foundations": "arbitration_procedures",
+    "mechanism": "Reconcile conflicting work and pay claims using evidence and mutually accepted mediation",
+    "operating_requirement": "Accessible records, participants and mediator time",
+    "consequence": "Offer a settlement route while allowing unresolved disputes and work interruption",
+    "status": "authored_draft",
+    "requires_all": [
+      "arbitration_procedures"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "employment_dispute_mediation",
+      "local_demonstration": "Reconcile conflicting work and pay claims using evidence and mutually accepted mediation",
+      "operating_requirements": "Accessible records, participants and mediator time",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "worker_owned_enterprise_accounts",
+    "name": "Worker-Owned Enterprise Accounts",
+    "foundations": "partnership_capital_accounts,profit_loss_allocation",
+    "mechanism": "Record worker membership claims, voting stakes and distribution of residual earnings",
+    "operating_requirement": "Actual contributed assets, membership rules and operating records",
+    "consequence": "Support worker ownership without assuming superior output or compulsory adoption",
+    "status": "authored_draft",
+    "requires_all": [
+      "partnership_capital_accounts",
+      "profit_loss_allocation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "worker_owned_enterprise_accounts",
+      "local_demonstration": "Record worker membership claims, voting stakes and distribution of residual earnings",
+      "operating_requirements": "Actual contributed assets, membership rules and operating records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "consumer_cooperative_rebates",
+    "name": "Consumer Cooperative Rebates",
+    "foundations": "cooperative_purchasing,profit_loss_allocation",
+    "mechanism": "Return eligible trading surplus according to recorded member purchases",
+    "operating_requirement": "Real surplus after obligations, purchase records and agreed allocation rules",
+    "consequence": "Separate patronage returns from capital dividends without inventing distributable funds",
+    "status": "authored_draft",
+    "requires_all": [
+      "cooperative_purchasing",
+      "profit_loss_allocation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "consumer_cooperative_rebates",
+      "local_demonstration": "Return eligible trading surplus according to recorded member purchases",
+      "operating_requirements": "Real surplus after obligations, purchase records and agreed allocation rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "household_budget_accounts",
+    "name": "Household Budget Accounts",
+    "foundations": "unit_of_account_conventions",
+    "mechanism": "Compare household receipts, essential outlays and remaining commitments over time",
+    "operating_requirement": "Actual household resources and recorded obligations",
+    "consequence": "Expose shortages and tradeoffs without reallocating households outside existing civic authority",
+    "status": "authored_draft",
+    "requires_all": [
+      "unit_of_account_conventions"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "household_budget_accounts",
+      "local_demonstration": "Compare household receipts, essential outlays and remaining commitments over time",
+      "operating_requirements": "Actual household resources and recorded obligations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "unpaid_work_time_surveys",
+    "name": "Unpaid Work Time Surveys",
+    "foundations": "wage_time_accounts",
+    "mechanism": "Sample time spent on care and other unpaid activities separately from paid employment",
+    "operating_requirement": "Consenting representative respondents, time diaries and survey staff",
+    "consequence": "Make otherwise unpriced labor visible without converting all activity into market output",
+    "status": "authored_draft",
+    "requires_all": [
+      "wage_time_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "unpaid_work_time_surveys",
+      "local_demonstration": "Sample time spent on care and other unpaid activities separately from paid employment",
+      "operating_requirements": "Consenting representative respondents, time diaries and survey staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "input_output_production_accounts",
+    "name": "Input-Output Production Accounts",
+    "foundations": "industrial_job_costing",
+    "mechanism": "Record how outputs of one production activity become intermediate inputs of another",
+    "operating_requirement": "Comparable sector boundaries, actual flow records and valuation conventions",
+    "consequence": "Trace production dependence while avoiding double-counted intermediate output",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_job_costing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "input_output_production_accounts",
+      "local_demonstration": "Record how outputs of one production activity become intermediate inputs of another",
+      "operating_requirements": "Comparable sector boundaries, actual flow records and valuation conventions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "national_income_reconciliation",
+    "name": "National Income Reconciliation",
+    "foundations": "input_output_production_accounts,household_budget_accounts",
+    "mechanism": "Reconcile production, expenditure and income views of a defined economy",
+    "operating_requirement": "Survey coverage, institutional accounts and explicit boundary conventions",
+    "consequence": "Detect accounting discrepancies without equating measured output with wellbeing",
+    "status": "authored_draft",
+    "requires_all": [
+      "input_output_production_accounts",
+      "household_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "national_income_reconciliation",
+      "local_demonstration": "Reconcile production, expenditure and income views of a defined economy",
+      "operating_requirements": "Survey coverage, institutional accounts and explicit boundary conventions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "research_patronage_agreements",
+    "name": "Research Patronage Agreements",
+    "foundations": "witnessed_obligations",
+    "mechanism": "Support a scholar's bounded inquiry through negotiated subsistence, access and reporting duties",
+    "operating_requirement": "A willing competent scholar, actual board or trade goods and local learning time",
+    "consequence": "Sustain uncertain inquiry before formal research markets without purchasing guaranteed discoveries",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations"
+    ],
+    "requires_any": [
+      [
+        "demonstration_teaching",
+        "worked_example_teaching"
+      ]
+    ],
+    "branching_note": "Patronage can support practical demonstrations or worked reasoning examples before universities, written histories and procurement offices.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "research_patronage_agreements",
+      "local_demonstration": "Support a scholar's bounded inquiry through negotiated subsistence, access and reporting duties",
+      "operating_requirements": "A willing competent scholar, actual board or trade goods and local learning time",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "commissioned_research_scoping",
+    "name": "Commissioned Research Scoping",
+    "foundations": "",
+    "mechanism": "Define a purchased question, usable evidence, deliverables and acceptance limits before commissioning",
+    "operating_requirement": "Known capable provider, payment resources and a locally interpretable question",
+    "consequence": "Avoid paying for an irrelevant report while retaining uncertainty of a useful result",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "research_priority_registers",
+        "research_patronage_agreements"
+      ]
+    ],
+    "branching_note": "An explicitly scoped paid question can evolve from patronage as well as formal research administration.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "commissioned_research_scoping",
+      "local_demonstration": "Define a purchased question, usable evidence, deliverables and acceptance limits before commissioning",
+      "operating_requirements": "Known capable provider, payment resources and a locally interpretable question",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "research_milestone_payments",
+    "name": "Research Milestone Payments",
+    "foundations": "commissioned_research_scoping",
+    "mechanism": "Release agreed payment tranches against verified intermediate deliverables",
+    "operating_requirement": "Escrowed or affordable funds, review capacity and honest evidence of milestones",
+    "consequence": "Limit exposure to unfinished work without making failed hypotheses fraudulent by definition",
+    "status": "authored_draft",
+    "requires_all": [
+      "commissioned_research_scoping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "research_milestone_payments",
+      "local_demonstration": "Release agreed payment tranches against verified intermediate deliverables",
+      "operating_requirements": "Escrowed or affordable funds, review capacity and honest evidence of milestones",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "research_cost_sharing_accounts",
+    "name": "Research Cost-Sharing Accounts",
+    "foundations": "partnership_capital_accounts",
+    "mechanism": "Attribute contributed staff, equipment time, specimens and funds to a joint inquiry",
+    "operating_requirement": "Actual partner contributions, accessible accounts and agreed valuation",
+    "consequence": "Distribute research cost while exposing uneven participation and coordination overhead",
+    "status": "authored_draft",
+    "requires_all": [
+      "partnership_capital_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "research_cost_sharing_accounts",
+      "local_demonstration": "Attribute contributed staff, equipment time, specimens and funds to a joint inquiry",
+      "operating_requirements": "Actual partner contributions, accessible accounts and agreed valuation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "background_knowledge_access_terms",
+    "name": "Background Knowledge Access Terms",
+    "foundations": "research_cost_sharing_accounts",
+    "mechanism": "Separate pre-existing partner knowledge from new jointly produced results and define access",
+    "operating_requirement": "Identified knowledge holders, interpretable scope and accepted obligations",
+    "consequence": "Prevent participation from automatically conveying every partner discovery",
+    "status": "authored_draft",
+    "requires_all": [
+      "research_cost_sharing_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "background_knowledge_access_terms",
+      "local_demonstration": "Separate pre-existing partner knowledge from new jointly produced results and define access",
+      "operating_requirements": "Identified knowledge holders, interpretable scope and accepted obligations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "technology_use_licenses",
+    "name": "Technology Use Licenses",
+    "foundations": "witnessed_obligations",
+    "mechanism": "Specify a bounded permission to use a controlled method with fees, scope and duration",
+    "operating_requirement": "Willing holder, enforceable agreed terms and a recipient capable of the permitted use",
+    "consequence": "Permit dependent use while leaving know-how transfer, equipment and independent mastery separate",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations"
+    ],
+    "requires_any": [
+      [
+        "apprentice_contracts",
+        "commercial_disclosure"
+      ]
+    ],
+    "branching_note": "A negotiated permission can rely on craft arrangements or formal commercial disclosure; a universal patent system is not mandatory.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "technology_use_licenses",
+      "local_demonstration": "Specify a bounded permission to use a controlled method with fees, scope and duration",
+      "operating_requirements": "Willing holder, enforceable agreed terms and a recipient capable of the permitted use",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "know_how_transfer_packages",
+    "name": "Know-How Transfer Packages",
+    "foundations": "demonstration_teaching",
+    "mechanism": "Combine demonstrations, process records and tacit-practice instruction for a defined method",
+    "operating_requirement": "Competent instructors, transferable records, local equipment and repeated practice",
+    "consequence": "Reduce reconstruction effort while leaving local qualification and missing tacit knowledge costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "demonstration_teaching"
+    ],
+    "requires_any": [
+      [
+        "laboratory_notebooks",
+        "craft_demonstration_collections"
+      ]
+    ],
+    "branching_note": "Transfer can use practical craft examples or recorded experimental methods; a license alone is not know-how.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "know_how_transfer_packages",
+      "local_demonstration": "Combine demonstrations, process records and tacit-practice instruction for a defined method",
+      "operating_requirements": "Competent instructors, transferable records, local equipment and repeated practice",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare. Learning how to organize a transfer package does not grant the particular method being transferred; every recipient must demonstrate the destination method separately.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "research_result_reproduction_acceptance",
+    "name": "Research Result Reproduction Acceptance",
+    "foundations": "experimental_controls,commissioned_research_scoping",
+    "mechanism": "Test whether delivered findings can be reproduced under the contracted conditions before final acceptance",
+    "operating_requirement": "Comparable samples, local method capacity and finite independent evaluation",
+    "consequence": "Distinguish purchased evidence from a locally demonstrated capability",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_controls",
+      "commissioned_research_scoping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "research_result_reproduction_acceptance",
+      "local_demonstration": "Test whether delivered findings can be reproduced under the contracted conditions before final acceptance",
+      "operating_requirements": "Comparable samples, local method capacity and finite independent evaluation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "pooled_technology_access",
+    "name": "Pooled Technology Access",
+    "foundations": "technology_use_licenses",
+    "mechanism": "Aggregate complementary permissions under common access and allocation terms",
+    "operating_requirement": "Actual participating rights holders, compatible terms and fee allocation records",
+    "consequence": "Reduce repeated negotiations while retaining missing-rights and market-exclusion risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "technology_use_licenses"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pooled_technology_access",
+      "local_demonstration": "Aggregate complementary permissions under common access and allocation terms",
+      "operating_requirements": "Actual participating rights holders, compatible terms and fee allocation records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "innovation_prize_commitments",
+    "name": "Innovation Prize Commitments",
+    "foundations": "witnessed_obligations",
+    "mechanism": "Commit a funded reward to a demonstrated outcome judged by predeclared criteria",
+    "operating_requirement": "Credible reserved reward, feasible evaluation and voluntary capable entrants",
+    "consequence": "Encourage competing approaches without ensuring a solution or covering every entrant's cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "innovation_prize_commitments",
+      "local_demonstration": "Commit a funded reward to a demonstrated outcome judged by predeclared criteria",
+      "operating_requirements": "Credible reserved reward, feasible evaluation and voluntary capable entrants",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "contingent_claim_exposure_nets",
+    "name": "Contingent Claim Exposure Nets",
+    "foundations": "correlated_loss_stress_models,net_settlement",
+    "mechanism": "Trace linked obligations across institutions and identify cascading settlement shortfalls",
+    "operating_requirement": "Disclosed positions, counterparties and scenario computations",
+    "consequence": "Expose systemic dependencies without assuming every bilateral cancellation is legally available",
+    "status": "authored_draft",
+    "requires_all": [
+      "correlated_loss_stress_models",
+      "net_settlement"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "contingent_claim_exposure_nets",
+      "local_demonstration": "Trace linked obligations across institutions and identify cascading settlement shortfalls",
+      "operating_requirements": "Disclosed positions, counterparties and scenario computations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "autonomous_procurement_budget_limits",
+    "name": "Autonomous Procurement Budget Limits",
+    "foundations": "machine_action_accountability",
+    "mechanism": "Constrain a purchasing agent by authorized spend, counterparties, quantities and revocation rules",
+    "operating_requirement": "Authenticated authority, real budget and auditable order execution",
+    "consequence": "Delegate bounded procurement while retaining mistaken orders and human accountability",
+    "status": "authored_draft",
+    "requires_all": [
+      "machine_action_accountability"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "autonomous_procurement_budget_limits",
+      "local_demonstration": "Constrain a purchasing agent by authorized spend, counterparties, quantities and revocation rules",
+      "operating_requirements": "Authenticated authority, real budget and auditable order execution",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "long_delay_delivery_acceptance",
+    "name": "Long-Delay Delivery Acceptance",
+    "foundations": "long_delay_correspondence_protocols,commodity_forward_delivery",
+    "mechanism": "Separate dispatch evidence, arrival evidence and final acceptance across long communication delays",
+    "operating_requirement": "Actual cargo tracking, authenticated records and funded contingent obligations",
+    "consequence": "Support distant trade without treating a departure message as completed delivery",
+    "status": "authored_draft",
+    "requires_all": [
+      "long_delay_correspondence_protocols",
+      "commodity_forward_delivery"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "long_delay_delivery_acceptance",
+      "local_demonstration": "Separate dispatch evidence, arrival evidence and final acceptance across long communication delays",
+      "operating_requirements": "Actual cargo tracking, authenticated records and funded contingent obligations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "habitat_life_support_cost_accounts",
+    "name": "Habitat Life-Support Cost Accounts",
+    "foundations": "closed_habitat_material_accounts,industrial_job_costing",
+    "mechanism": "Allocate finite maintenance, replenishment and reserve costs to life-support services",
+    "operating_requirement": "Measured material and energy flows, occupied capacity and local operating staff",
+    "consequence": "Expose the real cost of inhabited capacity without pricing permission to exist as an automatic policy",
+    "status": "authored_draft",
+    "requires_all": [
+      "closed_habitat_material_accounts",
+      "industrial_job_costing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "habitat_life_support_cost_accounts",
+      "local_demonstration": "Allocate finite maintenance, replenishment and reserve costs to life-support services",
+      "operating_requirements": "Measured material and energy flows, occupied capacity and local operating staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "recovery_material_value_models",
+    "name": "Recovery Material Value Models",
+    "foundations": "resource_circularity_accounts,commodity_quality_grading",
+    "mechanism": "Value recovered material by usable grade, separation cost and actual reachable demand",
+    "operating_requirement": "Assayed recoverable stocks, process costs and observed buyers",
+    "consequence": "Distinguish gross scrap mass from economically usable recovery without overriding material conservation",
+    "status": "authored_draft",
+    "requires_all": [
+      "resource_circularity_accounts",
+      "commodity_quality_grading"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "recovery_material_value_models",
+      "local_demonstration": "Value recovered material by usable grade, separation cost and actual reachable demand",
+      "operating_requirements": "Assayed recoverable stocks, process costs and observed buyers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "intergenerational_fund_draw_rules",
+    "name": "Intergenerational Fund Draw Rules",
+    "foundations": "long_duration_liability_funds",
+    "mechanism": "Set revisable withdrawals against future obligations, uncertain returns and replenishment needs",
+    "operating_requirement": "Actual fund assets, disclosed beneficiaries and authorized oversight",
+    "consequence": "Limit depletion while retaining loss, changing needs and contested allocation",
+    "status": "authored_draft",
+    "requires_all": [
+      "long_duration_liability_funds"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "intergenerational_fund_draw_rules",
+      "local_demonstration": "Set revisable withdrawals against future obligations, uncertain returns and replenishment needs",
+      "operating_requirements": "Actual fund assets, disclosed beneficiaries and authorized oversight",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "scarcity_allocation_mechanism_trials",
+    "name": "Scarcity Allocation Mechanism Trials",
+    "foundations": "",
+    "mechanism": "Compare declared allocation rules against measured access and strategic response under finite supply",
+    "operating_requirement": "Representative trials, agreed evaluation criteria and real capacity constraints",
+    "consequence": "Inform choices among queues, lotteries, bids and needs rules without imposing one system",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "constrained_optimization",
+        "experimental_controls"
+      ]
+    ],
+    "branching_note": "Empirical comparison can precede formal optimization; measured outcomes and rights constraints still require review.",
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "scarcity_allocation_mechanism_trials",
+      "local_demonstration": "Compare declared allocation rules against measured access and strategic response under finite supply",
+      "operating_requirements": "Representative trials, agreed evaluation criteria and real capacity constraints",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "adoption_contract": {
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
+    },
+    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+  }
+]
