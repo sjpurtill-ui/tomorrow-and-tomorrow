@@ -99,7 +99,7 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Expand the full master beyond 2390 accounted identities: 2610 remain to author. Largest field gaps are military 152, medicine 147, buildings 147, biology 139 and economy 133. Continue cohesive authored mechanisms and disadvantaged recovery design. Historical-horizon allocation remains outstanding and must not create era gates.",
+    "Expand the full master beyond 2442 accounted identities: 2558 remain to author. Largest field gaps are medicine 147, buildings 147, biology 139, economy 133 and electronics 132. Continue cohesive authored mechanisms and disadvantaged recovery design. Military role labels are consumers, not new live unit counts. Historical-horizon allocation remains outstanding and must not create era gates.",
     "Continue semantic and atlas reconciliation: 250 candidates mapped, three earlier partial subjects and 350 unmapped candidates. Synthetic Polymers now maps to authored synthesis families; shared arches and reusable launch/stage architecture remain partial. Mappings add zero discoveries. Preserve all duplicate exclusions and complete historical-horizon allocation.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
@@ -125,9 +125,9 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 1786,
-    "distinct_ids_accounted": 2390,
-    "remaining_to_author": 2610,
+    "authored_drafts": 1838,
+    "distinct_ids_accounted": 2442,
+    "remaining_to_author": 2558,
     "complete": false,
     "atlas_candidates_mapped": 250,
     "atlas_partial_mappings": 3,
