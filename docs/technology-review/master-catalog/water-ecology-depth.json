@@ -47,15 +47,18 @@
     "field": "D02",
     "id": "water_intake_screening",
     "name": "Water Intake Screening",
-    "foundations": "raw_water_quality_sampling",
+    "foundations": "",
     "mechanism": "Exclude specified debris and organisms from an intake with a maintainable physical screen",
     "operating_requirement": "Suitable openings, actual screen area, cleaning access and available intake head",
     "consequence": "Protect downstream works while retaining clogging, entrainment and head-loss constraints",
     "status": "authored_draft",
-    "requires_all": [
-      "raw_water_quality_sampling"
+    "requires_all": [],
+    "requires_any": [
+      [
+        "basketry",
+        "joinery"
+      ]
     ],
-    "requires_any": [],
     "recovery": "Obtain paid specialist instruction, partner evidence, commissioned analysis, a qualified external service or interpretable delivered records or material. Pay actual access, transport and local validation; outside knowledge does not create water, treatment capacity, habitat or healthy organisms.",
     "recovery_contract": {
       "status": "design_proposal",
@@ -79,7 +82,8 @@
       }
     },
     "scope_boundary": "A proposed physical or analytical capability. Actual site conditions, finite resources and measured performance determine outcomes. Discovery does not enact land-use restrictions, grant access rights, replace civic labor authority or guarantee safe water or ecosystem recovery.",
-    "implementation_status": "Authored proposal; coupled water and habitat state, operating installations, finite interventions, acquisition penalties, AI choices and campaign outcomes remain pending."
+    "implementation_status": "Authored proposal; coupled water and habitat state, operating installations, finite interventions, acquisition penalties, AI choices and campaign outcomes remain pending.",
+    "branching_note": "Woven or fitted slatted screens can exclude visible debris before formal water-quality sampling; this does not establish potable quality."
   },
   {
     "field": "D02",
@@ -2244,15 +2248,20 @@
     "field": "D03",
     "id": "deadwood_habitat_retention",
     "name": "Deadwood Habitat Retention",
-    "foundations": "forest_inventory_plots",
+    "foundations": "habitat_observation_records",
     "mechanism": "Retain measured decaying wood structures for organisms that depend on them",
     "operating_requirement": "Suitable retained material, site access and balanced fire or public-use constraints",
     "consequence": "Preserve specific microhabitats while retaining competing land-use effects",
     "status": "authored_draft",
     "requires_all": [
-      "forest_inventory_plots"
+      "habitat_observation_records"
     ],
-    "requires_any": [],
+    "requires_any": [
+      [
+        "forest_inventory_plots",
+        "community_resource_monitoring"
+      ]
+    ],
     "recovery": "Obtain paid specialist instruction, partner evidence, commissioned analysis, a qualified external service or interpretable delivered records or material. Pay actual access, transport and local validation; outside knowledge does not create water, treatment capacity, habitat or healthy organisms.",
     "recovery_contract": {
       "status": "design_proposal",
@@ -2281,22 +2290,27 @@
       "guarantees_restoration": false,
       "guarantees_transfer_to_new_site": false,
       "requires_observed_response": true
-    }
+    },
+    "branching_note": "Repeated local observations can support retention before formal forest plot measurement."
   },
   {
     "field": "D03",
     "id": "herbivory_exclosure_trials",
     "name": "Herbivory Exclosure Trials",
-    "foundations": "vegetation_quadrats,experimental_controls",
+    "foundations": "experimental_controls",
     "mechanism": "Compare vegetation recovery with and without selected browsing access",
     "operating_requirement": "Actual maintained barriers, comparison plots and repeated observations",
     "consequence": "Separate some browsing effects from other limits without assuming fencing restores all vegetation",
     "status": "authored_draft",
     "requires_all": [
-      "vegetation_quadrats",
       "experimental_controls"
     ],
-    "requires_any": [],
+    "requires_any": [
+      [
+        "vegetation_quadrats",
+        "habitat_observation_records"
+      ]
+    ],
     "recovery": "Obtain paid specialist instruction, partner evidence, commissioned analysis, a qualified external service or interpretable delivered records or material. Pay actual access, transport and local validation; outside knowledge does not create water, treatment capacity, habitat or healthy organisms.",
     "recovery_contract": {
       "status": "design_proposal",
@@ -2325,7 +2339,8 @@
       "guarantees_restoration": false,
       "guarantees_transfer_to_new_site": false,
       "requires_observed_response": true
-    }
+    },
+    "branching_note": "Repeated observed comparisons inside and outside browsing barriers need not await formal vegetation quadrats."
   },
   {
     "field": "D03",
@@ -2399,49 +2414,6 @@
       "destination": "rangeland_residual_forage_management",
       "local_demonstration": "Set and revise grazing pressure against measured remaining forage and recovery conditions",
       "operating_requirements": "Actual stock records, forage observations and enforceable access arrangements",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "payment or reciprocal contribution",
-        "real sample transport or information delivery",
-        "finite local trials and interpretation",
-        "continuing labor, equipment, material and site access"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff repeat the relevant site assessment, model or qualified operation.",
-        "partnership": "Contribute actual observations, samples, staff, equipment time or funds; shared evidence still needs local interpretation and compatible site conditions.",
-        "purchased_research": "Commission a defined water or ecological question from a capable source; pay for evidence and local evaluation without a guaranteed favorable or transferable result.",
-        "licensed_or_imported_service": "Pay for a real bounded treatment, measurement or field service within the provider's reachable capacity; continuing supply and maintenance remain dependencies.",
-        "reverse_engineering": "Examine delivered hardware, authorized samples or interpretable records with finite local analysis; observed outcomes alone do not reveal all causal or operating conditions."
-      }
-    },
-    "scope_boundary": "A proposed physical or analytical capability. Actual site conditions, finite resources and measured performance determine outcomes. Discovery does not enact land-use restrictions, grant access rights, replace civic labor authority or guarantee safe water or ecosystem recovery.",
-    "implementation_status": "Authored proposal; coupled water and habitat state, operating installations, finite interventions, acquisition penalties, AI choices and campaign outcomes remain pending.",
-    "outcome_contract": {
-      "guarantees_restoration": false,
-      "guarantees_transfer_to_new_site": false,
-      "requires_observed_response": true
-    }
-  },
-  {
-    "field": "D03",
-    "id": "rotational_grazing_design",
-    "name": "Rotational Grazing Design",
-    "foundations": "rangeland_residual_forage_management",
-    "mechanism": "Move grazing pressure among areas with explicit rest and recovery criteria",
-    "operating_requirement": "Actual accessible pasture, water points, labor and observed regrowth",
-    "consequence": "Change use timing without automatically increasing carrying capacity",
-    "status": "authored_draft",
-    "requires_all": [
-      "rangeland_residual_forage_management"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain paid specialist instruction, partner evidence, commissioned analysis, a qualified external service or interpretable delivered records or material. Pay actual access, transport and local validation; outside knowledge does not create water, treatment capacity, habitat or healthy organisms.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "rotational_grazing_design",
-      "local_demonstration": "Move grazing pressure among areas with explicit rest and recovery criteria",
-      "operating_requirements": "Actual accessible pasture, water points, labor and observed regrowth",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent available source",

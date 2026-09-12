@@ -1438,49 +1438,6 @@
   },
   {
     "field": "D17",
-    "id": "employment_dispute_mediation",
-    "name": "Employment Dispute Mediation",
-    "foundations": "arbitration_procedures",
-    "mechanism": "Reconcile conflicting work and pay claims using evidence and mutually accepted mediation",
-    "operating_requirement": "Accessible records, participants and mediator time",
-    "consequence": "Offer a settlement route while allowing unresolved disputes and work interruption",
-    "status": "authored_draft",
-    "requires_all": [
-      "arbitration_procedures"
-    ],
-    "requires_any": [],
-    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "employment_dispute_mediation",
-      "local_demonstration": "Reconcile conflicting work and pay claims using evidence and mutually accepted mediation",
-      "operating_requirements": "Accessible records, participants and mediator time",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "payment or reciprocal contribution",
-        "actual travel or information delivery",
-        "finite local interpretation and trial",
-        "continuing counterparties, staff, records and operating resources"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
-        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
-        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
-        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
-        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
-      }
-    },
-    "adoption_contract": {
-      "learning_enacts_policy": false,
-      "required_for_all_civilizations": false,
-      "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
-    },
-    "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
-    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
-  },
-  {
-    "field": "D17",
     "id": "worker_owned_enterprise_accounts",
     "name": "Worker-Owned Enterprise Accounts",
     "foundations": "partnership_capital_accounts,profit_loss_allocation",
@@ -2416,35 +2373,33 @@
     "field": "D17",
     "id": "intergenerational_fund_draw_rules",
     "name": "Intergenerational Fund Draw Rules",
-    "foundations": "long_duration_liability_funds",
+    "foundations": "long_horizon_public_trusts",
     "mechanism": "Set revisable withdrawals against future obligations, uncertain returns and replenishment needs",
     "operating_requirement": "Actual fund assets, disclosed beneficiaries and authorized oversight",
     "consequence": "Limit depletion while retaining loss, changing needs and contested allocation",
     "status": "authored_draft",
     "requires_all": [
-      "long_duration_liability_funds"
+      "long_horizon_public_trusts"
     ],
-    "requires_any": [],
-    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "requires_any": [
+      [
+        "long_duration_liability_funds",
+        "public_budget_accounts"
+      ]
+    ],
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
     "recovery_contract": {
       "status": "design_proposal",
       "destination": "intergenerational_fund_draw_rules",
-      "local_demonstration": "Set revisable withdrawals against future obligations, uncertain returns and replenishment needs",
+      "local_demonstration": "a withdrawal scenario tested against actual assets, obligations and changed assumptions",
       "operating_requirements": "Actual fund assets, disclosed beneficiaries and authorized oversight",
       "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "payment or reciprocal contribution",
-        "actual travel or information delivery",
-        "finite local interpretation and trial",
-        "continuing counterparties, staff, records and operating resources"
-      ],
       "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
-        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
-        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
-        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
-        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete a withdrawal scenario tested against actual assets, obligations and changed assumptions.",
+        "partnership": "Contribute staff, evidence or supplies to a withdrawal scenario tested against actual assets, obligations and changed assumptions; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing a withdrawal scenario tested against actual assets, obligations and changed assumptions; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for a withdrawal scenario tested against actual assets, obligations and changed assumptions; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to a withdrawal scenario tested against actual assets, obligations and changed assumptions; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
       }
     },
     "adoption_contract": {
@@ -2453,7 +2408,8 @@
       "authority": "Existing GovernmentPeopleSystem and authorized economic actors retain labor, policy and allocation authority."
     },
     "scope_boundary": "A proposed institutional or analytical capability. Its discovery neither imposes the institution nor grants balances, labor, consent, enforcement, goods, information about hidden societies or guaranteed welfare.",
-    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending."
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending.",
+    "branching_note": "Purpose-bound assets and ordinary budget accounts can support bounded draw rules before specialized long-duration liability funds."
   },
   {
     "field": "D17",

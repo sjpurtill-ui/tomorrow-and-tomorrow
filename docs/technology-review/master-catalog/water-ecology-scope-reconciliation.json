@@ -16,6 +16,11 @@
       "excluded_proposal": "ecological_intervention_reversibility",
       "retained_id": "long_horizon_project_optioning",
       "reason": "Staged commitments and explicit reversal limits belong to the existing option-preserving project method; ecological irreversibility remains a constraint."
+    },
+    {
+      "excluded_proposal": "rotational_grazing_design",
+      "retained_id": "rotational_grazing_plans",
+      "reason": "Both move herds among grazing areas according to observed rest and forage recovery. The retained identity incorporates the physical limits and five recovery routes; stocking-pressure assessment remains a distinct foundation. Selective breeding was removed as an unnecessary gate."
     }
   ],
   "scope_distinctions": [

@@ -153,122 +153,6 @@
   },
   {
     "field": "D01",
-    "id": "hearth_roasting_control",
-    "name": "Hearth Roasting Control",
-    "foundations": "",
-    "mechanism": "Manage distance and exposure of suitable food to a controlled hearth",
-    "operating_requirement": "Fuel, maintained hearth, suitable food and attentive cooks",
-    "consequence": "Prepare evaluated roasted foods while fuel and uneven heat limit output",
-    "status": "authored_draft",
-    "requires_all": [],
-    "requires_any": [],
-    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "hearth_roasting_control",
-      "local_demonstration": "Manage distance and exposure of suitable food to a controlled hearth",
-      "operating_requirements": "Fuel, maintained hearth, suitable food and attentive cooks",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "payment or reciprocal contribution",
-        "actual travel or product delivery",
-        "finite local trials and practiced qualification",
-        "continuing feedstock, labor, utilities and maintenance"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
-        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
-        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
-        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
-        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
-      }
-    },
-    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
-    "branching_note": "Controlled fire is an actual operating requirement and may be learned in this root practice; pottery kiln control is not a historical prerequisite."
-  },
-  {
-    "field": "D01",
-    "id": "earth_oven_cooking",
-    "name": "Earth Oven Cooking",
-    "foundations": "hearth_roasting_control",
-    "mechanism": "Retain and transfer heat through an enclosed heated-earth or stone cooking arrangement",
-    "operating_requirement": "Suitable site and materials, fuel, food and practiced operators",
-    "consequence": "Cook suitable batches with retained heat and finite preparation time",
-    "status": "authored_draft",
-    "requires_all": [
-      "hearth_roasting_control"
-    ],
-    "requires_any": [],
-    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "earth_oven_cooking",
-      "local_demonstration": "Retain and transfer heat through an enclosed heated-earth or stone cooking arrangement",
-      "operating_requirements": "Suitable site and materials, fuel, food and practiced operators",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "payment or reciprocal contribution",
-        "actual travel or product delivery",
-        "finite local trials and practiced qualification",
-        "continuing feedstock, labor, utilities and maintenance"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
-        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
-        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
-        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
-        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
-      }
-    },
-    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
-  },
-  {
-    "field": "D01",
-    "id": "food_steaming_vessels",
-    "name": "Food Steaming Vessels",
-    "foundations": "hearth_roasting_control",
-    "mechanism": "Transfer heat to food through a qualified steam-producing vessel arrangement",
-    "operating_requirement": "Compatible vessels, clean water, fuel and careful operation",
-    "consequence": "Prepare selected foods without assuming one heating method suits all products",
-    "status": "authored_draft",
-    "requires_all": [
-      "hearth_roasting_control"
-    ],
-    "requires_any": [
-      [
-        "clay_shaping",
-        "basketry"
-      ]
-    ],
-    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "food_steaming_vessels",
-      "local_demonstration": "Transfer heat to food through a qualified steam-producing vessel arrangement",
-      "operating_requirements": "Compatible vessels, clean water, fuel and careful operation",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "payment or reciprocal contribution",
-        "actual travel or product delivery",
-        "finite local trials and practiced qualification",
-        "continuing feedstock, labor, utilities and maintenance"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
-        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
-        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
-        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
-        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
-      }
-    },
-    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
-    "branching_note": "Qualified basket or pottery arrangements can provide different steam-cooking equipment; actual compatible heat and water handling remain necessary."
-  },
-  {
-    "field": "D01",
     "id": "cereal_dehulling",
     "name": "Cereal Dehulling",
     "foundations": "grain_milling",
@@ -571,20 +455,16 @@
     "field": "D01",
     "id": "honey_extraction_separation",
     "name": "Honey Extraction Separation",
-    "foundations": "movable_comb_frames",
+    "foundations": "managed_bee_hives,sealed_vessels",
     "mechanism": "Separate and handle qualified hive products while preserving identity and quality",
     "operating_requirement": "Suitable extraction equipment, clean containers and beekeeping labor",
     "consequence": "Recover usable honey with handling and storage limits",
     "status": "authored_draft",
     "requires_all": [
-      "movable_comb_frames"
+      "managed_bee_hives",
+      "sealed_vessels"
     ],
-    "requires_any": [
-      [
-        "food_batch_traceability",
-        "sealed_vessels"
-      ]
-    ],
+    "requires_any": [],
     "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
     "recovery_contract": {
       "status": "design_proposal",
@@ -608,7 +488,7 @@
       }
     },
     "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
-    "branching_note": "Careful product handling can precede modern lot tracking; physical cleanliness and product suitability remain required."
+    "branching_note": "Honey can be separated from harvested fixed comb; removable frames improve hive handling but are not a prerequisite for extraction."
   },
   {
     "field": "D01",
@@ -1123,13 +1003,13 @@
     "field": "D01",
     "id": "animal_feed_storage_hygiene",
     "name": "Animal Feed Storage Hygiene",
-    "foundations": "livestock_feed_rations",
+    "foundations": "animal_taming",
     "mechanism": "Maintain feed quality through controlled handling, exclusion and condition checks",
     "operating_requirement": "Suitable feed stores, actual stocks, monitoring and cleaning labor",
     "consequence": "Reduce avoidable contamination and loss while feed remains finite",
     "status": "authored_draft",
     "requires_all": [
-      "livestock_feed_rations"
+      "animal_taming"
     ],
     "requires_any": [
       [
@@ -1160,7 +1040,7 @@
       }
     },
     "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
-    "branching_note": "Practical exclusion and dry storage can precede formal hazard analysis; contaminated feed does not become suitable by discovery grant."
+    "branching_note": "Keeping feed stores clean and protected can follow practical granary handling before quantified feed-ration design."
   },
   {
     "field": "D01",
@@ -1242,13 +1122,13 @@
     "field": "D01",
     "id": "livestock_heat_stress_management",
     "name": "Livestock Heat Stress Management",
-    "foundations": "livestock_body_condition_scoring",
+    "foundations": "animal_taming",
     "mechanism": "Identify heat exposure and apply qualified shade, ventilation or water support",
     "operating_requirement": "Appropriate shelters, actual water, labor and species-specific observations",
     "consequence": "Reduce selected heat-related losses within resource and environmental limits",
     "status": "authored_draft",
     "requires_all": [
-      "livestock_body_condition_scoring"
+      "animal_taming"
     ],
     "requires_any": [
       [
@@ -1279,7 +1159,7 @@
       }
     },
     "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
-    "branching_note": "Experienced local heat observation can support early care before regional instrument networks; available shade, water and ventilation limit assistance."
+    "branching_note": "Observed heat and animal behavior can guide shade and water provision without a formal body-condition scoring system."
   },
   {
     "field": "D01",
@@ -1480,13 +1360,13 @@
     "field": "D01",
     "id": "food_acidity_measurement",
     "name": "Food Acidity Measurement",
-    "foundations": "food_process_hazard_analysis,electrochemical_cells",
+    "foundations": "standard_measures,electrochemical_cells",
     "mechanism": "Measure a specified acidity property with calibrated food-analysis methods",
     "operating_requirement": "Qualified testing, representative samples and retained process context",
     "consequence": "Inform product assessment without assuming acidity alone establishes safety",
     "status": "authored_draft",
     "requires_all": [
-      "food_process_hazard_analysis",
+      "standard_measures",
       "electrochemical_cells"
     ],
     "requires_any": [],
@@ -1512,7 +1392,8 @@
         "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
       }
     },
-    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "This retained route uses calibrated electrochemical measurement; prior food hazard-analysis organization is unnecessary. A chemical-titration alternative still requires its own authored measurement foundation."
   },
   {
     "field": "D01",

@@ -3299,23 +3299,28 @@
     "field": "D08",
     "id": "building_heat_pump_systems",
     "name": "Building Heat-Pump Systems",
-    "foundations": "mechanical_refrigeration,building_services_coordination",
-    "mechanism": "Move heat between a building and a qualified source or sink through a controlled cycle",
-    "operating_requirement": "Suitable equipment, electricity, heat-exchange access and maintenance",
-    "consequence": "Supply heating or cooling with climate-dependent capacity and efficiency",
+    "foundations": "heat_pump_cycles,building_services_coordination",
+    "mechanism": "Match a heat-pump operating envelope, building demand and installed heat-delivery system while coordinating cycling and auxiliary heat",
+    "operating_requirement": "Qualified heat-pump equipment, measured building loads, compatible emitters or air distribution, electricity, source access and commissioning staff",
+    "consequence": "Deliver building heating or cooling only within matched capacity and temperature limits; auxiliary demand and unmet loads remain explicit",
     "status": "authored_draft",
     "requires_all": [
-      "mechanical_refrigeration",
+      "heat_pump_cycles",
       "building_services_coordination"
     ],
-    "requires_any": [],
+    "requires_any": [
+      [
+        "hydronic_building_balancing",
+        "mechanical_building_ventilation"
+      ]
+    ],
     "recovery": "For Building Heat-Pump Systems: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
     "recovery_contract": {
       "status": "design_proposal",
       "destination": "building_heat_pump_systems",
       "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Building Heat-Pump Systems",
-      "local_demonstration": "Move heat between a building and a qualified source or sink through a controlled cycle",
-      "operating_requirements": "Suitable equipment, electricity, heat-exchange access and maintenance",
+      "local_demonstration": "Match a heat-pump operating envelope, building demand and installed heat-delivery system while coordinating cycling and auxiliary heat",
+      "operating_requirements": "Qualified heat-pump equipment, measured building loads, compatible emitters or air distribution, electricity, source access and commissioning staff",
       "outside_costs": [
         "competent source availability",
         "negotiated payment or reciprocal work",
@@ -3325,46 +3330,8 @@
       ],
       "grants_instant_mastery": false,
       "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
-    }
-  },
-  {
-    "field": "D08",
-    "id": "district_heat_distribution",
-    "name": "District-Heat Distribution",
-    "foundations": "pressure_pipe_jointing,calorimetry",
-    "mechanism": "Distribute useful heat from actual sources through a maintained network",
-    "operating_requirement": "Heat supply, insulated pipes, pumps or circulation, customers and maintenance",
-    "consequence": "Share heat infrastructure while distribution losses and outages remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "pressure_pipe_jointing",
-      "calorimetry"
-    ],
-    "requires_any": [
-      [
-        "thermal_storage_tanks",
-        "solar_thermal_collectors",
-        "heat_engine_cycles"
-      ]
-    ],
-    "branching_note": "Several actual heat sources can serve a distribution network; heat storage is not universal.",
-    "recovery": "For District-Heat Distribution: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "district_heat_distribution",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for District-Heat Distribution",
-      "local_demonstration": "Distribute useful heat from actual sources through a maintained network",
-      "operating_requirements": "Heat supply, insulated pipes, pumps or circulation, customers and maintenance",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
-    }
+    },
+    "branching_note": "This is building load/emitter/cycling integration, not another heat-pump thermodynamic cycle. Water-circuit and air-distribution routes remain alternatives."
   },
   {
     "field": "D08",

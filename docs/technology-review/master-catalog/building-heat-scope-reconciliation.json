@@ -1,0 +1,20 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "district_heat_distribution",
+      "retained_id": "district_heating_loops",
+      "reason": "Both describe shared heat delivery through a maintained pipe network. The retained method preserves source, loss, load and service constraints while removing mandatory storage."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "heat_pump_cycles",
+        "building_heat_pump_systems"
+      ],
+      "distinction": "The first is thermodynamic heat transfer; the second now explicitly matches building demand, heat emitters/air distribution, cycling and auxiliary capacity. No additional identity was created."
+    }
+  ]
+}
