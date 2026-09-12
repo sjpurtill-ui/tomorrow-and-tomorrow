@@ -73,3 +73,13 @@ Current atlas reconciliation: 400 candidates mapped, including five partial subj
 JSON records preserve the proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts. Run `tools/technology-review/check_master_catalog.py` for the inexpensive authoring check; it does not run the game or certify behavior.
 
 Section handoff counts describe their publication checkpoints. This README and `coverage.json` hold the current combined count; initial coverage does not mean a field is complete.
+
+## Coverage accounting checks
+
+The catalog checker now derives atlas coverage from the candidate inventory and all reconciliation files. It rejects duplicate candidate mappings across files, unknown or renamed candidates, missing or repeated destination discoveries, unexplained/unknown scope statuses, stale summary counts, and any claim that atlas mappings add discovery identities. Multiple distinct candidate subjects may legitimately point to the same discovery.
+
+`coverage.json` separately reports 400 mapped candidates: 395 with fully mapped authored scope and five partial subjects, plus 200 unmapped candidates. The report includes the unresolved candidate IDs and each partial subject's source file and explanation. “Fully mapped” describes authored subject coverage; it does not mean implemented, historically verified or playable.
+
+The future reconciliation now uses the same destination/status fields as the other sections. The materials/construction/flight summary now correctly records zero remaining partial mappings within that file following the earlier arch, polymer and reusable-stage work. No discovery identities changed in this accounting correction.
+
+Validation: `python3 tools/technology-review/test_atlas_coverage.py` passes seven focused tests, including rejection of duplicated mappings and stale/inflated counts; `python3 tools/technology-review/check_master_catalog.py` passes against the current catalog. These checks do not run Godot or validate operating behavior.

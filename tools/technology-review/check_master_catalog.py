@@ -11,6 +11,64 @@ def read(name):
     return json.loads((CATALOG / name).read_text())
 
 
+def atlas_coverage(candidates, documents, discovery_ids):
+    """Count unique review subjects separately from discovery identities."""
+    candidate_ids = [row["review_id"] for row in candidates]
+    if len(set(candidate_ids)) != len(candidate_ids):
+        raise ValueError("Duplicate candidate ID in atlas inventory")
+    expected = {row["review_id"]: row["name"] for row in candidates}
+    available = set(discovery_ids)
+    mapped = {}
+    partial = []
+    for source, document in documents:
+        rows = document["mappings"]
+        file_partial = 0
+        for row in rows:
+            ident = row["review_id"]
+            if ident in mapped:
+                raise ValueError(f"Duplicate atlas mapping: {ident}: {mapped[ident]} and {source}")
+            if ident not in expected:
+                raise ValueError(f"Unknown atlas candidate: {ident}: {source}")
+            if row["candidate_name"] != expected[ident]:
+                raise ValueError(f"Stale atlas candidate name: {ident}: {source}")
+            targets = row["mapped_ids"]
+            if (not isinstance(targets, list) or not targets
+                    or any(not isinstance(target, str) for target in targets)):
+                raise ValueError(f"Invalid atlas destinations: {ident}: {source}")
+            if len(set(targets)) != len(targets):
+                raise ValueError(f"Repeated atlas destination: {ident}: {source}")
+            missing = set(targets) - available
+            if missing:
+                raise ValueError(f"Unknown atlas destinations: {ident}: {sorted(missing)}")
+            status = row["scope_status"]
+            if status not in ("subject_mapped", "partial"):
+                raise ValueError(f"Invalid atlas scope status: {ident}: {status}")
+            if not isinstance(row.get("note"), str) or not row["note"].strip():
+                raise ValueError(f"Missing atlas scope explanation: {ident}: {source}")
+            mapped[ident] = source
+            if status == "partial":
+                file_partial += 1
+                partial.append({"review_id": ident, "candidate_name": expected[ident],
+                                "source": source, "note": row["note"]})
+        for key, actual in (("mapped_candidates", len(rows)),
+                            ("partial_candidates", file_partial),
+                            ("adds_discovery_ids", 0),
+                            ("adds_discovery_identities", 0)):
+            if key in document and (type(document[key]) is not int or document[key] != actual):
+                raise ValueError(f"Stale atlas summary: {source}: {key}: expected {actual}")
+    return {
+        "candidate_count": len(candidates),
+        "mapped_candidate_count": len(mapped),
+        "fully_mapped_subject_count": len(mapped) - len(partial),
+        "partial_candidate_count": len(partial),
+        "unmapped_candidate_count": len(expected) - len(mapped),
+        "partial_subjects": sorted(partial, key=lambda row: row["review_id"]),
+        "unmapped_candidate_ids": sorted(set(expected) - set(mapped)),
+        "adds_discovery_identities": 0,
+        "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification.",
+    }
+
+
 def field_coverage(baseline, pending, drafts, allocation):
     """Reconcile editorial counts without changing runtime knowledge domains."""
     fields = allocation["fields"]
@@ -90,6 +148,12 @@ def main():
     if errors:
         raise ValueError("\n".join(errors))
     field_totals = field_coverage(baseline, pending, drafts, read("baseline-field-allocation.json"))
+    atlas = atlas_coverage(
+        json.loads((CATALOG.parent / "candidate-atlas.json").read_text()),
+        [(path.name, json.loads(path.read_text()))
+         for path in sorted(CATALOG.glob("atlas-reconciliation-*.json"))],
+        ids,
+    )
     reached = {row["id"] for row in baseline + pending}
     remaining = drafts.copy()
     rounds = 0
@@ -112,14 +176,15 @@ def main():
         "target": 5000,
         "draft_missing_parents": [],
         "draft_unreachable_nodes": [],
-        "review_candidates_not_added_to_count": 600,
+        "review_candidates_not_added_to_count": atlas["candidate_count"],
+        "atlas_coverage": atlas,
         "branch_alternatives": sum(len(row["requires_any"]) for row in drafts),
         "draft_reachability_rounds": rounds,
         "draft_fields": dict(sorted(Counter(row["field"] for row in drafts).items())),
         "field_coverage": field_totals,
         "duplicate_normalized_names": [],
         "complete": False,
-        "validation_scope": "Identity, editorial field accounting and AND/OR reachability only; not semantic duplicate review, historical review, operating implementation or campaign pacing.",
+        "validation_scope": "Identity, editorial field and atlas accounting, and AND/OR reachability only; not semantic duplicate review, historical review, operating implementation or campaign pacing.",
     }
     (CATALOG / "coverage.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report))

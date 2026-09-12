@@ -100,7 +100,7 @@
   ],
   "next_work": [
     "Expand the full master beyond 2864 accounted identities: 2136 remain to author. Largest gaps include electronics 132, energy 123, governance 120, food 119, materials 114 and culture 112. Records/communications now accounts for 173/240. Continue distinct mechanisms and disadvantaged recovery design; complete explicit historical-horizon allocation without era gates.",
-    "Continue semantic and atlas reconciliation: 400 candidates mapped, including five partial scopes (ceramic pipe manufacture, autonomous water-network control, autonomous habitat monitoring, regional ecological recovery coupling, rapid pathogen-platform response); 200 candidates remain unmapped. Mappings add zero discoveries and do not establish operating implementation. Earlier accessible-record, archive-replication, long-correspondence and decentralized-network prerequisite errors are corrected.",
+    "Continue semantic and atlas reconciliation: 400 candidates mapped, including five partial scopes (ceramic pipe manufacture, autonomous water-network control, autonomous habitat monitoring, regional ecological recovery coupling, rapid pathogen-platform response); 200 candidates remain unmapped. Mappings add zero discoveries and do not establish operating implementation. Earlier accessible-record, archive-replication, long-correspondence and decentralized-network prerequisite errors are corrected. The catalog checker now derives these counts and rejects duplicate mappings, unknown references and stale summary totals; use coverage.json rather than adding section counts manually.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
@@ -132,6 +132,8 @@
     "atlas_candidates_mapped": 400,
     "atlas_partial_mappings": 5,
     "baseline_field_allocation": "master-catalog/baseline-field-allocation.json",
-    "historical_horizon_allocation_complete": false
+    "historical_horizon_allocation_complete": false,
+    "atlas_coverage_source": "master-catalog/coverage.json: atlas_coverage",
+    "atlas_fully_mapped_subjects": 395
   }
 }
