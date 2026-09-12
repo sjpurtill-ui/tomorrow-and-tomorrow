@@ -1,0 +1,42 @@
+{
+  "status": "scope_reconciliation_for_review",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "food_smoke_exposure_control",
+      "existing_id": "smoking",
+      "reason": "Control of the existing process is already covered; do not count a reformulated label as another discovery."
+    },
+    {
+      "excluded_id": "food_fermentation_temperature_control",
+      "existing_id": "fermentation_control",
+      "reason": "Control of the existing process is already covered; do not count a reformulated label as another discovery."
+    }
+  ],
+  "mappings": [
+    {
+      "existing_id": "grain_milling",
+      "scope": "Size reduction of grain; removing hulls and separating starch fractions are distinct transformations with distinct outputs and losses.",
+      "distinct_children": [
+        "cereal_dehulling",
+        "starch_washing_separation"
+      ]
+    },
+    {
+      "existing_id": "pond_aquaculture",
+      "scope": "Managed aquatic cultivation; providing shellfish settlement structures or seaweed growing supports adds distinct husbandry mechanisms, not a generic fish-yield modifier.",
+      "distinct_children": [
+        "shellfish_aquaculture_substrates",
+        "seaweed_farm_cultivation"
+      ]
+    },
+    {
+      "existing_id": "fermentation_control",
+      "scope": "Control of food fermentation; stable inoculum maintenance and specialized product purification remain distinct capabilities.",
+      "distinct_children": [
+        "fermentation_starter_cultures",
+        "precision_fermented_food_ingredients"
+      ]
+    }
+  ]
+}

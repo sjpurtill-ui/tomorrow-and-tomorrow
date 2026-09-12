@@ -1,0 +1,699 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_identities": 0,
+  "mapped_candidates": 75,
+  "partial_candidates": 0,
+  "mappings": [
+    {
+      "review_id": "D06-01",
+      "candidate_name": "Wedges and levers",
+      "mapped_ids": [
+        "wedges_and_levers"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-02",
+      "candidate_name": "Bow drills",
+      "mapped_ids": [
+        "bow_drill_drive"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-03",
+      "candidate_name": "Wood joinery",
+      "mapped_ids": [
+        "joinery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-04",
+      "candidate_name": "Hafted tools",
+      "mapped_ids": [
+        "hafted_tools"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-05",
+      "candidate_name": "Rope lifting rigs",
+      "mapped_ids": [
+        "rope_rigging",
+        "compound_pulleys"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-06",
+      "candidate_name": "Treadle lathes",
+      "mapped_ids": [
+        "treadle_lathe_drive"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-07",
+      "candidate_name": "Water powered hammers",
+      "mapped_ids": [
+        "water_powered_hammers"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-08",
+      "candidate_name": "Screw presses",
+      "mapped_ids": [
+        "mechanical_screw_presses"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-09",
+      "candidate_name": "Gear cutting",
+      "mapped_ids": [
+        "gear_tooth_generation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-10",
+      "candidate_name": "Interchangeable gauges",
+      "mapped_ids": [
+        "dimensional_metrology",
+        "matched_thread_inspection"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-11",
+      "candidate_name": "Precision machine tools",
+      "mapped_ids": [
+        "basic_machine_shops",
+        "precision_toolrooms"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-12",
+      "candidate_name": "Interchangeable components",
+      "mapped_ids": [
+        "interchangeable_component_fits"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-13",
+      "candidate_name": "Assembly line organization",
+      "mapped_ids": [
+        "production_line_balancing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-14",
+      "candidate_name": "Hydraulic machinery",
+      "mapped_ids": [
+        "hydraulic_power_machinery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-15",
+      "candidate_name": "Steam powered excavation",
+      "mapped_ids": [
+        "steam_excavation_equipment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-16",
+      "candidate_name": "Numerical machine control",
+      "mapped_ids": [
+        "numerical_machine_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-17",
+      "candidate_name": "Industrial robotics",
+      "mapped_ids": [
+        "robotic_workcell_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-18",
+      "candidate_name": "Additive manufacturing",
+      "mapped_ids": [
+        "metal_additive_manufacturing",
+        "polymer_additive_manufacturing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-19",
+      "candidate_name": "Non destructive inspection",
+      "mapped_ids": [
+        "nondestructive_inspection_qualification",
+        "ultrasonic_flaw_mapping"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-20",
+      "candidate_name": "Semiconductor lithography",
+      "mapped_ids": [
+        "photolithographic_patterning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-21",
+      "candidate_name": "Adaptive factory control",
+      "mapped_ids": [
+        "adaptive_factory_scheduling",
+        "in_process_defect_response"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-22",
+      "candidate_name": "In process defect correction",
+      "mapped_ids": [
+        "in_process_defect_response"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-23",
+      "candidate_name": "Robotic field repair",
+      "mapped_ids": [
+        "robotic_field_repair"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-24",
+      "candidate_name": "Microfabrication assembly",
+      "mapped_ids": [
+        "microfabrication_assembly"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D06-25",
+      "candidate_name": "Distributed manufacturing verification",
+      "mapped_ids": [
+        "distributed_manufacturing_verification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-01",
+      "candidate_name": "Twisted cordage",
+      "mapped_ids": [
+        "cordage"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-02",
+      "candidate_name": "Basket weaving",
+      "mapped_ids": [
+        "basketry"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-03",
+      "candidate_name": "Hide tanning",
+      "mapped_ids": [
+        "hide_tanning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-04",
+      "candidate_name": "Bone needle sewing",
+      "mapped_ids": [
+        "bone_needle_sewing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-05",
+      "candidate_name": "Insulated clothing",
+      "mapped_ids": [
+        "layered_clothing_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-06",
+      "candidate_name": "Spindle spinning",
+      "mapped_ids": [
+        "drop_spindles"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-07",
+      "candidate_name": "Pattern looms",
+      "mapped_ids": [
+        "drawloom_pattern_control",
+        "punched_card_loom_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-08",
+      "candidate_name": "Felt making",
+      "mapped_ids": [
+        "felt_fabric_making"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-09",
+      "candidate_name": "Textile dye fixation",
+      "mapped_ids": [
+        "textile_dye_fixation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-10",
+      "candidate_name": "Soap making",
+      "mapped_ids": [
+        "soap_manufacture"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-11",
+      "candidate_name": "Mechanized spinning",
+      "mapped_ids": [
+        "multi_spindle_spinning",
+        "mule_spinning",
+        "ring_spinning_systems"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-12",
+      "candidate_name": "Power looms",
+      "mapped_ids": [
+        "electric_power_looms"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-13",
+      "candidate_name": "Sewing machines",
+      "mapped_ids": [
+        "sewing_machine_mechanisms"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-14",
+      "candidate_name": "Domestic refrigeration appliances",
+      "mapped_ids": [
+        "domestic_refrigeration_appliances"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-15",
+      "candidate_name": "Efficient cooking stoves",
+      "mapped_ids": [
+        "household_cooking_stoves",
+        "insulated_food_cookers"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-16",
+      "candidate_name": "Synthetic textile fibers",
+      "mapped_ids": [
+        "solution_spun_fibers",
+        "melt_spun_fibers"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-17",
+      "candidate_name": "Flame resistant fabrics",
+      "mapped_ids": [
+        "flame_resistant_textiles"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-18",
+      "candidate_name": "Washing machines",
+      "mapped_ids": [
+        "mechanical_washing_machines"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-19",
+      "candidate_name": "Ergonomic household tools",
+      "mapped_ids": [
+        "household_task_ergonomics"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-20",
+      "candidate_name": "Adaptive assistive clothing",
+      "mapped_ids": [
+        "adaptive_assistive_clothing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-21",
+      "candidate_name": "Textile fiber separation",
+      "mapped_ids": [
+        "textile_fiber_separation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-22",
+      "candidate_name": "Reparable domestic robots",
+      "mapped_ids": [
+        "repairable_domestic_robots"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-23",
+      "candidate_name": "Low energy fabric finishing",
+      "mapped_ids": [
+        "low_energy_fabric_finishing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-24",
+      "candidate_name": "Responsive insulating textiles",
+      "mapped_ids": [
+        "responsive_insulating_textiles"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D07-25",
+      "candidate_name": "Closed loop textile production",
+      "mapped_ids": [
+        "closed_loop_textile_production"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-01",
+      "candidate_name": "Weather signs",
+      "mapped_ids": [
+        "seasonal_patterns",
+        "weather_observation_logs"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-02",
+      "candidate_name": "Mineral field mapping",
+      "mapped_ids": [
+        "geochemical_anomaly_mapping",
+        "structural_geologic_mapping"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-03",
+      "candidate_name": "Tidal calendars",
+      "mapped_ids": [
+        "tidal_port_planning",
+        "tidal_harmonic_analysis"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-04",
+      "candidate_name": "Groundwater tracing",
+      "mapped_ids": [
+        "groundwater_tracer_interpretation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-05",
+      "candidate_name": "Seasonal flood records",
+      "mapped_ids": [
+        "seasonal_flood_reconstruction"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-06",
+      "candidate_name": "Stratigraphic observation",
+      "mapped_ids": [
+        "relative_stratigraphy"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-07",
+      "candidate_name": "Compass field measurement",
+      "mapped_ids": [
+        "geomagnetic_field_surveys"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-08",
+      "candidate_name": "Barometric observation",
+      "mapped_ids": [
+        "barometric_observation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-09",
+      "candidate_name": "Ocean current charts",
+      "mapped_ids": [
+        "ocean_current_observation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-10",
+      "candidate_name": "Temperature record networks",
+      "mapped_ids": [
+        "temperature_station_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-11",
+      "candidate_name": "Seismology",
+      "mapped_ids": [
+        "seismic_wave_observation",
+        "seismic_source_location"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-12",
+      "candidate_name": "Plate tectonic theory",
+      "mapped_ids": [
+        "plate_tectonic_theory"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-13",
+      "candidate_name": "Atmospheric circulation models",
+      "mapped_ids": [
+        "atmospheric_circulation_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-14",
+      "candidate_name": "Oceanographic surveying",
+      "mapped_ids": [
+        "hydrographic_charting",
+        "ocean_temperature_salinity_profiles"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-15",
+      "candidate_name": "Radiometric dating",
+      "mapped_ids": [
+        "radiometric_geochronology"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-16",
+      "candidate_name": "Satellite Earth observation",
+      "mapped_ids": [
+        "satellite_earth_observation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-17",
+      "candidate_name": "Climate system modeling",
+      "mapped_ids": [
+        "climate_system_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-18",
+      "candidate_name": "Hazard early warning",
+      "mapped_ids": [
+        "hazard_early_warning_services"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-19",
+      "candidate_name": "Carbon cycle measurement",
+      "mapped_ids": [
+        "carbon_cycle_measurement"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-20",
+      "candidate_name": "Deep ocean sensing",
+      "mapped_ids": [
+        "deep_ocean_sensor_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-21",
+      "candidate_name": "Verified carbon removal",
+      "mapped_ids": [
+        "carbon_removal_verification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-22",
+      "candidate_name": "Ice sheet dynamics forecasting",
+      "mapped_ids": [
+        "ice_sheet_dynamics_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-23",
+      "candidate_name": "Regional water climate prediction",
+      "mapped_ids": [
+        "regional_hydroclimate_projection"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-24",
+      "candidate_name": "Planetary sensor integration",
+      "mapped_ids": [
+        "planetary_sensor_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    },
+    {
+      "review_id": "D22-25",
+      "candidate_name": "Climate intervention monitoring",
+      "mapped_ids": [
+        "climate_intervention_monitoring"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Catalog reference only; implementation, full field coverage and numerical performance are not established."
+    }
+  ]
+}

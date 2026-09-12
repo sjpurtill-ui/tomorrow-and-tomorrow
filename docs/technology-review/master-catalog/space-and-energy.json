@@ -1,0 +1,1977 @@
+[
+  {
+    "field": "D05",
+    "id": "waterwheel_head_surveys",
+    "name": "Waterwheel Head Surveys",
+    "foundations": "flow_continuity,hydrostatic_pressure",
+    "mechanism": "Compare available head and discharge before selecting a wheel site",
+    "operating_requirement": "Survey workers and seasonal flow observations",
+    "consequence": "Reject sites unable to support the intended shaft load",
+    "status": "authored_draft",
+    "requires_all": [
+      "flow_continuity",
+      "hydrostatic_pressure"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "overshot_waterwheels",
+    "name": "Overshot Waterwheels",
+    "foundations": "waterwheel_head_surveys,joinery",
+    "mechanism": "Water admitted above the axle transfers gravitational energy through bucket loading",
+    "operating_requirement": "Head race, wheel, maintained buckets and seasonal water",
+    "consequence": "Deliver local shaft work while sufficient flow exists",
+    "status": "authored_draft",
+    "requires_all": [
+      "waterwheel_head_surveys",
+      "joinery"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "undershot_waterwheels",
+    "name": "Undershot Waterwheels",
+    "foundations": "waterwheel_head_surveys,joinery",
+    "mechanism": "Moving stream water pushes submerged blades",
+    "operating_requirement": "Anchored wheel and an adequate current",
+    "consequence": "Use low-head rivers with lower conversion efficiency",
+    "status": "authored_draft",
+    "requires_all": [
+      "waterwheel_head_surveys",
+      "joinery"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "breastshot_waterwheels",
+    "name": "Breastshot Waterwheels",
+    "foundations": "waterwheel_head_surveys,bearing_surfaces",
+    "mechanism": "Water enters near axle height and acts through a confined curved passage",
+    "operating_requirement": "Masonry breast, wheel and controlled inlet",
+    "consequence": "Exploit moderate heads with measured leakage losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "waterwheel_head_surveys",
+      "bearing_surfaces"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "waterwheel_gate_control",
+    "name": "Waterwheel Gate Control",
+    "foundations": "feedback_governors",
+    "mechanism": "Vary inlet flow to match changing shaft demand",
+    "operating_requirement": "Gate, linkage and assigned operator",
+    "consequence": "Avoid excessive wheel speed and unnecessary water use",
+    "status": "authored_draft",
+    "requires_all": [
+      "feedback_governors"
+    ],
+    "requires_any": [
+      [
+        "overshot_waterwheels",
+        "undershot_waterwheels",
+        "breastshot_waterwheels"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D05",
+    "id": "millpond_storage",
+    "name": "Millpond Storage",
+    "foundations": "waterwheel_head_surveys,drainage",
+    "mechanism": "Store inflow behind a controlled outlet to separate supply timing from demand",
+    "operating_requirement": "Embankment, spillway and finite reservoir",
+    "consequence": "Run a mill temporarily when current inflow is insufficient",
+    "status": "authored_draft",
+    "requires_all": [
+      "waterwheel_head_surveys",
+      "drainage"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "impulse_turbines",
+    "name": "Impulse Turbines",
+    "foundations": "flow_continuity,precision_machinery",
+    "mechanism": "A high-speed water jet changes momentum against shaped buckets",
+    "operating_requirement": "Pressure pipe, nozzle, rotor and head",
+    "consequence": "Produce shaft work from high-head water",
+    "status": "authored_draft",
+    "requires_all": [
+      "flow_continuity",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "reaction_turbines",
+    "name": "Reaction Turbines",
+    "foundations": "flow_continuity,viscous_resistance",
+    "mechanism": "Pressure and velocity changes through submerged passages exert torque",
+    "operating_requirement": "Pressure casing, runner and controlled outlet",
+    "consequence": "Convert medium-head water into rotating work",
+    "status": "authored_draft",
+    "requires_all": [
+      "flow_continuity",
+      "viscous_resistance"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "adjustable_blade_turbines",
+    "name": "Adjustable-Blade Turbines",
+    "foundations": "reaction_turbines,feedback_governors",
+    "mechanism": "Change runner pitch with flow to maintain useful operating conditions",
+    "operating_requirement": "Movable blade hubs and governors",
+    "consequence": "Broaden efficient operation across variable discharge",
+    "status": "authored_draft",
+    "requires_all": [
+      "reaction_turbines",
+      "feedback_governors"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "turbine_cavitation_control",
+    "name": "Turbine Cavitation Control",
+    "foundations": "reaction_turbines,hydrostatic_pressure",
+    "mechanism": "Keep local pressure above damaging vapor-cavity conditions",
+    "operating_requirement": "Pressure observations, suitable setting and maintenance",
+    "consequence": "Reduce erosion at the cost of restricted operating range",
+    "status": "authored_draft",
+    "requires_all": [
+      "reaction_turbines",
+      "hydrostatic_pressure"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "hydroelectric_generation",
+    "name": "Hydroelectric Generation",
+    "foundations": "electrical_generators",
+    "mechanism": "Couple hydraulic shaft power to a generator",
+    "operating_requirement": "Water rights, turbine, generator and staffed switchgear",
+    "consequence": "Provide electricity limited by flow and head",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_generators"
+    ],
+    "requires_any": [
+      [
+        "impulse_turbines",
+        "reaction_turbines",
+        "overshot_waterwheels"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D05",
+    "id": "pumped_hydro_storage",
+    "name": "Pumped Hydro Storage",
+    "foundations": "hydroelectric_generation,electric_motors",
+    "mechanism": "Spend electricity lifting water and recover part during descent",
+    "operating_requirement": "Two reservoirs, reversible machinery and finite water",
+    "consequence": "Shift electrical supply across time with energy losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydroelectric_generation",
+      "electric_motors"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "windmill_sail_control",
+    "name": "Windmill Sail Control",
+    "foundations": "woven_carriers,rotational_dynamics",
+    "mechanism": "Adjust exposed sail area to changing wind force",
+    "operating_requirement": "Sails, rigging and a miller",
+    "consequence": "Regulate wind-driven machinery without constant output",
+    "status": "authored_draft",
+    "requires_all": [
+      "woven_carriers",
+      "rotational_dynamics"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "windmill_yaw_control",
+    "name": "Windmill Yaw Control",
+    "foundations": "bearing_surfaces",
+    "mechanism": "Turn the rotor plane toward the wind",
+    "operating_requirement": "Rotating cap or yaw bearing and control linkage",
+    "consequence": "Reduce misalignment losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "bearing_surfaces"
+    ],
+    "requires_any": [
+      [
+        "windmill_sail_control",
+        "airfoil_wind_rotors"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D05",
+    "id": "airfoil_wind_rotors",
+    "name": "Airfoil Wind Rotors",
+    "foundations": "aerodynamics,wind_tunnel_testing",
+    "mechanism": "Shaped blades generate torque mainly through aerodynamic lift",
+    "operating_requirement": "Manufactured blades, tower and bearings",
+    "consequence": "Convert a bounded wind-speed range to shaft work",
+    "status": "authored_draft",
+    "requires_all": [
+      "aerodynamics",
+      "wind_tunnel_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "wind_turbine_pitch_control",
+    "name": "Wind Turbine Pitch Control",
+    "foundations": "airfoil_wind_rotors,feedback_governors",
+    "mechanism": "Change blade pitch to limit torque and regulate power",
+    "operating_requirement": "Actuators, sensors and fail-safe controls",
+    "consequence": "Curtail generation in damaging winds",
+    "status": "authored_draft",
+    "requires_all": [
+      "airfoil_wind_rotors",
+      "feedback_governors"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "wind_generator_conversion",
+    "name": "Wind Generator Conversion",
+    "foundations": "airfoil_wind_rotors,electrical_generators",
+    "mechanism": "Match variable rotor speed to an electrical generator",
+    "operating_requirement": "Gearbox or direct drive and electrical conversion",
+    "consequence": "Supply variable electricity with conversion losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "airfoil_wind_rotors",
+      "electrical_generators"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "wind_resource_assessment",
+    "name": "Wind Resource Assessment",
+    "foundations": "statistical_sampling,measurement_uncertainty",
+    "mechanism": "Estimate distributions of wind speed and direction from observations",
+    "operating_requirement": "Masts, instruments and a sufficiently long record",
+    "consequence": "Choose sites using expected output and uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_sampling",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "solar_thermal_collectors",
+    "name": "Solar Thermal Collectors",
+    "foundations": "glassmaking,calorimetry",
+    "mechanism": "Absorb sunlight into a fluid while restricting heat loss",
+    "operating_requirement": "Collector area, piping and a usable heat load",
+    "consequence": "Provide weather-dependent low-temperature heat",
+    "status": "authored_draft",
+    "requires_all": [
+      "glassmaking",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "solar_concentrators",
+    "name": "Solar Concentrators",
+    "foundations": "experimental_optics,solar_thermal_collectors",
+    "mechanism": "Mirrors redirect sunlight onto a smaller receiver",
+    "operating_requirement": "Reflectors, tracking and clear-sky radiation",
+    "consequence": "Reach higher temperatures with optical losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_optics",
+      "solar_thermal_collectors"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "thermal_storage_tanks",
+    "name": "Thermal Storage Tanks",
+    "foundations": "calorimetry,pressure_vessels",
+    "mechanism": "Retain sensible heat in an insulated finite mass",
+    "operating_requirement": "Tank, storage medium and heat exchanger",
+    "consequence": "Delay heat use while losing energy to surroundings",
+    "status": "authored_draft",
+    "requires_all": [
+      "calorimetry",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "phase_change_heat_storage",
+    "name": "Phase-Change Heat Storage",
+    "foundations": "thermal_storage_tanks,precision_thermometry",
+    "mechanism": "Store latent heat during a controlled material transition",
+    "operating_requirement": "Compatible containment and selected phase-change medium",
+    "consequence": "Buffer heat near a transition temperature",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermal_storage_tanks",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "concentrated_solar_power",
+    "name": "Concentrated Solar Power",
+    "foundations": "solar_concentrators,heat_engine_cycles",
+    "mechanism": "Use concentrated solar heat to drive a thermodynamic engine",
+    "operating_requirement": "Receiver, engine, cooling and generator",
+    "consequence": "Produce dispatch-limited electricity from sunlight and stored heat",
+    "status": "authored_draft",
+    "requires_all": [
+      "solar_concentrators",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "geothermal_resource_testing",
+    "name": "Geothermal Resource Testing",
+    "foundations": "geologic_cross_sections,precision_thermometry",
+    "mechanism": "Measure subsurface temperature, flow and reservoir response",
+    "operating_requirement": "Test wells, pumps and monitoring",
+    "consequence": "Distinguish heat in rock from an exploitable reservoir",
+    "status": "authored_draft",
+    "requires_all": [
+      "geologic_cross_sections",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "geothermal_heat_exchange",
+    "name": "Geothermal Heat Exchange",
+    "foundations": "geothermal_resource_testing,pressure_pipe_jointing",
+    "mechanism": "Transfer reservoir heat through a circulating working fluid",
+    "operating_requirement": "Wells, piping and corrosion management",
+    "consequence": "Provide heat while reservoir and flow remain adequate",
+    "status": "authored_draft",
+    "requires_all": [
+      "geothermal_resource_testing",
+      "pressure_pipe_jointing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "binary_geothermal_cycles",
+    "name": "Binary Geothermal Cycles",
+    "foundations": "geothermal_heat_exchange,heat_engine_cycles",
+    "mechanism": "A secondary working fluid extracts useful work from moderate-temperature heat",
+    "operating_requirement": "Heat exchanger, turbine and condenser",
+    "consequence": "Generate electricity without passing reservoir fluid through the turbine",
+    "status": "authored_draft",
+    "requires_all": [
+      "geothermal_heat_exchange",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "combined_heat_and_power",
+    "name": "Combined Heat and Power",
+    "foundations": "electrical_generators,heat_engine_cycles",
+    "mechanism": "Use otherwise rejected engine heat near an appropriate demand",
+    "operating_requirement": "Generator, heat exchanger and nearby heat consumers",
+    "consequence": "Improve useful energy recovery without creating additional fuel",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_generators",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "district_heating_loops",
+    "name": "District Heating Loops",
+    "foundations": "pressure_pipe_jointing,thermal_storage_tanks",
+    "mechanism": "Circulate heat through a shared supply-and-return pipe system",
+    "operating_requirement": "Insulated pipes, pumps and connected buildings",
+    "consequence": "Deliver heat with distance and pumping losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "pressure_pipe_jointing",
+      "thermal_storage_tanks"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "heat_pump_cycles",
+    "name": "Heat Pump Cycles",
+    "foundations": "mechanical_refrigeration,heat_engine_cycles",
+    "mechanism": "Spend work to move heat from a colder source to a warmer sink",
+    "operating_requirement": "Compressor, exchangers and suitable temperature difference",
+    "consequence": "Deliver heat exceeding input work by extracting environmental heat",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_refrigeration",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "ground_source_heat_pumps",
+    "name": "Ground-Source Heat Pumps",
+    "foundations": "heat_pump_cycles,geothermal_heat_exchange",
+    "mechanism": "Use the shallow ground as a heat source or sink",
+    "operating_requirement": "Ground loop, pump and sufficient ground exchange capacity",
+    "consequence": "Moderate seasonal heating and cooling loads",
+    "status": "authored_draft",
+    "requires_all": [
+      "heat_pump_cycles",
+      "geothermal_heat_exchange"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "boiler_feedwater_treatment",
+    "name": "Boiler Feedwater Treatment",
+    "foundations": "pressure_vessels,chemical_distillation",
+    "mechanism": "Remove scale-forming and corrosive constituents before heating",
+    "operating_requirement": "Treatment plant, chemicals and testing",
+    "consequence": "Reduce fouling and boiler damage through consumable treatment",
+    "status": "authored_draft",
+    "requires_all": [
+      "pressure_vessels",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "steam_condensers",
+    "name": "Steam Condensers",
+    "foundations": "steam_propulsion,calorimetry",
+    "mechanism": "Condense exhaust steam at reduced pressure and recover feedwater",
+    "operating_requirement": "Cooling source, condenser and vacuum integrity",
+    "consequence": "Improve steam-cycle work while adding cooling demand",
+    "status": "authored_draft",
+    "requires_all": [
+      "steam_propulsion",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "steam_superheating",
+    "name": "Steam Superheating",
+    "foundations": "steam_propulsion,precision_thermometry",
+    "mechanism": "Raise steam temperature above saturation before expansion",
+    "operating_requirement": "Heat-resistant tubes and controlled combustion",
+    "consequence": "Improve expansion conditions within material limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "steam_propulsion",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "regenerative_feed_heating",
+    "name": "Regenerative Feed Heating",
+    "foundations": "steam_condensers,heat_engine_cycles",
+    "mechanism": "Use extracted steam to preheat feedwater",
+    "operating_requirement": "Heaters, piping and controlled bleed flows",
+    "consequence": "Trade some turbine flow for reduced boiler heat demand",
+    "status": "authored_draft",
+    "requires_all": [
+      "steam_condensers",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "gas_turbine_cycles",
+    "name": "Gas Turbine Cycles",
+    "foundations": "heat_engine_cycles,aerodynamics",
+    "mechanism": "Compress air, add heat and expand hot gas through a turbine",
+    "operating_requirement": "Compressor, combustion chamber and heat-resistant turbine",
+    "consequence": "Produce shaft work with continuous fuel and airflow",
+    "status": "authored_draft",
+    "requires_all": [
+      "heat_engine_cycles",
+      "aerodynamics"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "combined_cycle_generation",
+    "name": "Combined-Cycle Generation",
+    "foundations": "gas_turbine_cycles,steam_condensers",
+    "mechanism": "Use gas-turbine exhaust heat to supply a second steam cycle",
+    "operating_requirement": "Heat recovery boiler, steam turbine and cooling",
+    "consequence": "Recover more electrical work from a fuel stream",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_turbine_cycles",
+      "steam_condensers"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "generator_excitation_control",
+    "name": "Generator Excitation Control",
+    "foundations": "electrical_generators,feedback_governors",
+    "mechanism": "Adjust magnetic excitation to control terminal electrical conditions",
+    "operating_requirement": "Exciter, sensing and regulator",
+    "consequence": "Maintain voltage within a defined operating envelope",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_generators",
+      "feedback_governors"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "alternating_current_distribution",
+    "name": "Alternating-Current Distribution",
+    "foundations": "wound_transformers,electrical_generators",
+    "mechanism": "Transform voltage between generation, transmission and use",
+    "operating_requirement": "Transformers, insulated conductors and protection",
+    "consequence": "Trade voltage for current to manage resistive losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "wound_transformers",
+      "electrical_generators"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "three_phase_power",
+    "name": "Three-Phase Power",
+    "foundations": "alternating_current_distribution,harmonic_analysis",
+    "mechanism": "Displaced alternating phases transfer power and form rotating fields",
+    "operating_requirement": "Compatible machines, three conductors and phase control",
+    "consequence": "Support efficient rotating machinery and shared power delivery",
+    "status": "authored_draft",
+    "requires_all": [
+      "alternating_current_distribution",
+      "harmonic_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "protective_circuit_breakers",
+    "name": "Protective Circuit Breakers",
+    "foundations": "electromagnetic_relays,electrical_measurement",
+    "mechanism": "Interrupt a circuit when measured fault conditions exceed limits",
+    "operating_requirement": "Rated interrupters and coordinated trip settings",
+    "consequence": "Limit fault duration while disconnecting affected supply",
+    "status": "authored_draft",
+    "requires_all": [
+      "electromagnetic_relays",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "grid_synchronization",
+    "name": "Grid Synchronization",
+    "foundations": "three_phase_power,frequency_stabilization",
+    "mechanism": "Match phase, frequency and voltage before connecting generators",
+    "operating_requirement": "Instrumentation, control and switching equipment",
+    "consequence": "Connect sources without excessive transient currents",
+    "status": "authored_draft",
+    "requires_all": [
+      "three_phase_power",
+      "frequency_stabilization"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "load_dispatch",
+    "name": "Load Dispatch",
+    "foundations": "grid_synchronization,constrained_optimization",
+    "mechanism": "Allocate available generation against demand and operating constraints",
+    "operating_requirement": "Telemetry, staffed control and controllable sources",
+    "consequence": "Balance supply while respecting fuel and equipment limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "grid_synchronization",
+      "constrained_optimization"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "transmission_stability",
+    "name": "Transmission Stability",
+    "foundations": "grid_synchronization,differential_equations",
+    "mechanism": "Analyze whether linked machines retain acceptable motion after disturbances",
+    "operating_requirement": "System models, observations and protective controls",
+    "consequence": "Restrict transfers or isolate faults before widespread instability",
+    "status": "authored_draft",
+    "requires_all": [
+      "grid_synchronization",
+      "differential_equations"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "high_voltage_direct_current",
+    "name": "High-Voltage Direct Current",
+    "foundations": "three_phase_power,silicon_rectifiers",
+    "mechanism": "Convert between alternating supply and a controlled direct-current link",
+    "operating_requirement": "Converter stations, insulation and line capacity",
+    "consequence": "Carry bulk power with conversion cost and distinct control requirements",
+    "status": "authored_draft",
+    "requires_all": [
+      "three_phase_power",
+      "silicon_rectifiers"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "grid_forming_inverters",
+    "name": "Grid-Forming Inverters",
+    "foundations": "transistor_inverters,feedback_governors",
+    "mechanism": "A controlled converter establishes a local voltage waveform",
+    "operating_requirement": "Power electronics, energy source and control reserve",
+    "consequence": "Support an islanded electrical system within finite power limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "transistor_inverters",
+      "feedback_governors"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "islandable_microgrids",
+    "name": "Islandable Microgrids",
+    "foundations": "grid_forming_inverters,protective_circuit_breakers",
+    "mechanism": "Separate and rebalance a local electrical island when an upstream link fails",
+    "operating_requirement": "Local generation, switchgear and adequate reserves",
+    "consequence": "Maintain prioritized loads while shedding unsupported demand",
+    "status": "authored_draft",
+    "requires_all": [
+      "grid_forming_inverters",
+      "protective_circuit_breakers"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "black_start_planning",
+    "name": "Black-Start Planning",
+    "foundations": "grid_synchronization,islandable_microgrids",
+    "mechanism": "Sequence self-starting sources and loads to rebuild a de-energized grid",
+    "operating_requirement": "Start-capable equipment, stored energy and rehearsed crews",
+    "consequence": "Restore supply without assuming the grid already operates",
+    "status": "authored_draft",
+    "requires_all": [
+      "grid_synchronization",
+      "islandable_microgrids"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "battery_state_estimation",
+    "name": "Battery State Estimation",
+    "foundations": "charge_regulation,least_squares_estimation",
+    "mechanism": "Infer usable charge from current, voltage, temperature and a cell model",
+    "operating_requirement": "Sensors, computation and calibrated storage models",
+    "consequence": "Avoid treating nominal capacity as available energy",
+    "status": "authored_draft",
+    "requires_all": [
+      "charge_regulation",
+      "least_squares_estimation"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "battery_thermal_management",
+    "name": "Battery Thermal Management",
+    "foundations": "battery_bank_wiring,heat_pump_cycles",
+    "mechanism": "Control cell temperature during charging and discharge",
+    "operating_requirement": "Thermal paths, sensors and cooling power",
+    "consequence": "Reduce thermal stress while consuming auxiliary energy",
+    "status": "authored_draft",
+    "requires_all": [
+      "battery_bank_wiring",
+      "heat_pump_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "flow_battery_storage",
+    "name": "Flow Battery Storage",
+    "foundations": "chloralkali_cells,electrochemical_cells",
+    "mechanism": "Store electroactive liquids separately and circulate them through a cell stack",
+    "operating_requirement": "Electrolyte tanks, membranes, pumps and conversion equipment",
+    "consequence": "Separate stored-energy volume from stack power rating",
+    "status": "authored_draft",
+    "requires_all": [
+      "chloralkali_cells",
+      "electrochemical_cells"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "hydrogen_storage_systems",
+    "name": "Hydrogen Storage Systems",
+    "foundations": "water_electrolysis,pressure_vessels",
+    "mechanism": "Contain hydrogen with compatible seals and controlled pressure or temperature",
+    "operating_requirement": "Rated vessels, leak detection and handling procedures",
+    "consequence": "Retain a finite hydrogen inventory with losses and hazards",
+    "status": "authored_draft",
+    "requires_all": [
+      "water_electrolysis",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "fuel_cell_stacks",
+    "name": "Fuel Cell Stacks",
+    "foundations": "electrochemical_cells,hydrogen_storage_systems",
+    "mechanism": "Combine fuel and oxidant electrochemically across controlled electrodes",
+    "operating_requirement": "Catalysts, electrolyte, reactant supply and thermal management",
+    "consequence": "Produce electricity while consuming chemical reactants",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrochemical_cells",
+      "hydrogen_storage_systems"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "electrolyzer_load_control",
+    "name": "Electrolyzer Load Control",
+    "foundations": "water_electrolysis,load_dispatch",
+    "mechanism": "Adjust hydrogen production to available electricity and process limits",
+    "operating_requirement": "Controllable electrolyzers, water and gas handling",
+    "consequence": "Absorb surplus power into a finite chemical inventory",
+    "status": "authored_draft",
+    "requires_all": [
+      "water_electrolysis",
+      "load_dispatch"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "nuclear_fuel_fabrication",
+    "name": "Nuclear Fuel Fabrication",
+    "foundations": "reactor_engineering,dimensional_metrology",
+    "mechanism": "Prepare and enclose reactor fuel to defined composition and dimensions",
+    "operating_requirement": "Specialized facilities, containment and verified material records",
+    "consequence": "Supply a specified reactor without granting generic nuclear operation",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_engineering",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "reactor_heat_removal",
+    "name": "Reactor Heat Removal",
+    "foundations": "reactor_engineering,flow_continuity",
+    "mechanism": "Move reactor heat through a maintained coolant circuit",
+    "operating_requirement": "Pumps or passive circulation, exchangers and coolant inventory",
+    "consequence": "Keep temperatures within design limits during defined conditions",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_engineering",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "reactor_shutdown_systems",
+    "name": "Reactor Shutdown Systems",
+    "foundations": "reactor_engineering,protective_circuit_breakers",
+    "mechanism": "Introduce negative reactivity through independent shutdown mechanisms",
+    "operating_requirement": "Qualified absorbers, sensing and actuators",
+    "consequence": "Stop the chain reaction while decay heat still requires removal",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_engineering",
+      "protective_circuit_breakers"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "decay_heat_management",
+    "name": "Decay Heat Management",
+    "foundations": "reactor_shutdown_systems,reactor_heat_removal",
+    "mechanism": "Provide cooling after fission power falls because radioactive decay continues",
+    "operating_requirement": "Long-duration heat sinks and reliable coolant paths",
+    "consequence": "Avoid mistaking shutdown for an immediate end to cooling demand",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_shutdown_systems",
+      "reactor_heat_removal"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "nuclear_waste_characterization",
+    "name": "Nuclear Waste Characterization",
+    "foundations": "radiation_measurement,material_accounting",
+    "mechanism": "Measure radionuclide inventory and material form before selecting handling",
+    "operating_requirement": "Shielded sampling, assay and chain of custody",
+    "consequence": "Assign storage and isolation requirements to actual waste",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiation_measurement",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_plasma_confinement",
+    "name": "Fusion Plasma Confinement",
+    "foundations": "atomic_physics,electromagnetic_wave_theory",
+    "mechanism": "Attempt to retain a hot plasma long enough for useful fusion conditions",
+    "operating_requirement": "Specialized magnets or inertial drivers and diagnostic systems",
+    "consequence": "Enable confinement experiments; net power is not assumed",
+    "status": "authored_draft",
+    "requires_all": [
+      "atomic_physics",
+      "electromagnetic_wave_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_power_integration",
+    "name": "Fusion Power Integration",
+    "foundations": "fusion_plasma_confinement,reactor_heat_removal",
+    "mechanism": "Combine a demonstrated fusion source with heat recovery and plant energy accounting",
+    "operating_requirement": "Validated source, materials, fuel cycle and auxiliary power budget",
+    "consequence": "Only a positive verified net energy balance enables power delivery",
+    "status": "authored_draft",
+    "requires_all": [
+      "fusion_plasma_confinement",
+      "reactor_heat_removal"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "angular_sky_catalogs",
+    "name": "Angular Sky Catalogs",
+    "foundations": "wayfinding_stars,standard_measures",
+    "mechanism": "Record repeatable angular positions of visible sky objects",
+    "operating_requirement": "Calibrated sights, records and repeated observations",
+    "consequence": "Compare sky positions without assuming physical distances",
+    "status": "authored_draft",
+    "requires_all": [
+      "wayfinding_stars",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "planetary_motion_tables",
+    "name": "Planetary Motion Tables",
+    "foundations": "angular_sky_catalogs,formal_archives",
+    "mechanism": "Fit repeated apparent planetary positions into predictive tables",
+    "operating_requirement": "Long observational records and trained calculators",
+    "consequence": "Predict apparent positions with quantified residual errors",
+    "status": "authored_draft",
+    "requires_all": [
+      "angular_sky_catalogs",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "celestial_reference_frames",
+    "name": "Celestial Reference Frames",
+    "foundations": "angular_sky_catalogs,coordinate_geometry",
+    "mechanism": "Specify axes, origins and epochs for positional measurements",
+    "operating_requirement": "Agreed conventions and maintained reference observations",
+    "consequence": "Make observations from different sites comparable",
+    "status": "authored_draft",
+    "requires_all": [
+      "angular_sky_catalogs",
+      "coordinate_geometry"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_dynamics",
+    "name": "Orbital Dynamics",
+    "foundations": "inertial_motion,momentum_balance,differential_equations",
+    "mechanism": "Predict trajectories under gravitational acceleration",
+    "operating_requirement": "Measured initial conditions and suitable force models",
+    "consequence": "Estimate orbital paths rather than treating spaceflight as straight travel",
+    "status": "authored_draft",
+    "requires_all": [
+      "inertial_motion",
+      "momentum_balance",
+      "differential_equations"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "orbit_determination",
+    "name": "Orbit Determination",
+    "foundations": "orbital_dynamics,least_squares_estimation,celestial_reference_frames",
+    "mechanism": "Infer a trajectory from uncertain observations over time",
+    "operating_requirement": "Tracking observations, computation and calibrated clocks",
+    "consequence": "Update orbit estimates with uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "least_squares_estimation",
+      "celestial_reference_frames"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "launch_window_planning",
+    "name": "Launch Window Planning",
+    "foundations": "orbital_dynamics,constrained_optimization",
+    "mechanism": "Choose departure times compatible with target geometry and vehicle limits",
+    "operating_requirement": "Trajectory calculation and actual vehicle performance",
+    "consequence": "Restrict departure opportunities by achievable trajectories",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "constrained_optimization"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "rocket_nozzle_expansion",
+    "name": "Rocket Nozzle Expansion",
+    "foundations": "flow_continuity,heat_engine_cycles",
+    "mechanism": "Expand hot gas through a shaped nozzle to produce directed exhaust momentum",
+    "operating_requirement": "Heat-resistant nozzle and pressurized gas source",
+    "consequence": "Produce measurable thrust with pressure-dependent losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "flow_continuity",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "rocket_propellant_feed",
+    "name": "Rocket Propellant Feed",
+    "foundations": "pressure_vessels,pressure_pipe_jointing",
+    "mechanism": "Deliver controlled propellant flows to a combustion chamber",
+    "operating_requirement": "Compatible tanks, valves and feed system",
+    "consequence": "Support sustained firing while finite propellants remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "pressure_vessels",
+      "pressure_pipe_jointing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "liquid_rocket_engines",
+    "name": "Liquid Rocket Engines",
+    "foundations": "rocket_nozzle_expansion,rocket_propellant_feed",
+    "mechanism": "Combine separately stored propellants in a controlled thrust chamber",
+    "operating_requirement": "Qualified propellants, injectors, ignition and cooling",
+    "consequence": "Produce controllable rocket impulse at actual propellant cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "rocket_nozzle_expansion",
+      "rocket_propellant_feed"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "solid_rocket_motors",
+    "name": "Solid Rocket Motors",
+    "foundations": "rocket_nozzle_expansion,black_powder",
+    "mechanism": "A shaped solid propellant grain burns inside a pressure casing",
+    "operating_requirement": "Prepared grain, casing, nozzle and ignition",
+    "consequence": "Deliver a largely predetermined thrust history",
+    "status": "authored_draft",
+    "requires_all": [
+      "rocket_nozzle_expansion",
+      "black_powder"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "rocket_staging",
+    "name": "Rocket Staging",
+    "foundations": "orbital_dynamics,structural_load_testing",
+    "mechanism": "Discard expended structural mass between propulsion phases",
+    "operating_requirement": "Separation mechanisms and independently qualified stages",
+    "consequence": "Improve achievable velocity while introducing separation risk",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "launch_vehicle_guidance",
+    "name": "Launch Vehicle Guidance",
+    "foundations": "orbital_dynamics,electronic_machine_control",
+    "mechanism": "Steer a vehicle using measured motion and a target trajectory",
+    "operating_requirement": "Sensors, computation and control authority",
+    "consequence": "Correct deviations within remaining propellant and actuator limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "electronic_machine_control"
+    ],
+    "requires_any": [
+      [
+        "inertial_navigation_platforms",
+        "launch_range_tracking"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D23",
+    "id": "inertial_navigation_platforms",
+    "name": "Inertial Navigation Platforms",
+    "foundations": "measured_kinematics,rotational_dynamics,resistive_sensing",
+    "mechanism": "Integrate accelerometer and rotation measurements to estimate motion",
+    "operating_requirement": "Calibrated inertial sensors and initialization",
+    "consequence": "Navigate without continuous external fixes while errors accumulate",
+    "status": "authored_draft",
+    "requires_all": [
+      "measured_kinematics",
+      "rotational_dynamics",
+      "resistive_sensing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "launch_range_tracking",
+    "name": "Launch Range Tracking",
+    "foundations": "orbit_determination,radio_telegraphy",
+    "mechanism": "Track a rising vehicle with coordinated ground measurements",
+    "operating_requirement": "Tracking stations, timing and communication links",
+    "consequence": "Estimate flight progress and detect major deviations",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbit_determination",
+      "radio_telegraphy"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "cryogenic_propellant_storage",
+    "name": "Cryogenic Propellant Storage",
+    "foundations": "cryogenic_air_separation,thermal_storage_tanks",
+    "mechanism": "Retain low-temperature fluids with insulation and pressure control",
+    "operating_requirement": "Insulated tanks, venting and compatible transfer hardware",
+    "consequence": "Hold finite propellant inventories with boil-off losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryogenic_air_separation",
+      "thermal_storage_tanks"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "rocket_engine_turbopumps",
+    "name": "Rocket Engine Turbopumps",
+    "foundations": "gas_turbine_cycles,rocket_propellant_feed",
+    "mechanism": "Turbine-driven pumps supply high chamber pressure without equally heavy tanks",
+    "operating_requirement": "High-speed pumps, seals and suitable turbine drive",
+    "consequence": "Raise engine feed pressure within cavitation and thermal limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_turbine_cycles",
+      "rocket_propellant_feed"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "regenerative_rocket_cooling",
+    "name": "Regenerative Rocket Cooling",
+    "foundations": "liquid_rocket_engines,flow_continuity",
+    "mechanism": "Circulate propellant through chamber passages before injection",
+    "operating_requirement": "Manufactured channels and adequate coolant flow",
+    "consequence": "Limit chamber wall temperature while transferring heat to fuel",
+    "status": "authored_draft",
+    "requires_all": [
+      "liquid_rocket_engines",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "spacecraft_structural_testing",
+    "name": "Spacecraft Structural Testing",
+    "foundations": "structural_load_testing,cyclic_fatigue",
+    "mechanism": "Qualify payload structures against launch vibration and loading",
+    "operating_requirement": "Test fixtures, representative loads and inspection",
+    "consequence": "Reject assemblies unable to survive the specified launch environment",
+    "status": "authored_draft",
+    "requires_all": [
+      "structural_load_testing",
+      "cyclic_fatigue"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "spacecraft_attitude_sensing",
+    "name": "Spacecraft Attitude Sensing",
+    "foundations": "celestial_reference_frames,optical_lenses,inertial_navigation_platforms",
+    "mechanism": "Combine external references and inertial observations to estimate orientation",
+    "operating_requirement": "Star or sun sensors, inertial sensors and processing",
+    "consequence": "Know pointing direction within sensor uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "celestial_reference_frames",
+      "optical_lenses",
+      "inertial_navigation_platforms"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "reaction_wheel_control",
+    "name": "Reaction-Wheel Control",
+    "foundations": "spacecraft_attitude_sensing,electric_motors,rotational_dynamics",
+    "mechanism": "Exchange angular momentum between spacecraft and internal wheels",
+    "operating_requirement": "Wheels, drives, power and momentum management",
+    "consequence": "Adjust orientation until wheel saturation or failure limits control",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_attitude_sensing",
+      "electric_motors",
+      "rotational_dynamics"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "spacecraft_thruster_control",
+    "name": "Spacecraft Thruster Control",
+    "foundations": "spacecraft_attitude_sensing",
+    "mechanism": "Apply small directed impulses to change orientation or trajectory",
+    "operating_requirement": "Thrusters, valves and finite propellant",
+    "consequence": "Perform corrections at measurable propellant cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_attitude_sensing"
+    ],
+    "requires_any": [
+      [
+        "rocket_propellant_feed",
+        "electric_space_propulsion"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_rendezvous",
+    "name": "Orbital Rendezvous",
+    "foundations": "orbit_determination,launch_vehicle_guidance",
+    "mechanism": "Match position and velocity with a target using relative-motion planning",
+    "operating_requirement": "Tracking, guidance and adequate maneuver reserve",
+    "consequence": "Approach another spacecraft without assuming immediate docking",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbit_determination",
+      "launch_vehicle_guidance"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "spacecraft_docking",
+    "name": "Spacecraft Docking",
+    "foundations": "orbital_rendezvous,precision_machinery",
+    "mechanism": "Align and mechanically capture two vehicles under limited relative motion",
+    "operating_requirement": "Compatible interfaces, sensors and capture mechanisms",
+    "consequence": "Join vehicles when alignment and approach conditions are satisfied",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_rendezvous",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_transfer_planning",
+    "name": "Orbital Transfer Planning",
+    "foundations": "orbital_dynamics,constrained_optimization",
+    "mechanism": "Trade transfer time, impulse and trajectory constraints between orbits",
+    "operating_requirement": "Trajectory tools and verified propulsion capability",
+    "consequence": "Choose feasible transfers instead of spending arbitrary travel points",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "constrained_optimization"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "gravity_assist_navigation",
+    "name": "Gravity-Assist Navigation",
+    "foundations": "orbit_determination,orbital_transfer_planning",
+    "mechanism": "Exchange momentum with a moving gravitating body during a planned flyby",
+    "operating_requirement": "Accurate ephemerides, tracking and trajectory correction",
+    "consequence": "Alter heliocentric trajectory within encounter geometry",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbit_determination",
+      "orbital_transfer_planning"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "electric_space_propulsion",
+    "name": "Electric Space Propulsion",
+    "foundations": "plasma_physics,electrical_generators",
+    "mechanism": "Use electrical energy to accelerate reaction mass",
+    "operating_requirement": "Power supply, thruster and propellant feed",
+    "consequence": "Accumulate velocity through low continuous thrust",
+    "status": "authored_draft",
+    "requires_all": [
+      "plasma_physics",
+      "electrical_generators"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "plasma_physics",
+    "name": "Plasma Physics",
+    "foundations": "atomic_physics,electromagnetic_wave_theory",
+    "mechanism": "Model collective behavior of charged particles and fields",
+    "operating_requirement": "Plasma sources, diagnostics and mathematical models",
+    "consequence": "Provide a foundation for controlled discharge and propulsion experiments",
+    "status": "authored_draft",
+    "requires_all": [
+      "atomic_physics",
+      "electromagnetic_wave_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "spacecraft_thermal_balance",
+    "name": "Spacecraft Thermal Balance",
+    "foundations": "calorimetry,experimental_optics",
+    "mechanism": "Balance radiation, internal dissipation and absorbed external heat",
+    "operating_requirement": "Thermal model, surface treatments and measured loads",
+    "consequence": "Identify temperatures incompatible with equipment or crew operation",
+    "status": "authored_draft",
+    "requires_all": [
+      "calorimetry",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "space_radiators",
+    "name": "Space Radiators",
+    "foundations": "spacecraft_thermal_balance,pressure_pipe_jointing",
+    "mechanism": "Reject waste heat by thermal radiation from exposed surfaces",
+    "operating_requirement": "Radiator area, fluid transport and unobstructed view",
+    "consequence": "Limit continuous power use by available heat rejection",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_thermal_balance",
+      "pressure_pipe_jointing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "multilayer_space_insulation",
+    "name": "Multilayer Space Insulation",
+    "foundations": "spacecraft_thermal_balance,foil_capacitors",
+    "mechanism": "Separated reflective layers reduce radiative heat exchange",
+    "operating_requirement": "Low-conductance spacers and vacuum-compatible sheets",
+    "consequence": "Reduce heat transfer without eliminating conduction paths",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_thermal_balance",
+      "foil_capacitors"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "space_power_arrays",
+    "name": "Space Power Arrays",
+    "foundations": "photovoltaic_power,spacecraft_attitude_sensing",
+    "mechanism": "Orient and condition solar-array output for a spacecraft load",
+    "operating_requirement": "Qualified arrays, deployment and power electronics",
+    "consequence": "Provide sunlight-dependent electrical supply",
+    "status": "authored_draft",
+    "requires_all": [
+      "photovoltaic_power",
+      "spacecraft_attitude_sensing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "space_power_eclipse_reserves",
+    "name": "Space Power Eclipse Reserves",
+    "foundations": "space_power_arrays",
+    "mechanism": "Reserve stored energy for periods without usable sunlight",
+    "operating_requirement": "Batteries, load prediction and priority control",
+    "consequence": "Sustain selected loads across finite eclipses",
+    "status": "authored_draft",
+    "requires_all": [
+      "space_power_arrays"
+    ],
+    "requires_any": [
+      [
+        "battery_state_estimation",
+        "fuel_cell_stacks"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D23",
+    "id": "space_radiation_shielding",
+    "name": "Space Radiation Shielding",
+    "foundations": "radiation_measurement,spacecraft_structural_testing",
+    "mechanism": "Use material and geometry to reduce specified radiation exposures",
+    "operating_requirement": "Mass budget, exposure model and measured particle environment",
+    "consequence": "Reduce dose with material-dependent secondary-radiation tradeoffs",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiation_measurement",
+      "spacecraft_structural_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_environment_monitoring",
+    "name": "Orbital Environment Monitoring",
+    "foundations": "orbit_determination,radiation_measurement",
+    "mechanism": "Track debris and environmental conditions relevant to operations",
+    "operating_requirement": "Sensors, catalogs and maintained observations",
+    "consequence": "Inform avoidance and equipment-protection decisions",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbit_determination",
+      "radiation_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "collision_avoidance_maneuvers",
+    "name": "Collision-Avoidance Maneuvers",
+    "foundations": "orbital_environment_monitoring,spacecraft_thruster_control",
+    "mechanism": "Alter a trajectory when a predicted close approach warrants action",
+    "operating_requirement": "Uncertain conjunction estimates and maneuver reserve",
+    "consequence": "Trade propellant and mission disturbance for reduced encounter risk",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_environment_monitoring",
+      "spacecraft_thruster_control"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "controlled_reentry",
+    "name": "Controlled Reentry",
+    "foundations": "orbital_dynamics,aerodynamics",
+    "mechanism": "Plan atmospheric entry to manage deceleration, heating and landing region",
+    "operating_requirement": "Entry vehicle, navigation and atmospheric estimates",
+    "consequence": "Reach a defined return corridor within vehicle limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "aerodynamics"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "ablative_heat_shields",
+    "name": "Ablative Heat Shields",
+    "foundations": "controlled_reentry,calorimetry",
+    "mechanism": "Sacrificial material absorbs and carries away entry heat",
+    "operating_requirement": "Qualified ablative material and structural backing",
+    "consequence": "Protect a vehicle while consuming shield material",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_reentry",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "reusable_thermal_protection",
+    "name": "Reusable Thermal Protection",
+    "foundations": "controlled_reentry,refractory_body_trials",
+    "mechanism": "Low-conductance high-temperature surfaces limit heat reaching structure",
+    "operating_requirement": "Insulating tiles or panels and inspection",
+    "consequence": "Permit reuse only after damage and thermal qualification",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_reentry",
+      "refractory_body_trials"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "surface_descent_navigation",
+    "name": "Surface Descent Navigation",
+    "foundations": "spacecraft_attitude_sensing,launch_vehicle_guidance",
+    "mechanism": "Estimate motion relative to a surface and control a landing trajectory",
+    "operating_requirement": "Altitude and velocity sensing with adequate propulsion",
+    "consequence": "Land within terrain and residual-fuel limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_attitude_sensing",
+      "launch_vehicle_guidance"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "planetary_rover_mobility",
+    "name": "Planetary Rover Mobility",
+    "foundations": "inertial_navigation_platforms,electric_motors,soil_infiltration_trials",
+    "mechanism": "Manage traction and obstacle traversal on uncertain terrain",
+    "operating_requirement": "Wheels or tracks, suspension, sensors and energy",
+    "consequence": "Move a payload subject to slip, terrain and power constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "inertial_navigation_platforms",
+      "electric_motors",
+      "soil_infiltration_trials"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "remote_manipulation",
+    "name": "Remote Manipulation",
+    "foundations": "electronic_machine_control,spacecraft_attitude_sensing",
+    "mechanism": "Control an instrumented manipulator while observing contact and motion",
+    "operating_requirement": "Actuators, sensing and suitable operator feedback",
+    "consequence": "Handle tools or payloads with limited force and reach",
+    "status": "authored_draft",
+    "requires_all": [
+      "electronic_machine_control",
+      "spacecraft_attitude_sensing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "space_suit_pressure_systems",
+    "name": "Space-Suit Pressure Systems",
+    "foundations": "pressure_vessels,packed_piston_seals",
+    "mechanism": "Maintain a wearable pressure boundary with joints and life-support connections",
+    "operating_requirement": "Qualified suit materials, seals and gas inventory",
+    "consequence": "Permit external activity for a bounded duration",
+    "status": "authored_draft",
+    "requires_all": [
+      "pressure_vessels",
+      "packed_piston_seals"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "spacecraft_atmosphere_control",
+    "name": "Spacecraft Atmosphere Control",
+    "foundations": "gas_composition_analysis",
+    "mechanism": "Monitor and regulate cabin gas pressure and composition",
+    "operating_requirement": "Gas stores, valves, sensors and removal systems",
+    "consequence": "Maintain specified breathable conditions while resources last",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis"
+    ],
+    "requires_any": [
+      [
+        "pressure_vessels",
+        "space_suit_pressure_systems"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D23",
+    "id": "gas_composition_analysis",
+    "name": "Gas Composition Analysis",
+    "foundations": "spectroscopy,chemical_distillation",
+    "mechanism": "Measure components of a gas mixture using calibrated separation or spectral response",
+    "operating_requirement": "Sampling equipment, references and trained analysts",
+    "consequence": "Detect composition changes instead of inferring them from total pressure",
+    "status": "authored_draft",
+    "requires_all": [
+      "spectroscopy",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "carbon_dioxide_removal",
+    "name": "Carbon-Dioxide Removal",
+    "foundations": "gas_composition_analysis,chemical_distillation",
+    "mechanism": "Remove accumulated carbon dioxide with sorbents or regenerable separation",
+    "operating_requirement": "Air circulation, sorbent capacity and regeneration energy",
+    "consequence": "Control cabin carbon dioxide with finite consumable or power costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "cabin_oxygen_regeneration",
+    "name": "Cabin Oxygen Regeneration",
+    "foundations": "water_electrolysis,carbon_dioxide_removal",
+    "mechanism": "Generate replacement oxygen while accounting for separated gases and water",
+    "operating_requirement": "Electrolyzer, water supply and gas handling",
+    "consequence": "Reduce stored oxygen dependence without closing every life-support loop",
+    "status": "authored_draft",
+    "requires_all": [
+      "water_electrolysis",
+      "carbon_dioxide_removal"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "space_water_recovery",
+    "name": "Space Water Recovery",
+    "foundations": "chemical_distillation,water_service_inspections",
+    "mechanism": "Collect and process wastewater and humidity condensate for reuse",
+    "operating_requirement": "Treatment train, filters, energy and quality verification",
+    "consequence": "Recover part of used water with residual waste and losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "chemical_distillation",
+      "water_service_inspections"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "closed_habitat_material_accounts",
+    "name": "Closed-Habitat Material Accounts",
+    "foundations": "material_accounting,space_water_recovery",
+    "mechanism": "Track flows and losses of water, gases, food and waste within a habitat",
+    "operating_requirement": "Sensors, inventories and accountable operations",
+    "consequence": "Expose recurring resupply needs and unexplained losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting",
+      "space_water_recovery"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "habitat_fire_control",
+    "name": "Habitat Fire Control",
+    "foundations": "gas_composition_analysis,spacecraft_atmosphere_control",
+    "mechanism": "Detect and suppress combustion within a constrained atmosphere",
+    "operating_requirement": "Detection, isolation, extinguishing equipment and crew procedures",
+    "consequence": "Limit fire damage while protecting remaining atmosphere",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis",
+      "spacecraft_atmosphere_control"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_habitat_assembly",
+    "name": "Orbital Habitat Assembly",
+    "foundations": "spacecraft_docking,spacecraft_structural_testing",
+    "mechanism": "Join qualified habitation modules and commission shared services",
+    "operating_requirement": "Launch capacity, interfaces, crew and external manipulation",
+    "consequence": "Create usable habitat capacity only after services are operating",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_docking",
+      "spacecraft_structural_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "rotating_habitat_dynamics",
+    "name": "Rotating Habitat Dynamics",
+    "foundations": "rotational_dynamics,orbital_habitat_assembly",
+    "mechanism": "Use rotation to create an effective acceleration while managing balance and motion coupling",
+    "operating_requirement": "Rotating structure, bearings or free-flight design and control",
+    "consequence": "Support artificial-gravity experiments; human tolerance must be demonstrated",
+    "status": "authored_draft",
+    "requires_all": [
+      "rotational_dynamics",
+      "orbital_habitat_assembly"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "regolith_excavation",
+    "name": "Regolith Excavation",
+    "foundations": "planetary_rover_mobility,remote_manipulation",
+    "mechanism": "Move granular surface material under local gravity and contact conditions",
+    "operating_requirement": "Excavator, wear parts, power and dust control",
+    "consequence": "Supply handled regolith at finite excavation cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "planetary_rover_mobility",
+      "remote_manipulation"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "regolith_volatile_assays",
+    "name": "Regolith Volatile Assays",
+    "foundations": "regolith_excavation,gas_composition_analysis",
+    "mechanism": "Heat and analyze samples to estimate recoverable volatile content",
+    "operating_requirement": "Representative sampling, controlled heating and analysis",
+    "consequence": "Distinguish detectable traces from useful extractable reserves",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_excavation",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "lunar_oxygen_extraction",
+    "name": "Lunar Oxygen Extraction",
+    "foundations": "regolith_volatile_assays,water_electrolysis",
+    "mechanism": "Release oxygen from qualified local feedstock through a selected chemical or electrochemical process",
+    "operating_requirement": "Demonstrated feedstock, reactors, consumables and power",
+    "consequence": "Produce oxygen only where the chosen process and resource are viable",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_volatile_assays",
+      "water_electrolysis"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "in_situ_construction_materials",
+    "name": "In-Situ Construction Materials",
+    "foundations": "regolith_excavation",
+    "mechanism": "Process local material into qualified structural or shielding elements",
+    "operating_requirement": "Material trials, processing equipment and inspection",
+    "consequence": "Replace some imported mass with locally produced components",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_excavation"
+    ],
+    "requires_any": [
+      [
+        "refractory_body_trials",
+        "structural_load_testing"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Shared foundations remain mandatory; one member of each alternative group is sufficient. Operating assets and local validation remain required."
+  },
+  {
+    "field": "D23",
+    "id": "planetary_surface_power",
+    "name": "Planetary Surface Power",
+    "foundations": "spacecraft_thermal_balance",
+    "mechanism": "Combine local generation and storage against surface illumination and thermal conditions",
+    "operating_requirement": "Installed qualified generators, maintained distribution and actual storage or independent reserves sized for the specified surface environment and interruptions",
+    "consequence": "Power surface loads through a specified environmental cycle",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_thermal_balance"
+    ],
+    "requires_any": [
+      [
+        "space_power_arrays",
+        "fission_electric_space_power"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Solar arrays or qualified fission-electric generation can supply a surface system. Site-specific illumination, thermal rejection, radiation protection and finite continuity reserves remain real operating requirements."
+  },
+  {
+    "field": "D23",
+    "id": "deep_space_tracking",
+    "name": "Deep-Space Tracking",
+    "foundations": "orbit_determination,superheterodyne_reception",
+    "mechanism": "Recover weak spacecraft signals and measure timing or frequency for navigation",
+    "operating_requirement": "Large receiving systems, calibrated clocks and scheduled contact",
+    "consequence": "Update remote trajectory estimates subject to light time and link limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbit_determination",
+      "superheterodyne_reception"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "delay_tolerant_space_networks",
+    "name": "Delay-Tolerant Space Networks",
+    "foundations": "store_forward_archives,deep_space_tracking",
+    "mechanism": "Retain data across scheduled or interrupted links with long propagation delays",
+    "operating_requirement": "Addressed storage, contact plans and compatible endpoints",
+    "consequence": "Deliver messages after real transmission opportunities rather than instantly",
+    "status": "authored_draft",
+    "requires_all": [
+      "store_forward_archives",
+      "deep_space_tracking"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "optical_space_links",
+    "name": "Optical Space Links",
+    "foundations": "experimental_optics,spacecraft_attitude_sensing,deep_space_tracking",
+    "mechanism": "Exchange narrowly directed optical signals between accurately pointed terminals",
+    "operating_requirement": "Demonstrated optical source, detector, pointing and contact geometry",
+    "consequence": "Raise potential data throughput while tightening acquisition and pointing limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_optics",
+      "spacecraft_attitude_sensing",
+      "deep_space_tracking"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  },
+  {
+    "field": "D23",
+    "id": "interstellar_probe_navigation",
+    "name": "Interstellar Probe Navigation",
+    "foundations": "gravity_assist_navigation,delay_tolerant_space_networks",
+    "mechanism": "Navigate a long-duration probe with sparse delayed ground corrections",
+    "operating_requirement": "Demonstrated propulsion, durable autonomy and long-life power",
+    "consequence": "Enable bounded mission studies; interstellar arrival is not assumed",
+    "status": "authored_draft",
+    "requires_all": [
+      "gravity_assist_navigation",
+      "delay_tolerant_space_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+  }
+]

@@ -11,6 +11,8 @@ const BASE_CASUALTY_RATE := 0.055
 const MIN_EFFECTIVE_STRENGTH := 0.05
 
 const UNIT_TYPES := {
+	"field_repair_company":{"name":"Field Repair Company","attack":0.0,"defense":0.5,"organization":1.0},
+	"medical_detachment":{"name":"Medical Detachment","attack":0.0,"defense":0.5,"organization":1.0},
 	"levy": {"name": "Levy", "attack": 0.65, "defense": 0.55, "organization": 0.65},
 	"line_infantry": {"name": "Line Infantry", "attack": 1.00, "defense": 1.00, "organization": 1.00},
 	"skirmisher": {"name": "Skirmisher", "attack": 0.85, "defense": 0.60, "organization": 0.85},
@@ -64,6 +66,8 @@ const UNIT_TYPES := {
 }
 
 const WEAPONS := {
+	"repair_kit":{"name":"Armorer tools","attack":0.0,"defense":0.5,"armor":0.0,"penetration":0.0},
+	"medical_kit":{"name":"Medical care equipment","attack":0.0,"defense":0.6,"armor":0.0,"penetration":0.0},
 	"improvised": {"name": "Improvised Arms", "attack": 0.65, "defense": 0.70, "armor": 0.00, "penetration": 0.10},
 	"spear": {"name": "Spears", "attack": 1.00, "defense": 1.18, "armor": 0.05, "penetration": 0.55},
 	"bow": {"name": "Bows", "attack": 1.18, "defense": 0.70, "armor": 0.00, "penetration": 0.35},
@@ -205,6 +209,7 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		armor_total += count * float(weapon.armor)
 		penetration_total += count * float(weapon.penetration)
 		normalized.append({"id":int(formation.get("id",-1)),"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"ammunition":ammunition,"ammunition_required":ammunition_required,"training":training,"experience":experience,"personnel_condition":clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0),"readiness":clampf(float(formation.get("readiness",readiness)),0.0,1.5),"prototype":bool(formation.get("prototype",false)),"wear_accumulator":float(formation.get("wear_accumulator",0.0))})
+		normalized[-1]["doctrines"]=preload("res://scripts/combined_arms_doctrine.gd").clean(formation.get("doctrines",{}))
 		normalized[-1]["visual_model"] = String(formation.get("visual_model", ""))
 	var divisor := maxf(1.0, float(troops))
 	return {
@@ -379,12 +384,13 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var condition_factor:=0.72+personnel_condition*0.28
 		var matchup := _weighted_matchup(unit_id, enemy_formations)
 		matchup=1.0+(matchup-1.0)*(0.65+tactics*0.70)
+		var doctrine_defense:=preload("res://scripts/combined_arms_doctrine.gd").defense(formation,formations,enemy_formations)
 		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) - _enemy_penetration(enemy_formations)) * 0.35
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
 			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
-			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*float(formation.get("round_order_defense",1.0)),
-			"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
+			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
+			"doctrine_defense":doctrine_defense,"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
 		})
 	return result
 
@@ -452,6 +458,7 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	var scattered_progress:=float(prepared.get("scattered_recovery_accumulator",0.0))+float(scattered_available)*(0.22+logistics*0.28)
 	var wounded_progress:=float(prepared.get("wounded_recovery_accumulator",0.0))+float(wounded_available)*(0.035+logistics*0.055)*recovery_multiplier
 	var scattered_return:=mini(scattered_available,maxi(0,floori(scattered_progress)))
+	wounded_progress+=clampf(float(context.get("medical_recovery",0)),0,float(wounded_available))
 	var wounded_return:=mini(wounded_available,maxi(0,floori(wounded_progress)))
 	prepared["scattered_recovery_accumulator"]=scattered_progress-float(scattered_return) if scattered_available>scattered_return else 0.0
 	prepared["wounded_recovery_accumulator"]=wounded_progress-float(wounded_return) if wounded_available>wounded_return else 0.0
@@ -464,9 +471,14 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 		var count:=int(formation.get("count",0))
 		var authorized:=int(formation.get("authorized_count",count))
 		var equipment:=int(formation.get("equipment",count))
-		var capacity:=mini(maxi(0,authorized-count),maxi(0,equipment-count))
+		var required:=maxi(1,int(formation.get("equipment_required",equipment_required_for_weapon(String(formation.get("weapon","improvised")),authorized))))
+		var equipped_capacity:=floori(authorized*clampf(float(equipment)/float(required),0,1))
+		var capacity:=mini(maxi(0,authorized-count),maxi(0,equipped_capacity-count))
 		var arrivals:=mini(manpower_queue,capacity)
 		formation["count"]=count+arrivals
+		if arrivals>0:
+			formation["doctrines"]=preload("res://scripts/combined_arms_doctrine.gd").clean(formation.get("doctrines",{}))
+			for doctrine:String in formation.doctrines:formation.doctrines[doctrine]*=float(count)/float(count+arrivals)
 		formations[index]=formation
 		manpower_queue-=arrivals
 		integrated+=arrivals
@@ -480,6 +492,7 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	prepared["wounded_pool"]=wounded_available-from_wounded+disabled
 	prepared["reserve_manpower"]=reserves_available-from_reserves
 	prepared["formations"]=formations
+	preload("res://scripts/combined_arms_doctrine.gd").practice(formations,context.get("doctrine_levels",{}),float(context.get("doctrine_supply",0)))
 	prepared["troops"]=_formation_manpower(formations)
 	return {"force":prepared,"equipment_delivered":delivered,"equipment_unused":available_equipment,"manpower_rejoined":integrated,"scattered_recovered":scattered_return,"wounded_recovered":wounded_return,"scattered_returned":from_scattered,"wounded_returned":from_wounded,"reserves_arrived":from_reserves,"manpower_waiting_for_equipment":manpower_queue}
 

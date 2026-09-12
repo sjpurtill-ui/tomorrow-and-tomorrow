@@ -1,0 +1,9 @@
+# Compound Microscopy
+
+Mode: built-in image generation, 2026-09-11. Style reference: apprentice_contracts.png. Selected after visual inspection of paper texture, matte palette, negative space and recognizable microscope/slide preparation. Illustrative apparatus rather than an engineering diagram. Copied unchanged to compound_microscopy.png.
+
+Source: /Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-6877d09c-465d-4db4-b08b-6b6b4c70b4b0.png
+
+## Exact prompt
+
+Use case: historical-scene. Asset type: square research-discovery illustration for Tomorrow and Tomorrow. Subject: Compound Microscopy. Use the supplied apprentice illustration only as a style reference for the exact established matte gouache, fibrous warm ivory paper, muted earth palette and broad negative space. Invent a distinct early scientific workshop scene: a seated investigator in a faded slate work coat leans naturally to the eyepiece of one modest brass-and-dark-iron compound microscope on a low wooden table. The microscope has a clearly readable optical tube, small specimen stage, focusing knob, and a little daylight mirror beneath the stage. A second standing assistant in an ivory shirt and muted ochre apron prepares a glass slide beside a shallow sample dish. No visible written text. The microscope and their attentive gestures are the focal point. Keep the people and table in one compact group in the lower half, with the upper half mostly empty ivory paper. Warm dry-brush pigment, soft uneven silhouettes, sparse woodblock-like marks, simplified faces, charcoal olive shadows, restrained ochre and terracotta. Calm human curiosity. All central equipment contained within a full square. No labels, letters, numbers, logos, border, watermark, inset microscopic images, glowing optics, photorealism or glossy rendering. Illustrative scene, not an engineering schematic.

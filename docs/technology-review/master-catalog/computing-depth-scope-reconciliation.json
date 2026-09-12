@@ -1,0 +1,62 @@
+{
+  "status": "scope_clarification_for_review",
+  "adds_discovery_identities": 0,
+  "mappings": [
+    {
+      "existing_id": "integrated_circuit_fabrication",
+      "scope": "Integration of connected devices on one substrate; distinct pattern removal, dopant introduction, planarity and test mechanisms require their own process qualification.",
+      "distinct_children": [
+        "selective_wet_etching",
+        "plasma_pattern_etching",
+        "ion_implantation_control",
+        "chemical_mechanical_planarization",
+        "wafer_electrical_probing"
+      ]
+    },
+    {
+      "existing_id": "semiconductor_package_engineering",
+      "scope": "General die protection and electrical/thermal interface design; specific joining and vertical-interconnect processes are distinct physical mechanisms.",
+      "distinct_children": [
+        "wire_bond_interconnection",
+        "flip_chip_interconnection",
+        "through_silicon_interconnects",
+        "package_thermal_path_design"
+      ]
+    },
+    {
+      "existing_id": "microprocessor_architecture",
+      "scope": "Architectural organization and externally specified execution; pipelining, scheduling and lane organization are distinct implementation techniques.",
+      "distinct_children": [
+        "pipeline_instruction_execution",
+        "out_of_order_execution",
+        "vector_instruction_execution"
+      ]
+    },
+    {
+      "existing_id": "transactional_databases",
+      "scope": "Transaction consistency and recovery contract; logging and version visibility are distinct implementation choices, not both universal prerequisites.",
+      "distinct_children": [
+        "write_ahead_recovery_logs",
+        "multiversion_concurrency_control"
+      ]
+    },
+    {
+      "existing_id": "fault_tolerant_computing",
+      "scope": "General fault detection and redundancy; persistent job resumption and replica ownership transfer address different recovery states.",
+      "distinct_children": [
+        "checkpoint_restart_computation",
+        "replicated_service_failover"
+      ]
+    },
+    {
+      "existing_id": "statistical_learning",
+      "scope": "Learning objective and model fitting; evaluation separation, calibration and model compression each change a distinct evidence or resource mechanism.",
+      "distinct_children": [
+        "held_out_model_evaluation",
+        "model_uncertainty_calibration",
+        "model_compression_qualification"
+      ]
+    }
+  ],
+  "runtime_effect": "None. Preserve existing identities; review these scope boundaries when implementing the operating graph."
+}

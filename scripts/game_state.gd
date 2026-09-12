@@ -124,6 +124,8 @@ var society_subcategories:Dictionary={}
 ## it never grows with population.
 var societal_values:Dictionary=SOCIETAL_VALUES_MODEL.initial_state("",world_seed,"player")
 var combined_intelligence:=0.18
+var technology_operations:Dictionary=preload("res://scripts/technology_operations.gd").empty_state()
+var research_notification_mode:="milestones"
 var discovery_log: Array[Dictionary] = []
 var active_observations: Array[String] = []
 var research_targets:Dictionary={}
@@ -227,6 +229,7 @@ var material_history: Array[Dictionary] = []
 var water_metrics: Dictionary = {"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 var water_history: Array[Dictionary] = []
 var food_stocks: Dictionary = {}
+var cultivation_nutrients:Dictionary={"nitrogen":0.0,"phosphorus":0.0}
 var food_source_health := {"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
 var food_history: Array[Dictionary] = []
 ## Bounded aggregate audit trail for food removed outside the daily meal cycle
@@ -444,6 +447,8 @@ func reset_for_new_world(new_seed:int)->void:
 	society_subcategories={}
 	societal_values=SOCIETAL_VALUES_MODEL.initial_state("",world_seed,"player")
 	combined_intelligence=0.18
+	technology_operations=preload("res://scripts/technology_operations.gd").empty_state()
+	research_notification_mode="milestones"
 	discovery_log=[]
 	active_observations=[]
 	research_targets={}
@@ -530,6 +535,7 @@ func reset_for_new_world(new_seed:int)->void:
 	water_metrics={"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 	water_history=[]
 	food_stocks={}
+	cultivation_nutrients={"nitrogen":0.0,"phosphorus":0.0}
 	food_source_health={"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
 	food_history=[]
 	food_issue_history=[]
@@ -1362,6 +1368,8 @@ func effective_workers(role:String,include_military_construction:bool=false)->fl
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
 	if role=="Construction" and not include_military_construction and WorldSimulation.military.joint_operations!=null:capacity*=1.0-WorldSimulation.military.joint_operations.construction_share(resource_settlement_id)
+	if role=="Knowledge":capacity=maxf(0,capacity-preload("res://scripts/scholar_visits.gd").absent(self,int(elapsed_days)))
+	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/technology_operations.gd").reserved_workers(self))
 	return capacity
 
 func receive_injured_veterans(count:int,severe:int)->void:

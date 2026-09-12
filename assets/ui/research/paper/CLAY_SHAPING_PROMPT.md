@@ -1,0 +1,5 @@
+# Clay Shaping
+
+Built-in image generation using apprentice_contracts.png as a style reference. Visually reviewed: hand-built coil vessel, unfired clay, no wheel, broad ivory paper and matte muted gouache.
+
+Use case: historical-scene. Generate a new square technology-tree subject illustration for Clay Shaping. Use the reference solely for its style: matte gouache on fibrous warm ivory paper, rough broken brush edges, flattened simplified human forms, muted ochre, olive, terracotta and charcoal; quiet low composition and broad empty space. Show an early potter seated on the ground in the lower right, building a small round vessel by adding a coil of damp clay to its rim with both hands. Beside them a few coils of raw clay and one modest completed unfired bowl lie on a reed mat. The vessel must read as handmade coil pottery. No pottery wheel, no kiln, no fire, no metal tools. Suggest a distant low riverbank with a tiny muted reed cluster. Keep at least the top sixty percent empty warm ivory paper, with spare low terrain marks. No text, frame, watermark, photorealism, glossy lighting, fantasy or ornamental decoration.

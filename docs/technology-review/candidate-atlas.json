@@ -1,0 +1,4202 @@
+[
+  {
+    "review_id": "D01-01",
+    "name": "Seasonal food calendars",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-02",
+    "name": "Selective seed keeping",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-03",
+    "name": "Root crop propagation",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-04",
+    "name": "Food drying racks",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-05",
+    "name": "Smoke preservation",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-06",
+    "name": "Terrace cultivation",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-07",
+    "name": "Managed fallow",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-08",
+    "name": "Crop rotation",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-09",
+    "name": "Grafting orchards",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-10",
+    "name": "Seed granaries",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-11",
+    "name": "Rotary grain milling",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-12",
+    "name": "Mechanical threshing",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-13",
+    "name": "Pressure canning",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-14",
+    "name": "Soil nutrient testing",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-15",
+    "name": "Synthetic nitrogen fertilizer",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-16",
+    "name": "Hybrid crop breeding",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-17",
+    "name": "Refrigerated food storage",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-18",
+    "name": "Drip irrigation",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-19",
+    "name": "Integrated pest management",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-20",
+    "name": "Controlled environment agriculture",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-21",
+    "name": "Precision fermentation",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-22",
+    "name": "Cultured food bioreactors",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-23",
+    "name": "Salt tolerant crop breeding",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-24",
+    "name": "Robotic selective harvesting",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D01-25",
+    "name": "Closed nutrient food production",
+    "field": "Food and agriculture",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-01",
+    "name": "Water source comparison",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-02",
+    "name": "Lined wells",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-03",
+    "name": "Rainwater cisterns",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-04",
+    "name": "Household boiling",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-05",
+    "name": "Waste separation",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-06",
+    "name": "Gravity aqueducts",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-07",
+    "name": "Infiltration galleries",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-08",
+    "name": "Ceramic water pipes",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-09",
+    "name": "Public washing facilities",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-10",
+    "name": "Covered drains",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-11",
+    "name": "Municipal filtration",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-12",
+    "name": "Pressure water networks",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-13",
+    "name": "Sewer ventilation",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-14",
+    "name": "Waterborne disease tracing",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-15",
+    "name": "Mechanical sewage pumping",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-16",
+    "name": "Drinking water disinfection",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-17",
+    "name": "Activated sludge treatment",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-18",
+    "name": "Membrane desalination",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-19",
+    "name": "Leak detection networks",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-20",
+    "name": "Wastewater nutrient recovery",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-21",
+    "name": "Energy recovering desalination",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-22",
+    "name": "Selective contaminant membranes",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-23",
+    "name": "Autonomous water network control",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-24",
+    "name": "Closed habitat water recycling",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D02-25",
+    "name": "Distributed potable reuse",
+    "field": "Water and sanitation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-01",
+    "name": "Animal track interpretation",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-02",
+    "name": "Seasonal burning practice",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-03",
+    "name": "Habitat refuges",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-04",
+    "name": "Seed dispersal observation",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-05",
+    "name": "Woodland coppicing",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-06",
+    "name": "Community grazing rules",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-07",
+    "name": "Contour erosion control",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-08",
+    "name": "Managed fisheries",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-09",
+    "name": "Mixed woodland cultivation",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-10",
+    "name": "Watershed protection",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-11",
+    "name": "Species inventories",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-12",
+    "name": "Population ecology",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-13",
+    "name": "Forest regeneration plans",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-14",
+    "name": "Pest predator management",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-15",
+    "name": "Wetland drainage assessment",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-16",
+    "name": "Habitat corridors",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-17",
+    "name": "Ecosystem restoration",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-18",
+    "name": "Catch limits from stock surveys",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-19",
+    "name": "Biodiversity monitoring",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-20",
+    "name": "Invasive species control",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-21",
+    "name": "Assisted ecosystem migration",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-22",
+    "name": "Genomic conservation planning",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-23",
+    "name": "Automated habitat monitoring",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-24",
+    "name": "Marine habitat reconstruction",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D03-25",
+    "name": "Regional ecological recovery models",
+    "field": "Ecology and land stewardship",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-01",
+    "name": "Stone selection",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-02",
+    "name": "Controlled flaking",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-03",
+    "name": "Tempered clay",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-04",
+    "name": "Charcoal making",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-05",
+    "name": "Mineral pigment preparation",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-06",
+    "name": "Copper smelting",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-07",
+    "name": "Bronze alloying",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-08",
+    "name": "Bloomery iron",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-09",
+    "name": "Glassmaking",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-10",
+    "name": "Lime mortar chemistry",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-11",
+    "name": "Coke metallurgy",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-12",
+    "name": "Bulk sulfuric acid production",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-13",
+    "name": "Fractional distillation",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-14",
+    "name": "Electrochemical refining",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-15",
+    "name": "Industrial steelmaking",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-16",
+    "name": "Synthetic polymers",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-17",
+    "name": "Semiconductor grade silicon",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-18",
+    "name": "Composite laminates",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-19",
+    "name": "Corrosion resistant alloys",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-20",
+    "name": "Catalytic process design",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-21",
+    "name": "High temperature structural ceramics",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-22",
+    "name": "Recyclable thermoset chemistry",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-23",
+    "name": "High entropy alloys",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-24",
+    "name": "Selective metal recovery",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D04-25",
+    "name": "Radiation tolerant structural materials",
+    "field": "Materials and chemistry",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-01",
+    "name": "Fire maintenance",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-02",
+    "name": "Fire ignition",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-03",
+    "name": "Insulated hearths",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-04",
+    "name": "Fuel drying",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-05",
+    "name": "Charcoal heat control",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-06",
+    "name": "Water wheels",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-07",
+    "name": "Wind driven mills",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-08",
+    "name": "Mechanical power transmission",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-09",
+    "name": "Furnace draft control",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-10",
+    "name": "Heat resistant boilers",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-11",
+    "name": "Steam engines",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-12",
+    "name": "Steam turbines",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-13",
+    "name": "Electrical generators",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-14",
+    "name": "Alternating current transmission",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-15",
+    "name": "Hydroelectric power",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-16",
+    "name": "Photovoltaic conversion",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-17",
+    "name": "Lithium ion storage",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-18",
+    "name": "Fission power generation",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-19",
+    "name": "Grid frequency control",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-20",
+    "name": "High efficiency heat pumps",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-21",
+    "name": "Long duration grid storage",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-22",
+    "name": "Fusion confinement",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-23",
+    "name": "Fusion fuel breeding",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-24",
+    "name": "Fusion heat extraction",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D05-25",
+    "name": "Net electric fusion operation",
+    "field": "Energy and power",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-01",
+    "name": "Wedges and levers",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-02",
+    "name": "Bow drills",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-03",
+    "name": "Wood joinery",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-04",
+    "name": "Hafted tools",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-05",
+    "name": "Rope lifting rigs",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-06",
+    "name": "Treadle lathes",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-07",
+    "name": "Water powered hammers",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-08",
+    "name": "Screw presses",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-09",
+    "name": "Gear cutting",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-10",
+    "name": "Interchangeable gauges",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-11",
+    "name": "Precision machine tools",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-12",
+    "name": "Interchangeable components",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-13",
+    "name": "Assembly line organization",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-14",
+    "name": "Hydraulic machinery",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-15",
+    "name": "Steam powered excavation",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-16",
+    "name": "Numerical machine control",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-17",
+    "name": "Industrial robotics",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-18",
+    "name": "Additive manufacturing",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-19",
+    "name": "Non destructive inspection",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-20",
+    "name": "Semiconductor lithography",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-21",
+    "name": "Adaptive factory control",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-22",
+    "name": "In process defect correction",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-23",
+    "name": "Robotic field repair",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-24",
+    "name": "Microfabrication assembly",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D06-25",
+    "name": "Distributed manufacturing verification",
+    "field": "Machinery and manufacturing",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-01",
+    "name": "Twisted cordage",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-02",
+    "name": "Basket weaving",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-03",
+    "name": "Hide tanning",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-04",
+    "name": "Bone needle sewing",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-05",
+    "name": "Insulated clothing",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-06",
+    "name": "Spindle spinning",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-07",
+    "name": "Pattern looms",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-08",
+    "name": "Felt making",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-09",
+    "name": "Textile dye fixation",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-10",
+    "name": "Soap making",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-11",
+    "name": "Mechanized spinning",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-12",
+    "name": "Power looms",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-13",
+    "name": "Sewing machines",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-14",
+    "name": "Domestic refrigeration appliances",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-15",
+    "name": "Efficient cooking stoves",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-16",
+    "name": "Synthetic textile fibers",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-17",
+    "name": "Flame resistant fabrics",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-18",
+    "name": "Washing machines",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-19",
+    "name": "Ergonomic household tools",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-20",
+    "name": "Adaptive assistive clothing",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-21",
+    "name": "Textile fiber separation",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-22",
+    "name": "Reparable domestic robots",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-23",
+    "name": "Low energy fabric finishing",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-24",
+    "name": "Responsive insulating textiles",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D07-25",
+    "name": "Closed loop textile production",
+    "field": "Fibers clothing and domestic practice",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-01",
+    "name": "Framed shelters",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-02",
+    "name": "Earthen walls",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-03",
+    "name": "Thatched roofing",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-04",
+    "name": "Stone foundations",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-05",
+    "name": "Passive shelter ventilation",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-06",
+    "name": "Load bearing arches",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-07",
+    "name": "Vaulted construction",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-08",
+    "name": "Planned street drainage",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-09",
+    "name": "Fire separation rules",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-10",
+    "name": "Courtyard climate design",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-11",
+    "name": "Structural steel frames",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-12",
+    "name": "Reinforced concrete",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-13",
+    "name": "Safety elevators",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-14",
+    "name": "Building services coordination",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-15",
+    "name": "Industrial housing systems",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-16",
+    "name": "Seismic isolation",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-17",
+    "name": "Glazed curtain walls",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-18",
+    "name": "District heating",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-19",
+    "name": "Accessible building design",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-20",
+    "name": "Whole building energy control",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-21",
+    "name": "Low carbon structural binders",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-22",
+    "name": "Robotic construction assembly",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-23",
+    "name": "Reusable building components",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-24",
+    "name": "Adaptive coastal foundations",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D08-25",
+    "name": "Self monitoring structures",
+    "field": "Buildings and cities",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-01",
+    "name": "Encoded route memory",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-02",
+    "name": "Carrying frames",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-03",
+    "name": "Pack animal handling",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-04",
+    "name": "Sled transport",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-05",
+    "name": "Wheeled carts",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-06",
+    "name": "Graded roads",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-07",
+    "name": "Timber bridges",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-08",
+    "name": "Relay stations",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-09",
+    "name": "Caravanserais",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-10",
+    "name": "Standard cargo measures",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-11",
+    "name": "Rail traction",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-12",
+    "name": "Railway signaling",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-13",
+    "name": "Pneumatic tires",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-14",
+    "name": "Road freight engines",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-15",
+    "name": "Intermodal freight handling",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-16",
+    "name": "Container logistics",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-17",
+    "name": "Refrigerated freight",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-18",
+    "name": "Warehouse automation",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-19",
+    "name": "Electric road traction",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-20",
+    "name": "Supply network forecasting",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-21",
+    "name": "Autonomous freight corridors",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-22",
+    "name": "High speed magnetic transport",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-23",
+    "name": "Robotic last mile delivery",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-24",
+    "name": "Predictive infrastructure repair",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D09-25",
+    "name": "Resilient multimodal routing",
+    "field": "Overland transport and logistics",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-01",
+    "name": "Hide floats",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-02",
+    "name": "Dugout hulls",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-03",
+    "name": "Paddled river craft",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-04",
+    "name": "Sewn plank hulls",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-05",
+    "name": "Celestial wayfinding",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-06",
+    "name": "Sail handling",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-07",
+    "name": "Outrigger stabilization",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-08",
+    "name": "Hull caulking",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-09",
+    "name": "Coastal pilotage",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-10",
+    "name": "Dry docks",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-11",
+    "name": "Ocean position finding",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-12",
+    "name": "Marine chronometers",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-13",
+    "name": "Iron ship framing",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-14",
+    "name": "Screw propellers",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-15",
+    "name": "Powered harbor handling",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-16",
+    "name": "Marine radar",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-17",
+    "name": "Satellite aided navigation",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-18",
+    "name": "Diesel electric ship systems",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-19",
+    "name": "Automated ballast control",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-20",
+    "name": "Container ports",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-21",
+    "name": "Autonomous ocean navigation",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-22",
+    "name": "Low emission marine propulsion",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-23",
+    "name": "Robotic hull maintenance",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-24",
+    "name": "Offshore logistics hubs",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D10-25",
+    "name": "Deep ocean cargo habitats",
+    "field": "Navigation and maritime systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-01",
+    "name": "Kite stability",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-02",
+    "name": "Buoyancy experiments",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-03",
+    "name": "Lightweight frame construction",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-04",
+    "name": "Fabric aerodynamic testing",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-05",
+    "name": "Wind profile observation",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-06",
+    "name": "Glider control",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-07",
+    "name": "Lighter than air craft",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-08",
+    "name": "Propeller aerodynamics",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-09",
+    "name": "Lift measurement",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-10",
+    "name": "Airframe load testing",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-11",
+    "name": "Powered fixed wing flight",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-12",
+    "name": "Aircraft engine cooling",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-13",
+    "name": "Instrument flight",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-14",
+    "name": "All metal airframes",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-15",
+    "name": "Air traffic coordination",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-16",
+    "name": "Jet propulsion",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-17",
+    "name": "Rotary wing control",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-18",
+    "name": "Pressurized cabins",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-19",
+    "name": "Supersonic inlet control",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-20",
+    "name": "Reusable launch vehicles",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-21",
+    "name": "Electric regional aircraft",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-22",
+    "name": "Autonomous flight verification",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-23",
+    "name": "High temperature flight structures",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-24",
+    "name": "Integrated spaceplane operations",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D11-25",
+    "name": "Reusable orbital transfer stages",
+    "field": "Flight and aerospace",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-01",
+    "name": "Material tallies",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-02",
+    "name": "Shared measures",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-03",
+    "name": "Geometric comparison",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-04",
+    "name": "Seasonal reckoning",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-05",
+    "name": "Fractional quantities",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-06",
+    "name": "Place value calculation",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-07",
+    "name": "Algebraic methods",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-08",
+    "name": "Trigonometric methods",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-09",
+    "name": "Geometric surveying",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-10",
+    "name": "Mechanical timekeeping",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-11",
+    "name": "Differential calculus",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-12",
+    "name": "Probability theory",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-13",
+    "name": "Statistical inference",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-14",
+    "name": "Precision dimensional standards",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-15",
+    "name": "Thermodynamic measurement",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-16",
+    "name": "Information theory",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-17",
+    "name": "Control theory",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-18",
+    "name": "Atomic timekeeping",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-19",
+    "name": "Numerical simulation",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-20",
+    "name": "Uncertainty quantification",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-21",
+    "name": "Quantum limited sensing",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-22",
+    "name": "Distributed precision timing",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-23",
+    "name": "Automated formal proof",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-24",
+    "name": "Multiscale predictive modeling",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D12-25",
+    "name": "Extreme environment metrology",
+    "field": "Mathematics and measurement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-01",
+    "name": "Oral epics",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-02",
+    "name": "Pictographic records",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-03",
+    "name": "Clay record tablets",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-04",
+    "name": "Knotted record systems",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-05",
+    "name": "Messenger routes",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-06",
+    "name": "Phonetic notation",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-07",
+    "name": "Fiber writing sheets",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-08",
+    "name": "Woodblock printing",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-09",
+    "name": "Movable type composition",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-10",
+    "name": "Public postal relays",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-11",
+    "name": "Optical telegraphy",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-12",
+    "name": "Electrical telegraphy",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-13",
+    "name": "Telephone networks",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-14",
+    "name": "Radio transmission",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-15",
+    "name": "Mass newspaper production",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-16",
+    "name": "Optical fiber links",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-17",
+    "name": "Packet switched networks",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-18",
+    "name": "Satellite communications",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-19",
+    "name": "Error correcting transmission",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-20",
+    "name": "Secure digital messaging",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-21",
+    "name": "Delay tolerant interplanetary networks",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-22",
+    "name": "Deep space optical links",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-23",
+    "name": "Archival media longevity",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-24",
+    "name": "Authenticated synthetic media",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D13-25",
+    "name": "Resilient decentralized communications",
+    "field": "Records and communication",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-01",
+    "name": "Wound cleaning",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-02",
+    "name": "Medicinal plant comparison",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-03",
+    "name": "Birth attendance",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-04",
+    "name": "Fracture splinting",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-05",
+    "name": "Maternal recovery care",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-06",
+    "name": "Clinical case records",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-07",
+    "name": "Isolation practice",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-08",
+    "name": "Surgical anatomy",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-09",
+    "name": "Trained midwifery",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-10",
+    "name": "Community infirmaries",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-11",
+    "name": "Anesthesia",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-12",
+    "name": "Antiseptic surgery",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-13",
+    "name": "Germ theory",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-14",
+    "name": "Immunization programs",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-15",
+    "name": "Public health surveillance",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-16",
+    "name": "Antibiotic production",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-17",
+    "name": "Diagnostic imaging",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-18",
+    "name": "Blood transfusion services",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-19",
+    "name": "Organ transplantation",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-20",
+    "name": "Emergency care systems",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-21",
+    "name": "Personalized cell therapy",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-22",
+    "name": "Targeted drug delivery",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-23",
+    "name": "Regenerative tissue treatment",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-24",
+    "name": "Rapid pathogen platform response",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D14-25",
+    "name": "Long term implant integration",
+    "field": "Medicine and public health",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-01",
+    "name": "Animal taming",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-02",
+    "name": "Seed germination trials",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-03",
+    "name": "Yeast culture maintenance",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-04",
+    "name": "Selective herd breeding",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-05",
+    "name": "Plant disease observation",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-06",
+    "name": "Comparative anatomy",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-07",
+    "name": "Microscopy",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-08",
+    "name": "Biological classification",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-09",
+    "name": "Controlled breeding trials",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-10",
+    "name": "Fermentation cultures",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-11",
+    "name": "Cell theory",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-12",
+    "name": "Heredity experiments",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-13",
+    "name": "Microbial isolation",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-14",
+    "name": "Enzyme chemistry",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-15",
+    "name": "Evolutionary population analysis",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-16",
+    "name": "DNA sequencing",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-17",
+    "name": "Recombinant production",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-18",
+    "name": "Genomic selection",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-19",
+    "name": "Gene editing",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-20",
+    "name": "Tissue culture methods",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-21",
+    "name": "Engineered microbial consortia",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-22",
+    "name": "Programmable cell systems",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-23",
+    "name": "Biomanufacturing containment",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-24",
+    "name": "Organ scaffold cultivation",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D15-25",
+    "name": "Evolution resistant bioprocesses",
+    "field": "Biology and biotechnology",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-01",
+    "name": "Customary law",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-02",
+    "name": "Household councils",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-03",
+    "name": "Remembered judgments",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-04",
+    "name": "Shared store rules",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-05",
+    "name": "Water access agreements",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-06",
+    "name": "Property registers",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-07",
+    "name": "Census rolls",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-08",
+    "name": "Specialized courts",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-09",
+    "name": "Public levy schedules",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-10",
+    "name": "Municipal administration",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-11",
+    "name": "Professional civil service",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-12",
+    "name": "Public budget accounting",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-13",
+    "name": "Representative assembly procedure",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-14",
+    "name": "Independent statistical offices",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-15",
+    "name": "Labor inspection systems",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-16",
+    "name": "Administrative appeals",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-17",
+    "name": "Electoral administration",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-18",
+    "name": "Public procurement audits",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-19",
+    "name": "Emergency coordination systems",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-20",
+    "name": "Data protection institutions",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-21",
+    "name": "Algorithmic decision review",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-22",
+    "name": "Cross border resource arbitration",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-23",
+    "name": "Long horizon public trusts",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-24",
+    "name": "Habitat constitutional design",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D16-25",
+    "name": "Distributed civic verification",
+    "field": "Law governance and civic systems",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-01",
+    "name": "Reciprocal gift accounting",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-02",
+    "name": "Barter equivalence practices",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-03",
+    "name": "Market gatherings",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-04",
+    "name": "Cargo seals",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-05",
+    "name": "Debt witnesses",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-06",
+    "name": "Standard coin assay",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-07",
+    "name": "Merchant credit",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-08",
+    "name": "Bills of exchange",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-09",
+    "name": "Mutual risk pools",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-10",
+    "name": "Partnership accounting",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-11",
+    "name": "Double entry bookkeeping",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-12",
+    "name": "Joint stock organization",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-13",
+    "name": "Central clearing",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-14",
+    "name": "Public bond markets",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-15",
+    "name": "Industrial cost accounting",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-16",
+    "name": "Electronic settlement",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-17",
+    "name": "Deposit protection systems",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-18",
+    "name": "Project finance",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-19",
+    "name": "Supply chain credit",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-20",
+    "name": "Payment fraud detection",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-21",
+    "name": "Programmable settlement agreements",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-22",
+    "name": "Resource circularity accounting",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-23",
+    "name": "Interplanetary clearing",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-24",
+    "name": "Automated market oversight",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D17-25",
+    "name": "Long duration liability finance",
+    "field": "Exchange finance and economic organization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-01",
+    "name": "Apprentice contracts",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-02",
+    "name": "Labor rotations",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-03",
+    "name": "Crew handoffs",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-04",
+    "name": "Shared childcare",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-05",
+    "name": "Work and rest limits",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-06",
+    "name": "Traveling scholar instruction",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-07",
+    "name": "Translation workshops",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-08",
+    "name": "Craft guild training",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-09",
+    "name": "Public instruction",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-10",
+    "name": "Scholarly correspondence",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-11",
+    "name": "Research universities",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-12",
+    "name": "Technical institutes",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-13",
+    "name": "Experimental replication networks",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-14",
+    "name": "Occupational safety training",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-15",
+    "name": "Work motion studies",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-16",
+    "name": "Professional certification",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-17",
+    "name": "Multidisciplinary laboratories",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-18",
+    "name": "Open scientific repositories",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-19",
+    "name": "Distance education",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-20",
+    "name": "Research procurement offices",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-21",
+    "name": "Immersive skill transfer",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-22",
+    "name": "Human machine team training",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-23",
+    "name": "Automated experimental facilities",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-24",
+    "name": "Continuous technical retraining",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D18-25",
+    "name": "Intergenerational mission education",
+    "field": "Learning labor and organizations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-01",
+    "name": "Rhythmic performance",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-02",
+    "name": "Pigment image making",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-03",
+    "name": "Ritual gathering practice",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-04",
+    "name": "Kinship memory",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-05",
+    "name": "Festival calendars",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-06",
+    "name": "Public theatre",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-07",
+    "name": "Civic games",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-08",
+    "name": "Comparative chronicles",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-09",
+    "name": "Musical notation",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-10",
+    "name": "Monument conservation",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-11",
+    "name": "Public libraries",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-12",
+    "name": "Museum curation",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-13",
+    "name": "Photographic documentation",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-14",
+    "name": "Recorded sound",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-15",
+    "name": "Mass public exhibition",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-16",
+    "name": "Broadcast production",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-17",
+    "name": "Film editing",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-18",
+    "name": "Digital cultural archives",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-19",
+    "name": "Interactive media design",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-20",
+    "name": "Community heritage stewardship",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-21",
+    "name": "Immersive cultural environments",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-22",
+    "name": "Durable language preservation",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-23",
+    "name": "Collective memory authentication",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-24",
+    "name": "Participatory virtual performance",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D19-25",
+    "name": "Interplanetary cultural exchange",
+    "field": "Culture belief and collective memory",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-01",
+    "name": "Organized watch",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-02",
+    "name": "Bow craft",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-03",
+    "name": "Hafted weapons",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-04",
+    "name": "Shield wall discipline",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-05",
+    "name": "Field fortifications",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-06",
+    "name": "Combined infantry drill",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-07",
+    "name": "Mounted reconnaissance",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-08",
+    "name": "Siege engineering",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-09",
+    "name": "Military staff planning",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-10",
+    "name": "Naval boarding doctrine",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-11",
+    "name": "Rifled barrels",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-12",
+    "name": "Metallic cartridges",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-13",
+    "name": "Indirect fire control",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-14",
+    "name": "Armored fighting vehicles",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-15",
+    "name": "Battlefield medical evacuation",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-16",
+    "name": "Combined arms doctrine",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-17",
+    "name": "Integrated air defense",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-18",
+    "name": "Anti submarine coordination",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-19",
+    "name": "Electronic warfare",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-20",
+    "name": "Precision targeting networks",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-21",
+    "name": "Human supervised autonomous formations",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-22",
+    "name": "Directed energy defense",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-23",
+    "name": "Distributed sensor defense",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-24",
+    "name": "Orbital asset protection",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D20-25",
+    "name": "Contested logistics autonomy",
+    "field": "Defense and military operations",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-01",
+    "name": "Mechanical counting aids",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-02",
+    "name": "Logical inference methods",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-03",
+    "name": "Mechanical calculation",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-04",
+    "name": "Electrical conduction measurement",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-05",
+    "name": "Electromagnetic switching",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-06",
+    "name": "Vacuum tube amplification",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-07",
+    "name": "Boolean circuit design",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-08",
+    "name": "Stored program architecture",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-09",
+    "name": "Semiconductor transistors",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-10",
+    "name": "Magnetic data storage",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-11",
+    "name": "Integrated circuits",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-12",
+    "name": "Microprocessors",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-13",
+    "name": "Operating systems",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-14",
+    "name": "Relational data systems",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-15",
+    "name": "Digital control electronics",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-16",
+    "name": "Distributed computing",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-17",
+    "name": "Machine learning methods",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-18",
+    "name": "High density accelerators",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-19",
+    "name": "Reliable embedded systems",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-20",
+    "name": "Cryptographic hardware",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-21",
+    "name": "Fault tolerant quantum computing",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-22",
+    "name": "Neuromorphic computation",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-23",
+    "name": "Photonic interconnect systems",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-24",
+    "name": "Verifiable autonomous planning",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D21-25",
+    "name": "Energy proportional computing",
+    "field": "Electronics and computation",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-01",
+    "name": "Weather signs",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-02",
+    "name": "Mineral field mapping",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-03",
+    "name": "Tidal calendars",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-04",
+    "name": "Groundwater tracing",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-05",
+    "name": "Seasonal flood records",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-06",
+    "name": "Stratigraphic observation",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-07",
+    "name": "Compass field measurement",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-08",
+    "name": "Barometric observation",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-09",
+    "name": "Ocean current charts",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-10",
+    "name": "Temperature record networks",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-11",
+    "name": "Seismology",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-12",
+    "name": "Plate tectonic theory",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-13",
+    "name": "Atmospheric circulation models",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-14",
+    "name": "Oceanographic surveying",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-15",
+    "name": "Radiometric dating",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-16",
+    "name": "Satellite Earth observation",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-17",
+    "name": "Climate system modeling",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-18",
+    "name": "Hazard early warning",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-19",
+    "name": "Carbon cycle measurement",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-20",
+    "name": "Deep ocean sensing",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-21",
+    "name": "Verified carbon removal",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-22",
+    "name": "Ice sheet dynamics forecasting",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-23",
+    "name": "Regional water climate prediction",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-24",
+    "name": "Planetary sensor integration",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D22-25",
+    "name": "Climate intervention monitoring",
+    "field": "Earth oceans and climate",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-01",
+    "name": "Constellation records",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-02",
+    "name": "Eclipse prediction",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-03",
+    "name": "Optical telescopes",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-04",
+    "name": "Orbital mechanics",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-05",
+    "name": "Stellar spectroscopy",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-06",
+    "name": "Liquid rocket propulsion",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-07",
+    "name": "Spacecraft guidance",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-08",
+    "name": "Orbital launch operations",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-09",
+    "name": "Space life support",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-10",
+    "name": "Planetary robotic probes",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-11",
+    "name": "Orbital docking",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-12",
+    "name": "Space radiation protection",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-13",
+    "name": "Surface resource prospecting",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-14",
+    "name": "In situ oxygen extraction",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-15",
+    "name": "Orbital construction",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-16",
+    "name": "Reusable surface landers",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-17",
+    "name": "Cryogenic orbital storage",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-18",
+    "name": "Closed habitat agriculture",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-19",
+    "name": "Extraterrestrial metal processing",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-20",
+    "name": "Rotating habitat engineering",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-21",
+    "name": "Nuclear electric deep space propulsion",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-22",
+    "name": "Asteroid material processing",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-23",
+    "name": "Autonomous outer system observatories",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-24",
+    "name": "Beamed sail probes",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D23-25",
+    "name": "Interstellar communication receivers",
+    "field": "Space science and settlement",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-01",
+    "name": "Intergenerational knowledge trusts",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-02",
+    "name": "Disaster refuge planning",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-03",
+    "name": "Redundant skill preservation",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-04",
+    "name": "Long distance care coordination",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-05",
+    "name": "Accessible civic participation",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-06",
+    "name": "Life course health records",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-07",
+    "name": "Integrated disaster recovery",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-08",
+    "name": "Critical infrastructure redundancy",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-09",
+    "name": "Global scientific agreements",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-10",
+    "name": "Long term ecological trusteeship",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-11",
+    "name": "Advanced prosthetic control",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-12",
+    "name": "Neural interface rehabilitation",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-13",
+    "name": "Organ replacement coordination",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-14",
+    "name": "Distributed emergency manufacturing",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-15",
+    "name": "Planetary resource stewardship",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-16",
+    "name": "Evidence based aging intervention",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-17",
+    "name": "Resilient food energy settlements",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-18",
+    "name": "Reproductive health in low gravity",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-19",
+    "name": "Autonomous habitat repair",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-20",
+    "name": "Long duration crew governance",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-21",
+    "name": "Multigenerational space habitation",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-22",
+    "name": "Closed civilization material cycles",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-23",
+    "name": "Deep time archive recovery",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-24",
+    "name": "Interstellar probe autonomy",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  },
+  {
+    "review_id": "D24-25",
+    "name": "Planetary defense coordination",
+    "field": "Human futures and resilient civilization",
+    "status": "candidate for review",
+    "production_id": null
+  }
+]

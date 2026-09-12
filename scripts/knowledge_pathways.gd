@@ -28,51 +28,83 @@ static func evidence(id:String)->Dictionary:
 	return book().collections.get(key,{})
 
 static func routes(entry:Dictionary)->Array[Dictionary]:
-	var result:Array[Dictionary]=[{"id":"local","label":"Local practice","requires":entry.get("requires",[]).duplicate(),"signals":entry.get("signals",[]).duplicate()}]
-	if ALTERNATIVES.has(String(entry.id)):
-		var alternate:Dictionary=ALTERNATIVES[String(entry.id)].duplicate(true);alternate.id="experimental";result.append(alternate)
-	var source:=evidence(String(entry.id))
+	return routes_for(entry,WorldSimulation.state.known_discoveries,WorldSimulation.discovery.latest_context,evidence(String(entry.id)))
+
+static func routes_for(entry:Dictionary,known:Array,context:Dictionary,source:Dictionary={})->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	var common:Dictionary={"requires_all":entry.get("requires_all",[]),"requires_any":entry.get("requires_any",[])}
+	var definitions:Array=entry.get("learning_routes",[]).duplicate(true)
+	if definitions.is_empty():
+		definitions.append({"id":"local","label":"Local practice","requires":entry.get("requires",[]).duplicate()})
+		if ALTERNATIVES.has(String(entry.id)):
+			var alternate:Dictionary=ALTERNATIVES[String(entry.id)].duplicate(true);alternate.id="experimental";definitions.append(alternate)
+	for definition:Dictionary in definitions:
+		var route:Dictionary=definition.duplicate(true)
+		route["signals"]=route.get("signals",entry.get("signals",[])).duplicate()
+		route["requires_all"]=route.get("requires_all",route.get("requires",[])).duplicate()
+		route["requires_any"]=route.get("requires_any",[]).duplicate(true)
+		route["requires_all"].append_array(common.requires_all)
+		route["requires_any"].append_array(common.requires_any)
+		route["requires"]=Requirements.parents(route)
+		route["collection_id"]=""
+		route["progress_multiplier"]=float(route.get("progress_multiplier",1.0))
+		result.append(route)
+	# A studied foreign example supports any valid causal approach. It never
+	# forces the recipient to reconstruct the source's historical sequence.
 	if not source.is_empty():
-		# Demonstrations shorten the search; underlying scientific and material
-		# prerequisites still apply, preventing a late artifact from skipping eras.
-		result.append({"id":"fieldwork" if source.kind=="specimen" else "exchange","label":("Field experiments: " if source.kind=="specimen" else "Learned from ")+String(source.source_name),"requires":entry.get("requires",[]).duplicate(),"signals":entry.get("signals",[]).duplicate(),"collection_id":source.id})
+		for foundation:Dictionary in result.duplicate():
+			var imported:=foundation.duplicate(true)
+			imported["id"]=("fieldwork" if source.kind=="specimen" else "exchange")+("" if foundation.id=="local" else ":"+String(foundation.id))
+			imported["label"]=("Field experiments: " if source.kind=="specimen" else "Learned from ")+String(source.source_name)+" · "+String(foundation.label)
+			imported["collection_id"]=source.id
+			imported["imported"]=source.kind!="specimen"
+			imported["progress_multiplier"]*=preload("res://scripts/society_exchange.gd").evidence_strength(source)
+			if source.get("reverse_engineered",false):imported["label"]="Workshop examination · "+String(foundation.label)
+			result.append(imported)
 	for route:Dictionary in result:
-		# Common foundations and every OR group apply to foreign learning as well.
-		if entry.has("requires_all"):
-			route["requires_any"]=entry.get("requires_any",[]).duplicate(true)
-		route["ready"]=bool(Requirements.evaluate(entry,WorldSimulation.state.known_discoveries).ready) if entry.has("requires_all") else true
-		for requirement:String in route.requires:
-			if requirement not in WorldSimulation.state.known_discoveries:route.ready=false
-		for group:Array in route.get("requires_any",[]):
-			for parent:String in group:
-				if parent in WorldSimulation.state.known_discoveries:
-					if parent not in route.requires:route.requires.append(parent)
-					break
+		var assessment:=Requirements.evaluate(route,known)
+		route.merge(assessment,true)
 		var support:=0.0
-		for signal_name:String in route.signals:support+=clampf(float(WorldSimulation.discovery.latest_context.get(signal_name,0)),0,2)
+		for signal_name:String in route.signals:support+=clampf(float(context.get(signal_name,0)),0,2)
 		route["support"]=support/maxi(1,route.signals.size())
-		if route.id=="experimental" and float(route.support)<.25:route.ready=false
+		if String(route.id).begins_with("experimental") and float(route.support)<.25:route.ready=false
 	return result
 
-static func chosen(entry:Dictionary)->Dictionary:
+# The legacy day field is an authoring/order hint, never an eligibility gate.
+# Time is still required to do research; calendar age cannot replace foundations.
+static func chosen(entry:Dictionary,_day:int=-1)->Dictionary:
 	var result:Dictionary={};var best:=-1.0
 	for route:Dictionary in routes(entry):
 		if not bool(route.ready):continue
-		var score:=float(route.support)+(2.0 if route.id in ["exchange","fieldwork"] else .05 if route.id=="local" else .1)
+		var score:=float(route.support)+float(route.progress_multiplier)+(0.05 if route.id=="local" else .1)
 		if score>best:result=route;best=score
 	return result
 
 static func ready(entry:Dictionary,day:int)->bool:
-	var route:=chosen(entry)
-	if route.is_empty():return false
-	# Imported, studied evidence can introduce an already existing practice
-	# before the local earliest-question date, without removing its prerequisites.
-	return day>=int(entry.get("day",0)) or route.id=="exchange"
+	return not chosen(entry,day).is_empty()
 
 static func multiplier(entry:Dictionary)->float:
-	var route:=chosen(entry)
+	var route:=chosen(entry,int(WorldSimulation.state.elapsed_days))
 	if route.is_empty():return 1.0
-	return 1.8 if route.id=="exchange" else 1.0+minf(.4,float(route.support)*.15)
+	return preload("res://scripts/scholar_visits.gd").bonus(String(entry.id),int(WorldSimulation.state.elapsed_days))*float(route.progress_multiplier)*(1.0 if route.get("imported",false) else 1.0+minf(.4,float(route.support)*.15))
+
+static func missing(entry:Dictionary,day:int)->Array[String]:
+	if ready(entry,day):return []
+	var best:Array[String]=[]
+	var found:=false
+	for route:Dictionary in routes(entry):
+		var reasons:Array[String]=[]
+		for id:String in route.missing_all:reasons.append(_name(id))
+		for group:Array in route.missing_any:
+			var names:Array[String]=[]
+			for id:String in group:names.append(_name(id))
+			reasons.append("one of: "+" or ".join(names))
+		if reasons.is_empty():reasons.append("more supporting observations")
+		if not found or reasons.size()<best.size():best=reasons;found=true
+	return best
+
+static func _name(id:String)->String:
+	return String(WorldSimulation.discovery.discovery_definition(id).get("name",id))
 
 static func need(entry:Dictionary)->float:
 	var metrics:=WorldSimulation.state.simulation_metrics
@@ -84,12 +116,28 @@ static func need(entry:Dictionary)->float:
 	return 0
 
 static func remember(entry:Dictionary,day:int)->void:
-	var route:=chosen(entry)
+	var route:=chosen(entry,day)
 	if route.is_empty():route={"id":"local","label":"Local practice","requires":entry.get("requires",[])}
-	book().origins[String(entry.id)]={"route":route.id,"label":route.label,"requires":route.requires.duplicate(),"collection_id":route.get("collection_id",""),"day":day}
+	var foundations:Array=route.get("requires_all",route.get("requires",[])).duplicate()
+	for group:Array in route.get("requires_any",[]):
+		for parent:String in group:
+			if parent in WorldSimulation.state.known_discoveries:
+				if parent not in foundations:foundations.append(parent)
+				break
+	book().origins[String(entry.id)]={"route":route.id,"label":route.label,"requires":foundations,"collection_id":route.get("collection_id",""),"day":day}
 
 static func describe(entry:Dictionary)->String:
 	var origin:Dictionary=book().origins.get(String(entry.id),{})
 	if not origin.is_empty():return "Developed through %s · day %d" % [String(origin.label).to_lower(),int(origin.day)]
 	var route:=chosen(entry)
 	return "Current approach: "+String(route.label) if not route.is_empty() else "Several approaches may lead here; foundations or evidence are still missing."
+
+static func graph_entry(entry:Dictionary)->Dictionary:
+	return {"id":entry.id,"requires_all":[],"learning_routes":routes_for(entry,[],{})}
+
+static func definition_parents(entry:Dictionary)->Array[String]:
+	var parents:Array[String]=[]
+	for route:Dictionary in routes_for(entry,[],{}):
+		for id:String in route.requires:
+			if id not in parents:parents.append(id)
+	return parents

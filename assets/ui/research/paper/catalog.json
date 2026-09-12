@@ -1,0 +1,4461 @@
+{
+  "full_overhaul_art_complete": false,
+  "items": [
+    {
+      "asset": "res://assets/ui/research/paper/seasonal_patterns.png",
+      "description": "Gatherers report that plants and animals return in recurring cycles.",
+      "domain": "ecology",
+      "id": "seasonal_patterns",
+      "name": "Seasonal Patterns",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_selection.png",
+      "description": "Some gathered seeds consistently produce stronger plants.",
+      "domain": "nutrition",
+      "id": "seed_selection",
+      "name": "Selective Planting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_drying.png",
+      "description": "Food left in dry moving air spoils more slowly.",
+      "domain": "nutrition",
+      "id": "food_drying",
+      "name": "Food Drying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/smoking.png",
+      "description": "Food kept above smoky fires changes texture and lasts longer.",
+      "domain": "nutrition",
+      "id": "smoking",
+      "name": "Smoke Preservation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cordage.png",
+      "description": "Twisted plant fibers hold much more weight than loose strands.",
+      "domain": "production",
+      "id": "cordage",
+      "name": "Twisted Cordage",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/basketry.png",
+      "description": "Interlaced fibers form containers that remain light and strong.",
+      "domain": "production",
+      "id": "basketry",
+      "name": "Basketry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/charcoal.png",
+      "description": "Wood heated beneath restricted air leaves an unusually hot-burning residue.",
+      "domain": "production",
+      "id": "charcoal",
+      "name": "Charcoal Production",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_shaping.png",
+      "description": "Local wet earth can be shaped into containers before it dries.",
+      "domain": "production",
+      "id": "clay_shaping",
+      "name": "Clay Vessels",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pit_firing.png",
+      "description": "Clay exposed to sustained heat becomes permanently hard.",
+      "domain": "production",
+      "id": "pit_firing",
+      "name": "Pit Firing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/joinery.png",
+      "description": "Carefully cut wooden members can lock together without cord.",
+      "domain": "infrastructure",
+      "id": "joinery",
+      "name": "Wood Joinery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drainage.png",
+      "description": "Shallow channels keep occupied ground drier after storms.",
+      "domain": "infrastructure",
+      "id": "drainage",
+      "name": "Ground Drainage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/well_siting.png",
+      "description": "Certain terrain features reliably indicate water beneath the ground.",
+      "domain": "infrastructure",
+      "id": "well_siting",
+      "name": "Well Siting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wound_cleaning.png",
+      "description": "Washed wounds become dangerous less often than untreated wounds.",
+      "domain": "health",
+      "id": "wound_cleaning",
+      "name": "Wound Cleaning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/herbal_classification.png",
+      "description": "Healers begin separating plants by repeatable effects rather than appearance.",
+      "domain": "health",
+      "id": "herbal_classification",
+      "name": "Medicinal Classification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clean_water.png",
+      "description": "Families using cleaner water suffer fewer stomach illnesses.",
+      "domain": "health",
+      "id": "clean_water",
+      "name": "Clean-Water Practice",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tallies.png",
+      "description": "Repeated marks can preserve quantities after memory becomes unreliable.",
+      "domain": "knowledge",
+      "id": "tallies",
+      "name": "Material Tallies",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/standard_measures.png",
+      "description": "Disputes fall when different workers use the same reference quantities.",
+      "domain": "knowledge",
+      "id": "standard_measures",
+      "name": "Shared Measures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/route_memory.png",
+      "description": "Travelers develop repeatable stories that preserve direction and distance.",
+      "domain": "knowledge",
+      "id": "route_memory",
+      "name": "Encoded Routes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/labor_rotations.png",
+      "description": "Regular rotations distribute exhausting work without abandoning essential tasks.",
+      "domain": "institutions",
+      "id": "labor_rotations",
+      "name": "Labor Rotations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/customary_law.png",
+      "description": "Repeated judgments are being remembered as rules that bind future decisions.",
+      "domain": "institutions",
+      "id": "customary_law",
+      "name": "Customary Law",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_stores.png",
+      "description": "Shared reserves can support projects no household could sustain alone.",
+      "domain": "institutions",
+      "id": "public_stores",
+      "name": "Public Stores",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/watch_rotation.png",
+      "description": "Scheduled sentries detect threats earlier and reduce exhaustion.",
+      "domain": "security",
+      "id": "watch_rotation",
+      "name": "Organized Watch",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/formation_drill.png",
+      "description": "Groups moving under repeated commands retain cohesion under pressure.",
+      "domain": "security",
+      "id": "formation_drill",
+      "name": "Formation Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/supply_groups.png",
+      "description": "Separating carriers from scouts allows groups to travel farther.",
+      "domain": "security",
+      "id": "supply_groups",
+      "name": "Organized Supply Parties",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/animal_taming.png",
+      "description": "Orphaned young of herd animals raised beside the settlement stay, breed, and follow.",
+      "domain": "ecology",
+      "id": "animal_taming",
+      "name": "Animal Taming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pack_animals.png",
+      "description": "Tamed beasts under saddle-frames carry loads no human team matches, day after day.",
+      "domain": "logistics",
+      "id": "pack_animals",
+      "name": "Pack Animal Husbandry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/domesticated_mounts.png",
+      "description": "Selected bloodlines accept riders. A mounted person moves like weather, not like walking.",
+      "domain": "logistics",
+      "id": "domesticated_mounts",
+      "name": "Domesticated Mounts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mounted_scouts.png",
+      "description": "Riders range in days across country that costs walkers weeks, and return fresh enough to tell it.",
+      "domain": "logistics",
+      "id": "mounted_scouts",
+      "name": "Mounted Scouting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hide_floats.png",
+      "description": "Inflated hides lashed into rafts carry people and bundles across still water.",
+      "domain": "logistics",
+      "id": "hide_floats",
+      "name": "Hide Floats",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/river_craft.png",
+      "description": "Framed hulls with paddles run the river both ways; the current becomes a road.",
+      "domain": "logistics",
+      "id": "river_craft",
+      "name": "River Craft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coastal_watercraft.png",
+      "description": "Sewn-plank hulls hold a heading along the coast and cross the mouths of bays.",
+      "domain": "logistics",
+      "id": "coastal_watercraft",
+      "name": "Coastal Watercraft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stone_sorting.png",
+      "description": "Workers learn which local stones hold an edge, split cleanly, or survive repeated blows.",
+      "domain": "production",
+      "id": "stone_sorting",
+      "name": "Stone Selection",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/controlled_flaking.png",
+      "description": "Repeated blows begin producing predictable cutting edges instead of accidental shards.",
+      "domain": "production",
+      "id": "controlled_flaking",
+      "name": "Controlled Flaking",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hafted_tools.png",
+      "description": "Stone, wood, and binding are combined into tools that transfer force through a handle.",
+      "domain": "production",
+      "id": "hafted_tools",
+      "name": "Hafted Tools",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_grading.png",
+      "description": "Cutters distinguish woods by strength, flexibility, weight, and resistance to rot.",
+      "domain": "ecology",
+      "id": "timber_grading",
+      "name": "Timber Grading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_seasoning.png",
+      "description": "Wood stacked away from soil and rain becomes lighter, straighter, and more durable.",
+      "domain": "production",
+      "id": "timber_seasoning",
+      "name": "Timber Seasoning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/framed_construction.png",
+      "description": "Load-bearing frames separate a structure's strength from the material filling its walls.",
+      "domain": "infrastructure",
+      "id": "framed_construction",
+      "name": "Framed Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_grading.png",
+      "description": "Gatherers sort stems and bark by length, tensile strength, and behavior when wet.",
+      "domain": "ecology",
+      "id": "fiber_grading",
+      "name": "Fiber Grading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/woven_carriers.png",
+      "description": "Fitted baskets and slings let one carrier move more while keeping both hands free.",
+      "domain": "production",
+      "id": "woven_carriers",
+      "name": "Woven Carriers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rope_rigging.png",
+      "description": "Standard ropes, blocks, and lifting teams make heavy loads controllable.",
+      "domain": "infrastructure",
+      "id": "rope_rigging",
+      "name": "Rope Rigging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_testing.png",
+      "description": "Small samples reveal which clays crack, shrink, seal, or endure heat.",
+      "domain": "production",
+      "id": "clay_testing",
+      "name": "Clay Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_tempering.png",
+      "description": "Sand, crushed shell, and old pottery control cracking as vessels dry.",
+      "domain": "production",
+      "id": "clay_tempering",
+      "name": "Tempered Clay",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sealed_vessels.png",
+      "description": "Fitted lids and treated surfaces protect water, grain, oils, and medicines from damp and pests.",
+      "domain": "nutrition",
+      "id": "sealed_vessels",
+      "name": "Sealed Vessels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/kiln_control.png",
+      "description": "Enclosed firing chambers make heat repeatable enough to reproduce strong ceramics.",
+      "domain": "production",
+      "id": "kiln_control",
+      "name": "Controlled Kilns",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/quarry_reading.png",
+      "description": "Natural seams reveal where stone can be separated with less breakage and danger.",
+      "domain": "ecology",
+      "id": "quarry_reading",
+      "name": "Reading the Quarry Face",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wedges_and_levers.png",
+      "description": "Coordinated wedges and levers turn human effort into controlled movement of heavy stone.",
+      "domain": "infrastructure",
+      "id": "wedges_and_levers",
+      "name": "Wedges and Levers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lime_burning.png",
+      "description": "Burned limestone becomes a reactive powder that binds, coats, disinfects, and alters soil.",
+      "domain": "production",
+      "id": "lime_burning",
+      "name": "Lime Burning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lime_mortar.png",
+      "description": "Measured lime, sand, and water produce joints that harden into enduring masonry.",
+      "domain": "infrastructure",
+      "id": "lime_mortar",
+      "name": "Lime Mortar",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/salt_working.png",
+      "description": "Evaporation and scraping turn saline earth or water into a dependable preservative.",
+      "domain": "nutrition",
+      "id": "salt_working",
+      "name": "Salt Working",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/curing_regimens.png",
+      "description": "Measured salt, smoke, time, and airflow make preservation predictable across seasons.",
+      "domain": "nutrition",
+      "id": "curing_regimens",
+      "name": "Curing Regimens",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/peat_drying.png",
+      "description": "Cut peat stacked above wet ground becomes a compact, transportable fuel.",
+      "domain": "production",
+      "id": "peat_drying",
+      "name": "Peat Drying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ore_assaying.png",
+      "description": "Crushed samples, controlled heat, and recorded outcomes distinguish promising ore from colorful stone.",
+      "domain": "production",
+      "id": "ore_assaying",
+      "name": "Comparative Ore Assay",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/copper_smelting.png",
+      "description": "Hot charcoal and carefully selected ore yield beads of workable metal.",
+      "domain": "production",
+      "id": "copper_smelting",
+      "name": "Copper Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/copper_casting.png",
+      "description": "Prepared molds make metal forms repeatable, divisible, and repairable.",
+      "domain": "production",
+      "id": "copper_casting",
+      "name": "Reusable Casting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bronze_alloying.png",
+      "description": "Copper and tin in controlled proportions produce a harder, more reliable material.",
+      "domain": "production",
+      "id": "bronze_alloying",
+      "name": "Bronze Alloying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mine_shoring.png",
+      "description": "Regular supports and inspection practices let workings extend beyond self-supporting ground.",
+      "domain": "infrastructure",
+      "id": "mine_shoring",
+      "name": "Timbered Mine Shoring",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mine_airways.png",
+      "description": "Separate intake and return passages guide air through workings; crews compare flow and restrict poorly ventilated headings.",
+      "domain": "infrastructure",
+      "id": "mine_airways",
+      "name": "Mine Airways",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mine_drainage.png",
+      "description": "Sumps, channels, and lifting chains keep deeper workings usable.",
+      "domain": "infrastructure",
+      "id": "mine_drainage",
+      "name": "Mine Drainage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bitumen_sealing.png",
+      "description": "Heated bitumen seals roofs, containers, hulls, and vulnerable road surfaces.",
+      "domain": "infrastructure",
+      "id": "bitumen_sealing",
+      "name": "Bitumen Sealing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/iron_assaying.png",
+      "description": "Heated samples and slag behavior reveal iron-bearing rock that appearance alone concealed.",
+      "domain": "production",
+      "id": "iron_assaying",
+      "name": "Iron Ore Assay",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bloomery_smelting.png",
+      "description": "Forced air and charcoal reduce iron ore into a spongy bloom that can be consolidated by hammering.",
+      "domain": "production",
+      "id": "bloomery_smelting",
+      "name": "Bloomery Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/forge_welding.png",
+      "description": "Controlled heat and repeated working join iron pieces without melting them.",
+      "domain": "production",
+      "id": "forge_welding",
+      "name": "Forge Welding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hardened_edges.png",
+      "description": "Carbon, heat, and cooling are manipulated to keep cutting edges hard without making whole tools brittle.",
+      "domain": "production",
+      "id": "hardened_edges",
+      "name": "Hardened Iron Edges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coal_grading.png",
+      "description": "Different black seams are classified by smoke, heat, ash, and behavior under pressure.",
+      "domain": "ecology",
+      "id": "coal_grading",
+      "name": "Coal Grading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coke_firing.png",
+      "description": "Coal heated away from air produces a stronger, cleaner metallurgical fuel.",
+      "domain": "production",
+      "id": "coke_firing",
+      "name": "Coke Firing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/refractory_furnaces.png",
+      "description": "Heat-resistant linings allow furnaces to remain hotter and operate longer without collapsing.",
+      "domain": "production",
+      "id": "refractory_furnaces",
+      "name": "Refractory Furnaces",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/blast_furnace.png",
+      "description": "Continuous high-temperature reduction transforms the scale and organization of iron production.",
+      "domain": "production",
+      "id": "blast_furnace",
+      "name": "Continuous Blast Furnace",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sulfur_purification.png",
+      "description": "Controlled melting and condensation separate sulfur from mineral impurities.",
+      "domain": "production",
+      "id": "sulfur_purification",
+      "name": "Sulfur Purification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nitrate_cultivation.png",
+      "description": "Organic waste, drainage, and time are managed to cultivate nitrate-rich earth.",
+      "domain": "ecology",
+      "id": "nitrate_cultivation",
+      "name": "Nitrate Beds",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/black_powder.png",
+      "description": "Purified sulfur, charcoal, and nitrates are combined in repeatable proportions with violently expanding results.",
+      "domain": "security",
+      "id": "black_powder",
+      "name": "Composite Propellant",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/phosphate_dressing.png",
+      "description": "Ground phosphate is tested against exhausted soils and selected crops.",
+      "domain": "nutrition",
+      "id": "phosphate_dressing",
+      "name": "Phosphate Dressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/graphite_marking.png",
+      "description": "Prepared graphite leaves compact, erasable marks suited to inventories, diagrams, and calculation.",
+      "domain": "knowledge",
+      "id": "graphite_marking",
+      "name": "Graphite Marking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/graphite_crucibles.png",
+      "description": "Graphite-bearing crucibles endure heat and protect molten material from contamination.",
+      "domain": "production",
+      "id": "graphite_crucibles",
+      "name": "Graphite Crucibles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/material_accounting.png",
+      "description": "Stores are recorded by source, quality, loss, obligation, and intended use rather than as a single heap.",
+      "domain": "knowledge",
+      "id": "material_accounting",
+      "name": "Material Accounting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/workshop_standards.png",
+      "description": "Patterns, tolerances, and named grades let knowledge survive individual makers.",
+      "domain": "knowledge",
+      "id": "workshop_standards",
+      "name": "Workshop Standards",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crop_calendars.png",
+      "description": "Planting and harvest dates are preserved across households instead of remembered separately.",
+      "domain": "nutrition",
+      "id": "crop_calendars",
+      "name": "Crop Calendars",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/managed_fallow.png",
+      "description": "Leaving selected ground uncultivated restores yields more reliably than abandoning fields at random.",
+      "domain": "nutrition",
+      "id": "managed_fallow",
+      "name": "Managed Fallow",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_reserves.png",
+      "description": "The best seed is separated from ordinary food stores and protected through lean seasons.",
+      "domain": "nutrition",
+      "id": "seed_reserves",
+      "name": "Protected Seed Reserves",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/irrigation_schedules.png",
+      "description": "Households coordinate water turns so upstream use no longer destroys downstream crops.",
+      "domain": "nutrition",
+      "id": "irrigation_schedules",
+      "name": "Irrigation Schedules",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crop_rotation.png",
+      "description": "Different crops are sequenced to preserve soil and disrupt recurring pests.",
+      "domain": "nutrition",
+      "id": "crop_rotation",
+      "name": "Crop Rotation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grain_milling.png",
+      "description": "Rotary stones convert stored grain into digestible flour with less labor.",
+      "domain": "nutrition",
+      "id": "grain_milling",
+      "name": "Rotary Grain Milling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fermentation_control.png",
+      "description": "Temperature, vessels, and starter cultures are managed to reproduce fermentation.",
+      "domain": "nutrition",
+      "id": "fermentation_control",
+      "name": "Controlled Fermentation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/regional_granaries.png",
+      "description": "Surplus is distributed among measured, inspected stores rather than concentrated in one vulnerable reserve.",
+      "domain": "nutrition",
+      "id": "regional_granaries",
+      "name": "Regional Granaries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/soil_assays.png",
+      "description": "Soils are compared by drainage, texture, crop response, and amendments rather than color alone.",
+      "domain": "ecology",
+      "id": "soil_assays",
+      "name": "Comparative Soil Assays",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/intensive_gardens.png",
+      "description": "Highly tended plots near settlements produce diverse perishables for dense populations.",
+      "domain": "nutrition",
+      "id": "intensive_gardens",
+      "name": "Intensive Market Gardens",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/birth_attendants.png",
+      "description": "Birth attendants preserve positioning, cleanliness, warning signs, and methods of assisting difficult labor.",
+      "domain": "health",
+      "id": "birth_attendants",
+      "name": "Experienced Birth Attendants",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/latrine_siting.png",
+      "description": "Waste pits are placed according to slope, water flow, soil, and settlement use.",
+      "domain": "health",
+      "id": "latrine_siting",
+      "name": "Latrine Siting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/isolation_practice.png",
+      "description": "Repeated outbreaks reveal that separating the visibly ill can interrupt some chains of sickness.",
+      "domain": "health",
+      "id": "isolation_practice",
+      "name": "Isolation Practice",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/case_records.png",
+      "description": "Treatments and outcomes are recorded together, exposing remedies that fail as well as those that help.",
+      "domain": "health",
+      "id": "case_records",
+      "name": "Medical Case Records",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/trained_midwives.png",
+      "description": "Birth knowledge is taught deliberately and evaluated through recorded outcomes.",
+      "domain": "health",
+      "id": "trained_midwives",
+      "name": "Trained Midwives",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_baths.png",
+      "description": "Shared water and washing facilities separate drinking, cleaning, animals, and waste.",
+      "domain": "health",
+      "id": "public_baths",
+      "name": "Public Washing Facilities",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/surgical_anatomy.png",
+      "description": "Anatomical observations are compared across injuries and deaths, replacing many inherited assumptions.",
+      "domain": "health",
+      "id": "surgical_anatomy",
+      "name": "Surgical Anatomy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/civic_infirmaries.png",
+      "description": "Dedicated institutions concentrate carers, records, clean supplies, and difficult cases.",
+      "domain": "health",
+      "id": "civic_infirmaries",
+      "name": "Civic Infirmaries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/contagion_mapping.png",
+      "description": "Cases are mapped through households, water, work, and movement to distinguish environmental from contagious illness.",
+      "domain": "health",
+      "id": "contagion_mapping",
+      "name": "Contagion Mapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/preventive_inoculation.png",
+      "description": "Controlled exposure is organized to reduce the danger of later epidemics, despite immediate individual risk.",
+      "domain": "health",
+      "id": "preventive_inoculation",
+      "name": "Preventive Inoculation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pictographic_records.png",
+      "description": "Marks begin preserving categories, events, and obligations rather than quantities alone.",
+      "domain": "knowledge",
+      "id": "pictographic_records",
+      "name": "Pictographic Records",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/place_value.png",
+      "description": "Written position carries numerical meaning, making large calculations compact and checkable.",
+      "domain": "knowledge",
+      "id": "place_value",
+      "name": "Place-Value Calculation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/phonetic_notation.png",
+      "description": "Written signs represent speech sounds, allowing names and unfamiliar words to be preserved.",
+      "domain": "knowledge",
+      "id": "phonetic_notation",
+      "name": "Phonetic Notation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/formal_archives.png",
+      "description": "Records receive durable copies, custodians, dates, and known places of storage.",
+      "domain": "knowledge",
+      "id": "formal_archives",
+      "name": "Formal Archives",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geometric_survey.png",
+      "description": "Angles, baselines, and repeatable procedures turn land measurement into geometry.",
+      "domain": "knowledge",
+      "id": "geometric_survey",
+      "name": "Geometric Survey",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/regional_maps.png",
+      "description": "Routes, settlements, waters, elevations, and borders are reconciled onto shared surfaces.",
+      "domain": "knowledge",
+      "id": "regional_maps",
+      "name": "Regional Maps",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_schools.png",
+      "description": "Teaching is organized beyond households and occupations, widening access to preserved knowledge.",
+      "domain": "knowledge",
+      "id": "public_schools",
+      "name": "Public Instruction",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/paper_making.png",
+      "description": "Pulped fibers are formed into light sheets suitable for dense records and wide circulation.",
+      "domain": "knowledge",
+      "id": "paper_making",
+      "name": "Sheet Fiber Writing Material",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/printing_process.png",
+      "description": "Reusable forms reproduce texts and diagrams faster than individual copying.",
+      "domain": "knowledge",
+      "id": "printing_process",
+      "name": "Repeatable Printing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/experimental_controls.png",
+      "description": "Investigators deliberately vary one condition while holding others stable and preserve failed trials.",
+      "domain": "knowledge",
+      "id": "experimental_controls",
+      "name": "Experimental Controls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/statistical_inference.png",
+      "description": "Variation across many observations is measured rather than dismissed as noise.",
+      "domain": "knowledge",
+      "id": "statistical_inference",
+      "name": "Statistical Inference",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/household_councils.png",
+      "description": "Households send recognized speakers to settle shared work and recurring disputes.",
+      "domain": "institutions",
+      "id": "household_councils",
+      "name": "Household Councils",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/census_rolls.png",
+      "description": "Households, ages, dependents, occupations, and obligations are counted by name.",
+      "domain": "institutions",
+      "id": "census_rolls",
+      "name": "Household Census Rolls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_levies.png",
+      "description": "Public labor and material obligations become scheduled, recorded, and appealable.",
+      "domain": "institutions",
+      "id": "public_levies",
+      "name": "Scheduled Public Levies",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/specialized_courts.png",
+      "description": "Different disputes are heard through preserved procedures by people trained for the matter.",
+      "domain": "institutions",
+      "id": "specialized_courts",
+      "name": "Specialized Courts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/property_registers.png",
+      "description": "Claims to fields, water, workshops, and buildings are tied to maps and archived decisions.",
+      "domain": "institutions",
+      "id": "property_registers",
+      "name": "Property Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/craft_guilds.png",
+      "description": "Makers regulate apprenticeship, quality, mutual aid, and access to specialized work.",
+      "domain": "institutions",
+      "id": "craft_guilds",
+      "name": "Craft Guilds",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_credit.png",
+      "description": "Future tax and store revenues support present projects through recorded obligations.",
+      "domain": "institutions",
+      "id": "public_credit",
+      "name": "Public Credit",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/risk_pools.png",
+      "description": "Many households contribute to reserves that absorb rare fires, deaths, wrecks, and failed harvests.",
+      "domain": "institutions",
+      "id": "risk_pools",
+      "name": "Mutual Risk Pools",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/professional_service.png",
+      "description": "Offices preserve procedures and train successors independently of individual rulers.",
+      "domain": "institutions",
+      "id": "professional_service",
+      "name": "Professional Civil Service",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/graded_roads.png",
+      "description": "Road surfaces are crowned, drained, and repaired according to traffic and terrain.",
+      "domain": "infrastructure",
+      "id": "graded_roads",
+      "name": "Graded Roads",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_bridges.png",
+      "description": "Standard trusses carry roads across water and unstable ground.",
+      "domain": "infrastructure",
+      "id": "timber_bridges",
+      "name": "Timber Bridges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/canal_locks.png",
+      "description": "Gated chambers raise and lower vessels between controlled water levels.",
+      "domain": "infrastructure",
+      "id": "canal_locks",
+      "name": "Canal Locks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_mills.png",
+      "description": "Controlled water flow supplies continuous rotary power to milling and workshops.",
+      "domain": "infrastructure",
+      "id": "water_mills",
+      "name": "Water-Powered Mills",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/urban_street_plans.png",
+      "description": "Growth corridors, markets, drainage, firebreaks, and public ways are reserved before building closes them.",
+      "domain": "infrastructure",
+      "id": "urban_street_plans",
+      "name": "Urban Street Plans",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/covered_sewers.png",
+      "description": "Enclosed channels move waste away from dense settlement while inspection points permit maintenance.",
+      "domain": "infrastructure",
+      "id": "covered_sewers",
+      "name": "Covered Sewers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/precision_machinery.png",
+      "description": "Measured components, bearings, guides, and cutting tools reproduce controlled motion.",
+      "domain": "infrastructure",
+      "id": "precision_machinery",
+      "name": "Precision Machinery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hafted_weapons.png",
+      "description": "Tool hafting is adapted into balanced thrusting weapons whose bindings survive repeated impact.",
+      "domain": "security",
+      "id": "hafted_weapons",
+      "name": "Hafted Weapons",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bow_craft.png",
+      "description": "Bow woods, strings, draw lengths, and arrow shafts are matched deliberately for reliable military use.",
+      "domain": "security",
+      "id": "bow_craft",
+      "name": "War Bow Craft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shield_wall.png",
+      "description": "Overlapping shields and ranked spears turn individual fighters into a mutually supporting line.",
+      "domain": "security",
+      "id": "shield_wall",
+      "name": "Shield-Wall Discipline",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/field_fortifications.png",
+      "description": "Ditches, stakes, banks, and controlled approaches turn temporary camps into defensible ground.",
+      "domain": "security",
+      "id": "field_fortifications",
+      "name": "Field Fortifications",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fortified_stores.png",
+      "description": "Critical reserves are separated, guarded, fire-protected, and designed to resist seizure.",
+      "domain": "security",
+      "id": "fortified_stores",
+      "name": "Fortified Stores",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/siege_engineering.png",
+      "description": "Measured frames, counterweights, protective works, and supply schedules organize attacks on fortifications.",
+      "domain": "security",
+      "id": "siege_engineering",
+      "name": "Siege Engineering",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bronze_weaponry.png",
+      "description": "Standard molds, alloy proportions, edges, fittings, and shields make metal arms reproducible at military scale.",
+      "domain": "security",
+      "id": "bronze_weaponry",
+      "name": "Standardized Bronze Arms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/professional_corps.png",
+      "description": "A permanent body trains, records equipment, maintains readiness, and preserves doctrine.",
+      "domain": "security",
+      "id": "professional_corps",
+      "name": "Professional Military Corps",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/military_staffs.png",
+      "description": "Specialized officers reconcile intelligence, movement, stores, terrain, and timing before orders are issued.",
+      "domain": "security",
+      "id": "military_staffs",
+      "name": "Military Staff Planning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/battlefield_medicine.png",
+      "description": "Triage, evacuation, clean instruments, and organized convalescence reduce deaths after injury.",
+      "domain": "security",
+      "id": "battlefield_medicine",
+      "name": "Battlefield Medicine",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/powder_artillery.png",
+      "description": "Controlled powder charges propel standardized projectiles from reinforced barrels.",
+      "domain": "security",
+      "id": "powder_artillery",
+      "name": "Powder Artillery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/structural_steel.png",
+      "description": "Builders test and standardize structural steel frames before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "structural_steel",
+      "name": "Structural Steel Frames",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/reinforced_concrete.png",
+      "description": "Builders test and standardize reinforced concrete before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "reinforced_concrete",
+      "name": "Reinforced Concrete",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/safety_lifts.png",
+      "description": "Builders test and standardize safety lifts before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "safety_lifts",
+      "name": "Safety Lifts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/curtain_wall_systems.png",
+      "description": "Builders test and standardize glazed curtain walls before adopting it in new construction. Existing districts retain their inherited fabric.",
+      "domain": "infrastructure",
+      "id": "curtain_wall_systems",
+      "name": "Glazed Curtain Walls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pike_drill.png",
+      "description": "Develop and demonstrate pike formations through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "pike_drill",
+      "name": "Pike Formations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crossbow_mechanism.png",
+      "description": "Develop and demonstrate crossbow mechanisms through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "crossbow_mechanism",
+      "name": "Crossbow Mechanisms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/war_chariots.png",
+      "description": "Develop and demonstrate military chariots through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "war_chariots",
+      "name": "Military Chariots",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armored_riding.png",
+      "description": "Develop and demonstrate armored riding through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "armored_riding",
+      "name": "Armored Riding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/elephant_training.png",
+      "description": "Develop and demonstrate working elephant training through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "elephant_training",
+      "name": "Working Elephant Training",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/counterweight_engines.png",
+      "description": "Develop and demonstrate counterweight siege engines through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "counterweight_engines",
+      "name": "Counterweight Siege Engines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/matchlock_drill.png",
+      "description": "Develop and demonstrate matchlock arms and drill through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "matchlock_drill",
+      "name": "Matchlock Arms and Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mounted_firearms.png",
+      "description": "Develop and demonstrate mounted firearms through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "mounted_firearms",
+      "name": "Mounted Firearms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/galley_navigation.png",
+      "description": "Develop and demonstrate galley navigation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "galley_navigation",
+      "name": "Galley Navigation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_arsenals.png",
+      "description": "Develop and demonstrate naval arsenals through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_arsenals",
+      "name": "Naval Arsenals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ocean_sailing.png",
+      "description": "Develop and demonstrate ocean sailing through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "ocean_sailing",
+      "name": "Ocean Sailing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_gunnery.png",
+      "description": "Develop and demonstrate naval gunnery through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_gunnery",
+      "name": "Naval Gunnery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steam_propulsion.png",
+      "description": "Develop and demonstrate steam propulsion through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "steam_propulsion",
+      "name": "Steam Propulsion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armored_hulls.png",
+      "description": "Develop and demonstrate armored hulls through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "armored_hulls",
+      "name": "Armored Hulls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_torpedoes.png",
+      "description": "Develop and demonstrate naval torpedoes through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_torpedoes",
+      "name": "Naval Torpedoes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_fire_control.png",
+      "description": "Develop and demonstrate naval fire control through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_fire_control",
+      "name": "Naval Fire Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/submersible_hulls.png",
+      "description": "Develop and demonstrate submersible hulls through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "submersible_hulls",
+      "name": "Submersible Hulls",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_logistics.png",
+      "description": "Develop and demonstrate fleet replenishment through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_logistics",
+      "name": "Fleet Replenishment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aerostat_observation.png",
+      "description": "Develop and demonstrate aerostat observation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "aerostat_observation",
+      "name": "Aerostat Observation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fuel_refining.png",
+      "description": "Develop and demonstrate liquid fuel refining through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "fuel_refining",
+      "name": "Liquid Fuel Refining",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/powered_flight.png",
+      "description": "Develop and demonstrate powered flight through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "powered_flight",
+      "name": "Powered Flight",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fighter_tactics.png",
+      "description": "Develop and demonstrate fighter tactics through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "fighter_tactics",
+      "name": "Fighter Tactics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aerial_bombardment.png",
+      "description": "Develop and demonstrate aerial bombardment through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "aerial_bombardment",
+      "name": "Aerial Bombardment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/advanced_airframes.png",
+      "description": "Develop and demonstrate advanced airframes through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "advanced_airframes",
+      "name": "Advanced Airframes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_aviation.png",
+      "description": "Develop and demonstrate naval aviation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_aviation",
+      "name": "Naval Aviation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/carrier_aviation.png",
+      "description": "Develop and demonstrate carrier aviation through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "carrier_aviation",
+      "name": "Carrier Aviation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/airborne_operations.png",
+      "description": "Develop and demonstrate airborne operations through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "airborne_operations",
+      "name": "Airborne Operations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/amphibious_operations.png",
+      "description": "Develop and demonstrate amphibious operations through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "amphibious_operations",
+      "name": "Amphibious Operations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/jet_propulsion.png",
+      "description": "Develop and demonstrate jet propulsion through trained crews, reliable equipment and repeatable supply.",
+      "domain": "production",
+      "id": "jet_propulsion",
+      "name": "Jet Propulsion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rotary_wing.png",
+      "description": "Develop and demonstrate rotary-wing flight through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "rotary_wing",
+      "name": "Rotary-Wing Flight",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/guided_weapons.png",
+      "description": "Develop and demonstrate guided weapons through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "guided_weapons",
+      "name": "Guided Weapons",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/naval_missiles.png",
+      "description": "Develop and demonstrate naval missiles through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "naval_missiles",
+      "name": "Naval Missiles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nuclear_propulsion.png",
+      "description": "Develop and demonstrate nuclear propulsion through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "nuclear_propulsion",
+      "name": "Nuclear Propulsion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/remote_aircraft.png",
+      "description": "Develop and demonstrate remote aircraft through trained crews, reliable equipment and repeatable supply.",
+      "domain": "security",
+      "id": "remote_aircraft",
+      "name": "Remote Aircraft",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rifled_barrels.png",
+      "description": "Reliable rifled barrels allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "rifled_barrels",
+      "name": "Rifled Barrels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/metallic_cartridges.png",
+      "description": "Reliable metallic cartridges allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "metallic_cartridges",
+      "name": "Metallic Cartridges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/automatic_actions.png",
+      "description": "Reliable automatic firearms allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "automatic_actions",
+      "name": "Automatic Firearms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/internal_combustion.png",
+      "description": "Reliable internal combustion engines allow standardized military equipment and specialist training.",
+      "domain": "production",
+      "id": "internal_combustion",
+      "name": "Internal Combustion Engines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armored_vehicles.png",
+      "description": "Reliable armored fighting vehicles allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "armored_vehicles",
+      "name": "Armored Fighting Vehicles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/indirect_fire.png",
+      "description": "Reliable indirect artillery fire allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "indirect_fire",
+      "name": "Indirect Artillery Fire",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/armor_piercing_weapons.png",
+      "description": "Reliable armor-piercing weapons allow standardized military equipment and specialist training.",
+      "domain": "security",
+      "id": "armor_piercing_weapons",
+      "name": "Armor-Piercing Weapons",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/atomic_physics.png",
+      "description": "Spectra and charged-particle experiments support models of atomic structure.",
+      "domain": "knowledge",
+      "id": "atomic_physics",
+      "name": "Atomic Physics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/reactor_engineering.png",
+      "description": "Reaction control, cooling, containment and instrumentation are combined into a reactor design; operation still needs a constructed plant and fuel.",
+      "domain": "production",
+      "id": "reactor_engineering",
+      "name": "Controlled Nuclear Reactors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/festival_calendar.png",
+      "description": "Seasonal gatherings coordinate shared labor and bring scattered households together.",
+      "domain": "culture",
+      "id": "festival_calendar",
+      "name": "Festival Calendar",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/oral_epics.png",
+      "description": "Trained reciters preserve long accounts through rhythm, performance, and correction by listeners.",
+      "domain": "culture",
+      "id": "oral_epics",
+      "name": "Oral Epics",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_theatre.png",
+      "description": "Dedicated performance spaces bring stories, criticism, and public argument to larger audiences.",
+      "domain": "culture",
+      "id": "public_theatre",
+      "name": "Public Theatre",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/civic_games.png",
+      "description": "Agreed rules and measured contests create shared occasions across settlement rivalries.",
+      "domain": "culture",
+      "id": "civic_games",
+      "name": "Civic Games",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/comparative_chronicles.png",
+      "description": "Competing written accounts are checked against dates and records rather than repeating one official memory.",
+      "domain": "culture",
+      "id": "comparative_chronicles",
+      "name": "Comparative Chronicles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_libraries.png",
+      "description": "Catalogued shared collections let readers outside elite households compare and teach competing ideas.",
+      "domain": "culture",
+      "id": "public_libraries",
+      "name": "Public Libraries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crew_handoffs.png",
+      "description": "Checked tallies let the next crew continue unfinished work without duplicating the previous shift.",
+      "domain": "labor",
+      "id": "crew_handoffs",
+      "name": "Crew Handoffs",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/apprentice_contracts.png",
+      "description": "Agreed training duties and demonstrations of competence preserve skilled work across generations.",
+      "domain": "labor",
+      "id": "apprentice_contracts",
+      "name": "Apprentice Contracts",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/work_rest_limits.png",
+      "description": "Comparing fatigue and injury sets limits on continuous work, trading immediate hours for sustained output.",
+      "domain": "labor",
+      "id": "work_rest_limits",
+      "name": "Work and Rest Limits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/work_motion_studies.png",
+      "description": "Measured comparisons of tool placement and repeated movements reduce wasted effort at workshops.",
+      "domain": "labor",
+      "id": "work_motion_studies",
+      "name": "Work Motion Studies",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shared_childcare.png",
+      "description": "Households share supervised care so children remain attended while caregivers rotate necessary work.",
+      "domain": "demography",
+      "id": "shared_childcare",
+      "name": "Shared Childcare",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/maternal_recovery.png",
+      "description": "Food and relief from heavy work support recovery after birth rather than an immediate return to full workloads.",
+      "domain": "demography",
+      "id": "maternal_recovery",
+      "name": "Maternal Recovery Care",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/child_growth_records.png",
+      "description": "Repeated measurements reveal poor growth before severe illness and help direct scarce food and care.",
+      "domain": "demography",
+      "id": "child_growth_records",
+      "name": "Child Growth Records",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/household_space_planning.png",
+      "description": "Sleeping space, ventilation, and care areas are planned around household needs rather than floor area alone.",
+      "domain": "demography",
+      "id": "household_space_planning",
+      "name": "Household Space Planning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wayfinding_stars.png",
+      "description": "Recognized stars and seasonal sky changes help travelers keep direction when landmarks disappear.",
+      "domain": "logistics",
+      "id": "wayfinding_stars",
+      "name": "Celestial Wayfinding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/caravanserais.png",
+      "description": "Maintained stopping places offer shelter, protected stores, and rest along established overland trade routes.",
+      "domain": "logistics",
+      "id": "caravanserais",
+      "name": "Caravanserais",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/counterweight_cranes.png",
+      "description": "Counterweights and controlled lifting tackle let crews handle heavier loads at transfer points.",
+      "domain": "logistics",
+      "id": "counterweight_cranes",
+      "name": "Counterweight Cranes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cargo_seals.png",
+      "description": "Marked seals allow comparison of dispatched and received cargo to identify losses along a route.",
+      "domain": "logistics",
+      "id": "cargo_seals",
+      "name": "Cargo Seals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/root_cellars.png",
+      "description": "Below-ground stores buffer temperature swings while drainage keeps stored roots away from standing water.",
+      "domain": "nutrition",
+      "id": "root_cellars",
+      "name": "Root Cellars",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/raised_granaries.png",
+      "description": "Raised floors and separated supports keep grain away from damp ground and make animal access harder.",
+      "domain": "nutrition",
+      "id": "raised_granaries",
+      "name": "Raised Granaries",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hermetic_grain_storage.png",
+      "description": "Dry grain is enclosed in carefully sealed containers instead of repeatedly exposing the whole reserve.",
+      "domain": "nutrition",
+      "id": "hermetic_grain_storage",
+      "name": "Hermetic Grain Storage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/brine_fermentation.png",
+      "description": "Repeated batches compare salt concentration, vessel care and keeping time for fermented vegetables.",
+      "domain": "nutrition",
+      "id": "brine_fermentation",
+      "name": "Brine Fermentation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vinegar_pickling.png",
+      "description": "Soured fermented liquids are reused in measured batches to keep plant foods longer.",
+      "domain": "nutrition",
+      "id": "vinegar_pickling",
+      "name": "Vinegar Pickling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stock_rotation.png",
+      "description": "Storekeepers mark incoming batches and issue older usable stock before new deliveries.",
+      "domain": "nutrition",
+      "id": "stock_rotation",
+      "name": "Dated Stock Rotation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/protected_wellheads.png",
+      "description": "Raised well rims, covers and drainage carry dirty surface water away from the opening.",
+      "domain": "health",
+      "id": "protected_wellheads",
+      "name": "Protected Wellheads",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rainwater_cisterns.png",
+      "description": "Catchment surfaces feed lined reserves that retain water between rainfalls.",
+      "domain": "infrastructure",
+      "id": "rainwater_cisterns",
+      "name": "Rainwater Cisterns",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_settling_basins.png",
+      "description": "Water rests in separate basins before the clearer upper portion is drawn off.",
+      "domain": "health",
+      "id": "water_settling_basins",
+      "name": "Water Settling Basins",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/slow_sand_filtration.png",
+      "description": "Operators compare water passed slowly through maintained sand beds and clean the beds without abandoning their working layer.",
+      "domain": "health",
+      "id": "slow_sand_filtration",
+      "name": "Slow Sand Filtration",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_service_inspections.png",
+      "description": "Regular checks connect damaged intakes, dirty containers and repair records with recurring water complaints.",
+      "domain": "health",
+      "id": "water_service_inspections",
+      "name": "Water Service Inspections",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/separate_clean_water_storage.png",
+      "description": "Dedicated covered vessels and separate dipping tools prevent cleaned water from being mixed with untreated supplies.",
+      "domain": "health",
+      "id": "separate_clean_water_storage",
+      "name": "Separate Clean-Water Storage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/skirmish_pair_drill.png",
+      "description": "Partners practice alternating observation and movement so a dispersed screen can remain mutually supporting.",
+      "domain": "security",
+      "id": "skirmish_pair_drill",
+      "name": "Skirmish Pair Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mounted_remount_school.png",
+      "description": "Experienced handlers teach riders to change mounts, check tack and manage a working remount string.",
+      "domain": "security",
+      "id": "mounted_remount_school",
+      "name": "Mounted Remount School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/siege_crew_rehearsals.png",
+      "description": "Crews rehearse assembly, safe loading and coordinated operation before transporting engines into a siege.",
+      "domain": "security",
+      "id": "siege_crew_rehearsals",
+      "name": "Siege Crew Rehearsals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mountain_field_school.png",
+      "description": "Instructors teach route selection, load distribution and group movement over steep broken ground.",
+      "domain": "security",
+      "id": "mountain_field_school",
+      "name": "Mountain Field School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/range_estimation_drill.png",
+      "description": "Measured ranges and repeated observation teach shooters to estimate distance and correct their aim.",
+      "domain": "security",
+      "id": "range_estimation_drill",
+      "name": "Range Estimation Drill",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gun_detachment_school.png",
+      "description": "Gun detachments rehearse loading, laying and withdrawal with assigned duties and inspected equipment.",
+      "domain": "security",
+      "id": "gun_detachment_school",
+      "name": "Gun Detachment School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/engineer_demonstration_ranges.png",
+      "description": "Instructors use controlled obstacles and repeated demonstrations to teach field engineering procedures.",
+      "domain": "security",
+      "id": "engineer_demonstration_ranges",
+      "name": "Engineer Demonstration Ranges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanized_crew_school.png",
+      "description": "Drivers, mechanics and commanders train together on servicing routines and coordinated vehicle movement.",
+      "domain": "security",
+      "id": "mechanized_crew_school",
+      "name": "Mechanized Crew School",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/glassmaking.png",
+      "description": "Silica mixtures are heated and cooled into reproducible glass for vessels and optical work.",
+      "domain": "production",
+      "id": "glassmaking",
+      "name": "Glassmaking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/optical_lenses.png",
+      "description": "Curved transparent surfaces are ground and compared for repeatable magnification and focus.",
+      "domain": "knowledge",
+      "id": "optical_lenses",
+      "name": "Optical Lenses",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/experimental_optics.png",
+      "description": "Controlled light paths distinguish reflection, refraction and interference effects.",
+      "domain": "knowledge",
+      "id": "experimental_optics",
+      "name": "Experimental Optics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vacuum_pumps.png",
+      "description": "Fitted pumps and seals remove air from experimental chambers.",
+      "domain": "knowledge",
+      "id": "vacuum_pumps",
+      "name": "Vacuum Pumps",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vacuum_experiments.png",
+      "description": "Pressure is varied systematically while other chamber conditions are recorded.",
+      "domain": "knowledge",
+      "id": "vacuum_experiments",
+      "name": "Vacuum Experiments",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/precision_thermometry.png",
+      "description": "Reproducible temperature scales let observers compare heating and cooling experiments.",
+      "domain": "knowledge",
+      "id": "precision_thermometry",
+      "name": "Precision Thermometry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/calorimetry.png",
+      "description": "Measured heat exchanges distinguish temperature from the quantity of energy transferred.",
+      "domain": "knowledge",
+      "id": "calorimetry",
+      "name": "Calorimetry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/heat_engine_cycles.png",
+      "description": "Comparisons of compression, heating and expansion relate fuel use to mechanical work.",
+      "domain": "knowledge",
+      "id": "heat_engine_cycles",
+      "name": "Heat Engine Cycles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pressure_vessels.png",
+      "description": "Joined vessels are tested against internal pressure before use in engines and experiments.",
+      "domain": "production",
+      "id": "pressure_vessels",
+      "name": "Pressure Vessels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/chemical_distillation.png",
+      "description": "Vapors are condensed separately from their heated mixtures to recover different fractions.",
+      "domain": "production",
+      "id": "chemical_distillation",
+      "name": "Chemical Distillation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fractional_distillation.png",
+      "description": "Repeated vapor-liquid contact separates mixtures by measured boiling behavior.",
+      "domain": "production",
+      "id": "fractional_distillation",
+      "name": "Fractional Distillation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrochemical_cells.png",
+      "description": "Paired materials and electrolytes produce repeatable electrical currents for experiments.",
+      "domain": "knowledge",
+      "id": "electrochemical_cells",
+      "name": "Electrochemical Cells",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrical_measurement.png",
+      "description": "Current, potential difference and resistance are compared using calibrated instruments.",
+      "domain": "knowledge",
+      "id": "electrical_measurement",
+      "name": "Electrical Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electromagnetic_induction.png",
+      "description": "Changing magnetic conditions produce measurable electrical currents in conducting circuits.",
+      "domain": "knowledge",
+      "id": "electromagnetic_induction",
+      "name": "Electromagnetic Induction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrical_generators.png",
+      "description": "Rotating magnetic machinery converts mechanical input into sustained electrical output.",
+      "domain": "production",
+      "id": "electrical_generators",
+      "name": "Electrical Generators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_motors.png",
+      "description": "Controlled current and magnetic forces produce repeatable rotary mechanical work.",
+      "domain": "production",
+      "id": "electric_motors",
+      "name": "Electric Motors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spectroscopy.png",
+      "description": "Separated light patterns are compared to distinguish emitting and absorbing materials.",
+      "domain": "knowledge",
+      "id": "spectroscopy",
+      "name": "Spectroscopy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electron_physics.png",
+      "description": "Experiments with discharge and charged particles establish reproducible electronic behavior.",
+      "domain": "knowledge",
+      "id": "electron_physics",
+      "name": "Electron Physics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/radiation_measurement.png",
+      "description": "Shielded detectors and counted events distinguish radiation exposure from instrumental background.",
+      "domain": "knowledge",
+      "id": "radiation_measurement",
+      "name": "Radiation Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nuclear_fission.png",
+      "description": "Measured nuclear fragmentation connects reaction products, released energy and neutron production.",
+      "domain": "knowledge",
+      "id": "nuclear_fission",
+      "name": "Nuclear Fission",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/neutron_moderation.png",
+      "description": "Materials are compared for how they slow and absorb neutrons in a controlled reaction system.",
+      "domain": "knowledge",
+      "id": "neutron_moderation",
+      "name": "Neutron Moderation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/structural_load_testing.png",
+      "description": "Repeatable loads reveal failure margins and fatigue in structural members.",
+      "domain": "knowledge",
+      "id": "structural_load_testing",
+      "name": "Structural Load Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aerodynamics.png",
+      "description": "Controlled flow measurements compare lift, drag and stability of candidate surfaces.",
+      "domain": "knowledge",
+      "id": "aerodynamics",
+      "name": "Aerodynamics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wind_tunnel_testing.png",
+      "description": "Powered test sections compare airframes under repeatable flow and measured loads.",
+      "domain": "knowledge",
+      "id": "wind_tunnel_testing",
+      "name": "Wind Tunnel Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_arc_furnaces.png",
+      "description": "An arc between carbon electrodes supplies controllable heat inside a refractory-lined steelmaking vessel.",
+      "domain": "production",
+      "id": "electric_arc_furnaces",
+      "name": "Electric Arc Furnaces",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanical_refrigeration.png",
+      "description": "Powered compression and expansion move heat from a storage enclosure into its surroundings.",
+      "domain": "infrastructure",
+      "id": "mechanical_refrigeration",
+      "name": "Mechanical Refrigeration",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steel_refining.png",
+      "description": "Controlled refining compares carbon content and the behavior of iron under working loads.",
+      "domain": "production",
+      "id": "steel_refining",
+      "name": "Steel Refining",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wire_drawing.png",
+      "description": "Successive dies reduce drawn metal to repeatable wire sections.",
+      "domain": "production",
+      "id": "wire_drawing",
+      "name": "Wire Drawing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cable_insulation.png",
+      "description": "Wrapped conductors and insulating compounds are tested against leakage and contact faults.",
+      "domain": "production",
+      "id": "cable_insulation",
+      "name": "Cable Insulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crystallography.png",
+      "description": "Repeated crystal faces and optical behavior suggest an ordered internal structure.",
+      "domain": "knowledge",
+      "id": "crystallography",
+      "name": "Crystallography",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/solid_state_physics.png",
+      "description": "Charge transport and thermal behavior are investigated in ordered solids rather than isolated atoms.",
+      "domain": "knowledge",
+      "id": "solid_state_physics",
+      "name": "Solid-State Physics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/band_theory.png",
+      "description": "Allowed and forbidden electronic energy ranges explain contrasting conducting behavior.",
+      "domain": "knowledge",
+      "id": "band_theory",
+      "name": "Electronic Band Theory",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/photoconductivity.png",
+      "description": "Illumination changes the measured conductivity of selected solids.",
+      "domain": "knowledge",
+      "id": "photoconductivity",
+      "name": "Photoconductivity",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/semiconductor_doping.png",
+      "description": "Controlled impurity additions alter charge-carrier populations in a semiconductor.",
+      "domain": "knowledge",
+      "id": "semiconductor_doping",
+      "name": "Semiconductor Doping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pn_junctions.png",
+      "description": "Joining differently doped regions establishes a built-in field and directional electrical behavior.",
+      "domain": "knowledge",
+      "id": "pn_junctions",
+      "name": "P–N Junctions",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/silicon_smelting.png",
+      "description": "Electrical furnace heat and carbon reduction produce a silicon feedstock from silica-bearing material.",
+      "domain": "production",
+      "id": "silicon_smelting",
+      "name": "Silicon Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/chlorosilane_purification.png",
+      "description": "A volatile chemical intermediate allows impurities to be separated before silicon is deposited again.",
+      "domain": "production",
+      "id": "chlorosilane_purification",
+      "name": "Chlorosilane Purification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/single_crystal_growth.png",
+      "description": "Controlled solidification extends a selected crystal orientation through a semiconductor boule.",
+      "domain": "production",
+      "id": "single_crystal_growth",
+      "name": "Single-Crystal Growth",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wafer_sawing.png",
+      "description": "Thin slices are cut from semiconductor boules, with abrasive loss and surface damage limiting usable output.",
+      "domain": "production",
+      "id": "wafer_sawing",
+      "name": "Semiconductor Wafer Sawing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/photovoltaic_conversion.png",
+      "description": "Illuminated material produces a measurable voltage and supplies current to an external load.",
+      "domain": "knowledge",
+      "id": "photovoltaic_conversion",
+      "name": "Photovoltaic Conversion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/solar_cell_fabrication.png",
+      "description": "Prepared wafer surfaces, junctions and metal contacts are combined into working photovoltaic cells.",
+      "domain": "production",
+      "id": "solar_cell_fabrication",
+      "name": "Solar Cell Fabrication",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/module_encapsulation.png",
+      "description": "Connected cells are enclosed behind protective glazing and mounted for outdoor electrical service.",
+      "domain": "production",
+      "id": "module_encapsulation",
+      "name": "Photovoltaic Module Encapsulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/photovoltaic_power.png",
+      "description": "Installed modules and wiring are commissioned as an operated source of electrical energy.",
+      "domain": "infrastructure",
+      "id": "photovoltaic_power",
+      "name": "Photovoltaic Power",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/skirmisher_infantry_screens.png",
+      "description": "Skirmishers and formed infantry rehearse withdrawing through one another so a screen can give warning without isolating the main line.",
+      "domain": "security",
+      "id": "skirmisher_infantry_screens",
+      "name": "Skirmisher–Infantry Screens",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/engineer_infantry_security.png",
+      "description": "Infantry and engineer teams rehearse mutual protection while specialists approach defended positions.",
+      "domain": "security",
+      "id": "engineer_infantry_security",
+      "name": "Engineer–Infantry Security",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/infantry_antitank_coordination.png",
+      "description": "Infantry and antitank crews rehearse complementary fields of protection against armored attacks.",
+      "domain": "security",
+      "id": "infantry_antitank_coordination",
+      "name": "Infantry–Antitank Coordination",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cavalry_infantry_liaison.png",
+      "description": "Foot and mounted troops rehearse mutual support so mounted attacks do not meet formed resistance alone.",
+      "domain": "security",
+      "id": "cavalry_infantry_liaison",
+      "name": "Cavalry–Infantry Liaison",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gun_line_security.png",
+      "description": "Infantry guards and gun crews rehearse protecting gun positions against troops closing on the batteries.",
+      "domain": "security",
+      "id": "gun_line_security",
+      "name": "Gun-Line Security",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/infantry_tank_cooperation.png",
+      "description": "Infantry and tank crews rehearse coordinated movement and protection against antitank positions.",
+      "domain": "security",
+      "id": "infantry_tank_cooperation",
+      "name": "Infantry–Tank Cooperation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fractional_quantities.png",
+      "description": "Parts of a measured whole are named and compared so shares and remainders can be recorded.",
+      "domain": "knowledge",
+      "id": "fractional_quantities",
+      "name": "Fractional Quantities",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ratio_proportion.png",
+      "description": "Equivalent ratios connect mixtures, scale, exchange and measured quantities.",
+      "domain": "knowledge",
+      "id": "ratio_proportion",
+      "name": "Ratios and Proportions",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/straightedge_compass.png",
+      "description": "Lines and circles generate repeatable geometric constructions without relying on a drawing by eye.",
+      "domain": "knowledge",
+      "id": "straightedge_compass",
+      "name": "Straightedge and Compass Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/similar_triangles.png",
+      "description": "Corresponding sides of equal-angle triangles permit indirect measurement across inaccessible distances.",
+      "domain": "knowledge",
+      "id": "similar_triangles",
+      "name": "Similar Triangles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/trigonometry.png",
+      "description": "Tabulated relationships between angles and side lengths support calculations of height, direction and distance.",
+      "domain": "knowledge",
+      "id": "trigonometry",
+      "name": "Trigonometric Methods",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/symbolic_algebra.png",
+      "description": "Unknown quantities are represented and manipulated while preserving the equality of expressions.",
+      "domain": "knowledge",
+      "id": "symbolic_algebra",
+      "name": "Symbolic Algebra",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polynomial_equations.png",
+      "description": "Powers of unknown quantities are organized into equations whose roots describe possible solutions.",
+      "domain": "knowledge",
+      "id": "polynomial_equations",
+      "name": "Polynomial Equations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/logarithms.png",
+      "description": "Multiplicative relationships are represented on additive scales for calculation and comparison.",
+      "domain": "knowledge",
+      "id": "logarithms",
+      "name": "Logarithms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coordinate_geometry.png",
+      "description": "Numerical coordinates connect geometric shapes to equations and measured positions.",
+      "domain": "knowledge",
+      "id": "coordinate_geometry",
+      "name": "Coordinate Geometry",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/differential_calculus.png",
+      "description": "Limiting changes describe instantaneous rates, local slopes and sensitivity to variation.",
+      "domain": "knowledge",
+      "id": "differential_calculus",
+      "name": "Differential Calculus",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/integral_calculus.png",
+      "description": "Accumulations are described by limits of sums, connecting local variation with total quantities.",
+      "domain": "knowledge",
+      "id": "integral_calculus",
+      "name": "Integral Calculus",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/differential_equations.png",
+      "description": "Relations involving rates of change describe evolving mechanical and physical systems.",
+      "domain": "knowledge",
+      "id": "differential_equations",
+      "name": "Differential Equations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/complex_numbers.png",
+      "description": "An extended number system represents solutions and transformations unavailable on the real number line.",
+      "domain": "knowledge",
+      "id": "complex_numbers",
+      "name": "Complex Numbers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vector_analysis.png",
+      "description": "Magnitude and direction are combined in calculations of forces, motion and changing fields.",
+      "domain": "knowledge",
+      "id": "vector_analysis",
+      "name": "Vector Analysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/matrix_algebra.png",
+      "description": "Rectangular arrays organize coupled linear equations and transformations.",
+      "domain": "knowledge",
+      "id": "matrix_algebra",
+      "name": "Matrix Algebra",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/combinatorics.png",
+      "description": "Arrangements and selections are counted without listing every possibility.",
+      "domain": "knowledge",
+      "id": "combinatorics",
+      "name": "Combinatorial Counting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/probability_theory.png",
+      "description": "Uncertain outcomes are represented by coherent numerical likelihoods rather than single predictions.",
+      "domain": "knowledge",
+      "id": "probability_theory",
+      "name": "Probability Theory",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/statistical_sampling.png",
+      "description": "Selected observations are used to estimate a larger population while accounting for sampling variation.",
+      "domain": "knowledge",
+      "id": "statistical_sampling",
+      "name": "Statistical Sampling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/least_squares_estimation.png",
+      "description": "Model parameters are fitted to observations by minimizing squared residual differences.",
+      "domain": "knowledge",
+      "id": "least_squares_estimation",
+      "name": "Least-Squares Estimation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/measurement_uncertainty.png",
+      "description": "Measured values are reported with assessed uncertainty from instruments, procedures and repeated observations.",
+      "domain": "knowledge",
+      "id": "measurement_uncertainty",
+      "name": "Measurement Uncertainty",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/dimensional_analysis.png",
+      "description": "Physical equations are checked and scaled using dimensions and dimensionless relationships.",
+      "domain": "knowledge",
+      "id": "dimensional_analysis",
+      "name": "Dimensional Analysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/numerical_root_finding.png",
+      "description": "Successive numerical approximations locate equation solutions that lack a convenient exact expression.",
+      "domain": "knowledge",
+      "id": "numerical_root_finding",
+      "name": "Numerical Root Finding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/numerical_integration.png",
+      "description": "Weighted samples approximate accumulated quantities when direct symbolic integration is impractical.",
+      "domain": "knowledge",
+      "id": "numerical_integration",
+      "name": "Numerical Integration",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/constrained_optimization.png",
+      "description": "Design choices are compared against an objective while respecting explicit limits on available quantities.",
+      "domain": "knowledge",
+      "id": "constrained_optimization",
+      "name": "Constrained Optimization",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/harmonic_analysis.png",
+      "description": "Signals and spatial patterns are decomposed into oscillating components for analysis.",
+      "domain": "knowledge",
+      "id": "harmonic_analysis",
+      "name": "Harmonic Analysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/dimensional_metrology.png",
+      "description": "Reference standards, calibrated instruments and uncertainty budgets make small dimensions comparable between workshops.",
+      "domain": "knowledge",
+      "id": "dimensional_metrology",
+      "name": "Precision Dimensional Metrology",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/brine_purification.png",
+      "description": "Settling and filtered clarification remove suspended contamination from prepared salt solutions.",
+      "domain": "production",
+      "id": "brine_purification",
+      "name": "Brine Purification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/chloralkali_cells.png",
+      "description": "Separated electrolysis compartments recover chlorine, caustic soda and hydrogen from the same brine feed.",
+      "domain": "production",
+      "id": "chloralkali_cells",
+      "name": "Chlor-Alkali Cells",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hydrogen_chloride_synthesis.png",
+      "description": "Contained gas processing combines recovered hydrogen and chlorine into an industrial silicon-processing reagent.",
+      "domain": "production",
+      "id": "hydrogen_chloride_synthesis",
+      "name": "Hydrogen Chloride Synthesis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lever_moments.png",
+      "description": "Measured lever arms relate balancing loads to their distances from a fulcrum.",
+      "domain": "knowledge",
+      "id": "lever_moments",
+      "name": "Lever Moments",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/centers_of_mass.png",
+      "description": "Suspension and balance trials locate the effective point at which a body’s weight acts.",
+      "domain": "knowledge",
+      "id": "centers_of_mass",
+      "name": "Centers of Mass",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/compound_pulleys.png",
+      "description": "Multiple moving sheaves exchange a longer rope travel for a smaller lifting force.",
+      "domain": "knowledge",
+      "id": "compound_pulleys",
+      "name": "Compound Pulleys",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gear_ratios.png",
+      "description": "Counting meshing teeth predicts changes in rotational speed and torque.",
+      "domain": "knowledge",
+      "id": "gear_ratios",
+      "name": "Gear Ratios",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crank_linkages.png",
+      "description": "Pinned links convert continuous rotation into a controlled reciprocating stroke.",
+      "domain": "knowledge",
+      "id": "crank_linkages",
+      "name": "Crank Linkages",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flywheel_smoothing.png",
+      "description": "A weighted rotating wheel carries motion between intermittent driving strokes.",
+      "domain": "knowledge",
+      "id": "flywheel_smoothing",
+      "name": "Flywheel Smoothing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bearing_surfaces.png",
+      "description": "Replaceable fitted surfaces carry rotating shafts while controlling clearance and wear.",
+      "domain": "knowledge",
+      "id": "bearing_surfaces",
+      "name": "Bearing Surfaces",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/friction_measurement.png",
+      "description": "Repeated pull tests distinguish the forces needed to begin and sustain sliding.",
+      "domain": "knowledge",
+      "id": "friction_measurement",
+      "name": "Friction Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lubrication_regimes.png",
+      "description": "Load and speed trials distinguish boundary contact from motion supported by a lubricant film.",
+      "domain": "knowledge",
+      "id": "lubrication_regimes",
+      "name": "Lubrication Regimes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/displacement_buoyancy.png",
+      "description": "Comparing displaced water with carried weight explains when loaded bodies float.",
+      "domain": "knowledge",
+      "id": "displacement_buoyancy",
+      "name": "Displacement and Buoyancy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hydrostatic_pressure.png",
+      "description": "Water columns reveal that pressure increases with depth and acts on enclosing surfaces.",
+      "domain": "knowledge",
+      "id": "hydrostatic_pressure",
+      "name": "Hydrostatic Pressure",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flow_continuity.png",
+      "description": "Measured flows through changing sections balance incoming and outgoing fluid quantities.",
+      "domain": "knowledge",
+      "id": "flow_continuity",
+      "name": "Flow Continuity",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/viscous_resistance.png",
+      "description": "Controlled passages reveal how fluid viscosity and wall contact oppose motion.",
+      "domain": "knowledge",
+      "id": "viscous_resistance",
+      "name": "Viscous Resistance",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/elastic_deformation.png",
+      "description": "Repeated bending tests separate recoverable shape changes from permanent damage.",
+      "domain": "knowledge",
+      "id": "elastic_deformation",
+      "name": "Elastic Deformation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stress_strain_relations.png",
+      "description": "Loads compared with cross section and relative extension characterize material response.",
+      "domain": "knowledge",
+      "id": "stress_strain_relations",
+      "name": "Stress–Strain Relations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/column_buckling.png",
+      "description": "Slender loaded members fail by sideways instability before their material is crushed.",
+      "domain": "knowledge",
+      "id": "column_buckling",
+      "name": "Column Buckling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cyclic_fatigue.png",
+      "description": "Repeated loading reveals cracks and failure even below a single-load failure threshold.",
+      "domain": "knowledge",
+      "id": "cyclic_fatigue",
+      "name": "Cyclic Fatigue",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/measured_kinematics.png",
+      "description": "Repeated position and time measurements distinguish speed from acceleration.",
+      "domain": "knowledge",
+      "id": "measured_kinematics",
+      "name": "Measured Kinematics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/inertial_motion.png",
+      "description": "Low-resistance motion distinguishes persistence of motion from forces that change it.",
+      "domain": "knowledge",
+      "id": "inertial_motion",
+      "name": "Inertial Motion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/momentum_balance.png",
+      "description": "Collision and recoil measurements compare transferred motion across interacting bodies.",
+      "domain": "knowledge",
+      "id": "momentum_balance",
+      "name": "Momentum Balance",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanical_work_energy.png",
+      "description": "Force acting through distance relates lifting, motion and losses in machines.",
+      "domain": "knowledge",
+      "id": "mechanical_work_energy",
+      "name": "Mechanical Work and Energy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rotational_dynamics.png",
+      "description": "Torque and mass distribution explain changes in angular motion.",
+      "domain": "knowledge",
+      "id": "rotational_dynamics",
+      "name": "Rotational Dynamics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanical_oscillation.png",
+      "description": "Pendulums and spring-loaded bodies reveal repeatable periods and damping.",
+      "domain": "knowledge",
+      "id": "mechanical_oscillation",
+      "name": "Mechanical Oscillation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/feedback_governors.png",
+      "description": "A speed-sensitive linkage changes the drive input to resist unwanted speed changes.",
+      "domain": "knowledge",
+      "id": "feedback_governors",
+      "name": "Feedback Governors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_streak_tests.png",
+      "description": "Powder rubbed onto a consistent pale surface reveals diagnostic colors that weathered outer faces can conceal.",
+      "domain": "ecology",
+      "id": "mineral_streak_tests",
+      "name": "Mineral Streak Tests",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_cleavage.png",
+      "description": "Repeated breaks distinguish flat cleavage planes from irregular and conchoidal fractures.",
+      "domain": "ecology",
+      "id": "mineral_cleavage",
+      "name": "Cleavage and Fracture Classification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/comparative_mineral_hardness.png",
+      "description": "A repeatable scratch sequence separates resistance to scratching from toughness under impact.",
+      "domain": "ecology",
+      "id": "comparative_mineral_hardness",
+      "name": "Comparative Mineral Hardness",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_specific_gravity.png",
+      "description": "Mass compared with displaced water distinguishes dense ore minerals from visually similar gangue.",
+      "domain": "ecology",
+      "id": "mineral_specific_gravity",
+      "name": "Mineral Specific Gravity",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relative_stratigraphy.png",
+      "description": "Superposition and interruptions in layered ground establish an order of deposition without needing absolute dates.",
+      "domain": "ecology",
+      "id": "relative_stratigraphy",
+      "name": "Relative Stratigraphy",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lithologic_correlation.png",
+      "description": "Repeated rock assemblages allow separated exposures to be compared without assuming every similar-looking layer is identical.",
+      "domain": "ecology",
+      "id": "lithologic_correlation",
+      "name": "Lithologic Correlation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geologic_cross_sections.png",
+      "description": "Surface positions and layer inclinations can be reconciled in a vertical reconstruction of the ground.",
+      "domain": "ecology",
+      "id": "geologic_cross_sections",
+      "name": "Geologic Cross Sections",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/structural_geologic_mapping.png",
+      "description": "Faults, folds and joint orientations explain why mineralized and water-bearing zones depart from simple horizontal layers.",
+      "domain": "ecology",
+      "id": "structural_geologic_mapping",
+      "name": "Structural Geologic Mapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sediment_provenance.png",
+      "description": "Grain composition and transport patterns connect downstream sediment to possible upstream source rocks.",
+      "domain": "ecology",
+      "id": "sediment_provenance",
+      "name": "Sediment Provenance",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/systematic_channel_sampling.png",
+      "description": "Continuous measured cuts across an exposure reduce the bias of collecting only its richest-looking fragments.",
+      "domain": "ecology",
+      "id": "systematic_channel_sampling",
+      "name": "Systematic Channel Sampling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geochemical_baselines.png",
+      "description": "Local background variation must be understood before an unusual concentration can be treated as an exploration clue.",
+      "domain": "ecology",
+      "id": "geochemical_baselines",
+      "name": "Geochemical Baselines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/geochemical_anomaly_mapping.png",
+      "description": "Spatially coherent chemical departures become follow-up targets after background variation and analytical uncertainty are considered.",
+      "domain": "ecology",
+      "id": "geochemical_anomaly_mapping",
+      "name": "Geochemical Anomaly Mapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grade_tonnage_models.png",
+      "description": "Likely grade and deposit size must be considered together rather than extrapolating a rich specimen into an entire orebody.",
+      "domain": "ecology",
+      "id": "grade_tonnage_models",
+      "name": "Grade–Tonnage Models",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spatial_variograms.png",
+      "description": "Pairs of spatially separated samples reveal how mineral measurements vary with distance and direction.",
+      "domain": "ecology",
+      "id": "spatial_variograms",
+      "name": "Spatial Variograms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/resource_kriging.png",
+      "description": "Spatial covariance allows estimates between samples to carry explicit weights and estimation uncertainty.",
+      "domain": "ecology",
+      "id": "resource_kriging",
+      "name": "Resource Kriging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/orebody_block_models.png",
+      "description": "A three-dimensional partition reconciles sampled grades with geologic boundaries and volumes without treating unsampled ground as known ore.",
+      "domain": "ecology",
+      "id": "orebody_block_models",
+      "name": "Orebody Block Models",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/litter_bearer_drill.png",
+      "description": "Carrying teams rehearse lifting and handing over injured people without abandoning the rest of the column.",
+      "domain": "security",
+      "id": "litter_bearer_drill",
+      "name": "Litter Bearer Drill",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/casualty_collection_posts.png",
+      "description": "Marked collection points let bearers find waiting casualties instead of searching the whole camp repeatedly.",
+      "domain": "security",
+      "id": "casualty_collection_posts",
+      "name": "Casualty Collection Posts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/casualty_transfer_records.png",
+      "description": "A record accompanies each transfer so receiving carers know what happened and what care was already given.",
+      "domain": "security",
+      "id": "casualty_transfer_records",
+      "name": "Casualty Transfer Records",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/evacuation_relays.png",
+      "description": "Successive carrying teams exchange patients at agreed points rather than exhausting one team on the entire journey.",
+      "domain": "security",
+      "id": "evacuation_relays",
+      "name": "Casualty Evacuation Relays",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/field_aid_stations.png",
+      "description": "Organized sheltered care concentrates trained personnel and expendable supplies behind the fighting force.",
+      "domain": "security",
+      "id": "field_aid_stations",
+      "name": "Field Aid Stations",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/triage_registers.png",
+      "description": "Staff compare urgency and available treatment capacity before deciding the next destination for each casualty.",
+      "domain": "security",
+      "id": "triage_registers",
+      "name": "Triage Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/medical_resupply_packing.png",
+      "description": "Standard care bundles make shortages visible before a receiving station exhausts its dressings and supplies.",
+      "domain": "security",
+      "id": "medical_resupply_packing",
+      "name": "Medical Resupply Packing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/convalescent_duty_reviews.png",
+      "description": "Recovery records distinguish people ready for duty from those who still need care or different work.",
+      "domain": "security",
+      "id": "convalescent_duty_reviews",
+      "name": "Convalescent Duty Reviews",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/field_armorer_teams.png",
+      "description": "Trained crews inspect damaged equipment and organize tools and repair work before returning serviceable items to stores.",
+      "domain": "security",
+      "id": "field_armorer_teams",
+      "name": "Field Armorer Teams",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/germination_trials.png",
+      "description": "Counted seed samples are sprouted before sowing so poor establishment can be distinguished from later crop losses.",
+      "domain": "nutrition",
+      "id": "germination_trials",
+      "name": "Germination Trials",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_cleaning.png",
+      "description": "Screens and hand sorting separate useful seed from chaff, stones and visibly damaged material.",
+      "domain": "nutrition",
+      "id": "seed_cleaning",
+      "name": "Seed Cleaning",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sowing_depth_trials.png",
+      "description": "Comparable seed is planted at measured depths to find which placements emerge reliably in the local soil.",
+      "domain": "nutrition",
+      "id": "sowing_depth_trials",
+      "name": "Sowing Depth Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/row_spacing_trials.png",
+      "description": "Parallel planted strips compare crowding, access and harvest without confusing spacing with seed quality.",
+      "domain": "nutrition",
+      "id": "row_spacing_trials",
+      "name": "Row Spacing Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seedbed_firming.png",
+      "description": "Farmers compare seed contact and emergence after carefully pressing rather than merely loosening a seedbed.",
+      "domain": "nutrition",
+      "id": "seedbed_firming",
+      "name": "Seedbed Firming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mass_seed_selection.png",
+      "description": "Seed from many desirable plants is pooled across harvests while retaining enough plants to avoid a narrow accidental lineage.",
+      "domain": "nutrition",
+      "id": "mass_seed_selection",
+      "name": "Mass Seed Selection",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/progeny_rows.png",
+      "description": "Offspring of selected plants are kept in identifiable rows so inherited performance can be compared.",
+      "domain": "nutrition",
+      "id": "progeny_rows",
+      "name": "Progeny Rows",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/controlled_pollination.png",
+      "description": "Selected parents are crossed deliberately and their offspring kept separate from uncontrolled seed mixtures.",
+      "domain": "nutrition",
+      "id": "controlled_pollination",
+      "name": "Controlled Pollination",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/field_variety_trials.png",
+      "description": "Candidate varieties are compared in repeated field plots rather than judged from a single exceptional plant.",
+      "domain": "nutrition",
+      "id": "field_variety_trials",
+      "name": "Field Variety Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/regional_seed_trials.png",
+      "description": "The same seed is compared across growing districts so local adaptation is not mistaken for universal superiority.",
+      "domain": "nutrition",
+      "id": "regional_seed_trials",
+      "name": "Regional Seed Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crop_residue_cover.png",
+      "description": "Harvest residue is retained over soil instead of leaving the surface entirely exposed between crops.",
+      "domain": "nutrition",
+      "id": "crop_residue_cover",
+      "name": "Crop Residue Cover",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/green_manure_crops.png",
+      "description": "A deliberately grown crop is returned to the soil rather than harvested for food, exchanging immediate output for land condition.",
+      "domain": "nutrition",
+      "id": "green_manure_crops",
+      "name": "Green Manure Crops",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cover_crop_mixtures.png",
+      "description": "Different cover plants are combined and observed for complementary rooting and seasonal soil protection.",
+      "domain": "nutrition",
+      "id": "cover_crop_mixtures",
+      "name": "Cover Crop Mixtures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/contour_cultivation.png",
+      "description": "Cultivation follows measured contours so disturbed soil and runoff are less directly connected down a slope.",
+      "domain": "nutrition",
+      "id": "contour_cultivation",
+      "name": "Contour Cultivation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/strip_cropping.png",
+      "description": "Alternating crop strips interrupt long exposed slopes while requiring more careful work around field boundaries.",
+      "domain": "nutrition",
+      "id": "strip_cropping",
+      "name": "Strip Cropping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/reduced_tillage.png",
+      "description": "Repeated observations distinguish necessary seedbed work from disruptive passes that leave soil structure poorer.",
+      "domain": "nutrition",
+      "id": "reduced_tillage",
+      "name": "Reduced Tillage",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/soil_infiltration_trials.png",
+      "description": "Measured additions of water reveal differences in infiltration and surface sealing that visual soil descriptions miss.",
+      "domain": "nutrition",
+      "id": "soil_infiltration_trials",
+      "name": "Soil Infiltration Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mulch_water_management.png",
+      "description": "Cover depth and placement are compared against water retention and emergence instead of applying the same mulch everywhere.",
+      "domain": "nutrition",
+      "id": "mulch_water_management",
+      "name": "Mulch Water Management",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/irrigation_loss_accounts.png",
+      "description": "Water delivered and crop response are compared along a distribution route to identify where irrigation effort is being lost.",
+      "domain": "nutrition",
+      "id": "irrigation_loss_accounts",
+      "name": "Irrigation Loss Accounts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/soil_moisture_scheduling.png",
+      "description": "Observed soil moisture and crop response guide watering intervals rather than applying identical turns regardless of conditions.",
+      "domain": "nutrition",
+      "id": "soil_moisture_scheduling",
+      "name": "Soil Moisture Scheduling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nutrient_response_trials.png",
+      "description": "Comparable plots separate the response to supplied plant nutrients from differences in soil, water and seed.",
+      "domain": "nutrition",
+      "id": "nutrient_response_trials",
+      "name": "Nutrient Response Trials",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_nitrate_dressing.png",
+      "description": "Prepared mineral nitrate is accounted for as a crop input instead of treating a nearby deposit as an automatic harvest gain.",
+      "domain": "nutrition",
+      "id": "mineral_nitrate_dressing",
+      "name": "Mineral Nitrate Dressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sulfur_dioxide_recovery.png",
+      "description": "Contained processing recovers a sulfur-bearing gas stream as a chemical feedstock.",
+      "domain": "production",
+      "id": "sulfur_dioxide_recovery",
+      "name": "Sulfur Dioxide Recovery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sulfuric_acid_production.png",
+      "description": "A controlled chemical process turns a recovered sulfur feed into an acid used to transform mineral materials.",
+      "domain": "production",
+      "id": "sulfuric_acid_production",
+      "name": "Sulfuric Acid Production",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/phosphate_solubilization.png",
+      "description": "Chemical treatment makes more of a phosphate feed available to crops, at the cost of another manufactured input.",
+      "domain": "nutrition",
+      "id": "phosphate_solubilization",
+      "name": "Phosphate Solubilization",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/compressed_air_systems.png",
+      "description": "Powered compressors and sealed receivers deliver an air feed for industrial separation.",
+      "domain": "production",
+      "id": "compressed_air_systems",
+      "name": "Compressed Air Systems",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cryogenic_air_separation.png",
+      "description": "Cooling and separation recover distinct nitrogen and oxygen streams from processed air.",
+      "domain": "production",
+      "id": "cryogenic_air_separation",
+      "name": "Cryogenic Air Separation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_electrolysis.png",
+      "description": "Powered separated cells split a water feed into recoverable hydrogen and oxygen streams.",
+      "domain": "production",
+      "id": "water_electrolysis",
+      "name": "Water Electrolysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/iron_ammonia_catalysts.png",
+      "description": "Prepared iron catalyst material supports ammonia synthesis without becoming the main chemical feedstock.",
+      "domain": "production",
+      "id": "iron_ammonia_catalysts",
+      "name": "Iron Ammonia Catalysts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/catalytic_ammonia_synthesis.png",
+      "description": "An energy-consuming catalytic process combines nitrogen and hydrogen into ammonia for further manufacture.",
+      "domain": "production",
+      "id": "catalytic_ammonia_synthesis",
+      "name": "Catalytic Ammonia Synthesis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ammonium_sulfate_fertilizer.png",
+      "description": "Manufactured ammonia and acid supply a storable nitrogen fertilizer independently of a local nitrate deposit.",
+      "domain": "nutrition",
+      "id": "ammonium_sulfate_fertilizer",
+      "name": "Ammonium Sulfate Fertilizer",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_smelting.png",
+      "description": "Lead-bearing feed is processed into a workable metal stock rather than treated as finished electrical material.",
+      "domain": "production",
+      "id": "lead_smelting",
+      "name": "Lead Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_sheet_rolling.png",
+      "description": "Rollers produce repeatable lead sheets for electrode assemblies.",
+      "domain": "production",
+      "id": "lead_sheet_rolling",
+      "name": "Lead Sheet Rolling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/porous_battery_separators.png",
+      "description": "Prepared porous separators keep opposing electrodes apart while allowing the electrolyte to work between them.",
+      "domain": "production",
+      "id": "porous_battery_separators",
+      "name": "Porous Battery Separators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_oxide_preparation.png",
+      "description": "A controlled preparation produces lead-oxide feed for rechargeable electrode manufacture.",
+      "domain": "production",
+      "id": "lead_oxide_preparation",
+      "name": "Lead Oxide Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_acid_cells.png",
+      "description": "Lead electrodes, separators and electrolyte are assembled and formed into rechargeable cells.",
+      "domain": "production",
+      "id": "lead_acid_cells",
+      "name": "Lead-Acid Cells",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/battery_bank_wiring.png",
+      "description": "Cell assemblies are connected and housed as a stationary energy store with supervised charging and discharge.",
+      "domain": "production",
+      "id": "battery_bank_wiring",
+      "name": "Battery Bank Wiring",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/charge_regulation.png",
+      "description": "Sensing and switching regulate a battery bank with less continuous operator effort.",
+      "domain": "production",
+      "id": "charge_regulation",
+      "name": "Charge Regulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pressure_pipe_jointing.png",
+      "description": "Joined metal pipes convey a compressed-air supply to machinery while connections are checked for leakage.",
+      "domain": "infrastructure",
+      "id": "pressure_pipe_jointing",
+      "name": "Pressure Pipe Jointing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cylinder_boring.png",
+      "description": "A guided cutting tool produces a regular internal cylinder surface for a moving piston.",
+      "domain": "infrastructure",
+      "id": "cylinder_boring",
+      "name": "Cylinder Boring",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/packed_piston_seals.png",
+      "description": "Prepared packing limits leakage around moving piston rods while accepting friction and eventual replacement.",
+      "domain": "infrastructure",
+      "id": "packed_piston_seals",
+      "name": "Packed Piston Seals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/directional_air_valves.png",
+      "description": "A valve alternately admits and exhausts compressed air to control actuator movement.",
+      "domain": "infrastructure",
+      "id": "directional_air_valves",
+      "name": "Directional Air Valves",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pneumatic_cylinders.png",
+      "description": "A sealed piston converts admitted compressed air into a controlled linear stroke.",
+      "domain": "infrastructure",
+      "id": "pneumatic_cylinders",
+      "name": "Pneumatic Cylinders",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pneumatic_pressing.png",
+      "description": "A braced frame and air cylinder apply repeatable pressing work; useful motion requires a real compressed-air supply.",
+      "domain": "infrastructure",
+      "id": "pneumatic_pressing",
+      "name": "Pneumatic Pressing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lens_centering.png",
+      "description": "Lenses are seated around a common optical axis so an assembled instrument can retain its intended image.",
+      "domain": "knowledge",
+      "id": "lens_centering",
+      "name": "Lens Centering",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/eyepiece_design.png",
+      "description": "A second lens assembly presents the image formed by an objective to an observer.",
+      "domain": "knowledge",
+      "id": "eyepiece_design",
+      "name": "Eyepiece Design",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fine_focus_stages.png",
+      "description": "A guided specimen platform can move through small controlled focus adjustments.",
+      "domain": "knowledge",
+      "id": "fine_focus_stages",
+      "name": "Fine-Focus Stages",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/illumination_apertures.png",
+      "description": "Controlled openings and collecting optics regulate illumination reaching a specimen.",
+      "domain": "knowledge",
+      "id": "illumination_apertures",
+      "name": "Illumination Apertures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/specimen_slide_mounting.png",
+      "description": "Flat transparent mounts support small samples in a repeatable viewing position.",
+      "domain": "knowledge",
+      "id": "specimen_slide_mounting",
+      "name": "Specimen Slide Mounting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/compound_microscopy.png",
+      "description": "An aligned objective, eyepiece, stage and illumination system reveal structure in prepared small specimens.",
+      "domain": "knowledge",
+      "id": "compound_microscopy",
+      "name": "Compound Microscopy",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_levigation.png",
+      "description": "Settling suspended clay separates coarse debris and produces a more repeatable working body.",
+      "domain": "production",
+      "id": "clay_levigation",
+      "name": "Clay Levigation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grog_preparation.png",
+      "description": "Crushed fired clay can temper a fresh body, reducing the proportion that shrinks during drying and firing.",
+      "domain": "production",
+      "id": "grog_preparation",
+      "name": "Grog Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/refractory_body_trials.png",
+      "description": "Repeated firing trials select clay mixtures that retain useful shape under demanding furnace conditions.",
+      "domain": "production",
+      "id": "refractory_body_trials",
+      "name": "Refractory Body Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/refractory_brick_firing.png",
+      "description": "Regular fired refractory blocks make furnace linings replaceable without rebuilding the entire structure.",
+      "domain": "production",
+      "id": "refractory_brick_firing",
+      "name": "Refractory Brick Firing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ceramic_crucibles.png",
+      "description": "Formed and fired refractory vessels hold molten batches apart from the surrounding fuel and masonry.",
+      "domain": "production",
+      "id": "ceramic_crucibles",
+      "name": "Ceramic Crucibles",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crucible_glass_melting.png",
+      "description": "Prepared melting pots and furnace linings support repeatable glass batches while worn pots require replacement.",
+      "domain": "production",
+      "id": "crucible_glass_melting",
+      "name": "Crucible Glass Melting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/finery_forges.png",
+      "description": "Oxidizing and hammering pig iron removes excess carbon and consolidates workable wrought iron.",
+      "domain": "production",
+      "id": "finery_forges",
+      "name": "Finery Forges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/charcoal_retorts.png",
+      "description": "An enclosed vessel separates the wood charge from its heating fire, allowing more controlled carbonization.",
+      "domain": "production",
+      "id": "charcoal_retorts",
+      "name": "Charcoal Retorts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bloomery_charge_control.png",
+      "description": "Measured ore and prepared charcoal charges make the fuel supply and reduction work explicit at the bloomery.",
+      "domain": "production",
+      "id": "bloomery_charge_control",
+      "name": "Bloomery Charge Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tin_smelting.png",
+      "description": "Selected tin ore is reduced and separated into workable tin for controlled coating and alloying.",
+      "domain": "production",
+      "id": "tin_smelting",
+      "name": "Tin Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sheet_steel_rolling.png",
+      "description": "Repeated roller passes form steel into sheet that can be cut and folded consistently.",
+      "domain": "production",
+      "id": "sheet_steel_rolling",
+      "name": "Sheet Steel Rolling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tinplate_coating.png",
+      "description": "A controlled tin coating protects prepared steel sheet and supplies a useful container material.",
+      "domain": "production",
+      "id": "tinplate_coating",
+      "name": "Tinplate Coating",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/can_body_forming.png",
+      "description": "Sheet blanks become matching can bodies and ends that can be filled and closed at a packing line.",
+      "domain": "nutrition",
+      "id": "can_body_forming",
+      "name": "Can Body Forming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/double_seaming.png",
+      "description": "Controlled rolling joins a filled container body to its end, with seam checks detecting faulty closure.",
+      "domain": "nutrition",
+      "id": "double_seaming",
+      "name": "Double Seaming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_retorts.png",
+      "description": "A controlled heated vessel processes closed food containers in repeatable batches.",
+      "domain": "nutrition",
+      "id": "food_retorts",
+      "name": "Food Retorts",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thermal_process_validation.png",
+      "description": "Measured trials establish processing and closure controls for repeatable preserved food batches.",
+      "domain": "nutrition",
+      "id": "thermal_process_validation",
+      "name": "Thermal Process Validation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rope_laying.png",
+      "description": "Strands laid against their own twist share a load without immediately unravelling. A ropewalk produces repeatable working lengths.",
+      "domain": "movement",
+      "id": "rope_laying",
+      "name": "Rope Laying",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sail_panel_cutting.png",
+      "description": "Measured cloth panels preserve the intended outline and distribute the seams of a sail.",
+      "domain": "movement",
+      "id": "sail_panel_cutting",
+      "name": "Sail Panel Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sail_seaming.png",
+      "description": "Joined panels and reinforced edges transfer wind loads into the ropes that support and trim a sail.",
+      "domain": "movement",
+      "id": "sail_seaming",
+      "name": "Sail Seaming",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_sheave_blocks.png",
+      "description": "Grooved wooden wheels turn inside bound shells, guiding running rope while reducing the effort of hauling a sail.",
+      "domain": "movement",
+      "id": "wooden_sheave_blocks",
+      "name": "Wooden Sheave Blocks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/standing_running_rigging.png",
+      "description": "Fixed stays support the mast while separate moving lines hoist and trim the sails. Their coordinated layout makes a working rig.",
+      "domain": "movement",
+      "id": "standing_running_rigging",
+      "name": "Standing and Running Rigging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/keel_scarfing.png",
+      "description": "Long overlapping joints unite shorter timbers into the longitudinal backbone of a larger hull.",
+      "domain": "movement",
+      "id": "keel_scarfing",
+      "name": "Keel Scarfing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grown_frame_selection.png",
+      "description": "Naturally curved timber is selected so its grain follows the shape of a ship frame instead of cutting across the bend.",
+      "domain": "movement",
+      "id": "grown_frame_selection",
+      "name": "Grown Frame Selection",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/frame_moulding.png",
+      "description": "Reusable patterns transfer a planned hull section to a sequence of frames, reducing repeated fitting work.",
+      "domain": "movement",
+      "id": "frame_moulding",
+      "name": "Frame Moulding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plank_spiling.png",
+      "description": "Offsets taken from a curved hull are transferred to a plank blank, preserving the changing width needed along its length.",
+      "domain": "movement",
+      "id": "plank_spiling",
+      "name": "Plank Spiling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/caulking_fiber_preparation.png",
+      "description": "Separated fibers are worked into compressible strands that can pack the joints between hull planks.",
+      "domain": "movement",
+      "id": "caulking_fiber_preparation",
+      "name": "Caulking Fiber Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/treenail_fastening.png",
+      "description": "Close-fitting wooden pins fasten planking to its supporting frames, providing a fastening route without a supply of metal nails.",
+      "domain": "movement",
+      "id": "treenail_fastening",
+      "name": "Treenail Fastening",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hull_seam_caulking.png",
+      "description": "Driven fiber and a sealing compound close plank seams while allowing limited movement of the wooden hull.",
+      "domain": "movement",
+      "id": "hull_seam_caulking",
+      "name": "Hull Seam Caulking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/carvel_frame_construction.png",
+      "description": "Planks fitted edge to edge over a supporting frame form a smooth outer hull. The frames establish its shape before the planking closes it.",
+      "domain": "movement",
+      "id": "carvel_frame_construction",
+      "name": "Carvel Frame Construction",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clinker_shell_construction.png",
+      "description": "Overlapping strakes are fastened together as a shell before its internal supports are fitted, offering a different construction sequence from frame-first building.",
+      "domain": "movement",
+      "id": "clinker_shell_construction",
+      "name": "Clinker Shell Construction",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mast_making.png",
+      "description": "Selected straight timber is shaped into spars with reinforced attachment points for the loads of sails and rigging.",
+      "domain": "movement",
+      "id": "mast_making",
+      "name": "Mast Making",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/launching_cradles.png",
+      "description": "A fitted supporting cradle carries a completed hull along prepared ways during launching, becoming reusable shipyard tooling.",
+      "domain": "movement",
+      "id": "launching_cradles",
+      "name": "Launching Cradles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wheel_blank_jointing.png",
+      "description": "Joined and secured timber pieces form a broad blank from which a solid wheel can be cut.",
+      "domain": "infrastructure",
+      "id": "wheel_blank_jointing",
+      "name": "Wheel Blank Jointing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wheel_hub_boring.png",
+      "description": "An accurately centered bore lets a wooden hub turn around its axle without excessive binding.",
+      "domain": "infrastructure",
+      "id": "wheel_hub_boring",
+      "name": "Wheel Hub Boring",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spoke_tenon_cutting.png",
+      "description": "Shaped spoke ends fit the hub and rim, transmitting loads through a wheel while leaving its center open.",
+      "domain": "infrastructure",
+      "id": "spoke_tenon_cutting",
+      "name": "Spoke Tenon Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/felloe_jointing.png",
+      "description": "Curved rim segments meet around the ends of the spokes to complete a continuous wheel perimeter.",
+      "domain": "infrastructure",
+      "id": "felloe_jointing",
+      "name": "Felloe Jointing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/solid_wheel_assembly.png",
+      "description": "A matched pair of solid wheels joins broad wooden discs to bored hubs for a load-carrying cart.",
+      "domain": "infrastructure",
+      "id": "solid_wheel_assembly",
+      "name": "Solid Wheel Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spoked_wheel_assembly.png",
+      "description": "Hubs, spokes and curved rim segments are fitted into a pair of open wheels, using less timber than solid discs.",
+      "domain": "infrastructure",
+      "id": "spoked_wheel_assembly",
+      "name": "Spoked Wheel Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/iron_tyre_fitting.png",
+      "description": "An iron hoop fitted around a wooden wheel binds its joints and supplies a wearing surface around the rim.",
+      "domain": "infrastructure",
+      "id": "iron_tyre_fitting",
+      "name": "Iron Tyre Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_axle_shaping.png",
+      "description": "A straight axle is shaped with shoulders and wheel seats to carry the load while maintaining the spacing of its wheels.",
+      "domain": "infrastructure",
+      "id": "wooden_axle_shaping",
+      "name": "Wooden Axle Shaping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_axle_boxes.png",
+      "description": "Fitted bearing blocks support the moving axle connection and make its bearing surfaces replaceable.",
+      "domain": "infrastructure",
+      "id": "wooden_axle_boxes",
+      "name": "Wooden Axle Boxes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/axle_sleeve_fitting.png",
+      "description": "Metal sleeves line a prepared bearing connection, separating its working surface from the surrounding wood.",
+      "domain": "infrastructure",
+      "id": "axle_sleeve_fitting",
+      "name": "Axle Sleeve Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/linchpin_retention.png",
+      "description": "Removable retaining pins secure the wheels at the axle ends while allowing a wheel to be removed for repair.",
+      "domain": "infrastructure",
+      "id": "linchpin_retention",
+      "name": "Linchpin Retention",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cart_bed_framing.png",
+      "description": "A braced load bed transfers cargo weight to its running gear without depending on a loose pile of boards.",
+      "domain": "infrastructure",
+      "id": "cart_bed_framing",
+      "name": "Cart Bed Framing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drawbar_fitting.png",
+      "description": "A fitted drawbar carries pulling and steering loads from the hauling connection into the cart frame.",
+      "domain": "infrastructure",
+      "id": "drawbar_fitting",
+      "name": "Drawbar Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/haul_harness_weaving.png",
+      "description": "Broad woven pulling straps and joined ropes distribute a hauling load across a workable harness.",
+      "domain": "infrastructure",
+      "id": "haul_harness_weaving",
+      "name": "Haul Harness Weaving",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cart_running_gear.png",
+      "description": "Matched wheels, axle fittings, a braced bed and hauling connections become a fitted cart assembly ready for final commissioning.",
+      "domain": "infrastructure",
+      "id": "cart_running_gear",
+      "name": "Cart Running Gear",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sleeved_cart_assembly.png",
+      "description": "Prepared iron-bound wheels and sleeved axle connections reduce final fitting work in a cart assembly shop.",
+      "domain": "infrastructure",
+      "id": "sleeved_cart_assembly",
+      "name": "Sleeved Cart Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/three_plate_lapping.png",
+      "description": "Three reference surfaces are compared and worked against one another so a matching curve does not masquerade as a plane.",
+      "domain": "production",
+      "id": "three_plate_lapping",
+      "name": "Three-Plate Lapping",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/straightedge_scraping.png",
+      "description": "High spots are removed from a metal straightedge against a reference surface, providing a portable guide for fitting longer ways.",
+      "domain": "production",
+      "id": "straightedge_scraping",
+      "name": "Straightedge Scraping",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/machine_way_scraping.png",
+      "description": "Bearing contact is checked along a guideway and high spots are scraped away so a carriage can move without rocking or binding.",
+      "domain": "production",
+      "id": "machine_way_scraping",
+      "name": "Machine-Way Scraping",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_screw_cutting.png",
+      "description": "A repeated helical thread converts controlled rotation into a reproducible length of carriage travel.",
+      "domain": "production",
+      "id": "lead_screw_cutting",
+      "name": "Lead-Screw Cutting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/split_feed_nuts.png",
+      "description": "A matching split nut can engage a lead screw for a controlled feed and disengage it for repositioning.",
+      "domain": "production",
+      "id": "split_feed_nuts",
+      "name": "Split Feed Nuts",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cross_slide_assembly.png",
+      "description": "Intersecting guided slides and screw feeds set a cutting tool across the work rather than relying on unsupported hand pressure.",
+      "domain": "production",
+      "id": "cross_slide_assembly",
+      "name": "Cross-Slide Assembly",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/four_jaw_chucks.png",
+      "description": "Four independently adjusted jaws grip a workpiece and allow its working surface to be centered even when its outer shape is irregular.",
+      "domain": "production",
+      "id": "four_jaw_chucks",
+      "name": "Four-Jaw Chucks",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tailstock_fitting.png",
+      "description": "An aligned sliding support steadies the far end of a rotating workpiece or advances a tool along its center line.",
+      "domain": "production",
+      "id": "tailstock_fitting",
+      "name": "Tailstock Fitting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/toolbit_heat_treatment.png",
+      "description": "Heating, hardening and tempering prepare small steel cutting edges that retain useful hardness while resisting fracture.",
+      "domain": "production",
+      "id": "toolbit_heat_treatment",
+      "name": "Tool-Bit Heat Treatment",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/centre_lathe_assembly.png",
+      "description": "Aligned ways, a controlled slide, a gripping spindle and an opposing support form a machine for turning work about a stable axis.",
+      "domain": "production",
+      "id": "centre_lathe_assembly",
+      "name": "Centre-Lathe Assembly",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drill_bit_fluting.png",
+      "description": "Cutting lips and flutes are formed together so a drill can cut a round hole and carry its chips away.",
+      "domain": "production",
+      "id": "drill_bit_fluting",
+      "name": "Drill-Bit Fluting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/quill_feed_mechanisms.png",
+      "description": "A guided quill advances a rotating spindle toward the work while supporting its bearings and preserving alignment.",
+      "domain": "production",
+      "id": "quill_feed_mechanisms",
+      "name": "Quill Feed Mechanisms",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/column_drilling_machines.png",
+      "description": "A supported drilling head and fixed work table control the feed of a drill into a secured workpiece.",
+      "domain": "production",
+      "id": "column_drilling_machines",
+      "name": "Column Drilling Machines",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/milling_cutter_relief.png",
+      "description": "Clearance behind successive cutting edges lets a rotating multi-tooth cutter remove material without rubbing its whole flank on the work.",
+      "domain": "production",
+      "id": "milling_cutter_relief",
+      "name": "Milling Cutter Relief",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/milling_table_feeds.png",
+      "description": "A rigid table moves a secured workpiece along controlled intersecting feeds beneath a rotating cutter.",
+      "domain": "production",
+      "id": "milling_table_feeds",
+      "name": "Milling Table Feeds",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/milling_spindle_heads.png",
+      "description": "A supported spindle and its gear drive carry the cutting loads of a milling arbor without depending on a loose hand-held shaft.",
+      "domain": "production",
+      "id": "milling_spindle_heads",
+      "name": "Milling Spindle Heads",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/horizontal_milling_machines.png",
+      "description": "A rigid bed joins controlled table movement to a supported horizontal cutting spindle, allowing repeated flat and shaped cuts.",
+      "domain": "production",
+      "id": "horizontal_milling_machines",
+      "name": "Horizontal Milling Machines",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/worm_dividing_heads.png",
+      "description": "A worm reduction and indexed spindle divide a full turn into repeatable positions for evenly spaced machining operations.",
+      "domain": "production",
+      "id": "worm_dividing_heads",
+      "name": "Worm Dividing Heads",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drill_jig_bushings.png",
+      "description": "Fitted guide sleeves locate a drill while providing a replaceable wearing surface inside a drilling fixture.",
+      "domain": "production",
+      "id": "drill_jig_bushings",
+      "name": "Drill Jig Bushings",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drill_jig_layout.png",
+      "description": "A measured fixture locates both the workpiece and its drill guides so a hole pattern can be repeated across multiple parts.",
+      "domain": "production",
+      "id": "drill_jig_layout",
+      "name": "Drill Jig Layout",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gauge_block_lapping.png",
+      "description": "Hardened measuring blocks are finished with flat parallel faces and compared under controlled conditions to transfer a reference length.",
+      "domain": "production",
+      "id": "gauge_block_lapping",
+      "name": "Gauge-Block Lapping",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bench_vise_screws.png",
+      "description": "A guided moving jaw and fitted screw hold a workpiece against a fixed jaw while leaving both hands free for the machining task.",
+      "domain": "production",
+      "id": "bench_vise_screws",
+      "name": "Bench-Vise Screws",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/basic_machine_shops.png",
+      "description": "Turning, drilling and secure bench work are fitted together as an accountable set of machines ready for workshop installation.",
+      "domain": "production",
+      "id": "basic_machine_shops",
+      "name": "Basic Machine Shops",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/precision_toolrooms.png",
+      "description": "Milling, indexed workholding, fixtures and dimensional references join the basic machines in a shop equipped for controlled repeat production.",
+      "domain": "production",
+      "id": "precision_toolrooms",
+      "name": "Precision Toolrooms",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bolt_blank_forging.png",
+      "description": "A headed metal blank is formed before its shank receives a thread, separating head shaping from fitting.",
+      "domain": "production",
+      "id": "bolt_blank_forging",
+      "name": "Bolt Blank Forging",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nut_blank_forging.png",
+      "description": "Repeated nut blanks leave enough metal around a future bore for a wrench to transmit turning force.",
+      "domain": "production",
+      "id": "nut_blank_forging",
+      "name": "Nut Blank Forging",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nut_bore_drilling.png",
+      "description": "A supported blank is drilled through before an internal thread is cut, keeping the bore aligned with its bearing faces.",
+      "domain": "production",
+      "id": "nut_bore_drilling",
+      "name": "Nut Bore Drilling",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_tap_cutting.png",
+      "description": "A hardened threaded tool with cutting relief makes matching internal threads in a prepared bore.",
+      "domain": "production",
+      "id": "thread_tap_cutting",
+      "name": "Thread Tap Cutting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_die_cutting.png",
+      "description": "A relieved threaded die guides the cutting of an external screw thread on a prepared shank.",
+      "domain": "production",
+      "id": "thread_die_cutting",
+      "name": "Thread Die Cutting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/external_thread_cutting.png",
+      "description": "A die advances along a headed blank while chips are cleared, producing a bolt that can be fitted to a nut.",
+      "domain": "production",
+      "id": "external_thread_cutting",
+      "name": "External Thread Cutting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/internal_thread_tapping.png",
+      "description": "A tap cuts a helical bearing surface inside a drilled nut without replacing the surrounding material with an assumed fit.",
+      "domain": "production",
+      "id": "internal_thread_tapping",
+      "name": "Internal Thread Tapping",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_pitch_gauging.png",
+      "description": "A reference profile distinguishes thread spacing so parts with superficially similar diameters are not treated as interchangeable.",
+      "domain": "production",
+      "id": "thread_pitch_gauging",
+      "name": "Thread Pitch Gauging",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/matched_thread_inspection.png",
+      "description": "Bolts and nuts are checked together against the same thread reference before they are counted as matching fasteners.",
+      "domain": "production",
+      "id": "matched_thread_inspection",
+      "name": "Matched Thread Inspection",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/washer_punching.png",
+      "description": "A hole and outer edge are punched from sheet metal to create a bearing washer around a fastener.",
+      "domain": "production",
+      "id": "washer_punching",
+      "name": "Washer Punching",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cotter_pin_forming.png",
+      "description": "A narrow ductile strip is folded into a split pin that can pass through a drilled fastener and have its legs spread.",
+      "domain": "production",
+      "id": "cotter_pin_forming",
+      "name": "Cotter Pin Forming",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/castellated_nut_slotting.png",
+      "description": "Slots around the end of a nut provide positions through which a retaining pin can block its rotation.",
+      "domain": "production",
+      "id": "castellated_nut_slotting",
+      "name": "Castellated Nut Slotting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/split_pin_locking.png",
+      "description": "A bolt is cross-drilled and assembled with a slotted nut and split pin, giving a visible positive restraint against nut rotation.",
+      "domain": "production",
+      "id": "split_pin_locking",
+      "name": "Split-Pin Locking",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steel_wire_drawing.png",
+      "description": "Steel rod is reduced through successive drawing passes, providing wire feedstock for small resilient components.",
+      "domain": "production",
+      "id": "steel_wire_drawing",
+      "name": "Steel Wire Drawing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spring_wire_coiling.png",
+      "description": "Wire is guided around a mandrel so repeated turns retain a controlled coil form.",
+      "domain": "production",
+      "id": "spring_wire_coiling",
+      "name": "Spring Wire Coiling",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coil_spring_tempering.png",
+      "description": "Formed spring stock receives controlled heating and cooling before it is used as a resilient component.",
+      "domain": "production",
+      "id": "coil_spring_tempering",
+      "name": "Coil Spring Tempering",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/split_washer_cutting.png",
+      "description": "Short helical sections are cut from prepared spring stock and dressed into split washers; their presence alone is not treated as a guarantee against loosening.",
+      "domain": "production",
+      "id": "split_washer_cutting",
+      "name": "Split Washer Cutting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rivet_blank_heading.png",
+      "description": "A short shank receives one formed head while enough length is left for a second head to be made during joining.",
+      "domain": "production",
+      "id": "rivet_blank_heading",
+      "name": "Rivet Blank Heading",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rivet_hole_alignment.png",
+      "description": "Overlapping plates are located and drilled as a matching joint so rivets can pass through aligned holes.",
+      "domain": "production",
+      "id": "rivet_hole_alignment",
+      "name": "Rivet Hole Alignment",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hot_rivet_setting.png",
+      "description": "A heated rivet is supported from one side while its tail is upset on the other, drawing the overlapping joint together as it cools.",
+      "domain": "production",
+      "id": "hot_rivet_setting",
+      "name": "Hot Rivet Setting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cold_rivet_setting.png",
+      "description": "Smaller ductile rivets are upset without a heating stage to join light sheet assemblies.",
+      "domain": "production",
+      "id": "cold_rivet_setting",
+      "name": "Cold Rivet Setting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_rolling_die_making.png",
+      "description": "Hardened dies carry the negative thread profile needed to displace a blank surface into a repeated helix.",
+      "domain": "production",
+      "id": "thread_rolling_die_making",
+      "name": "Thread-Rolling Die Making",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bolt_thread_rolling.png",
+      "description": "A blank is pressed between profiled dies so displaced metal forms its thread rather than being removed as chips.",
+      "domain": "production",
+      "id": "bolt_thread_rolling",
+      "name": "Bolt Thread Rolling",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/standard_fastener_kitting.png",
+      "description": "Matched fasteners and washers are issued as a counted assembly set, reducing fitting work at the final machine bench without creating free components.",
+      "domain": "production",
+      "id": "standard_fastener_kitting",
+      "name": "Standard Fastener Kitting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_retting.png",
+      "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
+      "domain": "production",
+      "id": "fiber_retting",
+      "name": "Fiber Retting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_combing.png",
+      "description": "Repeated combing aligns long fibers and separates short tangled material from a spinnable bundle.",
+      "domain": "production",
+      "id": "fiber_combing",
+      "name": "Fiber Combing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drop_spindles.png",
+      "description": "A weighted rotating spindle draws and twists fibers into a continuous thread of manageable thickness.",
+      "domain": "production",
+      "id": "drop_spindles",
+      "name": "Drop Spindles",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/warp_weighted_looms.png",
+      "description": "Clay weights tension hanging warp threads while a supporting frame keeps the weaving accessible.",
+      "domain": "production",
+      "id": "warp_weighted_looms",
+      "name": "Warp-Weighted Looms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plain_weaving.png",
+      "description": "Alternating over-and-under crossings bind warp and weft into a repeatable sheet of cloth.",
+      "domain": "production",
+      "id": "plain_weaving",
+      "name": "Plain Weaving",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/woven_dressings.png",
+      "description": "Cloth is cleaned, cut and packed into consistent care supplies before it is needed.",
+      "domain": "production",
+      "id": "woven_dressings",
+      "name": "Woven Dressings",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spinning_wheels.png",
+      "description": "A hand-driven wheel transfers rotation to a spindle so drafting fibers need not stop for every fresh spin.",
+      "domain": "production",
+      "id": "spinning_wheels",
+      "name": "Spinning Wheels",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flyer_spinning.png",
+      "description": "A rotating flyer and bobbin coordinate twisting with winding instead of treating them as entirely separate operations.",
+      "domain": "production",
+      "id": "flyer_spinning",
+      "name": "Flyer Spinning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/multi_spindle_spinning.png",
+      "description": "A shared hand-driven frame coordinates multiple spindles while the worker draws out their fiber supply.",
+      "domain": "production",
+      "id": "multi_spindle_spinning",
+      "name": "Multi-Spindle Spinning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mule_spinning.png",
+      "description": "A moving spindle carriage combines controlled drawing and twisting with a return stroke for winding the yarn.",
+      "domain": "production",
+      "id": "mule_spinning",
+      "name": "Mule Spinning",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flying_shuttles.png",
+      "description": "A guided shuttle travels across the warp under cord control, reducing the need to pass each weft directly from hand to hand.",
+      "domain": "production",
+      "id": "flying_shuttles",
+      "name": "Flying Shuttles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_power_looms.png",
+      "description": "A motor coordinates shedding, shuttle movement and beating while operators tend breaks and material supply.",
+      "domain": "production",
+      "id": "electric_power_looms",
+      "name": "Electric Power Looms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
+      "description": "Repeated wet beating separates and fibrillates prepared plant fibers so they bond into a sheet.",
+      "domain": "production",
+      "id": "fiber_pulp_beating",
+      "name": "Fiber Pulp Beating",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_rag_pulping.png",
+      "description": "Washed plant-fiber cloth is cut, soaked and beaten back into pulp rather than discarded.",
+      "domain": "production",
+      "id": "textile_rag_pulping",
+      "name": "Textile Rag Pulping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/paper_sheet_pressing.png",
+      "description": "A controlled press removes water from a stack of wet sheets before final drying, reducing workshop time.",
+      "domain": "production",
+      "id": "paper_sheet_pressing",
+      "name": "Paper Sheet Pressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electric_pulp_beating.png",
+      "description": "A motor drives repeated mechanical working of wet fibers while the operator regulates the consistency of the pulp.",
+      "domain": "production",
+      "id": "electric_pulp_beating",
+      "name": "Electric Pulp Beating",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/core_formed_glass.png",
+      "description": "A removable core supports hot glass while a hollow vessel is built around it.",
+      "domain": "production",
+      "id": "core_formed_glass",
+      "name": "Core-Formed Glass",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/glass_blowing.png",
+      "description": "Air introduced through a metal blowpipe expands a hot gather into a hollow vessel.",
+      "domain": "production",
+      "id": "glass_blowing",
+      "name": "Glass Blowing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mold_blown_glass.png",
+      "description": "An inflated gather takes the repeatable shape of a surrounding mold.",
+      "domain": "production",
+      "id": "mold_blown_glass",
+      "name": "Mold-Blown Glass",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plunger_pressed_glass.png",
+      "description": "A metal plunger displaces hot glass against a mold to form the inside and outside of an open vessel.",
+      "domain": "production",
+      "id": "plunger_pressed_glass",
+      "name": "Plunger-Pressed Glass",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/glass_tube_drawing.png",
+      "description": "A hot hollow gather is drawn lengthwise while preserving a passage through the resulting tube.",
+      "domain": "production",
+      "id": "glass_tube_drawing",
+      "name": "Glass Tube Drawing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hydrogen_flame_glassworking.png",
+      "description": "A controlled hydrogen flame softens a small region of glass tubing for joining and shaping laboratory apparatus.",
+      "domain": "production",
+      "id": "hydrogen_flame_glassworking",
+      "name": "Hydrogen-Flame Glassworking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/carbon_resistors.png",
+      "description": "A measured carbon path supplies repeatable electrical resistance between metal contacts.",
+      "domain": "production",
+      "id": "carbon_resistors",
+      "name": "Carbon Resistors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/foil_capacitors.png",
+      "description": "Conducting foils separated by an insulating paper layer store charge without a continuous conducting path.",
+      "domain": "production",
+      "id": "foil_capacitors",
+      "name": "Foil Capacitors",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electromagnetic_relays.png",
+      "description": "A current-carrying coil moves an iron armature to switch a separate circuit.",
+      "domain": "production",
+      "id": "electromagnetic_relays",
+      "name": "Electromagnetic Relays",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wound_transformers.png",
+      "description": "Coupled windings transfer changing electrical excitation through a magnetic core at a winding-dependent voltage ratio.",
+      "domain": "production",
+      "id": "wound_transformers",
+      "name": "Wound Transformers",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/silicon_rectifiers.png",
+      "description": "A manufactured silicon junction passes current much more readily in one direction than the other.",
+      "domain": "production",
+      "id": "silicon_rectifiers",
+      "name": "Silicon Rectifiers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bipolar_junction_transistors.png",
+      "description": "Two adjacent junctions let a small base signal control a larger collector current.",
+      "domain": "production",
+      "id": "bipolar_junction_transistors",
+      "name": "Bipolar Junction Transistors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/transistor_amplifiers.png",
+      "description": "A biased transistor circuit uses supplied power to amplify an input signal while passive components establish its operating range.",
+      "domain": "production",
+      "id": "transistor_amplifiers",
+      "name": "Transistor Amplifiers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/resistive_sensing.png",
+      "description": "A calibrated change in resistance becomes a measurable signal of a changing physical condition.",
+      "domain": "production",
+      "id": "resistive_sensing",
+      "name": "Resistive Sensing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electronic_machine_control.png",
+      "description": "A sensor, amplifier and switching stage compare machine behavior with a reference and adjust its actuation.",
+      "domain": "production",
+      "id": "electronic_machine_control",
+      "name": "Electronic Machine Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relay_logic.png",
+      "description": "Series and parallel switch contacts implement repeatable conditions using relay states.",
+      "domain": "production",
+      "id": "relay_logic",
+      "name": "Relay Logic",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/diode_logic.png",
+      "description": "Networks of one-way junctions combine input levels; restoring or inverting a signal requires an active stage.",
+      "domain": "production",
+      "id": "diode_logic",
+      "name": "Diode Logic",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/transistor_inverters.png",
+      "description": "A switching transistor makes a high input produce a low output and restores a usable output level.",
+      "domain": "production",
+      "id": "transistor_inverters",
+      "name": "Transistor Inverters",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bistable_multivibrators.png",
+      "description": "Cross-coupled active stages retain one of two stable states until a switching input changes it.",
+      "domain": "production",
+      "id": "bistable_multivibrators",
+      "name": "Bistable Multivibrators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/binary_counters.png",
+      "description": "Linked bistable stages accumulate input pulses as a binary count.",
+      "domain": "production",
+      "id": "binary_counters",
+      "name": "Binary Counters",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shift_registers.png",
+      "description": "Clocked storage stages transfer a sequence of states one position at a time.",
+      "domain": "production",
+      "id": "shift_registers",
+      "name": "Shift Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/binary_adders.png",
+      "description": "Logic combinations produce a sum and carry from binary inputs; linked stages propagate the carry.",
+      "domain": "production",
+      "id": "binary_adders",
+      "name": "Binary Adders",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hardwired_sequence_control.png",
+      "description": "Counters, stored states and fixed logic advance machinery through a wired sequence of operations in response to measured inputs.",
+      "domain": "production",
+      "id": "hardwired_sequence_control",
+      "name": "Hardwired Sequence Control",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relay_registers.png",
+      "description": "Interlocked relay contacts retain a binary word while the register is powered.",
+      "domain": "production",
+      "id": "relay_registers",
+      "name": "Relay Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/parallel_register_banks.png",
+      "description": "Grouped bistable circuits retain several words with separate access connections.",
+      "domain": "production",
+      "id": "parallel_register_banks",
+      "name": "Parallel Register Banks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/memory_address_decoding.png",
+      "description": "A pattern on address lines selects one storage location rather than every location at once.",
+      "domain": "production",
+      "id": "memory_address_decoding",
+      "name": "Memory Address Decoding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/read_write_memory.png",
+      "description": "Selection and write control let a stored word be retrieved or replaced without manually rewiring its representation.",
+      "domain": "production",
+      "id": "read_write_memory",
+      "name": "Addressable Read/Write Memory",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/instruction_registers.png",
+      "description": "A dedicated register holds the current instruction while control circuits interpret it.",
+      "domain": "production",
+      "id": "instruction_registers",
+      "name": "Instruction Registers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/program_counters.png",
+      "description": "A counter retains and advances the address from which the next instruction is fetched.",
+      "domain": "production",
+      "id": "program_counters",
+      "name": "Program Counters",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/conditional_branch_circuits.png",
+      "description": "A tested arithmetic condition selects between the sequential instruction address and a branch destination.",
+      "domain": "production",
+      "id": "conditional_branch_circuits",
+      "name": "Conditional Branch Circuits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/stored_program_control.png",
+      "description": "Stored instructions, addressed memory and conditional transfers coordinate a machine through a changeable sequence.",
+      "domain": "production",
+      "id": "stored_program_control",
+      "name": "Stored-Program Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/diode_control_stores.png",
+      "description": "A wired diode matrix stores repeatable low-level control words selected by an address decoder.",
+      "domain": "knowledge",
+      "id": "diode_control_stores",
+      "name": "Diode Control Stores",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microinstruction_sequencing.png",
+      "description": "A dedicated sequencer chooses the next control word, including conditional paths within an instruction.",
+      "domain": "knowledge",
+      "id": "microinstruction_sequencing",
+      "name": "Microinstruction Sequencing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/arithmetic_logic_units.png",
+      "description": "A selected operation directs shared registers through arithmetic or logical circuitry.",
+      "domain": "knowledge",
+      "id": "arithmetic_logic_units",
+      "name": "Arithmetic-Logic Units",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microprogrammed_machine_control.png",
+      "description": "Stored control words coordinate an arithmetic datapath and machine interfaces to execute a programmable controller design.",
+      "domain": "knowledge",
+      "id": "microprogrammed_machine_control",
+      "name": "Microprogrammed Machine Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/seed_oil_pressing.png",
+      "description": "Pressure separates oil from collected oil-bearing seeds; the resulting oil can serve as a printing-ink vehicle.",
+      "domain": "production",
+      "id": "seed_oil_pressing",
+      "name": "Seed Oil Pressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lampblack_capture.png",
+      "description": "Restricted combustion and cool collecting surfaces recover fine carbon soot for pigment.",
+      "domain": "production",
+      "id": "lampblack_capture",
+      "name": "Lampblack Capture",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/oil_based_printing_inks.png",
+      "description": "Fine carbon pigment is worked into a prepared drying-oil vehicle that transfers from a printing surface to paper.",
+      "domain": "production",
+      "id": "oil_based_printing_inks",
+      "name": "Oil-Based Printing Inks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relief_block_cutting.png",
+      "description": "Cutting away nonprinting areas leaves raised images and characters that can be inked repeatedly.",
+      "domain": "production",
+      "id": "relief_block_cutting",
+      "name": "Relief Block Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_movable_type.png",
+      "description": "Individually cut wooden characters can be aligned, locked into a form and rearranged for another text.",
+      "domain": "production",
+      "id": "wooden_movable_type",
+      "name": "Wooden Movable Type",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hand_relief_printing.png",
+      "description": "Hand pressure transfers an inked relief onto successive sheets without a powered press.",
+      "domain": "production",
+      "id": "hand_relief_printing",
+      "name": "Hand Relief Printing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/screw_press_printing.png",
+      "description": "A screw-driven platen applies controlled pressure across a prepared printing form.",
+      "domain": "production",
+      "id": "screw_press_printing",
+      "name": "Screw-Press Printing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cylinder_press_printing.png",
+      "description": "A turning pressure cylinder brings paper across an inked form in a controlled rolling impression.",
+      "domain": "production",
+      "id": "cylinder_press_printing",
+      "name": "Cylinder-Press Printing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/copperplate_preparation.png",
+      "description": "Hammering, flattening and polishing copper produces a smooth plate that can carry a reproducible recessed image.",
+      "domain": "production",
+      "id": "copperplate_preparation",
+      "name": "Copperplate Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/burin_engraving.png",
+      "description": "A controlled cutting tool removes narrow metal shavings to leave recessed lines that retain ink.",
+      "domain": "production",
+      "id": "burin_engraving",
+      "name": "Burin Engraving",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drypoint_printmaking.png",
+      "description": "A pointed tool scratches a plate and leaves raised burrs beside the furrows; both hold ink for a soft-edged impression.",
+      "domain": "production",
+      "id": "drypoint_printmaking",
+      "name": "Drypoint Printmaking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mezzotint_printmaking.png",
+      "description": "A serrated rocker roughens the plate; selective scraping and burnishing reduce retained ink to build tonal images.",
+      "domain": "production",
+      "id": "mezzotint_printmaking",
+      "name": "Mezzotint Printmaking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steelplate_engraving.png",
+      "description": "Engravers adapt controlled cutting to steel plates, providing another metal supply route for recessed printing images.",
+      "domain": "production",
+      "id": "steelplate_engraving",
+      "name": "Steelplate Engraving",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
+      "description": "A rolling press forces damp paper against an inked, wiped plate, drawing ink out of recesses.",
+      "domain": "production",
+      "id": "rolling_intaglio_printing",
+      "name": "Rolling Intaglio Printing",
+      "status": "verified"
+    }
+  ],
+  "live_art_complete": false,
+  "live_count": 556,
+  "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
+  "queued_count": 454,
+  "schema": 1,
+  "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
+  "target_discoveries": 5000,
+  "verified_count": 102
+}

@@ -46,7 +46,8 @@ func test_unrelated_live_work_cannot_take_waiting_emphasis_and_later_evidence_wa
 			assert_dict(state.research_subcategory_allocations).is_equal(waiting)
 		state.known_discoveries.append("food_drying")
 		research._redistribute_stranded_attention(100)
-		assert_dict(state.research_subcategory_allocations).is_equal(waiting)
+		# The approved revamp opens causal routes without a calendar unlock.
+		assert_dict(state.research_subcategory_allocations).is_equal({"nutrition":{"Old question":0,"New question":3},"culture":{"Continuing question":4}})
 		research._redistribute_stranded_attention(101)
 		assert_dict(state.research_subcategory_allocations).is_equal({"nutrition":{"Old question":0,"New question":3},"culture":{"Continuing question":4}})
 		assert_dict(state.research_allocations).is_equal({"nutrition":3,"culture":4})

@@ -12,6 +12,13 @@ static func execute(order:Dictionary)->Dictionary:
 			if not WorldSimulation.state.research_subcategory_allocations.has(domain) or weight<0 or weight>12:return {"error":"Choose a research domain and emphasis from 0 to 12."}
 			WorldSimulation.discovery.set_domain_research_priority(domain,weight)
 			return {"ok":true}
+		"research_license":return preload("res://scripts/research_licenses.gd").dispatch(String(order.get("source","")),String(order.get("subject","")),String(order.get("resource","")))
+		"research_scholar":return preload("res://scripts/scholar_visits.gd").dispatch(String(order.get("source","")),String(order.get("subject","")),String(order.get("resource","")))
+		"research_purchase":return preload("res://scripts/research_purchase.gd").dispatch(String(order.get("source","")),String(order.get("subject","")),String(order.get("resource","")))
+		"research_target":
+			var entry:Dictionary=WorldSimulation.discovery.discovery_definition(String(order.get("id","")))
+			if entry.is_empty() or int(WorldSimulation.state.research_allocations.get(String(entry.get("dynamic","")),0))<=0:return {"error":"Assign field attention before selecting this investigation."}
+			return WorldSimulation.discovery.select_research_target(String(entry.id))
 		"found":
 			if WorldSimulation.state.settlement_site_committed:return {"error":"The founding site is already committed."}
 			var origin:=WorldSimulation.world.player_world_origin
@@ -36,12 +43,15 @@ static func execute(order:Dictionary)->Dictionary:
 		"scout":return WorldSimulation.world.dispatch_scouts(int(order.get("days",30)),String(order.get("target","open_world")),String(order.get("heading","")))
 		"diplomacy":return WorldSimulation.world.dispatch_diplomat(String(order.get("target","")),"",String(order.get("action","goodwill")))
 		"training_policy":return WorldSimulation.military.training_staff.set_policy(String(order.get("service","army")),String(order.get("policy","regular")))
+		"army_reinforce_home":return preload("res://scripts/home_army_reinforcement.gd").transfer(WorldSimulation.military,int(order.get("army",0)),String(order.get("unit","")),int(order.get("count",0)))
 		"deploy":return WorldSimulation.military.create_field_army(int(order.get("count",0)),String(order.get("name","")))
 		"area":return WorldSimulation.military.command_hierarchy.create_region(String(order.get("service","army")),order.get("vertices",[]),String(order.get("name","")))
 		"objective":return WorldSimulation.military.command_hierarchy.assign(String(order.get("command","army")),[],order.get("region",{}),String(order.get("mission","defend")),String(order.get("target","")),String(order.get("vision","")))
 		"recruit":return WorldSimulation.military.raise_recruits(int(order.get("count",0)))
 		"train":return WorldSimulation.military.start_training(String(order.get("unit","")),String(order.get("weapon","")),int(order.get("count",0)))
+		"production_retool":return WorldSimulation.military.retool_production_line(int(order.get("job",-1)),String(order.get("item","")))
 		"production_target":return WorldSimulation.military.configure_production_line(int(order.get("job",-1)),int(order.get("target",0)),bool(order.get("paused",false)))
+		"plant_install":return preload("res://scripts/technology_operations.gd").install(String(order.get("plant","")),int(order.get("count",1)))
 		"production":return WorldSimulation.military.start_production_line(String(order.get("item","")),int(order.get("target",0)))
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))

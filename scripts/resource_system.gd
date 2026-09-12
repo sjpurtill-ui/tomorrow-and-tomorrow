@@ -3,6 +3,20 @@ extends Node
 var rng := RandomNumberGenerator.new()
 var initialized := false
 
+# Identification follows observations and existing methods, never campaign age.
+# These gates apply to unknown occurrences only; saved recognition is retained.
+const RECOGNITION_RULES={
+	"Deep Aquifer":{"requires_all":["well_siting"]},
+	"Refractory Clay":{"requires_all":["pit_firing"]},
+	"Phosphate Rock":{"requires_any":[["soil_assays","chemical_distillation"]]},
+	"Uranium Ore":{"requires_all":["ore_assaying"],"requires_any":[["chemical_distillation","radiation_measurement"]]},
+	"Nitrates":{"requires_all":["charcoal"],"requires_any":[["salt_working","chemical_distillation"]]},
+	"Graphite":{"requires_any":[["stone_sorting","tallies"]]}
+}
+func recognition_ready(resource_name:String)->bool:
+	if not catalog.has(resource_name):return false
+	return bool(preload("res://scripts/technology_requirements.gd").evaluate(RECOGNITION_RULES.get(resource_name,{}),WorldSimulation.state.known_discoveries).ready)
+
 const FOUNDING_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber Plants"]
 
 # Keep the simulation/save key stable while giving players a name that describes
@@ -21,7 +35,8 @@ func reset_for_new_world()->void:
 	initialized=false
 	rng=RandomNumberGenerator.new()
 
-# Internal-only knowledge about resources across the first two centuries.
+# Internal resource definitions. recognition_year is retained legacy metadata,
+# not a recognition, survey or extraction eligibility gate.
 # UI receives discovered deposits and present constraints, never this catalog.
 var catalog := {
 	"Timber":{"family":"Organic","renewable":true,"recognition_year":0,"access":["labor"],"processing":["cordage","joinery"],"signals":["survey","construction"],"base":0.030},
@@ -31,7 +46,7 @@ var catalog := {
 	"Game":{"family":"Organic","renewable":true,"recognition_year":0,"access":["labor"],"processing":["seasonal_patterns"],"signals":["food","exploration"],"base":0.030},
 	"Fiber Plants":{"family":"Organic","renewable":true,"recognition_year":0,"access":["labor"],"processing":["cordage"],"signals":["food","survey"],"base":0.024},
 	"Clay":{"family":"Earth","renewable":false,"recognition_year":1,"access":["labor"],"processing":["clay_shaping"],"signals":["survey","materials"],"base":0.018},
-	"Flint":{"family":"Mineral","renewable":false,"recognition_year":1,"access":["labor"],"processing":[],"signals":["survey","crafting"],"base":0.016},
+	"Flint":{"family":"Mineral","renewable":false,"recognition_year":1,"access":["labor"],"processing":["controlled_flaking"],"signals":["survey","crafting"],"base":0.016},
 	"Salt":{"family":"Mineral","renewable":false,"recognition_year":3,"access":["labor","logistics"],"processing":["food_drying"],"signals":["survey","food"],"base":0.010},
 	"Medicinal Plants":{"family":"Organic","renewable":true,"recognition_year":2,"access":["labor"],"processing":["herbal_classification"],"signals":["health","nature"],"base":0.012},
 	"Peat":{"family":"Fuel","renewable":true,"recognition_year":5,"access":["labor"],"processing":["charcoal"],"signals":["survey","materials"],"base":0.008},
@@ -182,27 +197,29 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 		var origin:Vector3=context.get("origin",WorldSimulation.state.settlement_founded_at)
 		preload("res://scripts/civilization_resources.gd").initialize(Vector2(origin.x,origin.z))
 	var events: Array[Dictionary] = []
-	var year := int(WorldSimulation.state.elapsed_days / 365.0)
+	var method_factors:Dictionary=preload("res://scripts/geoscience_knowledge.gd").factors()
+	# Filled only if this city still has an eligible recognition/survey task.
+	# Family practice changes during the pass and remains evaluated per deposit.
+	var survey_inputs:Dictionary={}
 	for deposit in WorldSimulation.state.resource_deposits:
 		_ensure_deposit_fields(deposit)
 		var resource_name: String = deposit.resource
 		if not catalog.has(resource_name):
 			continue
 		var definition: Dictionary = catalog[resource_name]
-		if year < definition.recognition_year:
-			continue
 		if deposit.stage == "unknown":
-			var survey_effort := WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor()
-			var nature_focus := float(WorldSimulation.state.research_allocations.get("ecology", 0)) * 0.15
-			var material_focus := float(WorldSimulation.state.research_allocations.get("production", 0)) * 0.12
-			deposit.clues += definition.base * (0.5 + survey_effort + nature_focus + material_focus) * _family_literacy(resource_name) * rng.randf_range(0.5, 1.5)
+			if not recognition_ready(resource_name):continue
+			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
+			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("recognition",1.0))
+			deposit.clues += definition.base * (0.5 + survey_effort + float(survey_inputs.nature) + float(survey_inputs.material)) * _family_literacy(resource_name) * rng.randf_range(0.5, 1.5)
 			if deposit.clues >= 1.0:
 				deposit.stage = "recognized"
 				_gain_practice(resource_name,"recognition",0.12)
 				events.append(_event("Resource Indicated", "Evidence suggests %s is present. Its extent and accessibility remain unknown." % resource_name, deposit.id))
 		elif deposit.stage == "recognized":
-			var survey_effort := WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor()
-			deposit.survey += definition.base * 0.55 * survey_effort * (1.0+WorldSimulation.discovery.effect("survey_speed")) * _family_literacy(resource_name) * rng.randf_range(0.7,1.3)
+			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
+			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("survey",1.0))
+			deposit.survey += definition.base * 0.55 * survey_effort * float(survey_inputs.speed) * _family_literacy(resource_name) * rng.randf_range(0.7,1.3)
 			if deposit.survey >= 1.0:
 				deposit.stage = "surveyed"
 				_gain_practice(resource_name,"survey",0.18)
@@ -366,13 +383,13 @@ func _access_blockers(deposit: Dictionary, definition: Dictionary, context: Dict
 			blockers.append("specialist knowledge is unavailable")
 		elif requirement == "mine" and (float(deposit.route) < 0.8 or int(WorldSimulation.state.population_allocations.get("Construction",0)) < 10):
 			blockers.append("mining works have not been developed")
-		elif requirement == "ventilation":
+		elif requirement == "ventilation" and "mine_airways" not in WorldSimulation.state.known_discoveries:
 			blockers.append("safe underground ventilation is unknown")
 		elif requirement == "containers" and "clay_shaping" not in WorldSimulation.state.known_discoveries:
 			blockers.append("suitable containers are unavailable")
 		elif requirement == "well_siting" and "well_siting" not in WorldSimulation.state.known_discoveries:
 			blockers.append("deep-water siting is not understood")
-		elif requirement == "lifting":
+		elif requirement == "lifting" and "mine_drainage" not in WorldSimulation.state.known_discoveries:
 			blockers.append("deep lifting machinery is unavailable")
 	return blockers
 
@@ -722,3 +739,8 @@ func _abundance_label(deposit: Dictionary) -> String:
 	if effective >= 2500: return "common"
 	if effective >= 900: return "limited"
 	return "traces"
+
+# These inputs are invariant only within one local-city resource pass. Do not
+# cache them across days, city scopes, allocation changes or policy changes.
+func _local_survey_inputs()->Dictionary:
+	return {"effort":WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor(),"nature":float(WorldSimulation.state.research_allocations.get("ecology",0))*.15,"material":float(WorldSimulation.state.research_allocations.get("production",0))*.12,"speed":1.0+WorldSimulation.discovery.effect("survey_speed")}

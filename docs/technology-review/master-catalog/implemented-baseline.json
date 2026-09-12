@@ -1,0 +1,2786 @@
+{
+  "source_commit": "18b0cb7",
+  "status": "implemented_with_focused_worktree_checks; not canonical integration or full-campaign acceptance",
+  "items": [
+    {
+      "id": "seasonal_patterns",
+      "name": "Seasonal Patterns",
+      "domain": "ecology"
+    },
+    {
+      "id": "seed_selection",
+      "name": "Selective Planting",
+      "domain": "nutrition"
+    },
+    {
+      "id": "food_drying",
+      "name": "Food Drying",
+      "domain": "nutrition"
+    },
+    {
+      "id": "smoking",
+      "name": "Smoke Preservation",
+      "domain": "nutrition"
+    },
+    {
+      "id": "cordage",
+      "name": "Twisted Cordage",
+      "domain": "production"
+    },
+    {
+      "id": "basketry",
+      "name": "Basketry",
+      "domain": "production"
+    },
+    {
+      "id": "charcoal",
+      "name": "Charcoal Production",
+      "domain": "production"
+    },
+    {
+      "id": "clay_shaping",
+      "name": "Clay Vessels",
+      "domain": "production"
+    },
+    {
+      "id": "pit_firing",
+      "name": "Pit Firing",
+      "domain": "production"
+    },
+    {
+      "id": "joinery",
+      "name": "Wood Joinery",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "drainage",
+      "name": "Ground Drainage",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "well_siting",
+      "name": "Well Siting",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "wound_cleaning",
+      "name": "Wound Cleaning",
+      "domain": "health"
+    },
+    {
+      "id": "herbal_classification",
+      "name": "Medicinal Classification",
+      "domain": "health"
+    },
+    {
+      "id": "clean_water",
+      "name": "Clean-Water Practice",
+      "domain": "health"
+    },
+    {
+      "id": "tallies",
+      "name": "Material Tallies",
+      "domain": "knowledge"
+    },
+    {
+      "id": "standard_measures",
+      "name": "Shared Measures",
+      "domain": "knowledge"
+    },
+    {
+      "id": "route_memory",
+      "name": "Encoded Routes",
+      "domain": "knowledge"
+    },
+    {
+      "id": "labor_rotations",
+      "name": "Labor Rotations",
+      "domain": "institutions"
+    },
+    {
+      "id": "customary_law",
+      "name": "Customary Law",
+      "domain": "institutions"
+    },
+    {
+      "id": "public_stores",
+      "name": "Public Stores",
+      "domain": "institutions"
+    },
+    {
+      "id": "watch_rotation",
+      "name": "Organized Watch",
+      "domain": "security"
+    },
+    {
+      "id": "formation_drill",
+      "name": "Formation Drill",
+      "domain": "security"
+    },
+    {
+      "id": "supply_groups",
+      "name": "Organized Supply Parties",
+      "domain": "security"
+    },
+    {
+      "id": "animal_taming",
+      "name": "Animal Taming",
+      "domain": "ecology"
+    },
+    {
+      "id": "pack_animals",
+      "name": "Pack Animal Husbandry",
+      "domain": "logistics"
+    },
+    {
+      "id": "domesticated_mounts",
+      "name": "Domesticated Mounts",
+      "domain": "logistics"
+    },
+    {
+      "id": "mounted_scouts",
+      "name": "Mounted Scouting",
+      "domain": "logistics"
+    },
+    {
+      "id": "hide_floats",
+      "name": "Hide Floats",
+      "domain": "logistics"
+    },
+    {
+      "id": "river_craft",
+      "name": "River Craft",
+      "domain": "logistics"
+    },
+    {
+      "id": "coastal_watercraft",
+      "name": "Coastal Watercraft",
+      "domain": "logistics"
+    },
+    {
+      "id": "stone_sorting",
+      "name": "Stone Selection",
+      "domain": "production"
+    },
+    {
+      "id": "controlled_flaking",
+      "name": "Controlled Flaking",
+      "domain": "production"
+    },
+    {
+      "id": "hafted_tools",
+      "name": "Hafted Tools",
+      "domain": "production"
+    },
+    {
+      "id": "timber_grading",
+      "name": "Timber Grading",
+      "domain": "ecology"
+    },
+    {
+      "id": "timber_seasoning",
+      "name": "Timber Seasoning",
+      "domain": "production"
+    },
+    {
+      "id": "framed_construction",
+      "name": "Framed Construction",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "fiber_grading",
+      "name": "Fiber Grading",
+      "domain": "ecology"
+    },
+    {
+      "id": "woven_carriers",
+      "name": "Woven Carriers",
+      "domain": "production"
+    },
+    {
+      "id": "rope_rigging",
+      "name": "Rope Rigging",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "clay_testing",
+      "name": "Clay Testing",
+      "domain": "production"
+    },
+    {
+      "id": "clay_tempering",
+      "name": "Tempered Clay",
+      "domain": "production"
+    },
+    {
+      "id": "sealed_vessels",
+      "name": "Sealed Vessels",
+      "domain": "nutrition"
+    },
+    {
+      "id": "kiln_control",
+      "name": "Controlled Kilns",
+      "domain": "production"
+    },
+    {
+      "id": "quarry_reading",
+      "name": "Reading the Quarry Face",
+      "domain": "ecology"
+    },
+    {
+      "id": "wedges_and_levers",
+      "name": "Wedges and Levers",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "lime_burning",
+      "name": "Lime Burning",
+      "domain": "production"
+    },
+    {
+      "id": "lime_mortar",
+      "name": "Lime Mortar",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "salt_working",
+      "name": "Salt Working",
+      "domain": "nutrition"
+    },
+    {
+      "id": "curing_regimens",
+      "name": "Curing Regimens",
+      "domain": "nutrition"
+    },
+    {
+      "id": "peat_drying",
+      "name": "Peat Drying",
+      "domain": "production"
+    },
+    {
+      "id": "ore_assaying",
+      "name": "Comparative Ore Assay",
+      "domain": "production"
+    },
+    {
+      "id": "copper_smelting",
+      "name": "Copper Smelting",
+      "domain": "production"
+    },
+    {
+      "id": "copper_casting",
+      "name": "Reusable Casting",
+      "domain": "production"
+    },
+    {
+      "id": "bronze_alloying",
+      "name": "Bronze Alloying",
+      "domain": "production"
+    },
+    {
+      "id": "mine_shoring",
+      "name": "Timbered Mine Shoring",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "mine_airways",
+      "name": "Mine Airways",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "mine_drainage",
+      "name": "Mine Drainage",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "bitumen_sealing",
+      "name": "Bitumen Sealing",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "iron_assaying",
+      "name": "Iron Ore Assay",
+      "domain": "production"
+    },
+    {
+      "id": "bloomery_smelting",
+      "name": "Bloomery Smelting",
+      "domain": "production"
+    },
+    {
+      "id": "forge_welding",
+      "name": "Forge Welding",
+      "domain": "production"
+    },
+    {
+      "id": "hardened_edges",
+      "name": "Hardened Iron Edges",
+      "domain": "production"
+    },
+    {
+      "id": "coal_grading",
+      "name": "Coal Grading",
+      "domain": "ecology"
+    },
+    {
+      "id": "coke_firing",
+      "name": "Coke Firing",
+      "domain": "production"
+    },
+    {
+      "id": "refractory_furnaces",
+      "name": "Refractory Furnaces",
+      "domain": "production"
+    },
+    {
+      "id": "blast_furnace",
+      "name": "Continuous Blast Furnace",
+      "domain": "production"
+    },
+    {
+      "id": "sulfur_purification",
+      "name": "Sulfur Purification",
+      "domain": "production"
+    },
+    {
+      "id": "nitrate_cultivation",
+      "name": "Nitrate Beds",
+      "domain": "ecology"
+    },
+    {
+      "id": "black_powder",
+      "name": "Composite Propellant",
+      "domain": "security"
+    },
+    {
+      "id": "phosphate_dressing",
+      "name": "Phosphate Dressing",
+      "domain": "nutrition"
+    },
+    {
+      "id": "graphite_marking",
+      "name": "Graphite Marking",
+      "domain": "knowledge"
+    },
+    {
+      "id": "graphite_crucibles",
+      "name": "Graphite Crucibles",
+      "domain": "production"
+    },
+    {
+      "id": "material_accounting",
+      "name": "Material Accounting",
+      "domain": "knowledge"
+    },
+    {
+      "id": "workshop_standards",
+      "name": "Workshop Standards",
+      "domain": "knowledge"
+    },
+    {
+      "id": "crop_calendars",
+      "name": "Crop Calendars",
+      "domain": "nutrition"
+    },
+    {
+      "id": "managed_fallow",
+      "name": "Managed Fallow",
+      "domain": "nutrition"
+    },
+    {
+      "id": "seed_reserves",
+      "name": "Protected Seed Reserves",
+      "domain": "nutrition"
+    },
+    {
+      "id": "irrigation_schedules",
+      "name": "Irrigation Schedules",
+      "domain": "nutrition"
+    },
+    {
+      "id": "crop_rotation",
+      "name": "Crop Rotation",
+      "domain": "nutrition"
+    },
+    {
+      "id": "grain_milling",
+      "name": "Rotary Grain Milling",
+      "domain": "nutrition"
+    },
+    {
+      "id": "fermentation_control",
+      "name": "Controlled Fermentation",
+      "domain": "nutrition"
+    },
+    {
+      "id": "regional_granaries",
+      "name": "Regional Granaries",
+      "domain": "nutrition"
+    },
+    {
+      "id": "soil_assays",
+      "name": "Comparative Soil Assays",
+      "domain": "ecology"
+    },
+    {
+      "id": "intensive_gardens",
+      "name": "Intensive Market Gardens",
+      "domain": "nutrition"
+    },
+    {
+      "id": "birth_attendants",
+      "name": "Experienced Birth Attendants",
+      "domain": "health"
+    },
+    {
+      "id": "latrine_siting",
+      "name": "Latrine Siting",
+      "domain": "health"
+    },
+    {
+      "id": "isolation_practice",
+      "name": "Isolation Practice",
+      "domain": "health"
+    },
+    {
+      "id": "case_records",
+      "name": "Medical Case Records",
+      "domain": "health"
+    },
+    {
+      "id": "trained_midwives",
+      "name": "Trained Midwives",
+      "domain": "health"
+    },
+    {
+      "id": "public_baths",
+      "name": "Public Washing Facilities",
+      "domain": "health"
+    },
+    {
+      "id": "surgical_anatomy",
+      "name": "Surgical Anatomy",
+      "domain": "health"
+    },
+    {
+      "id": "civic_infirmaries",
+      "name": "Civic Infirmaries",
+      "domain": "health"
+    },
+    {
+      "id": "contagion_mapping",
+      "name": "Contagion Mapping",
+      "domain": "health"
+    },
+    {
+      "id": "preventive_inoculation",
+      "name": "Preventive Inoculation",
+      "domain": "health"
+    },
+    {
+      "id": "pictographic_records",
+      "name": "Pictographic Records",
+      "domain": "knowledge"
+    },
+    {
+      "id": "place_value",
+      "name": "Place-Value Calculation",
+      "domain": "knowledge"
+    },
+    {
+      "id": "phonetic_notation",
+      "name": "Phonetic Notation",
+      "domain": "knowledge"
+    },
+    {
+      "id": "formal_archives",
+      "name": "Formal Archives",
+      "domain": "knowledge"
+    },
+    {
+      "id": "geometric_survey",
+      "name": "Geometric Survey",
+      "domain": "knowledge"
+    },
+    {
+      "id": "regional_maps",
+      "name": "Regional Maps",
+      "domain": "knowledge"
+    },
+    {
+      "id": "public_schools",
+      "name": "Public Instruction",
+      "domain": "knowledge"
+    },
+    {
+      "id": "paper_making",
+      "name": "Sheet Fiber Writing Material",
+      "domain": "knowledge"
+    },
+    {
+      "id": "printing_process",
+      "name": "Repeatable Printing",
+      "domain": "knowledge"
+    },
+    {
+      "id": "experimental_controls",
+      "name": "Experimental Controls",
+      "domain": "knowledge"
+    },
+    {
+      "id": "statistical_inference",
+      "name": "Statistical Inference",
+      "domain": "knowledge"
+    },
+    {
+      "id": "household_councils",
+      "name": "Household Councils",
+      "domain": "institutions"
+    },
+    {
+      "id": "census_rolls",
+      "name": "Household Census Rolls",
+      "domain": "institutions"
+    },
+    {
+      "id": "public_levies",
+      "name": "Scheduled Public Levies",
+      "domain": "institutions"
+    },
+    {
+      "id": "specialized_courts",
+      "name": "Specialized Courts",
+      "domain": "institutions"
+    },
+    {
+      "id": "property_registers",
+      "name": "Property Registers",
+      "domain": "institutions"
+    },
+    {
+      "id": "craft_guilds",
+      "name": "Craft Guilds",
+      "domain": "institutions"
+    },
+    {
+      "id": "public_credit",
+      "name": "Public Credit",
+      "domain": "institutions"
+    },
+    {
+      "id": "risk_pools",
+      "name": "Mutual Risk Pools",
+      "domain": "institutions"
+    },
+    {
+      "id": "professional_service",
+      "name": "Professional Civil Service",
+      "domain": "institutions"
+    },
+    {
+      "id": "graded_roads",
+      "name": "Graded Roads",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "timber_bridges",
+      "name": "Timber Bridges",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "canal_locks",
+      "name": "Canal Locks",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "water_mills",
+      "name": "Water-Powered Mills",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "urban_street_plans",
+      "name": "Urban Street Plans",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "covered_sewers",
+      "name": "Covered Sewers",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "precision_machinery",
+      "name": "Precision Machinery",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "hafted_weapons",
+      "name": "Hafted Weapons",
+      "domain": "security"
+    },
+    {
+      "id": "bow_craft",
+      "name": "War Bow Craft",
+      "domain": "security"
+    },
+    {
+      "id": "shield_wall",
+      "name": "Shield-Wall Discipline",
+      "domain": "security"
+    },
+    {
+      "id": "field_fortifications",
+      "name": "Field Fortifications",
+      "domain": "security"
+    },
+    {
+      "id": "fortified_stores",
+      "name": "Fortified Stores",
+      "domain": "security"
+    },
+    {
+      "id": "siege_engineering",
+      "name": "Siege Engineering",
+      "domain": "security"
+    },
+    {
+      "id": "bronze_weaponry",
+      "name": "Standardized Bronze Arms",
+      "domain": "security"
+    },
+    {
+      "id": "professional_corps",
+      "name": "Professional Military Corps",
+      "domain": "security"
+    },
+    {
+      "id": "military_staffs",
+      "name": "Military Staff Planning",
+      "domain": "security"
+    },
+    {
+      "id": "battlefield_medicine",
+      "name": "Battlefield Medicine",
+      "domain": "security"
+    },
+    {
+      "id": "powder_artillery",
+      "name": "Powder Artillery",
+      "domain": "security"
+    },
+    {
+      "id": "structural_steel",
+      "name": "Structural Steel Frames",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "reinforced_concrete",
+      "name": "Reinforced Concrete",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "safety_lifts",
+      "name": "Safety Lifts",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "curtain_wall_systems",
+      "name": "Glazed Curtain Walls",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "pike_drill",
+      "name": "Pike Formations",
+      "domain": "security"
+    },
+    {
+      "id": "crossbow_mechanism",
+      "name": "Crossbow Mechanisms",
+      "domain": "security"
+    },
+    {
+      "id": "war_chariots",
+      "name": "Military Chariots",
+      "domain": "security"
+    },
+    {
+      "id": "armored_riding",
+      "name": "Armored Riding",
+      "domain": "security"
+    },
+    {
+      "id": "elephant_training",
+      "name": "Working Elephant Training",
+      "domain": "security"
+    },
+    {
+      "id": "counterweight_engines",
+      "name": "Counterweight Siege Engines",
+      "domain": "security"
+    },
+    {
+      "id": "matchlock_drill",
+      "name": "Matchlock Arms and Drill",
+      "domain": "security"
+    },
+    {
+      "id": "mounted_firearms",
+      "name": "Mounted Firearms",
+      "domain": "security"
+    },
+    {
+      "id": "galley_navigation",
+      "name": "Galley Navigation",
+      "domain": "security"
+    },
+    {
+      "id": "naval_arsenals",
+      "name": "Naval Arsenals",
+      "domain": "security"
+    },
+    {
+      "id": "ocean_sailing",
+      "name": "Ocean Sailing",
+      "domain": "security"
+    },
+    {
+      "id": "naval_gunnery",
+      "name": "Naval Gunnery",
+      "domain": "security"
+    },
+    {
+      "id": "steam_propulsion",
+      "name": "Steam Propulsion",
+      "domain": "production"
+    },
+    {
+      "id": "armored_hulls",
+      "name": "Armored Hulls",
+      "domain": "security"
+    },
+    {
+      "id": "naval_torpedoes",
+      "name": "Naval Torpedoes",
+      "domain": "security"
+    },
+    {
+      "id": "naval_fire_control",
+      "name": "Naval Fire Control",
+      "domain": "security"
+    },
+    {
+      "id": "submersible_hulls",
+      "name": "Submersible Hulls",
+      "domain": "security"
+    },
+    {
+      "id": "naval_logistics",
+      "name": "Fleet Replenishment",
+      "domain": "security"
+    },
+    {
+      "id": "aerostat_observation",
+      "name": "Aerostat Observation",
+      "domain": "security"
+    },
+    {
+      "id": "fuel_refining",
+      "name": "Liquid Fuel Refining",
+      "domain": "production"
+    },
+    {
+      "id": "powered_flight",
+      "name": "Powered Flight",
+      "domain": "production"
+    },
+    {
+      "id": "fighter_tactics",
+      "name": "Fighter Tactics",
+      "domain": "security"
+    },
+    {
+      "id": "aerial_bombardment",
+      "name": "Aerial Bombardment",
+      "domain": "security"
+    },
+    {
+      "id": "advanced_airframes",
+      "name": "Advanced Airframes",
+      "domain": "production"
+    },
+    {
+      "id": "naval_aviation",
+      "name": "Naval Aviation",
+      "domain": "security"
+    },
+    {
+      "id": "carrier_aviation",
+      "name": "Carrier Aviation",
+      "domain": "security"
+    },
+    {
+      "id": "airborne_operations",
+      "name": "Airborne Operations",
+      "domain": "security"
+    },
+    {
+      "id": "amphibious_operations",
+      "name": "Amphibious Operations",
+      "domain": "security"
+    },
+    {
+      "id": "jet_propulsion",
+      "name": "Jet Propulsion",
+      "domain": "production"
+    },
+    {
+      "id": "rotary_wing",
+      "name": "Rotary-Wing Flight",
+      "domain": "security"
+    },
+    {
+      "id": "guided_weapons",
+      "name": "Guided Weapons",
+      "domain": "security"
+    },
+    {
+      "id": "naval_missiles",
+      "name": "Naval Missiles",
+      "domain": "security"
+    },
+    {
+      "id": "nuclear_propulsion",
+      "name": "Nuclear Propulsion",
+      "domain": "security"
+    },
+    {
+      "id": "remote_aircraft",
+      "name": "Remote Aircraft",
+      "domain": "security"
+    },
+    {
+      "id": "rifled_barrels",
+      "name": "Rifled Barrels",
+      "domain": "security"
+    },
+    {
+      "id": "metallic_cartridges",
+      "name": "Metallic Cartridges",
+      "domain": "security"
+    },
+    {
+      "id": "automatic_actions",
+      "name": "Automatic Firearms",
+      "domain": "security"
+    },
+    {
+      "id": "internal_combustion",
+      "name": "Internal Combustion Engines",
+      "domain": "production"
+    },
+    {
+      "id": "armored_vehicles",
+      "name": "Armored Fighting Vehicles",
+      "domain": "security"
+    },
+    {
+      "id": "indirect_fire",
+      "name": "Indirect Artillery Fire",
+      "domain": "security"
+    },
+    {
+      "id": "armor_piercing_weapons",
+      "name": "Armor-Piercing Weapons",
+      "domain": "security"
+    },
+    {
+      "id": "atomic_physics",
+      "name": "Atomic Physics",
+      "domain": "knowledge"
+    },
+    {
+      "id": "reactor_engineering",
+      "name": "Controlled Nuclear Reactors",
+      "domain": "production"
+    },
+    {
+      "id": "festival_calendar",
+      "name": "Festival Calendar",
+      "domain": "culture"
+    },
+    {
+      "id": "oral_epics",
+      "name": "Oral Epics",
+      "domain": "culture"
+    },
+    {
+      "id": "public_theatre",
+      "name": "Public Theatre",
+      "domain": "culture"
+    },
+    {
+      "id": "civic_games",
+      "name": "Civic Games",
+      "domain": "culture"
+    },
+    {
+      "id": "comparative_chronicles",
+      "name": "Comparative Chronicles",
+      "domain": "culture"
+    },
+    {
+      "id": "public_libraries",
+      "name": "Public Libraries",
+      "domain": "culture"
+    },
+    {
+      "id": "crew_handoffs",
+      "name": "Crew Handoffs",
+      "domain": "labor"
+    },
+    {
+      "id": "apprentice_contracts",
+      "name": "Apprentice Contracts",
+      "domain": "labor"
+    },
+    {
+      "id": "work_rest_limits",
+      "name": "Work and Rest Limits",
+      "domain": "labor"
+    },
+    {
+      "id": "work_motion_studies",
+      "name": "Work Motion Studies",
+      "domain": "labor"
+    },
+    {
+      "id": "shared_childcare",
+      "name": "Shared Childcare",
+      "domain": "demography"
+    },
+    {
+      "id": "maternal_recovery",
+      "name": "Maternal Recovery Care",
+      "domain": "demography"
+    },
+    {
+      "id": "child_growth_records",
+      "name": "Child Growth Records",
+      "domain": "demography"
+    },
+    {
+      "id": "household_space_planning",
+      "name": "Household Space Planning",
+      "domain": "demography"
+    },
+    {
+      "id": "wayfinding_stars",
+      "name": "Celestial Wayfinding",
+      "domain": "logistics"
+    },
+    {
+      "id": "caravanserais",
+      "name": "Caravanserais",
+      "domain": "logistics"
+    },
+    {
+      "id": "counterweight_cranes",
+      "name": "Counterweight Cranes",
+      "domain": "logistics"
+    },
+    {
+      "id": "cargo_seals",
+      "name": "Cargo Seals",
+      "domain": "logistics"
+    },
+    {
+      "id": "root_cellars",
+      "name": "Root Cellars",
+      "domain": "nutrition"
+    },
+    {
+      "id": "raised_granaries",
+      "name": "Raised Granaries",
+      "domain": "nutrition"
+    },
+    {
+      "id": "hermetic_grain_storage",
+      "name": "Hermetic Grain Storage",
+      "domain": "nutrition"
+    },
+    {
+      "id": "brine_fermentation",
+      "name": "Brine Fermentation",
+      "domain": "nutrition"
+    },
+    {
+      "id": "vinegar_pickling",
+      "name": "Vinegar Pickling",
+      "domain": "nutrition"
+    },
+    {
+      "id": "stock_rotation",
+      "name": "Dated Stock Rotation",
+      "domain": "nutrition"
+    },
+    {
+      "id": "protected_wellheads",
+      "name": "Protected Wellheads",
+      "domain": "health"
+    },
+    {
+      "id": "rainwater_cisterns",
+      "name": "Rainwater Cisterns",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "water_settling_basins",
+      "name": "Water Settling Basins",
+      "domain": "health"
+    },
+    {
+      "id": "slow_sand_filtration",
+      "name": "Slow Sand Filtration",
+      "domain": "health"
+    },
+    {
+      "id": "water_service_inspections",
+      "name": "Water Service Inspections",
+      "domain": "health"
+    },
+    {
+      "id": "separate_clean_water_storage",
+      "name": "Separate Clean-Water Storage",
+      "domain": "health"
+    },
+    {
+      "id": "skirmish_pair_drill",
+      "name": "Skirmish Pair Drill",
+      "domain": "security"
+    },
+    {
+      "id": "mounted_remount_school",
+      "name": "Mounted Remount School",
+      "domain": "security"
+    },
+    {
+      "id": "siege_crew_rehearsals",
+      "name": "Siege Crew Rehearsals",
+      "domain": "security"
+    },
+    {
+      "id": "mountain_field_school",
+      "name": "Mountain Field School",
+      "domain": "security"
+    },
+    {
+      "id": "range_estimation_drill",
+      "name": "Range Estimation Drill",
+      "domain": "security"
+    },
+    {
+      "id": "gun_detachment_school",
+      "name": "Gun Detachment School",
+      "domain": "security"
+    },
+    {
+      "id": "engineer_demonstration_ranges",
+      "name": "Engineer Demonstration Ranges",
+      "domain": "security"
+    },
+    {
+      "id": "mechanized_crew_school",
+      "name": "Mechanized Crew School",
+      "domain": "security"
+    },
+    {
+      "id": "glassmaking",
+      "name": "Glassmaking",
+      "domain": "production"
+    },
+    {
+      "id": "optical_lenses",
+      "name": "Optical Lenses",
+      "domain": "knowledge"
+    },
+    {
+      "id": "experimental_optics",
+      "name": "Experimental Optics",
+      "domain": "knowledge"
+    },
+    {
+      "id": "vacuum_pumps",
+      "name": "Vacuum Pumps",
+      "domain": "knowledge"
+    },
+    {
+      "id": "vacuum_experiments",
+      "name": "Vacuum Experiments",
+      "domain": "knowledge"
+    },
+    {
+      "id": "precision_thermometry",
+      "name": "Precision Thermometry",
+      "domain": "knowledge"
+    },
+    {
+      "id": "calorimetry",
+      "name": "Calorimetry",
+      "domain": "knowledge"
+    },
+    {
+      "id": "heat_engine_cycles",
+      "name": "Heat Engine Cycles",
+      "domain": "knowledge"
+    },
+    {
+      "id": "pressure_vessels",
+      "name": "Pressure Vessels",
+      "domain": "production"
+    },
+    {
+      "id": "chemical_distillation",
+      "name": "Chemical Distillation",
+      "domain": "production"
+    },
+    {
+      "id": "fractional_distillation",
+      "name": "Fractional Distillation",
+      "domain": "production"
+    },
+    {
+      "id": "electrochemical_cells",
+      "name": "Electrochemical Cells",
+      "domain": "knowledge"
+    },
+    {
+      "id": "electrical_measurement",
+      "name": "Electrical Measurement",
+      "domain": "knowledge"
+    },
+    {
+      "id": "electromagnetic_induction",
+      "name": "Electromagnetic Induction",
+      "domain": "knowledge"
+    },
+    {
+      "id": "electrical_generators",
+      "name": "Electrical Generators",
+      "domain": "production"
+    },
+    {
+      "id": "electric_motors",
+      "name": "Electric Motors",
+      "domain": "production"
+    },
+    {
+      "id": "spectroscopy",
+      "name": "Spectroscopy",
+      "domain": "knowledge"
+    },
+    {
+      "id": "electron_physics",
+      "name": "Electron Physics",
+      "domain": "knowledge"
+    },
+    {
+      "id": "radiation_measurement",
+      "name": "Radiation Measurement",
+      "domain": "knowledge"
+    },
+    {
+      "id": "nuclear_fission",
+      "name": "Nuclear Fission",
+      "domain": "knowledge"
+    },
+    {
+      "id": "neutron_moderation",
+      "name": "Neutron Moderation",
+      "domain": "knowledge"
+    },
+    {
+      "id": "structural_load_testing",
+      "name": "Structural Load Testing",
+      "domain": "knowledge"
+    },
+    {
+      "id": "aerodynamics",
+      "name": "Aerodynamics",
+      "domain": "knowledge"
+    },
+    {
+      "id": "wind_tunnel_testing",
+      "name": "Wind Tunnel Testing",
+      "domain": "knowledge"
+    },
+    {
+      "id": "electric_arc_furnaces",
+      "name": "Electric Arc Furnaces",
+      "domain": "production"
+    },
+    {
+      "id": "mechanical_refrigeration",
+      "name": "Mechanical Refrigeration",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "steel_refining",
+      "name": "Steel Refining",
+      "domain": "production"
+    },
+    {
+      "id": "wire_drawing",
+      "name": "Wire Drawing",
+      "domain": "production"
+    },
+    {
+      "id": "cable_insulation",
+      "name": "Cable Insulation",
+      "domain": "production"
+    },
+    {
+      "id": "crystallography",
+      "name": "Crystallography",
+      "domain": "knowledge"
+    },
+    {
+      "id": "solid_state_physics",
+      "name": "Solid-State Physics",
+      "domain": "knowledge"
+    },
+    {
+      "id": "band_theory",
+      "name": "Electronic Band Theory",
+      "domain": "knowledge"
+    },
+    {
+      "id": "photoconductivity",
+      "name": "Photoconductivity",
+      "domain": "knowledge"
+    },
+    {
+      "id": "semiconductor_doping",
+      "name": "Semiconductor Doping",
+      "domain": "knowledge"
+    },
+    {
+      "id": "pn_junctions",
+      "name": "P\u2013N Junctions",
+      "domain": "knowledge"
+    },
+    {
+      "id": "silicon_smelting",
+      "name": "Silicon Smelting",
+      "domain": "production"
+    },
+    {
+      "id": "chlorosilane_purification",
+      "name": "Chlorosilane Purification",
+      "domain": "production"
+    },
+    {
+      "id": "single_crystal_growth",
+      "name": "Single-Crystal Growth",
+      "domain": "production"
+    },
+    {
+      "id": "wafer_sawing",
+      "name": "Semiconductor Wafer Sawing",
+      "domain": "production"
+    },
+    {
+      "id": "photovoltaic_conversion",
+      "name": "Photovoltaic Conversion",
+      "domain": "knowledge"
+    },
+    {
+      "id": "solar_cell_fabrication",
+      "name": "Solar Cell Fabrication",
+      "domain": "production"
+    },
+    {
+      "id": "module_encapsulation",
+      "name": "Photovoltaic Module Encapsulation",
+      "domain": "production"
+    },
+    {
+      "id": "photovoltaic_power",
+      "name": "Photovoltaic Power",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "skirmisher_infantry_screens",
+      "name": "Skirmisher\u2013Infantry Screens",
+      "domain": "security"
+    },
+    {
+      "id": "engineer_infantry_security",
+      "name": "Engineer\u2013Infantry Security",
+      "domain": "security"
+    },
+    {
+      "id": "infantry_antitank_coordination",
+      "name": "Infantry\u2013Antitank Coordination",
+      "domain": "security"
+    },
+    {
+      "id": "cavalry_infantry_liaison",
+      "name": "Cavalry\u2013Infantry Liaison",
+      "domain": "security"
+    },
+    {
+      "id": "gun_line_security",
+      "name": "Gun-Line Security",
+      "domain": "security"
+    },
+    {
+      "id": "infantry_tank_cooperation",
+      "name": "Infantry\u2013Tank Cooperation",
+      "domain": "security"
+    },
+    {
+      "id": "fractional_quantities",
+      "name": "Fractional Quantities",
+      "domain": "knowledge"
+    },
+    {
+      "id": "ratio_proportion",
+      "name": "Ratios and Proportions",
+      "domain": "knowledge"
+    },
+    {
+      "id": "straightedge_compass",
+      "name": "Straightedge and Compass Construction",
+      "domain": "knowledge"
+    },
+    {
+      "id": "similar_triangles",
+      "name": "Similar Triangles",
+      "domain": "knowledge"
+    },
+    {
+      "id": "trigonometry",
+      "name": "Trigonometric Methods",
+      "domain": "knowledge"
+    },
+    {
+      "id": "symbolic_algebra",
+      "name": "Symbolic Algebra",
+      "domain": "knowledge"
+    },
+    {
+      "id": "polynomial_equations",
+      "name": "Polynomial Equations",
+      "domain": "knowledge"
+    },
+    {
+      "id": "logarithms",
+      "name": "Logarithms",
+      "domain": "knowledge"
+    },
+    {
+      "id": "coordinate_geometry",
+      "name": "Coordinate Geometry",
+      "domain": "knowledge"
+    },
+    {
+      "id": "differential_calculus",
+      "name": "Differential Calculus",
+      "domain": "knowledge"
+    },
+    {
+      "id": "integral_calculus",
+      "name": "Integral Calculus",
+      "domain": "knowledge"
+    },
+    {
+      "id": "differential_equations",
+      "name": "Differential Equations",
+      "domain": "knowledge"
+    },
+    {
+      "id": "complex_numbers",
+      "name": "Complex Numbers",
+      "domain": "knowledge"
+    },
+    {
+      "id": "vector_analysis",
+      "name": "Vector Analysis",
+      "domain": "knowledge"
+    },
+    {
+      "id": "matrix_algebra",
+      "name": "Matrix Algebra",
+      "domain": "knowledge"
+    },
+    {
+      "id": "combinatorics",
+      "name": "Combinatorial Counting",
+      "domain": "knowledge"
+    },
+    {
+      "id": "probability_theory",
+      "name": "Probability Theory",
+      "domain": "knowledge"
+    },
+    {
+      "id": "statistical_sampling",
+      "name": "Statistical Sampling",
+      "domain": "knowledge"
+    },
+    {
+      "id": "least_squares_estimation",
+      "name": "Least-Squares Estimation",
+      "domain": "knowledge"
+    },
+    {
+      "id": "measurement_uncertainty",
+      "name": "Measurement Uncertainty",
+      "domain": "knowledge"
+    },
+    {
+      "id": "dimensional_analysis",
+      "name": "Dimensional Analysis",
+      "domain": "knowledge"
+    },
+    {
+      "id": "numerical_root_finding",
+      "name": "Numerical Root Finding",
+      "domain": "knowledge"
+    },
+    {
+      "id": "numerical_integration",
+      "name": "Numerical Integration",
+      "domain": "knowledge"
+    },
+    {
+      "id": "constrained_optimization",
+      "name": "Constrained Optimization",
+      "domain": "knowledge"
+    },
+    {
+      "id": "harmonic_analysis",
+      "name": "Harmonic Analysis",
+      "domain": "knowledge"
+    },
+    {
+      "id": "dimensional_metrology",
+      "name": "Precision Dimensional Metrology",
+      "domain": "knowledge"
+    },
+    {
+      "id": "brine_purification",
+      "name": "Brine Purification",
+      "domain": "production"
+    },
+    {
+      "id": "chloralkali_cells",
+      "name": "Chlor-Alkali Cells",
+      "domain": "production"
+    },
+    {
+      "id": "hydrogen_chloride_synthesis",
+      "name": "Hydrogen Chloride Synthesis",
+      "domain": "production"
+    },
+    {
+      "id": "lever_moments",
+      "name": "Lever Moments",
+      "domain": "knowledge"
+    },
+    {
+      "id": "centers_of_mass",
+      "name": "Centers of Mass",
+      "domain": "knowledge"
+    },
+    {
+      "id": "compound_pulleys",
+      "name": "Compound Pulleys",
+      "domain": "knowledge"
+    },
+    {
+      "id": "gear_ratios",
+      "name": "Gear Ratios",
+      "domain": "knowledge"
+    },
+    {
+      "id": "crank_linkages",
+      "name": "Crank Linkages",
+      "domain": "knowledge"
+    },
+    {
+      "id": "flywheel_smoothing",
+      "name": "Flywheel Smoothing",
+      "domain": "knowledge"
+    },
+    {
+      "id": "bearing_surfaces",
+      "name": "Bearing Surfaces",
+      "domain": "knowledge"
+    },
+    {
+      "id": "friction_measurement",
+      "name": "Friction Measurement",
+      "domain": "knowledge"
+    },
+    {
+      "id": "lubrication_regimes",
+      "name": "Lubrication Regimes",
+      "domain": "knowledge"
+    },
+    {
+      "id": "displacement_buoyancy",
+      "name": "Displacement and Buoyancy",
+      "domain": "knowledge"
+    },
+    {
+      "id": "hydrostatic_pressure",
+      "name": "Hydrostatic Pressure",
+      "domain": "knowledge"
+    },
+    {
+      "id": "flow_continuity",
+      "name": "Flow Continuity",
+      "domain": "knowledge"
+    },
+    {
+      "id": "viscous_resistance",
+      "name": "Viscous Resistance",
+      "domain": "knowledge"
+    },
+    {
+      "id": "elastic_deformation",
+      "name": "Elastic Deformation",
+      "domain": "knowledge"
+    },
+    {
+      "id": "stress_strain_relations",
+      "name": "Stress\u2013Strain Relations",
+      "domain": "knowledge"
+    },
+    {
+      "id": "column_buckling",
+      "name": "Column Buckling",
+      "domain": "knowledge"
+    },
+    {
+      "id": "cyclic_fatigue",
+      "name": "Cyclic Fatigue",
+      "domain": "knowledge"
+    },
+    {
+      "id": "measured_kinematics",
+      "name": "Measured Kinematics",
+      "domain": "knowledge"
+    },
+    {
+      "id": "inertial_motion",
+      "name": "Inertial Motion",
+      "domain": "knowledge"
+    },
+    {
+      "id": "momentum_balance",
+      "name": "Momentum Balance",
+      "domain": "knowledge"
+    },
+    {
+      "id": "mechanical_work_energy",
+      "name": "Mechanical Work and Energy",
+      "domain": "knowledge"
+    },
+    {
+      "id": "rotational_dynamics",
+      "name": "Rotational Dynamics",
+      "domain": "knowledge"
+    },
+    {
+      "id": "mechanical_oscillation",
+      "name": "Mechanical Oscillation",
+      "domain": "knowledge"
+    },
+    {
+      "id": "feedback_governors",
+      "name": "Feedback Governors",
+      "domain": "knowledge"
+    },
+    {
+      "id": "mineral_streak_tests",
+      "name": "Mineral Streak Tests",
+      "domain": "ecology"
+    },
+    {
+      "id": "mineral_cleavage",
+      "name": "Cleavage and Fracture Classification",
+      "domain": "ecology"
+    },
+    {
+      "id": "comparative_mineral_hardness",
+      "name": "Comparative Mineral Hardness",
+      "domain": "ecology"
+    },
+    {
+      "id": "mineral_specific_gravity",
+      "name": "Mineral Specific Gravity",
+      "domain": "ecology"
+    },
+    {
+      "id": "relative_stratigraphy",
+      "name": "Relative Stratigraphy",
+      "domain": "ecology"
+    },
+    {
+      "id": "lithologic_correlation",
+      "name": "Lithologic Correlation",
+      "domain": "ecology"
+    },
+    {
+      "id": "geologic_cross_sections",
+      "name": "Geologic Cross Sections",
+      "domain": "ecology"
+    },
+    {
+      "id": "structural_geologic_mapping",
+      "name": "Structural Geologic Mapping",
+      "domain": "ecology"
+    },
+    {
+      "id": "sediment_provenance",
+      "name": "Sediment Provenance",
+      "domain": "ecology"
+    },
+    {
+      "id": "systematic_channel_sampling",
+      "name": "Systematic Channel Sampling",
+      "domain": "ecology"
+    },
+    {
+      "id": "geochemical_baselines",
+      "name": "Geochemical Baselines",
+      "domain": "ecology"
+    },
+    {
+      "id": "geochemical_anomaly_mapping",
+      "name": "Geochemical Anomaly Mapping",
+      "domain": "ecology"
+    },
+    {
+      "id": "grade_tonnage_models",
+      "name": "Grade\u2013Tonnage Models",
+      "domain": "ecology"
+    },
+    {
+      "id": "spatial_variograms",
+      "name": "Spatial Variograms",
+      "domain": "ecology"
+    },
+    {
+      "id": "resource_kriging",
+      "name": "Resource Kriging",
+      "domain": "ecology"
+    },
+    {
+      "id": "orebody_block_models",
+      "name": "Orebody Block Models",
+      "domain": "ecology"
+    },
+    {
+      "id": "litter_bearer_drill",
+      "name": "Litter Bearer Drill",
+      "domain": "security"
+    },
+    {
+      "id": "casualty_collection_posts",
+      "name": "Casualty Collection Posts",
+      "domain": "security"
+    },
+    {
+      "id": "casualty_transfer_records",
+      "name": "Casualty Transfer Records",
+      "domain": "security"
+    },
+    {
+      "id": "evacuation_relays",
+      "name": "Casualty Evacuation Relays",
+      "domain": "security"
+    },
+    {
+      "id": "field_aid_stations",
+      "name": "Field Aid Stations",
+      "domain": "security"
+    },
+    {
+      "id": "triage_registers",
+      "name": "Triage Registers",
+      "domain": "security"
+    },
+    {
+      "id": "medical_resupply_packing",
+      "name": "Medical Resupply Packing",
+      "domain": "security"
+    },
+    {
+      "id": "convalescent_duty_reviews",
+      "name": "Convalescent Duty Reviews",
+      "domain": "security"
+    },
+    {
+      "id": "field_armorer_teams",
+      "name": "Field Armorer Teams",
+      "domain": "security"
+    },
+    {
+      "id": "germination_trials",
+      "name": "Germination Trials",
+      "domain": "nutrition"
+    },
+    {
+      "id": "seed_cleaning",
+      "name": "Seed Cleaning",
+      "domain": "nutrition"
+    },
+    {
+      "id": "sowing_depth_trials",
+      "name": "Sowing Depth Trials",
+      "domain": "nutrition"
+    },
+    {
+      "id": "row_spacing_trials",
+      "name": "Row Spacing Trials",
+      "domain": "nutrition"
+    },
+    {
+      "id": "seedbed_firming",
+      "name": "Seedbed Firming",
+      "domain": "nutrition"
+    },
+    {
+      "id": "mass_seed_selection",
+      "name": "Mass Seed Selection",
+      "domain": "nutrition"
+    },
+    {
+      "id": "progeny_rows",
+      "name": "Progeny Rows",
+      "domain": "nutrition"
+    },
+    {
+      "id": "controlled_pollination",
+      "name": "Controlled Pollination",
+      "domain": "nutrition"
+    },
+    {
+      "id": "field_variety_trials",
+      "name": "Field Variety Trials",
+      "domain": "nutrition"
+    },
+    {
+      "id": "regional_seed_trials",
+      "name": "Regional Seed Trials",
+      "domain": "nutrition"
+    },
+    {
+      "id": "crop_residue_cover",
+      "name": "Crop Residue Cover",
+      "domain": "nutrition"
+    },
+    {
+      "id": "green_manure_crops",
+      "name": "Green Manure Crops",
+      "domain": "nutrition"
+    },
+    {
+      "id": "cover_crop_mixtures",
+      "name": "Cover Crop Mixtures",
+      "domain": "nutrition"
+    },
+    {
+      "id": "contour_cultivation",
+      "name": "Contour Cultivation",
+      "domain": "nutrition"
+    },
+    {
+      "id": "strip_cropping",
+      "name": "Strip Cropping",
+      "domain": "nutrition"
+    },
+    {
+      "id": "reduced_tillage",
+      "name": "Reduced Tillage",
+      "domain": "nutrition"
+    },
+    {
+      "id": "soil_infiltration_trials",
+      "name": "Soil Infiltration Trials",
+      "domain": "nutrition"
+    },
+    {
+      "id": "mulch_water_management",
+      "name": "Mulch Water Management",
+      "domain": "nutrition"
+    },
+    {
+      "id": "irrigation_loss_accounts",
+      "name": "Irrigation Loss Accounts",
+      "domain": "nutrition"
+    },
+    {
+      "id": "soil_moisture_scheduling",
+      "name": "Soil Moisture Scheduling",
+      "domain": "nutrition"
+    },
+    {
+      "id": "nutrient_response_trials",
+      "name": "Nutrient Response Trials",
+      "domain": "nutrition"
+    },
+    {
+      "id": "mineral_nitrate_dressing",
+      "name": "Mineral Nitrate Dressing",
+      "domain": "nutrition"
+    },
+    {
+      "id": "sulfur_dioxide_recovery",
+      "name": "Sulfur Dioxide Recovery",
+      "domain": "production"
+    },
+    {
+      "id": "sulfuric_acid_production",
+      "name": "Sulfuric Acid Production",
+      "domain": "production"
+    },
+    {
+      "id": "phosphate_solubilization",
+      "name": "Phosphate Solubilization",
+      "domain": "nutrition"
+    },
+    {
+      "id": "compressed_air_systems",
+      "name": "Compressed Air Systems",
+      "domain": "production"
+    },
+    {
+      "id": "cryogenic_air_separation",
+      "name": "Cryogenic Air Separation",
+      "domain": "production"
+    },
+    {
+      "id": "water_electrolysis",
+      "name": "Water Electrolysis",
+      "domain": "production"
+    },
+    {
+      "id": "iron_ammonia_catalysts",
+      "name": "Iron Ammonia Catalysts",
+      "domain": "production"
+    },
+    {
+      "id": "catalytic_ammonia_synthesis",
+      "name": "Catalytic Ammonia Synthesis",
+      "domain": "production"
+    },
+    {
+      "id": "ammonium_sulfate_fertilizer",
+      "name": "Ammonium Sulfate Fertilizer",
+      "domain": "nutrition"
+    },
+    {
+      "id": "lead_smelting",
+      "name": "Lead Smelting",
+      "domain": "production"
+    },
+    {
+      "id": "lead_sheet_rolling",
+      "name": "Lead Sheet Rolling",
+      "domain": "production"
+    },
+    {
+      "id": "porous_battery_separators",
+      "name": "Porous Battery Separators",
+      "domain": "production"
+    },
+    {
+      "id": "lead_oxide_preparation",
+      "name": "Lead Oxide Preparation",
+      "domain": "production"
+    },
+    {
+      "id": "lead_acid_cells",
+      "name": "Lead-Acid Cells",
+      "domain": "production"
+    },
+    {
+      "id": "battery_bank_wiring",
+      "name": "Battery Bank Wiring",
+      "domain": "production"
+    },
+    {
+      "id": "charge_regulation",
+      "name": "Charge Regulation",
+      "domain": "production"
+    },
+    {
+      "id": "pressure_pipe_jointing",
+      "name": "Pressure Pipe Jointing",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "cylinder_boring",
+      "name": "Cylinder Boring",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "packed_piston_seals",
+      "name": "Packed Piston Seals",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "directional_air_valves",
+      "name": "Directional Air Valves",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "pneumatic_cylinders",
+      "name": "Pneumatic Cylinders",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "pneumatic_pressing",
+      "name": "Pneumatic Pressing",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "lens_centering",
+      "name": "Lens Centering",
+      "domain": "knowledge"
+    },
+    {
+      "id": "eyepiece_design",
+      "name": "Eyepiece Design",
+      "domain": "knowledge"
+    },
+    {
+      "id": "fine_focus_stages",
+      "name": "Fine-Focus Stages",
+      "domain": "knowledge"
+    },
+    {
+      "id": "illumination_apertures",
+      "name": "Illumination Apertures",
+      "domain": "knowledge"
+    },
+    {
+      "id": "specimen_slide_mounting",
+      "name": "Specimen Slide Mounting",
+      "domain": "knowledge"
+    },
+    {
+      "id": "compound_microscopy",
+      "name": "Compound Microscopy",
+      "domain": "knowledge"
+    },
+    {
+      "id": "clay_levigation",
+      "name": "Clay Levigation",
+      "domain": "production"
+    },
+    {
+      "id": "grog_preparation",
+      "name": "Grog Preparation",
+      "domain": "production"
+    },
+    {
+      "id": "refractory_body_trials",
+      "name": "Refractory Body Trials",
+      "domain": "production"
+    },
+    {
+      "id": "refractory_brick_firing",
+      "name": "Refractory Brick Firing",
+      "domain": "production"
+    },
+    {
+      "id": "ceramic_crucibles",
+      "name": "Ceramic Crucibles",
+      "domain": "production"
+    },
+    {
+      "id": "crucible_glass_melting",
+      "name": "Crucible Glass Melting",
+      "domain": "production"
+    },
+    {
+      "id": "finery_forges",
+      "name": "Finery Forges",
+      "domain": "production"
+    },
+    {
+      "id": "charcoal_retorts",
+      "name": "Charcoal Retorts",
+      "domain": "production"
+    },
+    {
+      "id": "bloomery_charge_control",
+      "name": "Bloomery Charge Control",
+      "domain": "production"
+    },
+    {
+      "id": "tin_smelting",
+      "name": "Tin Smelting",
+      "domain": "production"
+    },
+    {
+      "id": "sheet_steel_rolling",
+      "name": "Sheet Steel Rolling",
+      "domain": "production"
+    },
+    {
+      "id": "tinplate_coating",
+      "name": "Tinplate Coating",
+      "domain": "production"
+    },
+    {
+      "id": "can_body_forming",
+      "name": "Can Body Forming",
+      "domain": "nutrition"
+    },
+    {
+      "id": "double_seaming",
+      "name": "Double Seaming",
+      "domain": "nutrition"
+    },
+    {
+      "id": "food_retorts",
+      "name": "Food Retorts",
+      "domain": "nutrition"
+    },
+    {
+      "id": "thermal_process_validation",
+      "name": "Thermal Process Validation",
+      "domain": "nutrition"
+    },
+    {
+      "id": "rope_laying",
+      "name": "Rope Laying",
+      "domain": "movement"
+    },
+    {
+      "id": "sail_panel_cutting",
+      "name": "Sail Panel Cutting",
+      "domain": "movement"
+    },
+    {
+      "id": "sail_seaming",
+      "name": "Sail Seaming",
+      "domain": "movement"
+    },
+    {
+      "id": "wooden_sheave_blocks",
+      "name": "Wooden Sheave Blocks",
+      "domain": "movement"
+    },
+    {
+      "id": "standing_running_rigging",
+      "name": "Standing and Running Rigging",
+      "domain": "movement"
+    },
+    {
+      "id": "keel_scarfing",
+      "name": "Keel Scarfing",
+      "domain": "movement"
+    },
+    {
+      "id": "grown_frame_selection",
+      "name": "Grown Frame Selection",
+      "domain": "movement"
+    },
+    {
+      "id": "frame_moulding",
+      "name": "Frame Moulding",
+      "domain": "movement"
+    },
+    {
+      "id": "plank_spiling",
+      "name": "Plank Spiling",
+      "domain": "movement"
+    },
+    {
+      "id": "caulking_fiber_preparation",
+      "name": "Caulking Fiber Preparation",
+      "domain": "movement"
+    },
+    {
+      "id": "treenail_fastening",
+      "name": "Treenail Fastening",
+      "domain": "movement"
+    },
+    {
+      "id": "hull_seam_caulking",
+      "name": "Hull Seam Caulking",
+      "domain": "movement"
+    },
+    {
+      "id": "carvel_frame_construction",
+      "name": "Carvel Frame Construction",
+      "domain": "movement"
+    },
+    {
+      "id": "clinker_shell_construction",
+      "name": "Clinker Shell Construction",
+      "domain": "movement"
+    },
+    {
+      "id": "mast_making",
+      "name": "Mast Making",
+      "domain": "movement"
+    },
+    {
+      "id": "launching_cradles",
+      "name": "Launching Cradles",
+      "domain": "movement"
+    },
+    {
+      "id": "wheel_blank_jointing",
+      "name": "Wheel Blank Jointing",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "wheel_hub_boring",
+      "name": "Wheel Hub Boring",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "spoke_tenon_cutting",
+      "name": "Spoke Tenon Cutting",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "felloe_jointing",
+      "name": "Felloe Jointing",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "solid_wheel_assembly",
+      "name": "Solid Wheel Assembly",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "spoked_wheel_assembly",
+      "name": "Spoked Wheel Assembly",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "iron_tyre_fitting",
+      "name": "Iron Tyre Fitting",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "wooden_axle_shaping",
+      "name": "Wooden Axle Shaping",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "wooden_axle_boxes",
+      "name": "Wooden Axle Boxes",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "axle_sleeve_fitting",
+      "name": "Axle Sleeve Fitting",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "linchpin_retention",
+      "name": "Linchpin Retention",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "cart_bed_framing",
+      "name": "Cart Bed Framing",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "drawbar_fitting",
+      "name": "Drawbar Fitting",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "haul_harness_weaving",
+      "name": "Haul Harness Weaving",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "cart_running_gear",
+      "name": "Cart Running Gear",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "sleeved_cart_assembly",
+      "name": "Sleeved Cart Assembly",
+      "domain": "infrastructure"
+    },
+    {
+      "id": "three_plate_lapping",
+      "name": "Three-Plate Lapping",
+      "domain": "production"
+    },
+    {
+      "id": "straightedge_scraping",
+      "name": "Straightedge Scraping",
+      "domain": "production"
+    },
+    {
+      "id": "machine_way_scraping",
+      "name": "Machine-Way Scraping",
+      "domain": "production"
+    },
+    {
+      "id": "lead_screw_cutting",
+      "name": "Lead-Screw Cutting",
+      "domain": "production"
+    },
+    {
+      "id": "split_feed_nuts",
+      "name": "Split Feed Nuts",
+      "domain": "production"
+    },
+    {
+      "id": "cross_slide_assembly",
+      "name": "Cross-Slide Assembly",
+      "domain": "production"
+    },
+    {
+      "id": "four_jaw_chucks",
+      "name": "Four-Jaw Chucks",
+      "domain": "production"
+    },
+    {
+      "id": "tailstock_fitting",
+      "name": "Tailstock Fitting",
+      "domain": "production"
+    },
+    {
+      "id": "toolbit_heat_treatment",
+      "name": "Tool-Bit Heat Treatment",
+      "domain": "production"
+    },
+    {
+      "id": "centre_lathe_assembly",
+      "name": "Centre-Lathe Assembly",
+      "domain": "production"
+    },
+    {
+      "id": "drill_bit_fluting",
+      "name": "Drill-Bit Fluting",
+      "domain": "production"
+    },
+    {
+      "id": "quill_feed_mechanisms",
+      "name": "Quill Feed Mechanisms",
+      "domain": "production"
+    },
+    {
+      "id": "column_drilling_machines",
+      "name": "Column Drilling Machines",
+      "domain": "production"
+    },
+    {
+      "id": "milling_cutter_relief",
+      "name": "Milling Cutter Relief",
+      "domain": "production"
+    },
+    {
+      "id": "milling_table_feeds",
+      "name": "Milling Table Feeds",
+      "domain": "production"
+    },
+    {
+      "id": "milling_spindle_heads",
+      "name": "Milling Spindle Heads",
+      "domain": "production"
+    },
+    {
+      "id": "horizontal_milling_machines",
+      "name": "Horizontal Milling Machines",
+      "domain": "production"
+    },
+    {
+      "id": "worm_dividing_heads",
+      "name": "Worm Dividing Heads",
+      "domain": "production"
+    },
+    {
+      "id": "drill_jig_bushings",
+      "name": "Drill Jig Bushings",
+      "domain": "production"
+    },
+    {
+      "id": "drill_jig_layout",
+      "name": "Drill Jig Layout",
+      "domain": "production"
+    },
+    {
+      "id": "gauge_block_lapping",
+      "name": "Gauge-Block Lapping",
+      "domain": "production"
+    },
+    {
+      "id": "bench_vise_screws",
+      "name": "Bench-Vise Screws",
+      "domain": "production"
+    },
+    {
+      "id": "basic_machine_shops",
+      "name": "Basic Machine Shops",
+      "domain": "production"
+    },
+    {
+      "id": "precision_toolrooms",
+      "name": "Precision Toolrooms",
+      "domain": "production"
+    },
+    {
+      "id": "bolt_blank_forging",
+      "name": "Bolt Blank Forging",
+      "domain": "production"
+    },
+    {
+      "id": "nut_blank_forging",
+      "name": "Nut Blank Forging",
+      "domain": "production"
+    },
+    {
+      "id": "nut_bore_drilling",
+      "name": "Nut Bore Drilling",
+      "domain": "production"
+    },
+    {
+      "id": "thread_tap_cutting",
+      "name": "Thread Tap Cutting",
+      "domain": "production"
+    },
+    {
+      "id": "thread_die_cutting",
+      "name": "Thread Die Cutting",
+      "domain": "production"
+    },
+    {
+      "id": "external_thread_cutting",
+      "name": "External Thread Cutting",
+      "domain": "production"
+    },
+    {
+      "id": "internal_thread_tapping",
+      "name": "Internal Thread Tapping",
+      "domain": "production"
+    },
+    {
+      "id": "thread_pitch_gauging",
+      "name": "Thread Pitch Gauging",
+      "domain": "production"
+    },
+    {
+      "id": "matched_thread_inspection",
+      "name": "Matched Thread Inspection",
+      "domain": "production"
+    },
+    {
+      "id": "washer_punching",
+      "name": "Washer Punching",
+      "domain": "production"
+    },
+    {
+      "id": "cotter_pin_forming",
+      "name": "Cotter Pin Forming",
+      "domain": "production"
+    },
+    {
+      "id": "castellated_nut_slotting",
+      "name": "Castellated Nut Slotting",
+      "domain": "production"
+    },
+    {
+      "id": "split_pin_locking",
+      "name": "Split-Pin Locking",
+      "domain": "production"
+    },
+    {
+      "id": "steel_wire_drawing",
+      "name": "Steel Wire Drawing",
+      "domain": "production"
+    },
+    {
+      "id": "spring_wire_coiling",
+      "name": "Spring Wire Coiling",
+      "domain": "production"
+    },
+    {
+      "id": "coil_spring_tempering",
+      "name": "Coil Spring Tempering",
+      "domain": "production"
+    },
+    {
+      "id": "split_washer_cutting",
+      "name": "Split Washer Cutting",
+      "domain": "production"
+    },
+    {
+      "id": "rivet_blank_heading",
+      "name": "Rivet Blank Heading",
+      "domain": "production"
+    },
+    {
+      "id": "rivet_hole_alignment",
+      "name": "Rivet Hole Alignment",
+      "domain": "production"
+    },
+    {
+      "id": "hot_rivet_setting",
+      "name": "Hot Rivet Setting",
+      "domain": "production"
+    },
+    {
+      "id": "cold_rivet_setting",
+      "name": "Cold Rivet Setting",
+      "domain": "production"
+    },
+    {
+      "id": "thread_rolling_die_making",
+      "name": "Thread-Rolling Die Making",
+      "domain": "production"
+    },
+    {
+      "id": "bolt_thread_rolling",
+      "name": "Bolt Thread Rolling",
+      "domain": "production"
+    },
+    {
+      "id": "standard_fastener_kitting",
+      "name": "Standard Fastener Kitting",
+      "domain": "production"
+    },
+    {
+      "id": "fiber_retting",
+      "name": "Fiber Retting",
+      "domain": "production"
+    },
+    {
+      "id": "fiber_combing",
+      "name": "Fiber Combing",
+      "domain": "production"
+    },
+    {
+      "id": "drop_spindles",
+      "name": "Drop Spindles",
+      "domain": "production"
+    },
+    {
+      "id": "warp_weighted_looms",
+      "name": "Warp-Weighted Looms",
+      "domain": "production"
+    },
+    {
+      "id": "plain_weaving",
+      "name": "Plain Weaving",
+      "domain": "production"
+    },
+    {
+      "id": "woven_dressings",
+      "name": "Woven Dressings",
+      "domain": "production"
+    },
+    {
+      "id": "spinning_wheels",
+      "name": "Spinning Wheels",
+      "domain": "production"
+    },
+    {
+      "id": "flyer_spinning",
+      "name": "Flyer Spinning",
+      "domain": "production"
+    },
+    {
+      "id": "multi_spindle_spinning",
+      "name": "Multi-Spindle Spinning",
+      "domain": "production"
+    },
+    {
+      "id": "mule_spinning",
+      "name": "Mule Spinning",
+      "domain": "production"
+    },
+    {
+      "id": "flying_shuttles",
+      "name": "Flying Shuttles",
+      "domain": "production"
+    },
+    {
+      "id": "electric_power_looms",
+      "name": "Electric Power Looms",
+      "domain": "production"
+    },
+    {
+      "id": "fiber_pulp_beating",
+      "name": "Fiber Pulp Beating",
+      "domain": "production"
+    },
+    {
+      "id": "textile_rag_pulping",
+      "name": "Textile Rag Pulping",
+      "domain": "production"
+    },
+    {
+      "id": "paper_sheet_pressing",
+      "name": "Paper Sheet Pressing",
+      "domain": "production"
+    },
+    {
+      "id": "electric_pulp_beating",
+      "name": "Electric Pulp Beating",
+      "domain": "production"
+    },
+    {
+      "id": "core_formed_glass",
+      "name": "Core-Formed Glass",
+      "domain": "production"
+    },
+    {
+      "id": "glass_blowing",
+      "name": "Glass Blowing",
+      "domain": "production"
+    },
+    {
+      "id": "mold_blown_glass",
+      "name": "Mold-Blown Glass",
+      "domain": "production"
+    },
+    {
+      "id": "plunger_pressed_glass",
+      "name": "Plunger-Pressed Glass",
+      "domain": "production"
+    },
+    {
+      "id": "glass_tube_drawing",
+      "name": "Glass Tube Drawing",
+      "domain": "production"
+    },
+    {
+      "id": "hydrogen_flame_glassworking",
+      "name": "Hydrogen-Flame Glassworking",
+      "domain": "production"
+    },
+    {
+      "id": "carbon_resistors",
+      "name": "Carbon Resistors",
+      "domain": "production"
+    },
+    {
+      "id": "foil_capacitors",
+      "name": "Foil Capacitors",
+      "domain": "production"
+    },
+    {
+      "id": "electromagnetic_relays",
+      "name": "Electromagnetic Relays",
+      "domain": "production"
+    },
+    {
+      "id": "wound_transformers",
+      "name": "Wound Transformers",
+      "domain": "production"
+    },
+    {
+      "id": "silicon_rectifiers",
+      "name": "Silicon Rectifiers",
+      "domain": "production"
+    },
+    {
+      "id": "bipolar_junction_transistors",
+      "name": "Bipolar Junction Transistors",
+      "domain": "production"
+    },
+    {
+      "id": "transistor_amplifiers",
+      "name": "Transistor Amplifiers",
+      "domain": "production"
+    },
+    {
+      "id": "resistive_sensing",
+      "name": "Resistive Sensing",
+      "domain": "production"
+    },
+    {
+      "id": "electronic_machine_control",
+      "name": "Electronic Machine Control",
+      "domain": "production"
+    },
+    {
+      "id": "relay_logic",
+      "name": "Relay Logic",
+      "domain": "production"
+    },
+    {
+      "id": "diode_logic",
+      "name": "Diode Logic",
+      "domain": "production"
+    },
+    {
+      "id": "transistor_inverters",
+      "name": "Transistor Inverters",
+      "domain": "production"
+    },
+    {
+      "id": "bistable_multivibrators",
+      "name": "Bistable Multivibrators",
+      "domain": "production"
+    },
+    {
+      "id": "binary_counters",
+      "name": "Binary Counters",
+      "domain": "production"
+    },
+    {
+      "id": "shift_registers",
+      "name": "Shift Registers",
+      "domain": "production"
+    },
+    {
+      "id": "binary_adders",
+      "name": "Binary Adders",
+      "domain": "production"
+    },
+    {
+      "id": "hardwired_sequence_control",
+      "name": "Hardwired Sequence Control",
+      "domain": "production"
+    },
+    {
+      "id": "relay_registers",
+      "name": "Relay Registers",
+      "domain": "production"
+    },
+    {
+      "id": "parallel_register_banks",
+      "name": "Parallel Register Banks",
+      "domain": "production"
+    },
+    {
+      "id": "memory_address_decoding",
+      "name": "Memory Address Decoding",
+      "domain": "production"
+    },
+    {
+      "id": "read_write_memory",
+      "name": "Addressable Read/Write Memory",
+      "domain": "production"
+    },
+    {
+      "id": "instruction_registers",
+      "name": "Instruction Registers",
+      "domain": "production"
+    },
+    {
+      "id": "program_counters",
+      "name": "Program Counters",
+      "domain": "production"
+    },
+    {
+      "id": "conditional_branch_circuits",
+      "name": "Conditional Branch Circuits",
+      "domain": "production"
+    },
+    {
+      "id": "stored_program_control",
+      "name": "Stored-Program Control",
+      "domain": "production"
+    },
+    {
+      "id": "diode_control_stores",
+      "name": "Diode Control Stores",
+      "domain": "knowledge"
+    },
+    {
+      "id": "microinstruction_sequencing",
+      "name": "Microinstruction Sequencing",
+      "domain": "knowledge"
+    },
+    {
+      "id": "arithmetic_logic_units",
+      "name": "Arithmetic-Logic Units",
+      "domain": "knowledge"
+    },
+    {
+      "id": "microprogrammed_machine_control",
+      "name": "Microprogrammed Machine Control",
+      "domain": "knowledge"
+    },
+    {
+      "id": "seed_oil_pressing",
+      "name": "Seed Oil Pressing",
+      "domain": "production"
+    },
+    {
+      "id": "lampblack_capture",
+      "name": "Lampblack Capture",
+      "domain": "production"
+    },
+    {
+      "id": "oil_based_printing_inks",
+      "name": "Oil-Based Printing Inks",
+      "domain": "production"
+    },
+    {
+      "id": "relief_block_cutting",
+      "name": "Relief Block Cutting",
+      "domain": "production"
+    },
+    {
+      "id": "wooden_movable_type",
+      "name": "Wooden Movable Type",
+      "domain": "production"
+    },
+    {
+      "id": "hand_relief_printing",
+      "name": "Hand Relief Printing",
+      "domain": "production"
+    },
+    {
+      "id": "screw_press_printing",
+      "name": "Screw-Press Printing",
+      "domain": "production"
+    },
+    {
+      "id": "cylinder_press_printing",
+      "name": "Cylinder-Press Printing",
+      "domain": "production"
+    },
+    {
+      "id": "copperplate_preparation",
+      "name": "Copperplate Preparation",
+      "domain": "production"
+    },
+    {
+      "id": "burin_engraving",
+      "name": "Burin Engraving",
+      "domain": "production"
+    },
+    {
+      "id": "drypoint_printmaking",
+      "name": "Drypoint Printmaking",
+      "domain": "production"
+    },
+    {
+      "id": "mezzotint_printmaking",
+      "name": "Mezzotint Printmaking",
+      "domain": "production"
+    },
+    {
+      "id": "steelplate_engraving",
+      "name": "Steelplate Engraving",
+      "domain": "production"
+    },
+    {
+      "id": "rolling_intaglio_printing",
+      "name": "Rolling Intaglio Printing",
+      "domain": "production"
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "review_id": "D23-01",
+      "candidate_name": "Constellation records",
+      "mapped_ids": [
+        "angular_sky_catalogs"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-02",
+      "candidate_name": "Eclipse prediction",
+      "mapped_ids": [
+        "eclipse_geometry_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-03",
+      "candidate_name": "Optical telescopes",
+      "mapped_ids": [
+        "refracting_telescopes",
+        "reflecting_telescopes"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-04",
+      "candidate_name": "Orbital mechanics",
+      "mapped_ids": [
+        "orbital_dynamics"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-05",
+      "candidate_name": "Stellar spectroscopy",
+      "mapped_ids": [
+        "spectroscopy",
+        "refracting_telescopes",
+        "reflecting_telescopes"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Reuse the shared physical mechanism with subject-specific instruments, environment and operating qualification; avoid a location-prefixed duplicate."
+    },
+    {
+      "review_id": "D23-06",
+      "candidate_name": "Liquid rocket propulsion",
+      "mapped_ids": [
+        "liquid_rocket_engines"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-07",
+      "candidate_name": "Spacecraft guidance",
+      "mapped_ids": [
+        "launch_vehicle_guidance",
+        "spacecraft_attitude_sensing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-08",
+      "candidate_name": "Orbital launch operations",
+      "mapped_ids": [
+        "launch_vehicle_mass_closure",
+        "launch_window_planning",
+        "launch_range_tracking"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-09",
+      "candidate_name": "Space life support",
+      "mapped_ids": [
+        "spacecraft_atmosphere_control",
+        "space_water_recovery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-10",
+      "candidate_name": "Planetary robotic probes",
+      "mapped_ids": [
+        "planetary_rover_mobility",
+        "autonomous_probe_science_selection"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-11",
+      "candidate_name": "Orbital docking",
+      "mapped_ids": [
+        "spacecraft_docking"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-12",
+      "candidate_name": "Space radiation protection",
+      "mapped_ids": [
+        "space_radiation_shielding"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-13",
+      "candidate_name": "Surface resource prospecting",
+      "mapped_ids": [
+        "regolith_volatile_assays",
+        "ore_assaying"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-14",
+      "candidate_name": "In situ oxygen extraction",
+      "mapped_ids": [
+        "lunar_oxygen_extraction"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-15",
+      "candidate_name": "Orbital construction",
+      "mapped_ids": [
+        "orbital_habitat_assembly",
+        "deployable_orbital_structures"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-16",
+      "candidate_name": "Reusable surface landers",
+      "mapped_ids": [
+        "reusable_surface_lander_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-17",
+      "candidate_name": "Cryogenic orbital storage",
+      "mapped_ids": [
+        "cryogenic_orbital_depot_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-18",
+      "candidate_name": "Closed habitat agriculture",
+      "mapped_ids": [
+        "habitat_food_balance",
+        "closed_crop_water_loops"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing stable mechanisms; the candidate label adds zero identities and does not certify an implemented mission."
+    },
+    {
+      "review_id": "D23-19",
+      "candidate_name": "Extraterrestrial metal processing",
+      "mapped_ids": [
+        "vacuum_metal_melting",
+        "magnetic_mineral_separation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Reuse the shared physical mechanism with subject-specific instruments, environment and operating qualification; avoid a location-prefixed duplicate."
+    },
+    {
+      "review_id": "D23-20",
+      "candidate_name": "Rotating habitat engineering",
+      "mapped_ids": [
+        "rotating_habitat_dynamics",
+        "rotating_habitat_bearing_services"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Conditional engineering program: supporting principles and authored design do not establish an operational mission at scale."
+    },
+    {
+      "review_id": "D23-21",
+      "candidate_name": "Nuclear electric deep space propulsion",
+      "mapped_ids": [
+        "nuclear_electric_transfer_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Conditional engineering program: supporting principles and authored design do not establish an operational mission at scale."
+    },
+    {
+      "review_id": "D23-22",
+      "candidate_name": "Asteroid material processing",
+      "mapped_ids": [
+        "asteroid_contact_processing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Conditional engineering program: supporting principles and authored design do not establish an operational mission at scale."
+    },
+    {
+      "review_id": "D23-23",
+      "candidate_name": "Autonomous outer system observatories",
+      "mapped_ids": [
+        "autonomous_probe_science_selection",
+        "long_baseline_probe_fault_recovery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Conditional engineering program: supporting principles and authored design do not establish an operational mission at scale."
+    },
+    {
+      "review_id": "D23-24",
+      "candidate_name": "Beamed sail probes",
+      "mapped_ids": [
+        "beamed_sail_acceleration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Conditional engineering program: supporting principles and authored design do not establish an operational mission at scale."
+    },
+    {
+      "review_id": "D23-25",
+      "candidate_name": "Interstellar communication receivers",
+      "mapped_ids": [
+        "deep_space_tracking",
+        "communication_link_budgets"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Reuse the shared physical mechanism with subject-specific instruments, environment and operating qualification; avoid a location-prefixed duplicate."
+    }
+  ]
+}

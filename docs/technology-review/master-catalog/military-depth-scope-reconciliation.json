@@ -1,0 +1,94 @@
+{
+  "status": "scope_reconciliation_for_review",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "armor_articulation_maintenance",
+      "existing_id": "field_armorer_teams",
+      "role_design_targets": [
+        "Armored troops",
+        "field armorers"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    },
+    {
+      "excluded_id": "weapon_condition_inspection",
+      "existing_id": "field_maintenance_diagnostics",
+      "role_design_targets": [
+        "All equipped troops"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    },
+    {
+      "excluded_id": "armored_transport_occupant_protection",
+      "existing_id": "modular_vehicle_protection",
+      "role_design_targets": [
+        "Protected troop carriers"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    },
+    {
+      "excluded_id": "military_water_treatment_units",
+      "existing_id": "campaign_water_services",
+      "role_design_targets": [
+        "Field water units"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    },
+    {
+      "excluded_id": "expeditionary_medical_power",
+      "existing_id": "field_electrical_service_units",
+      "role_design_targets": [
+        "Medical support detachments"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    },
+    {
+      "excluded_id": "naval_bulkhead_damage_isolation",
+      "existing_id": "shipboard_damage_control",
+      "role_design_targets": [
+        "Naval damage-control parties"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    },
+    {
+      "excluded_id": "warship_propulsion_redundancy",
+      "existing_id": "independent_service_reserve_design",
+      "role_design_targets": [
+        "Fleet engineering crews"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    },
+    {
+      "excluded_id": "military_spares_forecasting",
+      "existing_id": "logistics_readiness_forecasting",
+      "role_design_targets": [
+        "Maintenance planning staffs"
+      ],
+      "reason": "An application of existing service or qualification knowledge; retain the roles without creating another discovery."
+    }
+  ],
+  "role_count_boundary": "Role labels are proposed consumers only, not new unit identities, live formations or additive counts. Multiple discoveries may support one role, and one discovery may serve several roles.",
+  "mappings": [
+    {
+      "existing_id": "carrier_aviation",
+      "scope": "General integration of ship and aircraft service; qualified deck handling, compatible recovery/launch and maintenance each consume distinct physical capacities.",
+      "distinct_children": [
+        "naval_aircraft_deck_handling",
+        "carrier_aircraft_recovery_systems",
+        "carrier_aircraft_launch_systems",
+        "naval_aviation_maintenance_shops"
+      ]
+    },
+    {
+      "existing_id": "armored_vehicles",
+      "scope": "General protected powered vehicle capability; crew layout, driveline and optical observation are distinct integration mechanisms.",
+      "distinct_children": [
+        "armored_vehicle_crew_layouts",
+        "armored_vehicle_powertrains",
+        "armored_vehicle_optics"
+      ]
+    }
+  ],
+  "command_invariant": "General-led objectives and execution in every era; no direct cohort or platform control, automatic victory or free equipment."
+}

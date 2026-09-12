@@ -1,0 +1,46 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "regolith_metal_separation",
+      "retained_id": "magnetic_mineral_separation",
+      "reason": "Concentrating characterized regolith is an application of existing mineral-separation processes; alternate suitable gravity concentration remains available under qualified acceleration."
+    },
+    {
+      "excluded_proposal": "extraterrestrial_melt_processing",
+      "retained_id": "vacuum_metal_melting",
+      "reason": "Off-world melt qualification applies existing vacuum melting with local containment, energy and solidification constraints; the location does not create a second melting discovery."
+    },
+    {
+      "excluded_proposal": "interstellar_receiver_link_models",
+      "retained_id": "communication_link_budgets",
+      "reason": "Extreme-distance receiver analysis extends the shared link-budget mechanism with actual source assumptions, aperture, noise and observation time; it is not a second law of signal propagation."
+    }
+  ],
+  "prior_branch_corrections": [
+    {
+      "id": "planetary_surface_power",
+      "change": "Remove mandatory solar arrays and eclipse storage from every surface power route; permit qualified fission-electric generation with real site-specific operating requirements."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "reusable_launch_system_integration",
+        "recovered_stage_requalification",
+        "orbital_transfer_stage_reuse",
+        "reusable_surface_lander_integration"
+      ],
+      "distinction": "Atmospheric launch/recovery architecture, condition-based flight release, repeated in-space transfer and surface-orbit transport have different operating envelopes. Orbital reuse does not require an atmospheric heat shield."
+    },
+    {
+      "ids": [
+        "cryogenic_propellant_storage",
+        "cryogenic_active_heat_removal",
+        "cryogenic_orbital_depot_integration"
+      ],
+      "distinction": "Low-temperature storage, powered heat removal and integrated orbital stock delivery differ; reduced boiloff is conditional on real power and heat rejection."
+    }
+  ]
+}

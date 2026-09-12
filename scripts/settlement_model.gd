@@ -21,6 +21,7 @@ const SETTLEMENT_NAME_ROOTS:=["Alder","Ash","Bright","Cairn","Dawn","Deep","Elm"
 const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","haven","hearth","holm","landing","march","meadow","rest","ridge","stead","vale","watch","wick"]
 
 const CITY_RESOURCE_DEFAULTS:={
+	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
 	"resource_events":[],"resource_practice":{},"resource_priorities":{},
 	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],
@@ -235,21 +236,36 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	state.resource_settlement_id=previous_id
 	return result
 
-func process_city_resources(settlement_id:String,context:Dictionary,daily_work:Callable=Callable())->void:
+func process_city_resources(settlement_id:String,context:Dictionary,daily_work:Callable=Callable(),timings:Dictionary={})->void:
 	if not String(settlement_record(settlement_id).get("occupied_by","")).is_empty():return
 	var record:=settlement_record(settlement_id)
 	if record.is_empty() or bool(record.get("primary",false)): return
 	if int(record.get("last_resource_day",-1))>=int(WorldSimulation.state.elapsed_days): return
-	with_city_resources(settlement_id,func()->void:
+	var started:=Time.get_ticks_usec() if not timings.is_empty() else 0
+	var last_stamp:int=with_city_resources(settlement_id,func()->int:
+		var stamp:=_record_secondary_timing(timings,"scope_entry",started)
 		WorldSimulation.resources.process_day(context)
+		stamp=_record_secondary_timing(timings,"resources",stamp)
 		with_local_population(func()->void:WorldSimulation.consequences.process_day(context),true)
+		stamp=_record_secondary_timing(timings,"consequences",stamp)
 		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
+		stamp=_record_secondary_timing(timings,"economy",stamp)
 		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)
 		if daily_work.is_valid(): with_local_population(daily_work)
-		with_local_population(func()->void:process_month(context))
+		stamp=_record_secondary_timing(timings,"construction",stamp)
+		process_local_month(context)
+		return _record_secondary_timing(timings,"morphology",stamp)
 	)
+	_record_secondary_timing(timings,"scope_exit",last_stamp)
 	WorldSimulation.state.settlement_network_revision+=1
 	record["last_resource_day"]=int(WorldSimulation.state.elapsed_days)
+
+func _record_secondary_timing(timings:Dictionary,phase:String,start:int)->int:
+	if timings.is_empty():return 0
+	var now:=Time.get_ticks_usec()
+	var record:Dictionary=timings.get(phase,{"calls":0,"microseconds":0})
+	record.calls+=1;record.microseconds+=now-start;timings[phase]=record
+	return now
 
 const MAX_CITY_SHIPMENTS:=128
 const CITY_TRADE_GOODS:=["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Flint","Copper Ore","Tin Ore","Iron Ore","Coal"]
@@ -1247,6 +1263,16 @@ func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary
 		plot["frontage_route_id"]=route_id
 		connected_centers.append(plot_center)
 		route_id+=1
+
+func process_local_month(context:Dictionary={})->Array[Dictionary]:
+	# Keep registry refresh even when morphology is idle. Founding or summary
+	# repair still needs the real local population and follows the full path.
+	var state:=WorldSimulation.state
+	var month_day:=int(floor(state.elapsed_days/30.0))*30
+	if not state.settlement_plots.is_empty() and not state.settlement_morphology.is_empty() and month_day<=state.last_morphology_day:
+		_ensure_primary_settlement_record()
+		return []
+	return with_local_population(func()->Array[Dictionary]:return process_month(context))
 
 func process_month(context:Dictionary={})->Array[Dictionary]:
 	ensure_founded()

@@ -1,0 +1,57 @@
+{
+  "status": "scope_reconciliation_for_review",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "public_decision_witnessing",
+      "existing_id": "witnessed_obligations",
+      "reason": "Application of an existing procedure rather than a distinct mechanism; retain the existing identity."
+    },
+    {
+      "excluded_id": "succession_dispute_adjudication",
+      "existing_id": "evidentiary_hearings",
+      "reason": "Application of an existing procedure rather than a distinct mechanism; retain the existing identity."
+    },
+    {
+      "excluded_id": "assessment_appeal_tribunals",
+      "existing_id": "administrative_appeals",
+      "reason": "Application of an existing procedure rather than a distinct mechanism; retain the existing identity."
+    },
+    {
+      "excluded_id": "service_eligibility_appeals",
+      "existing_id": "administrative_appeals",
+      "reason": "Application of an existing procedure rather than a distinct mechanism; retain the existing identity."
+    },
+    {
+      "excluded_id": "public_project_stage_reviews",
+      "existing_id": "long_horizon_project_optioning",
+      "reason": "Application of an existing procedure rather than a distinct mechanism; retain the existing identity."
+    },
+    {
+      "excluded_id": "public_consultation_response_logs",
+      "existing_id": "petition_registers",
+      "reason": "Application of an existing procedure rather than a distinct mechanism; retain the existing identity."
+    }
+  ],
+  "mappings": [
+    {
+      "existing_id": "public_levies",
+      "scope": "General obligation and public collection practice; distinct tax bases and calculation mechanisms are separately learnable, not automatically adopted.",
+      "distinct_children": [
+        "poll_tax_registers",
+        "income_tax_assessment",
+        "excise_duty_accounts",
+        "invoice_credit_taxation"
+      ]
+    },
+    {
+      "existing_id": "census_rolls",
+      "scope": "Periodic population enumeration; recording vital events and maintaining current residence report different observations.",
+      "distinct_children": [
+        "civil_birth_death_registration",
+        "residency_registration_services"
+      ]
+    }
+  ],
+  "political_boundary": "Every voting, tax and succession method is learnable without adoption. Coercion, exclusion, unequal burden and political conflict remain modeled consequences, never universal advancement requirements."
+}

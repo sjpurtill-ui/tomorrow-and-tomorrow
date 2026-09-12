@@ -7,6 +7,11 @@ var cards:VBoxContainer
 var summary:Label
 var timer:=0.0
 var signature:=""
+const PAGE_SIZE:=40
+var page:=0
+var previous_page:Button
+var next_page:Button
+var page_label:Label
 var filter:OptionButton
 
 static func open()->void:
@@ -36,9 +41,13 @@ func _ready()->void:
 	var policies:=VBoxContainer.new();policies.add_theme_constant_override("separation",6);body.add_child(policies)
 	choice(policies,"New households",["balanced","welcome","consolidate"],["As capacity allows","Welcome faster","Consolidate at home"],String(E.data().migration_policy),func(value:String):E.policy(value,String(E.data().sharing_policy));refresh(true))
 	choice(policies,"Our knowledge",["open","selective","guarded"],["Share practices openly","Share culture & simple crafts","Keep our know-how private"],String(E.data().sharing_policy),func(value:String):E.policy(String(E.data().migration_policy),value);refresh(true))
-	filter=OptionButton.new();filter.add_item("All returned finds");filter.add_item("Objects & specimens");filter.add_item("Knowledge");filter.add_item("Culture");filter.item_selected.connect(func(_value:int):refresh(true));body.add_child(filter)
+	filter=OptionButton.new();filter.add_item("All returned finds");filter.add_item("Objects & specimens");filter.add_item("Knowledge");filter.add_item("Culture");filter.item_selected.connect(func(_value:int):page=0;refresh(true));body.add_child(filter)
+	var navigation:=HBoxContainer.new();body.add_child(navigation)
+	previous_page=Button.new();previous_page.text="Previous";previous_page.pressed.connect(func():page=maxi(0,page-1);refresh(true));navigation.add_child(previous_page)
+	page_label=label(navigation,"",12,T.TEXT_SOFT)
+	next_page=Button.new();next_page.text="Next";next_page.pressed.connect(func():page+=1;refresh(true));navigation.add_child(next_page)
 	cards=VBoxContainer.new();cards.size_flags_horizontal=SIZE_EXPAND_FILL;cards.add_theme_constant_override("separation",8);body.add_child(cards)
-	label(body,"Knowledge workers examine finds automatically using 15% of their existing effort. Understanding a practice still leaves its ordinary research, materials and adoption requirements.",12,T.MUTED)
+	label(body,"Knowledge workers examine finds automatically using 15% of their existing effort. Printed Sheets support up to 30% faster examination, or Paper up to 20% (0.01 batch per supported work). These alternatives do not stack; study continues without either. Understanding a practice still leaves its ordinary research, materials and adoption requirements.",12,T.MUTED)
 	resized.connect(layout);layout();refresh(true)
 func choice(parent:Node,caption:String,ids:Array,titles:Array,current:String,action:Callable)->void:
 	var row:=VBoxContainer.new();parent.add_child(row);label(row,caption,13,T.BODY)
@@ -55,17 +64,24 @@ func _process(delta:float)->void:
 	if timer>=1:timer=0;refresh(false)
 func refresh(force:bool)->void:
 	var state:=E.data();var pressure:=E.pressure()
-	var sig:=str([state.collections.size(),state.history.size(),int(pressure.unsettled),int(GameState.elapsed_days),filter.selected])
+	var sig:=str([state.collections.size(),state.history.size(),int(pressure.unsettled),int(GameState.elapsed_days),filter.selected,page])
 	if not force and sig==signature:return
 	signature=sig
 	summary.text="%d finds · %d people settling in · room to invite %d" % [state.collections.size(),ceili(float(pressure.unsettled)),E.reception_capacity()]
 	for child in cards.get_children():cards.remove_child(child);child.queue_free()
-	var values:Array=state.collections.values();values.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.returned_day)>int(b.returned_day))
-	var shown:=0
+	var values:Array=state.collections.values();values.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return String(a.id)<String(b.id) if int(a.returned_day)==int(b.returned_day) else int(a.returned_day)>int(b.returned_day))
+	var matching:Array=[]
 	for item:Dictionary in values:
 		if filter.selected==1 and item.kind not in ["artifact","specimen"]:continue
 		if filter.selected==2 and item.kind!="knowledge":continue
 		if filter.selected==3 and item.kind!="culture":continue
+		matching.append(item)
+	var pages:=maxi(1,ceili(float(matching.size())/PAGE_SIZE))
+	page=clampi(page,0,pages-1)
+	previous_page.disabled=page==0;next_page.disabled=page>=pages-1
+	page_label.text="Page %d of %d · %d finds" % [page+1,pages,matching.size()]
+	var shown:=0
+	for item:Dictionary in matching.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE):
 		var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.TEAL if float(item.study)>=1 else T.BORDER,1,6,12));cards.add_child(card)
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 		var icon:=TextureRect.new();icon.texture=V.icon("population" if item.kind=="culture" else "production" if item.kind in ["artifact","specimen"] else "logistics");icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(36,36);row.add_child(icon)
@@ -75,8 +91,10 @@ func refresh(force:bool)->void:
 		var bar:=ProgressBar.new();bar.show_percentage=false;bar.value=float(item.study)*100;bar.custom_minimum_size.y=6;content.add_child(bar)
 		var definition:=DiscoverySystem.discovery_definition(String(item.discovery_id))
 		var known:=String(item.discovery_id) in GameState.known_discoveries
-		label(content,"Recorded in our cultural and knowledge collection" if known else ("Evidence ready: "+String(definition.get("name","related investigation")) if float(item.study)>=1 else "Being examined · %d%%" % roundi(float(item.study)*100)),12,T.TEAL)
-		if float(item.study)>=1 and not known:
+		label(content,"Recorded in our cultural and knowledge collection" if known else (("Ready to exchange findings" if item.get("partnership_protocol",false) else "Evidence ready: "+String(definition.get("name","related investigation"))) if float(item.study)>=1 else "Being examined · %d%%" % roundi(float(item.study)*100)),12,T.TEAL)
+		if item.get("partnership_protocol",false) and float(item.study)>=1:
+			label(content,"Local investigation complete. Arrange a findings exchange through this discovery’s foreign research support.",12,T.GOLD)
+		if float(item.study)>=1 and not known and not item.get("partnership_protocol",false):
 			var button:=Button.new();button.text="Direct study: "+String(definition.get("name","investigation"));button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 			button.disabled=not DiscoverySystem._discovery_is_eligible(definition,int(GameState.elapsed_days)) if not definition.is_empty() else true
 			var needs:Array[String]=[]
@@ -92,6 +110,6 @@ func refresh(force:bool)->void:
 				else:summary.text="Research directed toward "+String(definition.name))
 			content.add_child(button)
 		shown+=1
-		if shown>=40:break
+		if shown>=PAGE_SIZE:break
 	if shown==0:label(cards,"Explorers bring back samples from ground they visit. Peaceful encounters can bring objects, accounts and cultural practices. Finds appear here only when their carriers return.",15,T.TEXT_SOFT)
 	if not state.history.is_empty():label(cards,String(state.history[0].text),12,T.TEXT_SOFT)

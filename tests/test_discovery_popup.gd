@@ -59,7 +59,7 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	var f:=fixture();GameState.known_discoveries.append("stone_sorting")
 	var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"stone_sorting","day":1129}])
 	assert_str(popup.heading.text).is_equal("Stone Selection")
-	assert_str(popup.hero.texture.resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+	assert_str(popup.hero.texture.resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
 	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
 	assert_str(popup.effect_cards.survey_speed.value.text).is_equal("+3%")
 	assert_str(popup.effect_cards.tool_quality.value.text).is_equal("+4%")
@@ -72,5 +72,5 @@ func test_generic_art_is_labeled_and_hidden_questions_do_not_reveal_subject_art(
 	var hidden:={"id":"stone_sorting","domain":"production","exposed":false}
 	assert_str(Art.subject_art_key(hidden)).is_empty()
 	assert_str(Art.for_discovery(hidden).resource_path).is_equal("res://assets/ui/research/production-v1.png")
-	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).is_equal("res://assets/ui/research/production-v1.png")
+	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).is_equal("res://assets/ui/research/paper/clay_shaping.png")
 	popup.close()

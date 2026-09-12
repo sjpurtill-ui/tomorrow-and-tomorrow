@@ -1,11 +1,15 @@
 extends Node
 
+# Match the supported settlement count: a 16-site cache thrashed once a
+# civilization reached 17 cities. Only deterministic climate is retained.
+const FORECAST_SITE_LIMIT:=256
 var _forecast_climate_cache:Dictionary={}
 
 # Food is measured internally in adult-equivalent daily rations. One ration is
 # displayed as roughly 2,400 kcal. Demand is calculated from numeric age,
 # labor, pregnancy, lactation, travel, military, and climate cohorts.
 
+const Operations=preload("res://scripts/technology_operations.gd")
 const KCAL_PER_RATION := 2400.0
 const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
 const FOOD_TYPES := ["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"]
@@ -57,15 +61,20 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var demand_breakdown:=_calculate_demand(traveling)
-	var harvest:=_produce(workers,labor_efficiency,ecology,traveling)
+	var nutrient_report:Dictionary={}
+	var harvest:=_produce(workers,labor_efficiency,ecology,traveling,true,nutrient_report)
 	if WorldSimulation.state.resource_settlement_id.is_empty() and not traveling:
 		var access:=WorldSimulation.military.siege_home_food_access()
 		for food_type in harvest: harvest[food_type]*=access
+		for key:String in ["base_harvest","bonus","harvest"]:
+			if nutrient_report.has(key):nutrient_report[key]=float(nutrient_report[key])*access
 	for food_type in harvest:
 		WorldSimulation.state.food_stocks[food_type]=float(WorldSimulation.state.food_stocks.get(food_type,0.0))+float(harvest[food_type])
 	var meal_plan:=preload("res://scripts/food_preparation.gd").plan(logistics,float(demand_breakdown.total),traveling)
 	var preservation_inputs:Dictionary={}
 	var preserved:=_preserve(maxf(0.0,logistics-float(meal_plan.workers)),makers,traveling,preservation_inputs)
+	var canned:Dictionary=preload("res://scripts/canning_preservation.gd").preserve(float(demand_breakdown.total),traveling)
+	for food_type:String in canned:preserved[food_type]=float(preserved.get(food_type,0.0))+float(canned[food_type])
 	var spoilage:=_spoil(traveling)
 	var demand:=float(demand_breakdown.total)
 	var army_original:=float(demand_breakdown.get("army_field",0.0))
@@ -105,10 +114,13 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var food_days:=total/maxf(0.01,demand)
 	var sources:=_source_report(harvest,workers,traveling)
 	var milestones:Dictionary={}
-	var forecast_90:=_forecast(90,harvest,demand_breakdown,traveling,provision_delivery_ratio,milestones)
+	var forecast_90:=_forecast(90,harvest,demand_breakdown,traveling,provision_delivery_ratio,milestones,nutrient_report)
 	var forecast_30:Dictionary=milestones[30]
 	var weather_factor:=_weather_yield_factor(_environment_mix(),WorldSimulation.state.elapsed_days)
 	var result:={
+		"cultivation_base_harvest":float(nutrient_report.get("base_harvest",0)),
+		"cultivation_nutrient_inputs":nutrient_report.get("inputs",{}).duplicate(),
+		"cultivation_nutrient_bonus":float(nutrient_report.get("bonus",0)),
 		"food_days":food_days,
 		"food_production":production_total,
 		"food_consumption":demand,
@@ -227,7 +239,7 @@ func _age_need(age: float) -> float:
 	if age<75.0: return 0.88
 	return 0.78
 
-func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: bool) -> Dictionary:
+func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: bool,commit_nutrients:bool=false,nutrient_report:Dictionary={}) -> Dictionary:
 	var result:={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}
 	var occupation_transfer:=0.0
 	var civilization_system:=WorldSimulation.system("CivilizationSystem")
@@ -272,7 +284,12 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var fishing_access:=maxf(float(access.freshwater),float(coastal.marine_opportunity)*0.90)
 	result["Fish"]=workers*fishing_weight*5.00*BASE_SUBSISTENCE_YIELD_CALIBRATION*fish_season*efficiency*float(WorldSimulation.state.food_source_health.get("Fishing",0.9))*(0.76+fishing_access*0.34)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))*_food_type_weather_multiplier("Fish",weather_factor)
 	if cultivation_weight>0.0 and not traveling:
-		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*_food_type_weather_multiplier("Dry staples",weather_factor)
+		var agronomy:Dictionary=preload("res://scripts/agronomy_knowledge.gd").factors(traveling)
+		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*float(agronomy["yield"])*preload("res://scripts/agronomy_knowledge.gd").weather_factor(_food_type_weather_multiplier("Dry staples",weather_factor),agronomy)
+		if "nutrient_response_trials" in WorldSimulation.state.known_discoveries:
+			var nutrition:=preload("res://scripts/crop_nutrition.gd").cultivation(float(result["Dry staples"]),commit_nutrients)
+			nutrient_report.merge(nutrition,true)
+			result["Dry staples"]=float(nutrition.harvest)
 	result["Dry staples"]+=occupation_transfer
 	return result
 
@@ -343,9 +360,10 @@ func _spoil(traveling: bool) -> Dictionary:
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
 	if traveling: storage_multiplier*=1.28
+	var cooling:=Operations.refrigeration_multiplier(Operations.service("cold_storage") if not traveling else 0.0,WorldSimulation.state.food_stocks)
 	for food_type in FOOD_TYPES:
 		var amount:=float(WorldSimulation.state.food_stocks.get(food_type,0.0))
-		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier
+		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)*(cooling if food_type in ["Fresh plants","Fresh meat","Fish"] else 1.0)
 		WorldSimulation.state.food_stocks[food_type]=maxf(0.0,amount-loss)
 		result[food_type]=loss
 	return result
@@ -402,7 +420,7 @@ func _update_source_health(harvest: Dictionary,workers: float,traveling: bool) -
 		var current:=float(WorldSimulation.state.food_source_health.get(source,0.9))
 		var used:=float(harvest.get(mapping[source],0.0))>0.01
 		var damage:=maxf(0.0,pressure-0.42)*0.0018*(1.0+WorldSimulation.discovery.effect("ecological_pressure")) if used else 0.0
-		if source=="Cultivation" and used: damage=maxf(0.0,pressure-0.55)*0.0011
+		if source=="Cultivation" and used: damage=maxf(0.0,pressure-0.55)*0.0011*float(preload("res://scripts/agronomy_knowledge.gd").factors(traveling).soil_damage)
 		WorldSimulation.state.food_source_health[source]=clampf(current+recovery-damage,0.12,1.0)
 
 func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array[Dictionary]:
@@ -420,13 +438,13 @@ func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array
 		reports.append({"name":entry[0],"food_type":entry[1],"produced":amount,"resource":entry[2],"access":status,"source_health":float(WorldSimulation.state.food_source_health.get(entry[0],0.9)),"travel_limited":traveling})
 	return reports
 
-func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictionary,traveling: bool,provision_delivery_ratio:=1.0,milestones:Dictionary={}) -> Dictionary:
+func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictionary,traveling: bool,provision_delivery_ratio:=1.0,milestones:Dictionary={},nutrient_report:Dictionary={}) -> Dictionary:
 	var projected_stocks:Dictionary=WorldSimulation.state.food_stocks.duplicate(true)
 	var current_day:=WorldSimulation.state.elapsed_days
 	var environment:=_environment_mix()
 	var climate_key:=[WorldSimulation.state.world_seed,environment.get("position",Vector2.ZERO),environment.get("seasonality_c",12.0),environment.get("growing_season",0.5),environment.get("precipitation",0.5),environment.get("game",0.4),environment.get("water_access",0.0),environment.get("rainfall_variability",0.35)]
 	if not _forecast_climate_cache.has(climate_key):
-		if _forecast_climate_cache.size()>=16:_forecast_climate_cache.erase(_forecast_climate_cache.keys()[0])
+		if _forecast_climate_cache.size()>=FORECAST_SITE_LIMIT:_forecast_climate_cache.erase(_forecast_climate_cache.keys()[0])
 		_forecast_climate_cache[climate_key]={}
 	var climate_days:Dictionary=_forecast_climate_cache[climate_key]
 	var current_climate:=_forecast_climate(environment,current_day,climate_days)
@@ -446,6 +464,16 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		current_weather_types[food_type]=maxf(.05,float(current_climate[food_type][1]))
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	if traveling:storage_multiplier*=1.28
+	var preservation:Dictionary={}
+	for food_type:String in FOOD_TYPES:preservation[food_type]=WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)
+	# A projection mutates only projected food, never installed services. With
+	# no current cooling, none of its future days can promise refrigeration.
+	var has_cooling:=not traveling and Operations.service("cold_storage")>0.0
+	var has_nutrients:=not traveling and float(nutrient_report.get("adoption",0))>0 and float(nutrient_report.get("bonus",0))>0
+	var projected_nutrients:Dictionary=WorldSimulation.state.cultivation_nutrients.duplicate(true) if has_nutrients else {}
+	var projected_inputs:Dictionary={}
+	if has_nutrients:
+		for resource:String in preload("res://scripts/crop_nutrition.gd").INPUTS:projected_inputs[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
 	for offset in range(1,horizon+1):
 		var future_day:=current_day+float(offset)
 		var future_climate_factors:=_forecast_climate(environment,future_day,climate_days)
@@ -455,15 +483,20 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 			var current_weather_type:=float(current_weather_types[food_type])
 			var future_weather_type:=float(future_climate_factors[food_type][1])
 			var future_yield:=float(current_harvest.get(food_type,0.0))*future_season/current_season*future_weather_type/current_weather_type
+			if food_type=="Dry staples" and has_nutrients:
+				var scale:=future_season/current_season*future_weather_type/current_weather_type
+				var nutrition:=preload("res://scripts/crop_nutrition.gd").projection(float(nutrient_report.base_harvest)*scale,projected_inputs,projected_nutrients,float(nutrient_report.adoption))
+				future_yield=future_yield-float(nutrient_report.bonus)*scale+float(nutrition.bonus)
 			projected_stocks[food_type]=float(projected_stocks.get(food_type,0.0))+future_yield
 			total_produced+=future_yield
 		var season_wave:=sin(fmod(future_day,365.0)/365.0*TAU)
 		var future_climate:=non_climate*maxf(0.0,-season_wave)*0.06
 		var future_required:=maxf(0.0,(non_climate+future_climate)*ration_factor-inaccessible_army_rations)
 		total_required+=future_required
+		var cooling:=Operations.refrigeration_multiplier(Operations.forecast_service("cold_storage",offset),projected_stocks) if has_cooling else 1.0
 		for food_type in FOOD_TYPES:
 			var amount:=float(projected_stocks.get(food_type,0.0))
-			var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier
+			var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*float(preservation[food_type])*(cooling if food_type in ["Fresh plants","Fresh meat","Fish"] else 1.0)
 			projected_stocks[food_type]=maxf(0.0,amount-loss)
 			total_spoiled+=loss
 		var eaten:=_consume_projection(projected_stocks,future_required)

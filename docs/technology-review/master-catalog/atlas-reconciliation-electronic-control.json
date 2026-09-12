@@ -1,0 +1,245 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "review_id": "D21-01",
+      "candidate_name": "Mechanical counting aids",
+      "mapped_ids": [
+        "counting_board_operations"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-02",
+      "candidate_name": "Logical inference methods",
+      "mapped_ids": [
+        "formal_logic_calculi"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-03",
+      "candidate_name": "Mechanical calculation",
+      "mapped_ids": [
+        "mechanical_digit_carry"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-04",
+      "candidate_name": "Electrical conduction measurement",
+      "mapped_ids": [
+        "electrical_measurement"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-05",
+      "candidate_name": "Electromagnetic switching",
+      "mapped_ids": [
+        "electromagnetic_relays"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-06",
+      "candidate_name": "Vacuum tube amplification",
+      "mapped_ids": [
+        "triode_valves",
+        "differential_amplifier_circuits"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-07",
+      "candidate_name": "Boolean circuit design",
+      "mapped_ids": [
+        "diode_logic",
+        "arithmetic_logic_units"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-08",
+      "candidate_name": "Stored program architecture",
+      "mapped_ids": [
+        "stored_program_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-09",
+      "candidate_name": "Semiconductor transistors",
+      "mapped_ids": [
+        "bipolar_junction_transistors",
+        "mos_transistor_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-10",
+      "candidate_name": "Magnetic data storage",
+      "mapped_ids": [
+        "magnetic_tape_data_recording"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-11",
+      "candidate_name": "Integrated circuits",
+      "mapped_ids": [
+        "integrated_circuit_fabrication"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-12",
+      "candidate_name": "Microprocessors",
+      "mapped_ids": [
+        "microprocessor_architecture"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-13",
+      "candidate_name": "Operating systems",
+      "mapped_ids": [
+        "process_scheduling",
+        "memory_protection",
+        "file_system_organization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-14",
+      "candidate_name": "Relational data systems",
+      "mapped_ids": [
+        "relational_query_models",
+        "transactional_databases"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-15",
+      "candidate_name": "Digital control electronics",
+      "mapped_ids": [
+        "electronic_machine_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-16",
+      "candidate_name": "Distributed computing",
+      "mapped_ids": [
+        "distributed_job_partitioning",
+        "distributed_storage_replication"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-17",
+      "candidate_name": "Machine learning methods",
+      "mapped_ids": [
+        "statistical_learning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-18",
+      "candidate_name": "High density accelerators",
+      "mapped_ids": [
+        "tensor_processing_arrays",
+        "accelerator_workload_mapping"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-19",
+      "candidate_name": "Reliable embedded systems",
+      "mapped_ids": [
+        "watchdog_recovery_circuits",
+        "brownout_reset_control",
+        "fault_tolerant_computing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-20",
+      "candidate_name": "Cryptographic hardware",
+      "mapped_ids": [
+        "cryptographic_protocol_design",
+        "verified_boot_chains"
+      ],
+      "scope_status": "partial",
+      "note": "Cryptographic methods and verified boot exist, but dedicated key-protection hardware, side-channel qualification and accelerator integration are not yet authored as a complete physical chain."
+    },
+    {
+      "review_id": "D21-21",
+      "candidate_name": "Fault tolerant quantum computing",
+      "mapped_ids": [
+        "quantum_error_correction",
+        "controlled_qubit_operations"
+      ],
+      "scope_status": "partial",
+      "note": "Qubit control and error correction are present; a complete fault-tolerant system needs logical-operation scheduling, physical resource closure and validated fault assumptions beyond these foundations."
+    },
+    {
+      "review_id": "D21-22",
+      "candidate_name": "Neuromorphic computation",
+      "mapped_ids": [
+        "neuromorphic_computing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-23",
+      "candidate_name": "Photonic interconnect systems",
+      "mapped_ids": [
+        "photonic_computing_components",
+        "optical_fiber_communication"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-24",
+      "candidate_name": "Verifiable autonomous planning",
+      "mapped_ids": [
+        "verifiable_autonomous_research",
+        "robotic_task_planning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; candidate labels add zero discoveries and do not certify operating implementation."
+    },
+    {
+      "review_id": "D21-25",
+      "candidate_name": "Energy proportional computing",
+      "mapped_ids": [
+        "compute_power_budgeting"
+      ],
+      "scope_status": "partial",
+      "note": "Power budgeting is present; workload-dependent voltage, frequency, clock gating and sleep-state integration remain incomplete."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "source_commit": "e1278e01ab8874770739e52594f392f735a7d109",
+  "worktree": "/Users/seanpurtill/Documents/Codex/tt-technology-implementation",
+  "branch": "codex/technology-implementation",
+  "session": "52497",
+  "target_days": 91250,
+  "wall_limit_seconds": 14400,
+  "catalog_at_launch": 476,
+  "schema_at_launch": 10,
+  "profile": true,
+  "seed": 91420,
+  "report": "artifacts/technology-pacing/catalog-476-250-profile.json",
+  "log": "artifacts/technology-pacing/catalog-476-250-profile.log",
+  "status_at_record": "running; tool handle polled live; first annual snapshot emitted",
+  "recorded_utc": "2026-09-12T06:05:28.547665+00:00",
+  "terminal_result": null,
+  "full_campaign_verified": false
+}

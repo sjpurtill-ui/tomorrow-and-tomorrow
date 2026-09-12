@@ -1,0 +1,24 @@
+{
+  "day": 69715,
+  "year": 191.0,
+  "population": 20273,
+  "known": 225,
+  "food_days": 91.2701791573304,
+  "food_intake_ratio": 0.97992547540649,
+  "food_consumption": 3937.97224237272,
+  "army_provisions_required": 679.84,
+  "army_provision_delivery_ratio": 0.883718344569206,
+  "production": {
+    "available_civilian_recipes": 54,
+    "civilian_lines": 0,
+    "installed_units": 0,
+    "manufactured_stock_kinds": 1,
+    "operations_ledger_current": true,
+    "remaining_daily_services": {},
+    "units_under_construction": 0
+  },
+  "source": "artifacts/technology-pacing/catalog-476-250-profile.log",
+  "loaded_commit": "e1278e01ab8874770739e52594f392f735a7d109",
+  "terminal": false,
+  "limitation": "Annual observation from the live catalog-476 diagnostic; not a completed target and not proof that this guard is the only industrial blocker."
+}

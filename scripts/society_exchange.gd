@@ -2,7 +2,8 @@ extends RefCounted
 ## Shared rules for physical encounters, finite household migration and learning.
 ## All records belong to GameState and therefore to the current civilization.
 const PERSONALITY=preload("res://scripts/leader_personality.gd")
-const COLLECTION_LIMIT:=1024
+const COLLECTION_LIMIT:=32768 # Multiple acquisition records across the 5,000-discovery history.
+const CONTACT_LIMIT:=1024
 const CONTACT_RADIUS:=2.0
 const OBJECTS:={"clay_shaping":["Clay trial vessel","Clay"],"pit_firing":["Fired clay trial piece","Clay"],"cordage":["Braided cord sample","Fiber Plants"],"basketry":["Woven container sample","Fiber Plants"],"stone_sorting":["Selected cutting stone","Stone"],"joinery":["Fitted timber joint","Timber"],"tallies":["Marked counting stick","Timber"]}
 const CULTURE:=["oral_epics","festival_calendar","public_theatre","civic_games","comparative_chronicles","public_libraries","customary_law"]
@@ -20,9 +21,11 @@ static func number(value:Variant)->bool:return (value is int or value is float) 
 static func valid(value:Variant)->bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return false
+	if not preload("res://scripts/scholar_visits.gd").valid(value.get("scholar_visits",{})):return false
 	if not value.has_all(empty_state().keys()):return false
+	if not preload("res://scripts/research_licenses.gd").valid(value.get("production_licenses",{})):return false
 	for key:String in ["collections","evidence","origins","connections","outbound"]:
-		if not value[key] is Dictionary or value[key].size()>COLLECTION_LIMIT:return false
+		if not value[key] is Dictionary or value[key].size()>(CONTACT_LIMIT if key in ["connections","outbound"] else COLLECTION_LIMIT):return false
 	if value.migration_policy not in ["balanced","welcome","consolidate"] or value.sharing_policy not in ["open","selective","guarded"]:return false
 	if not number(value.last_day) or not number(value.exposure) or value.exposure<0 or value.exposure>1:return false
 	if not value.integration is Array or value.integration.size()>128 or not value.history is Array or value.history.size()>64:return false
@@ -34,10 +37,10 @@ static func valid(value:Variant)->bool:
 	for subject:Variant in value.evidence:
 		var key:Variant=value.evidence[subject]
 		if not subject is String or not key is String or not value.collections.has(key):return false
-		if value.collections[key].discovery_id!=subject or value.collections[key].study!=1:return false
+		if value.collections[key].discovery_id!=subject or value.collections[key].study!=1 or value.collections[key].get("partnership_protocol",false):return false
 	for origin:Variant in value.origins.values():
 		if not origin is Dictionary or not origin.has_all(["route","label","requires","collection_id","day"]):return false
-		if origin.route not in ["local","experimental","exchange","fieldwork"] or not short_text(origin.label) or not short_text(origin.collection_id) or not number(origin.day) or origin.day<0 or not text_list(origin.requires,20):return false
+		if not short_text(origin.route) or String(origin.route).is_empty() or not short_text(origin.label) or not short_text(origin.collection_id) or not number(origin.day) or origin.day<0 or not text_list(origin.requires,20):return false
 	for ties:Variant in value.connections.values():
 		if not ties is Dictionary or not ties.has_all(["last_visit","learned","shared","arrivals","departures","familiarity","respect","resentment"]):return false
 		if not text_list(ties.learned,COLLECTION_LIMIT) or not text_list(ties.shared,COLLECTION_LIMIT):return false
@@ -65,12 +68,48 @@ static func text_list(value:Variant,limit:int)->bool:
 static func valid_item(item:Variant)->bool:
 	if not item is Dictionary or not item.has_all(["id","kind","name","source_id","source_name","position","observed_day","returned_day","discovery_id","study","work","signals"]):return false
 	if item.kind not in ["artifact","knowledge","culture","specimen"]:return false
+	if item.has("reverse_engineered"):
+		if not item.reverse_engineered is bool or item.kind!="artifact":return false
+		if item.reverse_engineered:
+			if item.get("work")!=180.0 or item.get("id")!="reverse:"+String(item.get("discovery_id","")):return false
+			var recipe:Dictionary=preload("res://scripts/research_specimens.gd").definition(String(item.get("specimen_item","")))
+			if recipe.is_empty() or recipe.gate!=item.discovery_id:return false
+			if item.get("research_purchase",false) or item.get("research_partnership",false) or item.get("partnership_protocol",false):return false
+	if item.has("research_purchase") and (not item.research_purchase is bool or item.kind!="knowledge"):return false
+	for flag:String in ["partnership_protocol","research_partnership"]:
+		if item.has(flag) and (not item[flag] is bool or item.kind!="knowledge"):return false
+	if item.get("partnership_protocol",false) and item.get("research_partnership",false):return false
+	if item.get("partnership_protocol",false) or item.get("research_partnership",false):
+		var protocol:bool=item.get("partnership_protocol",false)
+		if item.get("work")!=(180.0 if protocol else 60.0) or item.get("research_purchase",false):return false
+		if item.get("id")!=("partnership_protocol:" if protocol else "partnership_result:")+String(item.get("source_id",""))+":"+String(item.get("discovery_id","")):return false
 	for field:String in ["id","name","source_id","source_name","discovery_id"]:
 		if not short_text(item[field]):return false
 	for field:String in ["observed_day","returned_day","study","work"]:
 		if not number(item[field]) or item[field]<0:return false
 	return item.study<=1 and item.work>=1 and item.work<=100000 and item.position is Dictionary and number(item.position.get("x")) and number(item.position.get("z")) and text_list(item.signals,30)
 static func valid_mission(mission:Dictionary)->bool:
+	if (mission.has("research_mode") or mission.has("scholar_contract") or mission.has("scholar_provisions")) and not mission.has("research_subject"):return false
+	if mission.has("scholar_contract") and mission.get("research_mode","")!="scholar":return false
+	if mission.has("scholar_provisions") and mission.get("research_mode","")!="scholar":return false
+	if mission.get("research_mode","purchase") not in ["purchase","scholar","partnership","materials","license"]:return false
+	for field:String in ["license_authorized","license_delivered"]:
+		if mission.has(field) and mission.get("research_mode","")!="license":return false
+	if mission.get("research_mode","")=="license" and not preload("res://scripts/research_licenses.gd").valid_mission(mission):return false
+	var materials:bool=mission.get("research_mode","")=="materials"
+	for field:String in ["materials_requested","material_cargo","materials_delivered"]:
+		if mission.has(field) and not materials:return false
+	if materials and not preload("res://scripts/research_materials.gd").valid(mission):return false
+	if mission.has("partnership_phase") and (mission.get("research_mode","")!="partnership" or mission.partnership_phase not in ["propose","exchange"]):return false
+	if mission.get("research_mode","")=="partnership" and (not mission.has("research_subject") or not mission.has("partnership_phase")):return false
+	if mission.has("scholar_provisions") and (not number(mission.scholar_provisions) or mission.scholar_provisions<0):return false
+	if mission.has("scholar_contract"):
+		if not mission.scholar_contract is Dictionary or not preload("res://scripts/scholar_visits.gd").valid({mission.scholar_contract.get("id",""):mission.scholar_contract}):return false
+	if not mission.has("research_subject") and (mission.has("research_refused") or mission.has("research_refunded")):return false
+	if mission.has("research_subject"):
+		if not short_text(mission.research_subject) or String(mission.research_subject).is_empty():return false
+		for flag:String in ["research_refused","research_refunded"]:
+			if mission.has(flag) and not mission[flag] is bool:return false
 	var items:Variant=mission.get("carried_collections",[])
 	if not items is Array or items.size()>256:return false
 	for item:Variant in items:
@@ -268,6 +307,7 @@ static func envoy_arrived(system:Node,mission:Dictionary,day:int)->void:
 	mission["mission_id"]=-1-int(mission.get("depart_day",day))
 	mission["encountered_societies"]=[id]
 	encounter(mission,id,String(system.civilizations[index].name),location,day)
+	preload("res://scripts/research_purchase.gd").negotiate(mission,id,String(system.civilizations[index].name),location,day)
 
 static func recruitment_targets(system:Node)->Array[String]:
 	# Receiving households is a separate decision at the actual encounter.
@@ -320,6 +360,17 @@ static func invite_households(mission:Dictionary,source:String,source_name:Strin
 	mission["migrant_reservation"]=result
 	mission["recruitment_reason"]="%d people accepted the invitation and are traveling with the party." % int(result.count)
 
+# These investigations can use a returned physical sample. This never claims
+# surveyed local reserves or supplies accessible/developed material gates.
+const SPECIMEN_RESOURCES={"clay_shaping":"Clay","stone_sorting":"Stone","fiber_grading":"Fiber Plants","timber_grading":"Timber","controlled_flaking":"Flint","salt_working":"Salt","herbal_classification":"Medicinal Plants","ore_assaying":"Copper Ore","iron_assaying":"Iron Ore","coal_grading":"Coal","soil_assays":"Fertile Soil"}
+static func studied_resource_sample(resource:String)->bool:
+	if resource.is_empty():return false
+	for item:Dictionary in data().collections.values():
+		if item.get("kind","")!="specimen" or float(item.get("study",0))<1.0:continue
+		if int(item.get("returned_day",0))>int(WorldSimulation.state.elapsed_days):continue
+		if SPECIMEN_RESOURCES.get(String(item.get("discovery_id","")),"")==resource:return true
+	return false
+
 static func sample_ground(system:Node,mission:Dictionary,position:Vector2,day:int)->void:
 	if not system.ground_survey_authority.is_valid() or mission.carried_collections.size()>=maxi(1,int(mission.personnel)/2):return
 	if system._position_is_revealed(position):return
@@ -358,8 +409,13 @@ static func sample_ground(system:Node,mission:Dictionary,position:Vector2,day:in
 static func returned(mission:Dictionary,day:int)->Array[Dictionary]:
 	var records:Array[Dictionary]=[]
 	if bool(mission.get("exchange_returned",false)):return records
+	if mission.get("research_mode","") in ["materials","license"] and day<int(mission.get("return_day",day+1)):return records
 	mission["exchange_returned"]=true
+	if mission.get("research_mode","")=="license":records.append_array(preload("res://scripts/research_licenses.gd").deliver(mission,day))
+	if mission.get("research_mode","")=="materials":records.append_array(preload("res://scripts/research_materials.gd").deliver(mission,day))
+	preload("res://scripts/research_purchase.gd").refund(mission)
 	for item:Dictionary in mission.get("carried_collections",[]):
+		if (item.get("research_purchase",false) or item.get("partnership_protocol",false) or item.get("research_partnership",false)) and mission.get("research_refused",false):continue
 		if data().collections.has(String(item.id)) or data().collections.size()>=COLLECTION_LIMIT:continue
 		var saved:=item.duplicate(true);saved.returned_day=day
 		data().collections[String(item.id)]=saved
@@ -403,6 +459,7 @@ static func advance(day:int)->void:
 	if day<=int(data().last_day):return
 	var elapsed:=mini(7,maxi(1,day-int(data().last_day))) if int(data().last_day)>=0 else 1
 	data().last_day=day
+	preload("res://scripts/scholar_visits.gd").advance(day)
 	for id:String in data().connections:
 		var view_id:="human" if id=="player" and WorldSimulation.actor_id!="player" else id
 		var index:int=WorldSimulation.world._civilization_index(view_id)
@@ -421,11 +478,17 @@ static func advance(day:int)->void:
 	# Study competes within the existing Knowledge workforce, not a free team.
 	var study_work:=WorldSimulation.state.effective_workers("Knowledge")*.15*elapsed*food
 	for item:Dictionary in data().collections.values():
-		if float(item.study)>=1 or study_work<=0:continue
-		var spent:=minf(study_work,(1-float(item.study))*float(item.work))
-		item.study=minf(1,float(item.study)+spent/float(item.work));study_work-=spent
+		if study_work<=0:break
+		if float(item.study)>=1 or day<int(item.returned_day):continue
+		var supplies:=preload("res://scripts/paper_study.gd").use(study_work,(1-float(item.study))*float(item.work))
+		supplies.progress+=preload("res://scripts/microscope_observation.gd").use(item,float(supplies.progress),(1-float(item.study))*float(item.work))
+		item.study=minf(1,float(item.study)+float(supplies.progress)/float(item.work));study_work-=float(supplies.work)
 		if item.study>=1:
-			data().evidence[String(item.discovery_id)]=String(item.id)
+			if item.get("partnership_protocol",false):
+				log_event("Completed %s. Send a delegation to exchange findings with the partner." % String(item.name))
+				continue
+			var prior:Dictionary=data().collections.get(String(data().evidence.get(String(item.discovery_id),"")),{})
+			if evidence_strength(item)>=evidence_strength(prior):data().evidence[String(item.discovery_id)]=String(item.id)
 			var signals:Dictionary={}
 			for signal_name:String in item.signals:signals[signal_name]=.65
 			WorldSimulation.state.register_field_observations(signals,day+180)
@@ -436,9 +499,16 @@ static func advance(day:int)->void:
 				ties.respect=minf(.3,float(ties.respect)+(.05 if item.kind=="culture" else .03))
 			log_event("Examined %s. Its evidence now supports the related investigation." % String(item.name))
 
+static func evidence_strength(item:Dictionary)->float:
+	if item.get("reverse_engineered",false):return 1.35
+	if item.is_empty() or item.get("partnership_protocol",false):return 0.0
+	if item.get("research_purchase",false):return 2.5
+	if item.get("research_partnership",false):return 1.6
+	return 1.0 if item.get("kind","")=="specimen" else 1.8
+
 static func studying()->bool:
 	for item:Dictionary in data().collections.values():
-		if float(item.study)<1:return true
+		if float(item.study)<1 and int(item.returned_day)<=int(WorldSimulation.state.elapsed_days):return true
 	return false
 
 static func known_relation(id:String)->Dictionary:

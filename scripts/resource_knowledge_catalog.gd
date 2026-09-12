@@ -5,6 +5,60 @@ extends RefCounted
 # perform relevant work.  "effects" are small, composable causal modifiers used
 # by the resource, food, settlement, health, and state simulations.
 
+const EXPERIMENTAL_SUPPLIES={
+  "lime_burning": {
+    "Limestone": 5.0
+  },
+  "lime_mortar": {
+    "Limestone": 5.0,
+    "Fine Sand": 3.0
+  },
+  "copper_smelting": {
+    "Copper Ore": 5.0
+  },
+  "copper_casting": {
+    "Copper Ore": 5.0,
+    "Clay": 3.0
+  },
+  "bronze_alloying": {
+    "Copper Ore": 5.0,
+    "Tin Ore": 3.0
+  },
+  "bloomery_smelting": {
+    "Iron Ore": 5.0
+  },
+  "forge_welding": {
+    "Iron Ore": 5.0
+  },
+  "hardened_edges": {
+    "Iron Ore": 5.0
+  },
+  "coke_firing": {
+    "Coal": 5.0
+  },
+  "refractory_furnaces": {
+    "Refractory Clay": 5.0
+  },
+  "blast_furnace": {
+    "Iron Ore": 10.0,
+    "Coal": 10.0,
+    "Limestone": 5.0
+  },
+  "sulfur_purification": {
+    "Sulfur": 5.0
+  },
+  "phosphate_dressing": {
+    "Phosphate Rock": 5.0
+  },
+  "graphite_marking": {
+    "Graphite": 2.0
+  },
+  "graphite_crucibles": {
+    "Graphite": 5.0,
+    "Refractory Clay": 5.0
+  }
+}
+
 static func entries() -> Array[Dictionary]:
 	return [
 		_entry("stone_sorting","Stone Selection","Materials",20,0.010,[],[_r("Stone","recognized")],["stone","crafting"],"Workers learn which local stones hold an edge, split cleanly, or survive repeated blows.",{"survey_speed":0.03,"tool_quality":0.04}),
@@ -32,6 +86,7 @@ static func entries() -> Array[Dictionary]:
 		_entry("copper_casting","Reusable Casting","Materials",6000,0.0025,["copper_smelting","clay_tempering"],[_r("Copper Ore","developed"),_r("Clay","developed")],["materials","crafting"],"Prepared molds make metal forms repeatable, divisible, and repairable.",{"tool_quality":0.08,"craft_output":0.10,"standardization":0.04,"warfare_readiness":0.04}),
 		_entry("bronze_alloying","Bronze Alloying","Materials",8200,0.0022,["copper_casting"],[_r("Copper Ore","developed"),_r("Tin Ore","accessible")],["materials","trade","crafting"],"Copper and tin in controlled proportions produce a harder, more reliable material.",{"tool_quality":0.14,"construction_rate":0.05,"warfare_readiness":0.09,"trade_capacity":0.07}),
 		_entry("mine_shoring","Timbered Mine Shoring","Infrastructure",10000,0.0024,["framed_construction","rope_rigging"],[_r("Timber","developed"),_r("Copper Ore","developed")],["infrastructure","timber","materials"],"Regular supports and inspection practices let workings extend beyond self-supporting ground.",{"mine_safety":0.12,"metal_yield":0.08,"construction_rate":0.03}),
+		_entry("mine_airways","Mine Airways","Infrastructure",12000,0.0022,["mine_shoring","experimental_controls"],[_r("Coal","surveyed")],["infrastructure","materials","health"],"Separate intake and return passages guide air through workings; crews compare flow and restrict poorly ventilated headings.",{"mine_safety":0.06}),
 		_entry("mine_drainage","Mine Drainage","Infrastructure",13000,0.0021,["mine_shoring","well_siting"],[_r("Deep Aquifer","recognized")],["infrastructure","water","materials"],"Sumps, channels, and lifting chains keep deeper workings usable.",{"mine_safety":0.08,"metal_yield":0.07,"water_access":0.04}),
 		_entry("bitumen_sealing","Bitumen Sealing","Infrastructure",6500,0.0028,["sealed_vessels"],[_r("Bitumen","accessible")],["construction","travel","storage"],"Heated bitumen seals roofs, containers, hulls, and vulnerable road surfaces.",{"food_spoilage":-0.03,"housing_output":0.05,"naval_capacity":0.06,"route_speed":0.05}),
 		_entry("iron_assaying","Iron Ore Assay","Materials",15500,0.0020,["kiln_control","standard_measures"],[_r("Iron Ore","surveyed")],["materials","fire","survey"],"Heated samples and slag behavior reveal iron-bearing rock that appearance alone concealed.",{"survey_speed":0.05,"metal_yield":0.04}),
@@ -56,4 +111,29 @@ static func _r(resource_name: String, stage: String, minimum_stock := 0.0) -> Di
 	return {"resource":resource_name,"stage":stage,"minimum_stock":minimum_stock}
 
 static func _entry(id: String,name: String,direction: String,day: int,chance: float,requires: Array,resource_requirements: Array,signals: Array,observation: String,effects: Dictionary) -> Dictionary:
-	return {"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}
+	if id in ["stone_sorting","controlled_flaking","timber_grading","fiber_grading","clay_testing","salt_working","ore_assaying","iron_assaying","coal_grading"]:
+		for requirement:Dictionary in resource_requirements:
+			if requirement.stage in ["recognized","surveyed"]:requirement["sample_sufficient"]=true
+	var imported_basis:Dictionary=EXPERIMENTAL_SUPPLIES.get(id,{})
+	for requirement:Dictionary in resource_requirements:
+		if imported_basis.has(requirement.resource):requirement.minimum_stock=imported_basis[requirement.resource]
+	var result:={"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}
+	if id=="phosphate_dressing":
+		result.effects={}
+		result["production_items"]=["ground_phosphate_fertilizer"]
+		result["production_contract"]="Enables physical ground phosphate dressing. Field uptake requires nutrient response trials and complementary nitrogen inputs; the deposit itself supplies no manufactured fertilizer."
+	if id=="coke_firing":
+		result.effects={}
+		result["production_items"]=["metallurgical_coke"]
+		result["production_contract"]="Converts actual coal into coke through finite workshop labor and paid kiln tooling. Coke is a stock consumed by ironmaking, not a global fuel or metal bonus."
+	if id=="blast_furnace":
+		result.effects={}
+		result["production_items"]=["blast_pig_iron","charcoal_pig_iron"]
+		result.requires=["rope_rigging"]
+		result["requires_all"]=result.requires.duplicate()
+		result["learning_routes"]=[{"id":"mine_supported","label":"Mine-supported furnace scale-up","requires_all":["refractory_furnaces","mine_drainage"]},{"id":"metallurgical","label":"Scaling forced-air iron reduction","requires_all":["refractory_furnaces","bloomery_smelting"]},{"id":"charcoal_furnace","label":"Charcoal and prepared furnace linings","requires_all":["charcoal","refractory_brick_firing","bloomery_smelting"]}]
+		for requirement:Dictionary in result.resource_requirements:
+			if requirement.resource=="Coal":requirement["alternative_stocks"]={"Charcoal":10.0}
+		result["production_contract"]="Preserves the mining-supported approach while allowing established forced-air iron reduction to support furnace scale-up. Refractory practice, lifting organization and actual iron and limestone supplies remain necessary; a prepared-charcoal route replaces the coal and coke foundation. Imported experimental stocks grant no discovery or operating furnace. Finite workshop batches consume coke or charcoal, ore and flux after brick and iron tooling is paid, producing pig iron that still needs refining."
+	if id=="mine_airways":result["production_contract"]="Clears the coal ventilation access blocker after mine-airway knowledge is learned. Routes, construction staffing, logistics, access preparation and extraction labor remain required; no coal stock is granted. Adopted practice also contributes bounded mine safety."
+	return result

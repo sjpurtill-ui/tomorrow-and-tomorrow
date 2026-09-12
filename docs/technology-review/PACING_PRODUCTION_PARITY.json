@@ -1,0 +1,11 @@
+{
+  "baseline_revision": "696c650",
+  "baseline_schema": 9,
+  "new_schema": 10,
+  "simulated_days": 400,
+  "target_reached_both": true,
+  "live_catalog": 463,
+  "equal_fields": "Entire reports excluding production evidence, schema and wall-clock timing/rate fields",
+  "comparison_sha256": "29860ab6621fcf3d171eb1566ba32beca539bad6659213c03bd3b4895fb5e749",
+  "scope": "Isolated seeded reference seat, no foreign exchange; not full-history verification"
+}

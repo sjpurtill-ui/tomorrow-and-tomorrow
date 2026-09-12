@@ -1,0 +1,61 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "handwriting_recognition_models",
+      "retained_id": "optical_character_recognition",
+      "reason": "Inference from variable written strokes is within the shared optical text-recognition mechanism. Writer-specific models are an implementation specialization, not another discovery identity."
+    }
+  ],
+  "prior_branch_corrections": [
+    {
+      "id": "record_accessibility_conversion",
+      "change": "Analog, spoken or tactile alternative presentations can precede digital schemas. A chosen representation still requires actual skilled conversion and user comprehension."
+    },
+    {
+      "id": "archival_replication_planning",
+      "change": "Qualified hand copies or digital replicas can be distributed against correlated loss; independent upkeep and actual media remain necessary."
+    },
+    {
+      "id": "long_delay_correspondence_protocols",
+      "change": "Long-journey custody can be physical or digital, with qualified record comparison or fixity checking. Space networking is not a prerequisite for distant correspondence."
+    },
+    {
+      "id": "resilient_decentralized_networks",
+      "change": "Several routing or coordination architectures can maintain independently operated networks; universal distributed consensus is not required."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "syllabic_script_encoding",
+        "consonantal_script_encoding",
+        "alphabetic_script_encoding"
+      ],
+      "distinction": "These encode speech at different conventional units. Mixed systems and local adaptations remain possible; no script is a universal superior stage."
+    },
+    {
+      "ids": [
+        "character_normalization_rules",
+        "multilingual_collation_rules"
+      ],
+      "distinction": "Declared equivalent encoding sequences differ from language-sensitive ordering. Sorting and normalization must not silently erase intended distinctions."
+    },
+    {
+      "ids": [
+        "lossless_data_compression",
+        "lossy_media_coding"
+      ],
+      "distinction": "Reversible coding preserves source data; lossy representation discards information under a stated criterion. Neither makes all data arbitrarily small."
+    },
+    {
+      "ids": [
+        "distance_vector_routing",
+        "link_state_routing",
+        "path_vector_routing"
+      ],
+      "distinction": "Neighbor metrics, distributed topology descriptions and advertised policy paths exchange different state; all consume actual control traffic and can fail to converge."
+    }
+  ]
+}

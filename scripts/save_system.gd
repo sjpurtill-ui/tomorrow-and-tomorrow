@@ -185,6 +185,11 @@ static func _apply_reflected(target:Object,state:Dictionary,skip:Array=[])->void
 			target.set(property_name,value)
 
 func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
+	var nutrition:=preload("res://scripts/crop_nutrition.gd")
+	var state:Dictionary=payload.get("reflected_GameState",{})
+	if not nutrition.valid(state.get("cultivation_nutrients",nutrition.empty_state())) or not nutrition.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid cultivation nutrient reserves."}
+	if not preload("res://scripts/technology_operations.gd").valid(payload.get("reflected_GameState",{}).get("technology_operations",preload("res://scripts/technology_operations.gd").empty_state())):return {"error":"Invalid technology installation records."}
+	if payload.get("reflected_GameState",{}).get("research_notification_mode","milestones") not in ["milestones","all","quiet"]:return {"error":"Invalid research notification preference."}
 	if not preload("res://scripts/society_exchange.gd").valid(payload.get("reflected_GameState",{}).get("society_exchange",preload("res://scripts/society_exchange.gd").empty_state())):return {"error":"Invalid society exchange records."}
 	# Validate in a disposable owner scope before resetting any live civilization.
 	var id:="__save_validation__"

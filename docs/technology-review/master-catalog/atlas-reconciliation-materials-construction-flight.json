@@ -1,0 +1,714 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_identities": 0,
+  "mapped_candidates": 75,
+  "partial_candidates": 0,
+  "mappings": [
+    {
+      "review_id": "D04-01",
+      "candidate_name": "Stone selection",
+      "mapped_ids": [
+        "stone_sorting"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-02",
+      "candidate_name": "Controlled flaking",
+      "mapped_ids": [
+        "controlled_flaking"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-03",
+      "candidate_name": "Tempered clay",
+      "mapped_ids": [
+        "clay_tempering"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-04",
+      "candidate_name": "Charcoal making",
+      "mapped_ids": [
+        "charcoal"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-05",
+      "candidate_name": "Mineral pigment preparation",
+      "mapped_ids": [
+        "mineral_pigment_preparation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-06",
+      "candidate_name": "Copper smelting",
+      "mapped_ids": [
+        "copper_smelting"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-07",
+      "candidate_name": "Bronze alloying",
+      "mapped_ids": [
+        "bronze_alloying"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-08",
+      "candidate_name": "Bloomery iron",
+      "mapped_ids": [
+        "bloomery_smelting"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-09",
+      "candidate_name": "Glassmaking",
+      "mapped_ids": [
+        "glassmaking"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-10",
+      "candidate_name": "Lime mortar chemistry",
+      "mapped_ids": [
+        "lime_mortar"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-11",
+      "candidate_name": "Coke metallurgy",
+      "mapped_ids": [
+        "coke_firing",
+        "refractory_furnaces"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-12",
+      "candidate_name": "Bulk sulfuric acid production",
+      "mapped_ids": [
+        "sulfuric_acid_production"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-13",
+      "candidate_name": "Fractional distillation",
+      "mapped_ids": [
+        "fractional_distillation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-14",
+      "candidate_name": "Electrochemical refining",
+      "mapped_ids": [
+        "copper_electrorefining"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-15",
+      "candidate_name": "Industrial steelmaking",
+      "mapped_ids": [
+        "steel_refining",
+        "electric_arc_furnaces"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-16",
+      "candidate_name": "Synthetic polymers",
+      "mapped_ids": [
+        "polymer_chain_models",
+        "thermoplastic_processing",
+        "thermoset_resin_processing",
+        "synthetic_elastomers",
+        "polymer_monomer_purification",
+        "radical_chain_polymerization",
+        "ionic_chain_polymerization",
+        "coordination_polymerization",
+        "condensative_step_polymerization",
+        "additive_step_polymerization",
+        "ring_opening_polymerization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Processing, models, elastomers and distinct synthesis families now have authored identities. This reconciles the candidate scope, not implementation or full industrial chemistry coverage."
+    },
+    {
+      "review_id": "D04-17",
+      "candidate_name": "Semiconductor grade silicon",
+      "mapped_ids": [
+        "single_crystal_growth",
+        "chlorosilane_purification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-18",
+      "candidate_name": "Composite laminates",
+      "mapped_ids": [
+        "fiber_composite_lamination"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-19",
+      "candidate_name": "Corrosion resistant alloys",
+      "mapped_ids": [
+        "stainless_steel_alloying",
+        "corrosion_rate_measurement"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-20",
+      "candidate_name": "Catalytic process design",
+      "mapped_ids": [
+        "industrial_catalyst_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-21",
+      "candidate_name": "High temperature structural ceramics",
+      "mapped_ids": [
+        "structural_technical_ceramics",
+        "ceramic_matrix_composites"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-22",
+      "candidate_name": "Recyclable thermoset chemistry",
+      "mapped_ids": [
+        "reversible_thermoset_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-23",
+      "candidate_name": "High entropy alloys",
+      "mapped_ids": [
+        "high_entropy_alloy_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-24",
+      "candidate_name": "Selective metal recovery",
+      "mapped_ids": [
+        "selective_metal_recovery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D04-25",
+      "candidate_name": "Radiation tolerant structural materials",
+      "mapped_ids": [
+        "radiation_tolerant_materials"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-01",
+      "candidate_name": "Framed shelters",
+      "mapped_ids": [
+        "framed_construction"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-02",
+      "candidate_name": "Earthen walls",
+      "mapped_ids": [
+        "adobe_wall_construction",
+        "rammed_earth_construction",
+        "wattle_and_daub_walls"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-03",
+      "candidate_name": "Thatched roofing",
+      "mapped_ids": [
+        "thatched_roofing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-04",
+      "candidate_name": "Stone foundations",
+      "mapped_ids": [
+        "stone_footing_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-05",
+      "candidate_name": "Passive shelter ventilation",
+      "mapped_ids": [
+        "passive_building_ventilation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-06",
+      "candidate_name": "Load bearing arches",
+      "mapped_ids": [
+        "masonry_bridge_arches",
+        "vaulted_masonry_roofs",
+        "voussoir_arch_assembly",
+        "masonry_arch_centering",
+        "masonry_thrust_assessment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Shared assembly, temporary support and thrust assessment now have authored identities. Bridge and vaulted-roof parent lists use shared assembly directly; vaults no longer require bridges. This is authored graph reconciliation, not implementation."
+    },
+    {
+      "review_id": "D08-07",
+      "candidate_name": "Vaulted construction",
+      "mapped_ids": [
+        "vaulted_masonry_roofs"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-08",
+      "candidate_name": "Planned street drainage",
+      "mapped_ids": [
+        "building_drainage_coordination",
+        "urban_street_plans"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-09",
+      "candidate_name": "Fire separation rules",
+      "mapped_ids": [
+        "building_fire_compartmentation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-10",
+      "candidate_name": "Courtyard climate design",
+      "mapped_ids": [
+        "courtyard_climate_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-11",
+      "candidate_name": "Structural steel frames",
+      "mapped_ids": [
+        "structural_steel"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-12",
+      "candidate_name": "Reinforced concrete",
+      "mapped_ids": [
+        "reinforced_concrete"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-13",
+      "candidate_name": "Safety elevators",
+      "mapped_ids": [
+        "safety_lifts"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-14",
+      "candidate_name": "Building services coordination",
+      "mapped_ids": [
+        "building_services_coordination"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-15",
+      "candidate_name": "Industrial housing systems",
+      "mapped_ids": [
+        "modular_housing_assembly",
+        "precast_building_components"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-16",
+      "candidate_name": "Seismic isolation",
+      "mapped_ids": [
+        "seismic_base_isolation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-17",
+      "candidate_name": "Glazed curtain walls",
+      "mapped_ids": [
+        "curtain_wall_systems"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-18",
+      "candidate_name": "District heating",
+      "mapped_ids": [
+        "district_heat_distribution"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-19",
+      "candidate_name": "Accessible building design",
+      "mapped_ids": [
+        "accessible_building_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-20",
+      "candidate_name": "Whole building energy control",
+      "mapped_ids": [
+        "building_energy_controls"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-21",
+      "candidate_name": "Low carbon structural binders",
+      "mapped_ids": [
+        "low_carbon_binder_qualification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-22",
+      "candidate_name": "Robotic construction assembly",
+      "mapped_ids": [
+        "robotic_construction_assembly"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-23",
+      "candidate_name": "Reusable building components",
+      "mapped_ids": [
+        "component_reuse_certification",
+        "material_disassembly_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-24",
+      "candidate_name": "Adaptive coastal foundations",
+      "mapped_ids": [
+        "adaptive_coastal_foundations"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D08-25",
+      "candidate_name": "Self monitoring structures",
+      "mapped_ids": [
+        "self_monitoring_structures"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-01",
+      "candidate_name": "Kite stability",
+      "mapped_ids": [
+        "kite_stability_trials"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-02",
+      "candidate_name": "Buoyancy experiments",
+      "mapped_ids": [
+        "aerostatic_lift_trials",
+        "displacement_buoyancy"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-03",
+      "candidate_name": "Lightweight frame construction",
+      "mapped_ids": [
+        "lightweight_aircraft_structures"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-04",
+      "candidate_name": "Fabric aerodynamic testing",
+      "mapped_ids": [
+        "fabric_airframe_coverings",
+        "wing_section_characterization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-05",
+      "candidate_name": "Wind profile observation",
+      "mapped_ids": [
+        "wind_profile_observation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-06",
+      "candidate_name": "Glider control",
+      "mapped_ids": [
+        "glider_control_trials"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-07",
+      "candidate_name": "Lighter than air craft",
+      "mapped_ids": [
+        "lifting_gas_envelopes",
+        "airship_structural_balance"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-08",
+      "candidate_name": "Propeller aerodynamics",
+      "mapped_ids": [
+        "aircraft_propeller_aerodynamics"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-09",
+      "candidate_name": "Lift measurement",
+      "mapped_ids": [
+        "wing_section_characterization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-10",
+      "candidate_name": "Airframe load testing",
+      "mapped_ids": [
+        "lightweight_aircraft_structures",
+        "structural_load_testing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-11",
+      "candidate_name": "Powered fixed wing flight",
+      "mapped_ids": [
+        "powered_flight"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-12",
+      "candidate_name": "Aircraft engine cooling",
+      "mapped_ids": [
+        "aircraft_engine_cooling"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-13",
+      "candidate_name": "Instrument flight",
+      "mapped_ids": [
+        "instrument_flight_training"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-14",
+      "candidate_name": "All metal airframes",
+      "mapped_ids": [
+        "all_metal_airframes"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-15",
+      "candidate_name": "Air traffic coordination",
+      "mapped_ids": [
+        "air_traffic_separation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-16",
+      "candidate_name": "Jet propulsion",
+      "mapped_ids": [
+        "jet_propulsion"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-17",
+      "candidate_name": "Rotary wing control",
+      "mapped_ids": [
+        "rotorcraft_control_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-18",
+      "candidate_name": "Pressurized cabins",
+      "mapped_ids": [
+        "cabin_pressurization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-19",
+      "candidate_name": "Supersonic inlet control",
+      "mapped_ids": [
+        "supersonic_inlet_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-20",
+      "candidate_name": "Reusable launch vehicles",
+      "mapped_ids": [
+        "reusable_launch_system_integration",
+        "recovered_stage_requalification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Complete proposed launch/recovery/turnaround architecture now authored with alternate recovery methods and actual refurbishment costs. This resolves design coverage, not runtime or mission validation."
+    },
+    {
+      "review_id": "D11-21",
+      "candidate_name": "Electric regional aircraft",
+      "mapped_ids": [
+        "electric_regional_aircraft"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-22",
+      "candidate_name": "Autonomous flight verification",
+      "mapped_ids": [
+        "uncrewed_flight_verification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-23",
+      "candidate_name": "High temperature flight structures",
+      "mapped_ids": [
+        "high_temperature_flight_structures"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-24",
+      "candidate_name": "Integrated spaceplane operations",
+      "mapped_ids": [
+        "integrated_spaceplane_operations"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to existing baseline or authored draft identities; this is not a claim of implementation or final semantic review."
+    },
+    {
+      "review_id": "D11-25",
+      "candidate_name": "Reusable orbital transfer stages",
+      "mapped_ids": [
+        "orbital_transfer_stage_reuse",
+        "orbital_component_exchange",
+        "orbital_propellant_transfer"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Repeated in-space stage use, compatible servicing and replenishment now authored. Atmospheric thermal protection is not a mandatory orbital reuse prerequisite. Operating implementation remains pending."
+    }
+  ]
+}

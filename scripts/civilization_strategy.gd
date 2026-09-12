@@ -8,21 +8,25 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	for axis:String in PERSONALITY.AXES:p[axis]=clampf(float(personality.get(axis,.5)),0,1)
 	var open:=float(p.openness);var discipline:=float(p.discipline);var empathy:=float(p.empathy)
 	var assertive:=float(p.assertiveness);var risk:=float(p.risk_tolerance)
-	var hungry:=float(situation.get("food_days",30))<16 or float(situation.get("food_intake_ratio",1))<.98
+	var constraints:=PERSONALITY.food_constraints(situation)
+	var hungry:=bool(constraints.hungry)
 	var war:=bool(situation.get("at_war",false))
 	var goals:=PERSONALITY.agenda(situation,p)
 	var weights:={"demography":.25+empathy*.9,"nutrition":.3+empathy*.6+(1-risk)*.3,"health":.25+empathy*.8,"labor":.2+discipline*.6,"knowledge":.15+open*1.2,"production":.25+discipline*.5+open*.4,"infrastructure":.25+discipline*.65,"logistics":.25+open*.5+assertive*.3,"ecology":.2+empathy*.45+(1-risk)*.35,"institutions":.2+discipline*.65,"security":.15+assertive*.8+discipline*.5,"culture":.2+empathy*.6+open*.4}
 	# The stated leading goal must be visible in actual spending of attention.
 	var goal_domains:Dictionary={"care":{"health":1.5,"demography":.7},"learning":{"knowledge":1.8,"culture":.4},"security":{"security":1.8,"infrastructure":.6,"logistics":.4},"exchange":{"logistics":1.5,"production":.75,"culture":.5},"growth":{"infrastructure":1.5,"demography":1.0,"production":.5}}
+	if hungry and not constraints.food_shortage:goal_domains.care={"logistics":1.5,"health":.7}
 	for domain:String in goal_domains[String(goals[0].id)]:weights[domain]+=float(goal_domains[String(goals[0].id)][domain])
-	if hungry:weights.nutrition+=3.0;weights.health+=1.0;weights.ecology+=.8
+	if constraints.food_shortage:weights.nutrition+=3.0;weights.health+=1.0;weights.ecology+=.8
+	if constraints.delivery_shortage:weights.logistics+=3.0
 	var integration:=float(situation.get("integration_pressure",0))
 	weights.institutions+=integration*8
 	weights.culture+=integration*5
 	weights.infrastructure+=integration*5
 	if war:weights.security+=1.5;weights.logistics+=1.0
 	var ambitions:={"horizons":open*.65+risk*.35,"makers":discipline*.55+open*.45,"gathering":empathy*.6+(1-assertive)*.4,"inquiry":open*.85+(1-risk)*.15,"military":assertive*.65+discipline*.35,"sustenance":empathy*.4+(1-risk)*.6,"wellbeing":empathy*.85+(1-assertive)*.15,"commerce":open*.45+empathy*.35+risk*.2}
-	if hungry:ambitions.sustenance+=2
+	if constraints.food_shortage:ambitions.sustenance+=2
+	if constraints.delivery_shortage:ambitions.commerce+=2
 	if war:ambitions.military+=1
 	var ambition:="horizons"
 	for candidate:String in ambitions:
@@ -30,7 +34,7 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	var training:="maintain" if discipline<.35 else ("intensive" if discipline>.68 and float(situation.get("food_days",0))>75 else "regular")
 	if hungry:training="suspended"
 	elif war:training="maintain" if risk<.65 else "regular"
-	return {"personality":p,"goals":goals,"ambition":ambition,"research_weights":weights,"training":training,"at_war":war,"hungry":hungry,
+	return {"personality":p,"goals":goals,"ambition":ambition,"research_weights":weights,"training":training,"at_war":war,"hungry":hungry,"food_shortage":constraints.food_shortage,"delivery_shortage":constraints.delivery_shortage,
 		"recruit_share":clampf(.025+assertive*.055+discipline*.035+risk*.02-empathy*.02+(.08 if war else 0),.02,.22),
 		"capacity_share":clampf(.3+assertive*.45+discipline*.25+(.2 if war else 0),.15,1),"deploy_share":.35+assertive*.25+risk*.2,"expansion_food":30+(1-risk)*60+empathy*15,"settle_distance":12+36*risk,
 		"scout_days":180 if open>.75 and risk>.65 else (90 if open>.5 else 30),"scout_food":22+(1-risk)*30,

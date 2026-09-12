@@ -1,0 +1,2351 @@
+[
+  {
+    "field": "D04",
+    "id": "metal_annealing_control",
+    "name": "Metal Annealing Control",
+    "foundations": "hardened_edges",
+    "mechanism": "Relate controlled thermal treatment to measured metal hardness and workability",
+    "operating_requirement": "Suitable metal, heating equipment, skilled handling and property checks",
+    "consequence": "Restore selected workability while altering other properties",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardened_edges"
+    ],
+    "requires_any": [
+      [
+        "precision_thermometry",
+        "kiln_control"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metal_annealing_control",
+      "local_demonstration": "Relate controlled thermal treatment to measured metal hardness and workability",
+      "operating_requirements": "Suitable metal, heating equipment, skilled handling and property checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Empirical furnace practice can precede calibrated thermometry; qualified property checks remain required."
+  },
+  {
+    "field": "D04",
+    "id": "steel_normalizing_control",
+    "name": "Steel Normalizing Control",
+    "foundations": "steel_refining",
+    "mechanism": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
+    "operating_requirement": "Known steel composition, suitable furnace and structural or mechanical tests",
+    "consequence": "Produce a bounded microstructural condition without universal strength gains",
+    "status": "authored_draft",
+    "requires_all": [
+      "steel_refining"
+    ],
+    "requires_any": [
+      [
+        "material_phase_diagrams",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "steel_normalizing_control",
+      "local_demonstration": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
+      "operating_requirements": "Known steel composition, suitable furnace and structural or mechanical tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Controlled comparative trials can precede full equilibrium phase models; the learned process retains material-specific limits."
+  },
+  {
+    "field": "D04",
+    "id": "surface_carburization",
+    "name": "Surface Carburization",
+    "foundations": "hardened_edges,charcoal",
+    "mechanism": "Enrich a suitable metal surface with carbon through a qualified thermal process",
+    "operating_requirement": "Compatible metal, controlled carbon source, thermal equipment and case assessment",
+    "consequence": "Create a graded surface condition while retaining core and distortion constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardened_edges",
+      "charcoal"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_carburization",
+      "local_demonstration": "Enrich a suitable metal surface with carbon through a qualified thermal process",
+      "operating_requirements": "Compatible metal, controlled carbon source, thermal equipment and case assessment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "steel_nitriding_qualification",
+    "name": "Steel Nitriding Qualification",
+    "foundations": "material_phase_diagrams",
+    "mechanism": "Qualify nitrogen-enriched surface layers for a specified steel service",
+    "operating_requirement": "Compatible material, controlled industrial treatment and inspection",
+    "consequence": "Improve selected surface properties with composition and fatigue limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_phase_diagrams"
+    ],
+    "requires_any": [
+      [
+        "surface_carburization",
+        "industrial_catalyst_design"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "steel_nitriding_qualification",
+      "local_demonstration": "Qualify nitrogen-enriched surface layers for a specified steel service",
+      "operating_requirements": "Compatible material, controlled industrial treatment and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Different qualified surface-reaction traditions can support investigation; carburized cases are not required on every treated part."
+  },
+  {
+    "field": "D04",
+    "id": "induction_surface_hardening",
+    "name": "Induction Surface Hardening",
+    "foundations": "electromagnetic_induction,hardened_edges",
+    "mechanism": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
+    "operating_requirement": "Compatible power equipment, workpiece, thermal control and inspection",
+    "consequence": "Localize treatment while geometry and material response limit results",
+    "status": "authored_draft",
+    "requires_all": [
+      "electromagnetic_induction",
+      "hardened_edges"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "induction_surface_hardening",
+      "local_demonstration": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
+      "operating_requirements": "Compatible power equipment, workpiece, thermal control and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "precipitation_hardening_models",
+    "name": "Precipitation Hardening Models",
+    "foundations": "material_phase_diagrams",
+    "mechanism": "Relate controlled precipitate populations to a qualified alloy's mechanical behavior",
+    "operating_requirement": "Known alloy, thermal treatment and microstructural or property measurement",
+    "consequence": "Guide selected strengthening with overaging and temperature limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_phase_diagrams"
+    ],
+    "requires_any": [
+      [
+        "metal_creep_characterization",
+        "aluminum_alloy_heat_treatment"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "precipitation_hardening_models",
+      "local_demonstration": "Relate controlled precipitate populations to a qualified alloy's mechanical behavior",
+      "operating_requirements": "Known alloy, thermal treatment and microstructural or property measurement",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Aging behavior can be investigated from alloy heat treatment or high-temperature property evidence; creep testing is not universally required."
+  },
+  {
+    "field": "D04",
+    "id": "metal_grain_size_measurement",
+    "name": "Metal Grain Size Measurement",
+    "foundations": "compound_microscopy",
+    "mechanism": "Measure representative grain structure using a defined preparation and counting method",
+    "operating_requirement": "Prepared samples, qualified imaging and analysts",
+    "consequence": "Compare microstructure without treating grain size alone as complete performance",
+    "status": "authored_draft",
+    "requires_all": [
+      "compound_microscopy"
+    ],
+    "requires_any": [
+      [
+        "material_phase_diagrams",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metal_grain_size_measurement",
+      "local_demonstration": "Measure representative grain structure using a defined preparation and counting method",
+      "operating_requirements": "Prepared samples, qualified imaging and analysts",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Prepared microstructure can be measured before a complete phase theory; sampling and preparation artifacts remain limits."
+  },
+  {
+    "field": "D04",
+    "id": "residual_stress_assessment",
+    "name": "Residual Stress Assessment",
+    "foundations": "stress_strain_relations,dimensional_metrology",
+    "mechanism": "Estimate retained internal stresses through qualified measurement and model assumptions",
+    "operating_requirement": "Suitable specimens, instruments and interpretation expertise",
+    "consequence": "Identify distortion or failure contributions with method-specific uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "stress_strain_relations",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "residual_stress_assessment",
+      "local_demonstration": "Estimate retained internal stresses through qualified measurement and model assumptions",
+      "operating_requirements": "Suitable specimens, instruments and interpretation expertise",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "metal_fracture_toughness_testing",
+    "name": "Metal Fracture Toughness Testing",
+    "foundations": "stress_strain_relations",
+    "mechanism": "Measure resistance to crack extension under a defined qualified specimen condition",
+    "operating_requirement": "Representative material, calibrated loading equipment and trained analysis",
+    "consequence": "Support bounded damage tolerance rather than equating strength with toughness",
+    "status": "authored_draft",
+    "requires_all": [
+      "stress_strain_relations"
+    ],
+    "requires_any": [
+      [
+        "cyclic_fatigue",
+        "structural_load_testing"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metal_fracture_toughness_testing",
+      "local_demonstration": "Measure resistance to crack extension under a defined qualified specimen condition",
+      "operating_requirements": "Representative material, calibrated loading equipment and trained analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Crack-extension testing may derive from repeated-load or static fracture evidence; prior fatigue specialization is not mandatory."
+  },
+  {
+    "field": "D04",
+    "id": "metal_hydrogen_damage_assessment",
+    "name": "Metal Hydrogen Damage Assessment",
+    "foundations": "corrosion_rate_measurement,metal_fracture_toughness_testing",
+    "mechanism": "Evaluate susceptibility to hydrogen-related degradation under defined exposure and loading",
+    "operating_requirement": "Characterized material, qualified tests and environmental controls",
+    "consequence": "Restrict unsuitable service conditions without assuming one result covers all alloys",
+    "status": "authored_draft",
+    "requires_all": [
+      "corrosion_rate_measurement",
+      "metal_fracture_toughness_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metal_hydrogen_damage_assessment",
+      "local_demonstration": "Evaluate susceptibility to hydrogen-related degradation under defined exposure and loading",
+      "operating_requirements": "Characterized material, qualified tests and environmental controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "welding_metallurgy",
+    "name": "Welding Metallurgy",
+    "foundations": "forge_welding,material_phase_diagrams",
+    "mechanism": "Relate joining thermal history to local microstructure and mechanical performance",
+    "operating_requirement": "Qualified joining equipment, known materials and inspection or test capacity",
+    "consequence": "Select evaluated joint processes rather than assuming a joined part matches parent material",
+    "status": "authored_draft",
+    "requires_all": [
+      "forge_welding",
+      "material_phase_diagrams"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "welding_metallurgy",
+      "local_demonstration": "Relate joining thermal history to local microstructure and mechanical performance",
+      "operating_requirements": "Qualified joining equipment, known materials and inspection or test capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "arc_welding_processes",
+    "name": "Arc Welding Processes",
+    "foundations": "electrical_measurement",
+    "mechanism": "Use a controlled electrical arc to form a qualified metal joint",
+    "operating_requirement": "Compatible power source, consumables, shielding where required and skilled operators",
+    "consequence": "Join suitable metals with real heat, defect and distortion limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [
+      [
+        "electric_arc_furnaces",
+        "electrical_generators"
+      ],
+      [
+        "welding_metallurgy",
+        "forge_welding"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "arc_welding_processes",
+      "local_demonstration": "Use a controlled electrical arc to form a qualified metal joint",
+      "operating_requirements": "Compatible power source, consumables, shielding where required and skilled operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Power-source and joining traditions provide separate alternatives; a metal-melting arc furnace is not mandatory before arc joining."
+  },
+  {
+    "field": "D04",
+    "id": "resistance_welding",
+    "name": "Resistance Welding",
+    "foundations": "electrical_measurement",
+    "mechanism": "Generate localized joining heat through controlled electrical resistance and force",
+    "operating_requirement": "Compatible equipment, joint surfaces, power and inspection",
+    "consequence": "Join selected assemblies with contact and geometry constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [
+      [
+        "welding_metallurgy",
+        "forge_welding"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "resistance_welding",
+      "local_demonstration": "Generate localized joining heat through controlled electrical resistance and force",
+      "operating_requirements": "Compatible equipment, joint surfaces, power and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Empirical joint qualification can precede formal welding metallurgy; real pressure, current and compatible contact surfaces remain necessary."
+  },
+  {
+    "field": "D04",
+    "id": "brazed_joint_qualification",
+    "name": "Brazed Joint Qualification",
+    "foundations": "copper_casting",
+    "mechanism": "Qualify a lower-melting filler joint between compatible surfaces without melting the base members",
+    "operating_requirement": "Suitable filler, surface preparation, heat source and inspection",
+    "consequence": "Join evaluated material combinations while filler and service temperature limit performance",
+    "status": "authored_draft",
+    "requires_all": [
+      "copper_casting"
+    ],
+    "requires_any": [
+      [
+        "forge_welding",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "brazed_joint_qualification",
+      "local_demonstration": "Qualify a lower-melting filler joint between compatible surfaces without melting the base members",
+      "operating_requirements": "Suitable filler, surface preparation, heat source and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Compatible filler joining can be qualified empirically; adhesive chemistry is not its necessary ancestor."
+  },
+  {
+    "field": "D04",
+    "id": "friction_stir_joining",
+    "name": "Friction Stir Joining",
+    "foundations": "precision_machinery,welding_metallurgy",
+    "mechanism": "Join compatible material through controlled tool-driven plastic deformation",
+    "operating_requirement": "Qualified tool, rigid machine, workholding and joint inspection",
+    "consequence": "Produce selected solid-state joints with tool wear and access constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "precision_machinery",
+      "welding_metallurgy"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "friction_stir_joining",
+      "local_demonstration": "Join compatible material through controlled tool-driven plastic deformation",
+      "operating_requirements": "Qualified tool, rigid machine, workholding and joint inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "powder_particle_characterization",
+    "name": "Powder Particle Characterization",
+    "foundations": "powder_metallurgy,dimensional_metrology",
+    "mechanism": "Measure powder size, shape and flow properties against a defined process need",
+    "operating_requirement": "Representative powder samples, qualified instruments and handling controls",
+    "consequence": "Match feedstock to a process without inferring finished-part properties from powder alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "powder_metallurgy",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "powder_particle_characterization",
+      "local_demonstration": "Measure powder size, shape and flow properties against a defined process need",
+      "operating_requirements": "Representative powder samples, qualified instruments and handling controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "hot_isostatic_densification",
+    "name": "Hot Isostatic Densification",
+    "foundations": "powder_metallurgy,pressure_vessels",
+    "mechanism": "Densify a suitable material under a qualified combined thermal and pressure treatment",
+    "operating_requirement": "Industrial pressure equipment, appropriate material and property verification",
+    "consequence": "Reduce selected internal defects while material and processing limits remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "powder_metallurgy",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hot_isostatic_densification",
+      "local_demonstration": "Densify a suitable material under a qualified combined thermal and pressure treatment",
+      "operating_requirements": "Industrial pressure equipment, appropriate material and property verification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "metal_casting_feed_design",
+    "name": "Metal Casting Feed Design",
+    "foundations": "copper_casting",
+    "mechanism": "Arrange mold filling and solidification feed paths for an evaluated casting",
+    "operating_requirement": "Suitable mold, melt, casting staff and defect inspection",
+    "consequence": "Reduce selected shrinkage and filling defects without guaranteeing zero porosity",
+    "status": "authored_draft",
+    "requires_all": [
+      "copper_casting"
+    ],
+    "requires_any": [
+      [
+        "flow_continuity",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metal_casting_feed_design",
+      "local_demonstration": "Arrange mold filling and solidification feed paths for an evaluated casting",
+      "operating_requirements": "Suitable mold, melt, casting staff and defect inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Comparative mold trials can precede formal flow models; actual melt and solidification evidence determine qualified designs."
+  },
+  {
+    "field": "D04",
+    "id": "continuous_metal_casting",
+    "name": "Continuous Metal Casting",
+    "foundations": "steel_refining,metal_casting_feed_design",
+    "mechanism": "Solidify a controlled metal stream into a continuously withdrawn shape",
+    "operating_requirement": "Qualified caster, cooling, melt supply and operators",
+    "consequence": "Produce finite intermediate stock with thermal and surface-quality constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "steel_refining",
+      "metal_casting_feed_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "continuous_metal_casting",
+      "local_demonstration": "Solidify a controlled metal stream into a continuously withdrawn shape",
+      "operating_requirements": "Qualified caster, cooling, melt supply and operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "vacuum_metal_melting",
+    "name": "Vacuum Metal Melting",
+    "foundations": "vacuum_pumps,metal_casting_feed_design",
+    "mechanism": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
+    "operating_requirement": "Compatible furnace, vacuum equipment, power and composition testing",
+    "consequence": "Produce evaluated material quality while volatile losses and equipment limits remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "vacuum_pumps",
+      "metal_casting_feed_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vacuum_metal_melting",
+      "local_demonstration": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
+      "operating_requirements": "Compatible furnace, vacuum equipment, power and composition testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_monomer_purification",
+    "name": "Polymer Monomer Purification",
+    "foundations": "experimental_controls",
+    "mechanism": "Qualify feed monomers by separating and measuring process-relevant impurities",
+    "operating_requirement": "Suitable feedstock, separation plant, analytical staff and storage",
+    "consequence": "Supply defined polymer feedstock without granting a synthesis process",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_controls"
+    ],
+    "requires_any": [
+      [
+        "fractional_distillation",
+        "chemical_distillation"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_monomer_purification",
+      "local_demonstration": "Qualify feed monomers by separating and measuring process-relevant impurities",
+      "operating_requirements": "Suitable feedstock, separation plant, analytical staff and storage",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Qualified feed separation can precede complete chain theory; analytical suitability remains specific to the intended reaction."
+  },
+  {
+    "field": "D04",
+    "id": "radical_chain_polymerization",
+    "name": "Radical Chain Polymerization",
+    "foundations": "polymer_monomer_purification",
+    "mechanism": "Build polymer chains through controlled radical propagation with evaluated product properties",
+    "operating_requirement": "Qualified monomers, controlled reactor, process chemicals and characterization",
+    "consequence": "Produce specified polymer material with conversion and distribution limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_monomer_purification"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radical_chain_polymerization",
+      "local_demonstration": "Build polymer chains through controlled radical propagation with evaluated product properties",
+      "operating_requirements": "Qualified monomers, controlled reactor, process chemicals and characterization",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "A qualified empirical synthesis route may precede a complete polymer-chain explanation. The method still requires actual suitable reactants, controlled plant and reproducible product evidence."
+  },
+  {
+    "field": "D04",
+    "id": "ionic_chain_polymerization",
+    "name": "Ionic Chain Polymerization",
+    "foundations": "polymer_monomer_purification",
+    "mechanism": "Build polymer chains through qualified ionic active centers under controlled conditions",
+    "operating_requirement": "Compatible feedstock, controlled plant and analytical qualification",
+    "consequence": "Produce selected polymer structures while impurity sensitivity and process limits remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_monomer_purification"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ionic_chain_polymerization",
+      "local_demonstration": "Build polymer chains through qualified ionic active centers under controlled conditions",
+      "operating_requirements": "Compatible feedstock, controlled plant and analytical qualification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "A qualified empirical synthesis route may precede a complete polymer-chain explanation. The method still requires actual suitable reactants, controlled plant and reproducible product evidence."
+  },
+  {
+    "field": "D04",
+    "id": "coordination_polymerization",
+    "name": "Coordination Polymerization",
+    "foundations": "industrial_catalyst_design",
+    "mechanism": "Use a qualified coordination catalyst system to control chain growth and selected structure",
+    "operating_requirement": "Suitable monomers, catalyst supply, industrial reactor and product testing",
+    "consequence": "Produce evaluated polymer structures with catalyst and feedstock dependence",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [
+      [
+        "polymer_chain_models",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "coordination_polymerization",
+      "local_demonstration": "Use a qualified coordination catalyst system to control chain growth and selected structure",
+      "operating_requirements": "Suitable monomers, catalyst supply, industrial reactor and product testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Catalyzed empirical synthesis can precede a complete polymer-chain model; product structure must still be evaluated."
+  },
+  {
+    "field": "D04",
+    "id": "condensative_step_polymerization",
+    "name": "Condensative Step Polymerization",
+    "foundations": "polymer_monomer_purification",
+    "mechanism": "Join functional molecules through qualified step reactions that release small-molecule products",
+    "operating_requirement": "Suitable reactants, controlled reactor, separation and molecular characterization",
+    "consequence": "Produce specified polymer material with stoichiometry and removal limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_monomer_purification"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "condensative_step_polymerization",
+      "local_demonstration": "Join functional molecules through qualified step reactions that release small-molecule products",
+      "operating_requirements": "Suitable reactants, controlled reactor, separation and molecular characterization",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "A qualified empirical synthesis route may precede a complete polymer-chain explanation. The method still requires actual suitable reactants, controlled plant and reproducible product evidence."
+  },
+  {
+    "field": "D04",
+    "id": "additive_step_polymerization",
+    "name": "Additive Step Polymerization",
+    "foundations": "polymer_monomer_purification",
+    "mechanism": "Join functional molecules through qualified step reactions without a required small-molecule elimination",
+    "operating_requirement": "Compatible reactants, controlled plant and product characterization",
+    "consequence": "Produce evaluated polymer networks or chains without conflating all addition with chain propagation",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_monomer_purification"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "additive_step_polymerization",
+      "local_demonstration": "Join functional molecules through qualified step reactions without a required small-molecule elimination",
+      "operating_requirements": "Compatible reactants, controlled plant and product characterization",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "A qualified empirical synthesis route may precede a complete polymer-chain explanation. The method still requires actual suitable reactants, controlled plant and reproducible product evidence."
+  },
+  {
+    "field": "D04",
+    "id": "ring_opening_polymerization",
+    "name": "Ring Opening Polymerization",
+    "foundations": "industrial_catalyst_design",
+    "mechanism": "Convert suitable cyclic monomers into a qualified polymer through ring-opening reactions",
+    "operating_requirement": "Compatible monomers, controlled reactor and analytical qualification",
+    "consequence": "Produce selected chain structures within process and purity limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [
+      [
+        "polymer_chain_models",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ring_opening_polymerization",
+      "local_demonstration": "Convert suitable cyclic monomers into a qualified polymer through ring-opening reactions",
+      "operating_requirements": "Compatible monomers, controlled reactor and analytical qualification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Qualified cyclic-reactant conversion may be established empirically before a complete chain model."
+  },
+  {
+    "field": "D04",
+    "id": "copolymer_sequence_control",
+    "name": "Copolymer Sequence Control",
+    "foundations": "polymer_molecular_weight_control",
+    "mechanism": "Control and characterize incorporation of different monomer units within a specified copolymer",
+    "operating_requirement": "Qualified feeds, suitable synthesis route and sequence-sensitive evidence",
+    "consequence": "Tune selected properties while composition alone does not establish sequence",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_molecular_weight_control"
+    ],
+    "requires_any": [
+      [
+        "radical_chain_polymerization",
+        "ionic_chain_polymerization",
+        "coordination_polymerization"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "copolymer_sequence_control",
+      "local_demonstration": "Control and characterize incorporation of different monomer units within a specified copolymer",
+      "operating_requirements": "Qualified feeds, suitable synthesis route and sequence-sensitive evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Sequence control depends on a suitable synthesis route; radical chemistry is not universal."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_tacticity_characterization",
+    "name": "Polymer Tacticity Characterization",
+    "foundations": "coordination_polymerization,spectroscopy",
+    "mechanism": "Measure stereochemical ordering in a qualified polymer against a defined analytical method",
+    "operating_requirement": "Representative material, appropriate instrumentation and trained interpretation",
+    "consequence": "Relate evaluated chain ordering to properties without treating one metric as complete quality",
+    "status": "authored_draft",
+    "requires_all": [
+      "coordination_polymerization",
+      "spectroscopy"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_tacticity_characterization",
+      "local_demonstration": "Measure stereochemical ordering in a qualified polymer against a defined analytical method",
+      "operating_requirements": "Representative material, appropriate instrumentation and trained interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_reaction_heat_management",
+    "name": "Polymer Reaction Heat Management",
+    "foundations": "calorimetry",
+    "mechanism": "Measure and control heat release and removal in a qualified polymer production process",
+    "operating_requirement": "Suitable reactor, actual cooling capacity, instruments and trained operators",
+    "consequence": "Operate within evaluated thermal limits rather than scaling batch volume without heat transfer",
+    "status": "authored_draft",
+    "requires_all": [
+      "calorimetry"
+    ],
+    "requires_any": [
+      [
+        "radical_chain_polymerization",
+        "condensative_step_polymerization",
+        "additive_step_polymerization"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_reaction_heat_management",
+      "local_demonstration": "Measure and control heat release and removal in a qualified polymer production process",
+      "operating_requirements": "Suitable reactor, actual cooling capacity, instruments and trained operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Thermal management applies across reaction families and must be qualified for the actual selected chemistry."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_solution_processing",
+    "name": "Polymer Solution Processing",
+    "foundations": "polymer_chain_models,chemical_distillation",
+    "mechanism": "Form and recover qualified polymer material through controlled dissolution and solvent handling",
+    "operating_requirement": "Compatible polymer, solvent, process plant and recovery or disposal capacity",
+    "consequence": "Produce selected material forms with solvent and energy costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_chain_models",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_solution_processing",
+      "local_demonstration": "Form and recover qualified polymer material through controlled dissolution and solvent handling",
+      "operating_requirements": "Compatible polymer, solvent, process plant and recovery or disposal capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_melt_rheology",
+    "name": "Polymer Melt Rheology",
+    "foundations": "thermoplastic_processing,viscous_resistance",
+    "mechanism": "Measure flow response of a polymer melt under defined thermal and deformation conditions",
+    "operating_requirement": "Representative polymer, qualified rheometry and thermal control",
+    "consequence": "Inform forming conditions while material degradation and history remain relevant",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermoplastic_processing",
+      "viscous_resistance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_melt_rheology",
+      "local_demonstration": "Measure flow response of a polymer melt under defined thermal and deformation conditions",
+      "operating_requirements": "Representative polymer, qualified rheometry and thermal control",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_injection_molding",
+    "name": "Polymer Injection Molding",
+    "foundations": "polymer_melt_rheology,precision_machinery",
+    "mechanism": "Fill a qualified mold with controlled polymer flow and solidification",
+    "operating_requirement": "Compatible polymer, molding machine, tooling, power and operators",
+    "consequence": "Produce repeatable parts within mold, shrinkage and cycle limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_melt_rheology",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_injection_molding",
+      "local_demonstration": "Fill a qualified mold with controlled polymer flow and solidification",
+      "operating_requirements": "Compatible polymer, molding machine, tooling, power and operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_blow_molding",
+    "name": "Polymer Blow Molding",
+    "foundations": "polymer_melt_rheology,compressed_air_systems",
+    "mechanism": "Expand a qualified polymer preform against a mold through controlled pressure",
+    "operating_requirement": "Suitable preforms or melt, tooling, air service and process control",
+    "consequence": "Produce selected hollow parts while wall distribution and defects constrain use",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_melt_rheology",
+      "compressed_air_systems"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_blow_molding",
+      "local_demonstration": "Expand a qualified polymer preform against a mold through controlled pressure",
+      "operating_requirements": "Suitable preforms or melt, tooling, air service and process control",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_film_extrusion",
+    "name": "Polymer Film Extrusion",
+    "foundations": "polymer_melt_rheology,precision_machinery",
+    "mechanism": "Form a continuous qualified polymer film through controlled die flow and cooling",
+    "operating_requirement": "Compatible polymer, extrusion equipment, cooling and inspection",
+    "consequence": "Produce finite film stock with thickness and orientation limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_melt_rheology",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_film_extrusion",
+      "local_demonstration": "Form a continuous qualified polymer film through controlled die flow and cooling",
+      "operating_requirements": "Compatible polymer, extrusion equipment, cooling and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_thermoforming",
+    "name": "Polymer Thermoforming",
+    "foundations": "thermoplastic_processing",
+    "mechanism": "Shape a heated qualified polymer sheet against compatible tooling",
+    "operating_requirement": "Suitable sheets, heating, pressure or vacuum service and molds",
+    "consequence": "Form selected parts while thinning and temperature limits remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermoplastic_processing"
+    ],
+    "requires_any": [
+      [
+        "vacuum_pumps",
+        "compressed_air_systems",
+        "precision_machinery"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_thermoforming",
+      "local_demonstration": "Shape a heated qualified polymer sheet against compatible tooling",
+      "operating_requirements": "Suitable sheets, heating, pressure or vacuum service and molds",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Vacuum, pressure or matched-tool forming can shape suitable heated sheet; a vacuum pump is not universal."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_foam_cell_control",
+    "name": "Polymer Foam Cell Control",
+    "foundations": "polymer_additive_formulation,polymer_melt_rheology",
+    "mechanism": "Control and measure cell structure in a qualified expanded polymer material",
+    "operating_requirement": "Compatible formulation, process plant and density or mechanical testing",
+    "consequence": "Produce selected lightweight material with strength, aging and waste tradeoffs",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_additive_formulation",
+      "polymer_melt_rheology"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_foam_cell_control",
+      "local_demonstration": "Control and measure cell structure in a qualified expanded polymer material",
+      "operating_requirements": "Compatible formulation, process plant and density or mechanical testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_weathering_trials",
+    "name": "Polymer Weathering Trials",
+    "foundations": "polymer_additive_formulation,statistical_inference",
+    "mechanism": "Measure property changes under specified light, moisture and temperature exposure",
+    "operating_requirement": "Representative samples, qualified exposure and property tests",
+    "consequence": "Bound outdoor service claims without equating short tests with indefinite lifetime",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_additive_formulation",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_weathering_trials",
+      "local_demonstration": "Measure property changes under specified light, moisture and temperature exposure",
+      "operating_requirements": "Representative samples, qualified exposure and property tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "polymer_solvent_recovery",
+    "name": "Polymer Solvent Recovery",
+    "foundations": "polymer_solution_processing,fractional_distillation",
+    "mechanism": "Recover suitable solvent from a characterized polymer-process stream",
+    "operating_requirement": "Separation plant, energy, quality controls and residue handling",
+    "consequence": "Reduce selected make-up solvent needs with finite recovery yield",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_solution_processing",
+      "fractional_distillation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_solvent_recovery",
+      "local_demonstration": "Recover suitable solvent from a characterized polymer-process stream",
+      "operating_requirements": "Separation plant, energy, quality controls and residue handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "selective_polymer_depolymerization",
+    "name": "Selective Polymer Depolymerization",
+    "foundations": "polymer_chain_models,industrial_catalyst_design",
+    "mechanism": "Deconstruct a specified polymer into qualified recoverable intermediates through a selected process",
+    "operating_requirement": "Sorted feedstock, suitable plant, process inputs and purification",
+    "consequence": "Recover selected chemical value without assuming mixed plastics all return to pristine monomers",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_chain_models",
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "selective_polymer_depolymerization",
+      "local_demonstration": "Deconstruct a specified polymer into qualified recoverable intermediates through a selected process",
+      "operating_requirements": "Sorted feedstock, suitable plant, process inputs and purification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "glass_batch_composition_control",
+    "name": "Glass Batch Composition Control",
+    "foundations": "glassmaking,material_accounting",
+    "mechanism": "Control measured batch constituents against a qualified glass composition",
+    "operating_requirement": "Characterized minerals or cullet, weighing, melting plant and analysis",
+    "consequence": "Produce consistent composition while impurities and furnace history affect quality",
+    "status": "authored_draft",
+    "requires_all": [
+      "glassmaking",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "glass_batch_composition_control",
+      "local_demonstration": "Control measured batch constituents against a qualified glass composition",
+      "operating_requirements": "Characterized minerals or cullet, weighing, melting plant and analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "glass_annealing_schedules",
+    "name": "Glass Annealing Schedules",
+    "foundations": "glassmaking",
+    "mechanism": "Control cooling through an evaluated stress-relief range for a specified glass article",
+    "operating_requirement": "Suitable annealing equipment, measured thermal conditions and inspection",
+    "consequence": "Reduce retained stress without making glass unbreakable",
+    "status": "authored_draft",
+    "requires_all": [
+      "glassmaking"
+    ],
+    "requires_any": [
+      [
+        "precision_thermometry",
+        "kiln_control"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "glass_annealing_schedules",
+      "local_demonstration": "Control cooling through an evaluated stress-relief range for a specified glass article",
+      "operating_requirements": "Suitable annealing equipment, measured thermal conditions and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Practical stress-relieving cooling can precede calibrated thermometry; each article and process still need suitable evidence."
+  },
+  {
+    "field": "D04",
+    "id": "glass_thermal_tempering",
+    "name": "Glass Thermal Tempering",
+    "foundations": "glass_annealing_schedules,residual_stress_assessment",
+    "mechanism": "Establish evaluated surface compression through controlled thermal treatment",
+    "operating_requirement": "Compatible glass geometry, thermal equipment and qualification tests",
+    "consequence": "Improve selected strength and fracture behavior within material limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "glass_annealing_schedules",
+      "residual_stress_assessment"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "glass_thermal_tempering",
+      "local_demonstration": "Establish evaluated surface compression through controlled thermal treatment",
+      "operating_requirements": "Compatible glass geometry, thermal equipment and qualification tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "chemically_strengthened_glass",
+    "name": "Chemically Strengthened Glass",
+    "foundations": "glass_batch_composition_control,residual_stress_assessment",
+    "mechanism": "Qualify surface compression produced by controlled ion exchange in suitable glass",
+    "operating_requirement": "Compatible glass, industrial treatment and depth or strength testing",
+    "consequence": "Support selected thin-glass applications with flaw and aging limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "glass_batch_composition_control",
+      "residual_stress_assessment"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "chemically_strengthened_glass",
+      "local_demonstration": "Qualify surface compression produced by controlled ion exchange in suitable glass",
+      "operating_requirements": "Compatible glass, industrial treatment and depth or strength testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "glass_lamination",
+    "name": "Glass Lamination",
+    "foundations": "glassmaking,adhesive_bond_design",
+    "mechanism": "Bond qualified glass layers through compatible interlayers with evaluated failure behavior",
+    "operating_requirement": "Prepared glass, suitable interlayer, forming equipment and tests",
+    "consequence": "Retain fragments or tailor assembly behavior without preventing every fracture",
+    "status": "authored_draft",
+    "requires_all": [
+      "glassmaking",
+      "adhesive_bond_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "glass_lamination",
+      "local_demonstration": "Bond qualified glass layers through compatible interlayers with evaluated failure behavior",
+      "operating_requirements": "Prepared glass, suitable interlayer, forming equipment and tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "float_glass_forming",
+    "name": "Float Glass Forming",
+    "foundations": "glass_batch_composition_control,glass_annealing_schedules",
+    "mechanism": "Form continuous glass sheet on a qualified molten support surface and control cooling",
+    "operating_requirement": "Compatible continuous plant, materials, thermal control and inspection",
+    "consequence": "Produce flat sheet stock with real energy and process-quality limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "glass_batch_composition_control",
+      "glass_annealing_schedules"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "float_glass_forming",
+      "local_demonstration": "Form continuous glass sheet on a qualified molten support surface and control cooling",
+      "operating_requirements": "Compatible continuous plant, materials, thermal control and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "borosilicate_glass_formulation",
+    "name": "Borosilicate Glass Formulation",
+    "foundations": "glass_batch_composition_control,calorimetry",
+    "mechanism": "Qualify a boron-containing glass formulation for specified thermal and chemical behavior",
+    "operating_requirement": "Characterized batch materials, melting equipment and property tests",
+    "consequence": "Produce evaluated glass for selected demanding applications",
+    "status": "authored_draft",
+    "requires_all": [
+      "glass_batch_composition_control",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "borosilicate_glass_formulation",
+      "local_demonstration": "Qualify a boron-containing glass formulation for specified thermal and chemical behavior",
+      "operating_requirements": "Characterized batch materials, melting equipment and property tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "optical_glass_homogeneity",
+    "name": "Optical Glass Homogeneity",
+    "foundations": "glass_batch_composition_control,optical_lenses",
+    "mechanism": "Assess refractive consistency and internal defects in a qualified optical glass",
+    "operating_requirement": "Suitable melt and annealing control, optical testing and skilled inspection",
+    "consequence": "Support optical performance without treating ordinary clear glass as precision stock",
+    "status": "authored_draft",
+    "requires_all": [
+      "glass_batch_composition_control",
+      "optical_lenses"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_glass_homogeneity",
+      "local_demonstration": "Assess refractive consistency and internal defects in a qualified optical glass",
+      "operating_requirements": "Suitable melt and annealing control, optical testing and skilled inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "glass_ceramic_crystallization",
+    "name": "Glass Ceramic Crystallization",
+    "foundations": "glass_batch_composition_control,material_phase_diagrams",
+    "mechanism": "Control crystallization within a suitable glass to achieve evaluated composite microstructure",
+    "operating_requirement": "Qualified composition, thermal treatment and structural testing",
+    "consequence": "Produce selected thermal or mechanical behavior with process sensitivity",
+    "status": "authored_draft",
+    "requires_all": [
+      "glass_batch_composition_control",
+      "material_phase_diagrams"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "glass_ceramic_crystallization",
+      "local_demonstration": "Control crystallization within a suitable glass to achieve evaluated composite microstructure",
+      "operating_requirements": "Qualified composition, thermal treatment and structural testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "ceramic_slip_casting",
+    "name": "Ceramic Slip Casting",
+    "foundations": "clay_levigation,clay_shaping",
+    "mechanism": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
+    "operating_requirement": "Prepared slip, molds, drying space and skilled operators",
+    "consequence": "Produce selected shapes while suspension stability and drying constrain quality",
+    "status": "authored_draft",
+    "requires_all": [
+      "clay_levigation",
+      "clay_shaping"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_slip_casting",
+      "local_demonstration": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
+      "operating_requirements": "Prepared slip, molds, drying space and skilled operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "ceramic_dry_pressing",
+    "name": "Ceramic Dry Pressing",
+    "foundations": "powder_particle_characterization,clay_shaping",
+    "mechanism": "Compact suitable ceramic powder into a qualified green shape",
+    "operating_requirement": "Prepared powder, press, tooling and handling staff",
+    "consequence": "Produce repeatable unfired forms with density and tooling limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "powder_particle_characterization",
+      "clay_shaping"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_dry_pressing",
+      "local_demonstration": "Compact suitable ceramic powder into a qualified green shape",
+      "operating_requirements": "Prepared powder, press, tooling and handling staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "ceramic_binder_removal",
+    "name": "Ceramic Binder Removal",
+    "foundations": "ceramic_dry_pressing,thermal_plant_heat_balances",
+    "mechanism": "Remove forming binders through a qualified controlled treatment before densification",
+    "operating_requirement": "Suitable shaped material, controlled heating or extraction and monitoring",
+    "consequence": "Prepare selected parts without excessive cracking or retained contamination",
+    "status": "authored_draft",
+    "requires_all": [
+      "ceramic_dry_pressing",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_binder_removal",
+      "local_demonstration": "Remove forming binders through a qualified controlled treatment before densification",
+      "operating_requirements": "Suitable shaped material, controlled heating or extraction and monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "ceramic_sintering_kinetics",
+    "name": "Ceramic Sintering Kinetics",
+    "foundations": "structural_technical_ceramics,material_phase_diagrams",
+    "mechanism": "Relate thermal treatment to densification and grain development in qualified ceramics",
+    "operating_requirement": "Known powders, controlled furnace and density or microstructure tests",
+    "consequence": "Choose evaluated densification conditions while shrinkage and coarsening compete",
+    "status": "authored_draft",
+    "requires_all": [
+      "structural_technical_ceramics",
+      "material_phase_diagrams"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_sintering_kinetics",
+      "local_demonstration": "Relate thermal treatment to densification and grain development in qualified ceramics",
+      "operating_requirements": "Known powders, controlled furnace and density or microstructure tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "ceramic_tape_casting",
+    "name": "Ceramic Tape Casting",
+    "foundations": "ceramic_slip_casting,polymer_additive_formulation",
+    "mechanism": "Form thin qualified ceramic precursor sheets from a controlled suspension",
+    "operating_requirement": "Suitable suspension, casting equipment, drying and thickness inspection",
+    "consequence": "Produce finite sheet stock with uniformity and handling limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "ceramic_slip_casting",
+      "polymer_additive_formulation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_tape_casting",
+      "local_demonstration": "Form thin qualified ceramic precursor sheets from a controlled suspension",
+      "operating_requirements": "Suitable suspension, casting equipment, drying and thickness inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "porous_ceramic_membranes",
+    "name": "Porous Ceramic Membranes",
+    "foundations": "powder_particle_characterization",
+    "mechanism": "Qualify connected pore structures for a specified separation or flow service",
+    "operating_requirement": "Suitable feedstock, forming and firing equipment and flow/retention testing",
+    "consequence": "Filter specified streams within pore, pressure and fouling constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "powder_particle_characterization"
+    ],
+    "requires_any": [
+      [
+        "ceramic_sintering_kinetics",
+        "structural_technical_ceramics"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "porous_ceramic_membranes",
+      "local_demonstration": "Qualify connected pore structures for a specified separation or flow service",
+      "operating_requirements": "Suitable feedstock, forming and firing equipment and flow/retention testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Empirical qualified firing can establish a specified porous structure before a complete sintering-kinetics model."
+  },
+  {
+    "field": "D04",
+    "id": "piezoelectric_ceramic_qualification",
+    "name": "Piezoelectric Ceramic Qualification",
+    "foundations": "structural_technical_ceramics,electrical_measurement",
+    "mechanism": "Prepare and assess a suitable ceramic's coupled electrical and mechanical response",
+    "operating_requirement": "Qualified composition, processing, electrical conditioning and testing",
+    "consequence": "Supply specified sensing or actuation material with temperature and fatigue limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "structural_technical_ceramics",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "piezoelectric_ceramic_qualification",
+      "local_demonstration": "Prepare and assess a suitable ceramic's coupled electrical and mechanical response",
+      "operating_requirements": "Qualified composition, processing, electrical conditioning and testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "ceramic_thermal_barrier_coatings",
+    "name": "Ceramic Thermal Barrier Coatings",
+    "foundations": "structural_technical_ceramics,thin_film_deposition",
+    "mechanism": "Apply and qualify an insulating ceramic coating over a compatible substrate",
+    "operating_requirement": "Suitable coating plant, materials and adhesion or thermal-cycle tests",
+    "consequence": "Reduce selected substrate heat exposure with coating life and defect limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "structural_technical_ceramics",
+      "thin_film_deposition"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_thermal_barrier_coatings",
+      "local_demonstration": "Apply and qualify an insulating ceramic coating over a compatible substrate",
+      "operating_requirements": "Suitable coating plant, materials and adhesion or thermal-cycle tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
+  },
+  {
+    "field": "D04",
+    "id": "functionally_graded_materials",
+    "name": "Functionally Graded Materials",
+    "foundations": "material_phase_diagrams",
+    "mechanism": "Create and verify a designed spatial variation of composition or microstructure",
+    "operating_requirement": "Qualified graded process, compatible constituents and spatial property measurements",
+    "consequence": "Tailor local behavior without assuming interfaces or gradients eliminate failure",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_phase_diagrams"
+    ],
+    "requires_any": [
+      [
+        "powder_metallurgy",
+        "metal_additive_manufacturing",
+        "ceramic_tape_casting"
+      ]
+    ],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "functionally_graded_materials",
+      "local_demonstration": "Create and verify a designed spatial variation of composition or microstructure",
+      "operating_requirements": "Qualified graded process, compatible constituents and spatial property measurements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "branching_note": "Different graded fabrication routes may be used; no single powder consolidation method is universal.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Application qualification remains specific to material, geometry, environment and duty; neither a gradient nor a healing response guarantees indefinite performance."
+  },
+  {
+    "field": "D04",
+    "id": "self_healing_material_trials",
+    "name": "Self Healing Material Trials",
+    "foundations": "polymer_chain_models,experimental_controls",
+    "mechanism": "Measure recovery of specified damaged properties through an evaluated material mechanism",
+    "operating_requirement": "Qualified material, representative damage and repeatable recovery testing",
+    "consequence": "Establish bounded repair potential without promising autonomous indefinite restoration",
+    "status": "authored_draft",
+    "requires_all": [
+      "polymer_chain_models",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "self_healing_material_trials",
+      "local_demonstration": "Measure recovery of specified damaged properties through an evaluated material mechanism",
+      "operating_requirements": "Qualified material, representative damage and repeatable recovery testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "negotiated payment or reciprocal contribution",
+        "actual record or specimen delivery",
+        "finite local trials and qualification",
+        "continuing feedstocks, energy, staff and waste handling"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+      }
+    },
+    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Application qualification remains specific to material, geometry, environment and duty; neither a gradient nor a healing response guarantees indefinite performance."
+  }
+]
