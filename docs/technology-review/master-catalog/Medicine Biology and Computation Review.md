@@ -252,7 +252,7 @@ These references ground selected distinctions; they do not validate every prereq
 
 ## Validation and implementation handoff
 
-The master checker passes identity uniqueness, normalized-name uniqueness, required record fields, parent references and AND/OR reachability against the recorded baseline and pending communications identities. Across all sections there are 660 master drafts, 59 alternative groups and 1,264 accounted-for identities. There are 3,736 identities left to author toward 5,000. The 556 implemented baseline and 48 pending communications entries remain separately classified.
+The master checker passes identity uniqueness, normalized-name uniqueness, required record fields, parent references and AND/OR reachability against the recorded baseline and pending communications identities. At this section's initial handoff, across all sections there were 660 master drafts, 59 alternative groups and 1,264 accounted-for identities. At that checkpoint, 3,736 identities remained to author toward 5,000. See the master README and coverage record for current totals. The 556 implemented baseline and 48 pending communications entries remain separately classified.
 
 The checker treats baseline and pending identities as available roots for checking draft reachability. It does not certify their runtime behavior, operating-resource closure, meaning-level uniqueness, recovery balance or 2,500–3,000-year progression. No game regression or long simulation was run for this document-only change.
 

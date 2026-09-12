@@ -99,7 +99,7 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Continue the full authored catalog across all 24 fields before further fine-grained production or artwork batches. Current 660 master drafts cover eleven fields. Military depth, materials, transport, buildings, culture and substantial human futures still need broad authoring. Add distinct mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts.",
+    "Continue the full authored catalog across all 24 fields before further fine-grained production or artwork batches. Current 842 master drafts provide initial coverage in fourteen fields. Materials, machinery, construction, flight, culture, earth systems and substantial human futures need broad authoring; already represented fields also require expansion. Preserve distinct mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts.",
     "Reconcile semantic duplicates and the existing 600 candidate atlas against the assembled master; never add candidate counts wholesale.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
@@ -125,9 +125,9 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 660,
-    "distinct_ids_accounted": 1264,
-    "remaining_to_author": 3736,
+    "authored_drafts": 842,
+    "distinct_ids_accounted": 1446,
+    "remaining_to_author": 3554,
     "complete": false
   }
 }
