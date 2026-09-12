@@ -93,6 +93,14 @@ func _food_blocks(metrics:Dictionary)->Array:
 			"tip":"Today's production and current access for this source",
 		})
 	var blocks:Array=[Charts.reserves(GameState.selected_player_settlement_id),Charts.food_flow(GameState.selected_player_settlement_id),{"type":"bars","heading":"TODAY'S FLOW","note":"rations · weather %d%%" % weather,"items":flow_items}]
+	var preparation:Dictionary=metrics.get("food_preparation",{})
+	if float(preparation.get("rations",0.0))>0.0:
+		var inputs:Array[String]=[]
+		for resource:String in preparation.get("inputs",{}):inputs.append("%.2f %s" % [float(preparation.inputs[resource]),resource])
+		blocks.append({"type":"rows","heading":"MEAL PREPARATION","items":[{"name":String(DiscoverySystem.discovery_definition(String(preparation.method)).get("name","Prepared meals")),"sub":", ".join(inputs),"value":"%.1f rations" % float(preparation.rations),"tip":"Uses %.2f Logistics worker-days, shared with preservation. These rations are part of food eaten today." % float(preparation.get("workers_reserved",0.0))}]})
+	var preservation_inputs:Dictionary=metrics.get("food_preservation_inputs",{})
+	if not preservation_inputs.is_empty():
+		blocks.append({"type":"rows","heading":"SMOKING FUEL","items":[{"name":"Timber used today","value":"%.2f" % float(preservation_inputs.get("Timber",0.0)),"sub":"Preserving meat and fish · shared processing staff"}]})
 	if not stock_items.is_empty():
 		blocks.append({"type":"rows","heading":"STORES BY KIND","note":"stock · lost today","items":stock_items})
 	if not source_items.is_empty():

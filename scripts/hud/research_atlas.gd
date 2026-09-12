@@ -240,6 +240,7 @@ func select(id:String,open_detail:bool=false)->void:
 				for current:Dictionary in all_records:
 					if current.id==current_id and current.exposed:Art.label(detail_body,"This team is currently investigating "+String(current.name)+". Focusing here redirects that team's attention.",12,T.TEXT_SOFT,true)
 		detail=Art.label(detail_body,item.description,13,T.BODY,true)
+		if not String(item.get("operating_summary","")).is_empty():Art.label(detail_body,String(item.operating_summary),12,T.TEXT_SOFT,true)
 		Art.label(detail_body,String(item.get("pathway_description","")),13,T.TEAL,true)
 		for route:Dictionary in item.get("pathways",[]):
 			Art.label(detail_body,("● " if bool(route.ready) else "○ ")+String(route.label),12,T.GREEN if bool(route.ready) else T.MUTED,true)
@@ -252,6 +253,14 @@ func select(id:String,open_detail:bool=false)->void:
 				for previous:Dictionary in all_records:
 					if previous.id==req and previous.exposed:title=String(previous.name)
 				Art.label(detail_body,("✓ " if req in GameState.known_discoveries else "○ ")+title,12,T.TEXT_SOFT,true)
+		for group:Array in item.get("requires_any",[]):
+			var options:Array[String]=[]
+			for req:String in group:
+				var title:="Unexplored prerequisite"
+				for previous:Dictionary in all_records:
+					if previous.id==req and previous.exposed:title=String(previous.name)
+				options.append(("✓ " if req in GameState.known_discoveries else "○ ")+title)
+			Art.label(detail_body,"ONE OF: "+" or ".join(options),12,T.TEXT_SOFT,true)
 		if not item.missing.is_empty():Art.label(detail_body,"Needs: "+", ".join(item.missing),12,T.AMBER,true)
 		action=Art.button(detail_body,"Team already investigating" if assignment.get("active",false) else "Established knowledge" if item.known else "Focus this team here" if item.ready else "More evidence needed",_act)
 		action.disabled=not item.ready or assignment.get("active",false)

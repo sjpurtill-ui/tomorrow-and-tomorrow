@@ -93,6 +93,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/settlement_architecture_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/joint_force_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
+	catalog.append_array(preload("res://scripts/food_preparation.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -162,7 +163,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 			WorldSimulation.state.known_discoveries.append(discovery.id)
 			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
-			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_effect_summary(discovery.get("effects",{})),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
+			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_discovery_effect_summary(discovery),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
 			WorldSimulation.state.discovery_log.push_front(event)
 			if WorldSimulation.state.discovery_log.size()>512: WorldSimulation.state.discovery_log.resize(512)
 			WorldSimulation.state.active_investigations.erase(channel)
@@ -250,7 +251,7 @@ func active_investigation_records()->Array[Dictionary]:
 		discovery["material_evidence"]=material_evidence
 		discovery["project_goal"]=_project_goal(discovery)
 		discovery["project_method"]=_project_method(discovery)
-		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_effect_summary(discovery.get("effects",{}))
+		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_discovery_effect_summary(discovery)
 		discovery["bottleneck"]=_investigation_bottleneck(discovery,allocation,leader_factor,material_evidence,progress,research_capacity)
 		discovery["estimated_days"]=ceili((1.0-progress)/maxf(0.000001,baseline_momentum))
 		records.append(discovery)
@@ -510,7 +511,7 @@ func player_facing_discovery_event(source:Dictionary)->Dictionary:
 	event["subcategory"]=String(definition.get("subcategory",event.get("subcategory","Established practice")))
 	event["description"]=String(definition.get("causal_mechanism",definition.get("observation",event.get("description",""))))
 	event["effects"]=(definition.get("effects",event.get("effects",{})) as Dictionary).duplicate(true)
-	event["effect_summary"]=_effect_summary(event["effects"])
+	event["effect_summary"]=_discovery_effect_summary(definition)
 	return event
 
 
@@ -855,7 +856,7 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 	var children:Dictionary={}
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)): continue
-		for requirement in entry.get("requires",[]):
+		for requirement in preload("res://scripts/technology_requirements.gd").parents(entry):
 			if not children.has(String(requirement)): children[String(requirement)]=[]
 			(children[String(requirement)] as Array).append(String(entry.name))
 	for entry in technology_catalog:
@@ -868,6 +869,10 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		row["pathway_description"]=Pathways.describe(entry)
 		for requirement in entry.get("requires",[]):
 			if String(requirement) not in WorldSimulation.state.known_discoveries: missing.append(String(catalog_by_id.get(String(requirement),{}).get("name",requirement)))
+		for group:Array in preload("res://scripts/technology_requirements.gd").evaluate(entry,WorldSimulation.state.known_discoveries).missing_any:
+			var options:Array[String]=[]
+			for parent:String in group:options.append(String(catalog_by_id.get(parent,{}).get("name",parent)))
+			missing.append(" or ".join(options))
 		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): missing.append("earliest day %d" % int(entry.day))
 		if not _resource_requirements_met(entry.get("resource_requirements",[])):
 			for requirement in entry.get("resource_requirements",[]): missing.append("%s: %s access" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized"))])
@@ -974,3 +979,9 @@ func _research_draw(id:String,seed_value:int,purpose:String)->float:
 	var random:=RandomNumberGenerator.new()
 	random.seed=hash(id+":"+purpose)^(seed_value*0x45d9f3b)
 	return random.randf()
+
+func _discovery_effect_summary(entry:Dictionary)->String:
+	if not String(entry.get("meal_preparation","")).is_empty():return String(entry.production_contract)
+	if String(entry.get("id",""))=="smoking":return "Adopted smoking converts meat and fish to preserved rations at 82% yield using shared Logistics/Crafting capacity and 0.04 Timber per input ration. Fuel shortages limit output; unavailable during travel."
+	if String(entry.get("id",""))=="food_drying":return "Adopted air drying converts fresh plants to dry staples at 88% yield using shared Logistics/Crafting capacity, without fuel. Unavailable during travel."
+	return _effect_summary(entry.get("effects",{}))

@@ -68,8 +68,7 @@ func _draw()->void:
 			draw_circle(at(b),3*zoom_level,color)
 	for item:Dictionary in owner_view.records:
 		for pathway:Dictionary in item.get("pathways",[]):
-			if pathway.id=="local":continue
-			for req:String in pathway.requires:
+			for req:String in preload("res://scripts/technology_requirements.gd").parents(pathway):
 				if not boxes.has(req) or req in item.requires:continue
 				var a:Vector2=boxes[req].get_center();var b:Vector2=boxes[item.id].get_center()
 				draw_dashed_line(at(a),at(b),T.TEAL if bool(pathway.ready) else T.MUTED,maxf(1,zoom_level),7*zoom_level)

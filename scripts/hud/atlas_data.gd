@@ -8,6 +8,8 @@ static func inquiry(domain:String="",query:String="")->Array[Dictionary]:
 		var title:=String(entry.name) if exposed else "Unexplored question"
 		if query!="" and not title.to_lower().contains(query.to_lower()): continue
 		var item:Dictionary={"id":String(entry.id),"name":title,"domain":String(entry.dynamic),"status":String(entry.status),"known":known,"ready":bool(entry.ready),"requires":entry.get("requires",[]).duplicate(),"progress":float(entry.progress),"description":String(entry.get("observation","")) if exposed else "This question needs earlier knowledge or further evidence. Its outcome is not yet known.","missing":entry.missing.duplicate() if exposed else [],"effects":entry.get("effects",{}).duplicate() if known else {}}
+		item["requires_any"]=entry.get("requires_any",[]).duplicate(true)
+		item["operating_summary"]=DiscoverySystem._discovery_effect_summary(entry) if exposed and (entry.has("meal_preparation") or String(entry.id) in ["smoking","food_drying"]) else ""
 		item["pathways"]=entry.get("pathways",[]).duplicate(true)
 		item["pathway_description"]=String(entry.get("pathway_description","")) if exposed else ""
 		item["subcategory"]=String(entry.get("subcategory",""))

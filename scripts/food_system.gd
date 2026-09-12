@@ -63,7 +63,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		for food_type in harvest: harvest[food_type]*=access
 	for food_type in harvest:
 		WorldSimulation.state.food_stocks[food_type]=float(WorldSimulation.state.food_stocks.get(food_type,0.0))+float(harvest[food_type])
-	var preserved:=_preserve(logistics,makers,traveling)
+	var meal_plan:=preload("res://scripts/food_preparation.gd").plan(logistics,float(demand_breakdown.total),traveling)
+	var preservation_inputs:Dictionary={}
+	var preserved:=_preserve(maxf(0.0,logistics-float(meal_plan.workers)),makers,traveling,preservation_inputs)
 	var spoilage:=_spoil(traveling)
 	var demand:=float(demand_breakdown.total)
 	var army_original:=float(demand_breakdown.get("army_field",0.0))
@@ -88,7 +90,8 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var army_delivered:=army_accessible*accessible_intake
 	if military_campaign!=null and military_campaign.has_method("record_daily_provisions"):
 		military_campaign.record_daily_provisions(army_original,army_delivered,credited)
-	var diet_quality:=_diet_quality(consumed,eaten)
+	var prepared:=preload("res://scripts/food_preparation.gd").prepare(meal_plan,consumed)
+	var diet_quality:=clampf(_diet_quality(consumed,eaten)+float(prepared.quality_bonus),0.0,1.0)
 	_update_nutrition(intake_ratio,diet_quality)
 	_update_source_health(harvest,workers,traveling)
 	var total:=_stock_total()
@@ -119,6 +122,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_forecast_30":forecast_30,
 		"food_forecast_90":forecast_90,
 		"food_diet_quality":diet_quality,
+		"food_preparation":prepared,
 		"food_weather_factor":weather_factor,
 		"nutrition_reserve":WorldSimulation.state.nutrition_reserve,
 		"malnutrition_burden":WorldSimulation.state.malnutrition_burden,
@@ -127,6 +131,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_consumed_by_type":consumed,
 		"food_spoilage_by_type":spoilage,
 		"food_preserved":preserved,
+		"food_preservation_inputs":preservation_inputs,
 		"food_demand_breakdown":demand_breakdown,
 		"army_provisions_required":army_required,
 		"army_provisions_delivered":army_delivered,
@@ -309,19 +314,25 @@ func _food_resource_access() -> Dictionary:
 		elif key=="fertile soil": result.fertile=maxf(float(result.fertile),float(deposit.get("quality",0.7)))
 	return result
 
-func _preserve(logistics: float,makers: float,traveling: bool) -> Dictionary:
+func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary={}) -> Dictionary:
 	var result:={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0}
 	if traveling: return result
 	var capacity:=(logistics*0.16+makers*0.18)*(1.0+WorldSimulation.discovery.effect("food_storage"))
 	if "food_drying" in WorldSimulation.state.known_discoveries:
-		var plant_amount:=minf(float(WorldSimulation.state.food_stocks.get("Fresh plants",0.0)),capacity*0.55*maxf(0.05,WorldSimulation.discovery.adoption("food_drying")))
+		var plant_amount:=minf(float(WorldSimulation.state.food_stocks.get("Fresh plants",0.0)),capacity*0.55*clampf(WorldSimulation.discovery.adoption("food_drying"),0.0,1.0))
 		WorldSimulation.state.food_stocks["Fresh plants"]-=plant_amount
 		WorldSimulation.state.food_stocks["Dry staples"]+=plant_amount*0.88
 		result["Fresh plants"]=plant_amount
 		capacity=maxf(0.0,capacity-plant_amount)
 	if "smoking" in WorldSimulation.state.known_discoveries and capacity>0.0:
 		for food_type in ["Fresh meat","Fish"]:
-			var amount:=minf(float(WorldSimulation.state.food_stocks.get(food_type,0.0)),capacity*0.5*maxf(0.05,WorldSimulation.discovery.adoption("smoking")))
+			var amount:=minf(float(WorldSimulation.state.food_stocks.get(food_type,0.0)),capacity*0.5*clampf(WorldSimulation.discovery.adoption("smoking"),0.0,1.0))
+			# Smoking must maintain an actual wood fire; knowledge alone supplies no heat.
+			amount=minf(amount,maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)))/0.04)
+			var fuel:=amount*0.04
+			if fuel>0.0:
+				WorldSimulation.state.resource_stockpiles.Timber-=fuel
+				inputs["Timber"]=float(inputs.get("Timber",0.0))+fuel
 			WorldSimulation.state.food_stocks[food_type]-=amount
 			WorldSimulation.state.food_stocks["Preserved food"]+=amount*0.82
 			result[food_type]=amount

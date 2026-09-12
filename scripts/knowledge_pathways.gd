@@ -1,6 +1,7 @@
 extends RefCounted
 ## Alternative routes converge on one discovery/adoption record. An imported
 ## example is evidence, never a second copy of its effects or an instant unlock.
+const Requirements=preload("res://scripts/technology_requirements.gd")
 const ALTERNATIVES:={
 	"smoking":{"label":"Hearth experiments","requires":["charcoal"],"signals":["fire","food"]},
 	"basketry":{"label":"Container experiments","requires":["clay_shaping"],"signals":["fiber","storage"]},
@@ -36,9 +37,17 @@ static func routes(entry:Dictionary)->Array[Dictionary]:
 		# prerequisites still apply, preventing a late artifact from skipping eras.
 		result.append({"id":"fieldwork" if source.kind=="specimen" else "exchange","label":("Field experiments: " if source.kind=="specimen" else "Learned from ")+String(source.source_name),"requires":entry.get("requires",[]).duplicate(),"signals":entry.get("signals",[]).duplicate(),"collection_id":source.id})
 	for route:Dictionary in result:
-		route["ready"]=true
+		# Common foundations and every OR group apply to foreign learning as well.
+		if entry.has("requires_all"):
+			route["requires_any"]=entry.get("requires_any",[]).duplicate(true)
+		route["ready"]=bool(Requirements.evaluate(entry,WorldSimulation.state.known_discoveries).ready) if entry.has("requires_all") else true
 		for requirement:String in route.requires:
 			if requirement not in WorldSimulation.state.known_discoveries:route.ready=false
+		for group:Array in route.get("requires_any",[]):
+			for parent:String in group:
+				if parent in WorldSimulation.state.known_discoveries:
+					if parent not in route.requires:route.requires.append(parent)
+					break
 		var support:=0.0
 		for signal_name:String in route.signals:support+=clampf(float(WorldSimulation.discovery.latest_context.get(signal_name,0)),0,2)
 		route["support"]=support/maxi(1,route.signals.size())
