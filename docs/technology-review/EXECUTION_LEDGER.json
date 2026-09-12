@@ -99,8 +99,8 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Continue the full authored catalog across all 24 fields before further fine-grained production or artwork batches. Current 1201 master drafts provide initial coverage in twenty fields. Machinery, fibers, earth systems and substantial human futures need initial authoring; every field also needs depth. Preserve distinct mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts.",
-    "Continue semantic and candidate-atlas reconciliation. D04, D08, D11, D12, D13 and D19 have 150 mappings, with four earlier subjects still partial; mappings add zero discoveries. Comparative Chronicles already covers the removed Plural Historical Interpretation proposal. Continue remaining 450 candidates without counting names wholesale.",
+    "Continue full master authoring before fine-grained production or artwork. Current 1381 drafts provide initial coverage in 23 fields; future humanity remains for initial coverage. Then expand every field toward 5000 distinct identities with explicit mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts.",
+    "Continue semantic and atlas reconciliation. Nine fields have 225 candidate mappings and four earlier subjects remain partial; mappings add zero discoveries. Reconcile the remaining 375 candidates without counting names wholesale. Preserve the removed well-curb and historical-interpretation duplicates as exclusions.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
@@ -125,11 +125,11 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 1201,
-    "distinct_ids_accounted": 1805,
-    "remaining_to_author": 3195,
+    "authored_drafts": 1381,
+    "distinct_ids_accounted": 1985,
+    "remaining_to_author": 3015,
     "complete": false,
-    "atlas_candidates_mapped": 150,
+    "atlas_candidates_mapped": 225,
     "atlas_partial_mappings": 4
   }
 }
