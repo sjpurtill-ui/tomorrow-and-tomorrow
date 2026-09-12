@@ -8,7 +8,7 @@ The original food worker was `c247e8d` on an isolated compatibility merge. Indep
 
 All **69 worktree and 69 canonical cases pass**, zero errors/failures/skips/orphans (food 14, tree 9, redistribution 2, atlas 9, discovery 9, society exchange 26). Canonical import and graph/channel/reachability audit are clean. Worktree normal-entry headless boot is clean. Logs are `/tmp/tt-food-canonical-<suite>.log` and `/tmp/tt-food-canonical-audit.log`. UI tests validate data/control construction, not native screenshot layout. Full-history balance, the 5,000-node revamp, later grain systems and new subject artwork remain unfinished.
 
-No canonical player/editor was running at integration, and no existing session was interrupted. The normal standalone launcher packages this recorded checkpoint next; the release's `build.ok` and absolute executable/player log identify its exact source and running process. There is no test override or alternate player entry scene.
+Verified standalone package and running player: source `d388ea0631865a060dbf7cd7c0118a595591df32`, PID `22048`, absolute executable under canonical `artifacts/macos-release/d388ea063186/Tomorrow and Tomorrow.app`. The normal launcher exported the release and verified its signature; `build.ok` matches that source hash. Native inspection shows the ordinary opening direction screen with window title `Tomorrow and Tomorrow · 2026.09.12.1`. No prior player/editor was running or interrupted. There is no test override or alternate player entry scene. This final launch record is documentation-only; the running executable already includes the integrated food code and is left open for the user.
 
 ## September 11 — skip invisible terrain shading
 
