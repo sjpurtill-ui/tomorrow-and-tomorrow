@@ -1,3 +1,9 @@
+## September 12 — catalog scaling and identity reconciliation
+
+INTEGRATED research scaling `3b399f9` on canonical `2fc24b4`: affected-dependency validation and temporary known-discovery indexes preserve causal research behavior while removing repeated scans. All 62 worktree cases across seven suites and 24 canonical cases across two suites pass. The live graph remains **614 discoveries / 396 explicit routes / 282 recipes / 17 operating facilities**. See `RESEARCH_CATALOG_SCALING_HANDOFF.md` for synthetic 5,000-node timings, unchanged saves and scope limits.
+
+Reviewed documentation delivery `4672aee` reconciles **614 integrated + 2,414 drafted = 3,028 distinct identities**, leaving **1,972 to author** toward 5,000. All 15 review-tool tests pass. Every stored runtime definition and ID exactly matches the freshly loaded 614-node catalog (`/tmp/tt-promotion-loaded.json`); no draft promotion creates a new identity. Causal/field/horizon bookkeeping is not proof that the drafts operate in the game. Construction's next 22 discoveries remain in the worker's isolated implementation checkout until tested handoff and integration. No new player launch.
+
 ## September 12 — communications and conserved staple processing
 
 INTEGRATED runtime merge `5eab52adbbc30af5c6437e08d61946dbaa3c51de` from canonical `604567c4bc6ae414ff256238a52e57513ed67d8c`, combining grain worker `1764b09` and communications `f3537b8` plus reviewed bench-family correction `2a9562c`. Canonical now has **614 discoveries, 396 explicit learning routes, 282 civilian recipes and 17 operating facilities**. This is a checkpoint toward the user's continuing request for all5,000 integrated discoveries, not completion of that goal.
