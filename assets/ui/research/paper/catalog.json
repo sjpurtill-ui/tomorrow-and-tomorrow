@@ -2903,7 +2903,7 @@
       "domain": "nutrition",
       "id": "nutrient_response_trials",
       "name": "Nutrient Response Trials",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/mineral_nitrate_dressing.png",
@@ -2975,7 +2975,7 @@
       "domain": "production",
       "id": "catalytic_ammonia_synthesis",
       "name": "Catalytic Ammonia Synthesis",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/ammonium_sulfate_fertilizer.png",
@@ -3477,9 +3477,9 @@
   "live_art_complete": false,
   "live_count": 434,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 398,
+  "queued_count": 396,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 36
+  "verified_count": 38
 }

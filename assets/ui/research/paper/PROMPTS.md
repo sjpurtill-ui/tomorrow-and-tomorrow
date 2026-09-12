@@ -37,3 +37,11 @@ Two built-in imagegen illustrations were generated and visually inspected on 202
 - Well Siting: [prompt record](WELL_SITING_PROMPT.md).
 
 - Relative Stratigraphy and Mineral Streak Tests: [prompt records](GEOSCIENCE_PROMPTS.md).
+
+
+## Crop nutrition and industrial fertilizer
+
+Built-in image generation, using the approved apprentice image as a style reference. New subject images were individually inspected for the approved palette, texture, composition and subject. Exact prompts and source provenance:
+
+- Nutrient Response Trials: [prompt record](NUTRIENT_RESPONSE_TRIALS_PROMPT.md).
+- Catalytic Ammonia Synthesis: [prompt record](CATALYTIC_AMMONIA_SYNTHESIS_PROMPT.md).

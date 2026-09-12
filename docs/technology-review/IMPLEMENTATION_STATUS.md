@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 93: **434 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 94: **434 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1017,3 +1017,16 @@ Graph: 434 live discoveries, 208 explicit learning routes, no graph errors. Idea
 Save compatibility: new reflected `cultivation_nutrients` dictionary, also included in secondary-city resource scopes; missing old data defaults to zero. Human and owned preflight validation covers primary and secondary balances. New IDs require this catalog. Existing Phosphate Dressing saves intentionally change from automatic modifiers to physical fertilizer behavior. Shared integration conflicts: `game_state.gd`, `discovery_system.gd`, `save_system.gd`, `world_simulation.gd`, `food_system.gd`, `settlement_model.gd`, civilian recipes/planning, resource knowledge, catalog validation, art manifest and graph audit. GovernmentPeopleSystem retains labor authority; no terrain or direct military-control changes.
 
 Limits: fertilizer-derived N/P above the existing ambient soil baseline, not complete soil/crop chemistry. No potassium, crop-specific uptake, idle-field leaching, runoff pollution, industrial gas loss, catalyst wear or broad fertilizer procurement yet. The long diagnostic session 57160 remains active on its originally loaded 414-discovery revision; last inspected at year 126, 125 known discoveries, 13 settlements. It does not exercise these new systems. The full objective remains active: 4,566 authored identities, extensive operating depth, imagery, 2,500–3,000-year evidence and canonical integration remain.
+
+
+## Checkpoint 94: crop-trial and ammonia-synthesis artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `42cdaca`. No canonical integration or player launch.
+
+Two subject images were generated through the built-in tool using `apprentice_contracts.png` as the style reference. Nutrient Response Trials depicts comparable crop plots and growers observing samples. Catalytic Ammonia Synthesis carries the same matte gouache, warm ivory texture and muted palette into an industrial apparatus scene. Both were visually inspected and copied unchanged into `assets/ui/research/paper/`, with exact prompt/source records linked from `PROMPTS.md`. The apparatus is an illustrative subject, not an engineering diagram.
+
+Both images have explicit discovery bindings, full-square presentation and 768-pixel runtime import limits with mipmaps. Original generated files remain untouched. Headless imports completed and exited. The atlas test previously covered an older fixed subset of bindings; it now examines every explicit subject binding, checks square dimensions/import size/cache bounds and frees each temporary view. This verifies the new images and the existing reviewed catalog without retaining all image controls simultaneously.
+
+Verification: all 11 visual-atlas cases pass with zero errors/failures/skips/orphans; all 38 subject bindings are covered. Selected-source/workspace hashes match. Art manifest: 434 live identities, 38 reviewed images, 396 queued. No new discovery count or gameplay change. Save representation unchanged. Native player presentation and canonical integration remain unverified; no player or editor was interrupted.
+
+Shared integration files: research visual bindings, visual-atlas test, art manifest, prompt index and implementation records; new PNGs, prompt records and their texture import metadata are task-owned. The full-history goal remains active, including 4,566 remaining discovery identities, extensive operating depth, full-span pacing and the rest of the artwork. Diagnostic session 57160 is still tracked independently; this art pass does not establish its target completion.
