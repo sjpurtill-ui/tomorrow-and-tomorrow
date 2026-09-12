@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 94: **434 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 95: **434 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1030,3 +1030,16 @@ Both images have explicit discovery bindings, full-square presentation and 768-p
 Verification: all 11 visual-atlas cases pass with zero errors/failures/skips/orphans; all 38 subject bindings are covered. Selected-source/workspace hashes match. Art manifest: 434 live identities, 38 reviewed images, 396 queued. No new discovery count or gameplay change. Save representation unchanged. Native player presentation and canonical integration remain unverified; no player or editor was interrupted.
 
 Shared integration files: research visual bindings, visual-atlas test, art manifest, prompt index and implementation records; new PNGs, prompt records and their texture import metadata are task-owned. The full-history goal remains active, including 4,566 remaining discovery identities, extensive operating depth, full-span pacing and the rest of the artwork. Diagnostic session 57160 is still tracked independently; this art pass does not establish its target completion.
+
+
+## Checkpoint 95: paid fertilizer licenses as a slower production route
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `49ab616`. No canonical integration or player launch.
+
+Fertilizer needs now inform the existing AI manufacturing-license planner. It uses the same observed cultivated output, nutrient reserves and prepared-stock accounting as domestic production. Both nutrients need a usable stock, domestic route or examined, immediately supplied license prospect. Domestic routes take precedence; two missing methods can use two successive paid envoy trips. No supplier's hidden discoveries are queried for new prospects. Existing contract support and on-arrival refusal remain ordinary license rules. Paper licensing now checks domestic study supply specifically, allowing unrelated fertilizer needs to coexist with study acquisition.
+
+Verification: 63 cases across manufacturing licenses (19, including four new fertilizer cases), crop nutrition (13), civilian production planning (8), power planning (8) and civilization strategy (15), zero errors/failures/skips/orphans. The end-to-end license case pays for both mineral fertilizer methods on separate journeys, produces both inputs at 65% throughput, and uses them for additional cultivated output without adding either discovery to local knowledge. Tests also cover future/unexamined leads, hidden supplier changes, domestic alternatives, missing complementary materials, absent farming and travel. See [AI manufacturing licenses](AI_MANUFACTURING_LICENSES.md).
+
+No save fields, catalog identities, unit counts or artwork were added: 434 live discoveries, 89 roles, seven installation types, 38 reviewed images, 396 queued images. The full objective still needs 4,566 authored identities and the broader operating, acquisition, art, pacing and integration work. Shared integration files are the license and civilian-production planners, crop-nutrition helper, license tests and review records. Existing government/labor ownership remains unchanged.
+
+Limits: currently supplied fertilizer manufacture, not raw-material procurement or upstream-license sequencing. Potential complementary contracts may be refused or arrive too far apart; this is not an optimal multi-provider contract scheduler. Hunger/war/new-embassy restrictions, 30-day retry history, payment reserves, one-year expiry and reduced throughput remain. No canonical or full-span campaign verification. Diagnostic session 57160 was re-polled live; last inspected at year 142, population 3,777, 149 known discoveries and 17 settlements on its loaded 414-discovery revision. Its 250-year target is still pending.

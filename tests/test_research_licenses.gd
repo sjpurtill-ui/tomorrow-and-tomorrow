@@ -249,3 +249,66 @@ func test_ai_renews_needed_line_from_own_contract_and_obeys_retry_window()->void
 	assert_str(AI.recommendation().subject).is_equal("glassmaking")
 	MilitaryCampaign.equipment_queue[0].paused=true
 	assert_dict(AI.recommendation()).is_empty()
+func fertilizer_license_need()->void:
+	prepare()
+	GameState.population_allocations.Knowledge=0;GameState.population_allocations.Food=30
+	GameState.simulation_metrics.cultivation_base_harvest=100.0
+	for id:String in ["seed_selection","nutrient_response_trials"]:GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
+	GameState.resource_stockpiles.Nitrates=10.0;GameState.resource_stockpiles["Phosphate Rock"]=10.0;GameState.resource_stockpiles.Freshwater=20.0
+	for id:String in ["mineral_nitrate_dressing","phosphate_dressing"]:
+		E.owner_state("neighbor").known_discoveries.append(id);E.owner_state("neighbor").discovery_adoption[id]=1.0
+		E.data().collections[id]={"id":id,"kind":"knowledge","name":"Examined fertilizer account","source_id":"neighbor","source_name":"Neighbor","position":{"x":30.0,"z":0.0},"observed_day":99990,"returned_day":100000,"discovery_id":id,"study":1.0,"work":90.0,"signals":["food"]}
+func test_ai_fertilizer_licenses_use_examined_prospects_for_both_nutrients()->void:
+	fertilizer_license_need()
+	var order:=AI.recommendation()
+	assert_str(String(order.get("subject",""))).is_equal("mineral_nitrate_dressing")
+	E.owner_state("neighbor").known_discoveries.erase("mineral_nitrate_dressing")
+	assert_dict(AI.recommendation()).is_equal(order)
+	E.data().collections.phosphate_dressing.study=.5
+	assert_dict(AI.recommendation()).is_empty()
+	E.data().collections.phosphate_dressing.study=1.0;E.data().collections.phosphate_dressing.returned_day=100001
+	assert_dict(AI.recommendation()).is_empty()
+func test_ai_fertilizer_licenses_accept_domestic_complement_and_avoid_redundant_contracts()->void:
+	fertilizer_license_need()
+	E.data().collections.erase("phosphate_dressing")
+	GameState.known_discoveries.append("phosphate_dressing");GameState.discovery_adoption.phosphate_dressing=1.0
+	assert_str(String(AI.recommendation().subject)).is_equal("mineral_nitrate_dressing")
+	GameState.known_discoveries.append("mineral_nitrate_dressing");GameState.discovery_adoption.mineral_nitrate_dressing=1.0
+	assert_dict(AI.recommendation()).is_empty()
+func test_ai_fertilizer_license_refuses_missing_complement_or_absent_cultivation()->void:
+	fertilizer_license_need()
+	GameState.resource_stockpiles["Phosphate Rock"]=0.0
+	assert_dict(AI.recommendation()).is_empty()
+	GameState.resource_stockpiles["Soluble Phosphate"]=5.0
+	assert_str(String(AI.recommendation().subject)).is_equal("mineral_nitrate_dressing")
+	GameState.population_allocations.Food=0;assert_dict(AI.recommendation()).is_empty();GameState.population_allocations.Food=30
+	GameState.convoy_traveling=true;assert_dict(AI.recommendation()).is_empty();GameState.convoy_traveling=false
+	GameState.simulation_metrics.cultivation_base_harvest=0.0;assert_dict(AI.recommendation()).is_empty()
+func test_two_paid_fertilizer_licenses_enable_slow_manufacture_without_local_invention()->void:
+	fertilizer_license_need()
+	var before:=float(GameState.resource_stockpiles.Stone)
+	for expected:String in ["mineral_nitrate_dressing","phosphate_dressing"]:
+		assert_str(String(AI.recommendation().subject)).is_equal(expected)
+		assert_bool(preload("res://scripts/civilization_controller.gd").license_acquisition_orders("player",{})).is_true()
+		var mission:Dictionary=CivilizationSystem.diplomatic_mission
+		assert_bool(L.active(expected)).is_false()
+		E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
+		GameState.elapsed_days=int(mission.return_day);E.returned(mission,int(mission.return_day))
+		assert_bool(L.active(expected)).is_true()
+		assert_bool(GameState.known_discoveries.has(expected)).is_false()
+		CivilizationSystem.diplomatic_mission={}
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
+	var industry=preload("res://scripts/civilian_industry.gd")
+	for item:String in ["nitrate_fertilizer","ground_phosphate_fertilizer"]:
+		var recipe:Dictionary=industry.product(item)
+		assert_bool(MilitaryCampaign.start_production_line(item,1).get("ok",false)).is_true()
+		var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+		Production.advance(MilitaryCampaign,job,float(recipe.days))
+		assert_int(int(job.completed)).is_equal(0)
+		assert_float(float(job.progress_days)).is_equal_approx(float(recipe.days)*.65,.000001)
+		Production.advance(MilitaryCampaign,job,float(recipe.days)*.35/.65)
+		assert_int(int(job.completed)).is_equal(1)
+		MilitaryCampaign.cancel_equipment_job(int(job.id))
+	assert_float(float(preload("res://scripts/crop_nutrition.gd").cultivation(100,true).bonus)).is_equal(12.5)
+	assert_bool(GameState.known_discoveries.has("mineral_nitrate_dressing")).is_false()
+	assert_bool(GameState.known_discoveries.has("phosphate_dressing")).is_false()

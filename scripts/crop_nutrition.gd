@@ -59,3 +59,17 @@ static func projection(base_harvest:float,stocks:Dictionary,reserves:Dictionary,
 	for resource:String in report.inputs:stocks[resource]=maxf(0,float(stocks[resource])-float(report.inputs[resource]))
 	reserves.merge(report.reserves,true)
 	return report
+
+static func needs()->Dictionary:
+	var state=WorldSimulation.state
+	if state.convoy_traveling or not state.settlement_site_committed or state.effective_workers("Food")<=0:return {}
+	var adopted:=adoption()
+	var harvest:=maxf(0,float(state.simulation_metrics.get("cultivation_base_harvest",0)))
+	if adopted<=0 or harvest<=0:return {}
+	var result:Dictionary={}
+	for nutrient:String in NUTRIENTS:
+		var daily:=harvest*(.01 if nutrient=="nitrogen" else .006)
+		var available:=float(state.cultivation_nutrients.get(nutrient,0))
+		for resource:String in INPUTS:available+=maxf(0,float(state.resource_stockpiles.get(resource,0)))*float(INPUTS[resource].get(nutrient,0))
+		result[nutrient]={"daily":daily,"available":available,"deficit":maxf(0,daily*7.0*adopted-available)}
+	return result
