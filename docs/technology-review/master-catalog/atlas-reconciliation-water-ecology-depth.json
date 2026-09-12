@@ -70,10 +70,14 @@
       "review_id": "D02-08",
       "candidate_name": "Ceramic water pipes",
       "mapped_ids": [
-        "pressure_pipe_jointing"
+        "pressure_pipe_jointing",
+        "clay_pipe_forming",
+        "ceramic_pipe_firing_qualification",
+        "ceramic_pipe_fit_gauges",
+        "clay_pipe_socket_jointing"
       ],
-      "scope_status": "partial",
-      "note": "Pressure-pipe joining is present; specific ceramic pipe forming, firing and dimensional qualification remain unauthored as a complete manufacturing chain."
+      "scope_status": "subject_mapped",
+      "note": "Authored scope now includes hollow-section forming, fired-batch qualification, fit gauges and gravity socket joints, alongside existing pressure-joint scope. This resolves the manufacturing omission at document level only; neither operating implementation nor suitability for drinking water is certified."
     },
     {
       "review_id": "D02-09",

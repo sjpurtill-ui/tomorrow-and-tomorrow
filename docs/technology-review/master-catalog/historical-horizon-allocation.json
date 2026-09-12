@@ -9354,6 +9354,106 @@
       "classification_status": "editorial_review",
       "rationale": "Comparative trials of allocation rules are modern research. Experimental results do not force a population to adopt a rule.",
       "scope_digest": "9fe386e129ad3e8be96de54ad70a856b3dbd10a5a4da459f02a0c49cbc897aaf"
+    },
+    {
+      "id": "clay_pipe_forming",
+      "name": "Clay Pipe Forming",
+      "horizon": "H02",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "6d38ccf2c84651740d971855736fe43f782059c475f9237420aedbc4dca79f35"
+    },
+    {
+      "id": "ceramic_pipe_firing_qualification",
+      "name": "Ceramic Pipe Firing Qualification",
+      "horizon": "H02",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "de7f5e10df5beab321e5fb739fad4629d3b1cefa4eeaa4f3effbdc17742f54ef"
+    },
+    {
+      "id": "ceramic_pipe_fit_gauges",
+      "name": "Ceramic Pipe Fit Gauges",
+      "horizon": "H03",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "9e520ef25e17af13723bdd65a96c1c76090b32965e6c010d9f543bc0a27f7d28"
+    },
+    {
+      "id": "clay_pipe_socket_jointing",
+      "name": "Clay Pipe Socket Jointing",
+      "horizon": "H02",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "378ffda5df09694d7864bff5037d3a72e0d6ae72a324a56eaae79eea4f497c9b"
+    },
+    {
+      "id": "rigid_pipe_bedding",
+      "name": "Rigid Pipe Bedding",
+      "horizon": "H03",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "22a494b832603b72c53fed69021fa443375520dd018a269a69d6d74c439de88c"
+    },
+    {
+      "id": "buried_pipe_load_assessment",
+      "name": "Buried Pipe Load Assessment",
+      "horizon": "H03",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "418d1dae6fbbf2512575243d9785626ad88d88f46fa8154e1cec03b7f08f6cc9"
+    },
+    {
+      "id": "conduit_infiltration_testing",
+      "name": "Conduit Infiltration Testing",
+      "horizon": "H03",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "7e1e4c2d0f96757bbfb77face21e28a6c3df1ed5a8858bfa998cb4813b2a8304"
+    },
+    {
+      "id": "wooden_log_conduits",
+      "name": "Wooden Log Conduits",
+      "horizon": "H02",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "6effbef6035c4331baaf2723e09c6a1be57a0dd6129968400cf261ba26dc41df"
+    },
+    {
+      "id": "gravity_conduit_grade_control",
+      "name": "Gravity Conduit Grade Control",
+      "horizon": "H03",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "5a441a2e5872ed06e41ac04061f461e1a640704d87301e542c0106c7d9c87f25"
+    },
+    {
+      "id": "sewer_rodding_service",
+      "name": "Sewer Rodding Service",
+      "horizon": "H03",
+      "source_file": "conduit-manufacturing-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirical manufacture or installation of regional water infrastructure; this does not claim an exclusive origin or impose a date gate. Modern vitrification, instrumented load models and regulated acceptance are later refinements, not prerequisites to the proposed early practice.",
+      "scope_digest": "b18e17c9205d01627f9ea790048698b5ac4cad9962dedce8681043c8d7c4d7f7"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

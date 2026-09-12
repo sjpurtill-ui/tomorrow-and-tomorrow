@@ -1,0 +1,423 @@
+[
+  {
+    "field": "D02",
+    "id": "clay_pipe_forming",
+    "name": "Clay Pipe Forming",
+    "status": "authored_draft",
+    "foundations": "clay_shaping, clay_tempering",
+    "requires_all": [
+      "clay_shaping",
+      "clay_tempering"
+    ],
+    "requires_any": [],
+    "mechanism": "Shape continuous hollow clay sections with controlled walls and open ends.",
+    "operating_requirement": "Suitable prepared clay, water, forming supports, drying space, potters and elapsed workshop time.",
+    "consequence": "Produces unfired conduit sections; malformed or cracked sections consume labor and clay without usable installed capacity.",
+    "scope_boundary": "A formed hollow section is a different product from a pot, brick, pressure joint or completed drainage network.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clay_pipe_forming",
+      "local_demonstration": "Shape continuous hollow clay sections with controlled walls and open ends.",
+      "operating_requirements": "Suitable prepared clay, water, forming supports, drying space, potters and elapsed workshop time.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "ceramic_pipe_firing_qualification",
+    "name": "Ceramic Pipe Firing Qualification",
+    "status": "authored_draft",
+    "foundations": "clay_pipe_forming, kiln_control",
+    "requires_all": [
+      "clay_pipe_forming",
+      "kiln_control"
+    ],
+    "requires_any": [],
+    "mechanism": "Compare fired conduit batches for warping, absorption and fracture under declared service conditions.",
+    "operating_requirement": "Actual dried pipe sections, kiln volume, fuel, firing labor and sacrificed test pieces.",
+    "consequence": "Releases a bounded batch of fired pipe for suitable service; poor firing raises rejection and repair demand. Early fired clay does not automatically gain modern vitrified-pipe performance.",
+    "scope_boundary": "Qualifies the long hollow product and its losses; generic kiln control alone does not certify a usable pipe batch.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_pipe_firing_qualification",
+      "local_demonstration": "Compare fired conduit batches for warping, absorption and fracture under declared service conditions.",
+      "operating_requirements": "Actual dried pipe sections, kiln volume, fuel, firing labor and sacrificed test pieces.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "ceramic_pipe_fit_gauges",
+    "name": "Ceramic Pipe Fit Gauges",
+    "status": "authored_draft",
+    "foundations": "clay_pipe_forming, standard_measures",
+    "requires_all": [
+      "clay_pipe_forming",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "mechanism": "Compare fired ends and bores with repeatable mating references.",
+    "operating_requirement": "Reference gauges, cooled fired samples, inspectors and batch identity.",
+    "consequence": "Sorts compatible sections and rejects bad fits before crews spend transport and trench labor; it grants neither strength nor pressure certification.",
+    "scope_boundary": "Dimensional interchangeability is distinct from firing quality and generic shared units.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ceramic_pipe_fit_gauges",
+      "local_demonstration": "Compare fired ends and bores with repeatable mating references.",
+      "operating_requirements": "Reference gauges, cooled fired samples, inspectors and batch identity.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "clay_pipe_socket_jointing",
+    "name": "Clay Pipe Socket Jointing",
+    "status": "authored_draft",
+    "foundations": "ceramic_pipe_firing_qualification",
+    "requires_all": [
+      "ceramic_pipe_firing_qualification"
+    ],
+    "requires_any": [
+      [
+        "lime_mortar",
+        "puddled_clay_water_linings"
+      ]
+    ],
+    "mechanism": "Fit overlapping ceramic ends with a compatible placed joint seal.",
+    "operating_requirement": "Matched pipe sections, seal material, joint access, placement labor and time for the chosen seal.",
+    "consequence": "Joins finite gravity-conduit lengths with retained leakage and movement limits; a clay seal remains available without lime technology.",
+    "scope_boundary": "A gravity socket joint does not substitute for the existing pressure_pipe_jointing contract or a modern flexible compression joint.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clay_pipe_socket_jointing",
+      "local_demonstration": "Fit overlapping ceramic ends with a compatible placed joint seal.",
+      "operating_requirements": "Matched pipe sections, seal material, joint access, placement labor and time for the chosen seal.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "rigid_pipe_bedding",
+    "name": "Rigid Pipe Bedding",
+    "status": "authored_draft",
+    "foundations": "drainage",
+    "requires_all": [
+      "drainage"
+    ],
+    "requires_any": [
+      [
+        "ceramic_pipe_firing_qualification",
+        "wooden_log_conduits"
+      ]
+    ],
+    "mechanism": "Support a conduit continuously on a prepared trench bed and place compatible side support.",
+    "operating_requirement": "Excavated alignment, suitable bedding material, hauling capacity and crews working around real buried services.",
+    "consequence": "Reduces unsupported spans and installation breakage for the treated length, at material and labor cost; poor ground can still settle.",
+    "scope_boundary": "Installed support is separate from manufacturing pipe or improving a building foundation.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rigid_pipe_bedding",
+      "local_demonstration": "Support a conduit continuously on a prepared trench bed and place compatible side support.",
+      "operating_requirements": "Excavated alignment, suitable bedding material, hauling capacity and crews working around real buried services.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "buried_pipe_load_assessment",
+    "name": "Buried Pipe Load Assessment",
+    "status": "authored_draft",
+    "foundations": "rigid_pipe_bedding, standard_measures",
+    "requires_all": [
+      "rigid_pipe_bedding",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "mechanism": "Relate observed cover, surface loading and support to tested conduit resistance.",
+    "operating_requirement": "Site observations, representative pipe loading trials, recorded geometry and trained assessors.",
+    "consequence": "Restricts feasible burial depths and traffic crossings; weak sections require stronger supply, better support or rerouting instead of a universal durability bonus.",
+    "scope_boundary": "Empirical loading trials provide an early route; modern continuum analysis is not compulsory for all buried conduits.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "buried_pipe_load_assessment",
+      "local_demonstration": "Relate observed cover, surface loading and support to tested conduit resistance.",
+      "operating_requirements": "Site observations, representative pipe loading trials, recorded geometry and trained assessors.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "conduit_infiltration_testing",
+    "name": "Conduit Infiltration Testing",
+    "status": "authored_draft",
+    "foundations": "standard_measures",
+    "requires_all": [
+      "standard_measures"
+    ],
+    "requires_any": [
+      [
+        "clay_pipe_socket_jointing",
+        "wooden_log_conduits",
+        "pressure_pipe_jointing"
+      ]
+    ],
+    "mechanism": "Compare water gained or lost across an isolated installed conduit section under recorded conditions.",
+    "operating_requirement": "Reachable test ends, closures, water observations, measurement time and a crew able to distinguish leakage from storage change.",
+    "consequence": "Locates sections needing further investigation and prevents untested sections being treated as tight; consumes inspection time without automatically locating every individual defect.",
+    "scope_boundary": "Section acceptance differs from network-wide water_leak_balances and from testing pipe material before installation.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "conduit_infiltration_testing",
+      "local_demonstration": "Compare water gained or lost across an isolated installed conduit section under recorded conditions.",
+      "operating_requirements": "Reachable test ends, closures, water observations, measurement time and a crew able to distinguish leakage from storage change.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "wooden_log_conduits",
+    "name": "Wooden Log Conduits",
+    "status": "authored_draft",
+    "foundations": "joinery",
+    "requires_all": [
+      "joinery"
+    ],
+    "requires_any": [
+      [
+        "wheel_hub_boring",
+        "cylinder_boring"
+      ]
+    ],
+    "mechanism": "Bore timber lengths and fit adjoining ends into a continuous water passage.",
+    "operating_requirement": "Suitable logs, maintained boring tools, timberworkers, joining labor and replaceable sections.",
+    "consequence": "Supplies a locally feasible conduit route where timber and boring skill exist; bore size, leakage and timber condition limit service.",
+    "scope_boundary": "Independent of ceramics, cement and metal pipe production; making a wheel-hub hole alone does not yield a continuous installed water line.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wooden_log_conduits",
+      "local_demonstration": "Bore timber lengths and fit adjoining ends into a continuous water passage.",
+      "operating_requirements": "Suitable logs, maintained boring tools, timberworkers, joining labor and replaceable sections.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "gravity_conduit_grade_control",
+    "name": "Gravity Conduit Grade Control",
+    "status": "authored_draft",
+    "foundations": "geometric_survey, drainage",
+    "requires_all": [
+      "geometric_survey",
+      "drainage"
+    ],
+    "requires_any": [],
+    "mechanism": "Set and check an installed conduit invert against an intended downhill alignment.",
+    "operating_requirement": "Survey references, accessible work fronts, measuring tools and crews able to adjust bedding before covering.",
+    "consequence": "Makes chosen gravity flow paths feasible and exposes reverse grades before burial; terrain can demand extra excavation or another route.",
+    "scope_boundary": "Turns general geometric survey into a conduit installation control, with no free pumping or guaranteed self-cleaning flow.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "gravity_conduit_grade_control",
+      "local_demonstration": "Set and check an installed conduit invert against an intended downhill alignment.",
+      "operating_requirements": "Survey references, accessible work fronts, measuring tools and crews able to adjust bedding before covering.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  },
+  {
+    "field": "D02",
+    "id": "sewer_rodding_service",
+    "name": "Sewer Rodding Service",
+    "status": "authored_draft",
+    "foundations": "covered_sewers",
+    "requires_all": [
+      "covered_sewers"
+    ],
+    "requires_any": [
+      [
+        "joinery",
+        "wire_drawing"
+      ]
+    ],
+    "mechanism": "Pass connected rods and compatible clearing heads through accessible conduit runs.",
+    "operating_requirement": "Actual access points, rods, cleaning heads, crews, waste handling and a reachable blockage.",
+    "consequence": "Restores part of obstructed service through finite maintenance work; inaccessible or structurally failed sections require excavation or replacement.",
+    "scope_boundary": "Mechanical obstruction removal is a different operation from inspecting water quality, hydraulic flushing or manufacturing pipe.",
+    "branching_note": "All listed mandatory foundations and one member of each alternative group are needed. These are proposed causal requirements, not date or civilization gates.",
+    "recovery": "Pay an available specialist for delivered plans or instruction, or contribute to joint trials; local crews still demonstrate this exact operation with local materials. Imported finished pipes can supply a project without granting manufacturing mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sewer_rodding_service",
+      "local_demonstration": "Pass connected rods and compatible clearing heads through accessible conduit runs.",
+      "operating_requirements": "Actual access points, rods, cleaning heads, crews, waste handling and a reachable blockage.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "source availability",
+        "payment or reciprocal research work",
+        "travel and delivery delay",
+        "local trial material and labor",
+        "continued operation and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction; reproduce the demonstrated operation locally.",
+        "partnership": "Supply agreed observations, trial sections or workshop time; partners keep their own capacity and conditions.",
+        "purchased_research": "Commission a specified unresolved conduit problem; pay for delivered evidence and local interpretation, without a guaranteed successful result.",
+        "licensed_or_imported_service": "Buy finite delivered sections or contracted installation work; service access does not unlock local manufacture.",
+        "reverse_engineering": "Spend analysis time and sometimes sacrifice delivered sections; appearance alone cannot reveal firing history, hidden joint defects or service limits."
+      }
+    },
+    "implementation_status": "Authored proposal only. Runtime recipe, installed conduit state, local labor and inventories, acquisition penalties, rival choices and campaign pacing remain to be implemented."
+  }
+]
