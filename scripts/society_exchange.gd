@@ -482,6 +482,7 @@ static func advance(day:int)->void:
 		if float(item.study)>=1 or day<int(item.returned_day):continue
 		var supplies:=preload("res://scripts/paper_study.gd").use(study_work,(1-float(item.study))*float(item.work))
 		supplies.progress+=preload("res://scripts/microscope_observation.gd").use(item,float(supplies.progress),(1-float(item.study))*float(item.work))
+		supplies.progress+=preload("res://scripts/communications_analysis.gd").use(item,float(supplies.progress),(1-float(item.study))*float(item.work))
 		item.study=minf(1,float(item.study)+float(supplies.progress)/float(item.work));study_work-=float(supplies.work)
 		if item.study>=1:
 			if item.get("partnership_protocol",false):

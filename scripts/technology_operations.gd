@@ -4,6 +4,11 @@ extends RefCounted
 const LIMIT:=1000
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"optical_signal_bench":{"name": "Optical signaling bench", "gate": "optical_telegraphy", "requires": ["experimental_controls"], "cost": {"Optical Telegraph Sets": 1, "Timber": 2}, "work": 10.0, "workers": 0.5, "inputs": {"Paper": 0.02}, "power": 0.0, "services": {"signal_analysis": 1.0}},
+	"electrical_signal_bench":{"name": "Electrical communications bench", "gate": "electrical_telegraphy", "requires": ["electrical_measurement", "telephone_circuits"], "cost": {"Electrical Telegraph Sets": 1, "Telephone Sets": 1, "Timber": 2}, "work": 14.0, "workers": 1.0, "inputs": {"Paper": 0.02}, "power": 1.0, "services": {"signal_analysis": 3.0}},
+	"radio_signal_bench":{"name": "Radio communications bench", "gate": "superheterodyne_reception", "requires": ["amplitude_modulation", "frequency_modulation", "radio_telegraphy"], "cost": {"Superheterodyne Receivers": 1, "AM Exciters": 1, "FM Signal Sets": 1, "Radio Telegraph Sets": 1}, "work": 18.0, "workers": 1.0, "inputs": {"Paper": 0.02}, "power": 3.0, "services": {"signal_analysis": 5.0}},
+	"digital_signal_bench":{"name": "Digital communications bench", "gate": "store_forward_archives", "requires": ["error_detection_codes", "automatic_telegraphy", "manual_switchboards", "duplex_telegraphy", "inductive_line_loading"], "cost": {"Message Archive Units": 1, "Automatic Telegraph Sets": 1, "Telephone Switchboards": 1, "Duplex Telegraph Sets": 1, "Loading Coils": 1}, "work": 20.0, "workers": 1.5, "inputs": {"Message Tape": 0.02}, "power": 4.0, "services": {"signal_analysis": 8.0}},
+
 	"cannery":{"name":"Thermal food cannery","gate":"thermal_process_validation","requires":["food_retorts","double_seaming"],"cost":{"Food Retorts":1.0,"Seaming Heads":1.0,"Wrought Iron":2.0},"work":16.0,"workers":2.0,"inputs":{"Food Can Sets":0.2,"Coal":0.2,"Freshwater":0.5},"power":0.0,"services":{"food_preservation":10.0}},
 	"microscopy_bench":{"name":"Microscopy bench","gate":"compound_microscopy","requires":["specimen_slide_mounting"],"cost":{"Compound Microscopes":1.0,"Timber":2.0},"work":10.0,"workers":0.5,"inputs":{"Specimen Slides":0.1},"power":0.0,"services":{"specimen_observation":2.0}},
 	"pneumatic_workshop":{"name":"Pneumatic pressing workshop","gate":"pneumatic_pressing","requires":["compressed_air_systems"],"cost":{"Pneumatic Presses":1.0,"Pressure Pipe Fittings":1.0},"work":12.0,"workers":1.0,"inputs":{"Compressed Air":0.5},"power":0.0,"services":{"mechanical_work":3.0}},
@@ -191,11 +196,11 @@ static func valid(value:Variant)->bool:
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
-			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation","food_preservation"]:return false
-			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets"]:return false
+			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation","food_preservation","signal_analysis"]:return false
+			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0}:
-		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]
