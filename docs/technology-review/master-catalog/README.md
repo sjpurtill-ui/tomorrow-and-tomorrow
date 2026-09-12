@@ -21,14 +21,15 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The master expansion contains **479 draft identities** across eight fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **1,083 distinct IDs; 3,917 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **660 draft identities** across eleven fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **1,264 distinct IDs; 3,736 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
-Thirty-three explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
+Fifty-nine explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
 Review sections:
 
 - [Energy and Space Review](Energy%20and%20Space%20Review.md): 120 drafts.
 - [Governance, Economy and Learning Review](Governance%20Economy%20and%20Learning%20Review.md): 180 drafts.
 - [Food, Water and Ecology Review](Food%20Water%20and%20Ecology%20Review.md): 179 drafts.
+- [Medicine, Biology and Computation Review](Medicine%20Biology%20and%20Computation%20Review.md): 181 drafts, including proposed per-discovery recovery contracts.
 
 JSON records preserve the proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts. Run `tools/technology-review/check_master_catalog.py` for the inexpensive authoring check; it does not run the game or certify behavior.

@@ -89,7 +89,7 @@
   ],
   "unfinished": [
     "Remaining 4444 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
-    "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
+    "Full 2500–3000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
     "Civilian and future operating models beyond twelve primary-settlement plants; solar weather, battery wear and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 89 total unit types are not the proposed 96-role inventory",
@@ -99,7 +99,7 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Continue the full authored catalog across all 24 fields before further fine-grained production or artwork batches. Current 479 master drafts cover eight fields; medicine, biology, military depth, modern computation, transport, buildings and human futures still need broad authoring. Add explicit mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts.",
+    "Continue the full authored catalog across all 24 fields before further fine-grained production or artwork batches. Current 660 master drafts cover eleven fields. Military depth, materials, transport, buildings, culture and substantial human futures still need broad authoring. Add distinct mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts.",
     "Reconcile semantic duplicates and the existing 600 candidate atlas against the assembled master; never add candidate counts wholesale.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
@@ -125,9 +125,9 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 479,
-    "distinct_ids_accounted": 1083,
-    "remaining_to_author": 3917,
+    "authored_drafts": 660,
+    "distinct_ids_accounted": 1264,
+    "remaining_to_author": 3736,
     "complete": false
   }
 }
