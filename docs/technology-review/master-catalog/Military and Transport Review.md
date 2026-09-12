@@ -279,7 +279,7 @@ These sources ground selected design distinctions, not every prerequisite or num
 
 ## Validation and implementation handoff
 
-The assembled master has 842 authored drafts across 14 fields. Combined with 556 implemented baseline identities and 48 pending communications identities, it accounts for 1,446 identities toward 5,000; 3,554 remain to author. Eighty-three explicit alternative groups are recorded across all master sections.
+At this section's publication checkpoint, the assembled master had 842 authored drafts across 14 fields. Combined with 556 implemented baseline identities and 48 pending communications identities, it accounts for 1,446 identities toward 5,000; 3,554 remain to author. Eighty-three explicit alternative groups are recorded across all master sections.
 
 The identity and AND/OR check passes with no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes. Baseline and pending identities are treated as available roots for that draft check. This does not certify semantic uniqueness, physical production closure, actual recovery routes or full-history campaign pacing.
 
