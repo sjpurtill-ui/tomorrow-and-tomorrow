@@ -1,0 +1,257 @@
+{
+  "status": "authored_scope_review",
+  "mapped_candidates": 25,
+  "partial_candidates": 0,
+  "adds_discovery_identities": 0,
+  "mappings": [
+    {
+      "review_id": "D05-01",
+      "candidate_name": "Fire maintenance",
+      "mapped_ids": [
+        "ember_tending"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-02",
+      "candidate_name": "Fire ignition",
+      "mapped_ids": [
+        "friction_fire_ignition",
+        "percussion_fire_ignition"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-03",
+      "candidate_name": "Insulated hearths",
+      "mapped_ids": [
+        "hearth_heat_retention"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-04",
+      "candidate_name": "Fuel drying",
+      "mapped_ids": [
+        "fuel_air_drying",
+        "fuel_moisture_assessment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-05",
+      "candidate_name": "Charcoal heat control",
+      "mapped_ids": [
+        "charcoal",
+        "combustion_air_regulation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-06",
+      "candidate_name": "Water wheels",
+      "mapped_ids": [
+        "water_mills",
+        "overshot_waterwheels",
+        "undershot_waterwheels"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-07",
+      "candidate_name": "Wind driven mills",
+      "mapped_ids": [
+        "windmill_sail_control",
+        "windmill_yaw_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-08",
+      "candidate_name": "Mechanical power transmission",
+      "mapped_ids": [
+        "belt_power_transmission",
+        "chain_power_transmission",
+        "gear_ratios"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-09",
+      "candidate_name": "Furnace draft control",
+      "mapped_ids": [
+        "furnace_draft_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-10",
+      "candidate_name": "Heat resistant boilers",
+      "mapped_ids": [
+        "pressure_vessels",
+        "steam_superheating",
+        "boiler_feedwater_treatment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-11",
+      "candidate_name": "Steam engines",
+      "mapped_ids": [
+        "steam_propulsion",
+        "steam_engine_valve_timing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-12",
+      "candidate_name": "Steam turbines",
+      "mapped_ids": [
+        "steam_turbine_blading",
+        "steam_turbine_governing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-13",
+      "candidate_name": "Electrical generators",
+      "mapped_ids": [
+        "electrical_generators"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-14",
+      "candidate_name": "Alternating current transmission",
+      "mapped_ids": [
+        "alternating_current_distribution",
+        "three_phase_power",
+        "transmission_stability"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-15",
+      "candidate_name": "Hydroelectric power",
+      "mapped_ids": [
+        "hydroelectric_generation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-16",
+      "candidate_name": "Photovoltaic conversion",
+      "mapped_ids": [
+        "solar_cell_fabrication",
+        "photovoltaic_array_matching"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-17",
+      "candidate_name": "Lithium ion storage",
+      "mapped_ids": [
+        "lithium_intercalation_cells"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-18",
+      "candidate_name": "Fission power generation",
+      "mapped_ids": [
+        "reactor_engineering",
+        "reactor_heat_removal",
+        "electrical_generators"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-19",
+      "candidate_name": "Grid frequency control",
+      "mapped_ids": [
+        "grid_frequency_reserve_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-20",
+      "candidate_name": "High efficiency heat pumps",
+      "mapped_ids": [
+        "heat_pump_cycles",
+        "ground_source_heat_pumps",
+        "thermal_plant_heat_balances"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Heat-pump cycles, ground heat exchange and measured plant heat balances cover efficiency evaluation. A favorable coefficient of performance depends on actual source/sink temperatures and auxiliary demand, not the label high efficiency."
+    },
+    {
+      "review_id": "D05-21",
+      "candidate_name": "Long duration grid storage",
+      "mapped_ids": [
+        "storage_dispatch_duration_models",
+        "pumped_hydro_storage",
+        "compressed_air_energy_storage",
+        "flow_battery_storage"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-22",
+      "candidate_name": "Fusion confinement",
+      "mapped_ids": [
+        "fusion_plasma_confinement"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-23",
+      "candidate_name": "Fusion fuel breeding",
+      "mapped_ids": [
+        "fusion_blanket_fuel_breeding",
+        "fusion_fuel_inventory_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-24",
+      "candidate_name": "Fusion heat extraction",
+      "mapped_ids": [
+        "fusion_blanket_heat_extraction",
+        "fusion_divertor_heat_management"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Subject is represented by the listed authored mechanisms; this mapping is not proof of operating implementation or achieved performance."
+    },
+    {
+      "review_id": "D05-25",
+      "candidate_name": "Net electric fusion operation",
+      "mapped_ids": [
+        "fusion_power_integration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Net electric operation is the acceptance condition of Fusion Power Integration, not an additional discovery identity or a promise that a fusion experiment exports electricity."
+    }
+  ]
+}

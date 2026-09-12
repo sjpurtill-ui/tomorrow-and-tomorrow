@@ -21,13 +21,15 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The master expansion contains **2,389 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **2,993 distinct IDs; 2,007 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **2,427 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **3,031 distinct IDs; 1,969 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
-Four hundred and thirty-six explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
+439 explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
 [Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 604 baseline/pending identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. Historical-horizon allocation remains outstanding.
 
 Review sections:
+
+- [Energy Conversion and Storage Depth Review](Energy%20Conversion%20and%20Storage%20Depth%20Review.md): 38 drafts covering early fire, fuel conversion, storage media, marine energy and conditional fusion systems; 25 energy atlas subjects reconciled without adding duplicate IDs.
 
 - [Energy and Space Review](Energy%20and%20Space%20Review.md): 120 drafts.
 - [Governance, Economy and Learning Review](Governance%20Economy%20and%20Learning%20Review.md): 180 drafts.

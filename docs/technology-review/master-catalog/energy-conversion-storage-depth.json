@@ -1,0 +1,1198 @@
+[
+  {
+    "field": "D05",
+    "id": "ember_tending",
+    "name": "Ember Tending",
+    "foundations": "",
+    "mechanism": "Maintain a living ember bed through fuel placement, shelter and controlled air",
+    "operating_requirement": "Existing natural or transferred fire, dry combustible stock, sheltered site and repeated attention",
+    "consequence": "Keep usable fire between cooking or heating tasks; unattended or exhausted embers die",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ember_tending",
+      "local_demonstration": "Maintain a living ember bed through fuel placement, shelter and controlled air",
+      "operating_requirements": "Existing natural or transferred fire, dry combustible stock, sheltered site and repeated attention",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of ember tending; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on ember tending; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of maintain a living ember bed through fuel placement, shelter and controlled air; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for ember tending; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to ember tending using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "friction_fire_ignition",
+    "name": "Friction Fire Ignition",
+    "foundations": "",
+    "mechanism": "Concentrate rubbing work into an ember and transfer it into prepared tinder",
+    "operating_requirement": "Suitable dry wood, tinder, physical effort and practiced handling",
+    "consequence": "Recreate fire without a surviving flame; wet material and poor technique can defeat ignition",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "friction_fire_ignition",
+      "local_demonstration": "Concentrate rubbing work into an ember and transfer it into prepared tinder",
+      "operating_requirements": "Suitable dry wood, tinder, physical effort and practiced handling",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of friction fire ignition; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on friction fire ignition; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of concentrate rubbing work into an ember and transfer it into prepared tinder; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for friction fire ignition; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to friction fire ignition using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "percussion_fire_ignition",
+    "name": "Percussion Fire Ignition",
+    "foundations": "",
+    "mechanism": "Strike compatible materials to produce hot particles that ignite receptive tinder",
+    "operating_requirement": "Spark-producing stone or qualified metal pairs, prepared tinder and repeated trials",
+    "consequence": "Provide an alternative ignition route whose material requirements differ from friction",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "percussion_fire_ignition",
+      "local_demonstration": "Strike compatible materials to produce hot particles that ignite receptive tinder",
+      "operating_requirements": "Spark-producing stone or qualified metal pairs, prepared tinder and repeated trials",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of percussion fire ignition; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on percussion fire ignition; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of strike compatible materials to produce hot particles that ignite receptive tinder; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for percussion fire ignition; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to percussion fire ignition using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "hearth_heat_retention",
+    "name": "Hearth Heat Retention",
+    "foundations": "",
+    "mechanism": "Arrange a contained hearth and refractory surrounding mass to reduce unwanted heat loss",
+    "operating_requirement": "Suitable non-spalling hearth material, fuel, air supply and smoke escape",
+    "consequence": "Increase useful local heating per fuel load without removing combustion losses",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "ember_tending",
+        "friction_fire_ignition",
+        "percussion_fire_ignition"
+      ]
+    ],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hearth_heat_retention",
+      "local_demonstration": "Arrange a contained hearth and refractory surrounding mass to reduce unwanted heat loss",
+      "operating_requirements": "Suitable non-spalling hearth material, fuel, air supply and smoke escape",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of hearth heat retention; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on hearth heat retention; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of arrange a contained hearth and refractory surrounding mass to reduce unwanted heat loss; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for hearth heat retention; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to hearth heat retention using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "fuel_air_drying",
+    "name": "Fuel Air Drying",
+    "foundations": "",
+    "mechanism": "Expose split or loose fuel to moving air while excluding rain and ground moisture",
+    "operating_requirement": "Harvested fuel, space, shelter, handling and drying time under suitable weather",
+    "consequence": "Reduce water carried into the fire; weather and stock thickness limit throughput",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fuel_air_drying",
+      "local_demonstration": "Expose split or loose fuel to moving air while excluding rain and ground moisture",
+      "operating_requirements": "Harvested fuel, space, shelter, handling and drying time under suitable weather",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of fuel air drying; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on fuel air drying; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of expose split or loose fuel to moving air while excluding rain and ground moisture; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for fuel air drying; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to fuel air drying using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "hydrocarbon_catalytic_cracking",
+    "name": "Hydrocarbon Catalytic Cracking",
+    "foundations": "fuel_refining,industrial_catalyst_design",
+    "mechanism": "Break heavy hydrocarbon molecules into a controlled distribution of lighter products",
+    "operating_requirement": "Qualified feed, catalyst, heat, separation and coke handling",
+    "consequence": "Change fuel yields while consuming feed and catalyst capacity; products require qualification",
+    "status": "authored_draft",
+    "requires_all": [
+      "fuel_refining",
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hydrocarbon_catalytic_cracking",
+      "local_demonstration": "Break heavy hydrocarbon molecules into a controlled distribution of lighter products",
+      "operating_requirements": "Qualified feed, catalyst, heat, separation and coke handling",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of hydrocarbon catalytic cracking; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on hydrocarbon catalytic cracking; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of break heavy hydrocarbon molecules into a controlled distribution of lighter products; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for hydrocarbon catalytic cracking; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to hydrocarbon catalytic cracking using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "hydrocarbon_hydrotreating",
+    "name": "Hydrocarbon Hydrotreating",
+    "foundations": "fuel_refining,industrial_catalyst_design",
+    "mechanism": "React selected contaminants and unsaturated compounds with supplied hydrogen",
+    "operating_requirement": "Compatible reactor, hydrogen, catalyst, heat and off-gas treatment",
+    "consequence": "Produce a cleaner qualified stream with hydrogen consumption and residual waste",
+    "status": "authored_draft",
+    "requires_all": [
+      "fuel_refining",
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hydrocarbon_hydrotreating",
+      "local_demonstration": "React selected contaminants and unsaturated compounds with supplied hydrogen",
+      "operating_requirements": "Compatible reactor, hydrogen, catalyst, heat and off-gas treatment",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of hydrocarbon hydrotreating; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on hydrocarbon hydrotreating; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of react selected contaminants and unsaturated compounds with supplied hydrogen; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for hydrocarbon hydrotreating; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to hydrocarbon hydrotreating using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "steam_methane_reforming",
+    "name": "Steam Methane Reforming",
+    "foundations": "industrial_catalyst_design,industrial_heat_exchangers",
+    "mechanism": "Convert methane and steam into a hydrogen-bearing synthesis gas using supplied heat",
+    "operating_requirement": "Methane, water, catalyst, heat source and gas separation",
+    "consequence": "Supply hydrogen feedstock with carbon-bearing byproducts and conversion losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "industrial_heat_exchangers"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "steam_methane_reforming",
+      "local_demonstration": "Convert methane and steam into a hydrogen-bearing synthesis gas using supplied heat",
+      "operating_requirements": "Methane, water, catalyst, heat source and gas separation",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of steam methane reforming; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on steam methane reforming; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of convert methane and steam into a hydrogen-bearing synthesis gas using supplied heat; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for steam methane reforming; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to steam methane reforming using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "water_gas_shift_conversion",
+    "name": "Water Gas Shift Conversion",
+    "foundations": "industrial_catalyst_design,gas_composition_analysis",
+    "mechanism": "Convert carbon monoxide and steam toward hydrogen and carbon dioxide",
+    "operating_requirement": "Suitable feed gas, steam, catalyst and temperature control",
+    "consequence": "Adjust synthesis gas composition; does not remove downstream separation work",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "water_gas_shift_conversion",
+      "local_demonstration": "Convert carbon monoxide and steam toward hydrogen and carbon dioxide",
+      "operating_requirements": "Suitable feed gas, steam, catalyst and temperature control",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of water gas shift conversion; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on water gas shift conversion; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of convert carbon monoxide and steam toward hydrogen and carbon dioxide; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for water gas shift conversion; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to water gas shift conversion using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "synthetic_hydrocarbon_synthesis",
+    "name": "Synthetic Hydrocarbon Synthesis",
+    "foundations": "industrial_catalyst_design,gas_composition_analysis",
+    "mechanism": "Assemble hydrocarbons from conditioned synthesis gas over a catalyst",
+    "operating_requirement": "Qualified gas supply, catalyst, pressure equipment, heat removal and product separation",
+    "consequence": "Make liquid fuel or chemical feed from an alternative carbon source at finite conversion yield",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "synthetic_hydrocarbon_synthesis",
+      "local_demonstration": "Assemble hydrocarbons from conditioned synthesis gas over a catalyst",
+      "operating_requirements": "Qualified gas supply, catalyst, pressure equipment, heat removal and product separation",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of synthetic hydrocarbon synthesis; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on synthetic hydrocarbon synthesis; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of assemble hydrocarbons from conditioned synthesis gas over a catalyst; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for synthetic hydrocarbon synthesis; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to synthetic hydrocarbon synthesis using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "branching_note": "Conditioned synthesis gas can be imported; local gasification or reforming remains an operating supply option rather than compulsory domestic mastery."
+  },
+  {
+    "field": "D05",
+    "id": "catalytic_methanation",
+    "name": "Catalytic Methanation",
+    "foundations": "industrial_catalyst_design,gas_composition_analysis",
+    "mechanism": "React hydrogen with carbon oxides to produce methane and water",
+    "operating_requirement": "Hydrogen, carbon-bearing feed, catalyst, cooling and gas qualification",
+    "consequence": "Store supplied chemical energy in methane with conversion losses and carbon accounting",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "catalytic_methanation",
+      "local_demonstration": "React hydrogen with carbon oxides to produce methane and water",
+      "operating_requirements": "Hydrogen, carbon-bearing feed, catalyst, cooling and gas qualification",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of catalytic methanation; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on catalytic methanation; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of react hydrogen with carbon oxides to produce methane and water; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for catalytic methanation; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to catalytic methanation using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "ammonia_fuel_conversion",
+    "name": "Ammonia Fuel Conversion",
+    "foundations": "combustion_air_regulation,gas_composition_analysis",
+    "mechanism": "Qualify ammonia combustion and control its distinct ignition and emissions behavior",
+    "operating_requirement": "Ammonia delivery, compatible burner, ignition support, ventilation and exhaust treatment",
+    "consequence": "Use ammonia as a fuel carrier only where measured usable output and emissions permit",
+    "status": "authored_draft",
+    "requires_all": [
+      "combustion_air_regulation",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ammonia_fuel_conversion",
+      "local_demonstration": "Qualify ammonia combustion and control its distinct ignition and emissions behavior",
+      "operating_requirements": "Ammonia delivery, compatible burner, ignition support, ventilation and exhaust treatment",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of ammonia fuel conversion; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on ammonia fuel conversion; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of qualify ammonia combustion and control its distinct ignition and emissions behavior; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for ammonia fuel conversion; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to ammonia fuel conversion using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "branching_note": "Qualified imported ammonia can support local combustion development without domestic synthesis mastery."
+  },
+  {
+    "field": "D05",
+    "id": "ammonia_hydrogen_release",
+    "name": "Ammonia Hydrogen Release",
+    "foundations": "industrial_catalyst_design,gas_composition_analysis",
+    "mechanism": "Dissociate supplied ammonia and separate a qualified hydrogen stream",
+    "operating_requirement": "Ammonia, heat, catalyst and residual-ammonia removal",
+    "consequence": "Recover hydrogen for compatible consumers while paying conversion and purification costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ammonia_hydrogen_release",
+      "local_demonstration": "Dissociate supplied ammonia and separate a qualified hydrogen stream",
+      "operating_requirements": "Ammonia, heat, catalyst and residual-ammonia removal",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of ammonia hydrogen release; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on ammonia hydrogen release; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of dissociate supplied ammonia and separate a qualified hydrogen stream; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for ammonia hydrogen release; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to ammonia hydrogen release using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "branching_note": "Imported ammonia is a finite feedstock route; domestic synthesis is not a compulsory discovery gate."
+  },
+  {
+    "field": "D05",
+    "id": "alkaline_water_electrolysis",
+    "name": "Alkaline Water Electrolysis",
+    "foundations": "water_electrolysis",
+    "mechanism": "Use an alkaline electrolyte and separated electrodes for repeated water splitting",
+    "operating_requirement": "Water, compatible electrolyte, electrodes, separator, electricity and gas handling",
+    "consequence": "Produce separated hydrogen and oxygen with measured electrical consumption",
+    "status": "authored_draft",
+    "requires_all": [
+      "water_electrolysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "alkaline_water_electrolysis",
+      "local_demonstration": "Use an alkaline electrolyte and separated electrodes for repeated water splitting",
+      "operating_requirements": "Water, compatible electrolyte, electrodes, separator, electricity and gas handling",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of alkaline water electrolysis; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on alkaline water electrolysis; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of use an alkaline electrolyte and separated electrodes for repeated water splitting; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for alkaline water electrolysis; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to alkaline water electrolysis using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "polymer_electrolyte_water_splitting",
+    "name": "Polymer Electrolyte Water Splitting",
+    "foundations": "water_electrolysis,membrane_transport_models",
+    "mechanism": "Conduct protons through a qualified polymer membrane during water splitting",
+    "operating_requirement": "Purified water, suitable membrane and catalysts, electricity and pressure management",
+    "consequence": "Offer a distinct electrolyzer operating envelope with material and lifetime constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "water_electrolysis",
+      "membrane_transport_models"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polymer_electrolyte_water_splitting",
+      "local_demonstration": "Conduct protons through a qualified polymer membrane during water splitting",
+      "operating_requirements": "Purified water, suitable membrane and catalysts, electricity and pressure management",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of polymer electrolyte water splitting; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on polymer electrolyte water splitting; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of conduct protons through a qualified polymer membrane during water splitting; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for polymer electrolyte water splitting; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to polymer electrolyte water splitting using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "solid_oxide_water_splitting",
+    "name": "Solid Oxide Water Splitting",
+    "foundations": "water_electrolysis,ceramic_sintering_kinetics",
+    "mechanism": "Transport oxygen ions through hot ceramic electrolyte to split supplied steam",
+    "operating_requirement": "Qualified ceramic cells, steam, high-temperature heat, electricity and thermal cycling control",
+    "consequence": "Substitute some electrical demand with supplied heat without treating that heat as free",
+    "status": "authored_draft",
+    "requires_all": [
+      "water_electrolysis",
+      "ceramic_sintering_kinetics"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "solid_oxide_water_splitting",
+      "local_demonstration": "Transport oxygen ions through hot ceramic electrolyte to split supplied steam",
+      "operating_requirements": "Qualified ceramic cells, steam, high-temperature heat, electricity and thermal cycling control",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of solid oxide water splitting; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on solid oxide water splitting; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of transport oxygen ions through hot ceramic electrolyte to split supplied steam; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for solid oxide water splitting; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to solid oxide water splitting using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "thermochemical_water_splitting",
+    "name": "Thermochemical Water Splitting",
+    "foundations": "thermochemical_heat_storage,gas_composition_analysis",
+    "mechanism": "Use a regenerating reaction cycle driven by external heat to separate water products",
+    "operating_requirement": "Demonstrated cycle chemistry, high-grade heat, corrosion-resistant equipment and separation",
+    "consequence": "Investigate heat-driven hydrogen production subject to measured cycle closure and losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermochemical_heat_storage",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "thermochemical_water_splitting",
+      "local_demonstration": "Use a regenerating reaction cycle driven by external heat to separate water products",
+      "operating_requirements": "Demonstrated cycle chemistry, high-grade heat, corrosion-resistant equipment and separation",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of thermochemical water splitting; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on thermochemical water splitting; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of use a regenerating reaction cycle driven by external heat to separate water products; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for thermochemical water splitting; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to thermochemical water splitting using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "confidence_class": "performance_conditional",
+    "uncertainty_limit": "A research result opens evaluated development choices; economic scale, lifetime, net output and integrated reliability require separate measured evidence."
+  },
+  {
+    "field": "D05",
+    "id": "lithium_intercalation_cells",
+    "name": "Lithium Intercalation Cells",
+    "foundations": "electrochemical_cells,porous_battery_separators",
+    "mechanism": "Move lithium ions reversibly between qualified host electrodes",
+    "operating_requirement": "Compatible electrodes, dry controlled assembly, electrolyte, separator and charge limits",
+    "consequence": "Create rechargeable cells with chemistry-specific capacity, degradation and fault behavior",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrochemical_cells",
+      "porous_battery_separators"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lithium_intercalation_cells",
+      "local_demonstration": "Move lithium ions reversibly between qualified host electrodes",
+      "operating_requirements": "Compatible electrodes, dry controlled assembly, electrolyte, separator and charge limits",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of lithium intercalation cells; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on lithium intercalation cells; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of move lithium ions reversibly between qualified host electrodes; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for lithium intercalation cells; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to lithium intercalation cells using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "sodium_intercalation_cells",
+    "name": "Sodium Intercalation Cells",
+    "foundations": "electrochemical_cells,porous_battery_separators",
+    "mechanism": "Move sodium ions between qualified host structures during cycling",
+    "operating_requirement": "Compatible sodium-host electrodes, electrolyte, separator and controlled formation",
+    "consequence": "Provide a different material supply route for rechargeable storage; not a drop-in lithium replacement",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrochemical_cells",
+      "porous_battery_separators"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sodium_intercalation_cells",
+      "local_demonstration": "Move sodium ions between qualified host structures during cycling",
+      "operating_requirements": "Compatible sodium-host electrodes, electrolyte, separator and controlled formation",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of sodium intercalation cells; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on sodium intercalation cells; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of move sodium ions between qualified host structures during cycling; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for sodium intercalation cells; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to sodium intercalation cells using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "solid_electrolyte_cells",
+    "name": "Solid Electrolyte Cells",
+    "foundations": "electrochemical_cells",
+    "mechanism": "Conduct ions through a solid separator while maintaining electrode contact",
+    "operating_requirement": "Qualified electrolyte, interfaces, pressure or fabrication control and cycling evidence",
+    "consequence": "Investigate cell designs constrained by contact loss, defects and measured conductivity",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrochemical_cells"
+    ],
+    "requires_any": [
+      [
+        "material_phase_diagrams",
+        "membrane_transport_models"
+      ]
+    ],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "solid_electrolyte_cells",
+      "local_demonstration": "Conduct ions through a solid separator while maintaining electrode contact",
+      "operating_requirements": "Qualified electrolyte, interfaces, pressure or fabrication control and cycling evidence",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of solid electrolyte cells; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on solid electrolyte cells; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of conduct ions through a solid separator while maintaining electrode contact; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for solid electrolyte cells; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to solid electrolyte cells using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "branching_note": "Solid-electrolyte development can build from phase/material characterization or measured ion transport; compatible physical samples remain necessary.",
+    "confidence_class": "performance_conditional",
+    "uncertainty_limit": "A research result opens evaluated development choices; economic scale, lifetime, net output and integrated reliability require separate measured evidence."
+  },
+  {
+    "field": "D05",
+    "id": "metal_air_storage",
+    "name": "Metal Air Storage",
+    "foundations": "electrochemical_cells,gas_composition_analysis",
+    "mechanism": "Couple oxidation of a supplied metal with an air electrode and a defined regeneration route",
+    "operating_requirement": "Metal, electrolyte, air management and either external regeneration or qualified recharge",
+    "consequence": "Use metal inventory as an energy carrier with explicit replenishment and air-electrode limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrochemical_cells",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metal_air_storage",
+      "local_demonstration": "Couple oxidation of a supplied metal with an air electrode and a defined regeneration route",
+      "operating_requirements": "Metal, electrolyte, air management and either external regeneration or qualified recharge",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of metal air storage; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on metal air storage; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of couple oxidation of a supplied metal with an air electrode and a defined regeneration route; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for metal air storage; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to metal air storage using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "electrochemical_double_layer_storage",
+    "name": "Electrochemical Double Layer Storage",
+    "foundations": "electrochemical_cells,foil_capacitors",
+    "mechanism": "Store charge at high-area electrode-electrolyte interfaces",
+    "operating_requirement": "Porous electrodes, compatible electrolyte, separator, voltage limits and balancing",
+    "consequence": "Supply short-duration high-power buffering with leakage and limited stored energy",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrochemical_cells",
+      "foil_capacitors"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electrochemical_double_layer_storage",
+      "local_demonstration": "Store charge at high-area electrode-electrolyte interfaces",
+      "operating_requirements": "Porous electrodes, compatible electrolyte, separator, voltage limits and balancing",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of electrochemical double layer storage; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on electrochemical double layer storage; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of store charge at high-area electrode-electrolyte interfaces; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for electrochemical double layer storage; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to electrochemical double layer storage using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "liquid_air_energy_storage",
+    "name": "Liquid Air Energy Storage",
+    "foundations": "cryogenic_air_separation,heat_engine_cycles",
+    "mechanism": "Liquefy supplied air during charging and recover work during controlled warming and expansion",
+    "operating_requirement": "Electricity, compression and cryogenic equipment, thermal reservoirs and turbines",
+    "consequence": "Shift energy through a cryogenic inventory with substantial heat-management and round-trip losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryogenic_air_separation",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "liquid_air_energy_storage",
+      "local_demonstration": "Liquefy supplied air during charging and recover work during controlled warming and expansion",
+      "operating_requirements": "Electricity, compression and cryogenic equipment, thermal reservoirs and turbines",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of liquid air energy storage; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on liquid air energy storage; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of liquefy supplied air during charging and recover work during controlled warming and expansion; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for liquid air energy storage; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to liquid air energy storage using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "solid_mass_gravity_storage",
+    "name": "Solid Mass Gravity Storage",
+    "foundations": "mechanical_work_energy,mechanical_clutches",
+    "mechanism": "Raise a controlled solid mass and recover work through its descent",
+    "operating_requirement": "Mass, elevation, load-rated structures, lifting equipment and brakes",
+    "consequence": "Store finite potential energy separately from power rating; structure and travel bound capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_work_energy",
+      "mechanical_clutches"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "solid_mass_gravity_storage",
+      "local_demonstration": "Raise a controlled solid mass and recover work through its descent",
+      "operating_requirements": "Mass, elevation, load-rated structures, lifting equipment and brakes",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of solid mass gravity storage; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on solid mass gravity storage; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of raise a controlled solid mass and recover work through its descent; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for solid mass gravity storage; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to solid mass gravity storage using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "tidal_stream_generation",
+    "name": "Tidal Stream Generation",
+    "foundations": "reaction_turbines,tidal_harmonic_analysis",
+    "mechanism": "Extract work from reversing tidal currents through a submerged rotor",
+    "operating_requirement": "Measured currents, foundations or moorings, marine service access and electrical connection",
+    "consequence": "Generate site-dependent periodic power while accounting for wakes and ecological disturbance",
+    "status": "authored_draft",
+    "requires_all": [
+      "reaction_turbines",
+      "tidal_harmonic_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tidal_stream_generation",
+      "local_demonstration": "Extract work from reversing tidal currents through a submerged rotor",
+      "operating_requirements": "Measured currents, foundations or moorings, marine service access and electrical connection",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of tidal stream generation; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on tidal stream generation; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of extract work from reversing tidal currents through a submerged rotor; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for tidal stream generation; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to tidal stream generation using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "wave_oscillating_water_columns",
+    "name": "Wave Oscillating Water Columns",
+    "foundations": "mechanical_work_energy,hydrostatic_pressure",
+    "mechanism": "Use wave motion in a chamber to drive oscillating air through a suitable turbine",
+    "operating_requirement": "Wave resource, chamber, compatible turbine, mooring or shoreline works and storm survival",
+    "consequence": "Convert a portion of wave energy with highly variable output and marine maintenance",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_work_energy",
+      "hydrostatic_pressure"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wave_oscillating_water_columns",
+      "local_demonstration": "Use wave motion in a chamber to drive oscillating air through a suitable turbine",
+      "operating_requirements": "Wave resource, chamber, compatible turbine, mooring or shoreline works and storm survival",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of wave oscillating water columns; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on wave oscillating water columns; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of use wave motion in a chamber to drive oscillating air through a suitable turbine; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for wave oscillating water columns; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to wave oscillating water columns using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "branching_note": "An oscillating air turbine extracts wave work; it does not require a combustion gas-turbine thermodynamic cycle."
+  },
+  {
+    "field": "D05",
+    "id": "wave_point_absorbers",
+    "name": "Wave Point Absorbers",
+    "foundations": "mechanical_oscillation",
+    "mechanism": "Convert relative motion between floating and reacting bodies into useful power",
+    "operating_requirement": "Qualified buoy, reaction system, power takeoff, mooring and sea access",
+    "consequence": "Harvest local wave motion subject to stroke, fatigue, storm and conversion limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_oscillation"
+    ],
+    "requires_any": [
+      [
+        "electrical_generators",
+        "mechanical_work_energy"
+      ]
+    ],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wave_point_absorbers",
+      "local_demonstration": "Convert relative motion between floating and reacting bodies into useful power",
+      "operating_requirements": "Qualified buoy, reaction system, power takeoff, mooring and sea access",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of wave point absorbers; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on wave point absorbers; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of convert relative motion between floating and reacting bodies into useful power; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for wave point absorbers; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to wave point absorbers using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "branching_note": "The takeoff may first supply useful mechanical work; electrical generation is an alternative consumer, not the only discovery route."
+  },
+  {
+    "field": "D05",
+    "id": "ocean_thermal_energy_conversion",
+    "name": "Ocean Thermal Energy Conversion",
+    "foundations": "heat_engine_cycles,industrial_heat_exchangers",
+    "mechanism": "Drive a cycle between sufficiently different ocean temperatures",
+    "operating_requirement": "Warm and cold water access, large heat exchangers, pumping and marine structures",
+    "consequence": "Produce net power only after subtracting pumping and auxiliary loads from low-gradient output",
+    "status": "authored_draft",
+    "requires_all": [
+      "heat_engine_cycles",
+      "industrial_heat_exchangers"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ocean_thermal_energy_conversion",
+      "local_demonstration": "Drive a cycle between sufficiently different ocean temperatures",
+      "operating_requirements": "Warm and cold water access, large heat exchangers, pumping and marine structures",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of ocean thermal energy conversion; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on ocean thermal energy conversion; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of drive a cycle between sufficiently different ocean temperatures; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for ocean thermal energy conversion; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to ocean thermal energy conversion using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "salinity_gradient_power",
+    "name": "Salinity Gradient Power",
+    "foundations": "membrane_transport_models,gas_composition_analysis",
+    "mechanism": "Recover a fraction of the free energy released as separated salinities mix",
+    "operating_requirement": "Sustained fresh and saline feeds, qualified membranes, pretreatment and discharge handling",
+    "consequence": "Generate limited site-dependent power with fouling, pumping and ecological constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "membrane_transport_models",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "salinity_gradient_power",
+      "local_demonstration": "Recover a fraction of the free energy released as separated salinities mix",
+      "operating_requirements": "Sustained fresh and saline feeds, qualified membranes, pretreatment and discharge handling",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of salinity gradient power; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on salinity gradient power; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of recover a fraction of the free energy released as separated salinities mix; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for salinity gradient power; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to salinity gradient power using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "reactor_neutron_economy",
+    "name": "Reactor Neutron Economy",
+    "foundations": "nuclear_fission,neutron_moderation",
+    "mechanism": "Account for neutron production, absorption and leakage in a modeled reactor configuration",
+    "operating_requirement": "Validated nuclear data, geometry, composition and measurement evidence",
+    "consequence": "Compare reactor concepts and margins without creating a functioning or self-regulating core",
+    "status": "authored_draft",
+    "requires_all": [
+      "nuclear_fission",
+      "neutron_moderation"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reactor_neutron_economy",
+      "local_demonstration": "Account for neutron production, absorption and leakage in a modeled reactor configuration",
+      "operating_requirements": "Validated nuclear data, geometry, composition and measurement evidence",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of reactor neutron economy; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on reactor neutron economy; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of account for neutron production, absorption and leakage in a modeled reactor configuration; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for reactor neutron economy; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to reactor neutron economy using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "reactor_fuel_burnup_models",
+    "name": "Reactor Fuel Burnup Models",
+    "foundations": "reactor_neutron_economy,nuclear_fuel_fabrication",
+    "mechanism": "Track changing fuel composition and reactivity through irradiation",
+    "operating_requirement": "Validated depletion models, irradiation history, measurements and qualified fuel limits",
+    "consequence": "Plan finite fuel use and replacement while representing changing heat and radiation inventories",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_neutron_economy",
+      "nuclear_fuel_fabrication"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reactor_fuel_burnup_models",
+      "local_demonstration": "Track changing fuel composition and reactivity through irradiation",
+      "operating_requirements": "Validated depletion models, irradiation history, measurements and qualified fuel limits",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of reactor fuel burnup models; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on reactor fuel burnup models; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of track changing fuel composition and reactivity through irradiation; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for reactor fuel burnup models; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to reactor fuel burnup models using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "reactor_containment_systems",
+    "name": "Reactor Containment Systems",
+    "foundations": "reactor_engineering,pressure_vessels",
+    "mechanism": "Provide monitored confinement boundaries for specified reactor release scenarios",
+    "operating_requirement": "Qualified structure, isolation equipment, inspection, power and scenario evidence",
+    "consequence": "Limit modeled releases within demonstrated design conditions; no absolute containment guarantee",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_engineering",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reactor_containment_systems",
+      "local_demonstration": "Provide monitored confinement boundaries for specified reactor release scenarios",
+      "operating_requirements": "Qualified structure, isolation equipment, inspection, power and scenario evidence",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of reactor containment systems; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on reactor containment systems; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of provide monitored confinement boundaries for specified reactor release scenarios; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for reactor containment systems; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to reactor containment systems using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "passive_reactor_cooling",
+    "name": "Passive Reactor Cooling",
+    "foundations": "reactor_heat_removal,hydrostatic_pressure",
+    "mechanism": "Use gravity or natural circulation to transfer heat under defined conditions",
+    "operating_requirement": "Maintained flow paths, adequate reservoirs or heat sinks and tested transition behavior",
+    "consequence": "Reduce selected powered-cooling dependencies while retaining finite duration and geometry limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_heat_removal",
+      "hydrostatic_pressure"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "passive_reactor_cooling",
+      "local_demonstration": "Use gravity or natural circulation to transfer heat under defined conditions",
+      "operating_requirements": "Maintained flow paths, adequate reservoirs or heat sinks and tested transition behavior",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of passive reactor cooling; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on passive reactor cooling; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of use gravity or natural circulation to transfer heat under defined conditions; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for passive reactor cooling; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to passive reactor cooling using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "reactor_decommissioning_sequence",
+    "name": "Reactor Decommissioning Sequence",
+    "foundations": "nuclear_waste_characterization,radiation_measurement",
+    "mechanism": "Sequence characterization, isolation and dismantling against changing radiological conditions",
+    "operating_requirement": "Competent crews, shielding, remote tools, waste routes and continuing site support",
+    "consequence": "Retire an installation through costly work instead of deleting its residual material obligations",
+    "status": "authored_draft",
+    "requires_all": [
+      "nuclear_waste_characterization",
+      "radiation_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reactor_decommissioning_sequence",
+      "local_demonstration": "Sequence characterization, isolation and dismantling against changing radiological conditions",
+      "operating_requirements": "Competent crews, shielding, remote tools, waste routes and continuing site support",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of reactor decommissioning sequence; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on reactor decommissioning sequence; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of sequence characterization, isolation and dismantling against changing radiological conditions; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for reactor decommissioning sequence; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to reactor decommissioning sequence using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_blanket_fuel_breeding",
+    "name": "Fusion Blanket Fuel Breeding",
+    "foundations": "fusion_plasma_confinement,neutron_moderation,radiation_measurement",
+    "mechanism": "Evaluate a blanket that uses fusion neutrons to regenerate a required fuel component",
+    "operating_requirement": "Qualified blanket materials, measured neutron balance, extraction system and startup inventory",
+    "consequence": "Investigate fuel self-supply only when breeding, recovery, losses and inventory jointly close",
+    "status": "authored_draft",
+    "requires_all": [
+      "fusion_plasma_confinement",
+      "neutron_moderation",
+      "radiation_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fusion_blanket_fuel_breeding",
+      "local_demonstration": "Evaluate a blanket that uses fusion neutrons to regenerate a required fuel component",
+      "operating_requirements": "Qualified blanket materials, measured neutron balance, extraction system and startup inventory",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of fusion blanket fuel breeding; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on fusion blanket fuel breeding; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of evaluate a blanket that uses fusion neutrons to regenerate a required fuel component; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for fusion blanket fuel breeding; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to fusion blanket fuel breeding using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "branching_note": "Fusion blanket experiments need neutron interaction evidence, not prior construction of a fission reactor.",
+    "confidence_class": "performance_conditional",
+    "uncertainty_limit": "A research result opens evaluated development choices; economic scale, lifetime, net output and integrated reliability require separate measured evidence."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_fuel_inventory_control",
+    "name": "Fusion Fuel Inventory Control",
+    "foundations": "fusion_blanket_fuel_breeding,material_accounting",
+    "mechanism": "Track fuel storage, retention, processing, decay and leakage across a fusion plant",
+    "operating_requirement": "Measured inventories, containment, processing capacity and replenishment access",
+    "consequence": "Constrain plant availability by recoverable fuel rather than theoretical breeding alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "fusion_blanket_fuel_breeding",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fusion_fuel_inventory_control",
+      "local_demonstration": "Track fuel storage, retention, processing, decay and leakage across a fusion plant",
+      "operating_requirements": "Measured inventories, containment, processing capacity and replenishment access",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of fusion fuel inventory control; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on fusion fuel inventory control; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of track fuel storage, retention, processing, decay and leakage across a fusion plant; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for fusion fuel inventory control; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to fusion fuel inventory control using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "confidence_class": "performance_conditional",
+    "uncertainty_limit": "A research result opens evaluated development choices; economic scale, lifetime, net output and integrated reliability require separate measured evidence."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_divertor_heat_management",
+    "name": "Fusion Divertor Heat Management",
+    "foundations": "fusion_plasma_confinement,reactor_heat_removal",
+    "mechanism": "Direct and remove concentrated exhaust heat and particles from a confined plasma",
+    "operating_requirement": "Qualified exhaust geometry, cooling, plasma control and replaceable exposed components",
+    "consequence": "Extend an operating envelope only within demonstrated erosion and heat-flux limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "fusion_plasma_confinement",
+      "reactor_heat_removal"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fusion_divertor_heat_management",
+      "local_demonstration": "Direct and remove concentrated exhaust heat and particles from a confined plasma",
+      "operating_requirements": "Qualified exhaust geometry, cooling, plasma control and replaceable exposed components",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of fusion divertor heat management; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on fusion divertor heat management; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of direct and remove concentrated exhaust heat and particles from a confined plasma; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for fusion divertor heat management; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to fusion divertor heat management using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "confidence_class": "performance_conditional",
+    "uncertainty_limit": "A research result opens evaluated development choices; economic scale, lifetime, net output and integrated reliability require separate measured evidence."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_blanket_heat_extraction",
+    "name": "Fusion Blanket Heat Extraction",
+    "foundations": "fusion_blanket_fuel_breeding,industrial_heat_exchangers",
+    "mechanism": "Transfer deposited blanket heat to a useful plant loop while maintaining fuel and structural functions",
+    "operating_requirement": "Qualified coolant, heat exchangers, pumping, materials compatibility and remote maintenance",
+    "consequence": "Make measured thermal output available to conversion equipment with auxiliary demand and outages",
+    "status": "authored_draft",
+    "requires_all": [
+      "fusion_blanket_fuel_breeding",
+      "industrial_heat_exchangers"
+    ],
+    "requires_any": [],
+    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fusion_blanket_heat_extraction",
+      "local_demonstration": "Transfer deposited blanket heat to a useful plant loop while maintaining fuel and structural functions",
+      "operating_requirements": "Qualified coolant, heat exchangers, pumping, materials compatibility and remote maintenance",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of fusion blanket heat extraction; reproduce the method locally with the required equipment and inputs.",
+        "partnership": "Contribute paid staff, samples or operating evidence to joint work on fusion blanket heat extraction; access, communication delay and dependence remain negotiated.",
+        "purchased_research": "Commission a bounded investigation of transfer deposited blanket heat to a useful plant loop while maintaining fuel and structural functions; pay for evidence and local acceptance work, without a guaranteed favorable result.",
+        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for fusion blanket heat extraction; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
+        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to fusion blanket heat extraction using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
+      }
+    },
+    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
+    "confidence_class": "performance_conditional",
+    "uncertainty_limit": "A research result opens evaluated development choices; economic scale, lifetime, net output and integrated reliability require separate measured evidence."
+  }
+]
