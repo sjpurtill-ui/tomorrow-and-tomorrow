@@ -3127,7 +3127,7 @@
       "domain": "knowledge",
       "id": "specimen_slide_mounting",
       "name": "Specimen Slide Mounting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/compound_microscopy.png",
@@ -3629,9 +3629,9 @@
   "live_art_complete": false,
   "live_count": 453,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 411,
+  "queued_count": 410,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 42
+  "verified_count": 43
 }

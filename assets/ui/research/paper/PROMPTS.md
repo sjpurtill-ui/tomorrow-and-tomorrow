@@ -51,3 +51,5 @@ Built-in image generation, using the approved apprentice image as a style refere
 - Cylinder Boring and Pneumatic Pressing: [exact prompts and provenance](PNEUMATIC_ENGINEERING_PROMPTS.md), built-in generation with the approved apprentice style reference.
 
 - Compound Microscopy: [exact prompt and provenance](COMPOUND_MICROSCOPY_PROMPT.md), built-in generation with the approved apprentice style reference.
+
+- [Specimen Slide Mounting](SPECIMEN_SLIDE_MOUNTING_PROMPT.md) — botanical slide preparation, built-in generation.
