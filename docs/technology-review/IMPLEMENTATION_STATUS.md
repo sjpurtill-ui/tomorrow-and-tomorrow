@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 111: **459 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 112: **463 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1227,3 +1227,16 @@ Ceramic Crucibles and Refractory Brick Firing receive individually generated sub
 No gameplay, save or discovery additions. Task-owned files: two subject PNGs/import metadata and prompt record. Shared files: research artwork bindings, prompt index, art manifest and this record. Native player presentation remains unverified. The active historical diagnostic session 57160 was confirmed live at the start; no target completion is claimed. Full-history work remains active and incomplete.
 
 Verification: both headless import passes exited cleanly. All eleven atlas cases pass with zero errors/failures/skips/orphans, covering all 45 explicit subject bindings, texture-size/mipmap requirements and cache limits. Manifest: 459 discoveries, 45 verified illustrations and 414 queued live illustrations. No full-history art-completion claim.
+
+
+## Checkpoint 112: microprogrammed machine control
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `d874a75`. No canonical integration or player launch.
+
+Four authored discoveries add diode control stores, microinstruction sequencing, arithmetic-logic units and microprogrammed machine control. Four real recipes consume existing electronics and converge on an alternative Programmable Controllers assembly. The original controller recipe remains available. Both feed the existing commissioned, staffed and powered programmable workshop. [Microprogramming](MICROPROGRAMMING.md) records the primary architectural source, manufacturing abstractions and limits; no instruction execution, clock model, modern chip fabrication or firmware patching is claimed.
+
+Verification: 33 cases pass with zero errors/failures/skips/orphans: new microprogramming branch 3, civilian industry 12, technology tree 9 and production dependency audit 9. The new manufacturing test checks physical component consumption, installs the resulting controller and demonstrates zero workshop output without electricity followed by actual powered service; it uses a fixture-installed generator. Local method and missing-component guards and the original recipe's continued identity are covered.
+
+Task-owned files: microprogramming module, tests and documentation. Shared files: civilian product catalog, discovery_system.gd (one registration; integration hotspot), art queue and this record. No save fields added; old records remain compatible, new IDs require this revision. Totals: 463 authored discoveries, 140 civilian recipes, eleven plant types, 89 military roles and 45 reviewed images. Modern/future coverage and full-history work remain incomplete, including 4,537 further authored identities. The loaded 414-discovery historical diagnostic was confirmed live at the start; its target completion is not claimed.
+
+Both graph and resource/research audits complete without errors: 463 reachable discovery identities and 237 explicit routes; all 140 civilian recipes and eleven installation types structurally reachable in seven production rounds. Manifest: 45 verified and 418 queued live illustrations. These are ideal-resource structural checks, not measured full-campaign pacing or integration evidence.

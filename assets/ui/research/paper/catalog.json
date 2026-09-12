@@ -3562,6 +3562,38 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/diode_control_stores.png",
+      "description": "A wired diode matrix stores repeatable low-level control words selected by an address decoder.",
+      "domain": "knowledge",
+      "id": "diode_control_stores",
+      "name": "Diode Control Stores",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microinstruction_sequencing.png",
+      "description": "A dedicated sequencer chooses the next control word, including conditional paths within an instruction.",
+      "domain": "knowledge",
+      "id": "microinstruction_sequencing",
+      "name": "Microinstruction Sequencing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/arithmetic_logic_units.png",
+      "description": "A selected operation directs shared registers through arithmetic or logical circuitry.",
+      "domain": "knowledge",
+      "id": "arithmetic_logic_units",
+      "name": "Arithmetic-Logic Units",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microprogrammed_machine_control.png",
+      "description": "Stored control words coordinate an arithmetic datapath and machine interfaces to execute a programmable controller design.",
+      "domain": "knowledge",
+      "id": "microprogrammed_machine_control",
+      "name": "Microprogrammed Machine Control",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/seed_oil_pressing.png",
       "description": "Pressure separates oil from collected oil-bearing seeds; the resulting oil can serve as a printing-ink vehicle.",
       "domain": "production",
@@ -3675,9 +3707,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 459,
+  "live_count": 463,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 414,
+  "queued_count": 418,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

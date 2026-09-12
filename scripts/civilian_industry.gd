@@ -2,6 +2,11 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"diode_control_store":{"name": "Diode Control Stores", "output": "Control Stores", "gate": "diode_control_stores", "materials": {"Silicon Diodes": 6.0, "Memory Decoders": 1.0, "Copper Wire": 0.5}, "days": 4.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"microsequencer":{"name": "Microinstruction Sequencing", "output": "Microsequencers", "gate": "microinstruction_sequencing", "materials": {"Program Counters": 1.0, "Branch Units": 1.0, "Register Modules": 1.0}, "days": 4.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"arithmetic_logic_unit":{"name": "Arithmetic-Logic Units", "output": "Arithmetic-Logic Units", "gate": "arithmetic_logic_units", "materials": {"Adder Modules": 1.0, "Logic Modules": 2.0, "Inverter Modules": 1.0, "Register Banks": 1.0}, "days": 4.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+	"microprogrammed_controller":{"name": "Microprogrammed Machine Control", "output": "Programmable Controllers", "gate": "microprogrammed_machine_control", "materials": {"Control Stores": 1.0, "Microsequencers": 1.0, "Arithmetic-Logic Units": 1.0, "Read-Write Memory": 1.0, "Electronic Controllers": 1.0, "Insulated Cable": 1.0}, "days": 4.0, "tooling": {"Steel": 2.0, "Optical Lenses": 1.0}},
+
 	"prepared_clay":{"name": "Clay Levigation", "output": "Prepared Clay", "gate": "clay_levigation", "materials": {"Clay": 2.0, "Freshwater": 2.0}, "days": 2.0, "tooling": {"Timber": 2.0, "Stone": 2.0}},
 	"ceramic_grog":{"name": "Grog Preparation", "output": "Ceramic Grog", "gate": "grog_preparation", "materials": {"Clay": 1.0, "Timber": 1.0}, "days": 2.0, "tooling": {"Stone": 3.0}},
 	"refractory_clay":{"name": "Refractory Body Trials", "output": "Refractory Clay", "gate": "refractory_body_trials", "materials": {"Prepared Clay": 2.0, "Ceramic Grog": 0.5, "Fine Sand": 0.5}, "days": 3.0, "tooling": {"Stone": 3.0, "Clay": 3.0}},
