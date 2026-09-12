@@ -25,6 +25,8 @@ The master expansion contains **1,437 draft identities** across all twenty-four 
 
 One hundred and fifty-nine explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
+[Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 604 baseline/pending identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. Historical-horizon allocation remains outstanding.
+
 Review sections:
 
 - [Energy and Space Review](Energy%20and%20Space%20Review.md): 120 drafts.

@@ -36,7 +36,249 @@
     "D23": 60,
     "D24": 56
   },
+  "field_coverage": [
+    {
+      "id": "D01",
+      "name": "Food and agriculture",
+      "target": 280,
+      "implemented_baseline": 43,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 103,
+      "remaining_to_target": 177
+    },
+    {
+      "id": "D02",
+      "name": "Water and sanitation",
+      "target": 180,
+      "implemented_baseline": 16,
+      "pending_communications": 0,
+      "authored_drafts": 59,
+      "accounted": 75,
+      "remaining_to_target": 105
+    },
+    {
+      "id": "D03",
+      "name": "Ecology and land stewardship",
+      "target": 180,
+      "implemented_baseline": 7,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 67,
+      "remaining_to_target": 113
+    },
+    {
+      "id": "D04",
+      "name": "Materials and chemical processes",
+      "target": 300,
+      "implemented_baseline": 67,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 127,
+      "remaining_to_target": 173
+    },
+    {
+      "id": "D05",
+      "name": "Energy",
+      "target": 260,
+      "implemented_baseline": 19,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 79,
+      "remaining_to_target": 181
+    },
+    {
+      "id": "D06",
+      "name": "Machinery and mechanical production",
+      "target": 240,
+      "implemented_baseline": 71,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 131,
+      "remaining_to_target": 109
+    },
+    {
+      "id": "D07",
+      "name": "Fibers and domestic technologies",
+      "target": 120,
+      "implemented_baseline": 16,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 76,
+      "remaining_to_target": 44
+    },
+    {
+      "id": "D08",
+      "name": "Buildings and settlements",
+      "target": 220,
+      "implemented_baseline": 13,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 73,
+      "remaining_to_target": 147
+    },
+    {
+      "id": "D09",
+      "name": "Overland transport",
+      "target": 180,
+      "implemented_baseline": 24,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 84,
+      "remaining_to_target": 96
+    },
+    {
+      "id": "D10",
+      "name": "Maritime technologies",
+      "target": 160,
+      "implemented_baseline": 27,
+      "pending_communications": 0,
+      "authored_drafts": 61,
+      "accounted": 88,
+      "remaining_to_target": 72
+    },
+    {
+      "id": "D11",
+      "name": "Flight",
+      "target": 160,
+      "implemented_baseline": 7,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 67,
+      "remaining_to_target": 93
+    },
+    {
+      "id": "D12",
+      "name": "Mathematics measurement and physical models",
+      "target": 180,
+      "implemented_baseline": 65,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 125,
+      "remaining_to_target": 55
+    },
+    {
+      "id": "D13",
+      "name": "Records and communications",
+      "target": 240,
+      "implemented_baseline": 20,
+      "pending_communications": 34,
+      "authored_drafts": 60,
+      "accounted": 114,
+      "remaining_to_target": 126
+    },
+    {
+      "id": "D14",
+      "name": "Medicine and care",
+      "target": 280,
+      "implemented_baseline": 13,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 73,
+      "remaining_to_target": 207
+    },
+    {
+      "id": "D15",
+      "name": "Biology",
+      "target": 200,
+      "implemented_baseline": 0,
+      "pending_communications": 0,
+      "authored_drafts": 61,
+      "accounted": 61,
+      "remaining_to_target": 139
+    },
+    {
+      "id": "D16",
+      "name": "Governance",
+      "target": 240,
+      "implemented_baseline": 6,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 66,
+      "remaining_to_target": 174
+    },
+    {
+      "id": "D17",
+      "name": "Economy and exchange",
+      "target": 200,
+      "implemented_baseline": 7,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 67,
+      "remaining_to_target": 133
+    },
+    {
+      "id": "D18",
+      "name": "Learning and organized work",
+      "target": 160,
+      "implemented_baseline": 9,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 69,
+      "remaining_to_target": 91
+    },
+    {
+      "id": "D19",
+      "name": "Culture",
+      "target": 180,
+      "implemented_baseline": 9,
+      "pending_communications": 0,
+      "authored_drafts": 59,
+      "accounted": 68,
+      "remaining_to_target": 112
+    },
+    {
+      "id": "D20",
+      "name": "Military systems",
+      "target": 280,
+      "implemented_baseline": 67,
+      "pending_communications": 0,
+      "authored_drafts": 61,
+      "accounted": 128,
+      "remaining_to_target": 152
+    },
+    {
+      "id": "D21",
+      "name": "Electronics and computation",
+      "target": 300,
+      "implemented_baseline": 34,
+      "pending_communications": 14,
+      "authored_drafts": 60,
+      "accounted": 108,
+      "remaining_to_target": 192
+    },
+    {
+      "id": "D22",
+      "name": "Earth systems and resources",
+      "target": 160,
+      "implemented_baseline": 16,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 76,
+      "remaining_to_target": 84
+    },
+    {
+      "id": "D23",
+      "name": "Space",
+      "target": 180,
+      "implemented_baseline": 0,
+      "pending_communications": 0,
+      "authored_drafts": 60,
+      "accounted": 60,
+      "remaining_to_target": 120
+    },
+    {
+      "id": "D24",
+      "name": "Human futures integration",
+      "target": 120,
+      "implemented_baseline": 0,
+      "pending_communications": 0,
+      "authored_drafts": 56,
+      "accounted": 56,
+      "remaining_to_target": 64
+    }
+  ],
   "duplicate_normalized_names": [],
   "complete": false,
-  "validation_scope": "Identity and AND/OR reachability only; not semantic duplicate review, historical review, operating implementation or campaign pacing."
+  "validation_scope": "Identity, editorial field accounting and AND/OR reachability only; not semantic duplicate review, historical review, operating implementation or campaign pacing."
 }

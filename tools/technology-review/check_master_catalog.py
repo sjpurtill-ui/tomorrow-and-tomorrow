@@ -11,6 +11,47 @@ def read(name):
     return json.loads((CATALOG / name).read_text())
 
 
+def field_coverage(baseline, pending, drafts, allocation):
+    """Reconcile editorial counts without changing runtime knowledge domains."""
+    fields = allocation["fields"]
+    targets = {row["id"]: row["target"] for row in fields}
+    if len(targets) != 24 or len(fields) != 24 or sum(targets.values()) != 5000:
+        raise ValueError("Field allocation must contain 24 unique fields totaling 5000")
+    if set(targets) != {f"D{i:02d}" for i in range(1, 25)}:
+        raise ValueError("Unrecognized editorial field IDs")
+    if any(not isinstance(t, int) or t <= 0 for t in targets.values()):
+        raise ValueError("Field targets must be positive integers")
+    expected = {row["id"]: (row["name"], status)
+                for records, status in ((baseline, "implemented_baseline"),
+                                        (pending, "pending_communications"))
+                for row in records}
+    mappings = allocation["mappings"]
+    mapped_ids = [row["id"] for row in mappings]
+    if len(mapped_ids) != len(set(mapped_ids)) or set(mapped_ids) != set(expected):
+        raise ValueError("Field allocation must map every baseline/pending identity exactly once")
+    for row in mappings:
+        if (row["name"], row["source_status"]) != expected[row["id"]]:
+            raise ValueError(f"Stale name or source status in field allocation: {row['id']}")
+    for row in mappings + drafts:
+        if row["field"] not in targets:
+            raise ValueError(f"Unknown primary field: {row['id']}: {row['field']}")
+    counts = {status: Counter(row["field"] for row in mappings
+                              if row["source_status"] == status)
+              for status in ("implemented_baseline", "pending_communications")}
+    draft_counts = Counter(row["field"] for row in drafts)
+    result = []
+    for field in fields:
+        ident = field["id"]
+        implemented = counts["implemented_baseline"][ident]
+        unfinished = counts["pending_communications"][ident]
+        authored = draft_counts[ident]
+        accounted = implemented + unfinished + authored
+        result.append({**field, "implemented_baseline": implemented,
+                       "pending_communications": unfinished, "authored_drafts": authored,
+                       "accounted": accounted, "remaining_to_target": field["target"] - accounted})
+    return result
+
+
 def main():
     baseline = read("implemented-baseline.json")["items"]
     pending = read("communications-pending.json")["entries"]
@@ -48,6 +89,7 @@ def main():
     errors += [f"Missing foundation: {parent}" for parent in sorted(missing)]
     if errors:
         raise ValueError("\n".join(errors))
+    field_totals = field_coverage(baseline, pending, drafts, read("baseline-field-allocation.json"))
     reached = {row["id"] for row in baseline + pending}
     remaining = drafts.copy()
     rounds = 0
@@ -74,9 +116,10 @@ def main():
         "branch_alternatives": sum(len(row["requires_any"]) for row in drafts),
         "draft_reachability_rounds": rounds,
         "draft_fields": dict(sorted(Counter(row["field"] for row in drafts).items())),
+        "field_coverage": field_totals,
         "duplicate_normalized_names": [],
         "complete": False,
-        "validation_scope": "Identity and AND/OR reachability only; not semantic duplicate review, historical review, operating implementation or campaign pacing.",
+        "validation_scope": "Identity, editorial field accounting and AND/OR reachability only; not semantic duplicate review, historical review, operating implementation or campaign pacing.",
     }
     (CATALOG / "coverage.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report))
