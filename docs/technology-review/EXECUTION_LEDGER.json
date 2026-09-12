@@ -102,7 +102,7 @@
     "Continue2097 unclassified existing horizon entries and semantic/causal review;1971 identities remain unauthored toward5000. Current distinct total3029. Civic pass repaired13 routes and merged employment mediation into the shared method; targeted16-barrier probe passes, not physical bootstrapping proof.",
     "Continue semantic and atlas reconciliation using checker-derived coverage: 475 candidates mapped, eight partial subjects retained in coverage.json, and 125 unmapped. Mappings add zero discoveries and do not establish operating implementation.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
-    "Coordinate substantive 556-baseline integration with designated task. Bounded canonical release is200 discoveries; never conflate it with source556 baseline or master3030 identities. Preserve running player and canonical food prerequisites/report behavior.",
+    "Verify final canonical test/package/launch evidence for559 baseline release2026.09.12.2 when integrator reports it. Source branch still contains old runtime versions; preserve integration fixes and uncommitted communications while planning the next isolated implementation base.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
   ],
   "constraints": [
@@ -143,7 +143,7 @@
     "task_id": "01a0978a-39f5-7620-a77f-5918ccb1d8ba",
     "originating_task_id": "01a09789-3d3c-71d1-b389-794d955f2135",
     "scope": "Early food cooking and physically constrained preservation; design documents read-only.",
-    "status": "Bounded food release integrated. User reauthorized substantive 556 baseline review; same integrator owns new canonical window.",
+    "status": "Substantive baseline merged canonically at a578cd4; canonical verification and release packaging pending.",
     "reported_graph_count": 559,
     "counting_note": "559 is a verified worker graph checkpoint, not this worktree baseline or canonical player count. Three IDs already exist among authored drafts, so they add zero to total identities.",
     "ready_commit": "c247e8d",
@@ -181,5 +181,20 @@
     "adds_master_identities": 0,
     "evidence": "Inspected canonical commits, integration handoff, canonical 200-node audit, build.ok exact hash and PID22048 command at this checkpoint.",
     "broader_556_baseline_included": false
+  },
+  "canonical_baseline_integration": {
+    "status": "canonical_source_integrated_release_verification_pending",
+    "canonical_commit": "a578cd4",
+    "source_baseline": "82b574e",
+    "last_source_runtime_commit": "18b0cb7",
+    "live_discoveries": 559,
+    "explicit_learning_routes": 336,
+    "civilian_recipes": 240,
+    "operating_facility_types": 12,
+    "release_target": "2026.09.12.2",
+    "running_release_changed": false,
+    "evidence": "Canonical git HEAD/handoff inspected; worktree graph log and consolidated results inspected. Canonical final verification/package remains with designated integrator.",
+    "uncommitted_communications_included": false,
+    "master_designs_complete": false
   }
 }
