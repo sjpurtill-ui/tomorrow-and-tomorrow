@@ -21,8 +21,14 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The master expansion contains **300 new draft identities**: 60 each in energy, space systems, governance, economic organization and learning. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for 904 distinct IDs; 4,096 remain to author. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **479 draft identities** across eight fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **1,083 distinct IDs; 3,917 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
-Twenty explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Similar meanings under different names still require human review; unique text is not proof of distinct mechanics.
+Thirty-three explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
-Read [Energy and Space Review](Energy%20and%20Space%20Review.md) and [Governance, Economy and Learning Review](Governance%20Economy%20and%20Learning%20Review.md). JSON records preserve the exact proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts.
+Review sections:
+
+- [Energy and Space Review](Energy%20and%20Space%20Review.md): 120 drafts.
+- [Governance, Economy and Learning Review](Governance%20Economy%20and%20Learning%20Review.md): 180 drafts.
+- [Food, Water and Ecology Review](Food%20Water%20and%20Ecology%20Review.md): 179 drafts.
+
+JSON records preserve the proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts. Run `tools/technology-review/check_master_catalog.py` for the inexpensive authoring check; it does not run the game or certify behavior.
