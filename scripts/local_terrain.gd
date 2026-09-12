@@ -13606,6 +13606,7 @@ func _settlement_plot_lens_report(plot:Dictionary)->String:
 		for material_name in consumed: consumed_parts.append("%.1f %s" % [float(consumed[material_name]),String(material_name)])
 		report+="Recorded inputs: [color=#ddd2b8]%s[/color]\n" % " + ".join(consumed_parts)
 	if lifecycle_events>0: report+="Architectural record: [color=#999b91]%d event%s[/color]\n" % [lifecycle_events,"" if lifecycle_events==1 else "s"]
+	report+=preload("res://scripts/building_material_operations.gd").describe(plot)
 	if String(plot.get("status",""))=="under_construction": report+="Construction: [color=#d1a45f]%d%%[/color]\n" % roundi(float(plot.get("construction_progress",0.0))*100.0)
 	if String(plot.get("status",""))=="vacant": report+="Reclaimed by vegetation: [color=#8fb08a]%d%%[/color]\n" % roundi(float(plot.get("reclamation",0.0))*100.0)
 	report+="Established: [color=#999b91]YEAR %d • DAY %d[/color]\n" % [int(plot.get("created_day",0))/365+1,int(plot.get("created_day",0))%365+1]

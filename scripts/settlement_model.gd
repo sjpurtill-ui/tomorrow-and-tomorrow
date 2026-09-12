@@ -1295,7 +1295,7 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 			# Parallel projects divide the real monthly builder pool. A large population
 			# can build concurrently, but no site receives the whole workforce for free.
 			var directive_pace:=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("construction_rate"))
-			plot["construction_progress"]=clampf(previous_progress+builders_per_site*labor_efficiency*directive_pace*0.10,0.0,1.0)
+			plot["construction_progress"]=preload("res://scripts/building_material_operations.gd").progress(plot,builders_per_site*labor_efficiency*directive_pace*0.10,month_day)
 			if not is_equal_approx(previous_progress,float(plot.construction_progress)):
 				WorldSimulation.state.morphology_revision+=1
 			if float(plot.construction_progress)>=1.0:
@@ -1543,7 +1543,7 @@ func _make_district_seed_plot(center:Vector2,radius:float,land_use:String,recipe
 	var era_names:=["founding","foothold","hamlet","village","local_centre"]
 	return {
 		"id":plot_id,"seed":plot_seed,"nucleus_id":nucleus_id,"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
-		"land_use":land_use,"secondary_use":"exchange" if land_use=="mixed_household" else "","form":form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),form),"material_family":recipe.family,"material_mix":recipe.mix.duplicate(true),"construction_recipe":"connected_district_seed","supply_provenance":recipe.cost.duplicate(true),"replacement_debt":{},"roof_coverage":0.34 if land_use=="mixed_household" else 0.28,"storeys":1,
+		"land_use":land_use,"secondary_use":"exchange" if land_use=="mixed_household" else "","form":form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),form),"material_family":recipe.family,"material_mix":recipe.mix.duplicate(true),"construction_recipe":"connected_district_seed","supply_provenance":recipe.cost.duplicate(true),"building_materials":recipe.get("building_materials",{}).duplicate(true),"replacement_debt":{},"roof_coverage":0.34 if land_use=="mixed_household" else 0.28,"storeys":1,
 		"resident_capacity":rng.randi_range(12,18) if land_use=="mixed_household" else rng.randi_range(7,10),"resident_count":0,"worker_capacity":5 if land_use=="mixed_household" else 1,"worker_count":0,"storage_capacity":2.4 if land_use=="mixed_household" else 0.8,
 		"condition":0.60,"maintenance_debt":0.0,"service_access":0.42,"hazard_exposure":rng.randf_range(0.08,0.20),"prosperity":0.34,"status":"under_construction","construction_progress":0.0,"growth_cause":"connected district expansion","fabric_generation":generation,"morphology_era":era_names[generation],
 		"pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied","displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
@@ -1982,9 +1982,9 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		var temporary_ground:=String(plot.get("land_use",""))=="temporary_encampment"
 		var previous_condition:=float(plot.get("condition",1.0))
 		var exposure:=float(plot.get("hazard_exposure",0.1))
-		var decay:=0.00065+exposure*0.00055+hardship*0.0012
+		var decay:=(0.00065+exposure*0.00055+hardship*0.0012)*preload("res://scripts/building_material_operations.gd").decay_factor(plot)
 		if status=="vacant": decay+=0.0018
-		var maintenance:=maintenance_per_plot if status in ["active","stressed","damaged"] else 0.0
+		var maintenance:=preload("res://scripts/building_material_operations.gd").supplied_maintenance(plot,maintenance_per_plot) if status in ["active","stressed","damaged"] else 0.0
 		plot["condition"]=clampf(previous_condition-decay+maintenance,0.0,1.0)
 		plot["maintenance_debt"]=clampf(float(plot.get("maintenance_debt",0.0))+decay-maintenance,0.0,1.0)
 		if status=="vacant":
@@ -2401,6 +2401,7 @@ func _available_functional_recipe(land_use:String)->Dictionary:
 			alternative.cost["Clay"]=float(alternative.cost.Clay)*1.25
 			alternative.cost["Fiber Plants"]=float(fiber_costs[land_use])
 			recipes.append(alternative)
+	recipes.append_array(preload("res://scripts/building_material_operations.gd").options(land_use))
 	return preload("res://scripts/construction_materials.gd").choose(recipes,stocks,WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
@@ -2556,7 +2557,7 @@ func _create_functional_growth_plot(day:int,land_use:String,recipe:Dictionary,co
 	var secondary_use:=String({"workshop":"craft","storage":"provisions","market":"exchange","hospitality":"lodging","civic":"administration","dirty_industry":"bulk_processing"}.get(land_use,"service"))
 	return {
 		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
-		"land_use":land_use,"secondary_use":secondary_use,"form":recipe.form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form)),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"specialized_%s_expansion" % land_use,"supply_provenance":recipe.cost.duplicate(true),"replacement_debt":{},"roof_coverage":0.42 if land_use=="workshop" else (0.36 if land_use in ["market","civic"] else 0.54),"storeys":1,
+		"land_use":land_use,"secondary_use":secondary_use,"form":recipe.form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form)),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"specialized_%s_expansion" % land_use,"supply_provenance":recipe.cost.duplicate(true),"building_materials":recipe.get("building_materials",{}).duplicate(true),"replacement_debt":{},"roof_coverage":0.42 if land_use=="workshop" else (0.36 if land_use in ["market","civic"] else 0.54),"storeys":1,
 		"resident_capacity":rng.randi_range(8,16) if land_use=="hospitality" else 0,"resident_count":0,"worker_capacity":worker_capacity,"worker_count":mini(workers,worker_capacity),"storage_capacity":rng.randf_range(10.0,18.0) if land_use=="storage" else (rng.randf_range(4.0,9.0) if land_use in ["market","dirty_industry"] else 1.4),"condition":0.58,"maintenance_debt":0.0,"service_access":0.38,"hazard_exposure":rng.randf_range(0.18,0.34) if land_use=="dirty_industry" else rng.randf_range(0.10,0.24),"prosperity":0.34,
 		"status":"under_construction","construction_progress":0.0,"growth_cause":"assigned %s labor, construction labor, and delivered materials" % ("craft" if land_use=="workshop" else "logistics"),"pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied",
 		"displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
@@ -2575,6 +2576,7 @@ func _available_household_recipe()->Dictionary:
 		{"family":"earth","form":"earthen_household","requires":"clay_shaping","cost":{"Clay":3.2,"Fiber Plants":0.6}},
 		{"family":"stone","form":"dry_stone_household","requires":"stone_selection","cost":{"Stone":4.2,"Timber":0.8}}
 	]
+	recipes.append_array(preload("res://scripts/building_material_operations.gd").options())
 	return preload("res://scripts/construction_materials.gd").choose(recipes,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictionary={},action_index:=0)->bool:
@@ -2602,6 +2604,8 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	return true
 
 func _attempt_household_infill(day:int,recipe:Dictionary,events:Array[Dictionary],action_index:=0)->bool:
+	# New manufactured fabric needs a construction/curing phase, not instant infill.
+	if not recipe.get("building_materials",{}).is_empty():return false
 	var route_by_id:Dictionary={}
 	for route in WorldSimulation.state.settlement_routes:
 		if bool(route.get("active",true)): route_by_id[int(route.get("id",-1))]=route
@@ -2722,7 +2726,7 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 	var polygon:=_irregular_polygon(center,radius,plot_seed)
 	return {
 		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
-		"land_use":"residential_compound","secondary_use":"","form":recipe.form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form)),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"household_expansion","supply_provenance":recipe.cost.duplicate(true),"replacement_debt":{},"roof_coverage":0.30,"storeys":1,
+		"land_use":"residential_compound","secondary_use":"","form":recipe.form,"roof_plan":_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form)),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"household_expansion","supply_provenance":recipe.cost.duplicate(true),"building_materials":recipe.get("building_materials",{}).duplicate(true),"replacement_debt":{},"roof_coverage":0.30,"storeys":1,
 		"resident_capacity":rng.randi_range(7,10),"resident_count":0,"worker_capacity":1,"worker_count":0,"storage_capacity":0.8,"condition":0.58,"maintenance_debt":0.0,"service_access":0.34,"hazard_exposure":rng.randf_range(0.08,0.20),"prosperity":0.31,
 		"status":"under_construction","construction_progress":0.0,"growth_cause":"household crowding, available labor, and delivered materials","pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied",
 		"displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
@@ -2930,6 +2934,7 @@ func validate_state()->PackedStringArray:
 	var ids:Dictionary={}
 	for plot in WorldSimulation.state.settlement_plots:
 		var id:=int(plot.get("id",-1))
+		if not preload("res://scripts/building_material_operations.gd").valid_plot(plot):errors.append("plot has invalid building material profile")
 		if id<1: errors.append("plot has invalid id")
 		elif ids.has(id): errors.append("duplicate plot id %d" % id)
 		ids[id]=true
