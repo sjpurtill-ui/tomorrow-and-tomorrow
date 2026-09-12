@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 614,
   "pending_communications": 0,
-  "new_authored_drafts": 2414,
-  "distinct_accounted_identities": 3028,
-  "remaining_identities_to_author": 1972,
+  "new_authored_drafts": 2424,
+  "distinct_accounted_identities": 3038,
+  "remaining_identities_to_author": 1962,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -11,16 +11,10 @@
   "atlas_coverage": {
     "candidate_count": 600,
     "mapped_candidate_count": 475,
-    "fully_mapped_subject_count": 467,
-    "partial_candidate_count": 8,
+    "fully_mapped_subject_count": 468,
+    "partial_candidate_count": 7,
     "unmapped_candidate_count": 125,
     "partial_subjects": [
-      {
-        "review_id": "D02-08",
-        "candidate_name": "Ceramic water pipes",
-        "source": "atlas-reconciliation-water-ecology-depth.json",
-        "note": "Pressure-pipe joining is present; specific ceramic pipe forming, firing and dimensional qualification remain unauthored as a complete manufacturing chain."
-      },
       {
         "review_id": "D02-23",
         "candidate_name": "Autonomous water network control",
@@ -195,7 +189,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 932,
+    "assigned_identities": 942,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2312,21 +2306,21 @@
         "id": "H02",
         "name": "Settlement and regional exchange",
         "target": 700,
-        "assigned": 65,
-        "target_slots_not_yet_assigned": 635,
+        "assigned": 69,
+        "target_slots_not_yet_assigned": 631,
         "implemented_baseline": 4,
         "pending_communications": 0,
-        "authored_drafts": 61
+        "authored_drafts": 65
       },
       {
         "id": "H03",
         "name": "Complex societies and learned traditions",
         "target": 800,
-        "assigned": 196,
-        "target_slots_not_yet_assigned": 604,
+        "assigned": 202,
+        "target_slots_not_yet_assigned": 598,
         "implemented_baseline": 0,
         "pending_communications": 0,
-        "authored_drafts": 196
+        "authored_drafts": 202
       },
       {
         "id": "H04",
@@ -2361,11 +2355,11 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 457,
+  "branch_alternatives": 462,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 108,
-    "D02": 99,
+    "D02": 109,
     "D03": 97,
     "D04": 119,
     "D05": 156,
@@ -2406,9 +2400,9 @@
       "target": 180,
       "implemented_baseline": 16,
       "pending_communications": 0,
-      "authored_drafts": 99,
-      "accounted": 115,
-      "remaining_to_target": 65
+      "authored_drafts": 109,
+      "accounted": 125,
+      "remaining_to_target": 55
     },
     {
       "id": "D03",
