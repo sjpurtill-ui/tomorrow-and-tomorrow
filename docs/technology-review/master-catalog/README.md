@@ -21,9 +21,9 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The master expansion contains **1,437 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **2,041 distinct IDs; 2,959 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **1,497 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **2,101 distinct IDs; 2,899 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
-One hundred and fifty-nine explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
+One hundred and seventy-four explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
 [Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 604 baseline/pending identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. Historical-horizon allocation remains outstanding.
 
@@ -39,6 +39,8 @@ Review sections:
 - [Machinery, Fibers and Earth Review](Machinery%20Fibers%20and%20Earth%20Review.md): 180 drafts and 75 more atlas mappings; 225 candidates mapped in total, with the earlier four partial subjects still open.
 
 - [Future Humanity Review](Future%20Humanity%20Review.md): 56 drafts after four semantic exclusions, explicit confidence and outcome limits, five proposed recovery methods per discovery, and 25 atlas mappings. Total mapped candidates: 250; four earlier partial subjects remain open.
+
+- [Medicine and Care Depth Review](Medicine%20and%20Care%20Depth%20Review.md): 60 further medical mechanisms, fifteen alternative groups and explicit supply-dependent care routes. D14 accounts for 133 of 280 target identities.
 
 JSON records preserve the proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts. Run `tools/technology-review/check_master_catalog.py` for the inexpensive authoring check; it does not run the game or certify behavior.
 

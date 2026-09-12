@@ -1,0 +1,2474 @@
+[
+  {
+    "field": "D14",
+    "id": "structured_clinical_history",
+    "name": "Structured Clinical History",
+    "foundations": "case_records",
+    "mechanism": "Elicit the sequence, context and functional effects of symptoms through a repeatable interview",
+    "operating_requirement": "Trained listener, accessible communication, privacy and retained observations",
+    "consequence": "Improve the clinical question before selecting tests or treatments",
+    "status": "authored_draft",
+    "requires_all": [
+      "case_records"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "structured_clinical_history",
+      "local_demonstration": "Elicit the sequence, context and functional effects of symptoms through a repeatable interview",
+      "operating_requirements": "Trained listener, accessible communication, privacy and retained observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "physical_percussion_examination",
+    "name": "Physical Percussion Examination",
+    "foundations": "clinical_observation_rounds",
+    "mechanism": "Compare sounds produced by examined body regions to infer selected underlying changes",
+    "operating_requirement": "Practiced examiner and appropriate examination setting",
+    "consequence": "Add bounded physical findings without powered instruments",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "physical_percussion_examination",
+      "local_demonstration": "Compare sounds produced by examined body regions to infer selected underlying changes",
+      "operating_requirements": "Practiced examiner and appropriate examination setting",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_palpation_mapping",
+    "name": "Clinical Palpation Mapping",
+    "foundations": "clinical_observation_rounds",
+    "mechanism": "Systematically compare accessible tissue and movement findings with recorded landmarks",
+    "operating_requirement": "Trained examiner, patient agreement and consistent observation practice",
+    "consequence": "Localize selected findings while preserving limits of touch-based inference",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_palpation_mapping",
+      "local_demonstration": "Systematically compare accessible tissue and movement findings with recorded landmarks",
+      "operating_requirements": "Trained examiner, patient agreement and consistent observation practice",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "respiratory_rate_assessment",
+    "name": "Respiratory Rate Assessment",
+    "foundations": "clinical_observation_rounds",
+    "mechanism": "Observe respiratory frequency and effort over a defined interval in context",
+    "operating_requirement": "Competent observer, time reference and repeat assessment",
+    "consequence": "Recognize changes that support further assessment without diagnosing from one number",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "respiratory_rate_assessment",
+      "local_demonstration": "Observe respiratory frequency and effort over a defined interval in context",
+      "operating_requirements": "Competent observer, time reference and repeat assessment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_visual_acuity_testing",
+    "name": "Clinical Visual Acuity Testing",
+    "foundations": "standard_measures",
+    "mechanism": "Measure resolved visual detail using standardized targets and test conditions",
+    "operating_requirement": "Suitable targets, measured viewing setup and trained assessment",
+    "consequence": "Identify measured vision limitations and guide appropriate referral",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures"
+    ],
+    "requires_any": [
+      [
+        "optical_lenses",
+        "case_records"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_visual_acuity_testing",
+      "local_demonstration": "Measure resolved visual detail using standardized targets and test conditions",
+      "operating_requirements": "Suitable targets, measured viewing setup and trained assessment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Standardized visual target assessment can precede corrective optics; trained observation and test conditions remain necessary."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_hearing_threshold_testing",
+    "name": "Clinical Hearing Threshold Testing",
+    "foundations": "standard_measures",
+    "mechanism": "Compare responses to calibrated sound presentations under controlled conditions",
+    "operating_requirement": "Calibrated sound equipment, quiet setting and qualified examiner",
+    "consequence": "Characterize hearing thresholds for support or investigation",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures"
+    ],
+    "requires_any": [
+      [
+        "electrical_measurement",
+        "resonant_percussion_instruments"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_hearing_threshold_testing",
+      "local_demonstration": "Compare responses to calibrated sound presentations under controlled conditions",
+      "operating_requirements": "Calibrated sound equipment, quiet setting and qualified examiner",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Calibrated acoustic reference methods can precede electronic audiometry; each method retains its narrower frequency and intensity limits."
+  },
+  {
+    "field": "D14",
+    "id": "neurological_function_examination",
+    "name": "Neurological Function Examination",
+    "foundations": "surgical_anatomy,clinical_observation_rounds",
+    "mechanism": "Compare defined sensory, movement and response findings across repeated examinations",
+    "operating_requirement": "Qualified examiner, suitable aids and accessible patient communication",
+    "consequence": "Identify patterns requiring targeted investigation without automatic localization certainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "surgical_anatomy",
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "neurological_function_examination",
+      "local_demonstration": "Compare defined sensory, movement and response findings across repeated examinations",
+      "operating_requirements": "Qualified examiner, suitable aids and accessible patient communication",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_functional_status_scales",
+    "name": "Clinical Functional Status Scales",
+    "foundations": "standard_measures",
+    "mechanism": "Use reproducible task-based measures of function with recorded context",
+    "operating_requirement": "Validated assessment tasks, trained observers and accessible testing",
+    "consequence": "Track meaningful change in daily function separately from laboratory markers",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures"
+    ],
+    "requires_any": [
+      [
+        "rehabilitation_services",
+        "clinical_observation_rounds"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_functional_status_scales",
+      "local_demonstration": "Use reproducible task-based measures of function with recorded context",
+      "operating_requirements": "Validated assessment tasks, trained observers and accessible testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Repeated clinical task observation can establish a functional measure before organized rehabilitation services."
+  },
+  {
+    "field": "D14",
+    "id": "electrocardiographic_recording",
+    "name": "Electrocardiographic Recording",
+    "foundations": "electrical_measurement,clinical_pulse_assessment",
+    "mechanism": "Record time-varying electrical activity from the heart through qualified surface measurements",
+    "operating_requirement": "Calibrated recorder, electrodes, power and clinical interpretation",
+    "consequence": "Add electrical rhythm evidence without equating every trace change with disease",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "clinical_pulse_assessment"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electrocardiographic_recording",
+      "local_demonstration": "Record time-varying electrical activity from the heart through qualified surface measurements",
+      "operating_requirements": "Calibrated recorder, electrodes, power and clinical interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "electroencephalographic_recording",
+    "name": "Electroencephalographic Recording",
+    "foundations": "electrical_measurement,neurological_function_examination",
+    "mechanism": "Record selected scalp electrical activity and distinguish artifacts from interpretable patterns",
+    "operating_requirement": "Qualified amplifier, electrodes, controlled acquisition and specialist review",
+    "consequence": "Support defined neurological questions with bounded signal evidence",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "neurological_function_examination"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electroencephalographic_recording",
+      "local_demonstration": "Record selected scalp electrical activity and distinguish artifacts from interpretable patterns",
+      "operating_requirements": "Qualified amplifier, electrodes, controlled acquisition and specialist review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "spirometric_testing",
+    "name": "Spirometric Testing",
+    "foundations": "flow_continuity,clinical_observation_rounds",
+    "mechanism": "Measure reproducible forced respiratory volume and flow under qualified test conditions",
+    "operating_requirement": "Calibrated flow equipment, hygienic consumables and trained coaching",
+    "consequence": "Characterize selected ventilatory limitations rather than all respiratory disease",
+    "status": "authored_draft",
+    "requires_all": [
+      "flow_continuity",
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "spirometric_testing",
+      "local_demonstration": "Measure reproducible forced respiratory volume and flow under qualified test conditions",
+      "operating_requirements": "Calibrated flow equipment, hygienic consumables and trained coaching",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "pulse_oximetric_sensing",
+    "name": "Pulse Oximetric Sensing",
+    "foundations": "spectroscopy,clinical_pulse_assessment",
+    "mechanism": "Estimate arterial oxygen saturation from calibrated pulsatile optical measurements",
+    "operating_requirement": "Qualified optical sensor, power, signal-quality checks and clinical context",
+    "consequence": "Provide bounded noninvasive oxygenation evidence with known interference limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "spectroscopy",
+      "clinical_pulse_assessment"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pulse_oximetric_sensing",
+      "local_demonstration": "Estimate arterial oxygen saturation from calibrated pulsatile optical measurements",
+      "operating_requirements": "Qualified optical sensor, power, signal-quality checks and clinical context",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "blood_gas_analysis",
+    "name": "Blood Gas Analysis",
+    "foundations": "clinical_chemistry,electrical_measurement",
+    "mechanism": "Measure selected dissolved gases and acid-base properties in appropriately handled blood specimens",
+    "operating_requirement": "Validated analyzer, reagents, controlled sampling and laboratory staff",
+    "consequence": "Support assessment of gas exchange and metabolic disturbance with handling-dependent accuracy",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_chemistry",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "blood_gas_analysis",
+      "local_demonstration": "Measure selected dissolved gases and acid-base properties in appropriately handled blood specimens",
+      "operating_requirements": "Validated analyzer, reagents, controlled sampling and laboratory staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_electrolyte_sensing",
+    "name": "Clinical Electrolyte Sensing",
+    "foundations": "clinical_chemistry,electrochemical_cells",
+    "mechanism": "Measure selected ionic activity with calibrated selective sensing methods",
+    "operating_requirement": "Qualified electrodes, reference materials, specimens and laboratory quality controls",
+    "consequence": "Guide interpretation of defined electrolyte disturbances",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_chemistry",
+      "electrochemical_cells"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_electrolyte_sensing",
+      "local_demonstration": "Measure selected ionic activity with calibrated selective sensing methods",
+      "operating_requirements": "Qualified electrodes, reference materials, specimens and laboratory quality controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "enzymatic_glucose_assays",
+    "name": "Enzymatic Glucose Assays",
+    "foundations": "clinical_chemistry,enzyme_catalysis",
+    "mechanism": "Couple a glucose-specific biochemical reaction to a calibrated measurable signal",
+    "operating_requirement": "Validated reagent or sensor supply, quality controls and trained interpretation",
+    "consequence": "Measure glucose for an indicated clinical question without inferring all metabolic health",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_chemistry",
+      "enzyme_catalysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "enzymatic_glucose_assays",
+      "local_demonstration": "Couple a glucose-specific biochemical reaction to a calibrated measurable signal",
+      "operating_requirements": "Validated reagent or sensor supply, quality controls and trained interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "continuous_glucose_monitoring",
+    "name": "Continuous Glucose Monitoring",
+    "foundations": "enzymatic_glucose_assays,real_time_computing",
+    "mechanism": "Track qualified interstitial glucose signals over time with calibration and fault handling",
+    "operating_requirement": "Approved sensor system, power, replacement supplies and patient support",
+    "consequence": "Provide trend evidence with signal lag and device limitations",
+    "status": "authored_draft",
+    "requires_all": [
+      "enzymatic_glucose_assays",
+      "real_time_computing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "continuous_glucose_monitoring",
+      "local_demonstration": "Track qualified interstitial glucose signals over time with calibration and fault handling",
+      "operating_requirements": "Approved sensor system, power, replacement supplies and patient support",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_immunoassays",
+    "name": "Clinical Immunoassays",
+    "foundations": "immune_response_models,clinical_laboratory_quality",
+    "mechanism": "Use specific binding and calibrated signal detection to estimate selected clinical analytes",
+    "operating_requirement": "Validated reagents, controls, suitable instruments and trained laboratory staff",
+    "consequence": "Detect specified targets subject to cross-reactivity and test performance",
+    "status": "authored_draft",
+    "requires_all": [
+      "immune_response_models",
+      "clinical_laboratory_quality"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_immunoassays",
+      "local_demonstration": "Use specific binding and calibrated signal detection to estimate selected clinical analytes",
+      "operating_requirements": "Validated reagents, controls, suitable instruments and trained laboratory staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_culture_susceptibility",
+    "name": "Clinical Culture Susceptibility",
+    "foundations": "microbial_isolation_methods,clinical_laboratory_quality",
+    "mechanism": "Compare isolated organisms under standardized laboratory susceptibility conditions",
+    "operating_requirement": "Qualified containment, culture supplies, reference methods and competent staff",
+    "consequence": "Inform antimicrobial choice while distinguishing laboratory results from guaranteed clinical response",
+    "status": "authored_draft",
+    "requires_all": [
+      "microbial_isolation_methods",
+      "clinical_laboratory_quality"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_culture_susceptibility",
+      "local_demonstration": "Compare isolated organisms under standardized laboratory susceptibility conditions",
+      "operating_requirements": "Qualified containment, culture supplies, reference methods and competent staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_specimen_transport",
+    "name": "Clinical Specimen Transport",
+    "foundations": "clinical_laboratory_quality",
+    "mechanism": "Preserve specimen identity and required conditions between collection and analysis",
+    "operating_requirement": "Appropriate containers, tracked routes, transport capacity and handling staff",
+    "consequence": "Reduce invalid or misidentified results from delayed or unsuitable transport",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_laboratory_quality"
+    ],
+    "requires_any": [
+      [
+        "freight_waybill_tracking",
+        "case_records"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_specimen_transport",
+      "local_demonstration": "Preserve specimen identity and required conditions between collection and analysis",
+      "operating_requirements": "Appropriate containers, tracked routes, transport capacity and handling staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "A locally maintained specimen register can preserve identity before general freight tracking systems; actual preservation and delivery remain required."
+  },
+  {
+    "field": "D14",
+    "id": "diagnostic_accuracy_estimation",
+    "name": "Diagnostic Accuracy Estimation",
+    "foundations": "statistical_inference,differential_diagnosis",
+    "mechanism": "Compare a test with an appropriate reference while accounting for the tested population",
+    "operating_requirement": "Representative evidence, defined reference methods and independent analysis",
+    "consequence": "Expose false positives and negatives before using a test as an automatic decision",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_inference",
+      "differential_diagnosis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "diagnostic_accuracy_estimation",
+      "local_demonstration": "Compare a test with an appropriate reference while accounting for the tested population",
+      "operating_requirements": "Representative evidence, defined reference methods and independent analysis",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_test_probability_updating",
+    "name": "Clinical Test Probability Updating",
+    "foundations": "diagnostic_accuracy_estimation,probability_theory",
+    "mechanism": "Update a clinical hypothesis using test evidence and justified starting probabilities",
+    "operating_requirement": "Competent interpretation and applicable accuracy evidence",
+    "consequence": "Reduce conclusions drawn from test labels without clinical context",
+    "status": "authored_draft",
+    "requires_all": [
+      "diagnostic_accuracy_estimation",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_test_probability_updating",
+      "local_demonstration": "Update a clinical hypothesis using test evidence and justified starting probabilities",
+      "operating_requirements": "Competent interpretation and applicable accuracy evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "screening_program_evaluation",
+    "name": "Screening Program Evaluation",
+    "foundations": "public_health_surveillance,diagnostic_accuracy_estimation",
+    "mechanism": "Assess whether testing an apparently unaffected population improves meaningful outcomes after downstream harms",
+    "operating_requirement": "Follow-up care, population evidence, consent and independent evaluation",
+    "consequence": "Distinguish beneficial screening from simply detecting more abnormalities",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_health_surveillance",
+      "diagnostic_accuracy_estimation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "screening_program_evaluation",
+      "local_demonstration": "Assess whether testing an apparently unaffected population improves meaningful outcomes after downstream harms",
+      "operating_requirements": "Follow-up care, population evidence, consent and independent evaluation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "portable_ultrasound_qualification",
+    "name": "Portable Ultrasound Qualification",
+    "foundations": "ultrasound_imaging,clinical_test_probability_updating",
+    "mechanism": "Validate limited bedside imaging tasks for particular operators and devices",
+    "operating_requirement": "Suitable portable equipment, training, maintenance and image review",
+    "consequence": "Bring selected imaging questions closer to care without replacing all specialist examinations",
+    "status": "authored_draft",
+    "requires_all": [
+      "ultrasound_imaging",
+      "clinical_test_probability_updating"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "portable_ultrasound_qualification",
+      "local_demonstration": "Validate limited bedside imaging tasks for particular operators and devices",
+      "operating_requirements": "Suitable portable equipment, training, maintenance and image review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "doppler_flow_imaging",
+    "name": "Doppler Flow Imaging",
+    "foundations": "ultrasound_imaging,flow_continuity",
+    "mechanism": "Interpret qualified frequency shifts from moving scatterers to estimate selected flow properties",
+    "operating_requirement": "Calibrated ultrasound equipment and trained acquisition and interpretation",
+    "consequence": "Add bounded circulation evidence without assuming exact flow in every geometry",
+    "status": "authored_draft",
+    "requires_all": [
+      "ultrasound_imaging",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "doppler_flow_imaging",
+      "local_demonstration": "Interpret qualified frequency shifts from moving scatterers to estimate selected flow properties",
+      "operating_requirements": "Calibrated ultrasound equipment and trained acquisition and interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_image_registration",
+    "name": "Clinical Image Registration",
+    "foundations": "computed_tomography,coordinate_geometry",
+    "mechanism": "Align images using evaluated anatomical correspondences and quantify registration error",
+    "operating_requirement": "Compatible image data, computation and clinical quality review",
+    "consequence": "Compare change or plan a procedure while exposing alignment uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "computed_tomography",
+      "coordinate_geometry"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_image_registration",
+      "local_demonstration": "Align images using evaluated anatomical correspondences and quantify registration error",
+      "operating_requirements": "Compatible image data, computation and clinical quality review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "image_guided_intervention_planning",
+    "name": "Image Guided Intervention Planning",
+    "foundations": "clinical_image_registration,aseptic_operating_practice",
+    "mechanism": "Relate an intended intervention path to evaluated images and physical landmarks",
+    "operating_requirement": "Qualified imaging, clinical team, sterile facilities and appropriate instruments",
+    "consequence": "Improve selected procedural planning without granting autonomous surgical success",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_image_registration",
+      "aseptic_operating_practice"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "image_guided_intervention_planning",
+      "local_demonstration": "Relate an intended intervention path to evaluated images and physical landmarks",
+      "operating_requirements": "Qualified imaging, clinical team, sterile facilities and appropriate instruments",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "radiotherapy_dose_planning",
+    "name": "Radiotherapy Dose Planning",
+    "foundations": "radiation_measurement,pathology_diagnosis",
+    "mechanism": "Plan a specified radiation treatment against target and non-target tissue constraints",
+    "operating_requirement": "Qualified radiation source, calibrated dosimetry, clinical physics and oncology staff",
+    "consequence": "Deliver only clinically justified treatment within verified planning limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiation_measurement",
+      "pathology_diagnosis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radiotherapy_dose_planning",
+      "local_demonstration": "Plan a specified radiation treatment against target and non-target tissue constraints",
+      "operating_requirements": "Qualified radiation source, calibrated dosimetry, clinical physics and oncology staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "radiotherapy_delivery_verification",
+    "name": "Radiotherapy Delivery Verification",
+    "foundations": "radiotherapy_dose_planning,dimensional_metrology",
+    "mechanism": "Check that positioning and delivered treatment conform to an authorized radiation plan",
+    "operating_requirement": "Calibrated equipment, independent checks and competent treatment staff",
+    "consequence": "Detect selected delivery deviations rather than assuming a plan equals treatment",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiotherapy_dose_planning",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radiotherapy_delivery_verification",
+      "local_demonstration": "Check that positioning and delivered treatment conform to an authorized radiation plan",
+      "operating_requirements": "Calibrated equipment, independent checks and competent treatment staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "sterile_drug_compounding",
+    "name": "Sterile Drug Compounding",
+    "foundations": "medicine_quality_assurance,aseptic_operating_practice",
+    "mechanism": "Prepare qualified patient-appropriate sterile formulations under controlled process conditions",
+    "operating_requirement": "Appropriate ingredients, clean facilities, trained staff and release checks",
+    "consequence": "Supply specified preparations while maintaining contamination and identity controls",
+    "status": "authored_draft",
+    "requires_all": [
+      "medicine_quality_assurance",
+      "aseptic_operating_practice"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sterile_drug_compounding",
+      "local_demonstration": "Prepare qualified patient-appropriate sterile formulations under controlled process conditions",
+      "operating_requirements": "Appropriate ingredients, clean facilities, trained staff and release checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "medicinal_active_fraction_isolation",
+    "name": "Medicinal Active Fraction Isolation",
+    "foundations": "herbal_classification",
+    "mechanism": "Separate and compare candidate medicinal fractions while tracking composition and observed effects",
+    "operating_requirement": "Characterized source material, separation equipment, analysts and controlled evidence",
+    "consequence": "Identify investigational fractions without treating traditional use as proof of safety",
+    "status": "authored_draft",
+    "requires_all": [
+      "herbal_classification"
+    ],
+    "requires_any": [
+      [
+        "chemical_distillation",
+        "protein_separation",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "medicinal_active_fraction_isolation",
+      "local_demonstration": "Separate and compare candidate medicinal fractions while tracking composition and observed effects",
+      "operating_requirements": "Characterized source material, separation equipment, analysts and controlled evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Fractionation can follow different qualified separation techniques or empirical controlled comparisons; distillation is not universal."
+  },
+  {
+    "field": "D14",
+    "id": "medicine_potency_standardization",
+    "name": "Medicine Potency Standardization",
+    "foundations": "medicine_quality_assurance,measurement_uncertainty",
+    "mechanism": "Compare functional or chemical strength against a defined reference with quantified variation",
+    "operating_requirement": "Suitable reference material, validated assay and quality staff",
+    "consequence": "Reduce between-batch uncertainty without establishing clinical benefit by itself",
+    "status": "authored_draft",
+    "requires_all": [
+      "medicine_quality_assurance",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "medicine_potency_standardization",
+      "local_demonstration": "Compare functional or chemical strength against a defined reference with quantified variation",
+      "operating_requirements": "Suitable reference material, validated assay and quality staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "oral_dosage_release_design",
+    "name": "Oral Dosage Release Design",
+    "foundations": "medicine_potency_standardization",
+    "mechanism": "Control and measure release behavior of a defined oral formulation under qualified conditions",
+    "operating_requirement": "Pharmaceutical ingredients, formulation plant and dissolution testing",
+    "consequence": "Produce evaluated release profiles rather than guaranteed patient response",
+    "status": "authored_draft",
+    "requires_all": [
+      "medicine_potency_standardization"
+    ],
+    "requires_any": [
+      [
+        "polymer_chain_models",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "oral_dosage_release_design",
+      "local_demonstration": "Control and measure release behavior of a defined oral formulation under qualified conditions",
+      "operating_requirements": "Pharmaceutical ingredients, formulation plant and dissolution testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Empirical formulation and release trials can precede molecular polymer explanations; suitability still needs measured evidence."
+  },
+  {
+    "field": "D14",
+    "id": "medicine_interaction_review",
+    "name": "Medicine Interaction Review",
+    "foundations": "pharmacokinetic_analysis,pharmacovigilance",
+    "mechanism": "Evaluate combined medicine exposure and patient factors against documented interaction evidence",
+    "operating_requirement": "Complete medicine records, competent review and reliable evidence access",
+    "consequence": "Identify avoidable treatment conflicts while preserving clinician judgment",
+    "status": "authored_draft",
+    "requires_all": [
+      "pharmacokinetic_analysis",
+      "pharmacovigilance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "medicine_interaction_review",
+      "local_demonstration": "Evaluate combined medicine exposure and patient factors against documented interaction evidence",
+      "operating_requirements": "Complete medicine records, competent review and reliable evidence access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "medication_reconciliation",
+    "name": "Medication Reconciliation",
+    "foundations": "case_records,medicine_quality_assurance",
+    "mechanism": "Resolve discrepancies in actual medicine use across care transitions",
+    "operating_requirement": "Patient communication, accessible prescriptions and responsible pharmacy or clinical staff",
+    "consequence": "Reduce omitted, duplicated or conflicting medicine instructions",
+    "status": "authored_draft",
+    "requires_all": [
+      "case_records",
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "medication_reconciliation",
+      "local_demonstration": "Resolve discrepancies in actual medicine use across care transitions",
+      "operating_requirements": "Patient communication, accessible prescriptions and responsible pharmacy or clinical staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "insulin_product_purification",
+    "name": "Insulin Product Purification",
+    "foundations": "protein_separation,medicine_potency_standardization",
+    "mechanism": "Purify and qualify a specified insulin product for consistent clinical supply",
+    "operating_requirement": "Suitable biological production source, validated purification, quality staff and required storage",
+    "consequence": "Make a qualified product available without providing automatic patient treatment",
+    "status": "authored_draft",
+    "requires_all": [
+      "protein_separation",
+      "medicine_potency_standardization"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "insulin_product_purification",
+      "local_demonstration": "Purify and qualify a specified insulin product for consistent clinical supply",
+      "operating_requirements": "Suitable biological production source, validated purification, quality staff and required storage",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "insulin_replacement_services",
+    "name": "Insulin Replacement Services",
+    "foundations": "enzymatic_glucose_assays",
+    "mechanism": "Coordinate indicated insulin replacement with monitoring, education and continuing review",
+    "operating_requirement": "Actual qualified product, delivery supplies, trained care team and patient support",
+    "consequence": "Support managed treatment while retaining individual assessment and adverse-event risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "enzymatic_glucose_assays"
+    ],
+    "requires_any": [
+      [
+        "insulin_product_purification",
+        "medicine_quality_assurance"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "insulin_replacement_services",
+      "local_demonstration": "Coordinate indicated insulin replacement with monitoring, education and continuing review",
+      "operating_requirements": "Actual qualified product, delivery supplies, trained care team and patient support",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Qualified imported insulin permits a locally competent care service; manufacture and delivery stocks remain separate from treatment knowledge."
+  },
+  {
+    "field": "D14",
+    "id": "programmable_infusion_pumps",
+    "name": "Programmable Infusion Pumps",
+    "foundations": "sterile_infusion_services,real_time_computing",
+    "mechanism": "Meter a prescribed infusion through qualified programmable delivery and fault detection",
+    "operating_requirement": "Maintained pump, compatible consumables, power and trained clinical supervision",
+    "consequence": "Provide controlled delivery with finite supplies and device-error limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "sterile_infusion_services",
+      "real_time_computing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "programmable_infusion_pumps",
+      "local_demonstration": "Meter a prescribed infusion through qualified programmable delivery and fault detection",
+      "operating_requirements": "Maintained pump, compatible consumables, power and trained clinical supervision",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "automated_insulin_delivery",
+    "name": "Automated Insulin Delivery",
+    "foundations": "continuous_glucose_monitoring,programmable_infusion_pumps,insulin_replacement_services",
+    "mechanism": "Coordinate qualified glucose feedback and insulin delivery within a clinically evaluated control system",
+    "operating_requirement": "Compatible devices, continuing insulin supply, patient training and backup care",
+    "consequence": "Support bounded glucose management without universal autonomous cure",
+    "status": "authored_draft",
+    "requires_all": [
+      "continuous_glucose_monitoring",
+      "programmable_infusion_pumps",
+      "insulin_replacement_services"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "automated_insulin_delivery",
+      "local_demonstration": "Coordinate qualified glucose feedback and insulin delivery within a clinically evaluated control system",
+      "operating_requirements": "Compatible devices, continuing insulin supply, patient training and backup care",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "medical_oxygen_supply_qualification",
+    "name": "Medical Oxygen Supply Qualification",
+    "foundations": "gas_composition_analysis,medicine_quality_assurance",
+    "mechanism": "Verify therapeutic oxygen identity and delivery-chain quality at the point of clinical use",
+    "operating_requirement": "Qualified source, containers or piping, analyzers and maintenance personnel",
+    "consequence": "Provide a trustworthy oxygen supply rather than equating any gas source with medical service",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis",
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "medical_oxygen_supply_qualification",
+      "local_demonstration": "Verify therapeutic oxygen identity and delivery-chain quality at the point of clinical use",
+      "operating_requirements": "Qualified source, containers or piping, analyzers and maintenance personnel",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "oxygen_concentrator_services",
+    "name": "Oxygen Concentrator Services",
+    "foundations": "medical_oxygen_supply_qualification,compressed_air_systems",
+    "mechanism": "Operate qualified oxygen concentrators against measured output and clinical demand",
+    "operating_requirement": "Approved equipment, filters, electrical supply, maintenance and clinical staff",
+    "consequence": "Supply bounded oxygen flow while outages and equipment condition constrain availability",
+    "status": "authored_draft",
+    "requires_all": [
+      "medical_oxygen_supply_qualification",
+      "compressed_air_systems"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "oxygen_concentrator_services",
+      "local_demonstration": "Operate qualified oxygen concentrators against measured output and clinical demand",
+      "operating_requirements": "Approved equipment, filters, electrical supply, maintenance and clinical staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Qualified gas separation equipment and electrical power are physical operating requirements; knowledge of circuit-breaker design is not a clinical prerequisite."
+  },
+  {
+    "field": "D14",
+    "id": "respiratory_support_interfaces",
+    "name": "Respiratory Support Interfaces",
+    "foundations": "medical_oxygen_supply_qualification,clinical_observation_rounds",
+    "mechanism": "Match a qualified respiratory delivery interface to assessed support and monitoring needs",
+    "operating_requirement": "Suitable consumables, fitted interface and trained clinical assessment",
+    "consequence": "Deliver an indicated service without assuming every patient needs the same interface",
+    "status": "authored_draft",
+    "requires_all": [
+      "medical_oxygen_supply_qualification",
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "respiratory_support_interfaces",
+      "local_demonstration": "Match a qualified respiratory delivery interface to assessed support and monitoring needs",
+      "operating_requirements": "Suitable consumables, fitted interface and trained clinical assessment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "mechanical_ventilation_services",
+    "name": "Mechanical Ventilation Services",
+    "foundations": "respiratory_support_interfaces",
+    "mechanism": "Provide monitored qualified mechanical breathing support for indicated conditions",
+    "operating_requirement": "Maintained ventilator, power, suitable gas supply, consumables and skilled critical-care team",
+    "consequence": "Support selected respiratory functions with ongoing monitoring and complications",
+    "status": "authored_draft",
+    "requires_all": [
+      "respiratory_support_interfaces"
+    ],
+    "requires_any": [
+      [
+        "blood_gas_analysis",
+        "anesthesia_monitoring"
+      ],
+      [
+        "real_time_computing",
+        "feedback_governors"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mechanical_ventilation_services",
+      "local_demonstration": "Provide monitored qualified mechanical breathing support for indicated conditions",
+      "operating_requirements": "Maintained ventilator, power, suitable gas supply, consumables and skilled critical-care team",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Qualified mechanical controls can precede digital ventilators. The available monitoring method limits the clinical operating envelope; modern blood-gas analysis is not the only historical observation route."
+  },
+  {
+    "field": "D14",
+    "id": "oral_rehydration_services",
+    "name": "Oral Rehydration Services",
+    "foundations": "clean_water,clinical_observation_rounds",
+    "mechanism": "Provide clinically assessed rehydration using qualified oral preparations and follow-up",
+    "operating_requirement": "Suitable clean water, approved preparations, competent caregivers and referral access",
+    "consequence": "Address indicated dehydration while exposing cases needing higher care",
+    "status": "authored_draft",
+    "requires_all": [
+      "clean_water",
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "oral_rehydration_services",
+      "local_demonstration": "Provide clinically assessed rehydration using qualified oral preparations and follow-up",
+      "operating_requirements": "Suitable clean water, approved preparations, competent caregivers and referral access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "clinical_nutrition_assessment",
+    "name": "Clinical Nutrition Assessment",
+    "foundations": "child_growth_records,clinical_observation_rounds",
+    "mechanism": "Relate intake, growth or body change and clinical findings to assessed nutritional needs",
+    "operating_requirement": "Competent staff, reliable measures, food history and clinical context",
+    "consequence": "Identify support needs without reducing health to one body measurement",
+    "status": "authored_draft",
+    "requires_all": [
+      "child_growth_records",
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_nutrition_assessment",
+      "local_demonstration": "Relate intake, growth or body change and clinical findings to assessed nutritional needs",
+      "operating_requirements": "Competent staff, reliable measures, food history and clinical context",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "therapeutic_food_services",
+    "name": "Therapeutic Food Services",
+    "foundations": "clinical_nutrition_assessment,food_batch_traceability",
+    "mechanism": "Supply qualified therapeutic foods within an evaluated care and follow-up program",
+    "operating_requirement": "Suitable products, actual stocks, trained caregivers and complication referral",
+    "consequence": "Support specified nutrition treatment with finite food and care capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_nutrition_assessment",
+      "food_batch_traceability"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "therapeutic_food_services",
+      "local_demonstration": "Supply qualified therapeutic foods within an evaluated care and follow-up program",
+      "operating_requirements": "Suitable products, actual stocks, trained caregivers and complication referral",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "enteral_nutrition_services",
+    "name": "Enteral Nutrition Services",
+    "foundations": "clinical_nutrition_assessment,medicine_quality_assurance",
+    "mechanism": "Provide monitored qualified nutritional delivery through an indicated enteral route",
+    "operating_requirement": "Suitable preparations, delivery equipment, competent staff and hygiene controls",
+    "consequence": "Support feeding when ordinary intake is insufficient and the route is appropriate",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_nutrition_assessment",
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "enteral_nutrition_services",
+      "local_demonstration": "Provide monitored qualified nutritional delivery through an indicated enteral route",
+      "operating_requirements": "Suitable preparations, delivery equipment, competent staff and hygiene controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "neonatal_feeding_support",
+    "name": "Neonatal Feeding Support",
+    "foundations": "birth_attendants,child_growth_records",
+    "mechanism": "Assess and assist safe effective newborn feeding with observation of growth and caregiver needs",
+    "operating_requirement": "Trained supporters, suitable feeding resources and timely referral",
+    "consequence": "Improve supported feeding without coercing one method or promising universal success",
+    "status": "authored_draft",
+    "requires_all": [
+      "birth_attendants",
+      "child_growth_records"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "neonatal_feeding_support",
+      "local_demonstration": "Assess and assist safe effective newborn feeding with observation of growth and caregiver needs",
+      "operating_requirements": "Trained supporters, suitable feeding resources and timely referral",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "kangaroo_mother_care_services",
+    "name": "Kangaroo Mother Care Services",
+    "foundations": "neonatal_thermal_care,neonatal_feeding_support",
+    "mechanism": "Organize qualified caregiver contact and feeding support for eligible newborns with monitoring",
+    "operating_requirement": "Willing supported caregivers, trained staff and escalation capacity",
+    "consequence": "Provide evidence-based supportive neonatal care under defined clinical conditions",
+    "status": "authored_draft",
+    "requires_all": [
+      "neonatal_thermal_care",
+      "neonatal_feeding_support"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "kangaroo_mother_care_services",
+      "local_demonstration": "Organize qualified caregiver contact and feeding support for eligible newborns with monitoring",
+      "operating_requirements": "Willing supported caregivers, trained staff and escalation capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "antenatal_care_continuity",
+    "name": "Antenatal Care Continuity",
+    "foundations": "trained_midwives,case_records",
+    "mechanism": "Maintain repeated pregnancy assessment and timely action on changing care needs",
+    "operating_requirement": "Qualified providers, accessible follow-up, suitable tests and referral capacity",
+    "consequence": "Support continuing maternal care rather than a single attendance bonus",
+    "status": "authored_draft",
+    "requires_all": [
+      "trained_midwives",
+      "case_records"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "antenatal_care_continuity",
+      "local_demonstration": "Maintain repeated pregnancy assessment and timely action on changing care needs",
+      "operating_requirements": "Qualified providers, accessible follow-up, suitable tests and referral capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "postpartum_complication_surveillance",
+    "name": "Postpartum Complication Surveillance",
+    "foundations": "maternal_recovery,clinical_observation_rounds",
+    "mechanism": "Recognize and escalate defined changes during post-birth recovery",
+    "operating_requirement": "Trained caregivers, continuing contact and functioning referral services",
+    "consequence": "Reduce delays in assessment while retaining limits of available treatment",
+    "status": "authored_draft",
+    "requires_all": [
+      "maternal_recovery",
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "postpartum_complication_surveillance",
+      "local_demonstration": "Recognize and escalate defined changes during post-birth recovery",
+      "operating_requirements": "Trained caregivers, continuing contact and functioning referral services",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "contraceptive_counseling_services",
+    "name": "Contraceptive Counseling Services",
+    "foundations": "case_records,medicine_quality_assurance",
+    "mechanism": "Support informed voluntary choice among suitable evaluated contraceptive options",
+    "operating_requirement": "Trained counselors, reliable information, privacy and actual selected products or services",
+    "consequence": "Enable reproductive choice with method-specific limitations and continuing access needs",
+    "status": "authored_draft",
+    "requires_all": [
+      "case_records",
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "contraceptive_counseling_services",
+      "local_demonstration": "Support informed voluntary choice among suitable evaluated contraceptive options",
+      "operating_requirements": "Trained counselors, reliable information, privacy and actual selected products or services",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "cervical_screening_followup",
+    "name": "Cervical Screening Followup",
+    "foundations": "screening_program_evaluation,clinical_referral_networks",
+    "mechanism": "Connect validated cervical screening results to indicated confirmatory assessment and care",
+    "operating_requirement": "Qualified testing, accessible follow-up and available clinical treatment capacity",
+    "consequence": "Reduce losses between screening and care without awarding benefit for testing alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "screening_program_evaluation",
+      "clinical_referral_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cervical_screening_followup",
+      "local_demonstration": "Connect validated cervical screening results to indicated confirmatory assessment and care",
+      "operating_requirements": "Qualified testing, accessible follow-up and available clinical treatment capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "oral_health_hygiene_practice",
+    "name": "Oral Health Hygiene Practice",
+    "foundations": "clinical_observation_rounds",
+    "mechanism": "Maintain and teach evaluated practical oral cleaning with observation of tissue condition",
+    "operating_requirement": "Suitable cleaning materials, trained instruction and accessible supplies",
+    "consequence": "Reduce selected preventable oral-health burdens with repeated practice",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "oral_health_hygiene_practice",
+      "local_demonstration": "Maintain and teach evaluated practical oral cleaning with observation of tissue condition",
+      "operating_requirements": "Suitable cleaning materials, trained instruction and accessible supplies",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "dental_caries_assessment",
+    "name": "Dental Caries Assessment",
+    "foundations": "oral_health_hygiene_practice",
+    "mechanism": "Assess suspected tooth decay using appropriate examination and qualified diagnostic aids",
+    "operating_requirement": "Competent oral-health provider, suitable instruments and referral capacity",
+    "consequence": "Identify indicated preventive or restorative care without equating discoloration with disease",
+    "status": "authored_draft",
+    "requires_all": [
+      "oral_health_hygiene_practice"
+    ],
+    "requires_any": [
+      [
+        "clinical_observation_rounds",
+        "radiographic_imaging"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dental_caries_assessment",
+      "local_demonstration": "Assess suspected tooth decay using appropriate examination and qualified diagnostic aids",
+      "operating_requirements": "Competent oral-health provider, suitable instruments and referral capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Direct qualified oral examination can precede dental imaging. Formal visual-acuity testing is not a prerequisite for examining teeth."
+  },
+  {
+    "field": "D14",
+    "id": "dental_restorative_materials",
+    "name": "Dental Restorative Materials",
+    "foundations": "medicine_quality_assurance",
+    "mechanism": "Qualify materials that restore selected tooth structures under oral mechanical and biological conditions",
+    "operating_requirement": "Approved materials, dental equipment, trained clinicians and quality review",
+    "consequence": "Support indicated restoration with wear, compatibility and maintenance limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [
+      [
+        "material_property_databases",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dental_restorative_materials",
+      "local_demonstration": "Qualify materials that restore selected tooth structures under oral mechanical and biological conditions",
+      "operating_requirements": "Approved materials, dental equipment, trained clinicians and quality review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Empirical material qualification may precede digital material databases; oral compatibility and qualified clinical placement remain necessary."
+  },
+  {
+    "field": "D14",
+    "id": "orthotic_support_design",
+    "name": "Orthotic Support Design",
+    "foundations": "rehabilitation_services",
+    "mechanism": "Fit external supports to evaluated movement or alignment needs and monitor their effects",
+    "operating_requirement": "Qualified orthotic staff, suitable materials, fitting tools and follow-up",
+    "consequence": "Support selected function while avoiding a universal correction bonus",
+    "status": "authored_draft",
+    "requires_all": [
+      "rehabilitation_services"
+    ],
+    "requires_any": [
+      [
+        "stress_strain_relations",
+        "fracture_immobilization"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orthotic_support_design",
+      "local_demonstration": "Fit external supports to evaluated movement or alignment needs and monitor their effects",
+      "operating_requirements": "Qualified orthotic staff, suitable materials, fitting tools and follow-up",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Empirically fitted supports can precede formal stress-strain models; fitting, inspection and follow-up remain mandatory."
+  },
+  {
+    "field": "D14",
+    "id": "wheelchair_seating_services",
+    "name": "Wheelchair Seating Services",
+    "foundations": "rehabilitation_services",
+    "mechanism": "Match seating and mobility equipment to assessed posture, propulsion and environment needs",
+    "operating_requirement": "Appropriate chairs, fitting staff, repair supplies and accessible routes",
+    "consequence": "Improve usable mobility through individualized fitting and ongoing support",
+    "status": "authored_draft",
+    "requires_all": [
+      "rehabilitation_services"
+    ],
+    "requires_any": [
+      [
+        "accessible_transport_design",
+        "cart_running_gear"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wheelchair_seating_services",
+      "local_demonstration": "Match seating and mobility equipment to assessed posture, propulsion and environment needs",
+      "operating_requirements": "Appropriate chairs, fitting staff, repair supplies and accessible routes",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Individual wheeled seating can develop before an accessible public transport system; actual route accessibility still constrains use."
+  },
+  {
+    "field": "D14",
+    "id": "speech_language_rehabilitation",
+    "name": "Speech Language Rehabilitation",
+    "foundations": "rehabilitation_services",
+    "mechanism": "Assess and practice specified communication functions using appropriate language and access methods",
+    "operating_requirement": "Qualified practitioners, accessible materials and repeated supported practice",
+    "consequence": "Improve or adapt selected communication tasks within individual recovery limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "rehabilitation_services"
+    ],
+    "requires_any": [
+      [
+        "language_documentation_corpora",
+        "demonstration_teaching"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "speech_language_rehabilitation",
+      "local_demonstration": "Assess and practice specified communication functions using appropriate language and access methods",
+      "operating_requirements": "Qualified practitioners, accessible materials and repeated supported practice",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Direct language-appropriate teaching and practice can precede formal linguistic corpora; evidence and qualified assessment remain required."
+  },
+  {
+    "field": "D14",
+    "id": "swallowing_function_services",
+    "name": "Swallowing Function Services",
+    "foundations": "rehabilitation_services,clinical_nutrition_assessment",
+    "mechanism": "Assess swallowing function and coordinate qualified feeding support or referral",
+    "operating_requirement": "Competent clinicians, appropriate assessment resources and suitable nutrition support",
+    "consequence": "Reduce avoidable feeding difficulties without assuming every swallowing problem has one remedy",
+    "status": "authored_draft",
+    "requires_all": [
+      "rehabilitation_services",
+      "clinical_nutrition_assessment"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "swallowing_function_services",
+      "local_demonstration": "Assess swallowing function and coordinate qualified feeding support or referral",
+      "operating_requirements": "Competent clinicians, appropriate assessment resources and suitable nutrition support",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit."
+  },
+  {
+    "field": "D14",
+    "id": "pressure_injury_prevention",
+    "name": "Pressure Injury Prevention",
+    "foundations": "nursing_care_organization",
+    "mechanism": "Identify tissue-pressure risks and organize qualified positioning, skin observation and support",
+    "operating_requirement": "Adequate caregivers, suitable support surfaces, hygiene and reassessment",
+    "consequence": "Reduce selected preventable tissue injury with continuing labor and equipment",
+    "status": "authored_draft",
+    "requires_all": [
+      "nursing_care_organization"
+    ],
+    "requires_any": [
+      [
+        "clinical_nutrition_assessment",
+        "clinical_observation_rounds"
+      ]
+    ],
+    "recovery": "Obtain evidence or instruction from a competent source through paid visiting practitioners, reciprocal research, commissioned studies or licensed supply. Retain actual travel or delivery, local supervised qualification and ongoing operating costs; purchased clinical products are not discovery mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pressure_injury_prevention",
+      "local_demonstration": "Identify tissue-pressure risks and organize qualified positioning, skin observation and support",
+      "operating_requirements": "Adequate caregivers, suitable support surfaces, hygiene and reassessment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available qualified source",
+        "payment or reciprocal contribution",
+        "actual travel or record/product delivery",
+        "finite supervised local learning",
+        "ongoing supplies and competent clinical service"
+      ],
+      "qualification_focus": "Demonstrate the specified mechanism under evaluated clinical or laboratory conditions; never substitute a purchased product for local care competence.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a competent visiting practitioner; actual journey, board and finite supervised practice precede local qualification.",
+        "partnership": "Contribute staff, materials or interpretable clinical evidence to an accepted joint question; communication, access limits and local validation remain.",
+        "purchased_research": "Commission a specified evidentiary question from a qualified provider; payment and delivery accelerate only supported inquiry, with no guarantee of positive findings.",
+        "licensed_supply_or_service": "Pay continuing charges and transport or access costs for qualified products or external services; retain local clinical competence and supplier dependence without mastery grants.",
+        "reverse_engineering": "Examine an available instrument, formulation or documented process with qualified analysis; inspection cannot alone establish clinical benefit, safe operation or tacit practitioner competence."
+      },
+      "runtime_status": "Proposed design; route selection, numerical work penalties, clinical capacity and AI enforcement remain to implement."
+    },
+    "clinical_scope": "Game capability design, not treatment instructions. Indication, consent, validated supplies, qualified staff and monitoring remain operating requirements; no universal cure or automatic population benefit.",
+    "branching_note": "Repeated skin and mobility observation supports early prevention before formal nutritional assessment; equipment and caregiver capacity still limit service."
+  }
+]
