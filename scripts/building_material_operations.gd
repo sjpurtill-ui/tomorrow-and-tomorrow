@@ -126,3 +126,30 @@ static func describe(plot:Dictionary)->String:
 	if String(plot.get("status",""))=="under_construction" and plot.has("curing_started_day"):
 		result+="Curing: %.0f / %d supplied days. Needs %.2f Freshwater per 30-day interval; shortages pause curing.\n" % [float(plot.get("curing_work_days",0)),int(profile.curing_days),float(profile.curing_water)*30.0/maxf(1,float(profile.curing_days))]
 	return result
+static func visual_mix(cost:Dictionary)->Dictionary:
+	# Appearance equivalents only. These values never enter the resource ledger.
+	var equivalents:={"Building Mortar":{"Clay":.6,"Stone":.4},"Concrete Dry Mix":{"Stone":.8,"Clay":.2},"Roof Tiles":{"Clay":1.0},"Timber Trusses":{"Timber":1.0},"Thatch Panels":{"Fiber Plants":1.0},"Voussoir Stones":{"Stone":1.0},"Masonry Drainage Beds":{"Stone":1.0}}
+	var result:Dictionary={};var total:=0.0
+	for material:String in cost:
+		var parts:Dictionary=equivalents.get(material,{material:1.0} if material in ["Timber","Stone","Clay","Fiber Plants"] else {})
+		for name:String in parts:
+			var amount:=float(cost[material])*float(parts[name])
+			result[name]=float(result.get(name,0))+amount;total+=amount
+	if total>0:
+		for name:String in result:result[name]=float(result[name])/total
+	return result
+static func roof_plan(profile:Dictionary,fallback:String)->String:
+	match String(profile.get("id","")):
+		"thatched_frame","trussed_roof":return "long_thatch"
+		"tiled_masonry":return "fired_tile_roof"
+		"arched_masonry","vaulted_masonry","domed_masonry":return "masonry_roof"
+		"cast_concrete":return "concrete_roof"
+	return fallback
+static func extend_fabric(plot:Dictionary,new_cost:Dictionary)->void:
+	var profile:Dictionary=plot.get("building_materials",{})
+	if profile.is_empty():return
+	var previous:=0.0;var added:=0.0
+	for value in plot.get("supply_provenance",{}).values():previous+=maxf(0,float(value))
+	for value in new_cost.values():added+=maxf(0,float(value))
+	# A raw-material extension does not inherit the old paid fabric's durability.
+	if added>0:profile.decay=(float(profile.decay)*previous+added)/maxf(.0001,previous+added)
