@@ -3295,7 +3295,7 @@
       "domain": "movement",
       "id": "rope_laying",
       "name": "Rope Laying",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/sail_panel_cutting.png",
@@ -3311,7 +3311,7 @@
       "domain": "movement",
       "id": "sail_seaming",
       "name": "Sail Seaming",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/wooden_sheave_blocks.png",
@@ -3391,7 +3391,7 @@
       "domain": "movement",
       "id": "carvel_frame_construction",
       "name": "Carvel Frame Construction",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/clinker_shell_construction.png",
@@ -3399,7 +3399,7 @@
       "domain": "movement",
       "id": "clinker_shell_construction",
       "name": "Clinker Shell Construction",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/mast_making.png",
@@ -3941,9 +3941,9 @@
   "live_art_complete": false,
   "live_count": 492,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 442,
+  "queued_count": 438,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 50
+  "verified_count": 54
 }

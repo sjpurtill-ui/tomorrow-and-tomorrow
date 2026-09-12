@@ -1412,3 +1412,16 @@ Validation: five connected shipbuilding cases and nineteen existing persistent-p
 No save schema change. Existing saved ship jobs retain their stored recipes and partial work; newly created or deliberately retooled lines use component costs. No changes to crew roles, general-led control or combat statistics. Shared integration conflicts: the catalog append in discovery_system.gd, civilian_industry.gd, civilization_controller.gd, joint_force_catalog.gd and persistent_production.gd; no canonical merge or player launch.
 
 Current totals: 492 of 5,000 discoveries; 171 civilian recipes; 12 plants; 89 military roles; 50 reviewed images. Remaining: 4,508 discovery identities, 442 images for currently live discoveries, and 4,950 images against the final target. Full 2,500–3,000-year progression and full-world military/economic acceptance remain unproved. Session 52497 was polled live during implementation; its loaded 476-discovery run had reached year 86 in the last inspected log and continues independently. It does not include this shipbuilding batch. The longest completed requested horizon remains 100 years.
+
+
+## Shipbuilding imagery: four distinct illustrations
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `a744aee`. No canonical integration or player launch.
+
+Added individually reviewed paper-and-gouache imagery for Rope Laying, Sail Seaming, Carvel Frame Construction and Clinker Shell Construction. The scenes distinguish twisted rope strands, stitched sail edges, exposed supporting frames and overlapping hull strakes. All use the inspected Apprentice Contracts style reference, warm fibrous ivory, muted pigment, simplified workers and open upper space. The built-in generator produced one asset per call. Original image files are copied unchanged and hash-verified; complete prompts and original source paths are in assets/ui/research/paper/SHIPBUILDING_ART_PROMPTS.md.
+
+The four cards have explicit individual bindings, full-frame presentation and 768px runtime texture limits with mipmaps. Discovery and production behavior are unchanged. Save compatibility is unchanged. Shared integration conflict is scripts/hud/research_visuals.gd plus the art manifest. This is headless asset verification and visual review of generated originals, not native player acceptance.
+
+The manifest now reports 492 live discoveries, 54 reviewed images and 438 live images queued. The full target still lacks 4,508 discovery identities and 4,946 images, plus multi-millennial progression, full-world acceptance and canonical integration.
+
+Verification: all 11 research visual atlas cases pass, with zero errors/failures/skips/orphans; all current bindings are checked. Both import processes exited without script errors. The manifest export reports no missing bound assets. No broad gameplay regression was repeated for these asset-only changes.
