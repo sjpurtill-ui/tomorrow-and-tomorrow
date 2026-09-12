@@ -32,7 +32,7 @@ func refresh()->void:
 		if float(spec.services.get("electricity",0))>0:row.label.text+=" Nominal generation: %.1f power units per day." % float(spec.services.electricity)
 		if spec.services.has("specimen_observation"):row.label.text+=" Uses slide supplies each operating day to help researchers examine returned physical specimens; ordinary study work is still required."
 		if spec.services.has("radio_records"):row.label.text+=" Sends agreed research records home from a physically reached partner with an operating station, up to 120 km. Both endpoints spend daily capacity; local study and physical return travel remain required."
-		if spec.services.has("signal_analysis"):row.label.text+=" Uses supplies and finite daily instrument time to examine acquired communications equipment; it does not establish a distant network link."
+		if spec.has("analysis_family"):row.label.text+=" Uses supplies and finite daily instrument time to examine compatible "+String(spec.analysis_family)+" equipment; other communications families need their own bench."
 		row.label.text+="\n"+Ops.status(id)
 		var terms:=Ops.quote(id)
 		row.build.disabled=terms.has("error")

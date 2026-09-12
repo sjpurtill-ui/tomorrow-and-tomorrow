@@ -14,23 +14,26 @@ static func recommendation()->Dictionary:
 	var ordinary:=float(state.effective_workers("Knowledge"))*.15
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1)
 	if ordinary<=0 or condition<=0:return {}
-	var remaining:=0.0
+	var remaining:Dictionary={}
 	for item:Dictionary in E.data().collections.values():
 		if int(item.get("returned_day",2147483647))>int(state.elapsed_days) or not Analysis.eligible(item):continue
-		remaining+=maxf(0,1.0-float(item.study))*float(item.work)
-	if remaining<ordinary*30.0:return {}
-	var capacity:=0.0;var operators:=0.0
+		var group:=Analysis.family(item)
+		remaining[group]=float(remaining.get(group,0))+maxf(0,1.0-float(item.study))*float(item.work)
+	if remaining.is_empty():return {}
+	var capacity:Dictionary={};var operators:=0.0
 	for id:String in Ops.data().plants:
 		var record:Dictionary=Ops.data().plants[id];var spec:Dictionary=Ops.PLANTS[id]
 		if not bool(record.enabled):continue
 		if int(record.building)>0:return {}
 		operators+=int(record.installed)*float(spec.workers)
-		capacity+=int(record.installed)*float(spec.services.get("signal_analysis",0))*condition
-	if capacity>=ordinary*.25:return {}
+		var group:=String(spec.get("analysis_family",""))
+		if not group.is_empty():capacity[group]=float(capacity.get(group,0))+int(record.installed)*float(spec.services.get("analysis_"+group,0))*condition
 	if state.effective_workers("Crafting")+Ops.reserved_workers(state)<operators+2.0:return {}
 	var upstream:Dictionary={}
 	for id:String in TYPES:
 		var spec:Dictionary=Ops.PLANTS[id];var record:Dictionary=Ops.data().plants.get(id,{})
+		var group:=String(spec.analysis_family)
+		if float(remaining.get(group,0))<ordinary*30.0 or float(capacity.get(group,0))>=ordinary*.25:continue
 		if not record.is_empty() and not bool(record.enabled):continue
 		if int(record.get("installed",0))>=Ops.LIMIT:continue
 		var known:=true
