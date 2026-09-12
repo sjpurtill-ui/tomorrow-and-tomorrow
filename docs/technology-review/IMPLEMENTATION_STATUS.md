@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 106: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 107: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1172,3 +1172,14 @@ Compound Microscopy now has an individually generated and visually inspected sub
 Both headless import passes exited without errors. The texture uses the shared 768-pixel runtime limit and mipmaps. All 11 atlas cases pass with zero errors/failures/skips/orphans, covering all 42 explicit image bindings and square/cache constraints. Native player presentation remains unverified. No gameplay or save change.
 
 Totals: 453 discoveries, 89 military roles, eleven installation types; 42 reviewed images and 411 queued live images. Shared files are visual bindings, art manifest, prompt index and review records; image/import metadata/prompt record are task-owned. Full-history work remains active. Diagnostic session 57160 was confirmed live at the start; latest inspected snapshot is year 184, population 13,848, 203 known discoveries and 17 settlements on the loaded 414-discovery revision. Its 250-year target remains pending.
+
+
+## Checkpoint 107: autonomous specimen laboratory investment
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `902ae0c`. No canonical integration or player launch.
+
+Civilian monthly decisions can now obtain slides, manufacture missing microscope components and commission microscopy benches against substantial returned specimen work. Installed capacity bounds further investment. The planner requires local adoption, settled primary-site access, actual Crafting and Knowledge workers, a month of slides and ordinary installation costs. Paused benches, existing construction, hunger and war are respected. Existing power investment retains priority. See [Optical instruments](OPTICAL_INSTRUMENTS.md) for policy assumptions and limitations.
+
+Files owned: scientific instrument planner, focused tests, optical documentation and this review record; shared existing controller gains one planner call. No save fields or catalog/art additions. Existing saves remain compatible; runtime behavior requires this revision. No shared integration hotspots changed. Full-history work remains incomplete: 453 authored discoveries and 42 reviewed images. The ongoing loaded 414-discovery diagnostic was confirmed live and most recently inspected at year 188, population 15,691, 207 known discoveries and 17 settlements; no 250-year completion is claimed.
+
+Verification: 29 cases pass with zero errors, failures, skips or orphans: laboratory investment 5, optical instruments 4, civilian supply 8 and power investment 12. The new checks cover paid controller-to-commissioning flow, manufactured instruments, bounded investment, real slide supply, returned-specimen demand and adoption/labor/pause/emergency guards. These are focused simulations, not full-campaign balance or native player verification.

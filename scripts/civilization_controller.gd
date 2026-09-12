@@ -102,6 +102,7 @@ static func choose_orders(id:String)->void:
 static func civilian_orders(id:String,plan:Dictionary)->void:
 	if bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)):return
 	var recommendation:=preload("res://scripts/power_investment_planner.gd").recommendation()
+	if recommendation.is_empty():recommendation=preload("res://scripts/scientific_instrument_planner.gd").recommendation()
 	if recommendation.is_empty():
 		var candidate:=preload("res://scripts/civilian_production_planner.gd").recommendation(true)
 		if not candidate.is_empty():
