@@ -1586,6 +1586,86 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/hearth_roasting_control.png",
+      "description": "Manage distance and exposure of suitable food to a controlled hearth",
+      "domain": "nutrition",
+      "id": "hearth_roasting_control",
+      "name": "Hearth Roasting Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/earth_oven_cooking.png",
+      "description": "Retain and transfer heat through an enclosed heated-earth or stone cooking arrangement",
+      "domain": "nutrition",
+      "id": "earth_oven_cooking",
+      "name": "Earth Oven Cooking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_steaming_vessels.png",
+      "description": "Transfer heat to food through a qualified steam-producing vessel arrangement",
+      "domain": "nutrition",
+      "id": "food_steaming_vessels",
+      "name": "Food Steaming Vessels",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/threshing_frames.png",
+      "description": "Frames and repeated impacts separate grain from harvested heads. Handling takes time and loses a small share of recoverable food.",
+      "domain": "nutrition",
+      "id": "threshing_frames",
+      "name": "Threshing Frames",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/winnowing_practice.png",
+      "description": "Repeated tossing and sorting separate lighter residues from grain. Containers and handlers are required; discarded material is not extra food.",
+      "domain": "nutrition",
+      "id": "winnowing_practice",
+      "name": "Winnowing Practice",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grain_moisture_testing.png",
+      "description": "Representative samples are compared before and after controlled drying. The sampled batch becomes eligible for monitored forced-air treatment.",
+      "domain": "nutrition",
+      "id": "grain_moisture_testing",
+      "name": "Grain-Moisture Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/forced_air_grain_drying.png",
+      "description": "Powered airflow dries an assessed grain batch. Fans, handlers and a finite electrical supply limit the volume treated.",
+      "domain": "nutrition",
+      "id": "forced_air_grain_drying",
+      "name": "Forced-Air Grain Drying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/roller_grain_milling.png",
+      "description": "Driven rollers reduce grain through measured gaps. Their throughput requires deployed machinery, handlers and electricity.",
+      "domain": "nutrition",
+      "id": "roller_grain_milling",
+      "name": "Roller Grain Milling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/flour_sifting.png",
+      "description": "Meshes separate fine flour from edible bran. Both fractions remain in the food ledger; a small handling loss is recorded.",
+      "domain": "nutrition",
+      "id": "flour_sifting",
+      "name": "Flour Sifting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grain_malting.png",
+      "description": "A portion of suitable grain is steeped, germinated and dried over four days. It is unavailable while in process and returns with less stored food energy.",
+      "domain": "nutrition",
+      "id": "grain_malting",
+      "name": "Grain Malting",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/root_cellars.png",
       "description": "Below-ground stores buffer temperature swings while drainage keeps stored roots away from standing water.",
       "domain": "nutrition",
@@ -3292,7 +3372,7 @@
     {
       "asset": "res://assets/ui/research/paper/rope_laying.png",
       "description": "Strands laid against their own twist share a load without immediately unravelling. A ropewalk produces repeatable working lengths.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "rope_laying",
       "name": "Rope Laying",
       "status": "verified"
@@ -3300,7 +3380,7 @@
     {
       "asset": "res://assets/ui/research/paper/sail_panel_cutting.png",
       "description": "Measured cloth panels preserve the intended outline and distribute the seams of a sail.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "sail_panel_cutting",
       "name": "Sail Panel Cutting",
       "status": "queued"
@@ -3308,7 +3388,7 @@
     {
       "asset": "res://assets/ui/research/paper/sail_seaming.png",
       "description": "Joined panels and reinforced edges transfer wind loads into the ropes that support and trim a sail.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "sail_seaming",
       "name": "Sail Seaming",
       "status": "verified"
@@ -3316,7 +3396,7 @@
     {
       "asset": "res://assets/ui/research/paper/wooden_sheave_blocks.png",
       "description": "Grooved wooden wheels turn inside bound shells, guiding running rope while reducing the effort of hauling a sail.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "wooden_sheave_blocks",
       "name": "Wooden Sheave Blocks",
       "status": "queued"
@@ -3324,7 +3404,7 @@
     {
       "asset": "res://assets/ui/research/paper/standing_running_rigging.png",
       "description": "Fixed stays support the mast while separate moving lines hoist and trim the sails. Their coordinated layout makes a working rig.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "standing_running_rigging",
       "name": "Standing and Running Rigging",
       "status": "queued"
@@ -3332,7 +3412,7 @@
     {
       "asset": "res://assets/ui/research/paper/keel_scarfing.png",
       "description": "Long overlapping joints unite shorter timbers into the longitudinal backbone of a larger hull.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "keel_scarfing",
       "name": "Keel Scarfing",
       "status": "queued"
@@ -3340,7 +3420,7 @@
     {
       "asset": "res://assets/ui/research/paper/grown_frame_selection.png",
       "description": "Naturally curved timber is selected so its grain follows the shape of a ship frame instead of cutting across the bend.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "grown_frame_selection",
       "name": "Grown Frame Selection",
       "status": "queued"
@@ -3348,7 +3428,7 @@
     {
       "asset": "res://assets/ui/research/paper/frame_moulding.png",
       "description": "Reusable patterns transfer a planned hull section to a sequence of frames, reducing repeated fitting work.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "frame_moulding",
       "name": "Frame Moulding",
       "status": "queued"
@@ -3356,7 +3436,7 @@
     {
       "asset": "res://assets/ui/research/paper/plank_spiling.png",
       "description": "Offsets taken from a curved hull are transferred to a plank blank, preserving the changing width needed along its length.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "plank_spiling",
       "name": "Plank Spiling",
       "status": "queued"
@@ -3364,7 +3444,7 @@
     {
       "asset": "res://assets/ui/research/paper/caulking_fiber_preparation.png",
       "description": "Separated fibers are worked into compressible strands that can pack the joints between hull planks.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "caulking_fiber_preparation",
       "name": "Caulking Fiber Preparation",
       "status": "queued"
@@ -3372,7 +3452,7 @@
     {
       "asset": "res://assets/ui/research/paper/treenail_fastening.png",
       "description": "Close-fitting wooden pins fasten planking to its supporting frames, providing a fastening route without a supply of metal nails.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "treenail_fastening",
       "name": "Treenail Fastening",
       "status": "queued"
@@ -3380,7 +3460,7 @@
     {
       "asset": "res://assets/ui/research/paper/hull_seam_caulking.png",
       "description": "Driven fiber and a sealing compound close plank seams while allowing limited movement of the wooden hull.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "hull_seam_caulking",
       "name": "Hull Seam Caulking",
       "status": "queued"
@@ -3388,7 +3468,7 @@
     {
       "asset": "res://assets/ui/research/paper/carvel_frame_construction.png",
       "description": "Planks fitted edge to edge over a supporting frame form a smooth outer hull. The frames establish its shape before the planking closes it.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "carvel_frame_construction",
       "name": "Carvel Frame Construction",
       "status": "verified"
@@ -3396,7 +3476,7 @@
     {
       "asset": "res://assets/ui/research/paper/clinker_shell_construction.png",
       "description": "Overlapping strakes are fastened together as a shell before its internal supports are fitted, offering a different construction sequence from frame-first building.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "clinker_shell_construction",
       "name": "Clinker Shell Construction",
       "status": "verified"
@@ -3404,7 +3484,7 @@
     {
       "asset": "res://assets/ui/research/paper/mast_making.png",
       "description": "Selected straight timber is shaped into spars with reinforced attachment points for the loads of sails and rigging.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "mast_making",
       "name": "Mast Making",
       "status": "queued"
@@ -3412,7 +3492,7 @@
     {
       "asset": "res://assets/ui/research/paper/launching_cradles.png",
       "description": "A fitted supporting cradle carries a completed hull along prepared ways during launching, becoming reusable shipyard tooling.",
-      "domain": "movement",
+      "domain": "logistics",
       "id": "launching_cradles",
       "name": "Launching Cradles",
       "status": "queued"
@@ -3928,6 +4008,390 @@
       "id": "standard_fastener_kitting",
       "name": "Standard Fastener Kitting",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/agreed_signal_codes.png",
+      "description": "A community agrees which distinct visible or audible signs denote particular messages; the shared code must be learned at both ends.",
+      "domain": "knowledge",
+      "id": "agreed_signal_codes",
+      "name": "Agreed Signal Codes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/relay_observation_posts.png",
+      "description": "Observers choose successive visible stations and repeat an acknowledged message instead of assuming a distant recipient has seen it.",
+      "domain": "knowledge",
+      "id": "relay_observation_posts",
+      "name": "Relay Observation Posts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timed_signal_sequences.png",
+      "description": "Separating marks, gaps and message boundaries by agreed durations lets a short set of signals encode longer messages.",
+      "domain": "knowledge",
+      "id": "timed_signal_sequences",
+      "name": "Timed Signal Sequences",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shutter_signal_frames.png",
+      "description": "Movable contrasting shutters present distinct states to a distant observer without requiring the observer to read small writing.",
+      "domain": "knowledge",
+      "id": "shutter_signal_frames",
+      "name": "Shutter Signal Frames",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/optical_telegraphy.png",
+      "description": "Trained observers read, acknowledge and relay coded visual states; obscured sightlines interrupt the chain.",
+      "domain": "knowledge",
+      "id": "optical_telegraphy",
+      "name": "Optical Telegraphy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/telegraph_keys.png",
+      "description": "A sprung contact deliberately opens and closes a circuit so an operator can send a timed electrical sequence.",
+      "domain": "knowledge",
+      "id": "telegraph_keys",
+      "name": "Telegraph Keys",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electromagnet_sounders.png",
+      "description": "A current-operated armature makes a reproducible click, turning the circuit state into a locally audible signal.",
+      "domain": "knowledge",
+      "id": "electromagnet_sounders",
+      "name": "Electromagnet Sounders",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/line_insulators.png",
+      "description": "Shaped insulating supports keep a conductor apart from its support while providing a longer leakage path.",
+      "domain": "knowledge",
+      "id": "line_insulators",
+      "name": "Line Insulators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/telegraph_return_circuits.png",
+      "description": "A signal circuit requires a complete return path; paired conductors avoid relying on uncertain earth contact.",
+      "domain": "knowledge",
+      "id": "telegraph_return_circuits",
+      "name": "Telegraph Return Circuits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrical_telegraphy.png",
+      "description": "Coded circuit interruptions operate a distant receiving instrument when conductors and an energy source form a complete circuit.",
+      "domain": "knowledge",
+      "id": "electrical_telegraphy",
+      "name": "Electrical Telegraphy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polarized_telegraph_relays.png",
+      "description": "A magnetically biased armature distinguishes current direction as well as current presence.",
+      "domain": "knowledge",
+      "id": "polarized_telegraph_relays",
+      "name": "Polarized Telegraph Relays",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/duplex_telegraphy.png",
+      "description": "Balanced circuits distinguish locally sent current from the received signal, allowing opposite directions to share a line.",
+      "domain": "knowledge",
+      "id": "duplex_telegraphy",
+      "name": "Duplex Telegraphy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/punched_message_tape.png",
+      "description": "Rows of punched positions retain a sequence of coded characters that a mechanical reader can revisit.",
+      "domain": "knowledge",
+      "id": "punched_message_tape",
+      "name": "Punched Message Tape",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/teleprinter_mechanisms.png",
+      "description": "A timed selector maps received character codes to a printing mechanism, retaining an intelligible local record.",
+      "domain": "knowledge",
+      "id": "teleprinter_mechanisms",
+      "name": "Teleprinter Mechanisms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/automatic_telegraphy.png",
+      "description": "A prepared tape drives timed transmission while a receiving selector records characters, leaving setup and error checking to operators.",
+      "domain": "knowledge",
+      "id": "automatic_telegraphy",
+      "name": "Automatic Telegraphy",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/acoustic_diaphragms.png",
+      "description": "A thin supported membrane converts pressure variation into repeatable mechanical displacement.",
+      "domain": "knowledge",
+      "id": "acoustic_diaphragms",
+      "name": "Acoustic Diaphragms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/carbon_microphones.png",
+      "description": "Changing contact pressure among carbon granules varies circuit resistance in response to sound.",
+      "domain": "knowledge",
+      "id": "carbon_microphones",
+      "name": "Carbon Microphones",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electromagnetic_earpieces.png",
+      "description": "A varying magnetic force moves a diaphragm and produces sound near the listener.",
+      "domain": "knowledge",
+      "id": "electromagnetic_earpieces",
+      "name": "Electromagnetic Earpieces",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/telephone_circuits.png",
+      "description": "A powered circuit carries continuously varying speech signals between a microphone and an earpiece.",
+      "domain": "knowledge",
+      "id": "telephone_circuits",
+      "name": "Telephone Circuits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/manual_switchboards.png",
+      "description": "An operator connects identified subscriber circuits through a panel rather than providing a separate permanent circuit for every pair.",
+      "domain": "knowledge",
+      "id": "manual_switchboards",
+      "name": "Manual Switchboards",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/balanced_conductor_pairs.png",
+      "description": "A paired, regularly exchanged conductor geometry reduces unequal coupling from external electrical disturbances.",
+      "domain": "knowledge",
+      "id": "balanced_conductor_pairs",
+      "name": "Balanced Conductor Pairs",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/inductive_line_loading.png",
+      "description": "Distributed loading coils change line behavior over a chosen voice-frequency band; they are not a universal improvement for broadband transmission.",
+      "domain": "knowledge",
+      "id": "inductive_line_loading",
+      "name": "Inductive Line Loading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/telephone_repeaters.png",
+      "description": "A supplied amplifier restores a weakened voice signal at an intermediate point; noise and instability still constrain the chain.",
+      "domain": "knowledge",
+      "id": "telephone_repeaters",
+      "name": "Telephone Repeaters",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electromagnetic_wave_theory.png",
+      "description": "Coupled changing electric and magnetic fields admit propagating disturbances, linking measured electrical behavior to wave transmission.",
+      "domain": "knowledge",
+      "id": "electromagnetic_wave_theory",
+      "name": "Electromagnetic Wave Theory",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/resonant_tuned_circuits.png",
+      "description": "An inductive and capacitive circuit responds preferentially near a resonant frequency, with losses limiting selectivity.",
+      "domain": "knowledge",
+      "id": "resonant_tuned_circuits",
+      "name": "Resonant Tuned Circuits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/variable_air_capacitors.png",
+      "description": "Interleaved movable metal plates vary capacitance without touching, allowing an operator to tune a circuit.",
+      "domain": "knowledge",
+      "id": "variable_air_capacitors",
+      "name": "Variable Air Capacitors",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aerial_matching.png",
+      "description": "A conductor, feed and matching circuit couple a radio-frequency source or receiver to the surrounding electromagnetic field.",
+      "domain": "knowledge",
+      "id": "aerial_matching",
+      "name": "Aerial Matching",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crystal_radio_detection.png",
+      "description": "A light contact on a selected rectifying mineral crystal extracts an amplitude envelope without supplying gain; many unselected mineral fragments do not work.",
+      "domain": "knowledge",
+      "id": "crystal_radio_detection",
+      "name": "Crystal Radio Detection",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tuned_radio_reception.png",
+      "description": "A tuned aerial circuit and detector recover a sufficiently strong amplitude-modulated signal for a sensitive earpiece.",
+      "domain": "knowledge",
+      "id": "tuned_radio_reception",
+      "name": "Tuned Radio Reception",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thermionic_emission.png",
+      "description": "Sufficiently heated material emits electrons; an evacuated enclosure permits their collection by a positively biased electrode.",
+      "domain": "knowledge",
+      "id": "thermionic_emission",
+      "name": "Thermionic Emission",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vacuum_diodes.png",
+      "description": "A heated cathode and separate anode in an evacuated envelope preferentially conduct in one direction.",
+      "domain": "knowledge",
+      "id": "vacuum_diodes",
+      "name": "Vacuum Diodes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/triode_valves.png",
+      "description": "An intervening control grid varies the current from cathode to anode, enabling powered amplification.",
+      "domain": "knowledge",
+      "id": "triode_valves",
+      "name": "Triode Valves",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/feedback_radio_oscillators.png",
+      "description": "A powered gain stage feeds a suitable fraction of its output back into a resonant circuit to sustain an electrical oscillation.",
+      "domain": "knowledge",
+      "id": "feedback_radio_oscillators",
+      "name": "Feedback Radio Oscillators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/frequency_stabilization.png",
+      "description": "Repeated comparison against a reference distinguishes frequency drift from intentional modulation and guides correction.",
+      "domain": "knowledge",
+      "id": "frequency_stabilization",
+      "name": "Frequency Stabilization",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/radio_telegraphy.png",
+      "description": "Keying a supplied radio-frequency source transmits coded marks; a matched receiving system and trained operator are still required.",
+      "domain": "knowledge",
+      "id": "radio_telegraphy",
+      "name": "Radio Telegraphy",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/amplitude_modulation.png",
+      "description": "A message varies the amplitude of a carrier while the receiver recovers its envelope within the usable signal range.",
+      "domain": "knowledge",
+      "id": "amplitude_modulation",
+      "name": "Amplitude Modulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/frequency_modulation.png",
+      "description": "A message varies the instantaneous carrier frequency; a matching discriminator recovers that variation at reception.",
+      "domain": "knowledge",
+      "id": "frequency_modulation",
+      "name": "Frequency Modulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/frequency_conversion.png",
+      "description": "A nonlinear stage combines input and local oscillator signals to produce sum and difference frequencies.",
+      "domain": "knowledge",
+      "id": "frequency_conversion",
+      "name": "Frequency Conversion",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/superheterodyne_reception.png",
+      "description": "A mixer shifts selected received signals to a common intermediate frequency for repeatable filtering and gain.",
+      "domain": "knowledge",
+      "id": "superheterodyne_reception",
+      "name": "Superheterodyne Reception",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/signal_sampling.png",
+      "description": "A time-varying signal is measured at specified intervals; a bandwidth bound and suitable sampling rate are necessary for reconstruction.",
+      "domain": "knowledge",
+      "id": "signal_sampling",
+      "name": "Signal Sampling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pulse_code_modulation.png",
+      "description": "Measured signal levels are quantized and represented as binary words, with precision and sample rate determining data demand.",
+      "domain": "knowledge",
+      "id": "pulse_code_modulation",
+      "name": "Pulse-Code Modulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/message_framing.png",
+      "description": "Start boundaries, lengths or reserved symbols separate a continuous bit stream into messages a receiver can parse.",
+      "domain": "knowledge",
+      "id": "message_framing",
+      "name": "Message Framing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/error_detection_codes.png",
+      "description": "Redundant check bits expose specified classes of corruption; detection alone cannot repair an arbitrary damaged message.",
+      "domain": "knowledge",
+      "id": "error_detection_codes",
+      "name": "Error-Detection Codes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/automatic_repeat_request.png",
+      "description": "Acknowledgements, sequence identifiers and timeouts request a retransmission instead of accepting a missing or corrupted frame.",
+      "domain": "knowledge",
+      "id": "automatic_repeat_request",
+      "name": "Automatic Repeat Request",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/data_modems.png",
+      "description": "Modulation maps data symbols onto a physical signal and demodulation recovers them; the line and receiver still limit reliable rate.",
+      "domain": "knowledge",
+      "id": "data_modems",
+      "name": "Data Modems",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/packet_switching.png",
+      "description": "Addressed packets share transmission resources through buffering and forwarding instead of reserving one complete circuit for a conversation.",
+      "domain": "knowledge",
+      "id": "packet_switching",
+      "name": "Packet Switching",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/packet_routers.png",
+      "description": "A processor consults a forwarding table, buffers received packets and sends them toward an available next interface.",
+      "domain": "knowledge",
+      "id": "packet_routers",
+      "name": "Packet Routers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/store_forward_archives.png",
+      "description": "A local store retains addressed messages across unavailable links and releases them when forwarding becomes possible; custody and expiry must be tracked.",
+      "domain": "knowledge",
+      "id": "store_forward_archives",
+      "name": "Store-and-Forward Archives",
+      "status": "queued"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
@@ -4451,11 +4915,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 556,
+  "live_count": 614,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 454,
+  "queued_count": 511,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 102
+  "verified_count": 103
 }

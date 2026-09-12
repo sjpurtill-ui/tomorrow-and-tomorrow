@@ -2,7 +2,7 @@
 
 Worktree: `/Users/seanpurtill/Documents/Codex/tt-communications-implementation`.
 Branch: `codex/technology-communications`. Base: `604567c4bc6ae414ff256238a52e57513ed67d8c`.
-Status: READY for integrator review. This is not a player release.
+Status: INTEGRATED in reviewed runtime merge `5eab52adbbc30af5c6437e08d61946dbaa3c51de`. This original handoff describes the isolated communications scope; INTEGRATION_STATUS records the combined614-node verification. No new player launch is claimed.
 
 ## Implemented behavior
 
