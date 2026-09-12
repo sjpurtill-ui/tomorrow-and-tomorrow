@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 556,
-  "pending_communications": 48,
-  "new_authored_drafts": 2424,
+  "verified_baseline_discoveries": 614,
+  "pending_communications": 0,
+  "new_authored_drafts": 2414,
   "distinct_accounted_identities": 3028,
   "remaining_identities_to_author": 1972,
   "target": 5000,
@@ -2304,9 +2304,9 @@
         "target": 600,
         "assigned": 23,
         "target_slots_not_yet_assigned": 577,
-        "implemented_baseline": 0,
+        "implemented_baseline": 3,
         "pending_communications": 0,
-        "authored_drafts": 23
+        "authored_drafts": 20
       },
       {
         "id": "H02",
@@ -2314,9 +2314,9 @@
         "target": 700,
         "assigned": 65,
         "target_slots_not_yet_assigned": 635,
-        "implemented_baseline": 0,
+        "implemented_baseline": 4,
         "pending_communications": 0,
-        "authored_drafts": 65
+        "authored_drafts": 61
       },
       {
         "id": "H03",
@@ -2334,9 +2334,9 @@
         "target": 700,
         "assigned": 177,
         "target_slots_not_yet_assigned": 523,
-        "implemented_baseline": 0,
+        "implemented_baseline": 3,
         "pending_communications": 0,
-        "authored_drafts": 177
+        "authored_drafts": 174
       },
       {
         "id": "H05",
@@ -2361,10 +2361,10 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 459,
+  "branch_alternatives": 457,
   "draft_reachability_rounds": 13,
   "draft_fields": {
-    "D01": 118,
+    "D01": 108,
     "D02": 99,
     "D03": 97,
     "D04": 119,
@@ -2394,9 +2394,9 @@
       "id": "D01",
       "name": "Food and agriculture",
       "target": 280,
-      "implemented_baseline": 43,
+      "implemented_baseline": 53,
       "pending_communications": 0,
-      "authored_drafts": 118,
+      "authored_drafts": 108,
       "accounted": 161,
       "remaining_to_target": 119
     },
@@ -2514,8 +2514,8 @@
       "id": "D13",
       "name": "Records and communications",
       "target": 240,
-      "implemented_baseline": 20,
-      "pending_communications": 34,
+      "implemented_baseline": 54,
+      "pending_communications": 0,
       "authored_drafts": 119,
       "accounted": 173,
       "remaining_to_target": 67
@@ -2594,8 +2594,8 @@
       "id": "D21",
       "name": "Electronics and computation",
       "target": 300,
-      "implemented_baseline": 34,
-      "pending_communications": 14,
+      "implemented_baseline": 48,
+      "pending_communications": 0,
       "authored_drafts": 180,
       "accounted": 228,
       "remaining_to_target": 72

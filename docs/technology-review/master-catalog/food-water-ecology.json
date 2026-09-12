@@ -348,38 +348,6 @@
   },
   {
     "field": "D01",
-    "id": "threshing_frames",
-    "name": "Threshing Frames",
-    "foundations": "grain_milling,joinery",
-    "mechanism": "Separate grain from harvested heads through repeated mechanical impact or rubbing",
-    "operating_requirement": "Harvested crop, working surface and labor",
-    "consequence": "Recover grain while risking breakage and contamination if poorly operated",
-    "status": "authored_draft",
-    "requires_all": [
-      "grain_milling",
-      "joinery"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "winnowing_practice",
-    "name": "Winnowing Practice",
-    "foundations": "threshing_frames,seasonal_patterns",
-    "mechanism": "Use differences in aerodynamic behavior to separate grain from lighter residues",
-    "operating_requirement": "Suitable airflow, containers and repeated handling",
-    "consequence": "Clean threshed grain while losing some material",
-    "status": "authored_draft",
-    "requires_all": [
-      "threshing_frames",
-      "seasonal_patterns"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
     "id": "mechanical_reapers",
     "name": "Mechanical Reapers",
     "foundations": "crank_linkages,gear_ratios,hardened_edges",
@@ -410,90 +378,6 @@
       "winnowing_practice"
     ],
     "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "grain_moisture_testing",
-    "name": "Grain-Moisture Testing",
-    "foundations": "measurement_uncertainty,precision_thermometry",
-    "mechanism": "Estimate grain water content using a calibrated comparison method",
-    "operating_requirement": "Representative sampling and calibrated instruments",
-    "consequence": "Distinguish grain suitable for storage from grain needing drying",
-    "status": "authored_draft",
-    "requires_all": [
-      "measurement_uncertainty",
-      "precision_thermometry"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "forced_air_grain_drying",
-    "name": "Forced-Air Grain Drying",
-    "foundations": "grain_moisture_testing,electric_motors",
-    "mechanism": "Pass controlled airflow through grain to remove moisture",
-    "operating_requirement": "Fans, energy, air passages and monitoring",
-    "consequence": "Dry harvests faster while consuming energy and risking uneven treatment",
-    "status": "authored_draft",
-    "requires_all": [
-      "grain_moisture_testing",
-      "electric_motors"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "roller_grain_milling",
-    "name": "Roller Grain Milling",
-    "foundations": "grain_milling,precision_machinery",
-    "mechanism": "Pass grain through adjustable rollers to control size reduction",
-    "operating_requirement": "Rollers, drive power and measured gaps",
-    "consequence": "Produce controlled fractions with machinery and maintenance costs",
-    "status": "authored_draft",
-    "requires_all": [
-      "grain_milling",
-      "precision_machinery"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "flour_sifting",
-    "name": "Flour Sifting",
-    "foundations": "grain_milling,woven_carriers",
-    "mechanism": "Separate milled particles through meshes of defined opening size",
-    "operating_requirement": "Screens, labor or drive power and clean handling",
-    "consequence": "Produce selected flour fractions while retaining separated bran and coarse material",
-    "status": "authored_draft",
-    "requires_all": [
-      "grain_milling",
-      "woven_carriers"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "grain_malting",
-    "name": "Grain Malting",
-    "foundations": "germination_trials",
-    "mechanism": "Allow controlled germination before arresting growth by drying",
-    "operating_requirement": "Suitable grain, moisture, temperature and drying capacity",
-    "consequence": "Develop useful grain enzymes while consuming some stored reserves",
-    "status": "authored_draft",
-    "requires_all": [
-      "germination_trials"
-    ],
-    "requires_any": [
-      [
-        "food_drying",
-        "forced_air_grain_drying"
-      ]
-    ],
     "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
   },
   {

@@ -1,11 +1,11 @@
 # Full-history master authoring catalog
 
-Target: 5,000 distinct discoveries across the approved 24 fields. This directory completes the authored graph before further small production or image batches. It does not replace the live catalog or count review names as implemented discoveries.
+Target: 5,000 distinct discoveries across the approved 24 fields. This directory tracks authored scope alongside implementation of complete operating systems. It does not replace the live catalog or count review names as implemented discoveries.
 
 ## Authoritative baselines
 
-- Commit `18b0cb7`: 556 verified discoveries and 102 reviewed subject illustrations.
-- Pending communications implementation: 48 further identities, 38 recipes and four instrument benches. The structural audit finds 604 live definitions, 278 recipes and 16 plants with no graph or ideal-resource closure errors. Behavioral checks, opponent investment, presentation and completion of actual network-link operation remain outstanding. These additions are not yet a verified gameplay delivery.
+- Verified canonical checkpoint `2fc24b49ff607ba2c4a6f6e1990db6e5a674e4db`: **614 discoveries, 396 learning routes, 282 civilian recipes, 17 facilities and 103 reviewed subject illustrations**. Runtime source `5eab52adbbc30af5c6437e08d61946dbaa3c51de` passed 279 combined worktree cases and 69 canonical cases; see canonical integration handoff for scope.
+- Communications and seven staple-processing discoveries are integrated. The snapshot promotes 58 previously accounted identities (48 communications, three cooking methods and seven grain techniques), adding no identities to the master total.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 
@@ -17,15 +17,15 @@ The remaining fields must be authored through the substantial future. Avoid spen
 
 ## Delivery cadence
 
-Finish broad authored coverage and cross-field links first. Validate identity uniqueness and causal reachability for the assembled graph. Implement whole operating systems against that graph, then generate subject artwork for stable identities. Run focused checks once per cohesive change; broad regression and long natural-history simulation belong at major milestones and must not block independent authoring.
+Implement and integrate cohesive operating systems while extending broad authored coverage and cross-field links. Validate identity uniqueness and causal reachability for the assembled graph, and generate subject artwork for stable identities. Run focused checks once per cohesive change; broad regression and long natural-history simulation belong at major milestones and must not block independent authoring.
 
 ## Current authored coverage
 
-The master expansion contains **2,424 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **3,028 distinct IDs; 1,972 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **2,414 draft identities** across all twenty-four fields. Alongside **614 integrated identities**, this accounts for **3,028 distinct IDs; 1,972 remain to author**. The pending communications bucket is empty. Integration and focused tests do not establish full-campaign pacing or completed artwork.
 
-459 explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
+457 explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
-[Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 604 baseline/pending identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. [Historical-horizon allocation](Historical%20Horizon%20Allocation%20Review.md) now includes 932 explicit scope-based assignments; 2,097 existing identities remain unassigned. The checker keeps unassigned identities visible and invalidates classifications when a capability changes. Future-facing fields do not automatically count toward advanced/future coverage. The [energy and space follow-on review](Energy%20and%20Space%20Historical%20Horizon%20Review.md) adds 235 explicit assignments without adding discoveries.
+[Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 614 integrated identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. [Historical-horizon allocation](Historical%20Horizon%20Allocation%20Review.md) now includes 932 explicit scope-based assignments; 2,096 existing identities remain unassigned. The checker keeps unassigned identities visible and invalidates classifications when a capability changes. Future-facing fields do not automatically count toward advanced/future coverage. The [energy and space follow-on review](Energy%20and%20Space%20Historical%20Horizon%20Review.md) adds 235 explicit assignments without adding discoveries.
 
 Review sections:
 
@@ -76,7 +76,7 @@ Review sections:
 
 Current atlas reconciliation: 450 candidates mapped, including eight partial subjects. The remaining 150 candidates are unmapped. Earlier section summaries retain their publication counts.
 
-JSON records preserve the proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts. Run `tools/technology-review/check_master_catalog.py` for the inexpensive authoring check; it does not run the game or certify behavior.
+JSON draft records preserve proposed relationships. `implemented-baseline.json` now records the verified 614-discovery runtime snapshot, including operating metadata and the previous prerequisites for promoted drafts. `communications-pending.json` is empty. Promotion moves records between buckets without adding IDs and updates field/horizon references. Run `tools/technology-review/check_master_catalog.py` for identity and reachability accounting; this is not a gameplay acceptance test.
 
 Section handoff counts describe their publication checkpoints. This README and `coverage.json` hold the current combined count; initial coverage does not mean a field is complete.
 
@@ -94,6 +94,6 @@ Validation: `python3 tools/technology-review/test_atlas_coverage.py` passes seve
 
 [Civic, economic and learning horizon/branch review](Civic%20Economic%20and%20Learning%20Horizon%20Review.md) classifies another 289 identities, merges one mediation duplicate and repairs 13 direct or indirect gates. Twelve repaired methods receive explicit local demonstration and five-route recovery contracts.
 
-Canonical integration checkpoint: the reviewed source baseline plus three cooking methods is merged at `a578cd4` with 559 live discoveries, 240 civilian recipes and 12 facility types. Final canonical verification and release 2026.09.12.2 packaging remain pending at this checkpoint; the already-running 200-node executable is not changed by a source merge. Uncommitted communications and subsequent master drafts are excluded. The execution ledger tracks final delivery evidence separately.
+Canonical integration checkpoint: `2fc24b4`, with runtime merge `5eab52a`, includes communications and staple processing. The old player opening window remains untouched; a new player launch is not claimed. Full 5,000-discovery implementation, historical pacing and remaining artwork are unfinished.
 
 [Building heat scope review](Building%20Heat%20Scope%20Review.md) merges a duplicate shared-heat network identity. User direction now prioritizes completing and integrating working runtime batches toward all5,000; remaining design/horizon review continues as needed alongside implementation, rather than blocking it.
