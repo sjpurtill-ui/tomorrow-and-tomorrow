@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 99: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 100: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1091,3 +1091,14 @@ Verification: 67 cases across new pneumatic research (4), existing operations (1
 Save compatibility: existing stock and installation ledgers carry new data; input validation accepts Compressed Air and upper bounds cover ten plant types. New identities require this revision. Shared files are discovery registration, civilian recipes, operating plant catalog/validation, graph audit, bounds tests, art queue and review records. New pneumatic catalog, tests and documentation are task-owned. Government and aggregate population ownership unchanged.
 
 Totals: 447 authored discoveries, 89 military roles, ten installation types, 39 reviewed images and 408 queued live images. Another 4,553 discovery identities and the wider operating, acquisition, art, pacing and integration objectives remain. No pipe network, leakage, pressure/temperature state, moisture treatment, seal wear or automatic consumer-plant investment yet. Diagnostic 57160 remains active on its loaded 414-discovery revision; latest inspected annual snapshot is year 169, population 8,671, 183 known discoveries and 17 settlements. The 250-year target remains pending.
+
+
+## Checkpoint 100: remove the seventeen-settlement forecast cache cliff
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `9d2334b`. No canonical integration or player launch.
+
+The live 414-discovery diagnostic reached 17 settlements, where its 16-location climate cache could evict every location before the next daily forecast. An isolated reproduction visits 17 fixed profiles across 30 days: before the change, all 510 forecasts missed their location entry; afterward, 493 visits reused it. The summaries have identical SHA-256 hashes. The climate cache now admits the supported 256 settlement profiles, still capped at 128 dates per profile. A new test checks its bound against the settlement limit, overlapping reuse, eviction and unchanged cold/warm results. Only deterministic climate factors are cached; stocks, consumption, nutrient depletion and shortage predictions remain live calculations.
+
+Verification: 27 cases, zero errors/failures/skips/orphans: simulation performance 14 and crop nutrition 13. A 400-day natural probe completes and matches every non-timing report field from checkpoint 99, including discoveries and annual/final gameplay snapshots. The focused 510-forecast sample measured 1,814,257 microseconds before and 992,185 afterward under concurrent host load; this is a local observation, not a guaranteed speedup or full-world benchmark. Reproduction: `tools/audit_food_forecast_sites.gd`; evidence: [forecast cache diagnostic](FORECAST_CACHE_DIAGNOSTIC.json). The full 400-day output stays in local `artifacts/technology-pacing/forecast-cache-400-days.json`.
+
+No gameplay balance, catalog, art or save fields changed. Cache remains excluded from save capture and cleared on reset. It can now retain up to 32,768 dated climate records per FoodSystem, increasing bounded memory in exchange for reuse across the supported settlement count. Shared implementation file is `scripts/food_system.gd`, plus the existing performance suite; the diagnostic tool and record are task-owned. This does not accelerate the already running process: session 57160 was confirmed live again on its original loaded revision and must not be restarted merely to obtain newer code. Its 250-year target remains pending. Current total remains 447 discoveries and 39 reviewed images; full-history completion is still far beyond this checkpoint.

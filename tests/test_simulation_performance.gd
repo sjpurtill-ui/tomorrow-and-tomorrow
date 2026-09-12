@@ -170,3 +170,31 @@ func test_shared_troop_catalog_keeps_every_observer_and_owner_independent()->voi
 	assert_float(float(player[0].route[0].x)).is_equal(0.0)
 	assert_float(float(catalog.alpha[0].command_position.x)).is_equal(50.0)
 	WorldSimulation.scoped("alpha",func()->void:assert_float(float(WorldSimulation.world.scout_missions[0].route[0].x)).is_equal(0.0))
+
+func test_forecast_climate_cache_retains_all_supported_settlements_and_stays_bounded()->void:
+	WorldSimulation.create_actor("many_forecasts",4242)
+	WorldSimulation.scoped("many_forecasts",func()->void:
+		var state:=WorldSimulation.state;var food:=WorldSimulation.food
+		var harvest:={"Fresh plants":30.0,"Fresh meat":10.0,"Fish":5.0,"Dry staples":12.0}
+		var demand:={"total":55.0,"climate":2.0,"rationing":0.0}
+		var limit:int=WorldSimulation.settlements.MAX_PLAYER_SETTLEMENTS
+		assert_int(food.FORECAST_SITE_LIMIT).is_equal(limit)
+		var first_key:Array=[]
+		for site in range(limit):
+			state.player_settlements.clear();state.player_settlements.append({"id":"home","primary":true,"environment_profile":{"position":Vector2(site*10,-80)}})
+			food._forecast(2,harvest,demand,false)
+			if site==0:first_key=food._forecast_climate_cache.keys()[0]
+		assert_int(food._forecast_climate_cache.size()).is_equal(limit)
+		assert_bool(food._forecast_climate_cache.has(first_key)).is_true()
+		state.elapsed_days+=1
+		state.player_settlements.clear();state.player_settlements.append({"id":"home","primary":true,"environment_profile":{"position":Vector2(0,-80)}})
+		var warm:Dictionary=food._forecast(2,harvest,demand,false)
+		# The old current date remains, proving the overlapping entry was reused.
+		assert_int(food._forecast_climate_cache[first_key].size()).is_equal(4)
+		state.player_settlements[0].environment_profile.position=Vector2(limit*10,-80)
+		food._forecast(2,harvest,demand,false)
+		assert_int(food._forecast_climate_cache.size()).is_equal(limit)
+		state.player_settlements[0].environment_profile.position=Vector2(0,-80)
+		food._forecast_climate_cache.clear()
+		assert_dict(food._forecast(2,harvest,demand,false)).is_equal(warm)
+	)

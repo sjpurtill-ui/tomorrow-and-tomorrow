@@ -1,5 +1,8 @@
 extends Node
 
+# Match the supported settlement count: a 16-site cache thrashed once a
+# civilization reached 17 cities. Only deterministic climate is retained.
+const FORECAST_SITE_LIMIT:=256
 var _forecast_climate_cache:Dictionary={}
 
 # Food is measured internally in adult-equivalent daily rations. One ration is
@@ -428,7 +431,7 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	var environment:=_environment_mix()
 	var climate_key:=[WorldSimulation.state.world_seed,environment.get("position",Vector2.ZERO),environment.get("seasonality_c",12.0),environment.get("growing_season",0.5),environment.get("precipitation",0.5),environment.get("game",0.4),environment.get("water_access",0.0),environment.get("rainfall_variability",0.35)]
 	if not _forecast_climate_cache.has(climate_key):
-		if _forecast_climate_cache.size()>=16:_forecast_climate_cache.erase(_forecast_climate_cache.keys()[0])
+		if _forecast_climate_cache.size()>=FORECAST_SITE_LIMIT:_forecast_climate_cache.erase(_forecast_climate_cache.keys()[0])
 		_forecast_climate_cache[climate_key]={}
 	var climate_days:Dictionary=_forecast_climate_cache[climate_key]
 	var current_climate:=_forecast_climate(environment,current_day,climate_days)
