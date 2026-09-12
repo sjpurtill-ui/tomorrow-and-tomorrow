@@ -108,7 +108,7 @@ static func nutrient_recommendation(plan_power:bool=false)->Dictionary:
 
 ## Replenish manufactured consumables for installed, enabled home machinery.
 ## Raw extraction and imported supplies remain separate acquisition systems.
-static func operating_input_recommendation(plan_power:bool=false)->Dictionary:
+static func operating_input_needs()->Dictionary:
 	var state=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
 	if state.effective_workers("Crafting")+preload("res://scripts/technology_operations.gd").reserved_workers(state)<=0:return {}
@@ -121,14 +121,20 @@ static func operating_input_recommendation(plan_power:bool=false)->Dictionary:
 		if not record.enabled or int(record.installed)<=0:continue
 		var spec:Dictionary=operations.PLANTS[id]
 		for item:String in spec.inputs:daily_inputs[item]=float(daily_inputs.get(item,0))+int(record.installed)*condition*float(spec.inputs[item])
-	var choices:Array[Dictionary]=[]
+	var needs:Dictionary={}
 	for item:String in daily_inputs:
 		var daily:=float(daily_inputs[item])
 		if daily<=0:continue
 		var stock:=maxf(0,float(state.resource_stockpiles.get(item,0)))
 		var target:=ceili(daily*30.0)
-		if stock>=target:continue
-		var candidate:=supply(item,target,{},plan_power)
-		if not candidate.is_empty():choices.append({"order":candidate,"coverage":stock/daily})
+		if stock<target:needs[item]={"daily":daily,"available":stock,"target":target}
+	return needs
+static func operating_input_recommendation(plan_power:bool=false)->Dictionary:
+	var choices:Array[Dictionary]=[]
+	var needs:=operating_input_needs()
+	for item:String in needs:
+		var need:Dictionary=needs[item]
+		var candidate:=supply(item,int(need.target),{},plan_power)
+		if not candidate.is_empty():choices.append({"order":candidate,"coverage":float(need.available)/float(need.daily)})
 	choices.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.coverage)<float(b.coverage))
 	return {} if choices.is_empty() else choices[0].order

@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 102: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 103: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1124,3 +1124,14 @@ Cylinder Boring and Pneumatic Pressing now have distinct subject illustrations m
 Selected source files were copied unchanged into `assets/ui/research/paper/cylinder_boring.png` and `pneumatic_pressing.png`; SHA-256 matches verified. Exact prompts and source paths are recorded in `PNEUMATIC_ENGINEERING_PROMPTS.md` and linked from the prompt index. Explicit discovery bindings, 768-pixel texture import limits and mipmaps. Both headless import passes exited without errors. All 11 atlas cases pass with zero errors/failures/skips/orphans and exercise every one of the 41 explicit image bindings. Native player presentation remains unverified.
 
 Totals remain 447 discoveries, 89 roles and ten installation types. Artwork: 41 reviewed images, 406 queued live images. No save or gameplay change. Shared files are visual bindings, art manifest and prompt index, and implementation records; new images/import metadata/prompt record are task-owned. Full-history work remains active. Diagnostic session 57160 was confirmed live, with latest inspected snapshot at year 175, population 10,451, 193 known discoveries and 17 settlements on its loaded 414-discovery revision. Its 250-year target remains pending.
+
+
+## Checkpoint 103: paid operating-input manufacturing licenses
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `bd29175`. No canonical integration or player launch.
+
+The license planner can negotiate missing operating-input manufacture for established machinery, using the same stock-needs calculation as domestic resupply. A fully examined returned lead or existing contract must name the method. Local/active licensed production takes precedence; paused input lines suppress new negotiations. Material/tooling supply and commissioned usable power are required before seeking a powered method. The ordinary paid-envoy journey, on-arrival refusal, year-long term, support requirements, retry window and reduced throughput remain. See [Operating resupply](OPERATING_RESUPPLY.md) and [AI manufacturing licenses](AI_MANUFACTURING_LICENSES.md).
+
+Verification: 62 cases across research licenses (23, four new), operating resupply (4), civilian production planning (8), power planning (12) and civilization strategy (15), zero errors/failures/skips/orphans. The new end-to-end case pays for a compressor license, completes the physical envoy return, starts production at 65% work throughput and feeds a real pneumatic press without granting the compressor discovery. Additional cases verify examined/returned evidence, unchanged recommendations after hidden provider-method changes, power/tooling shortages, sufficient stocks, domestic methods and paused production. Supplier acceptance is still tested at actual arrival rather than inferred from the examined lead.
+
+No save, discovery, unit or image additions. Totals remain 447 discoveries, 89 roles, ten installation types and 41 reviewed images. Shared implementation files: civilian-production and license-acquisition planners; existing license tests and review records accompany them. Remaining limits include upstream license chains, raw consumable imports, future power investment tied to unknown methods, optimum supplier/term selection and workshop scheduling. Full-history goal remains active. Diagnostic session 57160 was confirmed live at the start of this pass; its 250-year target is still not claimed complete.

@@ -1,5 +1,5 @@
 extends RefCounted
-## License dependent lines or immediately supplied study/fertilizer production.
+## License dependent lines or supplied study, fertilizer and operating inputs.
 ## Leads are examined returned evidence or the civilization's own contracts.
 const L=preload("res://scripts/research_licenses.gd")
 const E=preload("res://scripts/society_exchange.gd")
@@ -51,6 +51,7 @@ static func demanded_subjects(leads:Array[Dictionary])->Dictionary:
 		if int(job.get("target_stock",0))>0 and float(state.resource_stockpiles.get(recipe.output,0))>=int(job.target_stock):continue
 		if supplied(recipe,false):wanted[recipe.gate]=3.0
 	wanted.merge(fertilizer_subjects(leads),false)
+	wanted.merge(operating_subjects(leads),false)
 	if state.effective_workers("Knowledge")<=0 or not Supply.study_recommendation().is_empty():return wanted
 	var remaining:=0.0
 	for item:Dictionary in E.data().collections.values():
@@ -94,4 +95,23 @@ static func fertilizer_subjects(leads:Array[Dictionary])->Dictionary:
 		if not possible:return {}
 		if not domestic:
 			for subject:String in subjects:wanted[subject]=1.25+.25*clampf(1-float(need.available)/float(need.daily),0,1)
+	return wanted
+
+static func operating_subjects(leads:Array[Dictionary])->Dictionary:
+	var wanted:Dictionary={};var examined:Dictionary={}
+	for lead:Dictionary in leads:examined[String(lead.subject)]=true
+	var needs:=Supply.operating_input_needs()
+	for resource:String in needs:
+		var need:Dictionary=needs[resource]
+		var paused:=false
+		for job:Dictionary in WorldSimulation.military.equipment_queue:
+			if bool(job.get("persistent",false)) and bool(job.get("paused",false)) and String(I.product(String(job.get("item",""))).get("output",""))==resource:paused=true;break
+		if paused:continue
+		# An affordable independent or already licensed method takes precedence.
+		if not Supply.supply(resource,int(need.target),{},true).is_empty():continue
+		for recipe:Dictionary in I.PRODUCTS.values():
+			if String(recipe.output)!=resource or L.independent(String(recipe.gate)) or not examined.has(recipe.gate):continue
+			if not supplied(recipe,true):continue
+			if float(recipe.get("power",0))>0 and not preload("res://scripts/power_investment_planner.gd").can_supply(float(recipe.daily_power)):continue
+			wanted[recipe.gate]=1.5+.25*clampf(1-float(need.available)/float(need.daily),0,1)
 	return wanted

@@ -312,3 +312,57 @@ func test_two_paid_fertilizer_licenses_enable_slow_manufacture_without_local_inv
 	assert_float(float(preload("res://scripts/crop_nutrition.gd").cultivation(100,true).bonus)).is_equal(12.5)
 	assert_bool(GameState.known_discoveries.has("mineral_nitrate_dressing")).is_false()
 	assert_bool(GameState.known_discoveries.has("phosphate_dressing")).is_false()
+func operating_license_need()->void:
+	prepare();GameState.population_allocations.Knowledge=0
+	GameState.population_health=1.0;GameState.simulation_metrics.labor_efficiency=1.0
+	const Ops=preload("res://scripts/technology_operations.gd")
+	Ops.data().plants.pneumatic_workshop={"installed":1,"building":0,"work":0.0,"enabled":true}
+	Ops.data().plants.solar_array={"installed":1,"building":0,"work":0.0,"enabled":true}
+	for item:String in preload("res://scripts/civilian_industry.gd").product("compressed_air").tooling:GameState.resource_stockpiles[item]=10.0
+	GameState.resource_stockpiles["Compressed Air"]=0.0
+	var id:="compressed_air_systems"
+	E.owner_state("neighbor").known_discoveries.append(id);E.owner_state("neighbor").discovery_adoption[id]=1.0
+	E.data().collections[id]={"id":id,"kind":"knowledge","name":"Examined compressor account","source_id":"neighbor","source_name":"Neighbor","position":{"x":30.0,"z":0.0},"observed_day":99990,"returned_day":100000,"discovery_id":id,"study":1.0,"work":90.0,"signals":["crafting"]}
+func test_operating_license_uses_examined_need_without_reading_hidden_provider_methods()->void:
+	operating_license_need()
+	var order:=AI.recommendation();assert_str(String(order.get("subject",""))).is_equal("compressed_air_systems")
+	E.owner_state("neighbor").known_discoveries.erase("compressed_air_systems")
+	assert_dict(AI.recommendation()).is_equal(order)
+	E.data().collections.compressed_air_systems.study=.5;assert_dict(AI.recommendation()).is_empty()
+	E.data().collections.compressed_air_systems.study=1.0;E.data().collections.compressed_air_systems.returned_day=100001
+	assert_dict(AI.recommendation()).is_empty()
+func test_operating_license_needs_power_tooling_active_machinery_and_no_domestic_route()->void:
+	operating_license_need()
+	const Ops=preload("res://scripts/technology_operations.gd")
+	Ops.data().plants.pneumatic_workshop.enabled=false;assert_dict(AI.recommendation()).is_empty();Ops.data().plants.pneumatic_workshop.enabled=true
+	Ops.data().plants.solar_array.enabled=false;assert_dict(AI.recommendation()).is_empty();Ops.data().plants.solar_array.enabled=true
+	GameState.resource_stockpiles["Pressure Vessels"]=0.0;assert_dict(AI.recommendation()).is_empty();GameState.resource_stockpiles["Pressure Vessels"]=10.0
+	GameState.resource_stockpiles["Compressed Air"]=15.0;assert_dict(AI.recommendation()).is_empty();GameState.resource_stockpiles["Compressed Air"]=0.0
+	GameState.known_discoveries.append("compressed_air_systems");GameState.discovery_adoption.compressed_air_systems=1.0
+	assert_dict(AI.recommendation()).is_empty()
+func test_paid_compressor_license_runs_press_at_reduced_manufacturing_rate()->void:
+	operating_license_need()
+	const Ops=preload("res://scripts/technology_operations.gd")
+	const C=preload("res://scripts/civilization_controller.gd")
+	var before:=float(GameState.resource_stockpiles.Stone)
+	assert_bool(C.license_acquisition_orders("player",{})).is_true()
+	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
+	GameState.elapsed_days=int(mission.return_day);E.returned(mission,int(mission.return_day))
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
+	assert_bool(L.active("compressed_air_systems")).is_true()
+	assert_bool(GameState.known_discoveries.has("compressed_air_systems")).is_false()
+	C.civilian_orders("player",{})
+	assert_str(String(MilitaryCampaign.equipment_queue[0].item)).is_equal("compressed_air")
+	var job:Dictionary=MilitaryCampaign.equipment_queue[0]
+	GameState.elapsed_days+=1;Ops.advance(int(GameState.elapsed_days));Production.advance(MilitaryCampaign,job,1.0)
+	assert_float(float(job.progress_days)).is_equal_approx(.65,.000001)
+	for day in 4:
+		GameState.elapsed_days+=1;Ops.advance(int(GameState.elapsed_days));Production.advance(MilitaryCampaign,job,1.0)
+	assert_float(Ops.service("mechanical_work")).is_greater(0.0)
+	assert_bool(GameState.known_discoveries.has("compressed_air_systems")).is_false()
+
+func test_paused_operating_input_line_does_not_trigger_new_license()->void:
+	operating_license_need()
+	MilitaryCampaign.equipment_queue.append({"persistent":true,"paused":true,"item":"compressed_air"})
+	assert_dict(AI.recommendation()).is_empty()
