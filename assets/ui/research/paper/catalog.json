@@ -3738,6 +3738,198 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/bolt_blank_forging.png",
+      "description": "A headed metal blank is formed before its shank receives a thread, separating head shaping from fitting.",
+      "domain": "production",
+      "id": "bolt_blank_forging",
+      "name": "Bolt Blank Forging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nut_blank_forging.png",
+      "description": "Repeated nut blanks leave enough metal around a future bore for a wrench to transmit turning force.",
+      "domain": "production",
+      "id": "nut_blank_forging",
+      "name": "Nut Blank Forging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nut_bore_drilling.png",
+      "description": "A supported blank is drilled through before an internal thread is cut, keeping the bore aligned with its bearing faces.",
+      "domain": "production",
+      "id": "nut_bore_drilling",
+      "name": "Nut Bore Drilling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_tap_cutting.png",
+      "description": "A hardened threaded tool with cutting relief makes matching internal threads in a prepared bore.",
+      "domain": "production",
+      "id": "thread_tap_cutting",
+      "name": "Thread Tap Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_die_cutting.png",
+      "description": "A relieved threaded die guides the cutting of an external screw thread on a prepared shank.",
+      "domain": "production",
+      "id": "thread_die_cutting",
+      "name": "Thread Die Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/external_thread_cutting.png",
+      "description": "A die advances along a headed blank while chips are cleared, producing a bolt that can be fitted to a nut.",
+      "domain": "production",
+      "id": "external_thread_cutting",
+      "name": "External Thread Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/internal_thread_tapping.png",
+      "description": "A tap cuts a helical bearing surface inside a drilled nut without replacing the surrounding material with an assumed fit.",
+      "domain": "production",
+      "id": "internal_thread_tapping",
+      "name": "Internal Thread Tapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_pitch_gauging.png",
+      "description": "A reference profile distinguishes thread spacing so parts with superficially similar diameters are not treated as interchangeable.",
+      "domain": "production",
+      "id": "thread_pitch_gauging",
+      "name": "Thread Pitch Gauging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/matched_thread_inspection.png",
+      "description": "Bolts and nuts are checked together against the same thread reference before they are counted as matching fasteners.",
+      "domain": "production",
+      "id": "matched_thread_inspection",
+      "name": "Matched Thread Inspection",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/washer_punching.png",
+      "description": "A hole and outer edge are punched from sheet metal to create a bearing washer around a fastener.",
+      "domain": "production",
+      "id": "washer_punching",
+      "name": "Washer Punching",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cotter_pin_forming.png",
+      "description": "A narrow ductile strip is folded into a split pin that can pass through a drilled fastener and have its legs spread.",
+      "domain": "production",
+      "id": "cotter_pin_forming",
+      "name": "Cotter Pin Forming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/castellated_nut_slotting.png",
+      "description": "Slots around the end of a nut provide positions through which a retaining pin can block its rotation.",
+      "domain": "production",
+      "id": "castellated_nut_slotting",
+      "name": "Castellated Nut Slotting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/split_pin_locking.png",
+      "description": "A bolt is cross-drilled and assembled with a slotted nut and split pin, giving a visible positive restraint against nut rotation.",
+      "domain": "production",
+      "id": "split_pin_locking",
+      "name": "Split-Pin Locking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steel_wire_drawing.png",
+      "description": "Steel rod is reduced through successive drawing passes, providing wire feedstock for small resilient components.",
+      "domain": "production",
+      "id": "steel_wire_drawing",
+      "name": "Steel Wire Drawing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spring_wire_coiling.png",
+      "description": "Wire is guided around a mandrel so repeated turns retain a controlled coil form.",
+      "domain": "production",
+      "id": "spring_wire_coiling",
+      "name": "Spring Wire Coiling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coil_spring_tempering.png",
+      "description": "Formed spring stock receives controlled heating and cooling before it is used as a resilient component.",
+      "domain": "production",
+      "id": "coil_spring_tempering",
+      "name": "Coil Spring Tempering",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/split_washer_cutting.png",
+      "description": "Short helical sections are cut from prepared spring stock and dressed into split washers; their presence alone is not treated as a guarantee against loosening.",
+      "domain": "production",
+      "id": "split_washer_cutting",
+      "name": "Split Washer Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rivet_blank_heading.png",
+      "description": "A short shank receives one formed head while enough length is left for a second head to be made during joining.",
+      "domain": "production",
+      "id": "rivet_blank_heading",
+      "name": "Rivet Blank Heading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rivet_hole_alignment.png",
+      "description": "Overlapping plates are located and drilled as a matching joint so rivets can pass through aligned holes.",
+      "domain": "production",
+      "id": "rivet_hole_alignment",
+      "name": "Rivet Hole Alignment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hot_rivet_setting.png",
+      "description": "A heated rivet is supported from one side while its tail is upset on the other, drawing the overlapping joint together as it cools.",
+      "domain": "production",
+      "id": "hot_rivet_setting",
+      "name": "Hot Rivet Setting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cold_rivet_setting.png",
+      "description": "Smaller ductile rivets are upset without a heating stage to join light sheet assemblies.",
+      "domain": "production",
+      "id": "cold_rivet_setting",
+      "name": "Cold Rivet Setting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thread_rolling_die_making.png",
+      "description": "Hardened dies carry the negative thread profile needed to displace a blank surface into a repeated helix.",
+      "domain": "production",
+      "id": "thread_rolling_die_making",
+      "name": "Thread-Rolling Die Making",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bolt_thread_rolling.png",
+      "description": "A blank is pressed between profiled dies so displaced metal forms its thread rather than being removed as chips.",
+      "domain": "production",
+      "id": "bolt_thread_rolling",
+      "name": "Bolt Thread Rolling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/standard_fastener_kitting.png",
+      "description": "Matched fasteners and washers are issued as a counted assembly set, reducing fitting work at the final machine bench without creating free components.",
+      "domain": "production",
+      "id": "standard_fastener_kitting",
+      "name": "Standard Fastener Kitting",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -4259,9 +4451,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 532,
+  "live_count": 556,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 454,
+  "queued_count": 478,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

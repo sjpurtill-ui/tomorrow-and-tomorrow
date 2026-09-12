@@ -2,7 +2,9 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the machine-tool batch: **532 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the fastener batch: **556 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+
+Latest catalog expansion: 24 fastener, spring and riveting discoveries with 28 physical recipes, including alternative motor and pressure-vessel assemblies. See `FASTENER_PRODUCTION.md`. Four focused cases exercise the full chain, reconvergent routes, shortages and fractional production. Current totals: 556 discoveries, 240 recipes, 78 reviewed illustrations; 4,444 identities and 4,922 illustrations remain against the full target.
 
 Delivery-recovery correction: production now distinguishes actual food scarcity from a transport-only ration shortfall, allowing paid carts and peacetime civilian goods to address the latter while training remains suspended. See `DELIVERY_PRODUCTION_RECOVERY.md`; 21 focused recovery, strategy and diagnostic cases pass. The live catalog-476 run's year-191 absence of industry prompted this inspection, but the running process does not load this fix and full-campaign recovery is not yet proven.
 
