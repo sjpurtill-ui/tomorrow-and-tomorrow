@@ -454,16 +454,19 @@
         "synthetic_media_provenance"
       ],
       "scope_status": "subject_mapped",
-      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+      "note": "Authenticated source and transformation claims are bounded provenance evidence; they do not prove the truth of depicted events."
     },
     {
       "review_id": "D13-25",
       "candidate_name": "Resilient decentralized communications",
       "mapped_ids": [
-        "resilient_decentralized_networks"
+        "resilient_decentralized_networks",
+        "distance_vector_routing",
+        "link_state_routing",
+        "path_vector_routing"
       ],
       "scope_status": "subject_mapped",
-      "note": "Subject mapped to baseline, pending or draft identities; implementation and full semantic review are not implied."
+      "note": "Existing mapping rechecked after adding routing alternatives. Universal distributed consensus is not required. Design coverage does not prove an operating network."
     },
     {
       "review_id": "D19-01",

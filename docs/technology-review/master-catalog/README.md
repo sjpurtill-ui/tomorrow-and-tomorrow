@@ -21,9 +21,9 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The master expansion contains **2,201 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **2,805 distinct IDs; 2,195 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
+The master expansion contains **2,260 draft identities** across all twenty-four fields. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for **2,864 distinct IDs; 2,136 remain to author**. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
-Three hundred and eighty-four explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
+Four hundred and two explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
 [Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 604 baseline/pending identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. Historical-horizon allocation remains outstanding.
 
@@ -65,6 +65,8 @@ Review sections:
 - [Water and Ecology Depth Review](Water%20and%20Ecology%20Depth%20Review.md): 78 further proposals (40 water, 38 ecology), nineteen alternative groups and fifty atlas mappings. Three overlaps are excluded; four candidate scopes remain explicitly partial. D02 accounts for 115/180 and D03 for 105/180 identities.
 
 - [Medicine Interventions Depth Review](Medicine%20Interventions%20Depth%20Review.md): 56 further mechanisms after four overlap exclusions, sixteen alternative groups and 25 atlas mappings. Product supply, clinical qualification and staffed care remain separate; rapid pathogen-platform response remains partial. D14 accounts for 189/280 identities.
+
+- [Records and Network Depth Review](Records%20and%20Network%20Depth%20Review.md): 59 further mechanisms after one overlap exclusion, thirteen new alternative groups, four earlier prerequisite repairs and 25 existing atlas mappings rechecked. Physical correspondence and accessible records no longer require digital/space systems. D13 accounts for 173/240 identities.
 
 Current atlas reconciliation: 400 candidates mapped, including five partial subjects. The remaining 200 candidates are unmapped. Earlier section summaries retain their publication counts.
 
