@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 112: **463 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 113: **463 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1240,3 +1240,16 @@ Verification: 33 cases pass with zero errors/failures/skips/orphans: new micropr
 Task-owned files: microprogramming module, tests and documentation. Shared files: civilian product catalog, discovery_system.gd (one registration; integration hotspot), art queue and this record. No save fields added; old records remain compatible, new IDs require this revision. Totals: 463 authored discoveries, 140 civilian recipes, eleven plant types, 89 military roles and 45 reviewed images. Modern/future coverage and full-history work remain incomplete, including 4,537 further authored identities. The loaded 414-discovery historical diagnostic was confirmed live at the start; its target completion is not claimed.
 
 Both graph and resource/research audits complete without errors: 463 reachable discovery identities and 237 explicit routes; all 140 civilian recipes and eleven installation types structurally reachable in seven production rounds. Manifest: 45 verified and 418 queued live illustrations. These are ideal-resource structural checks, not measured full-campaign pacing or integration evidence.
+
+
+## Checkpoint 113: physical-production evidence in pacing reports
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `696c650`. No canonical integration or player launch.
+
+Pacing report schema 10 adds compact production/installation summaries and detailed final bottleneck evidence. It distinguishes currently available recipes, retained lines, partial manufacturing work, stocks, commissioned/construction units and current remaining services. Read-only helper and focused tests are task-owned; the existing pacing tool and review documentation are shared. No gameplay or save schema change. See [Pacing production evidence](PACING_PRODUCTION_EVIDENCE.md).
+
+Two focused cases pass with zero errors/failures/skips/orphans, covering real partial/completed production without stock/queue/operation mutation and suppression of stale operating services. A current 463-discovery run reaches its requested 400-day target under the ordinary daily simulation, with no script errors. Its zero civilian production and installation counters are early-run observations, not proof of later capability adoption. All counts remain 463 discoveries and 45 images.
+
+The existing schema-9 diagnostic session 57160 was confirmed live at the start; latest inspected year 202, population 24,320, known discoveries 226, settlements 17. It remains on its loaded 414-discovery revision and does not inherit this reporting change. Its 250-year target and full-history completion are not claimed.
+
+The previous reporting script at 696c650 also completed 400 days on the same current game code. Entire reports match after excluding new production fields, schema and timing/rate values. Compact comparison evidence is in PACING_PRODUCTION_PARITY.json; full local reports remain under artifacts/technology-pacing. This establishes unchanged behavior for this short seeded run, not all possible actors or later production states.
