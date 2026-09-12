@@ -2,6 +2,24 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"joined_wheel_blank":{"name": "Wheel Blank Jointing", "output": "Joined Wheel Blanks", "gate": "wheel_blank_jointing", "materials": {"Timber": 8.0}, "days": 3.0, "tooling": {"Timber": 2.0, "Stone": 2.0}},
+	"bored_wheel_hubs":{"name": "Wheel Hub Boring", "output": "Wheel Hubs", "gate": "wheel_hub_boring", "materials": {"Timber": 1.0}, "days": 2.0, "tooling": {"Stone": 2.0, "Timber": 1.0}},
+	"wheel_spokes":{"name": "Spoke Tenon Cutting", "output": "Spoke Sets", "gate": "spoke_tenon_cutting", "materials": {"Timber": 2.0}, "days": 3.0, "tooling": {"Stone": 2.0, "Timber": 1.0}},
+	"wheel_felloes":{"name": "Felloe Jointing", "output": "Felloe Sets", "gate": "felloe_jointing", "materials": {"Timber": 2.0}, "days": 3.0, "tooling": {"Stone": 2.0, "Timber": 2.0}},
+	"solid_wheel_pairs":{"name": "Solid Wheel Assembly", "output": "Wheel Pairs", "gate": "solid_wheel_assembly", "materials": {"Joined Wheel Blanks": 2.0, "Wheel Hubs": 2.0}, "days": 3.0, "tooling": {"Stone": 2.0, "Timber": 2.0}},
+	"spoked_wheel_pairs":{"name": "Spoked Wheel Assembly", "output": "Wheel Pairs", "gate": "spoked_wheel_assembly", "materials": {"Wheel Hubs": 2.0, "Spoke Sets": 2.0, "Felloe Sets": 2.0}, "days": 4.0, "tooling": {"Stone": 2.0, "Timber": 3.0}},
+	"iron_tired_wheels":{"name": "Iron Tyre Fitting", "output": "Iron-Tired Wheel Pairs", "gate": "iron_tyre_fitting", "materials": {"Wheel Pairs": 1.0, "Wrought Iron": 2.0, "Charcoal": 1.0}, "days": 3.0, "tooling": {"Stone": 4.0, "Wrought Iron": 2.0}},
+	"wooden_axles":{"name": "Wooden Axle Shaping", "output": "Wooden Axles", "gate": "wooden_axle_shaping", "materials": {"Timber": 3.0}, "days": 3.0, "tooling": {"Stone": 2.0, "Timber": 1.0}},
+	"axle_boxes":{"name": "Wooden Axle Boxes", "output": "Axle Boxes", "gate": "wooden_axle_boxes", "materials": {"Timber": 1.0}, "days": 2.0, "tooling": {"Stone": 2.0, "Timber": 1.0}},
+	"axle_sleeves":{"name": "Axle Sleeve Fitting", "output": "Axle Sleeves", "gate": "axle_sleeve_fitting", "materials": {"Axle Boxes": 1.0, "Wrought Iron": 1.0}, "days": 3.0, "tooling": {"Wrought Iron": 2.0, "Stone": 2.0}},
+	"cart_linchpins":{"name": "Linchpin Retention", "output": "Cart Linchpins", "gate": "linchpin_retention", "materials": {"Timber": 0.5}, "days": 1.0, "tooling": {"Stone": 1.0}},
+	"cart_beds":{"name": "Cart Bed Framing", "output": "Cart Beds", "gate": "cart_bed_framing", "materials": {"Timber": 5.0, "Treenails": 0.5}, "days": 4.0, "tooling": {"Timber": 2.0, "Stone": 2.0}},
+	"cart_drawbars":{"name": "Drawbar Fitting", "output": "Cart Drawbars", "gate": "drawbar_fitting", "materials": {"Timber": 2.0, "Rope Coils": 0.2}, "days": 2.0, "tooling": {"Stone": 2.0, "Timber": 1.0}},
+	"haul_harness":{"name": "Haul Harness Weaving", "output": "Haul Harness", "gate": "haul_harness_weaving", "materials": {"Woven Cloth": 1.0, "Rope Coils": 0.5}, "days": 3.0, "tooling": {"Timber": 2.0, "Stone": 1.0}},
+	"cart_assembly_kits":{"name": "Cart Running Gear", "output": "Cart Assembly Kits", "gate": "cart_running_gear", "materials": {"Wheel Pairs": 1.0, "Wooden Axles": 1.0, "Axle Boxes": 2.0, "Cart Linchpins": 1.0, "Cart Beds": 1.0, "Cart Drawbars": 1.0, "Haul Harness": 1.0}, "days": 5.0, "tooling": {"Timber": 4.0, "Stone": 3.0}},
+	"sleeved_cart_kits":{"name": "Sleeved Cart Assembly", "output": "Cart Assembly Kits", "gate": "sleeved_cart_assembly", "materials": {"Iron-Tired Wheel Pairs": 1.0, "Wooden Axles": 1.0, "Axle Sleeves": 2.0, "Cart Linchpins": 1.0, "Cart Beds": 1.0, "Cart Drawbars": 1.0, "Haul Harness": 1.0}, "days": 3.0, "tooling": {"Timber": 3.0, "Wrought Iron": 2.0}},
+	"assembled_transport_cart":{"name": "Assembled transport carts", "output": "Transport Carts", "gate": "cart_running_gear", "materials": {"Cart Assembly Kits": 1.0}, "days": 1.0, "tooling": {}},
+
 	"heavy_carvel_hull_sections":{"name": "Heavy frame-first hull construction", "output": "Heavy Hull Sections", "gate": "carvel_frame_construction", "materials": {"Keel Sections": 0.5, "Ship Frames": 3.0, "Sealed Planking": 4.0, "Treenails": 2.0, "Wrought Iron": 2.0}, "days": 9.0, "tooling": {"Timber": 8.0, "Wrought Iron": 3.0}},
 	"laid_rope":{"name": "Rope Laying", "output": "Rope Coils", "gate": "rope_laying", "materials": {"Fiber Plants": 8.0}, "days": 3.0, "tooling": {"Timber": 4.0, "Stone": 2.0}},
 	"sail_panel":{"name": "Sail Panel Cutting", "output": "Sail Panels", "gate": "sail_panel_cutting", "materials": {"Woven Cloth": 3.0}, "days": 2.0, "tooling": {"Timber": 2.0, "Stone": 1.0}},

@@ -2996,7 +2996,8 @@ func _normalize_equipment_jobs()->void:
 			var job_type:=String(job.get("job_type","production"))
 			var recipe:Dictionary
 			if job_type=="consumable": recipe=_consumable_recipe(String(job.get("item","arrows")))
-			elif job_type=="transport": recipe=_transport_recipe()
+			# Only legacy batches lack a reservation; preserve their historical input refund basis.
+			elif job_type=="transport": recipe={"materials":{"Timber":8.0,"Fiber Plants":1.5},"days":5.0}
 			else: recipe=_equipment_recipe(String(job.get("item","improvised")))
 			var factor:=0.18 if String(job.job_type)=="repair" else 1.0
 			var reserved:Dictionary={}
@@ -4156,7 +4157,7 @@ func _consumable_recipe(item:String)->Dictionary:
 
 
 func _transport_recipe()->Dictionary:
-	return {"materials":{"Timber":8.0,"Fiber Plants":1.5},"days":5.0}
+	return {"materials":{"Cart Assembly Kits":1.0},"days":1.0}
 
 
 func _unit_equipment_view()->Dictionary:

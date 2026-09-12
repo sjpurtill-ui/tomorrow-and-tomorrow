@@ -3418,6 +3418,134 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/wheel_blank_jointing.png",
+      "description": "Joined and secured timber pieces form a broad blank from which a solid wheel can be cut.",
+      "domain": "infrastructure",
+      "id": "wheel_blank_jointing",
+      "name": "Wheel Blank Jointing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wheel_hub_boring.png",
+      "description": "An accurately centered bore lets a wooden hub turn around its axle without excessive binding.",
+      "domain": "infrastructure",
+      "id": "wheel_hub_boring",
+      "name": "Wheel Hub Boring",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spoke_tenon_cutting.png",
+      "description": "Shaped spoke ends fit the hub and rim, transmitting loads through a wheel while leaving its center open.",
+      "domain": "infrastructure",
+      "id": "spoke_tenon_cutting",
+      "name": "Spoke Tenon Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/felloe_jointing.png",
+      "description": "Curved rim segments meet around the ends of the spokes to complete a continuous wheel perimeter.",
+      "domain": "infrastructure",
+      "id": "felloe_jointing",
+      "name": "Felloe Jointing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/solid_wheel_assembly.png",
+      "description": "A matched pair of solid wheels joins broad wooden discs to bored hubs for a load-carrying cart.",
+      "domain": "infrastructure",
+      "id": "solid_wheel_assembly",
+      "name": "Solid Wheel Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/spoked_wheel_assembly.png",
+      "description": "Hubs, spokes and curved rim segments are fitted into a pair of open wheels, using less timber than solid discs.",
+      "domain": "infrastructure",
+      "id": "spoked_wheel_assembly",
+      "name": "Spoked Wheel Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/iron_tyre_fitting.png",
+      "description": "An iron hoop fitted around a wooden wheel binds its joints and supplies a wearing surface around the rim.",
+      "domain": "infrastructure",
+      "id": "iron_tyre_fitting",
+      "name": "Iron Tyre Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_axle_shaping.png",
+      "description": "A straight axle is shaped with shoulders and wheel seats to carry the load while maintaining the spacing of its wheels.",
+      "domain": "infrastructure",
+      "id": "wooden_axle_shaping",
+      "name": "Wooden Axle Shaping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_axle_boxes.png",
+      "description": "Fitted bearing blocks support the moving axle connection and make its bearing surfaces replaceable.",
+      "domain": "infrastructure",
+      "id": "wooden_axle_boxes",
+      "name": "Wooden Axle Boxes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/axle_sleeve_fitting.png",
+      "description": "Metal sleeves line a prepared bearing connection, separating its working surface from the surrounding wood.",
+      "domain": "infrastructure",
+      "id": "axle_sleeve_fitting",
+      "name": "Axle Sleeve Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/linchpin_retention.png",
+      "description": "Removable retaining pins secure the wheels at the axle ends while allowing a wheel to be removed for repair.",
+      "domain": "infrastructure",
+      "id": "linchpin_retention",
+      "name": "Linchpin Retention",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cart_bed_framing.png",
+      "description": "A braced load bed transfers cargo weight to its running gear without depending on a loose pile of boards.",
+      "domain": "infrastructure",
+      "id": "cart_bed_framing",
+      "name": "Cart Bed Framing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drawbar_fitting.png",
+      "description": "A fitted drawbar carries pulling and steering loads from the hauling connection into the cart frame.",
+      "domain": "infrastructure",
+      "id": "drawbar_fitting",
+      "name": "Drawbar Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/haul_harness_weaving.png",
+      "description": "Broad woven pulling straps and joined ropes distribute a hauling load across a workable harness.",
+      "domain": "infrastructure",
+      "id": "haul_harness_weaving",
+      "name": "Haul Harness Weaving",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cart_running_gear.png",
+      "description": "Matched wheels, axle fittings, a braced bed and hauling connections become a fitted cart assembly ready for final commissioning.",
+      "domain": "infrastructure",
+      "id": "cart_running_gear",
+      "name": "Cart Running Gear",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sleeved_cart_assembly.png",
+      "description": "Prepared iron-bound wheels and sleeved axle connections reduce final fitting work in a cart assembly shop.",
+      "domain": "infrastructure",
+      "id": "sleeved_cart_assembly",
+      "name": "Sleeved Cart Assembly",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3939,9 +4067,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 492,
+  "live_count": 508,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 438,
+  "queued_count": 454,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

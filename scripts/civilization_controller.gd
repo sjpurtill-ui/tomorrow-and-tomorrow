@@ -136,6 +136,8 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 static func military_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
 	var campaign:=WorldSimulation.military
+	if not bool(plan.get("hungry",false)):
+		production_order(id,preload("res://scripts/cart_supply_planner.gd").recommendation())
 	var policy:=String(plan.training)
 	for service in ["army","navy","air"]:WorldSimulation.submit(id,{"kind":"training_policy","service":service,"policy":policy})
 	var capacity:=campaign.recruitment_capacity()

@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the shipbuilding batch: **492 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the cartwright batch: **508 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1425,3 +1425,18 @@ The four cards have explicit individual bindings, full-frame presentation and 76
 The manifest now reports 492 live discoveries, 54 reviewed images and 438 live images queued. The full target still lacks 4,508 discovery identities and 4,946 images, plus multi-millennial progression, full-world acceptance and canonical integration.
 
 Verification: all 11 research visual atlas cases pass, with zero errors/failures/skips/orphans; all current bindings are checked. Both import processes exited without script errors. The manifest export reports no missing bound assets. No broad gameplay regression was repeated for these asset-only changes.
+
+
+## Cartwright batch: wheel and harness production feeding actual delivery
+
+Implementation worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `b2e840e`. No canonical integration or player launch.
+
+[Cartwright production](CARTWRIGHT_PRODUCTION.md) adds sixteen distinct discoveries and seventeen workshop recipes. Solid and spoked wheel branches reconverge on fitted carts; sleeves and iron tyres offer a separately costed assembly method. New cart lines and legacy batch orders require physical kits. The controller follows actual military cart demand through ordinary paid production, and finished carts improve the existing staffed delivery calculation. No vehicle, workforce or global delivery bonus is granted by discovery.
+
+Save schema unchanged. Already reserved batches and retained persistent recipes remain intact; very old unreserved batches reconstruct their historical timber/fiber basis instead of fabricating kit refunds. Shared integration conflicts: discovery_system.gd, military_campaign.gd, civilian_industry.gd and civilization_controller.gd. The general-led control model is unchanged.
+
+Graph and ideal-resource manufacturing audit: 508 discoveries, 284 explicit route records, 188 recipes and 12 plants, with no graph or structural manufacturing errors. All results are structural or isolated-fixture evidence, not proof of natural full-history progression. The focused production fixture starts with supplied upstream cloth, rope, iron and treenails.
+
+Current totals: 508/5,000 discoveries, 188 civilian recipes, 12 plants, 89 military roles, 54 reviewed images. Remaining: 4,492 discovery identities, 454 illustrations for live discoveries and 4,946 images against the full target, plus 2,500–3,000-year progression proof, full-world acceptance and canonical integration. The separate long diagnostic loads the earlier 476-discovery source and cannot verify this batch.
+
+Validation result: six cartwright cases and nineteen existing persistent-production cases pass with zero errors, failures, skips or orphans. Graph and manifest tools exited successfully. These focused checks cover the changed component chain, adapter and save normalization; they do not establish full-world pacing or integration.
