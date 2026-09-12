@@ -3743,7 +3743,7 @@
       "domain": "production",
       "id": "bolt_blank_forging",
       "name": "Bolt Blank Forging",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/nut_blank_forging.png",
@@ -3751,7 +3751,7 @@
       "domain": "production",
       "id": "nut_blank_forging",
       "name": "Nut Blank Forging",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/nut_bore_drilling.png",
@@ -3759,7 +3759,7 @@
       "domain": "production",
       "id": "nut_bore_drilling",
       "name": "Nut Bore Drilling",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/thread_tap_cutting.png",
@@ -3767,7 +3767,7 @@
       "domain": "production",
       "id": "thread_tap_cutting",
       "name": "Thread Tap Cutting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/thread_die_cutting.png",
@@ -3775,7 +3775,7 @@
       "domain": "production",
       "id": "thread_die_cutting",
       "name": "Thread Die Cutting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/external_thread_cutting.png",
@@ -3783,7 +3783,7 @@
       "domain": "production",
       "id": "external_thread_cutting",
       "name": "External Thread Cutting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/internal_thread_tapping.png",
@@ -3791,7 +3791,7 @@
       "domain": "production",
       "id": "internal_thread_tapping",
       "name": "Internal Thread Tapping",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/thread_pitch_gauging.png",
@@ -3799,7 +3799,7 @@
       "domain": "production",
       "id": "thread_pitch_gauging",
       "name": "Thread Pitch Gauging",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/matched_thread_inspection.png",
@@ -3807,7 +3807,7 @@
       "domain": "production",
       "id": "matched_thread_inspection",
       "name": "Matched Thread Inspection",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/washer_punching.png",
@@ -3815,7 +3815,7 @@
       "domain": "production",
       "id": "washer_punching",
       "name": "Washer Punching",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/cotter_pin_forming.png",
@@ -3823,7 +3823,7 @@
       "domain": "production",
       "id": "cotter_pin_forming",
       "name": "Cotter Pin Forming",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/castellated_nut_slotting.png",
@@ -3831,7 +3831,7 @@
       "domain": "production",
       "id": "castellated_nut_slotting",
       "name": "Castellated Nut Slotting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/split_pin_locking.png",
@@ -3839,7 +3839,7 @@
       "domain": "production",
       "id": "split_pin_locking",
       "name": "Split-Pin Locking",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/steel_wire_drawing.png",
@@ -3847,7 +3847,7 @@
       "domain": "production",
       "id": "steel_wire_drawing",
       "name": "Steel Wire Drawing",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/spring_wire_coiling.png",
@@ -3855,7 +3855,7 @@
       "domain": "production",
       "id": "spring_wire_coiling",
       "name": "Spring Wire Coiling",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/coil_spring_tempering.png",
@@ -3863,7 +3863,7 @@
       "domain": "production",
       "id": "coil_spring_tempering",
       "name": "Coil Spring Tempering",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/split_washer_cutting.png",
@@ -3871,7 +3871,7 @@
       "domain": "production",
       "id": "split_washer_cutting",
       "name": "Split Washer Cutting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/rivet_blank_heading.png",
@@ -3879,7 +3879,7 @@
       "domain": "production",
       "id": "rivet_blank_heading",
       "name": "Rivet Blank Heading",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/rivet_hole_alignment.png",
@@ -3887,7 +3887,7 @@
       "domain": "production",
       "id": "rivet_hole_alignment",
       "name": "Rivet Hole Alignment",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/hot_rivet_setting.png",
@@ -3895,7 +3895,7 @@
       "domain": "production",
       "id": "hot_rivet_setting",
       "name": "Hot Rivet Setting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/cold_rivet_setting.png",
@@ -3903,7 +3903,7 @@
       "domain": "production",
       "id": "cold_rivet_setting",
       "name": "Cold Rivet Setting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/thread_rolling_die_making.png",
@@ -3911,7 +3911,7 @@
       "domain": "production",
       "id": "thread_rolling_die_making",
       "name": "Thread-Rolling Die Making",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/bolt_thread_rolling.png",
@@ -3919,7 +3919,7 @@
       "domain": "production",
       "id": "bolt_thread_rolling",
       "name": "Bolt Thread Rolling",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/standard_fastener_kitting.png",
@@ -3927,7 +3927,7 @@
       "domain": "production",
       "id": "standard_fastener_kitting",
       "name": "Standard Fastener Kitting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
@@ -4453,9 +4453,9 @@
   "live_art_complete": false,
   "live_count": 556,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 478,
+  "queued_count": 454,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 78
+  "verified_count": 102
 }

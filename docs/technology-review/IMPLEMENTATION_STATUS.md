@@ -4,7 +4,7 @@ The user approved the design on September 10, 2026. The target remains 5,000 dis
 
 Current branch state after the fastener batch: **556 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
-Latest catalog expansion: 24 fastener, spring and riveting discoveries with 28 physical recipes, including alternative motor and pressure-vessel assemblies. See `FASTENER_PRODUCTION.md`. Four focused cases exercise the full chain, reconvergent routes, shortages and fractional production. Current totals: 556 discoveries, 240 recipes, 78 reviewed illustrations; 4,444 identities and 4,922 illustrations remain against the full target.
+Latest catalog expansion: 24 fastener, spring and riveting discoveries with 28 physical recipes, including alternative motor and pressure-vessel assemblies. See `FASTENER_PRODUCTION.md`. Four focused cases exercise the full chain, reconvergent routes, shortages and fractional production. Current totals: 556 discoveries, 240 recipes, 102 reviewed illustrations; 4,444 identities and 4,898 illustrations remain against the full target. The 24 fastener illustrations are recorded in `assets/ui/research/paper/FASTENER_ART_PROMPTS.md`; 454 live discoveries still await individual art.
 
 Delivery-recovery correction: production now distinguishes actual food scarcity from a transport-only ration shortfall, allowing paid carts and peacetime civilian goods to address the latter while training remains suspended. See `DELIVERY_PRODUCTION_RECOVERY.md`; 21 focused recovery, strategy and diagnostic cases pass. The live catalog-476 run's year-191 absence of industry prompted this inspection, but the running process does not load this fix and full-campaign recovery is not yet proven.
 
@@ -1472,3 +1472,11 @@ Focused verification: both headless imports exited successfully without reported
 Remaining against the full objective: 4,468 discovery identities and 4,922 illustrations; full 2,500–3,000-year progression and canonical integration remain unproven. The independent catalog-476 diagnostic was confirmed live and reached year 182 during this batch; it does not include subsequent machine-tool gameplay changes and is not a completed 250-year result.
 
 Handoff: codex/technology-implementation, original base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9. Shared integration files are scripts/hud/research_visuals.gd and the art catalog. This batch changes no simulation or save format. Native combined-game presentation remains pending designated integration; no player/editor session was launched or interrupted.
+
+## Fastener subject-art batch
+
+All 24 fastener, spring and rivet subjects now have reviewed paper-and-gouache illustrations, bringing the live art catalog to 102 reviewed and 454 queued across 556 discoveries. Full prompts, generated source paths, final asset links and byte-preservation hashes are in `assets/ui/research/paper/FASTENER_ART_PROMPTS.md`. The nut-bore image was corrected to a single bore per blank; split-pin locking uses a replacement side view with a transverse pin.
+
+The 11 research-atlas cases pass with zero errors, failures, skipped cases or orphan nodes (`/tmp/tt-fastener-art-atlas.log`). Both headless import passes exit successfully; final runtime imports are limited to 768 pixels with mipmaps. The live manifest reports full-overhaul completion false. No gameplay regression suite was repeated for this asset batch.
+
+This batch changes subject assets, import metadata, explicit visual bindings and progress records only; no save fields change. Integration must resolve `scripts/hud/research_visuals.gd` alongside any other subject-art work and retain all approved bindings. Canonical integration and native player presentation remain unverified. The independent catalog-476 pacing diagnostic was confirmed live as session 52497; it loads older code and does not validate later production additions.

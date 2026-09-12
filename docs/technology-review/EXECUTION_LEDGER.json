@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 453,
+    "live": 556,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -80,13 +80,18 @@
     "Paid operating-input licenses use examined foreign leads and shared stock needs; compressor-license envoy journey feeds a real press at reduced manufacturing throughput without local discovery",
     "Six optical instrument-making discoveries and manufactured components; a staffed slide-consuming microscopy bench provides finite help to returned physical specimen examination",
     "Common graph audit now checks all civilian recipe/installation material, tooling, coproduct and electricity bootstrap paths; 130 recipes and eleven installation types structurally reachable, with seven targeted audit tests",
-    "Compound Microscopy receives reviewed paper-and-gouache subject art, bringing explicit reviewed images to 42"
+    "Compound Microscopy receives reviewed paper-and-gouache subject art, bringing explicit reviewed images to 42",
+    "Sixteen shipbuilding and sixteen cartwright discoveries connect paid hulls, rigging and running gear to ships and transport carts",
+    "Twenty-four machine-tool discoveries with retained paid line tooling; civilian planners invest in powered workshops against actual production demand",
+    "Twenty-four fastener, spring and riveting discoveries with twenty-eight physical recipes and reconvergent assembly methods",
+    "Production permits transport-only food recovery while actual food scarcity still blocks optional civilian work",
+    "Twenty-four fastener images complete the 102 reviewed subject-art set; all 556 live discoveries remain distinct from the 5000 target"
   ],
   "unfinished": [
-    "Remaining 4547 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4444 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
-    "Civilian and future operating models beyond eleven primary-settlement plants; solar weather, battery wear and night-time balancing",
+    "Civilian and future operating models beyond twelve primary-settlement plants; solar weather, battery wear and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 89 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline",
@@ -94,8 +99,8 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Poll live diagnostic session 57160, launched from 577f366 with 414 discoveries and schema 9: target 91250 days (250 years), explicit 14400-second wall cap. Persistent worktree outputs: artifacts/technology-pacing/catalog-414-250-profile.json and .log. Inspect annual secondary-city detail and eventual terminal result; no completion claimed. Old session 95746 is missing and must not be described as running.",
-    "Extend power investment beyond paper/printed-study supply to consumer plants, fuel replenishment, constrained workshop sequencing and lifetime investment costs. First powered-study production now commissions generation before starting a line.",
+    "Diagnostic session 52497 confirmed live during the fastener-art batch. Loaded e1278e0 with 476 discoveries and schema 10, before later production changes. Target 91250 days (250 years), 14400-second wall cap; artifacts/technology-pacing/catalog-476-250-profile.json and .log. Poll the same handle; inspect target_reached before claiming completion. Session 57160 is terminal at 234.44 years and did not reach its 250-year target.",
+    "Expand complete cross-field historical branches with focused changed-system checks. Broad regression only at major milestones; long pacing diagnostics proceed independently of content work.",
     "Expand distinct authored capabilities across remaining civilian, military and future fields; connect physical operating effects and reconvergent dependencies",
     "Add remaining disadvantaged recovery routes and measure full-history natural pacing",
     "Continue imagery and presentation after stable production identities; retain honest counts"
@@ -108,9 +113,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 453,
-    "verified_subject_images": 42,
-    "queued_live_images": 411,
+    "live_subjects": 556,
+    "verified_subject_images": 102,
+    "queued_live_images": 454,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"
