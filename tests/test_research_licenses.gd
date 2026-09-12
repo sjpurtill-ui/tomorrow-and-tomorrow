@@ -197,3 +197,55 @@ func test_known_but_unadopted_technology_keeps_license_renewal_visible()->void:
 	panel.free()
 	GameState.discovery_adoption.glassmaking=.10
 	assert_bool(Panel.visible_for("glassmaking",true,true)).is_false()
+const AI=preload("res://scripts/license_acquisition_planner.gd")
+func paper_license_need()->void:
+	prepare()
+	GameState.resource_stockpiles["Paper Pulp"]=5.0;GameState.resource_stockpiles["Fiber Plants"]=10.0;GameState.resource_stockpiles.Freshwater=10.0
+	E.owner_state("neighbor").known_discoveries.append("paper_making");E.owner_state("neighbor").discovery_adoption.paper_making=1.0
+	E.data().collections["paper_lead"]={"id":"paper_lead","kind":"knowledge","name":"Paper account","source_id":"neighbor","source_name":"Neighbor","position":{"x":30.0,"z":0.0},"observed_day":99990,"returned_day":100000,"discovery_id":"paper_making","study":1.0,"work":90.0,"signals":["crafting"]}
+	var study:Dictionary=E.data().collections.paper_lead.duplicate(true)
+	study.id="unfinished";study.study=0.0;study.discovery_id="clay_shaping";study.work=240.0
+	E.data().collections.unfinished=study
+func test_ai_license_uses_examined_lead_without_hidden_supplier_knowledge()->void:
+	paper_license_need()
+	var order:=AI.recommendation()
+	assert_str(String(order.get("kind",""))).is_equal("research_license")
+	assert_str(String(order.get("subject",""))).is_equal("paper_making")
+	E.owner_state("neighbor").known_discoveries.erase("paper_making")
+	assert_dict(AI.recommendation()).is_equal(order)
+	E.data().collections.paper_lead.study=.5;assert_dict(AI.recommendation()).is_empty()
+	E.data().collections.paper_lead.study=1.0;E.data().collections.paper_lead.returned_day=100001
+	assert_dict(AI.recommendation()).is_empty()
+func test_ai_license_dispatch_pays_without_instant_contract_or_discovery()->void:
+	paper_license_need()
+	var before:=float(GameState.resource_stockpiles.Stone)
+	assert_bool(preload("res://scripts/civilization_controller.gd").license_acquisition_orders("player",{})).is_true()
+	assert_str(String(CivilizationSystem.diplomatic_mission.get("research_mode",""))).is_equal("license")
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
+	assert_bool(L.active("paper_making")).is_false()
+	assert_bool(GameState.known_discoveries.has("paper_making")).is_false()
+	assert_dict(AI.recommendation()).is_empty()
+func test_ai_license_requires_real_need_inputs_staff_and_reserves()->void:
+	paper_license_need()
+	assert_dict(AI.recommendation({"hungry":true})).is_empty()
+	assert_dict(AI.recommendation({"at_war":true})).is_empty()
+	GameState.resource_stockpiles["Paper Pulp"]=0.0;assert_dict(AI.recommendation()).is_empty();GameState.resource_stockpiles["Paper Pulp"]=5.0
+	GameState.resource_stockpiles.Paper=10.0;assert_dict(AI.recommendation()).is_empty();GameState.resource_stockpiles.Paper=0.0
+	GameState.population_allocations.Crafting=0;assert_dict(AI.recommendation()).is_empty();GameState.population_allocations.Crafting=20
+	GameState.known_discoveries.append("paper_making");GameState.discovery_adoption.paper_making=1.0
+	assert_dict(AI.recommendation()).is_empty()
+	GameState.known_discoveries.erase("paper_making")
+	GameState.resource_stockpiles.Stone=100.0
+	assert_dict(AI.recommendation()).is_empty()
+func test_ai_renews_needed_line_from_own_contract_and_obeys_retry_window()->void:
+	prepare();license_trip();CivilizationSystem.diplomatic_mission={}
+	assert_bool(MilitaryCampaign.start_production_line("glass_batch",10).get("ok",false)).is_true()
+	assert_dict(AI.recommendation()).is_empty()
+	GameState.elapsed_days=int(L.records().glassmaking.expires_day)-90
+	assert_str(AI.recommendation().subject).is_equal("glassmaking")
+	CivilizationSystem.diplomatic_history.append({"civ_id":"neighbor","research_mode":"license","research_subject":"glassmaking","returned_day":int(GameState.elapsed_days)-10})
+	assert_dict(AI.recommendation()).is_empty()
+	GameState.elapsed_days+=30
+	assert_str(AI.recommendation().subject).is_equal("glassmaking")
+	MilitaryCampaign.equipment_queue[0].paused=true
+	assert_dict(AI.recommendation()).is_empty()
