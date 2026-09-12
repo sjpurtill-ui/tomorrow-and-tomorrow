@@ -1,0 +1,2335 @@
+[
+  {
+    "field": "D23",
+    "id": "refracting_telescopes",
+    "name": "Refracting Telescopes",
+    "foundations": "optical_lenses,lens_centering",
+    "mechanism": "Combine aligned objective and viewing optics to collect light and resolve distant angular detail",
+    "operating_requirement": "Qualified lenses, stable tube and mount, focusing mechanism and observer",
+    "consequence": "Extend sky observation within aperture, aberration and atmospheric limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_lenses",
+      "lens_centering"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "refracting_telescopes",
+      "local_demonstration": "Combine aligned objective and viewing optics to collect light and resolve distant angular detail",
+      "operating_requirements": "Qualified lenses, stable tube and mount, focusing mechanism and observer",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "reflecting_telescopes",
+    "name": "Reflecting Telescopes",
+    "foundations": "optical_lenses",
+    "mechanism": "Use a figured reflective primary and aligned secondary optics to form a distant image",
+    "operating_requirement": "Reflective optical surfaces, shape inspection, alignment and stable mounting",
+    "consequence": "Collect light without requiring a large transmitting objective while retaining alignment and surface limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_lenses"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reflecting_telescopes",
+      "local_demonstration": "Use a figured reflective primary and aligned secondary optics to form a distant image",
+      "operating_requirements": "Reflective optical surfaces, shape inspection, alignment and stable mounting",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "angular_image_calibration",
+    "name": "Angular Image Calibration",
+    "foundations": "celestial_reference_frames",
+    "mechanism": "Relate instrument image positions to sky angles with distortion and pointing corrections",
+    "operating_requirement": "Known reference positions, repeated observations and instrument calibration",
+    "consequence": "Turn recorded images into bounded positional measurements",
+    "status": "authored_draft",
+    "requires_all": [
+      "celestial_reference_frames"
+    ],
+    "requires_any": [
+      [
+        "refracting_telescopes",
+        "reflecting_telescopes"
+      ]
+    ],
+    "branching_note": "Refractive or reflective observation systems can supply a calibrated image; the selected instrument still needs adequate angular performance.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "angular_image_calibration",
+      "local_demonstration": "Relate instrument image positions to sky angles with distortion and pointing corrections",
+      "operating_requirements": "Known reference positions, repeated observations and instrument calibration",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "stellar_parallax_distance",
+    "name": "Stellar Parallax Distance",
+    "foundations": "angular_sky_catalogs,celestial_reference_frames",
+    "mechanism": "Infer stellar distance from repeated apparent displacement across a known observer baseline",
+    "operating_requirement": "Sufficient angular precision, baseline knowledge and separated observations",
+    "consequence": "Measure a limited distance range with explicit uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "angular_sky_catalogs",
+      "celestial_reference_frames"
+    ],
+    "requires_any": [
+      [
+        "refracting_telescopes",
+        "reflecting_telescopes"
+      ]
+    ],
+    "branching_note": "Different optical architectures can measure the repeated displacement if their actual precision is sufficient.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "stellar_parallax_distance",
+      "local_demonstration": "Infer stellar distance from repeated apparent displacement across a known observer baseline",
+      "operating_requirements": "Sufficient angular precision, baseline knowledge and separated observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "eclipse_geometry_models",
+    "name": "Eclipse Geometry Models",
+    "foundations": "planetary_motion_tables",
+    "mechanism": "Predict occultation geometry by comparing apparent sizes, relative motion and shadow alignment",
+    "operating_requirement": "Repeated sky observations, calibrated angular estimates and a stated motion model",
+    "consequence": "Forecast observable eclipses within model limits without requiring modern gravitational theory",
+    "status": "authored_draft",
+    "requires_all": [
+      "planetary_motion_tables"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "eclipse_geometry_models",
+      "local_demonstration": "Predict occultation geometry by comparing apparent sizes, relative motion and shadow alignment",
+      "operating_requirements": "Repeated sky observations, calibrated angular estimates and a stated motion model",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "variable_star_distance_models",
+    "name": "Variable-Star Distance Models",
+    "foundations": "stellar_parallax_distance",
+    "mechanism": "Calibrate relationships between changing brightness and luminosity for a qualified class of variable stars",
+    "operating_requirement": "Repeated brightness records, extinction estimates and reference distances",
+    "consequence": "Extend distance inference while retaining population and calibration limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "stellar_parallax_distance"
+    ],
+    "requires_any": [
+      [
+        "photographic_exposure_measurement",
+        "spectroscopy"
+      ]
+    ],
+    "branching_note": "Calibrated repeated intensity observations may be photographic or instrumentally spectral; neither a raw image nor a spectrum alone supplies a distance.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "variable_star_distance_models",
+      "local_demonstration": "Calibrate relationships between changing brightness and luminosity for a qualified class of variable stars",
+      "operating_requirements": "Repeated brightness records, extinction estimates and reference distances",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "radio_aperture_synthesis",
+    "name": "Radio Aperture Synthesis",
+    "foundations": "tuned_radio_reception,harmonic_analysis,frequency_stabilization",
+    "mechanism": "Combine correlated radio measurements from separated apertures to reconstruct angular structure",
+    "operating_requirement": "Synchronized receivers, known baselines, calibration sources and finite computation",
+    "consequence": "Resolve selected sky structure while retaining incomplete spatial sampling",
+    "status": "authored_draft",
+    "requires_all": [
+      "tuned_radio_reception",
+      "harmonic_analysis",
+      "frequency_stabilization"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radio_aperture_synthesis",
+      "local_demonstration": "Combine correlated radio measurements from separated apertures to reconstruct angular structure",
+      "operating_requirements": "Synchronized receivers, known baselines, calibration sources and finite computation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending.",
+    "branching_note": "Radio correlation and calibrated baseline reconstruction do not require prior optical interferometer construction."
+  },
+  {
+    "field": "D23",
+    "id": "coronagraphic_starlight_suppression",
+    "name": "Coronagraphic Starlight Suppression",
+    "foundations": "angular_image_calibration",
+    "mechanism": "Suppress a bright source's optical contribution while retaining nearby faint structure",
+    "operating_requirement": "Qualified masks or optical rejection elements, stable wavefronts and alignment",
+    "consequence": "Improve contrast near a bright object without guaranteeing a detectable planet",
+    "status": "authored_draft",
+    "requires_all": [
+      "angular_image_calibration"
+    ],
+    "requires_any": [
+      [
+        "refracting_telescopes",
+        "reflecting_telescopes"
+      ]
+    ],
+    "branching_note": "Rejection optics can be developed around either optical architecture; achievable contrast must be demonstrated.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "coronagraphic_starlight_suppression",
+      "local_demonstration": "Suppress a bright source's optical contribution while retaining nearby faint structure",
+      "operating_requirements": "Qualified masks or optical rejection elements, stable wavefronts and alignment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "exoplanet_transit_inference",
+    "name": "Exoplanet Transit Inference",
+    "foundations": "angular_image_calibration",
+    "mechanism": "Infer candidate orbit and size constraints from repeated stellar dimming with alternative explanations checked",
+    "operating_requirement": "Stable brightness measurements, sufficient observation time and false-positive review",
+    "consequence": "Identify conditional planetary evidence without assuming every dip is a planet",
+    "status": "authored_draft",
+    "requires_all": [
+      "angular_image_calibration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "exoplanet_transit_inference",
+      "local_demonstration": "Infer candidate orbit and size constraints from repeated stellar dimming with alternative explanations checked",
+      "operating_requirements": "Stable brightness measurements, sufficient observation time and false-positive review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "asteroseismic_inference",
+    "name": "Asteroseismic Inference",
+    "foundations": "spectroscopy",
+    "mechanism": "Infer stellar interior constraints from measured oscillation modes and physical models",
+    "operating_requirement": "Long observations, calibrated brightness or velocity measurements and model comparison",
+    "consequence": "Constrain internal structure without directly observing the stellar interior",
+    "status": "authored_draft",
+    "requires_all": [
+      "spectroscopy"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "asteroseismic_inference",
+      "local_demonstration": "Infer stellar interior constraints from measured oscillation modes and physical models",
+      "operating_requirements": "Long observations, calibrated brightness or velocity measurements and model comparison",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "launch_vehicle_mass_closure",
+    "name": "Launch Vehicle Mass Closure",
+    "foundations": "rocket_staging,orbital_dynamics",
+    "mechanism": "Reconcile payload, propellant, structural mass and trajectory losses against mission performance",
+    "operating_requirement": "Measured component masses, propulsion performance and bounded trajectory models",
+    "consequence": "Reject a launch architecture whose required mass or impulse does not close",
+    "status": "authored_draft",
+    "requires_all": [
+      "rocket_staging",
+      "orbital_dynamics"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "launch_vehicle_mass_closure",
+      "local_demonstration": "Reconcile payload, propellant, structural mass and trajectory losses against mission performance",
+      "operating_requirements": "Measured component masses, propulsion performance and bounded trajectory models",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "ascent_load_envelope_models",
+    "name": "Ascent Load Envelope Models",
+    "foundations": "launch_vehicle_guidance,spacecraft_structural_testing",
+    "mechanism": "Couple atmospheric, acceleration and vibration loads along a proposed ascent",
+    "operating_requirement": "Vehicle geometry, structural properties, environment estimates and validation data",
+    "consequence": "Set a qualified flight envelope without assuming all trajectories are survivable",
+    "status": "authored_draft",
+    "requires_all": [
+      "launch_vehicle_guidance",
+      "spacecraft_structural_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ascent_load_envelope_models",
+      "local_demonstration": "Couple atmospheric, acceleration and vibration loads along a proposed ascent",
+      "operating_requirements": "Vehicle geometry, structural properties, environment estimates and validation data",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "stage_separation_dynamics",
+    "name": "Stage Separation Dynamics",
+    "foundations": "rocket_staging",
+    "mechanism": "Model release forces and relative motion so departing bodies clear each other",
+    "operating_requirement": "Qualified release mechanisms, geometry, mass properties and separation tests",
+    "consequence": "Reduce recontact risk while preserving mechanism and timing failures",
+    "status": "authored_draft",
+    "requires_all": [
+      "rocket_staging"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "stage_separation_dynamics",
+      "local_demonstration": "Model release forces and relative motion so departing bodies clear each other",
+      "operating_requirements": "Qualified release mechanisms, geometry, mass properties and separation tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "propellant_slosh_models",
+    "name": "Propellant Slosh Models",
+    "foundations": "rocket_propellant_feed",
+    "mechanism": "Model moving liquid mass coupling with vehicle attitude and structural response",
+    "operating_requirement": "Tank geometry, fluid state, measured motion and model validation",
+    "consequence": "Bound control disturbances without assuming rigid or fully settled liquid",
+    "status": "authored_draft",
+    "requires_all": [
+      "rocket_propellant_feed"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "propellant_slosh_models",
+      "local_demonstration": "Model moving liquid mass coupling with vehicle attitude and structural response",
+      "operating_requirements": "Tank geometry, fluid state, measured motion and model validation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "engine_restart_qualification",
+    "name": "Engine Restart Qualification",
+    "foundations": "liquid_rocket_engines",
+    "mechanism": "Demonstrate reliable restart across qualified thermal and propellant inlet states",
+    "operating_requirement": "Actual engine, ignition resources, propellant conditioning and repeated tests",
+    "consequence": "Permit a bounded restart envelope while retaining ignition wear and finite attempts",
+    "status": "authored_draft",
+    "requires_all": [
+      "liquid_rocket_engines"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "engine_restart_qualification",
+      "local_demonstration": "Demonstrate reliable restart across qualified thermal and propellant inlet states",
+      "operating_requirements": "Actual engine, ignition resources, propellant conditioning and repeated tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "propulsive_booster_return",
+    "name": "Propulsive Booster Return",
+    "foundations": "surface_descent_navigation,engine_restart_qualification",
+    "mechanism": "Reserve propellant and control authority for deceleration and powered booster recovery",
+    "operating_requirement": "A suitable returning stage, usable reserves, navigation and a qualified landing site",
+    "consequence": "Recover a stage with a payload penalty and possible landing loss",
+    "status": "authored_draft",
+    "requires_all": [
+      "surface_descent_navigation",
+      "engine_restart_qualification"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "propulsive_booster_return",
+      "local_demonstration": "Reserve propellant and control authority for deceleration and powered booster recovery",
+      "operating_requirements": "A suitable returning stage, usable reserves, navigation and a qualified landing site",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "parachute_stage_recovery",
+    "name": "Parachute Stage Recovery",
+    "foundations": "controlled_reentry",
+    "mechanism": "Decelerate a returning stage with staged drag devices and manage landing or water recovery loads",
+    "operating_requirement": "Qualified parachutes, attachments, deployment system and actual recovery crews",
+    "consequence": "Recover suitable hardware while retaining impact, corrosion and retrieval costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_reentry"
+    ],
+    "requires_any": [
+      [
+        "solid_rocket_motors",
+        "liquid_rocket_engines"
+      ]
+    ],
+    "branching_note": "Recoverable stage hardware may carry solid or liquid propulsion; recovery does not establish that engines or propellant grains are reusable.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "parachute_stage_recovery",
+      "local_demonstration": "Decelerate a returning stage with staged drag devices and manage landing or water recovery loads",
+      "operating_requirements": "Qualified parachutes, attachments, deployment system and actual recovery crews",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "runway_return_stage_integration",
+    "name": "Runway-Return Stage Integration",
+    "foundations": "controlled_reentry,aircraft_landing_gear",
+    "mechanism": "Integrate a returning lifting vehicle with approach energy management and ground landing loads",
+    "operating_requirement": "Qualified aerodynamic surfaces, thermal protection, landing gear and available runway",
+    "consequence": "Recover a compatible stage without implying vertical recovery or low turnaround cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_reentry",
+      "aircraft_landing_gear"
+    ],
+    "requires_any": [
+      [
+        "ablative_heat_shields",
+        "reusable_thermal_protection"
+      ]
+    ],
+    "branching_note": "Replaceable ablative protection or qualified reusable surfaces can support repeated vehicle use with different refurbishment costs.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "runway_return_stage_integration",
+      "local_demonstration": "Integrate a returning lifting vehicle with approach energy management and ground landing loads",
+      "operating_requirements": "Qualified aerodynamic surfaces, thermal protection, landing gear and available runway",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "recovered_stage_requalification",
+    "name": "Recovered Stage Requalification",
+    "foundations": "cyclic_fatigue",
+    "mechanism": "Inspect a recovered stage against flight history and replace or refurbish life-limited parts before release",
+    "operating_requirement": "Traceable stage history, inspection equipment, spares, labor and acceptance criteria",
+    "consequence": "Permit repeated use only when measured condition supports it",
+    "status": "authored_draft",
+    "requires_all": [
+      "cyclic_fatigue"
+    ],
+    "requires_any": [
+      [
+        "propulsive_booster_return",
+        "parachute_stage_recovery",
+        "runway_return_stage_integration",
+        "surface_descent_navigation"
+      ]
+    ],
+    "branching_note": "Requalification can inspect hardware recovered by a qualified booster-return system or a surface lander. A returned physical article and its actual loading history remain required; knowing descent navigation is not proof of recovery.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "recovered_stage_requalification",
+      "local_demonstration": "Inspect a recovered stage against flight history and replace or refurbish life-limited parts before release",
+      "operating_requirements": "Traceable stage history, inspection equipment, spares, labor and acceptance criteria",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "reusable_launch_system_integration",
+    "name": "Reusable Launch System Integration",
+    "foundations": "launch_vehicle_mass_closure,stage_separation_dynamics,recovered_stage_requalification",
+    "mechanism": "Close payload, recovery reserves and turnaround resources for a specified reusable launch architecture",
+    "operating_requirement": "Qualified stages, launch facility, recovery capacity, paid refurbishment and actual propellant",
+    "consequence": "Operate repeated launches within measured turnaround and life limits; partial reuse remains possible",
+    "status": "authored_draft",
+    "requires_all": [
+      "launch_vehicle_mass_closure",
+      "stage_separation_dynamics",
+      "recovered_stage_requalification"
+    ],
+    "requires_any": [
+      [
+        "propulsive_booster_return",
+        "parachute_stage_recovery",
+        "runway_return_stage_integration"
+      ]
+    ],
+    "branching_note": "Powered, parachute or runway recovery can support a specified partially reusable architecture; all stages need not use the same method.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reusable_launch_system_integration",
+      "local_demonstration": "Close payload, recovery reserves and turnaround resources for a specified reusable launch architecture",
+      "operating_requirements": "Qualified stages, launch facility, recovery capacity, paid refurbishment and actual propellant",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "deployable_orbital_structures",
+    "name": "Deployable Orbital Structures",
+    "foundations": "spacecraft_structural_testing",
+    "mechanism": "Package structures for launch and deploy them into a stable qualified configuration",
+    "operating_requirement": "Hinges or extensible elements, release mechanisms, actuation energy and verification",
+    "consequence": "Increase deployed size while retaining deployment failure and stiffness limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_structural_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "deployable_orbital_structures",
+      "local_demonstration": "Package structures for launch and deploy them into a stable qualified configuration",
+      "operating_requirements": "Hinges or extensible elements, release mechanisms, actuation energy and verification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_module_interface_standards",
+    "name": "Orbital Module Interface Standards",
+    "foundations": "spacecraft_docking",
+    "mechanism": "Qualify mechanical, electrical and fluid interfaces for replaceable orbital modules",
+    "operating_requirement": "Compatible couplings, actual tolerances and isolation tests",
+    "consequence": "Enable compatible module exchange without making all vehicles interoperable",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_docking"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orbital_module_interface_standards",
+      "local_demonstration": "Qualify mechanical, electrical and fluid interfaces for replaceable orbital modules",
+      "operating_requirements": "Compatible couplings, actual tolerances and isolation tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "free_flying_manipulator_dynamics",
+    "name": "Free-Flying Manipulator Dynamics",
+    "foundations": "remote_manipulation,spacecraft_attitude_sensing",
+    "mechanism": "Model reaction motion of a free spacecraft while its manipulator moves or contacts a load",
+    "operating_requirement": "Measured mass properties, joint sensing and limited attitude-control capacity",
+    "consequence": "Plan robotic work without treating the spacecraft base as immovable",
+    "status": "authored_draft",
+    "requires_all": [
+      "remote_manipulation",
+      "spacecraft_attitude_sensing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "free_flying_manipulator_dynamics",
+      "local_demonstration": "Model reaction motion of a free spacecraft while its manipulator moves or contacts a load",
+      "operating_requirements": "Measured mass properties, joint sensing and limited attitude-control capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "noncooperative_capture_navigation",
+    "name": "Noncooperative Capture Navigation",
+    "foundations": "orbital_rendezvous",
+    "mechanism": "Estimate target pose and motion without relying on an active cooperative docking beacon",
+    "operating_requirement": "Observable target geometry, suitable sensors and bounded closing trajectories",
+    "consequence": "Attempt capture planning while retaining uncertain spin and inaccessible grasp points",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_rendezvous"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "noncooperative_capture_navigation",
+      "local_demonstration": "Estimate target pose and motion without relying on an active cooperative docking beacon",
+      "operating_requirements": "Observable target geometry, suitable sensors and bounded closing trajectories",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_component_exchange",
+    "name": "Orbital Component Exchange",
+    "foundations": "orbital_module_interface_standards",
+    "mechanism": "Isolate, remove and replace a qualified spacecraft module using controlled handling",
+    "operating_requirement": "Compatible replacement unit, service vehicle or crew, tools and energy",
+    "consequence": "Restore a specified service while consuming real spares and servicing capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_module_interface_standards"
+    ],
+    "requires_any": [
+      [
+        "free_flying_manipulator_dynamics",
+        "space_suit_pressure_systems"
+      ]
+    ],
+    "branching_note": "Compatible module exchange can be robotic or performed by qualified crew with actual tools and life support.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orbital_component_exchange",
+      "local_demonstration": "Isolate, remove and replace a qualified spacecraft module using controlled handling",
+      "operating_requirements": "Compatible replacement unit, service vehicle or crew, tools and energy",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "spacecraft_passivation",
+    "name": "Spacecraft Passivation",
+    "foundations": "spacecraft_thermal_balance",
+    "mechanism": "Place stored energy and pressure systems in a qualified low-risk end state",
+    "operating_requirement": "Controllable valves and circuits, known remaining energy and final-command capability",
+    "consequence": "Reduce post-mission fragmentation risk without eliminating all debris hazards",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_thermal_balance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "spacecraft_passivation",
+      "local_demonstration": "Place stored energy and pressure systems in a qualified low-risk end state",
+      "operating_requirements": "Controllable valves and circuits, known remaining energy and final-command capability",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "orbit_disposal_design",
+    "name": "Orbit Disposal Design",
+    "foundations": "orbital_transfer_planning,orbital_environment_monitoring",
+    "mechanism": "Choose an end-of-service trajectory and reserve resources for its execution",
+    "operating_requirement": "Vehicle capability, observed environment and actual maneuver reserves",
+    "consequence": "Reduce persistent interference without assuming abandoned objects disappear",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_transfer_planning",
+      "orbital_environment_monitoring"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orbit_disposal_design",
+      "local_demonstration": "Choose an end-of-service trajectory and reserve resources for its execution",
+      "operating_requirements": "Vehicle capability, observed environment and actual maneuver reserves",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "electrodynamic_tether_exchange",
+    "name": "Electrodynamic Tether Exchange",
+    "foundations": "plasma_physics,orbital_dynamics",
+    "mechanism": "Exchange orbital momentum through a conducting tether interacting with ambient magnetic field and plasma",
+    "operating_requirement": "Conductive tether, current closure, attitude control and suitable environment",
+    "consequence": "Change orbital energy with coupled electrical and drag constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "plasma_physics",
+      "orbital_dynamics"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electrodynamic_tether_exchange",
+      "local_demonstration": "Exchange orbital momentum through a conducting tether interacting with ambient magnetic field and plasma",
+      "operating_requirements": "Conductive tether, current closure, attitude control and suitable environment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_transfer_stage_reuse",
+    "name": "Orbital Transfer Stage Reuse",
+    "foundations": "orbital_transfer_planning,orbital_component_exchange",
+    "mechanism": "Plan repeated in-space transfers with replenishment, inspection and component-life limits",
+    "operating_requirement": "A serviceable stage, compatible replenishment or actual replacement motor modules, paid servicing and verified maneuver reserves",
+    "consequence": "Reuse a transfer stage without requiring atmospheric return or free refueling",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_transfer_planning",
+      "orbital_component_exchange"
+    ],
+    "requires_any": [
+      [
+        "engine_restart_qualification",
+        "electric_space_propulsion",
+        "solid_rocket_motors"
+      ]
+    ],
+    "branching_note": "A reusable carrier may use restartable chemical propulsion, electric propulsion, or exchanged finite solid-motor modules. A solid grain is not refilled or relit; actual replacement modules and compatible handling are required.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orbital_transfer_stage_reuse",
+      "local_demonstration": "Plan repeated in-space transfers with replenishment, inspection and component-life limits",
+      "operating_requirements": "A serviceable stage, compatible replenishment or actual replacement motor modules, paid servicing and verified maneuver reserves",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions. The selected propulsion architecture determines its physical fluid-transfer or replacement-module requirements; component-exchange knowledge alone does not provide propellant.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "formation_flying_control",
+    "name": "Formation Flying Control",
+    "foundations": "orbital_rendezvous,spacecraft_thruster_control",
+    "mechanism": "Maintain prescribed relative geometry among separately orbiting vehicles",
+    "operating_requirement": "Relative measurements, communication where needed and finite maneuver reserves",
+    "consequence": "Support distributed instruments while retaining drift and collision constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_rendezvous",
+      "spacecraft_thruster_control"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "formation_flying_control",
+      "local_demonstration": "Maintain prescribed relative geometry among separately orbiting vehicles",
+      "operating_requirements": "Relative measurements, communication where needed and finite maneuver reserves",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "capillary_propellant_acquisition",
+    "name": "Capillary Propellant Acquisition",
+    "foundations": "rocket_propellant_feed",
+    "mechanism": "Use wetted structures and surface forces to present liquid at an outlet under low acceleration",
+    "operating_requirement": "Qualified fluid-surface compatibility, clean acquisition structures and bounded flow demand",
+    "consequence": "Feed liquid without assuming gravity always separates liquid from gas",
+    "status": "authored_draft",
+    "requires_all": [
+      "rocket_propellant_feed"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "capillary_propellant_acquisition",
+      "local_demonstration": "Use wetted structures and surface forces to present liquid at an outlet under low acceleration",
+      "operating_requirements": "Qualified fluid-surface compatibility, clean acquisition structures and bounded flow demand",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "low_gravity_propellant_gauging",
+    "name": "Low-Gravity Propellant Gauging",
+    "foundations": "propellant_slosh_models",
+    "mechanism": "Infer remaining usable liquid from qualified measurements despite uncertain liquid position",
+    "operating_requirement": "Calibrated sensors, known tank and fluid conditions and estimation margins",
+    "consequence": "Bound available propellant without assuming a conventional level gauge works",
+    "status": "authored_draft",
+    "requires_all": [
+      "propellant_slosh_models"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "low_gravity_propellant_gauging",
+      "local_demonstration": "Infer remaining usable liquid from qualified measurements despite uncertain liquid position",
+      "operating_requirements": "Calibrated sensors, known tank and fluid conditions and estimation margins",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "propellant_settling_maneuvers",
+    "name": "Propellant Settling Maneuvers",
+    "foundations": "spacecraft_thruster_control,propellant_slosh_models",
+    "mechanism": "Apply bounded acceleration to collect liquid at a qualified feed location before use",
+    "operating_requirement": "Actual maneuver capability, propellant reserves and verified inlet conditions",
+    "consequence": "Condition feed at an impulse and time cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_thruster_control",
+      "propellant_slosh_models"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "propellant_settling_maneuvers",
+      "local_demonstration": "Apply bounded acceleration to collect liquid at a qualified feed location before use",
+      "operating_requirements": "Actual maneuver capability, propellant reserves and verified inlet conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "cryogenic_active_heat_removal",
+    "name": "Cryogenic Active Heat Removal",
+    "foundations": "cryogenic_propellant_storage,spacecraft_thermal_balance,mechanical_refrigeration",
+    "mechanism": "Remove incoming tank heat with a powered refrigerator matched to the required temperature",
+    "operating_requirement": "Qualified cooling machine, electrical power and heat rejection capacity",
+    "consequence": "Reduce measured boiloff within the installed heat-load envelope",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryogenic_propellant_storage",
+      "spacecraft_thermal_balance",
+      "mechanical_refrigeration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryogenic_active_heat_removal",
+      "local_demonstration": "Remove incoming tank heat with a powered refrigerator matched to the required temperature",
+      "operating_requirements": "Qualified cooling machine, electrical power and heat rejection capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "cryogenic_tank_pressure_control",
+    "name": "Cryogenic Tank Pressure Control",
+    "foundations": "cryogenic_propellant_storage,pressure_vessels",
+    "mechanism": "Manage vapor pressure through qualified thermal, mixing and venting responses",
+    "operating_requirement": "Tank pressure sensing, controllable hardware and finite thermal or vent resources",
+    "consequence": "Maintain tank limits while accounting for vented mass and changing fluid state",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryogenic_propellant_storage",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryogenic_tank_pressure_control",
+      "local_demonstration": "Manage vapor pressure through qualified thermal, mixing and venting responses",
+      "operating_requirements": "Tank pressure sensing, controllable hardware and finite thermal or vent resources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_fluid_connector_qualification",
+    "name": "Orbital Fluid Connector Qualification",
+    "foundations": "orbital_module_interface_standards",
+    "mechanism": "Demonstrate repeatable sealed fluid connection and disconnection across orbital operating conditions",
+    "operating_requirement": "Compatible connectors, alignment, leak tests and qualified material seals",
+    "consequence": "Enable fluid service without assuming docking alone makes a leak-free transfer path",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_module_interface_standards"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orbital_fluid_connector_qualification",
+      "local_demonstration": "Demonstrate repeatable sealed fluid connection and disconnection across orbital operating conditions",
+      "operating_requirements": "Compatible connectors, alignment, leak tests and qualified material seals",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "orbital_propellant_transfer",
+    "name": "Orbital Propellant Transfer",
+    "foundations": "orbital_fluid_connector_qualification,low_gravity_propellant_gauging",
+    "mechanism": "Move and account for usable propellant between attached orbital systems under controlled feed conditions",
+    "operating_requirement": "Actual donor stock, receiving capacity, qualified plumbing and energy",
+    "consequence": "Refill a compatible system while accounting for residuals and transfer losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_fluid_connector_qualification",
+      "low_gravity_propellant_gauging"
+    ],
+    "requires_any": [
+      [
+        "capillary_propellant_acquisition",
+        "propellant_settling_maneuvers"
+      ]
+    ],
+    "branching_note": "Compatible low-gravity feed can use surface-force acquisition or paid settling acceleration; neither route creates donor stock.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orbital_propellant_transfer",
+      "local_demonstration": "Move and account for usable propellant between attached orbital systems under controlled feed conditions",
+      "operating_requirements": "Actual donor stock, receiving capacity, qualified plumbing and energy",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "cryogenic_orbital_depot_integration",
+    "name": "Cryogenic Orbital Depot Integration",
+    "foundations": "orbital_propellant_transfer,cryogenic_tank_pressure_control",
+    "mechanism": "Integrate low-gravity fluid transfer, phase-dependent inventory and thermal support into a maintained cryogenic depot",
+    "operating_requirement": "Installed storage, actual deliveries, gauging, thermal support and service staff or automation",
+    "consequence": "Schedule finite deliveries without double-counting reserved or boiled-off propellant",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_propellant_transfer",
+      "cryogenic_tank_pressure_control"
+    ],
+    "requires_any": [
+      [
+        "cryogenic_active_heat_removal",
+        "multilayer_space_insulation"
+      ]
+    ],
+    "branching_note": "A depot may pay for active cooling or accept measured losses behind passive insulation; zero boiloff is not a universal prerequisite or guarantee.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryogenic_orbital_depot_integration",
+      "local_demonstration": "Integrate low-gravity fluid transfer, phase-dependent inventory and thermal support into a maintained cryogenic depot",
+      "operating_requirements": "Installed storage, actual deliveries, gauging, thermal support and service staff or automation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions. Depot integration closes coupled storage, loss and delivery constraints; ordinary inventory accounting is not reclassified as a new space invention.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "cryogenic_line_chilldown",
+    "name": "Cryogenic Line Chilldown",
+    "foundations": "cryogenic_propellant_storage",
+    "mechanism": "Condition transfer plumbing to the fluid temperature while accounting for vapor generation and thermal stress",
+    "operating_requirement": "Actual conditioning fluid or cooling capacity, qualified lines and monitored temperatures",
+    "consequence": "Prepare a usable transfer path at a material, energy and time cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryogenic_propellant_storage"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryogenic_line_chilldown",
+      "local_demonstration": "Condition transfer plumbing to the fluid temperature while accounting for vapor generation and thermal stress",
+      "operating_requirements": "Actual conditioning fluid or cooling capacity, qualified lines and monitored temperatures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "propellant_transfer_contamination_control",
+    "name": "Propellant Transfer Contamination Control",
+    "foundations": "orbital_fluid_connector_qualification,gas_composition_analysis",
+    "mechanism": "Qualify transferred fluid against contamination and compatibility limits before admitting it to a receiving system",
+    "operating_requirement": "Representative measurement, clean isolation equipment and reject or quarantine capacity",
+    "consequence": "Prevent incompatible stock from being counted as usable propulsion supply",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_fluid_connector_qualification",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "propellant_transfer_contamination_control",
+      "local_demonstration": "Qualify transferred fluid against contamination and compatibility limits before admitting it to a receiving system",
+      "operating_requirements": "Representative measurement, clean isolation equipment and reject or quarantine capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "planetary_entry_aerodynamics",
+    "name": "Planetary Entry Aerodynamics",
+    "foundations": "controlled_reentry",
+    "mechanism": "Model entry forces and heating for a specified atmosphere and vehicle geometry",
+    "operating_requirement": "Atmospheric uncertainty, mass properties, thermal limits and validated models",
+    "consequence": "Adapt entry planning to another environment without assuming Earth-derived margins transfer",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_reentry"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "planetary_entry_aerodynamics",
+      "local_demonstration": "Model entry forces and heating for a specified atmosphere and vehicle geometry",
+      "operating_requirements": "Atmospheric uncertainty, mass properties, thermal limits and validated models",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "terrain_relative_landing",
+    "name": "Terrain-Relative Landing",
+    "foundations": "surface_descent_navigation,multispectral_surface_mapping",
+    "mechanism": "Match onboard observations to a terrain reference and divert within available control authority",
+    "operating_requirement": "Usable local map, qualified sensors, computation and finite landing reserves",
+    "consequence": "Improve site-relative accuracy while retaining map mismatch and hazard limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "surface_descent_navigation",
+      "multispectral_surface_mapping"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "terrain_relative_landing",
+      "local_demonstration": "Match onboard observations to a terrain reference and divert within available control authority",
+      "operating_requirements": "Usable local map, qualified sensors, computation and finite landing reserves",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "plume_regolith_interaction_models",
+    "name": "Plume-Regolith Interaction Models",
+    "foundations": "surface_descent_navigation,regolith_excavation",
+    "mechanism": "Predict erosion, ejecta and surface response under exhaust loading",
+    "operating_requirement": "Qualified simulants or observations, plume data and uncertain terrain properties",
+    "consequence": "Plan surface exclusion and protection without assuming dust-free landings",
+    "status": "authored_draft",
+    "requires_all": [
+      "surface_descent_navigation",
+      "regolith_excavation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plume_regolith_interaction_models",
+      "local_demonstration": "Predict erosion, ejecta and surface response under exhaust loading",
+      "operating_requirements": "Qualified simulants or observations, plume data and uncertain terrain properties",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "low_gravity_surface_anchoring",
+    "name": "Low-Gravity Surface Anchoring",
+    "foundations": "regolith_excavation",
+    "mechanism": "Secure equipment against tool reaction forces where weight provides little restraint",
+    "operating_requirement": "Characterized terrain, actual anchors or restraint equipment and load tests",
+    "consequence": "Enable bounded excavation or manipulation without treating low weight as firm support",
+    "status": "authored_draft",
+    "requires_all": [
+      "regolith_excavation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "low_gravity_surface_anchoring",
+      "local_demonstration": "Secure equipment against tool reaction forces where weight provides little restraint",
+      "operating_requirements": "Characterized terrain, actual anchors or restraint equipment and load tests",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "regolith_electrostatic_dust_control",
+    "name": "Regolith Electrostatic Dust Control",
+    "foundations": "electrical_measurement",
+    "mechanism": "Use controlled electrical fields to move qualified charged dust from selected exposed surfaces",
+    "operating_requirement": "Powered electrodes, qualified surface geometry and environmental measurements",
+    "consequence": "Reduce specific dust accumulation while retaining abrasive and uncharged contamination",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regolith_electrostatic_dust_control",
+      "local_demonstration": "Use controlled electrical fields to move qualified charged dust from selected exposed surfaces",
+      "operating_requirements": "Powered electrodes, qualified surface geometry and environmental measurements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "planetary_sample_containment",
+    "name": "Planetary Sample Containment",
+    "foundations": "spacecraft_structural_testing",
+    "mechanism": "Maintain a defined sample boundary through collection, transport and controlled examination",
+    "operating_requirement": "Qualified vessels, cleanliness controls, integrity checks and review appropriate to uncertain samples",
+    "consequence": "Preserve sample evidence and containment without presuming sterility or biological harmlessness",
+    "status": "authored_draft",
+    "requires_all": [
+      "spacecraft_structural_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "planetary_sample_containment",
+      "local_demonstration": "Maintain a defined sample boundary through collection, transport and controlled examination",
+      "operating_requirements": "Qualified vessels, cleanliness controls, integrity checks and review appropriate to uncertain samples",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "reusable_surface_lander_integration",
+    "name": "Reusable Surface Lander Integration",
+    "foundations": "surface_descent_navigation,launch_vehicle_mass_closure,engine_restart_qualification,recovered_stage_requalification",
+    "mechanism": "Close repeated surface-to-orbit transport around actual refueling and maintained flight hardware",
+    "operating_requirement": "Qualified lander, local or delivered propellant, surface support and orbital destination capacity",
+    "consequence": "Permit repeated transport within reserve and component-life limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "surface_descent_navigation",
+      "launch_vehicle_mass_closure",
+      "engine_restart_qualification",
+      "recovered_stage_requalification"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reusable_surface_lander_integration",
+      "local_demonstration": "Close repeated surface-to-orbit transport around actual refueling and maintained flight hardware",
+      "operating_requirements": "Qualified lander, local or delivered propellant, surface support and orbital destination capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "surface_launch_pad_stabilization",
+    "name": "Surface Launch Pad Stabilization",
+    "foundations": "plume_regolith_interaction_models,in_situ_construction_materials",
+    "mechanism": "Prepare a load-bearing surface that limits exhaust erosion under a qualified launch vehicle",
+    "operating_requirement": "Actual surface preparation, construction equipment and inspected material",
+    "consequence": "Reduce ejecta around a maintained pad without eliminating plume loads",
+    "status": "authored_draft",
+    "requires_all": [
+      "plume_regolith_interaction_models",
+      "in_situ_construction_materials"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_launch_pad_stabilization",
+      "local_demonstration": "Prepare a load-bearing surface that limits exhaust erosion under a qualified launch vehicle",
+      "operating_requirements": "Actual surface preparation, construction equipment and inspected material",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "fission_electric_space_power",
+    "name": "Fission-Electric Space Power",
+    "foundations": "reactor_engineering,space_radiators",
+    "mechanism": "Integrate a fission heat source, electric conversion and space heat rejection within mission mass and control limits",
+    "operating_requirement": "Qualified reactor, fuel, conversion equipment, shielding and radiators",
+    "consequence": "Supply finite onboard electricity while retaining decay heat, startup and lifetime limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_engineering",
+      "space_radiators"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fission_electric_space_power",
+      "local_demonstration": "Integrate a fission heat source, electric conversion and space heat rejection within mission mass and control limits",
+      "operating_requirements": "Qualified reactor, fuel, conversion equipment, shielding and radiators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "nuclear_electric_transfer_integration",
+    "name": "Nuclear-Electric Transfer Integration",
+    "foundations": "fission_electric_space_power,electric_space_propulsion",
+    "mechanism": "Close a transfer mission around reactor power, electric thrust, heat rejection and finite reaction mass",
+    "operating_requirement": "Qualified propulsion system, actual propellant and verified mission mass and power budgets",
+    "consequence": "Trade low thrust and long maneuver duration for a specified mission capability",
+    "status": "authored_draft",
+    "requires_all": [
+      "fission_electric_space_power",
+      "electric_space_propulsion"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nuclear_electric_transfer_integration",
+      "local_demonstration": "Close a transfer mission around reactor power, electric thrust, heat rejection and finite reaction mass",
+      "operating_requirements": "Qualified propulsion system, actual propellant and verified mission mass and power budgets",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending.",
+    "confidence_class": "conditional_engineering_program",
+    "uncertainty_limit": "Individual principles do not establish a complete mission at game-relevant scale; demonstrations may reveal infeasible mass, thermal, reliability or cost closure.",
+    "research_outcome_contract": {
+      "guarantees_success": false,
+      "guarantees_operational_scale": false,
+      "requires_measured_acceptance": true
+    }
+  },
+  {
+    "field": "D23",
+    "id": "solar_sail_navigation",
+    "name": "Solar Sail Navigation",
+    "foundations": "orbital_dynamics,spacecraft_attitude_sensing",
+    "mechanism": "Steer a reflective sail to exchange momentum with incident sunlight",
+    "operating_requirement": "Deployed qualified sail, attitude control and available solar flux",
+    "consequence": "Change a trajectory with weak flux-dependent acceleration without reaction-mass consumption",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "spacecraft_attitude_sensing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "solar_sail_navigation",
+      "local_demonstration": "Steer a reflective sail to exchange momentum with incident sunlight",
+      "operating_requirements": "Deployed qualified sail, attitude control and available solar flux",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "beamed_sail_acceleration",
+    "name": "Beamed-Sail Acceleration",
+    "foundations": "solar_sail_navigation,optical_space_links",
+    "mechanism": "Evaluate acceleration of a qualified sail by a remotely powered directed light source",
+    "operating_requirement": "A real transmitter, tracking, sail thermal margins and full source energy accounting",
+    "consequence": "Support a conditional probe architecture without assuming arbitrary speed or demonstrated interstellar delivery",
+    "status": "authored_draft",
+    "requires_all": [
+      "solar_sail_navigation",
+      "optical_space_links"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "beamed_sail_acceleration",
+      "local_demonstration": "Evaluate acceleration of a qualified sail by a remotely powered directed light source",
+      "operating_requirements": "A real transmitter, tracking, sail thermal margins and full source energy accounting",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending.",
+    "confidence_class": "conditional_engineering_program",
+    "uncertainty_limit": "Individual principles do not establish a complete mission at game-relevant scale; demonstrations may reveal infeasible mass, thermal, reliability or cost closure.",
+    "research_outcome_contract": {
+      "guarantees_success": false,
+      "guarantees_operational_scale": false,
+      "requires_measured_acceptance": true
+    }
+  },
+  {
+    "field": "D23",
+    "id": "deep_space_clock_navigation",
+    "name": "Deep-Space Clock Navigation",
+    "foundations": "orbit_determination",
+    "mechanism": "Infer motion from one-way timing observations using a characterized onboard time reference",
+    "operating_requirement": "Stable calibrated clock, known transmitted timing and explicit bias estimates",
+    "consequence": "Reduce dependence on immediate two-way tracking while retaining accumulated clock uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbit_determination"
+    ],
+    "requires_any": [
+      [
+        "atomic_timekeeping",
+        "quartz_frequency_standards"
+      ]
+    ],
+    "branching_note": "A characterized atomic or quartz reference supports one-way estimates only over its measured stability interval; calibration and bias estimation remain required.",
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "deep_space_clock_navigation",
+      "local_demonstration": "Infer motion from one-way timing observations using a characterized onboard time reference",
+      "operating_requirements": "Stable calibrated clock, known transmitted timing and explicit bias estimates",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending."
+  },
+  {
+    "field": "D23",
+    "id": "space_interferometer_baseline_control",
+    "name": "Space Interferometer Baseline Control",
+    "foundations": "formation_flying_control,optical_interferometry",
+    "mechanism": "Measure and control separated optical paths so distributed space apertures can combine coherently",
+    "operating_requirement": "Qualified metrology, timing, optical delay control and finite formation reserves",
+    "consequence": "Enable a bounded distributed instrument without assuming formation geometry alone supplies optical coherence",
+    "status": "authored_draft",
+    "requires_all": [
+      "formation_flying_control",
+      "optical_interferometry"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "space_interferometer_baseline_control",
+      "local_demonstration": "Measure and control separated optical paths so distributed space apertures can combine coherently",
+      "operating_requirements": "Qualified metrology, timing, optical delay control and finite formation reserves",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending.",
+    "confidence_class": "conditional_engineering_program",
+    "uncertainty_limit": "Individual principles do not establish a complete mission at game-relevant scale; demonstrations may reveal infeasible mass, thermal, reliability or cost closure.",
+    "research_outcome_contract": {
+      "guarantees_success": false,
+      "guarantees_operational_scale": false,
+      "requires_measured_acceptance": true
+    }
+  },
+  {
+    "field": "D23",
+    "id": "rotating_habitat_bearing_services",
+    "name": "Rotating Habitat Bearing Services",
+    "foundations": "rotating_habitat_dynamics,bearing_surfaces",
+    "mechanism": "Transfer qualified mechanical loads and utilities across rotating and stationary habitat sections",
+    "operating_requirement": "Actual bearings or contactless support, seals, service interfaces and maintenance access",
+    "consequence": "Support a specified rotating interface while retaining wear, vibration and isolation needs",
+    "status": "authored_draft",
+    "requires_all": [
+      "rotating_habitat_dynamics",
+      "bearing_surfaces"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rotating_habitat_bearing_services",
+      "local_demonstration": "Transfer qualified mechanical loads and utilities across rotating and stationary habitat sections",
+      "operating_requirements": "Actual bearings or contactless support, seals, service interfaces and maintenance access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending.",
+    "confidence_class": "conditional_engineering_program",
+    "uncertainty_limit": "Individual principles do not establish a complete mission at game-relevant scale; demonstrations may reveal infeasible mass, thermal, reliability or cost closure.",
+    "research_outcome_contract": {
+      "guarantees_success": false,
+      "guarantees_operational_scale": false,
+      "requires_measured_acceptance": true
+    }
+  },
+  {
+    "field": "D23",
+    "id": "momentum_exchange_tether_capture",
+    "name": "Momentum-Exchange Tether Capture",
+    "foundations": "orbital_dynamics,formation_flying_control",
+    "mechanism": "Model timed payload capture by a rotating tether and replenish the resulting orbital momentum change",
+    "operating_requirement": "Qualified tensile structure, precise navigation, capture hardware and recovery propulsion or other momentum source",
+    "consequence": "Evaluate a transfer architecture without free net momentum or assured capture",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_dynamics",
+      "formation_flying_control"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "momentum_exchange_tether_capture",
+      "local_demonstration": "Model timed payload capture by a rotating tether and replenish the resulting orbital momentum change",
+      "operating_requirements": "Qualified tensile structure, precise navigation, capture hardware and recovery propulsion or other momentum source",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending.",
+    "confidence_class": "conditional_engineering_program",
+    "uncertainty_limit": "Individual principles do not establish a complete mission at game-relevant scale; demonstrations may reveal infeasible mass, thermal, reliability or cost closure.",
+    "research_outcome_contract": {
+      "guarantees_success": false,
+      "guarantees_operational_scale": false,
+      "requires_measured_acceptance": true
+    }
+  },
+  {
+    "field": "D23",
+    "id": "asteroid_contact_processing",
+    "name": "Asteroid Contact Processing",
+    "foundations": "low_gravity_surface_anchoring,ore_assaying",
+    "mechanism": "Contain, process and collect characterized asteroid material while controlling reaction motion and escaped particles",
+    "operating_requirement": "A reachable characterized body, attached machinery, real energy and contained material handling",
+    "consequence": "Produce qualified recovered stock without assuming every asteroid is accessible or profitable",
+    "status": "authored_draft",
+    "requires_all": [
+      "low_gravity_surface_anchoring",
+      "ore_assaying"
+    ],
+    "requires_any": [
+      [
+        "magnetic_mineral_separation",
+        "gravity_mineral_concentration"
+      ]
+    ],
+    "recovery": "Obtain a competent visiting specialist, shared research, commissioned engineering, a supplied service or a delivered article for analysis. Pay real access, travel or transmission and local qualification. Buying a launch, measurement or component does not grant every supporting discovery or a free operating vehicle.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "asteroid_contact_processing",
+      "local_demonstration": "Contain, process and collect characterized asteroid material while controlling reaction motion and escaped particles",
+      "operating_requirements": "A reachable characterized body, attached machinery, real energy and contained material handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual article transport or signal propagation",
+        "finite local reconstruction and qualification",
+        "continuing hardware, staff, propellant, power and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, life support where needed, board and finite engineering instruction; local staff reproduce the relevant measurement, model or qualified operation.",
+        "partnership": "Contribute actual instrument time, hardware, records, staff or funds; schedules and information travel remain bounded, and partner capacity is not duplicated.",
+        "purchased_research": "Commission a specified engineering question from a capable source; delivered evidence may shorten local inquiry but does not guarantee a feasible design or successful flight.",
+        "licensed_or_imported_service": "Pay for a bounded launch, observation, processing or servicing operation using the supplier's actual capacity and reachable infrastructure; continued access remains a dependency.",
+        "reverse_engineering": "Study a delivered instrument, recovered hardware or interpretable telemetry with finite analysis and local trials; inaccessible material properties, life history and tacit manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A civilian scientific or operating design, not a free spacecraft, settled world, observed map or guaranteed mission. Every claim is limited to demonstrated environmental, mass, energy, information and component-life conditions.",
+    "implementation_status": "Authored proposal; physical vehicles and installations, commissioning, maintenance, mission decisions, acquisition penalties and AI behavior remain pending.",
+    "confidence_class": "conditional_engineering_program",
+    "uncertainty_limit": "Individual principles do not establish a complete mission at game-relevant scale; demonstrations may reveal infeasible mass, thermal, reliability or cost closure.",
+    "research_outcome_contract": {
+      "guarantees_success": false,
+      "guarantees_operational_scale": false,
+      "requires_measured_acceptance": true
+    },
+    "branching_note": "Processing depends on characterized feed. Magnetic separation or gravity concentration under qualified natural or imposed acceleration can be used; neither implies all asteroid material is valuable."
+  }
+]

@@ -657,12 +657,11 @@
       "review_id": "D11-20",
       "candidate_name": "Reusable launch vehicles",
       "mapped_ids": [
-        "launch_vehicle_guidance",
-        "controlled_reentry",
-        "reusable_thermal_protection"
+        "reusable_launch_system_integration",
+        "recovered_stage_requalification"
       ],
-      "scope_status": "partial",
-      "note": "Guidance, return and thermal protection are supporting discoveries. A complete reusable launch-vehicle design, recovery and turnaround chain is not yet authored."
+      "scope_status": "subject_mapped",
+      "note": "Complete proposed launch/recovery/turnaround architecture now authored with alternate recovery methods and actual refurbishment costs. This resolves design coverage, not runtime or mission validation."
     },
     {
       "review_id": "D11-21",
@@ -704,11 +703,12 @@
       "review_id": "D11-25",
       "candidate_name": "Reusable orbital transfer stages",
       "mapped_ids": [
-        "orbital_transfer_planning",
-        "reusable_thermal_protection"
+        "orbital_transfer_stage_reuse",
+        "orbital_component_exchange",
+        "orbital_propellant_transfer"
       ],
-      "scope_status": "partial",
-      "note": "Orbital transfer planning and thermal protection are supporting discoveries. Reusable orbital-stage architecture, servicing and repeated-operation qualification remain to be authored."
+      "scope_status": "subject_mapped",
+      "note": "Repeated in-space stage use, compatible servicing and replenishment now authored. Atmospheric thermal protection is not a mandatory orbital reuse prerequisite. Operating implementation remains pending."
     }
   ]
 }

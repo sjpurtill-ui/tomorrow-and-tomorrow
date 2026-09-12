@@ -1892,17 +1892,22 @@
     "field": "D23",
     "id": "planetary_surface_power",
     "name": "Planetary Surface Power",
-    "foundations": "space_power_arrays,space_power_eclipse_reserves",
+    "foundations": "spacecraft_thermal_balance",
     "mechanism": "Combine local generation and storage against surface illumination and thermal conditions",
-    "operating_requirement": "Installed generators, storage and maintained distribution",
+    "operating_requirement": "Installed qualified generators, maintained distribution and actual storage or independent reserves sized for the specified surface environment and interruptions",
     "consequence": "Power surface loads through a specified environmental cycle",
     "status": "authored_draft",
     "requires_all": [
-      "space_power_arrays",
-      "space_power_eclipse_reserves"
+      "spacecraft_thermal_balance"
     ],
-    "requires_any": [],
-    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
+    "requires_any": [
+      [
+        "space_power_arrays",
+        "fission_electric_space_power"
+      ]
+    ],
+    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required.",
+    "branching_note": "Solar arrays or qualified fission-electric generation can supply a surface system. Site-specific illumination, thermal rejection, radiation protection and finite continuity reserves remain real operating requirements."
   },
   {
     "field": "D23",
