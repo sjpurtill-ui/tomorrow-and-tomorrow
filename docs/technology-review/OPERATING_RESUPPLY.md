@@ -1,0 +1,11 @@
+# Manufactured operating supplies
+
+Civilian production planning can replenish manufactured consumables for installed, enabled machinery at the settled primary home. Study supplies retain first priority, cultivation nutrients second, and operating supplies follow. The planner totals each plant's nominal daily input consumption at current health/labor condition, sets a stock target of thirty such days, and selects the lowest remaining coverage among currently producible inputs.
+
+A pneumatic pressing workshop therefore creates demand for Compressed Air. The ordinary supply planner checks adopted knowledge or an active manufacturing license, physical tooling, inputs, workshop space and power. The controller can commission generation through its existing dependency path if needed and affordable. It starts or retargets the ordinary persistent production line; it does not grant air, electricity or workers. Operating machinery then consumes that stock on subsequent days.
+
+Uncommissioned, disabled or traveling machinery creates no new resupply request. Zero Crafting availability or zero labor condition prevents planning. A paused manufacturing line remains paused, and a full workshop does not lose an active line. Existing hunger and war guards suppress civilian investment. Quotes do not mutate stocks. Thirty days is a planning target rather than a guaranteed reserve, since actual staffing, competing priorities and input availability determine output.
+
+This pass does not add extraction orders for raw Coal or Bitumen, imported consumable purchasing, new manufacturing-license negotiations, consumer-plant installation or optimal workshop scheduling. Existing active licenses work through the ordinary recipe gate. A continuously needed operating input can occupy the only production slot, and higher-priority study/cultivation may delay resupply. Those broader acquisition and scheduling requirements remain open.
+
+No save fields or separate population/industry authority. Uses existing plant records, inventory, production targets and monthly civilian decisions. New tests demonstrate an autonomous compressed-air line supplying a real press, gating, finite production, fleet/condition scaling, paused-line preservation and emergency restrictions.

@@ -1,5 +1,5 @@
 extends RefCounted
-## Follow manufactured inputs for returned studies and operating cultivation.
+## Follow manufactured inputs for studies, cultivation and commissioned machinery.
 ## Recommendations grant no materials, knowledge, labor, or workshop capacity.
 const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
@@ -7,7 +7,9 @@ const E=preload("res://scripts/society_exchange.gd")
 const S=preload("res://scripts/paper_study.gd")
 static func recommendation(plan_power:bool=false)->Dictionary:
 	var research:=study_recommendation(plan_power)
-	return research if not research.is_empty() else nutrient_recommendation(plan_power)
+	if not research.is_empty():return research
+	var nutrients:=nutrient_recommendation(plan_power)
+	return nutrients if not nutrients.is_empty() else operating_input_recommendation(plan_power)
 
 static func study_recommendation(plan_power:bool=false)->Dictionary:
 	var state=WorldSimulation.state
@@ -101,5 +103,32 @@ static func nutrient_recommendation(plan_power:bool=false)->Dictionary:
 		# Avoid making an unusable nutrient when its complement has no supply route.
 		if best.is_empty() and available<daily*.1:return {}
 		if not best.is_empty():choices.append({"order":best,"coverage":available/daily})
+	choices.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.coverage)<float(b.coverage))
+	return {} if choices.is_empty() else choices[0].order
+
+## Replenish manufactured consumables for installed, enabled home machinery.
+## Raw extraction and imported supplies remain separate acquisition systems.
+static func operating_input_recommendation(plan_power:bool=false)->Dictionary:
+	var state=WorldSimulation.state
+	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
+	if state.effective_workers("Crafting")+preload("res://scripts/technology_operations.gd").reserved_workers(state)<=0:return {}
+	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1)
+	if condition<=0:return {}
+	var daily_inputs:Dictionary={}
+	var operations=preload("res://scripts/technology_operations.gd")
+	for id:String in operations.data().plants:
+		var record:Dictionary=operations.data().plants[id]
+		if not record.enabled or int(record.installed)<=0:continue
+		var spec:Dictionary=operations.PLANTS[id]
+		for item:String in spec.inputs:daily_inputs[item]=float(daily_inputs.get(item,0))+int(record.installed)*condition*float(spec.inputs[item])
+	var choices:Array[Dictionary]=[]
+	for item:String in daily_inputs:
+		var daily:=float(daily_inputs[item])
+		if daily<=0:continue
+		var stock:=maxf(0,float(state.resource_stockpiles.get(item,0)))
+		var target:=ceili(daily*30.0)
+		if stock>=target:continue
+		var candidate:=supply(item,target,{},plan_power)
+		if not candidate.is_empty():choices.append({"order":candidate,"coverage":stock/daily})
 	choices.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.coverage)<float(b.coverage))
 	return {} if choices.is_empty() else choices[0].order

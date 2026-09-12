@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 100: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 101: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1102,3 +1102,14 @@ The live 414-discovery diagnostic reached 17 settlements, where its 16-location 
 Verification: 27 cases, zero errors/failures/skips/orphans: simulation performance 14 and crop nutrition 13. A 400-day natural probe completes and matches every non-timing report field from checkpoint 99, including discoveries and annual/final gameplay snapshots. The focused 510-forecast sample measured 1,814,257 microseconds before and 992,185 afterward under concurrent host load; this is a local observation, not a guaranteed speedup or full-world benchmark. Reproduction: `tools/audit_food_forecast_sites.gd`; evidence: [forecast cache diagnostic](FORECAST_CACHE_DIAGNOSTIC.json). The full 400-day output stays in local `artifacts/technology-pacing/forecast-cache-400-days.json`.
 
 No gameplay balance, catalog, art or save fields changed. Cache remains excluded from save capture and cleared on reset. It can now retain up to 32,768 dated climate records per FoodSystem, increasing bounded memory in exchange for reuse across the supported settlement count. Shared implementation file is `scripts/food_system.gd`, plus the existing performance suite; the diagnostic tool and record are task-owned. This does not accelerate the already running process: session 57160 was confirmed live again on its original loaded revision and must not be restarted merely to obtain newer code. Its 250-year target remains pending. Current total remains 447 discoveries and 39 reviewed images; full-history completion is still far beyond this checkpoint.
+
+
+## Checkpoint 101: manufactured operating-input resupply
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `93e1426`. No canonical integration or player launch.
+
+Civilian planning now follows study and cultivation supply with manufactured consumables for commissioned, enabled primary-home machinery. It totals nominal inputs at current labor condition, aims for thirty days of stocks and prioritizes the least-covered producible input. Existing supply recursion and controller power/line orders pay tooling, manufacturing inputs and electricity. A pneumatic press can therefore prompt ordinary compressed-air manufacture. Disabled/unbuilt/traveling machinery, unavailable workers, absent methods/tooling, paused lines and controller emergency guards remain respected. See [Operating resupply](OPERATING_RESUPPLY.md).
+
+Verification: 52 cases across operating-input planning (4 new), civilian planning (8), power planning (12), civilization strategy (15) and crop nutrition (13), zero errors/failures/skips/orphans. The controller case starts a compressor line, consumes tooling, uses generation to manufacture air and supplies an actual commissioned press. Quotes leave stocks unchanged; target scaling, missing power/knowledge/tooling, depleted stores, paused lines and hunger/war guards are covered.
+
+No save fields or catalog/art additions. Current totals remain 447 authored discoveries, 89 roles, ten installation types and 39 reviewed images. Shared implementation file is the civilian production planner; new tests and resupply document accompany review-record changes. No new authority over government labor. Limits: raw fuel extraction/imports, new license negotiation, automatic consumer-plant investment and scheduling continuously needed inputs around other work remain unfinished. Active manufacturing licenses already pass through the ordinary recipe gate. Diagnostic session 57160 was re-polled live; no claim that its 250-year target or full-history pacing has completed.
