@@ -1,0 +1,2948 @@
+[
+  {
+    "field": "D16",
+    "id": "witnessed_obligations",
+    "name": "Witnessed Obligations",
+    "foundations": "customary_law",
+    "mechanism": "Third parties attest that an obligation was accepted",
+    "operating_requirement": "Recognized witnesses and a way to recall terms",
+    "consequence": "Disputes can compare testimony instead of relying solely on the parties",
+    "status": "authored_draft",
+    "requires_all": [
+      "customary_law"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "precedent_collections",
+    "name": "Precedent Collections",
+    "foundations": "customary_law,formal_archives",
+    "mechanism": "Preserve earlier judgments for comparison with later disputes",
+    "operating_requirement": "Maintained records and trained interpreters",
+    "consequence": "Similar cases can be compared while precedent remains contestable",
+    "status": "authored_draft",
+    "requires_all": [
+      "customary_law",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "public_rule_proclamation",
+    "name": "Public Rule Proclamation",
+    "foundations": "customary_law",
+    "mechanism": "Repeat rules in accessible public settings with agreed wording",
+    "operating_requirement": "Messengers, public occasions and trusted speakers",
+    "consequence": "Improve awareness without assuming consent or literacy",
+    "status": "authored_draft",
+    "requires_all": [
+      "customary_law"
+    ],
+    "requires_any": [
+      [
+        "oral_epics",
+        "phonetic_notation"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D16",
+    "id": "written_legal_codes",
+    "name": "Written Legal Codes",
+    "foundations": "phonetic_notation,formal_archives",
+    "mechanism": "Consolidate stated rules into a maintained written text",
+    "operating_requirement": "Scribes, archives and a recognized revision process",
+    "consequence": "Permit reference to recorded rules rather than fluctuating recollection",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "jurisdiction_boundaries",
+    "name": "Jurisdiction Boundaries",
+    "foundations": "regional_maps,customary_law",
+    "mechanism": "Specify which authority handles a dispute by place, party or subject",
+    "operating_requirement": "Boundary records and recognized allocation of authority",
+    "consequence": "Reduce competing claims to hear the same matter",
+    "status": "authored_draft",
+    "requires_all": [
+      "regional_maps",
+      "customary_law"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "court_case_dockets",
+    "name": "Court Case Dockets",
+    "foundations": "specialized_courts,formal_archives",
+    "mechanism": "Track filings, hearings, decisions and unresolved matters",
+    "operating_requirement": "Clerks and maintained case records",
+    "consequence": "Expose pending work and missed procedural steps",
+    "status": "authored_draft",
+    "requires_all": [
+      "specialized_courts",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "evidentiary_hearings",
+    "name": "Evidentiary Hearings",
+    "foundations": "specialized_courts,witnessed_obligations",
+    "mechanism": "Provide a defined occasion to present and contest evidence",
+    "operating_requirement": "Adjudicators, parties and rules for examining evidence",
+    "consequence": "Resolve factual disagreement through a repeatable procedure",
+    "status": "authored_draft",
+    "requires_all": [
+      "specialized_courts",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "conflict_of_interest_recusal",
+    "name": "Conflict-of-Interest Recusal",
+    "foundations": "specialized_courts,witnessed_obligations",
+    "mechanism": "Identify interests that compromise an official decision and substitute a decision-maker",
+    "operating_requirement": "Disclosure, review and available substitutes",
+    "consequence": "Reduce specified conflicts without guaranteeing impartial outcomes",
+    "status": "authored_draft",
+    "requires_all": [
+      "specialized_courts",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "written_judgment_reasons",
+    "name": "Written Judgment Reasons",
+    "foundations": "court_case_dockets,phonetic_notation",
+    "mechanism": "Record the factual and normative grounds for a decision",
+    "operating_requirement": "Adjudicator time and durable records",
+    "consequence": "Make decisions inspectable and comparable",
+    "status": "authored_draft",
+    "requires_all": [
+      "court_case_dockets",
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "appellate_review",
+    "name": "Appellate Review",
+    "foundations": "written_judgment_reasons,jurisdiction_boundaries",
+    "mechanism": "A separate forum examines specified errors in an earlier decision",
+    "operating_requirement": "Review authority, records and allocated hearing capacity",
+    "consequence": "Correct qualifying errors while adding delay and cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "written_judgment_reasons",
+      "jurisdiction_boundaries"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "arbitration_procedures",
+    "name": "Arbitration Procedures",
+    "foundations": "witnessed_obligations,customary_law",
+    "mechanism": "Parties accept a specified third-party process for resolving a dispute",
+    "operating_requirement": "Agreed terms, available arbitrators and enforcement arrangements",
+    "consequence": "Offer a negotiated forum without displacing every public court",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations",
+      "customary_law"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "mediation_practice",
+    "name": "Mediation Practice",
+    "foundations": "witnessed_obligations,household_councils",
+    "mechanism": "An intermediary helps parties identify and negotiate compatible terms",
+    "operating_requirement": "Trained intermediaries and voluntary participation",
+    "consequence": "Resolve some disputes without an imposed decision",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations",
+      "household_councils"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "legal_aid_organization",
+    "name": "Legal Aid Organization",
+    "foundations": "specialized_courts",
+    "mechanism": "Pool resources to provide procedural assistance to otherwise excluded parties",
+    "operating_requirement": "Funded advocates and eligibility rules",
+    "consequence": "Expand practical access while consuming skilled labor",
+    "status": "authored_draft",
+    "requires_all": [
+      "specialized_courts"
+    ],
+    "requires_any": [
+      [
+        "public_levies",
+        "cooperative_purchasing"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D16",
+    "id": "procedural_notice",
+    "name": "Procedural Notice",
+    "foundations": "public_rule_proclamation,court_case_dockets",
+    "mechanism": "Give affected parties a defined opportunity to learn and respond before a proceeding",
+    "operating_requirement": "Reliable delivery, records and reasonable response time",
+    "consequence": "Reduce decisions made without an opportunity to participate",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_rule_proclamation",
+      "court_case_dockets"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "administrative_appeals",
+    "name": "Administrative Appeals",
+    "foundations": "procedural_notice",
+    "mechanism": "Review an administrative action through an identified challenge process",
+    "operating_requirement": "Review officers, evidence access and enforceable remedies",
+    "consequence": "Allow correction of specified official errors",
+    "status": "authored_draft",
+    "requires_all": [
+      "procedural_notice"
+    ],
+    "requires_any": [
+      [
+        "written_judgment_reasons",
+        "precedent_collections"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D16",
+    "id": "water_allocation_compacts",
+    "name": "Water Allocation Compacts",
+    "foundations": "irrigation_schedules,witnessed_obligations",
+    "mechanism": "Specify shares, priorities and shortage procedures among water users",
+    "operating_requirement": "Flow measurement, representatives and enforcement",
+    "consequence": "Coordinate competing use of a finite shared flow",
+    "status": "authored_draft",
+    "requires_all": [
+      "irrigation_schedules",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "common_land_boundaries",
+    "name": "Common-Land Boundaries",
+    "foundations": "geometric_survey,customary_law",
+    "mechanism": "Identify shared land and the community entitled to use it",
+    "operating_requirement": "Survey, local testimony and recognized membership rules",
+    "consequence": "Distinguish common access from unbounded open access",
+    "status": "authored_draft",
+    "requires_all": [
+      "geometric_survey",
+      "customary_law"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "resource_use_permits",
+    "name": "Resource-Use Permits",
+    "foundations": "common_land_boundaries,material_accounting",
+    "mechanism": "Authorize bounded extraction or use under recorded conditions",
+    "operating_requirement": "Monitoring, registries and enforceable conditions",
+    "consequence": "Allocate use while tracking compliance and exclusions",
+    "status": "authored_draft",
+    "requires_all": [
+      "common_land_boundaries",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "municipal_service_charters",
+    "name": "Municipal Service Charters",
+    "foundations": "urban_street_plans",
+    "mechanism": "Assign responsibility and resources for specific urban services",
+    "operating_requirement": "Defined mandates, staff and revenue",
+    "consequence": "Make service provision accountable to identifiable offices",
+    "status": "authored_draft",
+    "requires_all": [
+      "urban_street_plans"
+    ],
+    "requires_any": [
+      [
+        "professional_service",
+        "household_councils"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D16",
+    "id": "intergovernmental_compacts",
+    "name": "Intergovernmental Compacts",
+    "foundations": "jurisdiction_boundaries,witnessed_obligations",
+    "mechanism": "Several authorities agree responsibilities and dispute procedures for a shared task",
+    "operating_requirement": "Authorized representatives and durable agreements",
+    "consequence": "Coordinate across jurisdictions without merging their governments",
+    "status": "authored_draft",
+    "requires_all": [
+      "jurisdiction_boundaries",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "public_budget_accounts",
+    "name": "Public Budget Accounts",
+    "foundations": "public_levies,material_accounting",
+    "mechanism": "Record authorized receipts, commitments and expenditure over a defined period",
+    "operating_requirement": "Accountants, revenue records and spending controls",
+    "consequence": "Compare promises with available resources and actual spending",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_levies",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "appropriation_procedures",
+    "name": "Appropriation Procedures",
+    "foundations": "public_budget_accounts,household_councils",
+    "mechanism": "Separate authorization to spend from possession of public resources",
+    "operating_requirement": "Decision rules, budget records and responsible officials",
+    "consequence": "Constrain spending to approved purposes when enforced",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_budget_accounts",
+      "household_councils"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "treasury_cash_forecasts",
+    "name": "Treasury Cash Forecasts",
+    "foundations": "public_budget_accounts,statistical_sampling",
+    "mechanism": "Estimate when receipts and obligations will actually settle",
+    "operating_requirement": "Reliable schedules, balances and forecasting staff",
+    "consequence": "Expose timing shortfalls despite a nominally balanced budget",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_budget_accounts",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "public_asset_registers",
+    "name": "Public Asset Registers",
+    "foundations": "property_registers,material_accounting",
+    "mechanism": "Track publicly controlled assets, custody and condition",
+    "operating_requirement": "Inspections, identification and reconciled records",
+    "consequence": "Distinguish ownership on paper from usable public capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "property_registers",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "procurement_specifications",
+    "name": "Procurement Specifications",
+    "foundations": "workshop_standards,public_budget_accounts",
+    "mechanism": "State measurable requirements for a public purchase before choosing a supplier",
+    "operating_requirement": "Technical staff and funded purchasing authority",
+    "consequence": "Compare offers against a defined need",
+    "status": "authored_draft",
+    "requires_all": [
+      "workshop_standards",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "competitive_public_tendering",
+    "name": "Competitive Public Tendering",
+    "foundations": "procurement_specifications,public_rule_proclamation",
+    "mechanism": "Invite comparable offers under declared selection conditions",
+    "operating_requirement": "Accessible notice, evaluators and credible bidding rules",
+    "consequence": "Broaden competition while introducing administrative work",
+    "status": "authored_draft",
+    "requires_all": [
+      "procurement_specifications",
+      "public_rule_proclamation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "procurement_acceptance_checks",
+    "name": "Procurement Acceptance Checks",
+    "foundations": "procurement_specifications,dimensional_metrology",
+    "mechanism": "Inspect delivered work before accepting performance and payment",
+    "operating_requirement": "Inspectors, test methods and contract records",
+    "consequence": "Reject nonconforming delivery instead of counting a contract as an asset",
+    "status": "authored_draft",
+    "requires_all": [
+      "procurement_specifications",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "public_procurement_audits",
+    "name": "Public Procurement Audits",
+    "foundations": "procurement_acceptance_checks,public_budget_accounts",
+    "mechanism": "Trace procurement decisions and payments against authority and evidence",
+    "operating_requirement": "Independent access to records and competent auditors",
+    "consequence": "Expose specified irregularities without automatically preventing them",
+    "status": "authored_draft",
+    "requires_all": [
+      "procurement_acceptance_checks",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "civil_service_examinations",
+    "name": "Civil-Service Examinations",
+    "foundations": "public_schools,professional_service",
+    "mechanism": "Assess candidates against declared job-relevant tasks",
+    "operating_requirement": "Exam design, examiners and accessible administration",
+    "consequence": "Make appointment evidence comparable while risking narrow credential selection",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_schools",
+      "professional_service"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "public_office_handover",
+    "name": "Public Office Handover",
+    "foundations": "professional_service,formal_archives",
+    "mechanism": "Transfer pending duties, records and assets when officials change",
+    "operating_requirement": "Handover time, records and successor access",
+    "consequence": "Reduce knowledge loss at office turnover",
+    "status": "authored_draft",
+    "requires_all": [
+      "professional_service",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "official_mandate_registers",
+    "name": "Official Mandate Registers",
+    "foundations": "professional_service,jurisdiction_boundaries",
+    "mechanism": "Record which powers each office holds and when authorization ends",
+    "operating_requirement": "Maintained registers and enforceable delegation rules",
+    "consequence": "Distinguish an official title from current authority",
+    "status": "authored_draft",
+    "requires_all": [
+      "professional_service",
+      "jurisdiction_boundaries"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "ombuds_review",
+    "name": "Ombuds Review",
+    "foundations": "administrative_appeals,conflict_of_interest_recusal",
+    "mechanism": "A designated office investigates complaints about administration",
+    "operating_requirement": "Access, independence and a defined remedy or recommendation process",
+    "consequence": "Surface maladministration outside ordinary case selection",
+    "status": "authored_draft",
+    "requires_all": [
+      "administrative_appeals",
+      "conflict_of_interest_recusal"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "petition_registers",
+    "name": "Petition Registers",
+    "foundations": "phonetic_notation,professional_service",
+    "mechanism": "Record submitted grievances and their disposition",
+    "operating_requirement": "Clerks, public access and response procedures",
+    "consequence": "Make ignored or recurring requests visible",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation",
+      "professional_service"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "representative_agenda_rules",
+    "name": "Representative Agenda Rules",
+    "foundations": "household_councils,public_rule_proclamation",
+    "mechanism": "Define how proposals reach a representative assembly and receive deliberation",
+    "operating_requirement": "Recognized representation and published procedures",
+    "consequence": "Structure deliberation while leaving political outcomes contested",
+    "status": "authored_draft",
+    "requires_all": [
+      "household_councils",
+      "public_rule_proclamation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "assembly_quorum_rules",
+    "name": "Assembly Quorum Rules",
+    "foundations": "representative_agenda_rules,tallies",
+    "mechanism": "Specify the participation needed to conduct a valid decision",
+    "operating_requirement": "Attendance records and enforcement of the threshold",
+    "consequence": "Prevent a small unrecognized subset from acting as the entire assembly",
+    "status": "authored_draft",
+    "requires_all": [
+      "representative_agenda_rules",
+      "tallies"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "roll_call_decision_records",
+    "name": "Roll-Call Decision Records",
+    "foundations": "representative_agenda_rules,formal_archives",
+    "mechanism": "Record how individual representatives voted on a decision",
+    "operating_requirement": "Clerks and authenticated membership",
+    "consequence": "Permit later scrutiny while potentially increasing coercive pressure",
+    "status": "authored_draft",
+    "requires_all": [
+      "representative_agenda_rules",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "secret_ballot_procedures",
+    "name": "Secret-Ballot Procedures",
+    "foundations": "tallies,procedural_notice",
+    "mechanism": "Separate eligibility checking from the observable content of a vote",
+    "operating_requirement": "Private marking, custody and trustworthy counting",
+    "consequence": "Reduce direct observation of individual choices when secrecy holds",
+    "status": "authored_draft",
+    "requires_all": [
+      "tallies",
+      "procedural_notice"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "electoral_roll_maintenance",
+    "name": "Electoral Roll Maintenance",
+    "foundations": "census_rolls,procedural_notice",
+    "mechanism": "Maintain and challenge the roster eligible for a defined election",
+    "operating_requirement": "Registration staff, identity evidence and appeal access",
+    "consequence": "Reduce duplicate or missing registrations under the chosen franchise",
+    "status": "authored_draft",
+    "requires_all": [
+      "census_rolls",
+      "procedural_notice"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "ballot_chain_of_custody",
+    "name": "Ballot Chain of Custody",
+    "foundations": "secret_ballot_procedures,cargo_seals",
+    "mechanism": "Track ballots from issue through secure transport and counting",
+    "operating_requirement": "Seals, custody records and observable transfers",
+    "consequence": "Make unexplained ballot additions or losses detectable",
+    "status": "authored_draft",
+    "requires_all": [
+      "secret_ballot_procedures",
+      "cargo_seals"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "election_result_audits",
+    "name": "Election Result Audits",
+    "foundations": "ballot_chain_of_custody,statistical_sampling",
+    "mechanism": "Compare reported outcomes with retained evidence using a declared audit procedure",
+    "operating_requirement": "Independent evidence access and competent review",
+    "consequence": "Detect specified counting errors with stated confidence",
+    "status": "authored_draft",
+    "requires_all": [
+      "ballot_chain_of_custody",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "emergency_power_sunset_rules",
+    "name": "Emergency-Power Sunset Rules",
+    "foundations": "official_mandate_registers,public_rule_proclamation",
+    "mechanism": "Require extraordinary powers to expire or receive a renewed decision",
+    "operating_requirement": "Time records, review authority and enforceable expiry",
+    "consequence": "Bound emergency delegation when institutions honor the rule",
+    "status": "authored_draft",
+    "requires_all": [
+      "official_mandate_registers",
+      "public_rule_proclamation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "emergency_coordination_centers",
+    "name": "Emergency Coordination Centers",
+    "foundations": "municipal_service_charters,crew_handoffs",
+    "mechanism": "Bring authorized service representatives together around a shared incident picture",
+    "operating_requirement": "Communication, staff, logs and actual response resources",
+    "consequence": "Coordinate scarce response capacity without creating supplies",
+    "status": "authored_draft",
+    "requires_all": [
+      "municipal_service_charters",
+      "crew_handoffs"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "mutual_aid_activation",
+    "name": "Mutual-Aid Activation",
+    "foundations": "intergovernmental_compacts,emergency_coordination_centers",
+    "mechanism": "Use pre-agreed triggers to request and dispatch assistance between authorities",
+    "operating_requirement": "Available responders, travel capacity and cost agreements",
+    "consequence": "Deliver help after actual mobilization and travel",
+    "status": "authored_draft",
+    "requires_all": [
+      "intergovernmental_compacts",
+      "emergency_coordination_centers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "independent_statistical_offices",
+    "name": "Independent Statistical Offices",
+    "foundations": "census_rolls,statistical_inference",
+    "mechanism": "Separate production of public statistics from immediate policy advocacy",
+    "operating_requirement": "Competent statisticians, access and safeguards against interference",
+    "consequence": "Publish estimates with methods and uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "census_rolls",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "public_records_access",
+    "name": "Public Records Access",
+    "foundations": "formal_archives,procedural_notice",
+    "mechanism": "Provide a defined process for requesting and reviewing public records",
+    "operating_requirement": "Archivists, retrieval systems and explicit exceptions",
+    "consequence": "Expand inspectability while consuming retrieval and review effort",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_archives",
+      "procedural_notice"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "personal_data_stewardship",
+    "name": "Personal Data Stewardship",
+    "foundations": "public_records_access,official_mandate_registers",
+    "mechanism": "Assign responsibility for collecting, using, retaining and correcting personal records",
+    "operating_requirement": "Data inventories, access controls and accountable custodians",
+    "consequence": "Limit unauthorized uses under adopted rules",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_records_access",
+      "official_mandate_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "data_access_auditing",
+    "name": "Data-Access Auditing",
+    "foundations": "personal_data_stewardship,store_forward_archives",
+    "mechanism": "Record and inspect accesses to controlled digital records",
+    "operating_requirement": "Authenticated systems, logs and review capacity",
+    "consequence": "Expose specified misuse without making logs self-enforcing",
+    "status": "authored_draft",
+    "requires_all": [
+      "personal_data_stewardship",
+      "store_forward_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "algorithmic_decision_review",
+    "name": "Algorithmic Decision Review",
+    "foundations": "administrative_appeals,stored_program_control",
+    "mechanism": "Inspect automated recommendations, their inputs and avenues for challenge",
+    "operating_requirement": "Records, qualified reviewers and a responsible decision authority",
+    "consequence": "Permit contest of automated errors rather than treating software as authority",
+    "status": "authored_draft",
+    "requires_all": [
+      "administrative_appeals",
+      "stored_program_control"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "public_model_registers",
+    "name": "Public Model Registers",
+    "foundations": "algorithmic_decision_review,public_records_access",
+    "mechanism": "Record where models are used, their versions and responsible operators",
+    "operating_requirement": "Maintained inventories and update obligations",
+    "consequence": "Reveal model dependence and unreviewed replacements",
+    "status": "authored_draft",
+    "requires_all": [
+      "algorithmic_decision_review",
+      "public_records_access"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "cross_border_resource_arbitration",
+    "name": "Cross-Border Resource Arbitration",
+    "foundations": "water_allocation_compacts,arbitration_procedures",
+    "mechanism": "Apply agreed evidence and forum rules to a shared resource dispute",
+    "operating_requirement": "Monitoring across jurisdictions and accepted enforcement arrangements",
+    "consequence": "Resolve some allocation conflicts without assuming a world government",
+    "status": "authored_draft",
+    "requires_all": [
+      "water_allocation_compacts",
+      "arbitration_procedures"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "long_horizon_public_trusts",
+    "name": "Long-Horizon Public Trusts",
+    "foundations": "public_asset_registers,official_mandate_registers",
+    "mechanism": "Assign assets and fiduciary duties to a purpose extending beyond current officeholders",
+    "operating_requirement": "Durable oversight, asset custody and succession rules",
+    "consequence": "Preserve designated resources subject to real enforcement and losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_asset_registers",
+      "official_mandate_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "future_obligation_disclosure",
+    "name": "Future-Obligation Disclosure",
+    "foundations": "public_budget_accounts,long_horizon_public_trusts",
+    "mechanism": "Record costs and liabilities whose payments fall after the current budget period",
+    "operating_requirement": "Actuarial estimates, contracts and public reporting",
+    "consequence": "Expose deferred commitments rather than making them disappear",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_budget_accounts",
+      "long_horizon_public_trusts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "habitat_constitutional_compacts",
+    "name": "Habitat Constitutional Compacts",
+    "foundations": "orbital_habitat_assembly,intergovernmental_compacts",
+    "mechanism": "Specify authority, rights and service obligations within a dependent habitat",
+    "operating_requirement": "Residents, recognized decision procedures and life-support responsibilities",
+    "consequence": "Coordinate governance without claiming any single constitutional form is inevitable",
+    "status": "authored_draft",
+    "requires_all": [
+      "orbital_habitat_assembly",
+      "intergovernmental_compacts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "life_support_priority_rules",
+    "name": "Life-Support Priority Rules",
+    "foundations": "habitat_constitutional_compacts,closed_habitat_material_accounts",
+    "mechanism": "Define reviewable allocation and emergency rules for indispensable shared services",
+    "operating_requirement": "Measured capacity, representation and enforceable operating responsibilities",
+    "consequence": "Make scarcity decisions explicit without removing scarcity",
+    "status": "authored_draft",
+    "requires_all": [
+      "habitat_constitutional_compacts",
+      "closed_habitat_material_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "interhabitat_jurisdiction",
+    "name": "Interhabitat Jurisdiction",
+    "foundations": "habitat_constitutional_compacts,jurisdiction_boundaries",
+    "mechanism": "Allocate responsibility for events involving several habitats or mobile vehicles",
+    "operating_requirement": "Compatible compacts and communication",
+    "consequence": "Provide a forum despite separation and divided authority",
+    "status": "authored_draft",
+    "requires_all": [
+      "habitat_constitutional_compacts",
+      "jurisdiction_boundaries"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "delayed_governance_protocols",
+    "name": "Delayed Governance Protocols",
+    "foundations": "interhabitat_jurisdiction,delay_tolerant_space_networks",
+    "mechanism": "Delegate bounded local authority when consultation cannot be immediate",
+    "operating_requirement": "Recorded limits, durable messages and later review",
+    "consequence": "Allow decisions during communication delay without granting unlimited autonomy",
+    "status": "authored_draft",
+    "requires_all": [
+      "interhabitat_jurisdiction",
+      "delay_tolerant_space_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "machine_action_accountability",
+    "name": "Machine-Action Accountability",
+    "foundations": "algorithmic_decision_review,official_mandate_registers",
+    "mechanism": "Assign responsibility and evidence requirements for actions taken through automated systems",
+    "operating_requirement": "Action logs, human authority and reviewable delegation",
+    "consequence": "Preserve contestable responsibility when execution is automated",
+    "status": "authored_draft",
+    "requires_all": [
+      "algorithmic_decision_review",
+      "official_mandate_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "distributed_civic_verification",
+    "name": "Distributed Civic Verification",
+    "foundations": "data_access_auditing,intergovernmental_compacts",
+    "mechanism": "Several authorized custodians compare signed records rather than trusting one unchecked copy",
+    "operating_requirement": "Independent custody, authentication and reconciliation rules",
+    "consequence": "Detect inconsistent civic records while retaining governance over disputes",
+    "status": "authored_draft",
+    "requires_all": [
+      "data_access_auditing",
+      "intergovernmental_compacts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "institutional_continuity_exercises",
+    "name": "Institutional Continuity Exercises",
+    "foundations": "public_office_handover,emergency_coordination_centers",
+    "mechanism": "Rehearse transfer of authority and records during loss of a normal office",
+    "operating_requirement": "Staff time, duplicate records and realistic exercises",
+    "consequence": "Reveal missing succession paths before an actual disruption",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_office_handover",
+      "emergency_coordination_centers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D16",
+    "id": "constitutional_revision_procedures",
+    "name": "Constitutional Revision Procedures",
+    "foundations": "representative_agenda_rules,public_rule_proclamation",
+    "mechanism": "Specify how foundational rules may be reconsidered and adopted",
+    "operating_requirement": "Recognized procedures, deliberation and accepted authority",
+    "consequence": "Allow institutional adaptation without making every rule permanently unknowable",
+    "status": "authored_draft",
+    "requires_all": [
+      "representative_agenda_rules",
+      "public_rule_proclamation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "reciprocal_gift_accounts",
+    "name": "Reciprocal Gift Accounts",
+    "foundations": "tallies,oral_epics",
+    "mechanism": "Remember transfers and expectations across repeated gift relationships",
+    "operating_requirement": "Witnesses or records and recognized participants",
+    "consequence": "Track obligations without requiring a monetary price",
+    "status": "authored_draft",
+    "requires_all": [
+      "tallies",
+      "oral_epics"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "barter_equivalence_tables",
+    "name": "Barter Equivalence Tables",
+    "foundations": "standard_measures,tallies",
+    "mechanism": "Record commonly accepted exchange comparisons between unlike goods",
+    "operating_requirement": "Measured quantities and repeated market observations",
+    "consequence": "Reduce negotiation work while equivalences remain local and changeable",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures",
+      "tallies"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "market_gathering_schedules",
+    "name": "Market Gathering Schedules",
+    "foundations": "seasonal_patterns,route_memory",
+    "mechanism": "Coordinate where and when traders can expect counterparties",
+    "operating_requirement": "Accessible meeting sites and communication",
+    "consequence": "Concentrate exchange opportunities at a cost in travel and security",
+    "status": "authored_draft",
+    "requires_all": [
+      "seasonal_patterns",
+      "route_memory"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "merchant_weight_verification",
+    "name": "Merchant Weight Verification",
+    "foundations": "standard_measures,dimensional_metrology",
+    "mechanism": "Compare trading weights with recognized references",
+    "operating_requirement": "Reference weights, inspectors and correction procedures",
+    "consequence": "Detect specified quantity misrepresentation",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "commodity_quality_grading",
+    "name": "Commodity Quality Grading",
+    "foundations": "workshop_standards,material_accounting",
+    "mechanism": "Classify traded goods by observable quality attributes",
+    "operating_requirement": "Sampling, declared grades and competent assessors",
+    "consequence": "Distinguish unlike goods that share a common quantity label",
+    "status": "authored_draft",
+    "requires_all": [
+      "workshop_standards",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "warehouse_receipts",
+    "name": "Warehouse Receipts",
+    "foundations": "public_stores,cargo_seals,material_accounting",
+    "mechanism": "Issue a claim against a specified quantity held in identified storage",
+    "operating_requirement": "Secure warehouses, custody records and redemption rules",
+    "consequence": "Transfer a stored-goods claim without moving the goods each time",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_stores",
+      "cargo_seals",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "debt_maturity_records",
+    "name": "Debt Maturity Records",
+    "foundations": "witnessed_obligations,tallies",
+    "mechanism": "Record when an obligation becomes payable and to whom",
+    "operating_requirement": "Accepted terms and retained records",
+    "consequence": "Distinguish a future claim from present available stock",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations",
+      "tallies"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "interest_accrual_accounts",
+    "name": "Interest Accrual Accounts",
+    "foundations": "debt_maturity_records,fractional_quantities",
+    "mechanism": "Calculate agreed time-dependent charges on outstanding obligations",
+    "operating_requirement": "Consistent time and balance records",
+    "consequence": "Track owed charges while leaving their legitimacy and limits contestable",
+    "status": "authored_draft",
+    "requires_all": [
+      "debt_maturity_records",
+      "fractional_quantities"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "collateral_registration",
+    "name": "Collateral Registration",
+    "foundations": "property_registers,debt_maturity_records",
+    "mechanism": "Record assets pledged to support a claim and the order of competing interests",
+    "operating_requirement": "Reliable asset identification and enforceable registration",
+    "consequence": "Reduce undisclosed multiple pledges without guaranteeing recovery",
+    "status": "authored_draft",
+    "requires_all": [
+      "property_registers",
+      "debt_maturity_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "merchant_credit_networks",
+    "name": "Merchant Credit Networks",
+    "foundations": "debt_maturity_records",
+    "mechanism": "Extend delayed payment through repeated relationships and assessed reputation",
+    "operating_requirement": "Working capital, information and enforceable claims",
+    "consequence": "Finance trade while exposing creditors to default and concentration",
+    "status": "authored_draft",
+    "requires_all": [
+      "debt_maturity_records"
+    ],
+    "requires_any": [
+      [
+        "market_gathering_schedules",
+        "bills_of_exchange"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D17",
+    "id": "bills_of_exchange",
+    "name": "Bills of Exchange",
+    "foundations": "merchant_credit_networks,phonetic_notation",
+    "mechanism": "Direct payment through counterparties in different places under stated terms",
+    "operating_requirement": "Trusted correspondents and transferable written obligations",
+    "consequence": "Settle some distant trades without transporting every payment asset",
+    "status": "authored_draft",
+    "requires_all": [
+      "merchant_credit_networks",
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "commercial_endorsement",
+    "name": "Commercial Endorsement",
+    "foundations": "bills_of_exchange,witnessed_obligations",
+    "mechanism": "Transfer or guarantee a payment instrument through an authenticated endorsement",
+    "operating_requirement": "Recognized signatures and liability rules",
+    "consequence": "Move claims while preserving a traceable chain of responsibility",
+    "status": "authored_draft",
+    "requires_all": [
+      "bills_of_exchange",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "trade_draft_acceptance",
+    "name": "Trade-Draft Acceptance",
+    "foundations": "bills_of_exchange,debt_maturity_records",
+    "mechanism": "A designated payer acknowledges an obligation to honor a presented draft",
+    "operating_requirement": "Verification and acceptance records",
+    "consequence": "Distinguish an issued request from an accepted payment commitment",
+    "status": "authored_draft",
+    "requires_all": [
+      "bills_of_exchange",
+      "debt_maturity_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "partnership_capital_accounts",
+    "name": "Partnership Capital Accounts",
+    "foundations": "material_accounting,witnessed_obligations",
+    "mechanism": "Record each partner's contribution, withdrawals and agreed share",
+    "operating_requirement": "Partnership terms and reconciled ledgers",
+    "consequence": "Separate partnership resources from participants' personal holdings",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "profit_loss_allocation",
+    "name": "Profit-and-Loss Allocation",
+    "foundations": "partnership_capital_accounts,fractional_quantities",
+    "mechanism": "Apply agreed rules to distribute residual gains and losses",
+    "operating_requirement": "Reliable accounts and enforceable agreements",
+    "consequence": "Reveal who bears a venture's outcomes",
+    "status": "authored_draft",
+    "requires_all": [
+      "partnership_capital_accounts",
+      "fractional_quantities"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "double_entry_bookkeeping",
+    "name": "Double-Entry Bookkeeping",
+    "foundations": "material_accounting",
+    "mechanism": "Record each transaction as linked changes whose totals balance",
+    "operating_requirement": "Account definitions, trained bookkeepers and reconciliations",
+    "consequence": "Detect some recording inconsistencies without proving the transaction was honest",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting"
+    ],
+    "requires_any": [
+      [
+        "place_value",
+        "symbolic_algebra"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D17",
+    "id": "trial_balance_reconciliation",
+    "name": "Trial-Balance Reconciliation",
+    "foundations": "double_entry_bookkeeping",
+    "mechanism": "Compare ledger totals and investigate differences between accounts and evidence",
+    "operating_requirement": "Ledgers, source documents and accountant time",
+    "consequence": "Find specified posting errors while balanced fraud may remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "double_entry_bookkeeping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "inventory_cost_accounts",
+    "name": "Inventory Cost Accounts",
+    "foundations": "commodity_quality_grading,double_entry_bookkeeping",
+    "mechanism": "Assign recorded acquisition and conversion costs to stored goods",
+    "operating_requirement": "Inventory movements and a consistent costing method",
+    "consequence": "Separate stock quantity from its recorded production cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "commodity_quality_grading",
+      "double_entry_bookkeeping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "depreciation_accounts",
+    "name": "Depreciation Accounts",
+    "foundations": "public_asset_registers,double_entry_bookkeeping",
+    "mechanism": "Allocate an asset's recorded cost over an estimated useful service period",
+    "operating_requirement": "Asset records, chosen assumptions and review",
+    "consequence": "Recognize consumed service potential without equating book value with condition",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_asset_registers",
+      "double_entry_bookkeeping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "industrial_job_costing",
+    "name": "Industrial Job Costing",
+    "foundations": "inventory_cost_accounts,work_motion_studies",
+    "mechanism": "Associate materials, labor and overhead with a particular production job",
+    "operating_requirement": "Time records, material issues and allocation rules",
+    "consequence": "Compare estimates with the cost of actual jobs",
+    "status": "authored_draft",
+    "requires_all": [
+      "inventory_cost_accounts",
+      "work_motion_studies"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "standard_cost_variance_analysis",
+    "name": "Standard-Cost Variance Analysis",
+    "foundations": "industrial_job_costing,statistical_sampling",
+    "mechanism": "Compare actual input use and prices against declared standards",
+    "operating_requirement": "Current standards and reliable production records",
+    "consequence": "Identify deviations requiring investigation rather than automatic blame",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_job_costing",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "cash_flow_statements",
+    "name": "Cash-Flow Statements",
+    "foundations": "double_entry_bookkeeping,debt_maturity_records",
+    "mechanism": "Trace actual receipts and payments separately from recognized profit",
+    "operating_requirement": "Reconciled cash and obligation records",
+    "consequence": "Expose ventures that report gains while running out of spendable resources",
+    "status": "authored_draft",
+    "requires_all": [
+      "double_entry_bookkeeping",
+      "debt_maturity_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "joint_stock_organization",
+    "name": "Joint-Stock Organization",
+    "foundations": "partnership_capital_accounts",
+    "mechanism": "Divide a venture's residual ownership into transferable shares",
+    "operating_requirement": "Recognized ownership records and governance rules",
+    "consequence": "Pool capital while separating some ownership from daily management",
+    "status": "authored_draft",
+    "requires_all": [
+      "partnership_capital_accounts"
+    ],
+    "requires_any": [
+      [
+        "written_legal_codes",
+        "witnessed_obligations"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D17",
+    "id": "limited_liability_rules",
+    "name": "Limited-Liability Rules",
+    "foundations": "joint_stock_organization,collateral_registration",
+    "mechanism": "Define which obligations attach to the venture and which extend to owners",
+    "operating_requirement": "Enforceable legal boundaries and disclosure",
+    "consequence": "Change investor exposure while shifting risks toward counterparties",
+    "status": "authored_draft",
+    "requires_all": [
+      "joint_stock_organization",
+      "collateral_registration"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "shareholder_meeting_procedures",
+    "name": "Shareholder Meeting Procedures",
+    "foundations": "joint_stock_organization,assembly_quorum_rules",
+    "mechanism": "Define how recognized owners authorize major decisions and oversight",
+    "operating_requirement": "Ownership register, notice and voting procedures",
+    "consequence": "Coordinate dispersed ownership without ensuring equal influence",
+    "status": "authored_draft",
+    "requires_all": [
+      "joint_stock_organization",
+      "assembly_quorum_rules"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "commercial_disclosure",
+    "name": "Commercial Disclosure",
+    "foundations": "joint_stock_organization,double_entry_bookkeeping",
+    "mechanism": "Provide defined financial and governance information to counterparties",
+    "operating_requirement": "Reporting standards, records and responsible officers",
+    "consequence": "Reduce some information gaps while leaving estimates uncertain",
+    "status": "authored_draft",
+    "requires_all": [
+      "joint_stock_organization",
+      "double_entry_bookkeeping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "independent_financial_audits",
+    "name": "Independent Financial Audits",
+    "foundations": "commercial_disclosure,trial_balance_reconciliation",
+    "mechanism": "Examine accounts and evidence under a declared assurance scope",
+    "operating_requirement": "Independent qualified reviewers and record access",
+    "consequence": "Provide bounded assurance rather than a guarantee against failure",
+    "status": "authored_draft",
+    "requires_all": [
+      "commercial_disclosure",
+      "trial_balance_reconciliation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "bank_deposit_accounts",
+    "name": "Bank Deposit Accounts",
+    "foundations": "double_entry_bookkeeping,merchant_credit_networks",
+    "mechanism": "Record redeemable customer claims against an institution",
+    "operating_requirement": "Custody, liquidity and reliable account records",
+    "consequence": "Support payments while creating an obligation for the institution",
+    "status": "authored_draft",
+    "requires_all": [
+      "double_entry_bookkeeping",
+      "merchant_credit_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "payment_clearing_houses",
+    "name": "Payment Clearing Houses",
+    "foundations": "bank_deposit_accounts,bills_of_exchange",
+    "mechanism": "Compare payment claims among participants before final settlement",
+    "operating_requirement": "Agreed rules, timely records and participating institutions",
+    "consequence": "Reduce gross transfers while creating settlement dependencies",
+    "status": "authored_draft",
+    "requires_all": [
+      "bank_deposit_accounts",
+      "bills_of_exchange"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "net_settlement",
+    "name": "Net Settlement",
+    "foundations": "payment_clearing_houses,symbolic_algebra",
+    "mechanism": "Offset reciprocal claims and settle their residual balances",
+    "operating_requirement": "Valid obligations and an agreed settlement asset",
+    "consequence": "Lower required transfer volume without eliminating default exposure",
+    "status": "authored_draft",
+    "requires_all": [
+      "payment_clearing_houses",
+      "symbolic_algebra"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "gross_real_time_settlement",
+    "name": "Gross Real-Time Settlement",
+    "foundations": "payment_clearing_houses,store_forward_archives",
+    "mechanism": "Settle individual payments when sufficient funds and system access exist",
+    "operating_requirement": "Reliable communication, settlement balances and operating oversight",
+    "consequence": "Reduce unsettled exposure at greater intraday liquidity demand",
+    "status": "authored_draft",
+    "requires_all": [
+      "payment_clearing_houses",
+      "store_forward_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "liquidity_reserve_planning",
+    "name": "Liquidity Reserve Planning",
+    "foundations": "cash_flow_statements,bank_deposit_accounts,probability_theory",
+    "mechanism": "Hold accessible resources against uncertain payment timing",
+    "operating_requirement": "Scenario estimates and genuinely liquid reserves",
+    "consequence": "Reduce inability to pay without making insolvent obligations disappear",
+    "status": "authored_draft",
+    "requires_all": [
+      "cash_flow_statements",
+      "bank_deposit_accounts",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "lender_of_last_resort_procedures",
+    "name": "Lender-of-Last-Resort Procedures",
+    "foundations": "liquidity_reserve_planning,public_credit",
+    "mechanism": "Specify emergency liquidity support and its terms for eligible institutions",
+    "operating_requirement": "An authorized provider, collateral assessment and accountable decisions",
+    "consequence": "Bridge some liquidity disruptions while transferring risk and incentives",
+    "status": "authored_draft",
+    "requires_all": [
+      "liquidity_reserve_planning",
+      "public_credit"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "deposit_protection_pools",
+    "name": "Deposit Protection Pools",
+    "foundations": "bank_deposit_accounts,risk_pools",
+    "mechanism": "Pool resources to honor defined depositor claims after qualifying failures",
+    "operating_requirement": "Funded reserves, coverage rules and resolution capacity",
+    "consequence": "Protect covered claims only within actual institutional resources",
+    "status": "authored_draft",
+    "requires_all": [
+      "bank_deposit_accounts",
+      "risk_pools"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "bank_resolution_planning",
+    "name": "Bank Resolution Planning",
+    "foundations": "deposit_protection_pools,collateral_registration",
+    "mechanism": "Prepare procedures for loss allocation and continuity when an institution fails",
+    "operating_requirement": "Creditor records, legal authority and operational plans",
+    "consequence": "Wind down or restructure a failure without assuming all creditors are paid",
+    "status": "authored_draft",
+    "requires_all": [
+      "deposit_protection_pools",
+      "collateral_registration"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "public_bond_issuance",
+    "name": "Public Bond Issuance",
+    "foundations": "public_credit,debt_maturity_records,public_budget_accounts",
+    "mechanism": "Issue standardized claims on future public payments",
+    "operating_requirement": "Authorized borrowing, credible records and willing lenders",
+    "consequence": "Finance current activity while creating future debt service",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_credit",
+      "debt_maturity_records",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "bond_yield_comparison",
+    "name": "Bond Yield Comparison",
+    "foundations": "public_bond_issuance,logarithms",
+    "mechanism": "Compare price with a schedule of promised payments using consistent assumptions",
+    "operating_requirement": "Prices, maturities and calculation capacity",
+    "consequence": "Distinguish stated coupon from return implied by the purchase price",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_bond_issuance",
+      "logarithms"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "project_finance_accounts",
+    "name": "Project Finance Accounts",
+    "foundations": "cash_flow_statements,collateral_registration",
+    "mechanism": "Structure claims around a project's assets, cash flows and allocated risks",
+    "operating_requirement": "Contracts, forecasts and enforceable separation",
+    "consequence": "Fund large projects without assuming future revenues will materialize",
+    "status": "authored_draft",
+    "requires_all": [
+      "cash_flow_statements",
+      "collateral_registration"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "performance_bonds",
+    "name": "Performance Bonds",
+    "foundations": "procurement_specifications,risk_pools",
+    "mechanism": "A third party undertakes defined compensation if contracted performance fails",
+    "operating_requirement": "Underwriting, collateral and enforceable triggers",
+    "consequence": "Transfer specified performance risk at a real premium",
+    "status": "authored_draft",
+    "requires_all": [
+      "procurement_specifications",
+      "risk_pools"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "marine_cargo_insurance",
+    "name": "Marine Cargo Insurance",
+    "foundations": "risk_pools,commodity_quality_grading,coastal_watercraft",
+    "mechanism": "Pool specified voyage-loss risks against a premium",
+    "operating_requirement": "Cargo descriptions, route information and claims assessment",
+    "consequence": "Compensate covered losses while leaving exclusions and counterparty risk",
+    "status": "authored_draft",
+    "requires_all": [
+      "risk_pools",
+      "commodity_quality_grading",
+      "coastal_watercraft"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "actuarial_loss_tables",
+    "name": "Actuarial Loss Tables",
+    "foundations": "statistical_sampling,probability_theory,risk_pools",
+    "mechanism": "Estimate loss distributions from classified past exposures",
+    "operating_requirement": "Comparable data, statistical skill and periodic updates",
+    "consequence": "Price reserves with uncertainty rather than assuming the past repeats exactly",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_sampling",
+      "probability_theory",
+      "risk_pools"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "reinsurance_treaties",
+    "name": "Reinsurance Treaties",
+    "foundations": "actuarial_loss_tables,witnessed_obligations",
+    "mechanism": "Transfer an agreed portion of pooled insurance exposure to another risk carrier",
+    "operating_requirement": "Contracts, capacity and counterparty evaluation",
+    "consequence": "Spread concentrations while adding dependence on another institution",
+    "status": "authored_draft",
+    "requires_all": [
+      "actuarial_loss_tables",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "mutual_credit_associations",
+    "name": "Mutual Credit Associations",
+    "foundations": "merchant_credit_networks,partnership_capital_accounts",
+    "mechanism": "Members jointly govern credit provision and share defined financial responsibilities",
+    "operating_requirement": "Membership rules, accounts and funded lending capacity",
+    "consequence": "Provide an alternative ownership form for credit operations",
+    "status": "authored_draft",
+    "requires_all": [
+      "merchant_credit_networks",
+      "partnership_capital_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "cooperative_purchasing",
+    "name": "Cooperative Purchasing",
+    "foundations": "partnership_capital_accounts,commodity_quality_grading",
+    "mechanism": "Combine member demand into negotiated purchases with agreed distribution",
+    "operating_requirement": "Member commitments, storage and purchasing staff",
+    "consequence": "Reduce some transaction costs while requiring coordination",
+    "status": "authored_draft",
+    "requires_all": [
+      "partnership_capital_accounts",
+      "commodity_quality_grading"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "supply_chain_credit",
+    "name": "Supply-Chain Credit",
+    "foundations": "warehouse_receipts,merchant_credit_networks",
+    "mechanism": "Advance resources against verified orders, deliveries or receivables",
+    "operating_requirement": "Evidence of trade performance and enforceable claims",
+    "consequence": "Fund working capital while transmitting buyer and supplier failures",
+    "status": "authored_draft",
+    "requires_all": [
+      "warehouse_receipts",
+      "merchant_credit_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "invoice_verification",
+    "name": "Invoice Verification",
+    "foundations": "procurement_acceptance_checks,double_entry_bookkeeping",
+    "mechanism": "Match billed quantities and terms against ordered and received goods",
+    "operating_requirement": "Purchase records, receiving evidence and independent checks",
+    "consequence": "Reject duplicate or unsupported claims before payment",
+    "status": "authored_draft",
+    "requires_all": [
+      "procurement_acceptance_checks",
+      "double_entry_bookkeeping"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "payment_fraud_detection",
+    "name": "Payment Fraud Detection",
+    "foundations": "invoice_verification,statistical_inference",
+    "mechanism": "Flag unusual payment patterns for further investigation",
+    "operating_requirement": "Transaction records, calibrated rules and reviewers",
+    "consequence": "Identify some suspicious activity while producing false alarms",
+    "status": "authored_draft",
+    "requires_all": [
+      "invoice_verification",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "electronic_payment_authentication",
+    "name": "Electronic Payment Authentication",
+    "foundations": "store_forward_archives,commercial_endorsement",
+    "mechanism": "Authenticate a payment instruction and bind it to a specified transaction",
+    "operating_requirement": "Managed credentials, secure systems and verification",
+    "consequence": "Reduce unauthorized instruction while retaining endpoint and credential risk",
+    "status": "authored_draft",
+    "requires_all": [
+      "store_forward_archives",
+      "commercial_endorsement"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "settlement_finality_rules",
+    "name": "Settlement Finality Rules",
+    "foundations": "payment_clearing_houses,written_legal_codes",
+    "mechanism": "Specify when a settled transfer can no longer be routinely revoked",
+    "operating_requirement": "Compatible legal rules and reliable settlement records",
+    "consequence": "Clarify residual obligations after a payment is completed",
+    "status": "authored_draft",
+    "requires_all": [
+      "payment_clearing_houses",
+      "written_legal_codes"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "programmable_settlement_agreements",
+    "name": "Programmable Settlement Agreements",
+    "foundations": "electronic_payment_authentication,stored_program_control,settlement_finality_rules",
+    "mechanism": "Execute recorded payment conditions through a reviewed program",
+    "operating_requirement": "Funded balances, tested code and trustworthy condition inputs",
+    "consequence": "Automate defined transfers without making external facts self-verifying",
+    "status": "authored_draft",
+    "requires_all": [
+      "electronic_payment_authentication",
+      "stored_program_control",
+      "settlement_finality_rules"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "resource_circularity_accounts",
+    "name": "Resource Circularity Accounts",
+    "foundations": "inventory_cost_accounts,closed_habitat_material_accounts",
+    "mechanism": "Track material recovery, contamination, losses and replacement inputs",
+    "operating_requirement": "Material identification, measurements and reconciled flow records",
+    "consequence": "Distinguish genuine recovery from repeatedly counting the same stock",
+    "status": "authored_draft",
+    "requires_all": [
+      "inventory_cost_accounts",
+      "closed_habitat_material_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "extended_producer_obligations",
+    "name": "Extended Producer Obligations",
+    "foundations": "resource_circularity_accounts,written_legal_codes",
+    "mechanism": "Assign a defined share of end-of-use collection or treatment costs to producers",
+    "operating_requirement": "Traceable products, collection systems and enforceable rules",
+    "consequence": "Fund specified recovery duties while retaining actual processing costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "resource_circularity_accounts",
+      "written_legal_codes"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "long_duration_liability_funds",
+    "name": "Long-Duration Liability Funds",
+    "foundations": "future_obligation_disclosure,actuarial_loss_tables",
+    "mechanism": "Reserve assets against obligations extending beyond the original project's active life",
+    "operating_requirement": "Durable custody, revised estimates and oversight",
+    "consequence": "Support later payments while remaining vulnerable to misestimation and losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "future_obligation_disclosure",
+      "actuarial_loss_tables"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "interplanetary_clearing",
+    "name": "Interplanetary Clearing",
+    "foundations": "delay_tolerant_space_networks,payment_clearing_houses",
+    "mechanism": "Reconcile distant claims while explicitly retaining unsettled balances during communication delay",
+    "operating_requirement": "Compatible ledgers, reserves and delayed-message procedures",
+    "consequence": "Enable delayed settlement without instantaneous cross-world liquidity",
+    "status": "authored_draft",
+    "requires_all": [
+      "delay_tolerant_space_networks",
+      "payment_clearing_houses"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "settlement_dispute_escrow",
+    "name": "Settlement Dispute Escrow",
+    "foundations": "arbitration_procedures,settlement_finality_rules",
+    "mechanism": "Hold an agreed asset until defined release or dispute conditions are resolved",
+    "operating_requirement": "Independent custody and enforceable release terms",
+    "consequence": "Reduce unilateral nonperformance while immobilizing resources",
+    "status": "authored_draft",
+    "requires_all": [
+      "arbitration_procedures",
+      "settlement_finality_rules"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "automated_market_oversight",
+    "name": "Automated Market Oversight",
+    "foundations": "payment_fraud_detection,algorithmic_decision_review",
+    "mechanism": "Use monitored rules to flag market conduct and route decisions to accountable review",
+    "operating_requirement": "Data access, oversight staff and tested detection systems",
+    "consequence": "Increase review coverage without equating anomalies with proven misconduct",
+    "status": "authored_draft",
+    "requires_all": [
+      "payment_fraud_detection",
+      "algorithmic_decision_review"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "contingent_supply_contracts",
+    "name": "Contingent Supply Contracts",
+    "foundations": "procurement_specifications,performance_bonds",
+    "mechanism": "Specify deliveries that activate under observable future conditions",
+    "operating_requirement": "Reserved capacity, verified triggers and contract administration",
+    "consequence": "Prepare for uncertain demand while paying for availability",
+    "status": "authored_draft",
+    "requires_all": [
+      "procurement_specifications",
+      "performance_bonds"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "critical_supplier_exposure_maps",
+    "name": "Critical-Supplier Exposure Maps",
+    "foundations": "supply_chain_credit,regional_maps",
+    "mechanism": "Trace which obligations and operations depend on shared upstream suppliers",
+    "operating_requirement": "Verified supplier records and dependency analysis",
+    "consequence": "Reveal common failure points hidden by separate immediate vendors",
+    "status": "authored_draft",
+    "requires_all": [
+      "supply_chain_credit",
+      "regional_maps"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "trade_disruption_reserves",
+    "name": "Trade-Disruption Reserves",
+    "foundations": "critical_supplier_exposure_maps,liquidity_reserve_planning",
+    "mechanism": "Hold goods or liquid resources against specified interruption scenarios",
+    "operating_requirement": "Storage, capital and periodic stock review",
+    "consequence": "Buffer a finite disruption at ongoing holding cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "critical_supplier_exposure_maps",
+      "liquidity_reserve_planning"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D17",
+    "id": "cross_currency_risk_accounts",
+    "name": "Cross-Currency Risk Accounts",
+    "foundations": "bills_of_exchange,probability_theory",
+    "mechanism": "Record mismatches between the units in which resources and obligations are valued",
+    "operating_requirement": "Exchange observations, position records and scenario analysis",
+    "consequence": "Expose conversion risk without assuming a stable exchange rate",
+    "status": "authored_draft",
+    "requires_all": [
+      "bills_of_exchange",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "demonstration_teaching",
+    "name": "Demonstration Teaching",
+    "foundations": "oral_epics,hafted_tools",
+    "mechanism": "Show a task while identifying its important actions and failure points",
+    "operating_requirement": "A competent practitioner, learners and real practice materials",
+    "consequence": "Transfer observable technique through guided demonstration",
+    "status": "authored_draft",
+    "requires_all": [
+      "oral_epics",
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "guided_practice_cycles",
+    "name": "Guided Practice Cycles",
+    "foundations": "demonstration_teaching",
+    "mechanism": "Alternate learner attempts with specific corrective feedback",
+    "operating_requirement": "Instructor time, safe practice conditions and consumable supplies",
+    "consequence": "Build task proficiency through repeated supervised performance",
+    "status": "authored_draft",
+    "requires_all": [
+      "demonstration_teaching"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "skill_progression_records",
+    "name": "Skill Progression Records",
+    "foundations": "guided_practice_cycles,tallies",
+    "mechanism": "Record which tasks a learner can perform independently",
+    "operating_requirement": "Consistent assessments and maintained learner records",
+    "consequence": "Assign work using demonstrated competence rather than elapsed time alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "guided_practice_cycles",
+      "tallies"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "peer_instruction_groups",
+    "name": "Peer Instruction Groups",
+    "foundations": "guided_practice_cycles,household_councils",
+    "mechanism": "Learners explain and compare methods while a group checks results",
+    "operating_requirement": "Shared tasks, participation and correction of persistent errors",
+    "consequence": "Spread instructional effort without assuming every explanation is correct",
+    "status": "authored_draft",
+    "requires_all": [
+      "guided_practice_cycles",
+      "household_councils"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "craft_demonstration_collections",
+    "name": "Craft Demonstration Collections",
+    "foundations": "apprentice_contracts,formal_archives",
+    "mechanism": "Retain representative work and its production notes for teaching",
+    "operating_requirement": "Curated examples, space and competent instructors",
+    "consequence": "Make successful and failed methods available to later learners",
+    "status": "authored_draft",
+    "requires_all": [
+      "apprentice_contracts",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "journeyman_skill_trials",
+    "name": "Journeyman Skill Trials",
+    "foundations": "apprentice_contracts,skill_progression_records",
+    "mechanism": "Assess independent performance of a declared craft task",
+    "operating_requirement": "Materials, assessors and an explicit task standard",
+    "consequence": "Support a portable competence claim while leaving unfamiliar tasks unproven",
+    "status": "authored_draft",
+    "requires_all": [
+      "apprentice_contracts",
+      "skill_progression_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "traveling_master_instruction",
+    "name": "Traveling Master Instruction",
+    "foundations": "apprentice_contracts,route_memory",
+    "mechanism": "Bring a skilled practitioner to teach tasks in another community",
+    "operating_requirement": "Travel provisions, compensation, host capacity and practice supplies",
+    "consequence": "Transfer know-how through a temporary physical visit",
+    "status": "authored_draft",
+    "requires_all": [
+      "apprentice_contracts",
+      "route_memory"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "technical_translation_workshops",
+    "name": "Technical Translation Workshops",
+    "foundations": "phonetic_notation,craft_demonstration_collections",
+    "mechanism": "Translate specialized instructions while checking terms against practical demonstrations",
+    "operating_requirement": "Multilingual specialists and subject experts",
+    "consequence": "Reduce misunderstanding across language communities",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation",
+      "craft_demonstration_collections"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "shared_technical_lexicons",
+    "name": "Shared Technical Lexicons",
+    "foundations": "technical_translation_workshops,formal_archives",
+    "mechanism": "Maintain agreed mappings for technical terms and quantities",
+    "operating_requirement": "Editors, practitioners and versioned records",
+    "consequence": "Make cross-community instruction more interpretable",
+    "status": "authored_draft",
+    "requires_all": [
+      "technical_translation_workshops",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "illustrated_instruction_manuals",
+    "name": "Illustrated Instruction Manuals",
+    "foundations": "printing_process,craft_demonstration_collections",
+    "mechanism": "Combine visual sequences with explanations of a task",
+    "operating_requirement": "Illustrators, competent authors and printing supplies",
+    "consequence": "Distribute repeatable instruction while practice remains necessary",
+    "status": "authored_draft",
+    "requires_all": [
+      "printing_process",
+      "craft_demonstration_collections"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "worked_example_teaching",
+    "name": "Worked-Example Teaching",
+    "foundations": "public_schools,phonetic_notation",
+    "mechanism": "Expose intermediate reasoning and decisions in a solved problem",
+    "operating_requirement": "Prepared examples and an instructor who can answer questions",
+    "consequence": "Help learners compare a procedure with its result",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_schools",
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "question_driven_tutorials",
+    "name": "Question-Driven Tutorials",
+    "foundations": "public_schools,peer_instruction_groups",
+    "mechanism": "Use questions to reveal assumptions and guide a learner's reasoning",
+    "operating_requirement": "Small-group instructor time and suitable problems",
+    "consequence": "Identify misconceptions that rote reproduction can conceal",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_schools",
+      "peer_instruction_groups"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "curriculum_sequence_design",
+    "name": "Curriculum Sequence Design",
+    "foundations": "skill_progression_records,public_schools",
+    "mechanism": "Order instruction around dependencies between competences",
+    "operating_requirement": "Subject expertise and evidence about learner performance",
+    "consequence": "Reduce instruction that presumes skills not yet learned",
+    "status": "authored_draft",
+    "requires_all": [
+      "skill_progression_records",
+      "public_schools"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "practical_assessment_rubrics",
+    "name": "Practical Assessment Rubrics",
+    "foundations": "skill_progression_records,workshop_standards",
+    "mechanism": "Describe observable criteria for judging a practical performance",
+    "operating_requirement": "Agreed standards and assessor calibration",
+    "consequence": "Make assessment more consistent without exhausting every aspect of expertise",
+    "status": "authored_draft",
+    "requires_all": [
+      "skill_progression_records",
+      "workshop_standards"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "instructor_training",
+    "name": "Instructor Training",
+    "foundations": "guided_practice_cycles,practical_assessment_rubrics",
+    "mechanism": "Teach practitioners how to demonstrate, observe and give useful feedback",
+    "operating_requirement": "Mentors, classroom practice and supervised teaching",
+    "consequence": "Increase instructional capacity at the cost of expert time",
+    "status": "authored_draft",
+    "requires_all": [
+      "guided_practice_cycles",
+      "practical_assessment_rubrics"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "teacher_observation_review",
+    "name": "Teacher Observation Review",
+    "foundations": "instructor_training,practical_assessment_rubrics",
+    "mechanism": "Observe teaching and compare feedback against learner performance",
+    "operating_requirement": "Peer reviewers and access to actual instruction",
+    "consequence": "Improve teaching practice while avoiding a guarantee from credentials alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "instructor_training",
+      "practical_assessment_rubrics"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "accessible_learning_materials",
+    "name": "Accessible Learning Materials",
+    "foundations": "illustrated_instruction_manuals,instructor_training",
+    "mechanism": "Provide alternative representations and access methods for different learner needs",
+    "operating_requirement": "Adaptation expertise, suitable media and learner feedback",
+    "consequence": "Expand practical access without requiring a single presentation format",
+    "status": "authored_draft",
+    "requires_all": [
+      "illustrated_instruction_manuals",
+      "instructor_training"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "adult_literacy_programs",
+    "name": "Adult Literacy Programs",
+    "foundations": "work_rest_limits",
+    "mechanism": "Organize instruction around adult learners' available time and practical reading needs",
+    "operating_requirement": "Teachers, materials and time away from productive duties",
+    "consequence": "Build literacy while explicitly consuming teaching and learner time",
+    "status": "authored_draft",
+    "requires_all": [
+      "work_rest_limits"
+    ],
+    "requires_any": [
+      [
+        "public_schools",
+        "mobile_instruction_teams"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D18",
+    "id": "mobile_instruction_teams",
+    "name": "Mobile Instruction Teams",
+    "foundations": "instructor_training,route_memory",
+    "mechanism": "Move educators and teaching supplies between settlements",
+    "operating_requirement": "Travel, scheduled hosts and portable materials",
+    "consequence": "Reach dispersed learners at a cost in instructor travel time",
+    "status": "authored_draft",
+    "requires_all": [
+      "instructor_training",
+      "route_memory"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "technical_institutes",
+    "name": "Technical Institutes",
+    "foundations": "instructor_training,illustrated_instruction_manuals,workshop_standards",
+    "mechanism": "Maintain organized practical instruction around several related trades",
+    "operating_requirement": "Workshops, staff, students and recurring supplies",
+    "consequence": "Train multiple technical competences without granting instant mastery",
+    "status": "authored_draft",
+    "requires_all": [
+      "instructor_training",
+      "illustrated_instruction_manuals",
+      "workshop_standards"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "research_university_organization",
+    "name": "Research University Organization",
+    "foundations": "formal_archives,experimental_controls",
+    "mechanism": "Combine advanced instruction with sustained original investigation",
+    "operating_requirement": "Scholars, students, facilities and durable funding",
+    "consequence": "Reproduce research capacity across cohorts while competing for resources",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_archives",
+      "experimental_controls"
+    ],
+    "requires_any": [
+      [
+        "public_schools",
+        "technical_institutes"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D18",
+    "id": "laboratory_notebooks",
+    "name": "Laboratory Notebooks",
+    "foundations": "formal_archives,experimental_controls",
+    "mechanism": "Record methods, observations, deviations and dates while work occurs",
+    "operating_requirement": "Durable media and disciplined investigators",
+    "consequence": "Permit reconstruction of what was actually attempted",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_archives",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "instrument_training_protocols",
+    "name": "Instrument Training Protocols",
+    "foundations": "laboratory_notebooks,dimensional_metrology",
+    "mechanism": "Teach setup, calibration and failure recognition for an instrument",
+    "operating_requirement": "Qualified instructors, instruments and reference materials",
+    "consequence": "Reduce avoidable measurement mistakes while consuming equipment time",
+    "status": "authored_draft",
+    "requires_all": [
+      "laboratory_notebooks",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "experimental_protocol_publication",
+    "name": "Experimental Protocol Publication",
+    "foundations": "laboratory_notebooks,printing_process",
+    "mechanism": "Publish enough method detail for another group to attempt reproduction",
+    "operating_requirement": "Authors, editors and distributable records",
+    "consequence": "Separate a reported result from an executable method",
+    "status": "authored_draft",
+    "requires_all": [
+      "laboratory_notebooks",
+      "printing_process"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "independent_replication_networks",
+    "name": "Independent Replication Networks",
+    "foundations": "experimental_protocol_publication",
+    "mechanism": "Different groups repeat a method with separately obtained evidence",
+    "operating_requirement": "Participating laboratories, communication and independent resources",
+    "consequence": "Expose results dependent on one local setup",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_protocol_publication"
+    ],
+    "requires_any": [
+      [
+        "traveling_master_instruction",
+        "scholarly_correspondence"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D18",
+    "id": "scholarly_correspondence",
+    "name": "Scholarly Correspondence",
+    "foundations": "phonetic_notation,route_memory",
+    "mechanism": "Maintain an exchange of questions, results and criticism between scholars",
+    "operating_requirement": "Messengers, writing materials and time to respond",
+    "consequence": "Spread partial findings with real communication delay",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation",
+      "route_memory"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "peer_review_procedures",
+    "name": "Peer Review Procedures",
+    "foundations": "scholarly_correspondence,experimental_protocol_publication",
+    "mechanism": "Qualified readers examine methods and claims before or after dissemination",
+    "operating_requirement": "Reviewers, access to evidence and declared review scope",
+    "consequence": "Detect some weaknesses without certifying that every accepted claim is true",
+    "status": "authored_draft",
+    "requires_all": [
+      "scholarly_correspondence",
+      "experimental_protocol_publication"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "research_priority_registers",
+    "name": "Research Priority Registers",
+    "foundations": "formal_archives,scholarly_correspondence",
+    "mechanism": "Record when and by whom a claim or result was submitted",
+    "operating_requirement": "Authenticated records and accessible rules",
+    "consequence": "Support attribution disputes without determining scientific validity",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_archives",
+      "scholarly_correspondence"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "negative_result_archives",
+    "name": "Negative-Result Archives",
+    "foundations": "laboratory_notebooks,experimental_protocol_publication",
+    "mechanism": "Preserve unsuccessful attempts and the conditions under which they failed",
+    "operating_requirement": "Curators, reporting incentives and contextual detail",
+    "consequence": "Reduce repeated avoidable dead ends without treating all failures as universal",
+    "status": "authored_draft",
+    "requires_all": [
+      "laboratory_notebooks",
+      "experimental_protocol_publication"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "research_data_catalogs",
+    "name": "Research Data Catalogs",
+    "foundations": "formal_archives,shared_technical_lexicons",
+    "mechanism": "Describe datasets by origin, method, units and access conditions",
+    "operating_requirement": "Curators and maintained metadata",
+    "consequence": "Make evidence discoverable and interpretable beyond its creators",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_archives",
+      "shared_technical_lexicons"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "data_provenance_tracking",
+    "name": "Data Provenance Tracking",
+    "foundations": "research_data_catalogs,material_accounting",
+    "mechanism": "Track transformations from source observations to derived results",
+    "operating_requirement": "Versioned records and responsible analysts",
+    "consequence": "Expose unsupported alterations and incompatible data lineage",
+    "status": "authored_draft",
+    "requires_all": [
+      "research_data_catalogs",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "statistical_analysis_plans",
+    "name": "Statistical Analysis Plans",
+    "foundations": "statistical_inference,experimental_protocol_publication",
+    "mechanism": "State intended comparisons and analysis choices before examining final outcomes",
+    "operating_requirement": "Research design, recorded plans and transparent deviations",
+    "consequence": "Reduce some opportunistic analysis while permitting documented exploration",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_inference",
+      "experimental_protocol_publication"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "research_ethics_review",
+    "name": "Research Ethics Review",
+    "foundations": "peer_review_procedures,procedural_notice",
+    "mechanism": "Review proposed research for harms, consent and justified burdens",
+    "operating_requirement": "Qualified review, affected-party input and enforceable conditions",
+    "consequence": "Constrain research practices under adopted standards",
+    "status": "authored_draft",
+    "requires_all": [
+      "peer_review_procedures",
+      "procedural_notice"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "multidisciplinary_laboratories",
+    "name": "Multidisciplinary Laboratories",
+    "foundations": "research_university_organization,shared_technical_lexicons",
+    "mechanism": "Coordinate specialists around questions crossing disciplinary methods",
+    "operating_requirement": "Complementary staff, facilities and shared protocols",
+    "consequence": "Combine capabilities while adding translation and coordination costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "research_university_organization",
+      "shared_technical_lexicons"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "research_equipment_sharing",
+    "name": "Research Equipment Sharing",
+    "foundations": "instrument_training_protocols,material_accounting",
+    "mechanism": "Schedule scarce instruments across groups with maintenance responsibility",
+    "operating_requirement": "Booking records, trained users and upkeep supplies",
+    "consequence": "Increase utilization without multiplying instrument capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "instrument_training_protocols",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "research_procurement_offices",
+    "name": "Research Procurement Offices",
+    "foundations": "procurement_specifications,research_equipment_sharing",
+    "mechanism": "Translate research needs into funded and checked acquisitions",
+    "operating_requirement": "Technical buyers, budgets and acceptance testing",
+    "consequence": "Obtain suitable apparatus while tracking cost and delivery",
+    "status": "authored_draft",
+    "requires_all": [
+      "procurement_specifications",
+      "research_equipment_sharing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "laboratory_quality_systems",
+    "name": "Laboratory Quality Systems",
+    "foundations": "instrument_training_protocols,data_provenance_tracking",
+    "mechanism": "Control documented methods, calibration status and corrective actions",
+    "operating_requirement": "Quality staff, audits and maintained records",
+    "consequence": "Improve traceability without replacing substantive scientific judgment",
+    "status": "authored_draft",
+    "requires_all": [
+      "instrument_training_protocols",
+      "data_provenance_tracking"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "professional_certification",
+    "name": "Professional Certification",
+    "foundations": "practical_assessment_rubrics",
+    "mechanism": "Issue a recognized competence claim with defined scope and renewal rules",
+    "operating_requirement": "Assessors, registries and credible standards",
+    "consequence": "Help match workers to tasks while leaving untested competences uncertain",
+    "status": "authored_draft",
+    "requires_all": [
+      "practical_assessment_rubrics"
+    ],
+    "requires_any": [
+      [
+        "shared_technical_lexicons",
+        "craft_guilds"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D18",
+    "id": "credential_reciprocity",
+    "name": "Credential Reciprocity",
+    "foundations": "professional_certification,intergovernmental_compacts",
+    "mechanism": "Compare and recognize specified qualifications across institutions",
+    "operating_requirement": "Agreed standards, verification and bridge training where needed",
+    "consequence": "Reduce repeated assessment without treating unlike credentials as identical",
+    "status": "authored_draft",
+    "requires_all": [
+      "professional_certification",
+      "intergovernmental_compacts"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "occupational_hazard_identification",
+    "name": "Occupational Hazard Identification",
+    "foundations": "work_motion_studies,case_records",
+    "mechanism": "Observe tasks and incidents to identify sources of workplace harm",
+    "operating_requirement": "Worker participation, inspections and retained incident records",
+    "consequence": "Reveal preventable exposures before assigning controls",
+    "status": "authored_draft",
+    "requires_all": [
+      "work_motion_studies",
+      "case_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "occupational_safety_training",
+    "name": "Occupational Safety Training",
+    "foundations": "occupational_hazard_identification,instructor_training",
+    "mechanism": "Practice task-specific protective procedures and response actions",
+    "operating_requirement": "Qualified trainers, practice time and necessary protective equipment",
+    "consequence": "Reduce some preventable errors without removing physical hazards",
+    "status": "authored_draft",
+    "requires_all": [
+      "occupational_hazard_identification",
+      "instructor_training"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "incident_learning_reviews",
+    "name": "Incident Learning Reviews",
+    "foundations": "occupational_hazard_identification,laboratory_notebooks",
+    "mechanism": "Reconstruct an incident and examine interacting conditions rather than only its final action",
+    "operating_requirement": "Evidence access, participants and protected review time",
+    "consequence": "Identify corrective changes while preserving accountable fact finding",
+    "status": "authored_draft",
+    "requires_all": [
+      "occupational_hazard_identification",
+      "laboratory_notebooks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "worker_stop_work_protocols",
+    "name": "Worker Stop-Work Protocols",
+    "foundations": "occupational_safety_training,official_mandate_registers",
+    "mechanism": "Give identified workers authority to halt a task under specified danger conditions",
+    "operating_requirement": "Recognized authority, reporting and restart review",
+    "consequence": "Interrupt unsafe work while creating a bounded production cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "occupational_safety_training",
+      "official_mandate_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "fatigue_risk_scheduling",
+    "name": "Fatigue-Risk Scheduling",
+    "foundations": "work_rest_limits,statistical_sampling",
+    "mechanism": "Plan duties using measured workload, recovery and error patterns",
+    "operating_requirement": "Reliable rosters, worker feedback and scheduling capacity",
+    "consequence": "Reduce fatigue exposure while limiting available work hours",
+    "status": "authored_draft",
+    "requires_all": [
+      "work_rest_limits",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "cross_training_rosters",
+    "name": "Cross-Training Rosters",
+    "foundations": "skill_progression_records,labor_rotations",
+    "mechanism": "Maintain more than one qualified worker for critical tasks",
+    "operating_requirement": "Training time, instructors and realistic practice",
+    "consequence": "Reduce dependence on a single specialist at the cost of spare capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "skill_progression_records",
+      "labor_rotations"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "succession_mentoring",
+    "name": "Succession Mentoring",
+    "foundations": "cross_training_rosters,public_office_handover",
+    "mechanism": "Pair successors with experienced practitioners before a role becomes vacant",
+    "operating_requirement": "Overlapping appointments and protected teaching time",
+    "consequence": "Transfer tacit knowledge that records alone may omit",
+    "status": "authored_draft",
+    "requires_all": [
+      "cross_training_rosters",
+      "public_office_handover"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "team_briefing_protocols",
+    "name": "Team Briefing Protocols",
+    "foundations": "crew_handoffs,shared_technical_lexicons",
+    "mechanism": "Review objective, responsibilities and known constraints before coordinated work",
+    "operating_requirement": "Team time and current operational information",
+    "consequence": "Reduce mismatched assumptions without guaranteeing execution",
+    "status": "authored_draft",
+    "requires_all": [
+      "crew_handoffs",
+      "shared_technical_lexicons"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "closed_loop_team_communication",
+    "name": "Closed-Loop Team Communication",
+    "foundations": "team_briefing_protocols,agreed_signal_codes",
+    "mechanism": "Repeat and acknowledge critical instructions to confirm their interpretation",
+    "operating_requirement": "Trained teams and functioning communication",
+    "consequence": "Detect some misunderstood instructions before action",
+    "status": "authored_draft",
+    "requires_all": [
+      "team_briefing_protocols",
+      "agreed_signal_codes"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "organizational_memory_reviews",
+    "name": "Organizational Memory Reviews",
+    "foundations": "negative_result_archives,succession_mentoring",
+    "mechanism": "Periodically identify obsolete procedures and undocumented critical knowledge",
+    "operating_requirement": "Experienced staff and access to past decisions",
+    "consequence": "Keep retained knowledge usable instead of merely accumulating records",
+    "status": "authored_draft",
+    "requires_all": [
+      "negative_result_archives",
+      "succession_mentoring"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "distance_education",
+    "name": "Distance Education",
+    "foundations": "illustrated_instruction_manuals",
+    "mechanism": "Separate teaching and learning locations while returning work for feedback",
+    "operating_requirement": "Delivery channels, materials and instructor response capacity",
+    "consequence": "Extend access with delay and reduced direct supervision",
+    "status": "authored_draft",
+    "requires_all": [
+      "illustrated_instruction_manuals"
+    ],
+    "requires_any": [
+      [
+        "scholarly_correspondence",
+        "networked_learning_repositories"
+      ]
+    ],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+    "branching_note": "Keep the shared foundations; require one member of each alternative group. Acquired institutional knowledge does not itself enact a policy or create staff, legitimacy, funds or enforcement."
+  },
+  {
+    "field": "D18",
+    "id": "broadcast_instruction",
+    "name": "Broadcast Instruction",
+    "foundations": "distance_education,amplitude_modulation",
+    "mechanism": "Transmit the same prepared lesson to many receivers",
+    "operating_requirement": "Operating transmitter, receivers and scheduled teaching",
+    "consequence": "Spread common instruction while feedback needs another channel",
+    "status": "authored_draft",
+    "requires_all": [
+      "distance_education",
+      "amplitude_modulation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "networked_learning_repositories",
+    "name": "Networked Learning Repositories",
+    "foundations": "research_data_catalogs,store_forward_archives",
+    "mechanism": "Distribute versioned teaching resources through connected storage",
+    "operating_requirement": "Servers, actual links, curation and user access",
+    "consequence": "Share materials when communication and local power are available",
+    "status": "authored_draft",
+    "requires_all": [
+      "research_data_catalogs",
+      "store_forward_archives"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "interactive_training_simulators",
+    "name": "Interactive Training Simulators",
+    "foundations": "stored_program_control,practical_assessment_rubrics",
+    "mechanism": "Model selected task responses so learners can rehearse without the full real hazard",
+    "operating_requirement": "Validated models, interfaces and instructor oversight",
+    "consequence": "Provide bounded practice that transfers only where the model is adequate",
+    "status": "authored_draft",
+    "requires_all": [
+      "stored_program_control",
+      "practical_assessment_rubrics"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "remote_laboratory_instruction",
+    "name": "Remote Laboratory Instruction",
+    "foundations": "networked_learning_repositories,research_equipment_sharing",
+    "mechanism": "Let distant learners request operations on real shared apparatus",
+    "operating_requirement": "Operating instruments, network links, scheduling and local supervision",
+    "consequence": "Expose learners to real measurements while retaining finite instrument capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "networked_learning_repositories",
+      "research_equipment_sharing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "continuous_technical_retraining",
+    "name": "Continuous Technical Retraining",
+    "foundations": "professional_certification,curriculum_sequence_design",
+    "mechanism": "Reassess competence and teach changed methods during a worker's career",
+    "operating_requirement": "Updated standards, instructors and time away from work",
+    "consequence": "Maintain relevant skills instead of treating an old credential as permanent proficiency",
+    "status": "authored_draft",
+    "requires_all": [
+      "professional_certification",
+      "curriculum_sequence_design"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "human_machine_team_training",
+    "name": "Human-Machine Team Training",
+    "foundations": "interactive_training_simulators,machine_action_accountability",
+    "mechanism": "Practice oversight, handoffs and recovery when people work with automated systems",
+    "operating_requirement": "Known automation limits, realistic scenarios and responsible operators",
+    "consequence": "Improve coordination without assuming automation is reliable in every setting",
+    "status": "authored_draft",
+    "requires_all": [
+      "interactive_training_simulators",
+      "machine_action_accountability"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "automated_experimental_facilities",
+    "name": "Automated Experimental Facilities",
+    "foundations": "stored_program_control,laboratory_quality_systems",
+    "mechanism": "Execute bounded experimental sequences with logged control of apparatus",
+    "operating_requirement": "Robotic equipment, supplies, maintenance and reviewed experiment plans",
+    "consequence": "Increase repeatable throughput while retaining material and validation limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "stored_program_control",
+      "laboratory_quality_systems"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "remote_research_supervision",
+    "name": "Remote Research Supervision",
+    "foundations": "automated_experimental_facilities,delay_tolerant_space_networks",
+    "mechanism": "Delegate bounded experiments and review results after delayed communication",
+    "operating_requirement": "Local safeguards, durable logs and explicit delegation limits",
+    "consequence": "Continue selected research during delay without removing local failure constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "automated_experimental_facilities",
+      "delay_tolerant_space_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "intergenerational_mission_education",
+    "name": "Intergenerational Mission Education",
+    "foundations": "closed_habitat_material_accounts,continuous_technical_retraining,succession_mentoring",
+    "mechanism": "Teach essential operating and civic competences across successive habitat cohorts",
+    "operating_requirement": "Population, educators, records and working practice facilities",
+    "consequence": "Maintain necessary skills over generations subject to demographic and resource limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "closed_habitat_material_accounts",
+      "continuous_technical_retraining",
+      "succession_mentoring"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  },
+  {
+    "field": "D18",
+    "id": "knowledge_recovery_drills",
+    "name": "Knowledge Recovery Drills",
+    "foundations": "organizational_memory_reviews,independent_replication_networks",
+    "mechanism": "Reconstruct critical methods from retained records after simulated loss of experts or systems",
+    "operating_requirement": "Archived instructions, replacement practitioners and practice supplies",
+    "consequence": "Expose where nominally preserved knowledge cannot be put back into operation",
+    "status": "authored_draft",
+    "requires_all": [
+      "organizational_memory_reviews",
+      "independent_replication_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+  }
+]

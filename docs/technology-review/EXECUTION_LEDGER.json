@@ -99,11 +99,11 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Diagnostic session 52497 confirmed live during the fastener-art batch. Loaded e1278e0 with 476 discoveries and schema 10, before later production changes. Target 91250 days (250 years), 14400-second wall cap; artifacts/technology-pacing/catalog-476-250-profile.json and .log. Poll the same handle; inspect target_reached before claiming completion. Session 57160 is terminal at 234.44 years and did not reach its 250-year target.",
-    "Expand complete cross-field historical branches with focused changed-system checks. Broad regression only at major milestones; long pacing diagnostics proceed independently of content work.",
-    "Expand distinct authored capabilities across remaining civilian, military and future fields; connect physical operating effects and reconvergent dependencies",
-    "Add remaining disadvantaged recovery routes and measure full-history natural pacing",
-    "Continue imagery and presentation after stable production identities; retain honest counts"
+    "Continue the full authored catalog across all 24 fields before further fine-grained production or artwork batches. Add explicit mechanisms, operating requirements, reconvergent alternatives and disadvantaged recovery contracts. Current 300 master drafts cover five fields; pending communications has 48 more identities.",
+    "Reconcile semantic duplicates and the existing 600 candidate atlas against the assembled master; never add candidate counts wholesale.",
+    "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
+    "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
+    "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
   ],
   "constraints": [
     "Preserve canonical changes and existing stable IDs",
@@ -119,5 +119,15 @@
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"
+  },
+  "master_authoring": {
+    "path": "docs/technology-review/master-catalog",
+    "target": 5000,
+    "implemented_baseline": 556,
+    "pending_communications": 48,
+    "authored_drafts": 300,
+    "distinct_ids_accounted": 904,
+    "remaining_to_author": 4096,
+    "complete": false
   }
 }

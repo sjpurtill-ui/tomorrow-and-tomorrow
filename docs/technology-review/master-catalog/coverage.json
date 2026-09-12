@@ -1,14 +1,23 @@
 {
   "verified_baseline_discoveries": 556,
   "pending_communications": 48,
-  "new_authored_drafts": 120,
-  "distinct_accounted_identities": 724,
-  "remaining_identities_to_author": 4276,
+  "new_authored_drafts": 300,
+  "distinct_accounted_identities": 904,
+  "remaining_identities_to_author": 4096,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
   "review_candidates_not_added_to_count": 600,
-  "branch_alternatives": 8,
+  "branch_alternatives": 20,
+  "draft_reachability_rounds": 9,
+  "draft_fields": {
+    "D05": 60,
+    "D16": 60,
+    "D17": 60,
+    "D18": 60,
+    "D23": 60
+  },
+  "duplicate_normalized_names": [],
   "complete": false,
-  "validation_scope": "Identity and AND/OR reachability only; not historical review, operating implementation or campaign pacing."
+  "validation_scope": "Identity and AND/OR reachability only; not semantic duplicate review, historical review, operating implementation or campaign pacing."
 }

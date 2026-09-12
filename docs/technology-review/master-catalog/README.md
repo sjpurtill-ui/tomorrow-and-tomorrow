@@ -21,6 +21,8 @@ Finish broad authored coverage and cross-field links first. Validate identity un
 
 ## Current authored coverage
 
-The first broad expansion contains **120 new draft identities**: 60 energy and 60 space-system entries. Alongside 556 verified baseline identities and 48 pending communications identities, this accounts for 724 distinct IDs; 4,276 remain to author. This is not a verified gameplay total. Eight explicit alternative prerequisite groups are included. Identity and AND/OR reachability checks find no missing parents or unreachable draft nodes against the stated baseline; historical and operating review remains pending.
+The master expansion contains **300 new draft identities**: 60 each in energy, space systems, governance, economic organization and learning. Alongside 556 implemented baseline identities and 48 pending communications identities, this accounts for 904 distinct IDs; 4,096 remain to author. The baseline's focused worktree checks do not establish full-campaign acceptance, canonical integration or native player verification.
 
-Read [Energy and Space Review](Energy%20and%20Space%20Review.md). Detailed records are in `space-and-energy.json`; `communications-pending.json` preserves the current unfinished communications definitions for cross-reference without labeling them verified.
+Twenty explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Similar meanings under different names still require human review; unique text is not proof of distinct mechanics.
+
+Read [Energy and Space Review](Energy%20and%20Space%20Review.md) and [Governance, Economy and Learning Review](Governance%20Economy%20and%20Learning%20Review.md). JSON records preserve the exact proposed relationships. `communications-pending.json` records unfinished communications definitions without labeling them verified. `implemented-baseline.json` freezes the 556-ID reference at commit `18b0cb7` so later live additions cannot silently inflate counts.
