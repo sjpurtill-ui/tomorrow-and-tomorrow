@@ -3551,7 +3551,7 @@
       "domain": "production",
       "id": "three_plate_lapping",
       "name": "Three-Plate Lapping",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/straightedge_scraping.png",
@@ -3559,7 +3559,7 @@
       "domain": "production",
       "id": "straightedge_scraping",
       "name": "Straightedge Scraping",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/machine_way_scraping.png",
@@ -3567,7 +3567,7 @@
       "domain": "production",
       "id": "machine_way_scraping",
       "name": "Machine-Way Scraping",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/lead_screw_cutting.png",
@@ -3575,7 +3575,7 @@
       "domain": "production",
       "id": "lead_screw_cutting",
       "name": "Lead-Screw Cutting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/split_feed_nuts.png",
@@ -3583,7 +3583,7 @@
       "domain": "production",
       "id": "split_feed_nuts",
       "name": "Split Feed Nuts",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/cross_slide_assembly.png",
@@ -3591,7 +3591,7 @@
       "domain": "production",
       "id": "cross_slide_assembly",
       "name": "Cross-Slide Assembly",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/four_jaw_chucks.png",
@@ -3599,7 +3599,7 @@
       "domain": "production",
       "id": "four_jaw_chucks",
       "name": "Four-Jaw Chucks",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/tailstock_fitting.png",
@@ -3607,7 +3607,7 @@
       "domain": "production",
       "id": "tailstock_fitting",
       "name": "Tailstock Fitting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/toolbit_heat_treatment.png",
@@ -3615,7 +3615,7 @@
       "domain": "production",
       "id": "toolbit_heat_treatment",
       "name": "Tool-Bit Heat Treatment",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/centre_lathe_assembly.png",
@@ -3623,7 +3623,7 @@
       "domain": "production",
       "id": "centre_lathe_assembly",
       "name": "Centre-Lathe Assembly",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/drill_bit_fluting.png",
@@ -3631,7 +3631,7 @@
       "domain": "production",
       "id": "drill_bit_fluting",
       "name": "Drill-Bit Fluting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/quill_feed_mechanisms.png",
@@ -3639,7 +3639,7 @@
       "domain": "production",
       "id": "quill_feed_mechanisms",
       "name": "Quill Feed Mechanisms",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/column_drilling_machines.png",
@@ -3647,7 +3647,7 @@
       "domain": "production",
       "id": "column_drilling_machines",
       "name": "Column Drilling Machines",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/milling_cutter_relief.png",
@@ -3655,7 +3655,7 @@
       "domain": "production",
       "id": "milling_cutter_relief",
       "name": "Milling Cutter Relief",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/milling_table_feeds.png",
@@ -3663,7 +3663,7 @@
       "domain": "production",
       "id": "milling_table_feeds",
       "name": "Milling Table Feeds",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/milling_spindle_heads.png",
@@ -3671,7 +3671,7 @@
       "domain": "production",
       "id": "milling_spindle_heads",
       "name": "Milling Spindle Heads",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/horizontal_milling_machines.png",
@@ -3679,7 +3679,7 @@
       "domain": "production",
       "id": "horizontal_milling_machines",
       "name": "Horizontal Milling Machines",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/worm_dividing_heads.png",
@@ -3687,7 +3687,7 @@
       "domain": "production",
       "id": "worm_dividing_heads",
       "name": "Worm Dividing Heads",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/drill_jig_bushings.png",
@@ -3695,7 +3695,7 @@
       "domain": "production",
       "id": "drill_jig_bushings",
       "name": "Drill Jig Bushings",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/drill_jig_layout.png",
@@ -3703,7 +3703,7 @@
       "domain": "production",
       "id": "drill_jig_layout",
       "name": "Drill Jig Layout",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/gauge_block_lapping.png",
@@ -3711,7 +3711,7 @@
       "domain": "production",
       "id": "gauge_block_lapping",
       "name": "Gauge-Block Lapping",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/bench_vise_screws.png",
@@ -3719,7 +3719,7 @@
       "domain": "production",
       "id": "bench_vise_screws",
       "name": "Bench-Vise Screws",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/basic_machine_shops.png",
@@ -3727,7 +3727,7 @@
       "domain": "production",
       "id": "basic_machine_shops",
       "name": "Basic Machine Shops",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/precision_toolrooms.png",
@@ -3735,7 +3735,7 @@
       "domain": "production",
       "id": "precision_toolrooms",
       "name": "Precision Toolrooms",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
@@ -4261,9 +4261,9 @@
   "live_art_complete": false,
   "live_count": 532,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 478,
+  "queued_count": 454,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 54
+  "verified_count": 78
 }

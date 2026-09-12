@@ -1455,3 +1455,14 @@ Validation: seven machine-tool, nineteen persistent-production and eight civilia
 Graph/ideal-resource audit: 532 discoveries, 308 explicit route records, 212 recipes, 12 plants; zero structural errors. Current totals: 532/5,000 discoveries, 89 military roles and 54 reviewed images. Remaining: 4,468 discovery identities, 478 live illustrations and 4,946 target images, plus full-history/full-world acceptance and canonical integration. The separately running 476-discovery diagnostic was polled live this turn and its last inspected annual snapshot was year 153, 167 known discoveries, 6,183 population and 17 settlements; it had no active civilian production lines or installed plants in that snapshot. It cannot establish uptake of this new batch or completed 2,500–3,000-year progression.
 
 Shared integration conflicts: discovery_system.gd, civilian_industry.gd, technology_operations.gd, persistent_production.gd and civilian_production_planner.gd, plus the explicit precision-tool fixture in test_microprogramming.gd. No general, government, terrain or canonical player changes.
+
+
+## Machine-tool illustration batch — 24 subjects
+
+All 24 discoveries from machine-tool production commit d3712b0 now have individual paper-and-gouache artwork, from three-plate lapping and screw cutting to basic machine shops and precision toolrooms. Built-in generation used the established apprentice-contracts image as style reference; each output was visually reviewed and copied unchanged into assets/ui/research/paper. MACHINE_TOOL_ART_PROMPTS.md records every prompt, original path, final asset path and SHA-256. Imports use 768-pixel runtime limits and mipmaps; full-resolution originals remain in the project.
+
+Focused verification: both headless imports exited successfully without reported errors; the research visual atlas passed all 11 cases with zero errors, failures, skips or orphans. The regenerated live manifest reports 532 discoveries, 78 reviewed images and 454 queued live images. No broad gameplay regression was repeated for this artwork-only batch.
+
+Remaining against the full objective: 4,468 discovery identities and 4,922 illustrations; full 2,500–3,000-year progression and canonical integration remain unproven. The independent catalog-476 diagnostic was confirmed live and reached year 182 during this batch; it does not include subsequent machine-tool gameplay changes and is not a completed 250-year result.
+
+Handoff: codex/technology-implementation, original base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9. Shared integration files are scripts/hud/research_visuals.gd and the art catalog. This batch changes no simulation or save format. Native combined-game presentation remains pending designated integration; no player/editor session was launched or interrupted.
