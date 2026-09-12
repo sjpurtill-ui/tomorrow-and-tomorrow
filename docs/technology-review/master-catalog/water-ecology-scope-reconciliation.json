@@ -1,0 +1,46 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "remote_ecological_sensor_power",
+      "retained_id": "remote_platform_energy_support",
+      "reason": "Remote sensor replenishment uses the existing remote-platform energy service; sensor duty cycles are operating parameters, not a separate energy discovery."
+    },
+    {
+      "excluded_proposal": "restoration_reference_envelopes",
+      "retained_id": "ecological_restoration_targets",
+      "reason": "A bounded set of suitable reference states is part of defining qualified restoration targets using biodiversity reference sites."
+    },
+    {
+      "excluded_proposal": "ecological_intervention_reversibility",
+      "retained_id": "long_horizon_project_optioning",
+      "reason": "Staged commitments and explicit reversal limits belong to the existing option-preserving project method; ecological irreversibility remains a constraint."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "water_ultrafiltration",
+        "water_nanofiltration",
+        "reverse_osmosis_desalination"
+      ],
+      "distinction": "Qualified separation ranges and solute rejection differ; nominal membrane names never substitute for feed-specific performance."
+    },
+    {
+      "ids": [
+        "aquifer_response_testing",
+        "aquifer_compaction_models"
+      ],
+      "distinction": "An extraction-response measurement differs from a coupled pressure/deformation model that identifies potentially irreversible storage loss."
+    },
+    {
+      "ids": [
+        "seed_bank_viability_assessment",
+        "seed_dispersal_models",
+        "ecological_succession_models"
+      ],
+      "distinction": "Stored viable propagules, movement to a site and subsequent community change are different mechanisms; none guarantees the next stage."
+    }
+  ]
+}
