@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 101: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 102: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1113,3 +1113,14 @@ Civilian planning now follows study and cultivation supply with manufactured con
 Verification: 52 cases across operating-input planning (4 new), civilian planning (8), power planning (12), civilization strategy (15) and crop nutrition (13), zero errors/failures/skips/orphans. The controller case starts a compressor line, consumes tooling, uses generation to manufacture air and supplies an actual commissioned press. Quotes leave stocks unchanged; target scaling, missing power/knowledge/tooling, depleted stores, paused lines and hunger/war guards are covered.
 
 No save fields or catalog/art additions. Current totals remain 447 authored discoveries, 89 roles, ten installation types and 39 reviewed images. Shared implementation file is the civilian production planner; new tests and resupply document accompany review-record changes. No new authority over government labor. Limits: raw fuel extraction/imports, new license negotiation, automatic consumer-plant investment and scheduling continuously needed inputs around other work remain unfinished. Active manufacturing licenses already pass through the ordinary recipe gate. Diagnostic session 57160 was re-polled live; no claim that its 250-year target or full-history pacing has completed.
+
+
+## Checkpoint 102: pneumatic engineering illustrations
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `9e21424`. No canonical integration or player launch.
+
+Cylinder Boring and Pneumatic Pressing now have distinct subject illustrations made with built-in image generation and the approved apprentice style reference. Both were visually inspected for matte gouache, fibrous warm ivory paper, restrained colors and negative space. The boring scene emphasizes the aligned shaft and open bore; the pressing scene shows an upright actuator and connected air receiver. Apparatus is illustrative, not an engineering schematic.
+
+Selected source files were copied unchanged into `assets/ui/research/paper/cylinder_boring.png` and `pneumatic_pressing.png`; SHA-256 matches verified. Exact prompts and source paths are recorded in `PNEUMATIC_ENGINEERING_PROMPTS.md` and linked from the prompt index. Explicit discovery bindings, 768-pixel texture import limits and mipmaps. Both headless import passes exited without errors. All 11 atlas cases pass with zero errors/failures/skips/orphans and exercise every one of the 41 explicit image bindings. Native player presentation remains unverified.
+
+Totals remain 447 discoveries, 89 roles and ten installation types. Artwork: 41 reviewed images, 406 queued live images. No save or gameplay change. Shared files are visual bindings, art manifest and prompt index, and implementation records; new images/import metadata/prompt record are task-owned. Full-history work remains active. Diagnostic session 57160 was confirmed live, with latest inspected snapshot at year 175, population 10,451, 193 known discoveries and 17 settlements on its loaded 414-discovery revision. Its 250-year target remains pending.

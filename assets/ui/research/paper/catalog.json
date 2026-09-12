@@ -3055,7 +3055,7 @@
       "domain": "infrastructure",
       "id": "cylinder_boring",
       "name": "Cylinder Boring",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/packed_piston_seals.png",
@@ -3087,7 +3087,7 @@
       "domain": "infrastructure",
       "id": "pneumatic_pressing",
       "name": "Pneumatic Pressing",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
@@ -3581,9 +3581,9 @@
   "live_art_complete": false,
   "live_count": 447,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 408,
+  "queued_count": 406,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 39
+  "verified_count": 41
 }
