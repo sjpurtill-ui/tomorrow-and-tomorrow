@@ -2,6 +2,24 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"heavy_carvel_hull_sections":{"name": "Heavy frame-first hull construction", "output": "Heavy Hull Sections", "gate": "carvel_frame_construction", "materials": {"Keel Sections": 0.5, "Ship Frames": 3.0, "Sealed Planking": 4.0, "Treenails": 2.0, "Wrought Iron": 2.0}, "days": 9.0, "tooling": {"Timber": 8.0, "Wrought Iron": 3.0}},
+	"laid_rope":{"name": "Rope Laying", "output": "Rope Coils", "gate": "rope_laying", "materials": {"Fiber Plants": 8.0}, "days": 3.0, "tooling": {"Timber": 4.0, "Stone": 2.0}},
+	"sail_panel":{"name": "Sail Panel Cutting", "output": "Sail Panels", "gate": "sail_panel_cutting", "materials": {"Woven Cloth": 3.0}, "days": 2.0, "tooling": {"Timber": 2.0, "Stone": 1.0}},
+	"seamed_sails":{"name": "Sail Seaming", "output": "Sail Sets", "gate": "sail_seaming", "materials": {"Sail Panels": 2.0, "Spun Yarn": 2.0, "Rope Coils": 1.0}, "days": 4.0, "tooling": {"Timber": 2.0, "Stone": 1.0}},
+	"rigging_blocks":{"name": "Wooden Sheave Blocks", "output": "Rigging Blocks", "gate": "wooden_sheave_blocks", "materials": {"Timber": 3.0, "Rope Coils": 0.2}, "days": 3.0, "tooling": {"Stone": 2.0, "Wrought Iron": 1.0}},
+	"ship_rigging":{"name": "Standing and Running Rigging", "output": "Rigging Sets", "gate": "standing_running_rigging", "materials": {"Rope Coils": 3.0, "Rigging Blocks": 2.0}, "days": 4.0, "tooling": {"Timber": 3.0, "Stone": 2.0}},
+	"scarfed_keel":{"name": "Keel Scarfing", "output": "Keel Sections", "gate": "keel_scarfing", "materials": {"Timber": 6.0}, "days": 3.0, "tooling": {"Stone": 2.0, "Wrought Iron": 1.0}},
+	"grown_ship_frames":{"name": "Grown Frame Selection", "output": "Ship Frames", "gate": "grown_frame_selection", "materials": {"Timber": 8.0}, "days": 5.0, "tooling": {"Stone": 3.0, "Wrought Iron": 1.0}},
+	"moulded_ship_frames":{"name": "Frame Moulding", "output": "Ship Frames", "gate": "frame_moulding", "materials": {"Timber": 7.0}, "days": 3.0, "tooling": {"Timber": 6.0, "Wrought Iron": 2.0}},
+	"spiled_planks":{"name": "Plank Spiling", "output": "Hull Planks", "gate": "plank_spiling", "materials": {"Timber": 8.0}, "days": 3.0, "tooling": {"Timber": 2.0, "Wrought Iron": 1.0}},
+	"caulking_fiber":{"name": "Caulking Fiber Preparation", "output": "Caulking Fiber", "gate": "caulking_fiber_preparation", "materials": {"Fiber Plants": 3.0}, "days": 2.0, "tooling": {"Timber": 2.0, "Stone": 1.0}},
+	"treenails":{"name": "Treenail Fastening", "output": "Treenails", "gate": "treenail_fastening", "materials": {"Timber": 2.0}, "days": 2.0, "tooling": {"Stone": 2.0, "Wrought Iron": 1.0}},
+	"sealed_planking":{"name": "Hull Seam Caulking", "output": "Sealed Planking", "gate": "hull_seam_caulking", "materials": {"Hull Planks": 1.0, "Caulking Fiber": 0.5, "Bitumen": 0.2}, "days": 3.0, "tooling": {"Timber": 2.0, "Stone": 2.0}},
+	"carvel_hull_sections":{"name": "Carvel Frame Construction", "output": "Hull Sections", "gate": "carvel_frame_construction", "materials": {"Keel Sections": 0.5, "Ship Frames": 2.0, "Sealed Planking": 3.0, "Treenails": 1.0}, "days": 6.0, "tooling": {"Timber": 6.0, "Wrought Iron": 2.0}},
+	"clinker_hull_sections":{"name": "Clinker Shell Construction", "output": "Hull Sections", "gate": "clinker_shell_construction", "materials": {"Keel Sections": 0.5, "Ship Frames": 1.0, "Hull Planks": 3.0, "Caulking Fiber": 1.0, "Wrought Iron": 1.0}, "days": 8.0, "tooling": {"Timber": 6.0, "Wrought Iron": 2.0}},
+	"ship_masts":{"name": "Mast Making", "output": "Ship Masts", "gate": "mast_making", "materials": {"Timber": 12.0, "Rope Coils": 0.5}, "days": 4.0, "tooling": {"Timber": 3.0, "Wrought Iron": 1.0}},
+	"launch_cradle":{"name": "Launching Cradles", "output": "Launch Cradles", "gate": "launching_cradles", "materials": {"Timber": 12.0, "Rope Coils": 1.0}, "days": 5.0, "tooling": {"Timber": 3.0, "Stone": 3.0}},
+
 	"refined_tin":{"name": "Tin Smelting", "output": "Refined Tin", "gate": "tin_smelting", "materials": {"Tin Ore": 2.0, "Charcoal": 1.0}, "days": 3.0, "tooling": {"Clay": 5.0, "Stone": 5.0}},
 	"steel_sheet":{"name": "Sheet Steel Rolling", "output": "Steel Sheets", "gate": "sheet_steel_rolling", "materials": {"Steel": 1.0}, "days": 3.0, "tooling": {"Steel": 4.0, "Shaft Bearings": 2.0}},
 	"tinplate":{"name": "Tinplate Coating", "output": "Tinplate", "gate": "tinplate_coating", "materials": {"Steel Sheets": 1.0, "Refined Tin": 0.1}, "days": 3.0, "tooling": {"Wrought Iron": 3.0, "Clay": 3.0}},

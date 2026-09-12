@@ -13,7 +13,7 @@ static func recipe(host: Node, item: String) -> Dictionary:
 		definition=Industry.product(item);gate=host._knowledge_gate(String(definition.gate),.10);kind="civilian"
 		if not gate.get("unlocked",false) and preload("res://scripts/research_licenses.gd").active(String(definition.gate)):gate={"unlocked":true}
 	elif not joint.is_empty():
-		gate=host._knowledge_gate(String(joint.gate),.10);definition={"materials":joint.materials,"days":float(joint.work_days)}
+		gate=host._knowledge_gate(String(joint.gate),.10);definition={"materials":joint.materials,"days":float(joint.work_days),"tooling":joint.get("tooling",{})}
 	elif item=="transport_cart":
 		gate=host._knowledge_gate("joinery",.10);definition=host._transport_recipe();kind="transport"
 	elif host.CONSUMABLE_KNOWLEDGE.has(item):
@@ -103,7 +103,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 	for job in host.equipment_queue:
 		if int(job.id)!=id or not bool(job.get("persistent",false)): continue
 		if String(job.item)==item: return {"ok":true,"message":"This line already makes that item."}
-		if not Industry.product(item).is_empty():
+		if not Industry.product(item).is_empty() or not definition.tooling.is_empty():
 			var blockers:=startup_blockers(host,item)
 			if not blockers.is_empty():return {"error":"Cannot retool: "+" ".join(blockers)}
 			for resource:String in definition.tooling:WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))-float(definition.tooling[resource])

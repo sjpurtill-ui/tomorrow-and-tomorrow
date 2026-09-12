@@ -118,6 +118,9 @@ static func civilian_orders(id:String,plan:Dictionary)->void:
 	if String(recommendation.get("kind",""))=="plant_install":
 		WorldSimulation.submit(id,recommendation);return
 	if recommendation.is_empty():recommendation=preload("res://scripts/civilian_production_planner.gd").recommendation()
+	production_order(id,recommendation)
+
+static func production_order(id:String,recommendation:Dictionary)->void:
 	if recommendation.is_empty():return
 	var campaign:=WorldSimulation.military
 	var item:=String(recommendation.item)
@@ -163,19 +166,22 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 		if not campaign.joint_operations.available_base(service):WorldSimulation.submit(id,{"kind":"base","city":city,"service":service})
 		for base:Dictionary in campaign.joint_operations.state.bases:
 			if base.domain!=service or not campaign.joint_operations.base_ready(base):continue
-			var candidate:="";var work:=-1.0
+			var candidate:="";var work:=-1.0;var manufacturing:Dictionary={}
 			var desired:=STRATEGY.preferred_mission(service,campaign.joint_operations.MISSIONS[service].keys(),plan)
 			for unit:String in campaign.joint_operations.C.UNITS:
 				var definition:Dictionary=campaign.joint_operations.C.UNITS[unit]
 				if definition.domain!=service or not bool(campaign._knowledge_gate(String(definition.gate),.10).unlocked):continue
 				if int(definition.crew)>maxi(0,capacity-campaign._mobilized_count()):continue
 				var equipment:=String(definition.equipment)
-				if not can_supply_equipment(campaign,equipment):continue
+				var supply:=preload("res://scripts/joint_manufacturing_planner.gd").plan(campaign,equipment)
+				if supply.is_empty():continue
 				var fit:=log(1+float(definition.work_days))*.25+(3.0 if String(definition.mission)==desired else 0.0)
-				if fit>work:candidate=unit;work=fit
+				if fit>work:candidate=unit;work=fit;manufacturing=supply
 			if candidate=="":continue
+			if not bool(manufacturing.ready):
+				production_order(id,manufacturing.upstream);continue
 			var equipment:=String(campaign.joint_operations.C.UNITS[candidate].equipment)
-			ensure_line(id,equipment,1)
+			production_order(id,{"item":equipment,"target":1})
 			WorldSimulation.submit(id,{"kind":"commission","base":int(base.id),"unit":candidate,"count":1})
 	service_orders(id,plan)
 

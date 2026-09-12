@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 117: **466 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the shipbuilding batch: **492 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1399,3 +1399,16 @@ The existing session 57160 returned terminal exit 0. Its old 414-discovery/schem
 A new run was launched only after the old handle returned terminal. Session 52497, source e1278e0, current catalog 476/schema 10, seed 91420, target 91,250 days, wall cap 14,400 seconds. It uses the current cache correction and physical-production reporting. Its first annual snapshot emitted with production evidence and its handle was revalidated live. Launch metadata is saved in pacing/catalog-476-250-run.json. No completed target or improvement claim yet. Do not restart merely because an observation times out. The longest completed requested horizon remains the earlier 100-year test.
 
 This turn prioritized terminal evidence and the next current-code diagnostic over the initially announced shipbuilding investigation; no naval implementation edits were made. Task-owned evidence/launch record and shared profiling/status documents only. No game or save fields changed. Counts remain 476 discoveries, 154 recipes, 12 plants, 89 roles and 50 reviewed images; full overhaul incomplete, including 4,524 identities, 4,950 images and full-history/multi-civilization acceptance.
+
+
+## Shipbuilding batch: sixteen practices and an actual naval production chain
+
+Implementation worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `b4d9980`. This is isolated worker work, not an integrated player release.
+
+[Shipbuilding](SHIPBUILDING.md) adds sixteen authored discoveries and seventeen component recipes, connecting hulls, sailmaking, rope and rigging, masts and paid launch tooling to four sailing vessel roles. The controller follows feasible upstream production through ordinary orders. Heavy warships require the separate heavy frame-first hull output. Retooling now pays naval tooling instead of bypassing its material requirement.
+
+Validation: five connected shipbuilding cases and nineteen existing persistent-production cases pass, with zero errors/failures/skips/orphans. The graph audit reports 492 discoveries, 267 explicit route records, 171 civilian recipes, 12 plants, and zero graph or structural production errors. The transport test manufactures its components, produces its equipment and commissions twelve actual crew places. It uses an isolated harbor and supplied upstream materials; it is not a naturally played campaign. Testing was limited to this batch and its modified production adapter, without another broad regression sweep.
+
+No save schema change. Existing saved ship jobs retain their stored recipes and partial work; newly created or deliberately retooled lines use component costs. No changes to crew roles, general-led control or combat statistics. Shared integration conflicts: the catalog append in discovery_system.gd, civilian_industry.gd, civilization_controller.gd, joint_force_catalog.gd and persistent_production.gd; no canonical merge or player launch.
+
+Current totals: 492 of 5,000 discoveries; 171 civilian recipes; 12 plants; 89 military roles; 50 reviewed images. Remaining: 4,508 discovery identities, 442 images for currently live discoveries, and 4,950 images against the final target. Full 2,500–3,000-year progression and full-world military/economic acceptance remain unproved. Session 52497 was polled live during implementation; its loaded 476-discovery run had reached year 86 in the last inspected log and continues independently. It does not include this shipbuilding batch. The longest completed requested horizon remains 100 years.

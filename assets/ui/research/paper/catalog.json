@@ -3290,6 +3290,134 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/rope_laying.png",
+      "description": "Strands laid against their own twist share a load without immediately unravelling. A ropewalk produces repeatable working lengths.",
+      "domain": "movement",
+      "id": "rope_laying",
+      "name": "Rope Laying",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sail_panel_cutting.png",
+      "description": "Measured cloth panels preserve the intended outline and distribute the seams of a sail.",
+      "domain": "movement",
+      "id": "sail_panel_cutting",
+      "name": "Sail Panel Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sail_seaming.png",
+      "description": "Joined panels and reinforced edges transfer wind loads into the ropes that support and trim a sail.",
+      "domain": "movement",
+      "id": "sail_seaming",
+      "name": "Sail Seaming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_sheave_blocks.png",
+      "description": "Grooved wooden wheels turn inside bound shells, guiding running rope while reducing the effort of hauling a sail.",
+      "domain": "movement",
+      "id": "wooden_sheave_blocks",
+      "name": "Wooden Sheave Blocks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/standing_running_rigging.png",
+      "description": "Fixed stays support the mast while separate moving lines hoist and trim the sails. Their coordinated layout makes a working rig.",
+      "domain": "movement",
+      "id": "standing_running_rigging",
+      "name": "Standing and Running Rigging",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/keel_scarfing.png",
+      "description": "Long overlapping joints unite shorter timbers into the longitudinal backbone of a larger hull.",
+      "domain": "movement",
+      "id": "keel_scarfing",
+      "name": "Keel Scarfing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grown_frame_selection.png",
+      "description": "Naturally curved timber is selected so its grain follows the shape of a ship frame instead of cutting across the bend.",
+      "domain": "movement",
+      "id": "grown_frame_selection",
+      "name": "Grown Frame Selection",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/frame_moulding.png",
+      "description": "Reusable patterns transfer a planned hull section to a sequence of frames, reducing repeated fitting work.",
+      "domain": "movement",
+      "id": "frame_moulding",
+      "name": "Frame Moulding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plank_spiling.png",
+      "description": "Offsets taken from a curved hull are transferred to a plank blank, preserving the changing width needed along its length.",
+      "domain": "movement",
+      "id": "plank_spiling",
+      "name": "Plank Spiling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/caulking_fiber_preparation.png",
+      "description": "Separated fibers are worked into compressible strands that can pack the joints between hull planks.",
+      "domain": "movement",
+      "id": "caulking_fiber_preparation",
+      "name": "Caulking Fiber Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/treenail_fastening.png",
+      "description": "Close-fitting wooden pins fasten planking to its supporting frames, providing a fastening route without a supply of metal nails.",
+      "domain": "movement",
+      "id": "treenail_fastening",
+      "name": "Treenail Fastening",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hull_seam_caulking.png",
+      "description": "Driven fiber and a sealing compound close plank seams while allowing limited movement of the wooden hull.",
+      "domain": "movement",
+      "id": "hull_seam_caulking",
+      "name": "Hull Seam Caulking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/carvel_frame_construction.png",
+      "description": "Planks fitted edge to edge over a supporting frame form a smooth outer hull. The frames establish its shape before the planking closes it.",
+      "domain": "movement",
+      "id": "carvel_frame_construction",
+      "name": "Carvel Frame Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clinker_shell_construction.png",
+      "description": "Overlapping strakes are fastened together as a shell before its internal supports are fitted, offering a different construction sequence from frame-first building.",
+      "domain": "movement",
+      "id": "clinker_shell_construction",
+      "name": "Clinker Shell Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mast_making.png",
+      "description": "Selected straight timber is shaped into spars with reinforced attachment points for the loads of sails and rigging.",
+      "domain": "movement",
+      "id": "mast_making",
+      "name": "Mast Making",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/launching_cradles.png",
+      "description": "A fitted supporting cradle carries a completed hull along prepared ways during launching, becoming reusable shipyard tooling.",
+      "domain": "movement",
+      "id": "launching_cradles",
+      "name": "Launching Cradles",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3811,9 +3939,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 476,
+  "live_count": 492,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 426,
+  "queued_count": 442,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
