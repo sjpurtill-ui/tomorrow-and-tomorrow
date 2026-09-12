@@ -374,6 +374,7 @@ func validate_payload(payload:Dictionary)->String:
 				if not property_types.has(field):return "Unknown civilization field: "+field
 				var saved_type:=typeof(actor.state[name][field]);var expected_type:=int(property_types[field])
 				if expected_type!=TYPE_NIL and saved_type!=expected_type and not (saved_type in [TYPE_INT,TYPE_FLOAT] and expected_type in [TYPE_INT,TYPE_FLOAT]):return "Invalid civilization field type: "+field
+		if not preload("res://scripts/building_material_operations.gd").valid_state(actor.state.GameState):return "Invalid civilization building material or curing records."
 		var nutrition:=preload("res://scripts/crop_nutrition.gd")
 		var batches=preload("res://scripts/food_batches.gd")
 		if not batches.valid(actor.state.GameState.get("food_batches",batches.empty_state())) or not batches.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization food batch records."

@@ -3,12 +3,24 @@ extends GdUnitTestSuite
 const RENDERER:=preload("res://scripts/local_terrain.gd")
 const VALUES:=preload("res://scripts/societal_values_model.gd")
 
+# Give root-dependent helpers a tree without running the terrain startup flow.
+class IsolatedRenderer extends RENDERER:
+	func _ready()->void:pass
+
 var renderer:Node3D
 
 
 func before_test()->void:
+	WorldSimulation.clear()
 	GameState.reset_for_new_world(741991)
-	renderer=auto_free(RENDERER.new())
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	renderer=auto_free(IsolatedRenderer.new())
+	renderer.set_process(false);add_child(renderer)
+
+
+func after_test()->void:
+	WorldSimulation.clear()
+	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
 
 
 func test_visual_signature_is_bounded_and_ignores_imperceptible_daily_drift()->void:
@@ -267,7 +279,7 @@ func test_late_city_aerial_tone_inherits_real_construction_materials()->void:
 	assert_bool((organic.base as Color).is_equal_approx(stone.base as Color)).is_false()
 
 
-func test_hundreds_of_aggregate_plots_still_commit_a_fixed_mesh_set()->void:
+func test_hundreds_of_legacy_aggregate_plots_still_commit_a_fixed_mesh_set()->void:
 	GameState.societal_values=VALUES.initial_state("defense",741991,"player")
 	var plots:Array[Dictionary]=[]
 	for index in 256:
@@ -284,8 +296,11 @@ func test_hundreds_of_aggregate_plots_still_commit_a_fixed_mesh_set()->void:
 			"area_ha":0.08,"land_use":"residential_compound" if index%7 else "communal",
 			"form":"courtyard_compound","material_family":"earth","material_mix":{"Clay":0.52,"Timber":0.24,"Fiber Plants":0.18},
 			"roof_plan":"courtyard_flat","roof_coverage":0.42,"resident_count":26,"storeys":2,
-			"condition":0.78,"prosperity":0.48,"status":"active","fabric_generation":7,"created_day":0
+			"condition":0.78,"prosperity":0.48,"status":"active","fabric_generation":3,"created_day":0
 		})
+	# Keep this fixture on the legacy batch path; generation 4+ uses the
+	# separately tested architecture kit and intentionally omits legacy roofs.
+	assert_bool(preload("res://scripts/early_settlement_visual.gd").supports(plots[0])).is_false()
 	for lod in [0,1]:
 		var parent:Node3D=auto_free(Node3D.new())
 		renderer._create_plot_fabric(Vector3.ZERO,plots,lod,parent)
@@ -587,8 +602,8 @@ func test_stage_aware_secondary_symbols_remain_one_batch()->void:
 	var marker_root:Node3D=auto_free(Node3D.new())
 	renderer.settlement_network_marker_root=marker_root
 	var settlements:Array[Dictionary]=[
-		{"name":"New Camp","classification":"founding camp","population":40,"position":Vector2.ZERO},
-		{"name":"Large City","classification":"city","population":120000,"position":Vector2(8.0,0.0)}
+		{"id":"camp","name":"New Camp","classification":"founding camp","population":40,"position":Vector2.ZERO},
+		{"id":"city","name":"Large City","classification":"city","population":120000,"position":Vector2(8.0,0.0)}
 	]
 	renderer._create_secondary_settlement_markers(settlements)
 	var blips:=marker_root.get_child(0) as MultiMeshInstance3D
@@ -622,7 +637,7 @@ func test_entire_secondary_network_has_one_fixed_footprint_patch_budget()->void:
 	assert_int(total).is_equal(renderer.SECONDARY_SETTLEMENT_FOOTPRINT_PATCH_BUDGET)
 
 
-func test_a_secondary_megalopolis_commits_one_batched_physical_surface()->void:
+func test_population_only_secondary_megalopolis_does_not_invent_physical_fabric()->void:
 	var test_camera:Camera3D=auto_free(Camera3D.new())
 	test_camera.size=400.0
 	renderer.camera=test_camera
@@ -633,10 +648,9 @@ func test_a_secondary_megalopolis_commits_one_batched_physical_surface()->void:
 		"territory_drivers":{}
 	}]
 	renderer._create_secondary_settlement_footprints(settlements)
-	assert_int(renderer.settlement_network_marker_root.get_child_count()).is_equal(1)
-	var footprint:=renderer.settlement_network_marker_root.get_child(0) as MeshInstance3D
-	assert_str(footprint.name).is_equal("SecondaryUrbanSystems")
-	assert_int((footprint.mesh as Mesh).surface_get_array_len(0)).is_less_equal(512)
+	# Secondary fabric now comes from owned settlement records. Population and
+	# a classification alone must not synthesize a replacement city footprint.
+	assert_int(renderer.settlement_network_marker_root.get_child_count()).is_equal(0)
 
 
 func test_controlled_ground_fill_uses_fixed_boundary_geometry()->void:
@@ -688,10 +702,11 @@ func test_resource_labels_yield_to_settlement_identity_at_regional_zoom()->void:
 	assert_bool(renderer._resource_label_conflicts_with_settlement(Vector3(60.0,0.0,-7.0))).is_false()
 
 
-func test_world_zoom_retains_one_explicit_home_orientation_cue()->void:
+func test_world_zoom_retains_home_name_and_population()->void:
 	GameState.settlement_name="Alder Reach"
+	GameState.player_settlements=[];GameState.population_exact=120.0
 	var text:String=renderer._settlement_map_label_text(3000.0)
-	assert_str(text).is_equal("HOME  •  ALDER REACH")
+	assert_str(text).is_equal("ALDER REACH  •  120")
 
 
 func test_distant_urban_density_is_deterministic_and_strictly_bounded()->void:
@@ -769,7 +784,7 @@ func test_world_scale_keeps_bounded_major_place_symbols_after_borders_cull()->vo
 	renderer.settlement_network_marker_root=marker_root
 	var settlements:Array[Dictionary]=[]
 	for index in 100:
-		settlements.append({"name":"Place %d" % index,"classification":"city" if index<8 else "town","population":100000-index*300,"position":Vector2(float(index)*2.0,0.0)})
+		settlements.append({"id":"place_%d"%index,"name":"Place %d" % index,"classification":"city" if index<8 else "town","population":100000-index*300,"position":Vector2(float(index)*2.0,0.0)})
 	renderer._create_secondary_settlement_markers(settlements)
 	var blips:=marker_root.get_child(0) as MultiMeshInstance3D
 	assert_int(blips.multimesh.instance_count).is_equal(64)
@@ -1159,6 +1174,9 @@ func test_float_tolerant_close_lod_keeps_its_aggregate_neighborhoods()->void:
 
 
 func test_strategic_city_field_feathers_real_river_edges_without_coarse_triangle_holes()->void:
+	# This procedural-terrain probe intentionally uses its own configured shape,
+	# rather than the live planetary context used by rooted map-label fixtures.
+	renderer=auto_free(RENDERER.new())
 	renderer._configure_seamless_world()
 	renderer._configure_shape()
 	renderer._configure_noise()
@@ -1341,7 +1359,7 @@ func test_roof_opacity_is_not_baked_at_the_old_camera_threshold()->void:
 		"polygon":PackedVector2Array([Vector2(-0.01,-0.01),Vector2(0.01,-0.01),Vector2(0.01,0.01),Vector2(-0.01,0.01)]),
 		"land_use":"residential_compound","form":"courtyard_compound","material_family":"earth",
 		"roof_plan":"courtyard_flat","roof_coverage":0.42,"resident_count":26,"storeys":2,
-		"condition":0.78,"prosperity":0.48,"status":"active","fabric_generation":7,"created_day":0
+		"condition":0.78,"prosperity":0.48,"status":"active","fabric_generation":3,"created_day":0
 	}]
 	var original_colors:=PackedColorArray()
 	for zoom in [0.41,0.43]:

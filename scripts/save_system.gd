@@ -189,6 +189,7 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	var state:Dictionary=payload.get("reflected_GameState",{})
 	var batches=preload("res://scripts/food_batches.gd")
 	if not batches.valid(state.get("food_batches",batches.empty_state())) or not batches.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid food batch records."}
+	if not preload("res://scripts/building_material_operations.gd").valid_state(state):return {"error":"Invalid building material or curing records."}
 	var grain=preload("res://scripts/grain_processing.gd")
 	if not grain.valid(state.get("grain_processing",grain.empty_state())) or not grain.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid grain processing records."}
 	if not nutrition.valid(state.get("cultivation_nutrients",nutrition.empty_state())) or not nutrition.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid cultivation nutrient reserves."}

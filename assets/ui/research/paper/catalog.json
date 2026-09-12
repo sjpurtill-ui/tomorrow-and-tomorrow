@@ -4514,6 +4514,182 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/voussoir_arch_assembly.png",
+      "description": "Assemble shaped masonry units over temporary support so compression reaches suitable abutments",
+      "domain": "infrastructure",
+      "id": "voussoir_arch_assembly",
+      "name": "Voussoir Arch Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/masonry_arch_centering.png",
+      "description": "Support unfinished arch masonry with qualified removable temporary works",
+      "domain": "infrastructure",
+      "id": "masonry_arch_centering",
+      "name": "Masonry Arch Centering",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/masonry_bond_patterns.png",
+      "description": "Arrange masonry units and joints to distribute loads through evaluated wall bonds",
+      "domain": "infrastructure",
+      "id": "masonry_bond_patterns",
+      "name": "Masonry Bond Patterns",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mortar_compatibility_assessment.png",
+      "description": "Match repair mortar behavior to existing masonry and environmental exposure",
+      "domain": "infrastructure",
+      "id": "mortar_compatibility_assessment",
+      "name": "Mortar Compatibility Assessment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/masonry_repointing.png",
+      "description": "Renew deteriorated exposed mortar joints while preserving sound units and joint function",
+      "domain": "infrastructure",
+      "id": "masonry_repointing",
+      "name": "Masonry Repointing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/concrete_curing_control.png",
+      "description": "Maintain evaluated moisture and thermal conditions during concrete property development",
+      "domain": "infrastructure",
+      "id": "concrete_curing_control",
+      "name": "Concrete Curing Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/concrete_compaction_practice.png",
+      "description": "Consolidate placed concrete through a qualified method while avoiding harmful segregation",
+      "domain": "infrastructure",
+      "id": "concrete_compaction_practice",
+      "name": "Concrete Compaction Practice",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hydraulic_lime_binders.png",
+      "description": "Prepare a qualified lime-based binder that can develop strength under damp conditions",
+      "domain": "infrastructure",
+      "id": "hydraulic_lime_binders",
+      "name": "Hydraulic-Lime Binders",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pozzolanic_binder_blends.png",
+      "description": "Combine a lime-bearing binder with a characterized reactive mineral fraction",
+      "domain": "infrastructure",
+      "id": "pozzolanic_binder_blends",
+      "name": "Pozzolanic Binder Blends",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/portland_cement_clinker.png",
+      "description": "Produce and qualify a clinker-based hydraulic binder through controlled mineral processing",
+      "domain": "infrastructure",
+      "id": "portland_cement_clinker",
+      "name": "Portland-Cement Clinker",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rammed_earth_construction.png",
+      "description": "Compact suitable earth within temporary forms to create qualified wall sections",
+      "domain": "infrastructure",
+      "id": "rammed_earth_construction",
+      "name": "Rammed-Earth Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thatched_roofing.png",
+      "description": "Arrange plant material to shed water over a supported roof",
+      "domain": "infrastructure",
+      "id": "thatched_roofing",
+      "name": "Thatched Roofing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fired_roof_tiles.png",
+      "description": "Form and fire overlapping ceramic units for a supported weathering surface",
+      "domain": "infrastructure",
+      "id": "fired_roof_tiles",
+      "name": "Fired Roof Tiles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shallow_foundation_assessment.png",
+      "description": "Compare near-surface ground behavior with a structure's expected load",
+      "domain": "infrastructure",
+      "id": "shallow_foundation_assessment",
+      "name": "Shallow-Foundation Assessment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/foundation_settlement_monitoring.png",
+      "description": "Measure movement of a loaded structure relative to maintained references",
+      "domain": "infrastructure",
+      "id": "foundation_settlement_monitoring",
+      "name": "Foundation-Settlement Monitoring",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_roof_trusses.png",
+      "description": "Carry roof loads through connected timber members with defined support paths",
+      "domain": "infrastructure",
+      "id": "timber_roof_trusses",
+      "name": "Timber Roof Trusses",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/masonry_buttressing.png",
+      "description": "Provide external or integrated support against masonry thrust and instability",
+      "domain": "infrastructure",
+      "id": "masonry_buttressing",
+      "name": "Masonry Buttressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vaulted_masonry_roofs.png",
+      "description": "Extend compressed masonry forms across enclosed spaces with supported thrust paths",
+      "domain": "infrastructure",
+      "id": "vaulted_masonry_roofs",
+      "name": "Vaulted Masonry Roofs",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/domed_masonry_roofs.png",
+      "description": "Carry enclosure loads through a curved shell with assessed supports",
+      "domain": "infrastructure",
+      "id": "domed_masonry_roofs",
+      "name": "Domed Masonry Roofs",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/masonry_moisture_management.png",
+      "description": "Control water entry, movement and drying in a compatible masonry assembly",
+      "domain": "infrastructure",
+      "id": "masonry_moisture_management",
+      "name": "Masonry Moisture Management",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/concrete_mix_design.png",
+      "description": "Qualify aggregate, binder and water proportions for a declared placing and service condition",
+      "domain": "infrastructure",
+      "id": "concrete_mix_design",
+      "name": "Concrete-Mix Design",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/concrete_formwork_systems.png",
+      "description": "Support freshly placed material in a controlled geometry until it can carry required loads",
+      "domain": "infrastructure",
+      "id": "concrete_formwork_systems",
+      "name": "Concrete Formwork Systems",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -5035,9 +5211,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 629,
+  "live_count": 651,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 526,
+  "queued_count": 548,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

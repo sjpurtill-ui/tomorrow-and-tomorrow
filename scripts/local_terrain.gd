@@ -7600,7 +7600,7 @@ func _settlement_plot_color(plot: Dictionary) -> Color:
 
 func _settlement_roof_color(plot: Dictionary) -> Color:
 	var family := String(plot.get("material_family", "organic"))
-	var mix:Dictionary=plot.get("material_mix",{})
+	var mix:Dictionary=plot.get("visual_material_mix",plot.get("material_mix",{})) if not plot.get("building_materials",{}).is_empty() else plot.get("material_mix",{})
 	var seed_variant:=absi(int(plot.get("seed",1)))%5
 	var organic_palette:=[Color("#9a875d"),Color("#756342"),Color("#b09a68"),Color("#67583f"),Color("#88704a")]
 	var earth_palette:=[Color("#8c6243"),Color("#684836"),Color("#9b7351"),Color("#75553d"),Color("#a17c59")]
@@ -8509,7 +8509,9 @@ func _roof_atlas_cell(plot:Dictionary,temporary_camp:bool,roof_variant:=0)->Vect
 	if temporary_camp: return Vector2i(0,mini(2,wear_row))
 	var family:=String(plot.get("material_family","organic"))
 	var roof_plan:=String(plot.get("roof_plan",""))
-	var mix:Dictionary=plot.get("material_mix",{})
+	if roof_plan=="fired_tile_roof":return Vector2i(2,wear_row)
+	if roof_plan in ["masonry_roof","concrete_roof"]:return Vector2i(3,wear_row)
+	var mix:Dictionary=plot.get("visual_material_mix",plot.get("material_mix",{})) if not plot.get("building_materials",{}).is_empty() else plot.get("material_mix",{})
 	var fibre:=float(mix.get("Fiber Plants",0.0))
 	var timber:=float(mix.get("Timber",0.0))
 	var clay:=float(mix.get("Clay",0.0))
@@ -8551,7 +8553,7 @@ func _late_roof_atlas_cell(plot:Dictionary,roof_variant:int)->Vector2i:
 	return Vector2i(0,wear_row)
 
 func _roof_repair_atlas_cell(plot:Dictionary,base_cell:Vector2i,roof_variant:int)->Vector2i:
-	var mix:Dictionary=plot.get("material_mix",{})
+	var mix:Dictionary=plot.get("visual_material_mix",plot.get("material_mix",{})) if not plot.get("building_materials",{}).is_empty() else plot.get("material_mix",{})
 	var candidates:Array[Vector2i]=[]
 	if float(mix.get("Fiber Plants",0.0))>0.035: candidates.append(Vector2i(0,3))
 	if float(mix.get("Timber",0.0))>0.035: candidates.append(Vector2i(1,3))
@@ -13606,6 +13608,7 @@ func _settlement_plot_lens_report(plot:Dictionary)->String:
 		for material_name in consumed: consumed_parts.append("%.1f %s" % [float(consumed[material_name]),String(material_name)])
 		report+="Recorded inputs: [color=#ddd2b8]%s[/color]\n" % " + ".join(consumed_parts)
 	if lifecycle_events>0: report+="Architectural record: [color=#999b91]%d event%s[/color]\n" % [lifecycle_events,"" if lifecycle_events==1 else "s"]
+	report+=preload("res://scripts/building_material_operations.gd").describe(plot)
 	if String(plot.get("status",""))=="under_construction": report+="Construction: [color=#d1a45f]%d%%[/color]\n" % roundi(float(plot.get("construction_progress",0.0))*100.0)
 	if String(plot.get("status",""))=="vacant": report+="Reclaimed by vegetation: [color=#8fb08a]%d%%[/color]\n" % roundi(float(plot.get("reclamation",0.0))*100.0)
 	report+="Established: [color=#999b91]YEAR %d • DAY %d[/color]\n" % [int(plot.get("created_day",0))/365+1,int(plot.get("created_day",0))%365+1]

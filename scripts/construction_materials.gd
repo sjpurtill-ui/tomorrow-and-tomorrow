@@ -16,6 +16,7 @@ static func choose(recipes:Array[Dictionary],stocks:Dictionary,known:Array,stone
 			pressure+=amount/maxf(amount,stored)
 		if not feasible:continue
 		if recipe.get("family","")=="stone":pressure/=1.0+maxf(0.0,stone_priority)*3.0
+		pressure/=clampf(float(recipe.get("service_life",1.0)),1.0,2.0)
 		if pressure<least_pressure:
 			least_pressure=pressure
 			best=recipe.duplicate(true)
