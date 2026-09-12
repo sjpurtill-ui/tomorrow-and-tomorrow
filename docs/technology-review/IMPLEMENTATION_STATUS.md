@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 96: **441 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 97: **441 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1058,3 +1058,14 @@ Graph audit: 441 discoveries, 215 explicit routes, no graph errors. Resource dep
 Save compatibility: storage values are optional fields in existing installation records, defaulting to zero. Validation bounds now cover nine installation types. New identities require this revision. Shared files: discovery registration, civilian recipe catalog, operating service dispatcher and panel, graph audit, existing bound tests, art queue and review records. New storage modules, tests and documentation are task-owned. No government or population ownership changes.
 
 Current totals: 441 authored discoveries, 89 military roles, nine installation types, 38 reviewed images and 403 queued live images. Another 4,559 discovery identities and extensive operating, acquisition, art, pacing and integration work remain. AI does not yet invest in batteries, solar has no day/night model, and storage lacks lifetime wear or mobile use. Session 57160 was re-polled live; last inspected year 156, population 5,798, 167 known discoveries, 17 settlements on its loaded 414-discovery revision. Its 250-year target remains pending. Full-history completion is not claimed.
+
+
+## Checkpoint 97: autonomous battery reserves
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `b37ab43`. Canonical integration remains pending.
+
+The power planner can buy or manufacture a limited battery reserve after commissioned generation has spare capacity, current demand exists, fuel stocks cover a nominal month and Crafting operators can support it. One unit per ordinary decision, no construction duplication, disabled-bank override or research/energy grants. An approximate three-day demand target uses installed usable capacity and discharge rate. Regulated banks are preferred when affordable and adopted; ordinary banks remain an alternative. A first powered line can use actual charged storage within next-day retention, rate and operator limits, while empty storage does not authorize it. See [AI power investment](AI_POWER_INVESTMENT.md).
+
+Verification: 35 cases, zero errors/failures/skips/orphans: power planning 12 (four new), civilian production planning 8 and civilization strategy 15. The controller test purchases, commissions, charges and then supplies a workshop after fuel is removed. Other tests cover finite stored-energy quotes, no quote mutations, empty/disabled/unstaffed banks, no surplus/demand/fuel, missing-bank manufacture and regulation adoption. Monthly strategic scheduling remains unchanged; tests exercise the sequence on shorter intervals.
+
+No new save fields, discoveries, roles or images: 441 discoveries, 89 military roles, nine installation types and 38 reviewed images. Shared file is the existing power investment planner; its tests and review records accompany the change. No player launch or merge. Limits include fuel replenishment, weather, battery lifetime valuation, one-slot workshop sequencing, consumer-plant investment and full-history pacing. Diagnostic session 57160 was confirmed live again; its target is not claimed complete.

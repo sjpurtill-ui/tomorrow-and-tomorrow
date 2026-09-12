@@ -134,3 +134,56 @@ func test_uncommissioned_unfueled_and_unstaffed_generation_does_not_authorize_fi
 		WorldSimulation.state.resource_stockpiles.Coal=100.0;WorldSimulation.state.population_allocations.Crafting=1
 		assert_bool(F.can_supply(1.0)).is_false()
 	)
+func storage_setup()->void:
+	prepare();learn("battery_bank_wiring");learn("cable_insulation")
+	Ops.data().plants.steam_generator={"installed":1,"building":0,"work":0.0,"enabled":true}
+	for item:String in Ops.PLANTS.battery_store.cost:WorldSimulation.state.resource_stockpiles[item]=10.0
+func test_ai_commissions_empty_reserve_then_charges_and_survives_fuel_loss()->void:
+	WorldSimulation.scoped("power_ruler",func()->void:
+		storage_setup();var state=WorldSimulation.state
+		assert_str(F.recommendation().plant).is_equal("battery_store")
+		C.civilian_orders("power_ruler",{})
+		assert_float(float(state.resource_stockpiles["Battery Banks"])).is_equal(9.0)
+		assert_dict(F.recommendation()).is_empty()
+		for day in range(1,16):state.elapsed_days=day;Ops.advance(day)
+		assert_float(float(Ops.data().plants.battery_store.stored_energy)).is_greater(0.0)
+		assert_dict(F.recommendation()).is_empty()
+		state.resource_stockpiles.Coal=0.0;state.elapsed_days=16;Ops.advance(16)
+		assert_float(Ops.service("electricity")).is_greater(0.0)
+		assert_float(float(Ops.data().plants.battery_store.discharge_output)).is_greater(0.0)
+	)
+func test_storage_investment_requires_surplus_fuel_and_respects_pause()->void:
+	WorldSimulation.scoped("power_ruler",func()->void:
+		storage_setup();var state=WorldSimulation.state
+		state.resource_stockpiles.Coal=0.0;assert_dict(F.recommendation()).is_empty();state.resource_stockpiles.Coal=100.0
+		assert_dict(F.storage_recommendation(10,10,2,1)).is_empty()
+		assert_dict(F.storage_recommendation(0,10,2,1)).is_empty()
+		Ops.data().plants.battery_store={"installed":0,"building":0,"work":0.0,"enabled":false}
+		assert_dict(F.recommendation()).is_empty()
+		Ops.data().plants.erase("battery_store");state.population_allocations.Crafting=3
+		assert_dict(F.recommendation()).is_empty()
+	)
+func test_first_line_can_use_only_real_staffed_stored_energy()->void:
+	WorldSimulation.scoped("power_ruler",func()->void:
+		prepare_first_industry()
+		Ops.data().plants.battery_store={"installed":1,"building":0,"work":0.0,"enabled":true,"stored_energy":3.0}
+		assert_bool(F.can_supply(1)).is_true()
+		var snapshot:=Ops.data().duplicate(true);F.can_supply(1);assert_dict(Ops.data()).is_equal(snapshot)
+		Ops.data().plants.battery_store.stored_energy=0.0;assert_bool(F.can_supply(1)).is_false()
+		Ops.data().plants.battery_store.stored_energy=3.0;Ops.data().plants.battery_store.enabled=false;assert_bool(F.can_supply(1)).is_false()
+		Ops.data().plants.battery_store.enabled=true;WorldSimulation.state.population_allocations.Crafting=1;assert_bool(F.can_supply(1)).is_false()
+	)
+func test_missing_bank_uses_ordinary_manufacture_and_regulation_is_preferred()->void:
+	WorldSimulation.scoped("power_ruler",func()->void:
+		storage_setup();var state=WorldSimulation.state
+		var recipe:=I.product("battery_bank")
+		for item:String in recipe.materials:state.resource_stockpiles[item]=10.0
+		for item:String in recipe.tooling:state.resource_stockpiles[item]=10.0
+		state.resource_stockpiles["Battery Banks"]=0.0
+		assert_str(F.recommendation().item).is_equal("battery_bank")
+		assert_float(float(state.resource_stockpiles["Battery Banks"])).is_equal(0.0)
+		learn("charge_regulation");state.resource_stockpiles["Battery Banks"]=1.0;state.resource_stockpiles["Charge Controllers"]=1.0
+		assert_str(F.recommendation().plant).is_equal("regulated_battery_store")
+		state.discovery_adoption.charge_regulation=.1
+		assert_str(F.recommendation().plant).is_equal("battery_store")
+	)

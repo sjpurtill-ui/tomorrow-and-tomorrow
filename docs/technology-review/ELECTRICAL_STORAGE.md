@@ -16,6 +16,6 @@ The [DOE energy-storage overview](https://www.energy.gov/documents/qtr2015-3c-el
 
 ## Limits
 
-Primary-settlement stationary storage only. Solar generation remains a daily aggregate; this does not introduce nights or weather. No battery wear, replacement lifetime, electrolyte depletion, mobile batteries or electrical network model yet. Automatic operation applies to installed banks; AI investment does not yet select storage or count it as a generation investment. Forecasts assume no future charging and can understate alternate-bank or generator substitution. Workshop power reserved but unused later that day is not recovered by a second charging pass. Labor reservation is conservative rather than an optimized dispatch solver.
+Primary-settlement stationary storage only. Solar generation remains a daily aggregate; this does not introduce nights or weather. No battery wear, replacement lifetime, electrolyte depletion, mobile batteries or electrical network model yet. Automatic operation applies to installed banks. AI can now invest in a bounded reserve after surplus generation exists and can start a line from actual charged storage; banks are not treated as permanent generation. Forecasts assume no future charging and can understate alternate-bank or generator substitution. Workshop power reserved but unused later that day is not recovered by a second charging pass. Labor reservation is conservative rather than an optimized dispatch solver.
 
 Full-history catalog, art, millennial pacing and canonical integration remain unfinished.
