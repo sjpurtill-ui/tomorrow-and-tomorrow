@@ -2,6 +2,12 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"pressure_pipe_fittings":{"name": "Pressure Pipe Jointing", "output": "Pressure Pipe Fittings", "gate": "pressure_pipe_jointing", "materials": {"Wrought Iron": 2.0}, "days": 3.0, "tooling": {"Wrought Iron": 3.0, "Stone": 3.0}},
+	"bored_cylinders":{"name": "Cylinder Boring", "output": "Bored Cylinders", "gate": "cylinder_boring", "materials": {"Wrought Iron": 2.0}, "days": 4.0, "tooling": {"Steel": 2.0, "Shaft Bearings": 1.0}},
+	"piston_packings":{"name": "Packed Piston Seals", "output": "Piston Packings", "gate": "packed_piston_seals", "materials": {"Woven Cloth": 1.0, "Graphite": 1.0}, "days": 2.0, "tooling": {"Timber": 2.0, "Wrought Iron": 1.0}},
+	"directional_air_valve":{"name": "Directional Air Valves", "output": "Directional Air Valves", "gate": "directional_air_valves", "materials": {"Wrought Iron": 1.0, "Piston Packings": 1.0}, "days": 3.0, "tooling": {"Steel": 1.0, "Stone": 2.0}},
+	"pneumatic_cylinder":{"name": "Pneumatic Cylinders", "output": "Pneumatic Cylinders", "gate": "pneumatic_cylinders", "materials": {"Bored Cylinders": 1.0, "Piston Packings": 1.0, "Directional Air Valves": 1.0, "Pressure Pipe Fittings": 1.0}, "days": 4.0, "tooling": {"Wrought Iron": 2.0, "Stone": 2.0}},
+	"pneumatic_press":{"name": "Pneumatic Pressing", "output": "Pneumatic Presses", "gate": "pneumatic_pressing", "materials": {"Pneumatic Cylinders": 1.0, "Wrought Iron": 3.0, "Timber": 3.0}, "days": 5.0, "tooling": {"Steel": 2.0, "Stone": 3.0}},
 	"refined_lead":{"name": "Refined lead", "output": "Refined Lead", "gate": "lead_smelting", "materials": {"Lead Ore": 2.0, "Timber": 2.0}, "days": 3.0, "tooling": {"Clay": 5.0, "Stone": 5.0}},
 	"lead_electrode_sheets":{"name": "Rolled lead electrode sheets", "output": "Lead Sheets", "gate": "lead_sheet_rolling", "materials": {"Refined Lead": 1.0}, "days": 3.0, "tooling": {"Wrought Iron": 3.0, "Shaft Bearings": 1.0}},
 	"battery_separators":{"name": "Porous cell separators", "output": "Battery Separators", "gate": "porous_battery_separators", "materials": {"Paper Pulp": 1.0, "Freshwater": 1.0}, "days": 3.0, "tooling": {"Timber": 2.0, "Clay": 2.0}},

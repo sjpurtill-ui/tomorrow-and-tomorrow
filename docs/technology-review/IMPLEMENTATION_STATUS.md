@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 98: **441 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 99: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1078,3 +1078,16 @@ Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, bran
 Copied unchanged to `assets/ui/research/paper/battery_bank_wiring.png`, with source hash verified and exact prompt/provenance in `BATTERY_BANK_WIRING_PROMPT.md`. Explicit discovery binding, 768-pixel runtime texture limit and mipmaps. Both headless imports exited without errors. All 11 atlas cases pass with zero errors/failures/skips/orphans, covering every one of the 39 explicit images and square presentation/cache limits. Native player presentation remains unverified.
 
 Totals remain 441 discoveries, 89 roles and nine installation types; artwork is now 39 reviewed, 402 queued live images. No save change. Shared files: research visual bindings, art manifest and prompt index, implementation records. New image, import metadata and prompt record are task-owned. No canonical merge, player launch or completion claim. Diagnostic session 57160 was confirmed live; target completion remains pending.
+
+
+## Checkpoint 99: physical pneumatic engineering
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `0c0abed`. No canonical integration or player launch.
+
+Six authored discoveries and six component recipes connect pipe jointing, cylinder boring, piston packing, directional valves and actuators to a pneumatic pressing workshop. The commissioned workshop consumes finite manufactured Compressed Air and reserves Crafting operators for mechanical service. Electricity is paid upstream during air manufacture. Partial air scales service; depletion, travel or unavailable labor stops it. Existing bounded workshop productivity consumes this service. See [Pneumatic engineering](PNEUMATIC_ENGINEERING.md) for component grounding, game coefficients and limits.
+
+Verification: 67 cases across new pneumatic research (4), existing operations (14), electrical storage (11), electronic components (5), power planning (12), civilian industry (12) and technology tree (9), zero errors/failures/skips/orphans. The new chain test manufactures each component, commissions the press, produces air with real solar-generated electricity and observes service end after depletion. Partial supply, operator reservation, travel and owned-save round-trip are covered. Graph: 447 discoveries, 221 explicit learning routes, no errors. Resource dependency audit reaches all 447 under abundant-resource structural assumptions, not campaign proof. A 400-day natural pacing probe completes its requested target; local report `artifacts/technology-pacing/pneumatic-400-days.json`.
+
+Save compatibility: existing stock and installation ledgers carry new data; input validation accepts Compressed Air and upper bounds cover ten plant types. New identities require this revision. Shared files are discovery registration, civilian recipes, operating plant catalog/validation, graph audit, bounds tests, art queue and review records. New pneumatic catalog, tests and documentation are task-owned. Government and aggregate population ownership unchanged.
+
+Totals: 447 authored discoveries, 89 military roles, ten installation types, 39 reviewed images and 408 queued live images. Another 4,553 discovery identities and the wider operating, acquisition, art, pacing and integration objectives remain. No pipe network, leakage, pressure/temperature state, moisture treatment, seal wear or automatic consumer-plant investment yet. Diagnostic 57160 remains active on its loaded 414-discovery revision; latest inspected annual snapshot is year 169, population 8,671, 183 known discoveries and 17 settlements. The 250-year target remains pending.

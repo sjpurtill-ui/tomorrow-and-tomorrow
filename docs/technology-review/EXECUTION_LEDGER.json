@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 441,
+    "live": 447,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -72,13 +72,14 @@
     "AI can acquire complementary fertilizer manufacturing methods through separate paid license trips from examined prospects; local nutrient needs are shared with production planning, and reduced-throughput manufacture feeds actual crops without discovery grants",
     "Seven electrical-storage discoveries and manufactured components; two commissioned finite-energy bank types with real charging, losses, discharge, operators and conservative forecasts",
     "AI buys or manufactures bounded battery reserves behind surplus generation and checks real stored energy for first powered production; no free charge or permanent generation credit",
-    "Battery Bank Wiring has individually generated and visually inspected paper-and-gouache art; 39 explicit subject images total"
+    "Battery Bank Wiring has individually generated and visually inspected paper-and-gouache art; 39 explicit subject images total",
+    "Six distinct pneumatic engineering discoveries, six manufactured components and a commissioned press consuming finite Compressed Air for staffed mechanical service"
   ],
   "unfinished": [
-    "Remaining 4559 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4553 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
-    "Civilian and future operating models beyond nine primary-settlement plants; solar weather, battery wear and night-time balancing",
+    "Civilian and future operating models beyond ten primary-settlement plants; solar weather, battery wear and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 89 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline",
@@ -99,9 +100,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 441,
+    "live_subjects": 447,
     "verified_subject_images": 39,
-    "queued_live_images": 402,
+    "queued_live_images": 408,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

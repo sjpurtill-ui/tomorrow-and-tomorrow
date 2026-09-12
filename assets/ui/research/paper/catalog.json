@@ -3042,6 +3042,54 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/pressure_pipe_jointing.png",
+      "description": "Joined metal pipes convey a compressed-air supply to machinery while connections are checked for leakage.",
+      "domain": "infrastructure",
+      "id": "pressure_pipe_jointing",
+      "name": "Pressure Pipe Jointing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cylinder_boring.png",
+      "description": "A guided cutting tool produces a regular internal cylinder surface for a moving piston.",
+      "domain": "infrastructure",
+      "id": "cylinder_boring",
+      "name": "Cylinder Boring",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/packed_piston_seals.png",
+      "description": "Prepared packing limits leakage around moving piston rods while accepting friction and eventual replacement.",
+      "domain": "infrastructure",
+      "id": "packed_piston_seals",
+      "name": "Packed Piston Seals",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/directional_air_valves.png",
+      "description": "A valve alternately admits and exhausts compressed air to control actuator movement.",
+      "domain": "infrastructure",
+      "id": "directional_air_valves",
+      "name": "Directional Air Valves",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pneumatic_cylinders.png",
+      "description": "A sealed piston converts admitted compressed air into a controlled linear stroke.",
+      "domain": "infrastructure",
+      "id": "pneumatic_cylinders",
+      "name": "Pneumatic Cylinders",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pneumatic_pressing.png",
+      "description": "A braced frame and air cylinder apply repeatable pressing work; useful motion requires a real compressed-air supply.",
+      "domain": "infrastructure",
+      "id": "pneumatic_pressing",
+      "name": "Pneumatic Pressing",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3531,9 +3579,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 441,
+  "live_count": 447,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 402,
+  "queued_count": 408,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
