@@ -1,3 +1,15 @@
+## September 12 — supplied cooking and preservation
+
+INTEGRATED bounded food commit `860cdb6964ac622c2f258f64d03b9f607be81c6b` by reviewed fast-forward from canonical Mac `2041666f666d9a487795326325df4d714dcda61f`. The originating coordinator designated this task integrator; the source acknowledged an exclusive runtime window. Release target **2026.09.12.1**.
+
+Hearth roasting, earth ovens and steaming are three ordinary discoveries with adopted, staffed operation and physical inputs. Steaming requires hearth practice plus clay shaping OR basketry. Meal preparation uses shared Logistics time and only benefits fresh rations actually consumed; it creates no calories or storage life. Smoking now consumes Timber; air drying retains its fuel-free plant route. Food reports show actual meals/material use, and the inspector/tree show causal alternatives and operating conditions. Existing save authorities remain unchanged.
+
+The original food worker was `c247e8d` on an isolated compatibility merge. Independent integration review excluded that merge's 625 inherited files: military, industrial, licensing, save extensions, unfinished communications and the 556-node worktree baseline are **not integrated**. Only 13 reviewed files were ported against current canonical code, including the small standalone AND/OR evaluator and existing-pathway/UI support. Canonical now has **200 live discoveries: 197 existing plus three food methods**. See `FOOD_PROCESSING_RELEASE_HANDOFF.md` for exact scope, conflicts, tuning and limits.
+
+All **69 worktree and 69 canonical cases pass**, zero errors/failures/skips/orphans (food 14, tree 9, redistribution 2, atlas 9, discovery 9, society exchange 26). Canonical import and graph/channel/reachability audit are clean. Worktree normal-entry headless boot is clean. Logs are `/tmp/tt-food-canonical-<suite>.log` and `/tmp/tt-food-canonical-audit.log`. UI tests validate data/control construction, not native screenshot layout. Full-history balance, the 5,000-node revamp, later grain systems and new subject artwork remain unfinished.
+
+No canonical player/editor was running at integration, and no existing session was interrupted. The normal standalone launcher packages this recorded checkpoint next; the release's `build.ok` and absolute executable/player log identify its exact source and running process. There is no test override or alternate player entry scene.
+
 ## September 11 — skip invisible terrain shading
 
 INTEGRATED `f3345c92c25d85ba2c1f45d4b3d229b56f66abfc` by reviewed, conflict-free fast-forward from canonical Mac `ef3eb8701ddc7bce05648da0268731440162aa29`. The terrain shader now skips full surface calculations under completely opaque fog, and close soil/clearing detail when its existing influence is exactly zero. Physical terrain, climate, resources, season, woodland scale, fog boundaries and four viewing distances remain unchanged. No new assets, geometry, cache budgets, simulation rules or save schema.
